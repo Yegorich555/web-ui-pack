@@ -106,19 +106,15 @@ export interface BaseTestOptions {
   attrs: Record<
     string,
     {
-      /** Set true if removing attr doesn't remove option but rollbacks to default */
-      onRemove?: boolean;
       skip?: boolean;
-      value?: string;
-      /** test when attr has key of window */
-      refGlobal?: any;
-    }
-  >;
-  $options: Record<
-    string,
-    {
-      skip?: boolean;
-      ignoreInput?: boolean;
+      value?: string | number | boolean | object;
+      /** Corrected internally attribute value after changing
+       * @example `disabled='true'` changes to `disabled=''` */
+      equalValue?: string;
+      /** Expected value parsed from attribute; point if custom parser implemented here */
+      parsedValue?: any;
+      /** With removing attr option reverted to default till nullValue is defined here */
+      nullValue?: any;
     }
   >;
 }
@@ -127,6 +123,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
   describe("common tests", () => {
     jest.useFakeTimers();
     const obj = createFunction() as WUPBaseElement | HTMLElement;
+    const c = Object.getPrototypeOf(obj).constructor;
     jest.advanceTimersByTime(1);
 
     test("no arrow functions", () => {
@@ -135,13 +132,8 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
       expect(fns.arrow).toHaveLength(0);
     });
 
-    // it doesn't required anymore because bind costs memory
-    // it("each function are bound", () => {
-    //   expect(fns.notBound).toHaveLength(0);
-    // });
     if (obj instanceof WUPBaseElement) {
       test("render + styles", () => {
-        const c = Object.getPrototypeOf(obj).constructor as typeof WUPBaseElement;
         expect(obj).toMatchSnapshot();
         expect(c.$refStyle).toMatchSnapshot();
       });
@@ -155,86 +147,102 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
         el.remove();
         spy.check(); // checking memory leak
       });
+
+      test("snapshot of $defaults", () => {
+        expect(c.$defaults).toMatchSnapshot();
+        expect(c.observedOptions?.sort()).toMatchSnapshot();
+        expect(c.observedAttributes?.sort()).toMatchSnapshot();
+      });
+
+      test("$defaults cloned secure", () => {
+        const wrongCloned = Object.keys(c.$defaults)
+          .map((k) => k)
+          .filter((k) => {
+            const def = c.$defaults[k];
+            if (def == null) {
+              return false;
+            }
+            switch (typeof def) {
+              case "function":
+              case "object":
+                if (obj.$options[k as string] === def && !(def instanceof HTMLElement)) {
+                  return true;
+                }
+                return false;
+              default:
+                return false;
+            }
+          });
+        expect(wrongCloned).toStrictEqual([]); // expected that complex objects & functions properly cloned otherwise user can change defaults via options
+      });
     }
 
     if (!opts?.skipAttrs && obj instanceof WUPBaseElement) {
-      const c = Object.getPrototypeOf(obj).constructor as typeof WUPBaseElement;
-      const attrs = ((c as any).observedAttributes || []) as string[];
-      if (attrs.length) {
-        describe("observedAttributes affects on options", () => {
-          attrs.forEach((a) => {
-            const isSkip = opts?.attrs && opts.attrs[a]?.skip;
-            test(`attr [${a}]${isSkip ? " - skipped" : ""}`, () => {
-              expect(a.toLowerCase()).toBe(a); // all observed attrs must be in lowercase otherwise it doesn't work
+      test("observedAttributes & options", () => {
+        // every attribute must be mentioned in cfg
+        const pointed = opts?.attrs || {};
+        const pointedAttr = Object.keys(pointed)
+          .filter((k) => pointed[k] != null)
+          .map((k) => k)
+          .sort();
 
-              if (isSkip) {
-                return;
-              }
-              obj.removeAttribute(a);
-              if (!obj.isConnected) {
-                document.body.appendChild(obj);
-                jest.advanceTimersByTime(1); // wait for ready
-              }
+        const observedAttrs = (((c as any).observedAttributes || []) as string[]).sort();
+        expect(pointedAttr).toEqual(observedAttrs);
 
-              delete (window as any)._myTestKey;
-              const oa = opts?.attrs[a];
-              if (oa?.refGlobal) {
-                (window as any)._myTestKey = oa?.refGlobal;
-              }
-              obj.setAttribute(a, oa?.value ?? (oa?.refGlobal ? "window._myTestKey" : "true"));
-              jest.advanceTimersByTime(1);
-              const key = Object.keys(obj.$options).find((k) => (k as string).toLowerCase() === a) as string;
-              expect(key).toBeDefined();
-              expect(obj.$options[key]).toBeDefined();
-              expect(obj.$options[key]).not.toBeFalsy();
-
-              obj.removeAttribute(a);
-              jest.advanceTimersByTime(1);
-              if (opts?.attrs && opts.attrs[a]?.onRemove) {
-                expect(obj.$options[key]).toBeTruthy();
-              } else {
-                expect(obj.$options[key]).toBeFalsy();
-              }
-              delete (window as any)._myTestKey;
-            });
-          });
+        if (!obj.isConnected) {
+          document.body.appendChild(obj);
+          expect(obj.parentElement).toBeDefined();
+          jest.advanceTimersByTime(1); // wait for ready
+        }
+        const map: Record<string, string> = {};
+        Object.keys(c.$defaults).forEach((k) => {
+          map[`w-${(k as string).toLowerCase()}`] = k as string;
+          map[`${(k as string).toLowerCase()}`] = k as string;
         });
 
-        const os = (c as any).observedOptions as string[];
-        if (os?.length) {
-          describe("observerOptions affects on attributes", () => {
-            os.forEach((o) => {
-              const attr = attrs.find((a) => a === o.toLowerCase());
-              if (attr) {
-                const isSkip = opts?.$options && opts?.$options[attr]?.skip;
-                if (isSkip) {
-                  return;
-                }
-                test(`opt [${o}]`, () => {
-                  if (!obj.isConnected) {
-                    document.body.appendChild(obj);
-                    jest.advanceTimersByTime(1); // wait for ready
-                  }
+        observedAttrs.forEach((attrName) => {
+          const pa = pointed[attrName];
+          if (pa.skip) {
+            return;
+          }
+          const propName = map[attrName] ?? attrName;
+          const defVal = c.$defaults[propName];
+          let attrVal = pa.value?.toString();
+          delete (window as any)._myTestKey;
+          if (typeof pa.value === "object") {
+            (window as any)._myTestKey = pa.value;
+            attrVal = "window._myTestKey";
+          }
 
-                  delete (window as any)._myTestKey;
-                  const oa = opts?.attrs[attr];
-                  if (oa?.refGlobal) {
-                    (window as any)._myTestKey = oa?.refGlobal;
-                  }
-                  obj.setAttribute(attr, oa?.value ?? (oa?.refGlobal ? "window._myTestKey" : "true"));
-                  jest.advanceTimersByTime(1);
-                  expect(obj.$options[o]).toBeDefined();
-
-                  obj.$options[o] = null;
-                  jest.advanceTimersByTime(1);
-                  expect(obj.getAttribute(attr)).toBeNull();
-                });
-              }
-            });
+          // changing attribute affects on option
+          obj.setAttribute(attrName, attrVal as string);
+          jest.advanceTimersByTime(1);
+          expect({ propName, propVal: obj.$options[propName] }).toStrictEqual({
+            propName,
+            propVal: pa.parsedValue ?? pa.value,
           });
-        }
-      }
+          expect({ attrName, attrVal: obj.getAttribute(attrName) }).toStrictEqual({
+            attrName,
+            attrVal: pa.equalValue ?? attrVal,
+          });
 
+          // removing attribute must reset option to default value
+          obj.removeAttribute(attrName);
+          jest.advanceTimersByTime(1);
+          expect({ propName, propVal: obj.$options[propName] }).toStrictEqual({
+            propName,
+            propVal: pa.nullValue ?? defVal,
+          });
+
+          // changing option must remove attribute
+          obj.setAttribute(attrName, attrVal as string);
+          obj.$options[propName] = undefined;
+          jest.advanceTimersByTime(1);
+          expect({ attrName, attrVal: obj.getAttribute(attrName) }).toStrictEqual({ attrName, attrVal: null });
+        });
+        delete (window as any)._myTestKey;
+      });
+      delete (window as any)._myTestKey;
       obj.remove();
     }
   });
@@ -386,9 +394,9 @@ export async function wait(t = 1000) {
 export async function userTypeText(
   el: HTMLInputElement,
   text: string,
-  opts = { clearPrevious: true, slow: false }
+  opts: { clearPrevious?: boolean; slow?: boolean } = { clearPrevious: true, slow: false }
 ): Promise<string> {
-  el.focus();
+  HTMLInputElement.prototype.focus.call(el);
   await wait(10);
   if (opts?.clearPrevious) {
     el.value = "";
@@ -426,7 +434,7 @@ export async function userTypeText(
 
 /** Simulate user inserts text */
 export async function userInsertText(el: HTMLInputElement, text: string): Promise<string> {
-  el.focus();
+  HTMLInputElement.prototype.focus.call(el);
   await wait(10);
   const inputType = "insertFromPaste";
 
@@ -463,7 +471,7 @@ export function setInputCursor(el: HTMLInputElement, cursorPattern: string, opts
   const was = el.value;
   const gotValue = cursorPattern.replace(/[|]/g, "");
   // expect(el.value).toBe(gotValue);
-  el.focus();
+  HTMLInputElement.prototype.focus.call(el);
   el.value = gotValue;
   const pos1 = cursorPattern.indexOf("|");
   let pos2 = cursorPattern.indexOf("|", pos1 + 1);
@@ -484,15 +492,15 @@ export function setInputCursor(el: HTMLInputElement, cursorPattern: string, opts
  * @return cursor snapshot (getInputCursor) */
 export async function userRemove(
   el: HTMLInputElement,
-  opts?: { removeCount: number; key: "Backspace" | "Delete" }
+  opts?: { removeCount?: number; key?: "Backspace" | "Delete" }
 ): Promise<string> {
   await wait(10);
-  el.focus();
+  HTMLInputElement.prototype.focus.call(el);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   opts = { removeCount: 1, key: "Backspace", ...opts };
   const { key } = opts;
 
-  for (let i = 0; i < opts.removeCount; ++i) {
+  for (let i = 0; i < (opts.removeCount || 1); ++i) {
     if (!el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }))) {
       continue;
     }
@@ -548,7 +556,7 @@ export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutM
   el.dispatchEvent(mouseEvent("pointerdown"));
   const isOk = el.dispatchEvent(mouseEvent("mousedown"));
   if (isOk) {
-    el.focus();
+    HTMLElement.prototype.focus.call(el);
     if (document.activeElement !== el) {
       // case when click on div moves focus to body
       (document.activeElement as HTMLElement)?.blur.call(document.activeElement);
@@ -600,7 +608,7 @@ export async function userTap(el: HTMLElement, opts?: MouseEventInit) {
   el.dispatchEvent(new TouchEvent("touchend", { touches: [], ...o() }));
 
   const isOk = el.dispatchEvent(mouseEvent("mousedown"));
-  isOk && el.focus();
+  isOk && HTMLInputElement.prototype.focus.call(el);
   el.dispatchEvent(mouseEvent("mouseup"));
   el.dispatchEvent(mouseEvent("click"));
 }
@@ -760,7 +768,7 @@ export async function userPressTab(next: HTMLElement | null) {
     if (!next) {
       (document.activeElement as HTMLElement)?.blur?.call(document.activeElement);
     } else {
-      next.focus();
+      HTMLElement.prototype.focus.call(next);
       next.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
     }
   });

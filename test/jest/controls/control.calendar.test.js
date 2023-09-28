@@ -47,9 +47,12 @@ describe("control.calendar", () => {
     ],
     validations: {},
     attrs: {
-      min: { value: "2022-05-20" },
-      max: { value: "2022-05-21" },
-      exclude: { refGlobal: [new Date("2009-02-06")] },
+      "w-utc": { value: true },
+      "w-min": { value: "2022-05-20", parsedValue: new Date("2022-05-20") },
+      "w-max": { value: "2022-05-21", parsedValue: new Date("2022-05-21") },
+      "w-exclude": { value: [new Date("2009-02-06")] },
+      "w-startwith": { skip: true }, // tested manually
+      "w-firstweekday": { value: 1 },
     },
     $options: { readOnly: { ignoreInput: true } },
   });
@@ -58,7 +61,7 @@ describe("control.calendar", () => {
   test("attr [startWith]", async () => {
     const set = async (s) => {
       el.remove();
-      el.setAttribute("startwith", s);
+      el.setAttribute("w-startwith", s);
       document.body.appendChild(el);
       await h.wait();
     };
@@ -80,7 +83,7 @@ describe("control.calendar", () => {
   });
 
   test("option starWith based on value", async () => {
-    expect(el.$options.startWith).toBeUndefined();
+    expect(el.$options.startWith).toBeFalsy();
     expect(el.$initValue).toBeFalsy();
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
 

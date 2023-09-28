@@ -37,7 +37,7 @@ export function parseCssVars(str: string): CssVar[] {
 
 /** Returns all css-vars that used by pointed tag */
 export function parseUsedCssVars(str: string, tagName: string): Set<string> {
-  const regTag = new RegExp(`${tagName}[ :[>][^{]+{([^}]+)}`, "g");
+  const regTag = new RegExp(`${tagName}[ :[>][^{]*{([^}]+)}`, "g");
   const reg = /var\((--[\w-]+)/g;
   const vars = new Set<string>();
   while (1) {

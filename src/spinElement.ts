@@ -1,40 +1,50 @@
-import WUPBaseElement from "./baseElement";
+import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
 import { px2Number, styleTransform } from "./helpers/styleHelpers";
 import { getOffset } from "./popup/popupPlacements";
 
 const tagName = "wup-spin";
 declare global {
   namespace WUP.Spin {
-    interface Defaults {
+    interface Options {
       /** Place inside parent as inline-block otherwise overflow target in the center (`position: relative` is not required);
        * @defaultValue false */
-      inline?: boolean;
+      inline: boolean;
+      /** Allow to reduce size to fit parent (for max-size change css-var --spin-size)
+       * @defaultValue `auto` => `false` when inline:true, `true` when inline:false */
+      fit: boolean | "auto";
       /** Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px
        * @defaultValue [4,4] */
       overflowOffset: [number, number, number, number] | [number, number];
       /** Allow to create shadowBox to partially hide target (only for `inline: false`)
        * @defaultValue true */
       overflowFade: boolean;
-      /** Allow to reduce size to fit parent (for max-size change css-var --spin-size)
-       * @defaultValue false for inline:true, true for inline:false */
-      fit?: boolean;
+      /** Anchor element that need to oveflow by spinner; ignored if option `inline='true'`
+       * @defaultValue `auto`: parentElement */
+      overflowTarget: HTMLElement | "auto";
     }
-    interface Options extends Defaults {
-      /** Anchor element that need to oveflow by spinner, by default it's parentElement  */
-      overflowTarget?: HTMLElement | null;
+    interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T>, WUP.Base.OnlyNames<Options> {
+      "w-inline"?: boolean | "";
+      "w-fit"?: boolean | "" | "auto";
+      /** Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px;
+       * * Point Global reference to object with array
+       * @example
+       * ```js
+       * window.someObj = [...];
+       * <wup-spin w-overflowoffset="window.someObj"></wup-spin>
+       * ```
+       * @defaultValue [4,4] */
+      "w-overflowOffset"?: string;
+      "w-overflowFade"?: boolean | "";
+      /** Anchor element that need to oveflow by spinner
+       * * Point querySelector to related element
+       * @example
+       * ```html
+       * <div id="me"></wup-spin>
+       * <wup-spin "w-overflowTarget="#me"></wup-spin>
+       * ```
+       * @defaultValue `auto`: parentElement */
+      "w-overflowTarget"?: string;
     }
-    interface Attributes {
-      /** Place inside parent as inline-block or overflow target in the center (`position: relative` isnot  required);
-       * @defaultValue false */
-      inline?: boolean | "";
-      /** Allow to create shadowBox to partially hide target (only for `inline: false`)
-       * @defaultValue true */
-      overflowFade?: boolean | "";
-      /** Allow to reduce size to fit parent (for max-size change css-var --spin-size)
-       * @defaultValue false for inline:true, true for inline:false */
-      fit?: boolean | "";
-    }
-    interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T>, Attributes {}
   }
 
   interface HTMLElementTagNameMap {
@@ -66,26 +76,17 @@ declare global {
  * ```html
  * <button> Loading...
  *  <!-- Default; it's equal to <wup-spin></wup-spin>-->
- *  <wup-spin inline="false" fit="true" overflowfade="true"></wup-spin>
+ *  <wup-spin w-inline="false" w-fit="true" w-overflowfade="true"></wup-spin>
  *  <!-- Inline + fit to parent -->
- *  <wup-spin inline fit></wup-spin>
- *  <!-- OR; it's equal to <wup-spin inline="false" fit="true" overflowfade="false"></wup-spin> -->
- *  <wup-spin overflowfade="false"></wup-spin>
+ *  <wup-spin w-inline w-fit></wup-spin>
+ *  <!-- OR; it's equal to <wup-spin w-inline="false" w-fit="true" w-overflowfade="false"></wup-spin> -->
+ *  <wup-spin w-overflowfade="false"></wup-spin>
  * </button>
- * ```
- */
+ * ``` */
 export default class WUPSpinElement<
   TOptions extends WUP.Spin.Options = WUP.Spin.Options
 > extends WUPBaseElement<TOptions> {
   #ctr = this.constructor as typeof WUPSpinElement;
-
-  static get observedOptions(): Array<keyof WUP.Spin.Options> {
-    return ["inline", "overflowTarget", "overflowOffset", "overflowFade", "fit"];
-  }
-
-  static get observedAttributes(): Array<LowerKeys<WUP.Spin.Attributes>> {
-    return ["inline", "overflowfade", "fit"];
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -143,10 +144,27 @@ export default class WUPSpinElement<
       ${this.$styleApplied}`;
   }
 
-  static $defaults: WUP.Spin.Defaults = {
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.fit.type = AttributeTypes.bool;
+    m.overflowtarget.type = AttributeTypes.selector;
+    return m;
+  }
+
+  static $defaults: WUP.Spin.Options = {
     overflowOffset: [4, 4],
     overflowFade: true,
+    overflowTarget: "auto",
+    inline: false,
+    fit: "auto",
   };
+
+  /** Used to clone defaults to options on init; override it to clone  */
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.Spin.Options;
+    d.overflowOffset = [...d.overflowOffset];
+    return d as unknown as T;
+  }
 
   static _itemsCount = 1;
 
@@ -187,10 +205,6 @@ export default class WUPSpinElement<
   protected override gotChanges(propsChanged: Array<keyof WUP.Spin.Options> | null): void {
     super.gotChanges(propsChanged);
 
-    this._opts.inline = this.getAttr("inline", "bool");
-    this._opts.fit = this.getAttr("fit", "bool", this._opts.fit ?? !this._opts.inline);
-    this._opts.overflowFade = this.getAttr("overflowfade", "bool", this._opts.overflowFade)!;
-
     this.style.cssText = "";
     this.#prevRect = undefined;
     this.#frameId && window.cancelAnimationFrame(this.#frameId);
@@ -229,7 +243,7 @@ export default class WUPSpinElement<
       this.$refFade?.remove();
       this.$refFade = undefined;
 
-      if (this._opts.fit) {
+      if (this.isFitParent) {
         const goUpdate = (): void => {
           this.style.display = "none";
           const p = this.parentElement as HTMLElement;
@@ -262,10 +276,19 @@ export default class WUPSpinElement<
     }
   }
 
-  get target(): HTMLElement {
-    return (this._opts.inline ? this.parentElement : this._opts.overflowTarget || this.parentElement) as HTMLElement;
+  /** Returns value based on `$options.fit` */
+  get isFitParent(): boolean {
+    const o = this._opts.fit;
+    return o === "auto" ? !this._opts.inline : o;
   }
 
+  /** Returns target element based on $options */
+  get target(): HTMLElement {
+    const trg = this._opts.overflowTarget;
+    return this._opts.inline || trg === "auto" || !trg ? this.parentElement! : trg;
+  }
+
+  /** Returns whether exists parent with position relative */
   get hasRelativeParent(): boolean {
     const p = this.offsetParent;
     return !!p && getComputedStyle(p).position === "relative";
@@ -308,7 +331,7 @@ export default class WUPSpinElement<
 
     const w = r.width - offset.left - offset.right;
     const h = r.height - offset.top - offset.bottom;
-    const scale = this._opts.fit ? Math.min(Math.min(h, w) / this.clientWidth, 1) : 1;
+    const scale = this.isFitParent ? Math.min(Math.min(h, w) / this.clientWidth, 1) : 1;
 
     const left = Math.round(r.left + offset.left + (w - this.clientWidth) / 2);
     const top = Math.round(r.top + offset.top + (h - this.clientHeight) / 2);
@@ -330,7 +353,7 @@ spinUseRing(WUPSpinElement);
 customElements.define(tagName, WUPSpinElement);
 
 /** Basic function to change spinner-style */
-export function spinSetStyle(cls: typeof WUPSpinElement, itemsCount: number, getter: () => string): void {
+export function spinSetStyle(cls: typeof WUPSpinElement<any>, itemsCount: number, getter: () => string): void {
   cls._itemsCount = itemsCount;
   Object.defineProperty(cls, "$styleApplied", {
     configurable: true,
@@ -339,7 +362,7 @@ export function spinSetStyle(cls: typeof WUPSpinElement, itemsCount: number, get
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseRing(cls: typeof WUPSpinElement): void {
+export function spinUseRing(cls: typeof WUPSpinElement<any>): void {
   spinSetStyle(
     cls,
     1,
@@ -351,7 +374,7 @@ export function spinUseRing(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseDualRing(cls: typeof WUPSpinElement): void {
+export function spinUseDualRing(cls: typeof WUPSpinElement<any>): void {
   spinSetStyle(
     cls,
     1,
@@ -365,7 +388,7 @@ export function spinUseDualRing(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
+export function spinUseTwinDualRing(cls: typeof WUPSpinElement<any>): void {
   spinSetStyle(
     cls,
     2,
@@ -397,7 +420,7 @@ export function spinUseTwinDualRing(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseRoller(cls: typeof WUPSpinElement): void {
+export function spinUseRoller(cls: typeof WUPSpinElement<any>): void {
   const cnt = 4;
   spinSetStyle(cls, cnt, () => {
     let s = "";
@@ -417,7 +440,7 @@ export function spinUseRoller(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseDotRoller(cls: typeof WUPSpinElement): void {
+export function spinUseDotRoller(cls: typeof WUPSpinElement<any>): void {
   const cnt = 7;
   spinSetStyle(cls, cnt, () => {
     let s = "";
@@ -449,7 +472,7 @@ export function spinUseDotRoller(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseDotRing(cls: typeof WUPSpinElement): void {
+export function spinUseDotRing(cls: typeof WUPSpinElement<any>): void {
   const cnt = 10;
   spinSetStyle(cls, cnt, () => {
     let s = "";
@@ -485,7 +508,7 @@ export function spinUseDotRing(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
+export function spinUseSpliceRing(cls: typeof WUPSpinElement<any>): void {
   const cnt = 12;
   spinSetStyle(cls, cnt, () => {
     let s = "";
@@ -517,7 +540,7 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement): void {
 }
 
 /** Apply on class to change spinner-style */
-export function spinUseHash(cls: typeof WUPSpinElement): void {
+export function spinUseHash(cls: typeof WUPSpinElement<any>): void {
   spinSetStyle(
     cls,
     2,

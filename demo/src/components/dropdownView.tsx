@@ -24,7 +24,7 @@ export default function DropdownView() {
           `html
 <wup-dropdown>
   <button type="button">Click me</button>
-  <wup-popup placement="left-start" animation="drawer">
+  <wup-popup w-placement="left-start" w-animation="drawer">
       <ul>
         <li>Home</li>
         <li>Products</li>
@@ -63,7 +63,7 @@ export default function DropdownView() {
         <small>use popup $options.placement to change direction</small>
         <wup-dropdown class={styles.custom}>
           <button type="button">{"<"}</button>
-          <wup-popup placement="left-middle" animation="stack">
+          <wup-popup w-placement="left-middle" w-animation="stack">
             <ul>
               <li>
                 <button type="button">A</button>
@@ -84,7 +84,7 @@ export default function DropdownView() {
           <button type="button" style={{ transform: "rotate(90deg)" }}>
             {">"}
           </button>
-          <wup-popup placement="bottom-middle" animation="stack">
+          <wup-popup w-placement="bottom-middle" w-animation="stack">
             <ul>
               <li>
                 <button type="button">A</button>
@@ -102,7 +102,7 @@ export default function DropdownView() {
           <button type="button" style={{ transform: "rotate(-90deg)" }}>
             {">"}
           </button>
-          <wup-popup placement="top-middle" animation="stack">
+          <wup-popup w-placement="top-middle" w-animation="stack">
             <ul>
               <li>
                 <button type="button">A</button>
@@ -118,7 +118,7 @@ export default function DropdownView() {
         </wup-dropdown>
         <wup-dropdown class={styles.custom}>
           <button type="button">{">"}</button>
-          <wup-popup placement="right-middle" animation="stack">
+          <wup-popup w-placement="right-middle" w-animation="stack">
             <ul>
               <li>
                 <button type="button">A</button>

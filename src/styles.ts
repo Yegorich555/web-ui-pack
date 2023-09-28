@@ -102,7 +102,7 @@ ${tag}[aria-busy] {
 }
 
 /** Returns default style for popup menu */
-export function WUPcssMenu(tag: string): string {
+export function WUPcssMenu(tag: string, hoverColor = "#f1f1f1"): string {
   return `
 ${tag} {
   padding: 0;
@@ -119,11 +119,10 @@ ${tag} ul {
 ${WUPcssScrollSmall(`${tag} ul`)}
 ${tag} li {
   padding: 1em;
-  border-radius: var(--border-radius);
 }
 @media (hover: hover) and (pointer: fine) {
   ${tag} li:hover {
-    box-shadow: inset 0 0 3px 0 var(--base-focus);
+    background-color: ${hoverColor};
   }
 }
 ${tag} li[aria-selected="true"] {

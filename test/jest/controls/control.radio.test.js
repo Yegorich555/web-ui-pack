@@ -33,9 +33,10 @@ describe("control.radio", () => {
       { attrValue: "30", value: 30 },
     ],
     validations: {},
-    attrs: { items: { skip: true } },
-    $options: { items: { skip: true } },
-    // attrs: { defaultchecked: { skip: true } },
+    attrs: {
+      "w-items": { value: getItems() },
+      "w-reverse": { value: true, equalValue: "" },
+    },
     onCreateNew: (e) => (e.$options.items = getItems()),
     testReadonly: { true: (el) => expect(el).toMatchSnapshot(), false: (el) => expect(el).toMatchSnapshot() },
   });
@@ -46,18 +47,18 @@ describe("control.radio", () => {
     el.$options.items = [{ value: "sss", text: "Ms" }];
     jest.advanceTimersByTime(1);
     expect(el.$options.items).toEqual([{ value: "sss", text: "Ms" }]);
-    expect(el.getAttribute("items")).toBeFalsy();
+    expect(el.getAttribute("w-items")).toBeFalsy();
 
     window.testItems = [{ value: 1, text: "Number 1" }];
-    el.setAttribute("items", "testItems");
+    el.setAttribute("w-items", "testItems");
     jest.advanceTimersByTime(1);
     expect(el.$options.items).toEqual([{ value: 1, text: "Number 1" }]);
-    expect(el.getAttribute("items")).toBe("testItems");
+    expect(el.getAttribute("w-items")).toBe("testItems");
 
     el.$options.items = [{ value: 33, text: "#33" }];
     jest.advanceTimersByTime(1);
     expect(el.$options.items).toEqual([{ value: 33, text: "#33" }]);
-    expect(el.getAttribute("items")).toBeFalsy();
+    expect(el.getAttribute("w-items")).toBeFalsy();
 
     el.$options.items = () => [{ value: 234, text: "Don" }]; // checking function
     jest.advanceTimersByTime(1);
@@ -80,12 +81,13 @@ describe("control.radio", () => {
       `"<fieldset><legend><strong></strong></legend><label for="txt15"><input id="txt15" type="radio" name="txt14473" tabindex="0" autocomplete="off"><span>testVal123_0</span></label></fieldset>"`
     );
 
+    const prev = el.$options.items;
     const onErr = jest.spyOn(el, "throwError").mockImplementationOnce(() => {});
-    el.setAttribute("items", "");
+    el.setAttribute("w-items", "missedGlobalKey");
     jest.advanceTimersByTime(1);
-    expect(el.$options.items?.length).toBe(0);
+    expect(el.$options.items).toStrictEqual(prev);
     expect(onErr.mock.lastCall[0]).toMatchInlineSnapshot(
-      `"Value not found according to attribute [items] in 'window.'"`
+      `"Value not found according to attribute [items] in 'window.missedGlobalKey'"`
     );
   });
 
@@ -115,7 +117,7 @@ describe("control.radio", () => {
     jest.advanceTimersByTime(2);
     expect(onErr).toBeCalledTimes(1); // because it doesn't fit value 11
     expect(el.$options.items[0]).toBe(item); // nested items must be not observed
-    expect(observer.isObserved(el.$options.items)).toBe(true); // but Array items itself must be observed
+    expect(observer.isObserved(el.$options.items)).toBe(false);
 
     // complex values with id's
     el = document.body.appendChild(document.createElement(el.tagName));
@@ -142,7 +144,7 @@ describe("control.radio", () => {
     el.$value = "hi";
     await h.wait();
     expect(onErr).toBeCalledTimes(1); // value not found in itmes
-    expect(el.$options.items).not.toBe(items); // because $options.items is Proxy
+    expect(el.$options.items).toBe(items);
 
     onErr.mockClear();
     el.$value = items[1].value;
@@ -158,19 +160,19 @@ describe("control.radio", () => {
   test("parsing $initValue", () => {
     const el = testEl;
     el.$initValue = 20;
-    el.setAttribute("initvalue", "");
+    el.setAttribute("w-initvalue", "");
     jest.advanceTimersByTime(1);
     expect(el.$initValue).toBe(undefined);
 
-    el.setAttribute("initvalue", "10");
+    el.setAttribute("w-initvalue", "10");
     jest.advanceTimersByTime(1);
     expect(el.$initValue).toBe(10);
 
-    el.setAttribute("initvalue", "333");
+    el.setAttribute("w-initvalue", "333");
     jest.advanceTimersByTime(1);
     expect(el.$initValue).toBe(undefined);
 
-    el.setAttribute("initvalue", "20");
+    el.setAttribute("w-initvalue", "20");
     jest.advanceTimersByTime(1);
     expect(el.$initValue).toBe(20);
 
@@ -183,9 +185,9 @@ describe("control.radio", () => {
     jest.advanceTimersByTime(1);
     h.unMockConsoleError();
 
-    el.setAttribute("initvalue", "");
+    el.setAttribute("w-initvalue", "");
     jest.advanceTimersByTime(1);
-    expect(el.getAttribute("initvalue")).toBe("");
+    expect(el.getAttribute("w-initvalue")).toBe("");
     expect(el.$initValue).toBe(null);
 
     // just for coverage
@@ -193,13 +195,13 @@ describe("control.radio", () => {
     jest.advanceTimersByTime(1);
     el.$initValue = undefined;
     expect(el.innerHTML).toMatchInlineSnapshot(`"<fieldset><legend><strong>Test Me</strong></legend></fieldset>"`);
-    el.setAttribute("initvalue", "10");
+    el.setAttribute("w-initvalue", "10");
     jest.advanceTimersByTime(1);
 
     const f = h.mockConsoleError();
     el.$initValue = 13;
     jest.advanceTimersByTime(1);
-    expect(el.hasAttribute("initvalue")).toBe(false);
+    expect(el.hasAttribute("w-initvalue")).toBe(false);
     expect(f).toBeCalled();
     h.unMockConsoleError();
 
@@ -251,7 +253,7 @@ describe("control.radio", () => {
   });
 
   test("focus on current input", () => {
-    const el = testEl;
+    let el = testEl;
     el.$value = 20;
     jest.advanceTimersByTime(1);
     expect(el.$refInput).toBe(el.$refItems[1]);
@@ -262,6 +264,97 @@ describe("control.radio", () => {
     el.$refItems[1].disabled = true;
     el.focus();
     expect(document.activeElement).toBe(el.$refItems[0]);
+
+    el.$refItems[1].disabled = false;
+    el.focus();
+    expect(document.activeElement).toBe(el.$refItems[1]);
+
+    window.items = getItems();
+    document.body.innerHTML = `
+      <wup-form w-autofocus>
+        <wup-radio w-initvalue="20" w-items="window.items"></wup-radio>
+      </wup-form>
+    `;
+    jest.advanceTimersByTime(1);
+    expect(document.body).toMatchInlineSnapshot(`
+      <body>
+        
+            
+        <wup-form
+          role="form"
+          w-autofocus=""
+        >
+          
+              
+          <wup-radio
+            w-initvalue="20"
+            w-items="window.items"
+          >
+            <fieldset>
+              <legend>
+                <strong />
+              </legend>
+              <label
+                for="txt7"
+              >
+                <input
+                  id="txt7"
+                  name="txt6473"
+                  tabindex="0"
+                  type="radio"
+                />
+                <span>
+                  Donny
+                </span>
+              </label>
+              <label
+                for="txt8"
+              >
+                <input
+                  autocomplete="off"
+                  id="txt8"
+                  name="txt6473"
+                  type="radio"
+                />
+                <span>
+                  Mikky
+                </span>
+              </label>
+              <label
+                for="txt9"
+              >
+                <input
+                  id="txt9"
+                  name="txt6473"
+                  type="radio"
+                />
+                <span>
+                  Leo
+                </span>
+              </label>
+              <label
+                for="txt10"
+              >
+                <input
+                  id="txt10"
+                  name="txt6473"
+                  type="radio"
+                />
+                <span>
+                  Splinter
+                </span>
+              </label>
+            </fieldset>
+          </wup-radio>
+          
+            
+        </wup-form>
+        
+          
+      </body>
+    `);
+    el = document.body.querySelector("wup-radio");
+    expect(document.activeElement).toBe(el.$refItems[1]);
   });
 
   test("storage", async () => {
@@ -272,7 +365,7 @@ describe("control.radio", () => {
     const items = getItems();
     items[0].value = null;
 
-    el.$options.skey = "rd";
+    el.$options.storageKey = "rd";
     el.$options.items = items;
     await h.wait(1);
     el.$value = null;
@@ -284,7 +377,7 @@ describe("control.radio", () => {
     el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.items = items;
     expect(el.$value).toBe(undefined);
-    el.$options.skey = "rd";
+    el.$options.storageKey = "rd";
     await h.wait(1);
     expect(el.$value).toBe(null);
     window.localStorage.clear();
@@ -297,7 +390,7 @@ describe("control.radio", () => {
     el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.items = items;
     await h.wait(1);
-    el.$options.skey = "rd";
+    el.$options.storageKey = "rd";
     await h.wait(1);
     onConsoleErr.mockClear();
     // eslint-disable-next-line prefer-destructuring

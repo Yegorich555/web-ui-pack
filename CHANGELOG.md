@@ -1,5 +1,63 @@
 # Changelog
 
+## 0.9.1 (\_\_\_)
+
+**BREAKING CHANGES**:
+
+- **Internals** (**Note:** Skip this if you haven't created custon Elements inherrited from WUP...)
+  - Added auto-mapping between attributes <=> options based on key-values in `$defaults`
+  - TypeScript. Removed interface `Defaults`. Merged with interface `Options` and now contains all fields as required
+  - Now removing attributes/options always rollbacks to value defined in `$defaults`
+  - Method `getAttr` changed to `parseAttr`
+- **Global**
+  - All attributes refactored and starts with `w-...` (attrs `[readonly]` & `[disabled]` without changes)
+  - Style rules changed from `[reverse]` to `[w-reverse]` for [RadioControl](src/controls/radio.ts), [SwitchControl](src/controls/switch.ts), [CheckControl](src/controls/check.ts) & [PasswordControl](src/controls/password.ts)
+- **Controls**
+  - Option `skey` renamed to `storageKey`
+  - Option `storageKey` changes `$value` instead of `$initValue` and now triggers `$onChange` event on init (added enum-key `SetValueReasons.storage`)
+  - Removed css `maxHeight` for [error] popup
+  - Changing `$initValue` isn't fired `$onChange` event anymore
+- [CircleElement](src/circleElement.ts). Renamed option _min**s**ize_ to _min**S**ize_
+- [SpinElement](src/spinElement.ts)
+  - Defaults `fit` & `overflowTarget` = `auto` (was `null`)
+  - Attribute `w-overflowtarget` expects `auto` or `querySelector` string (previously expected global-ref `window.someObj`)
+
+**Fixes**:
+
+- **TypeScript**
+  - Updated version & types
+  - Refactored & fixed some types
+- helper [observer](src/helpers/observer.ts). _excludeNested doesn't exclude when re-assign nested properties_
+- [RadioControl](src/controls/radio.ts). _autoFocus makes focused 1st but not active input when `form.$options.autoFocus=true`_
+- [SelectControl](src/controls/select.ts). _Wrong error `Not found in items` when re-assign `items` & `initValue` after a time_
+- [SelectManyControl](src/controls/selectMany.ts)
+  - _Wrong error `Not found in items` when re-assign `items` & `initValue` after a time_
+  - _Removing item from value affects on `$initValue`_
+  - _$isChanged is wrong if user removed then added same value_
+- [DateControl](src/controls/date.ts)
+  - _Validations `min`, `max`, `exclude` don't exclude time in comparison_
+  - _Validations messages `min` & `max` isn't formatted according to `utc`_
+  - _Error message doesn't appear for invalid input by pressing Enter_
+  - _Validation `_parse` doesn't work when added extra char and another char auto-removed (shifted & removed)_
+  - _History undo works wrong is select all + type new + Ctrl-Z_
+- [TimeControl](src/controls/time.ts)
+  - _Validation `_parse` doesn't work when added extra char and another char auto-removed (shifted & removed)_
+  - _Error message doesn't appear for invalid input by pressing Enter_
+- [CalendarControl](src/controls/calendar.ts). Removed useless background for button month in the header
+
+**New/Features**:
+
+- **Global**. Added support HTML intellisense in VSCode: follow [instructions](README.md#installing--usage) to use this
+- **Controls**
+  - `button[clear]` not hidden anymore for required controls (user must have ability to clear all at once & put new text). To rollback it use css-rule `wup-text[required] button[clear] { display: none; }`
+  - `button[clear]` visible only on focus & hover. To rollback it use css `wup-text button[clear] { display: block!important; }`
+  - updated hover & focus tyles
+- **Combobox controls (Select, Date, Time)**
+  - Now menu is hidden by default when `autoFocus` enabled. To revert to previous behavior use `WUPSelectControl.$defaults.showCase |= ShowCases.onFocusAuto`
+- [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts).
+  - Added validationRules `minCount` & `maxCount`
+  - Updated hover style for menu items. User css-var `--ctrl-select-menu-hover` to change
+
 ## 0.8.1 (Aug 29, 2023)
 
 **BREAKING CHANGES**:
@@ -30,7 +88,7 @@
 - [CircleElement](src/circleElement.ts).
   - _wrong tooltip position when segment is half of circle_
   - _wrong console.error when `items=[{value:2}]`_
-  - _wrong label-value when item value < opion **minsize**_
+  - \*wrong label-value when item value < opion **minsize\***
   - _edges of small segment are not rounded according to corner_
 - [TimeControl](src/controls/time.ts).
   - _menu items with wrong sizes and text not aligned_

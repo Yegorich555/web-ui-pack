@@ -1,7 +1,8 @@
+// eslint-disable-next-line max-classes-per-file
 import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
-import WUPBaseControl, { SetValueReasons } from "./baseControl";
+import WUPBaseControl, { SetValueReasons, ValidateFromCases } from "./baseControl";
 import TextHistory from "./text.history";
 
 const emailReg =
@@ -19,26 +20,11 @@ declare global {
       max: number;
       /** If $value doesn't match email-pattern shows message 'Invalid email address` */
       email: boolean;
-      /** If input value doesn't completely fit pointed mask shows pointed message
-       * @default "Incomplete value"
-       * @Rules
-       * * enabled by default with $options.mask
-       * * excluded from listing (for $options.validationShowAll)
-       * * ignores control value, instead it uses `this.refMask` state based on `$refInput.value`
-       *  */
-      _mask: string;
-      /** If parseInput() throws exception during the input-change is wrong then pointed message shows
-       * @default "Invalid value"
-       * @Rules
-       * * processed only by input change (not value-change)
-       * * removed by focusout (because input rollback to previous valid value)
-       * * excluded from listing (for $options.validationShowAll) */
-      _parse: string;
     }
-    interface Defaults<T = string, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {
+    interface NewOptions {
       /** Debounce time to wait for user finishes typing to start validate and provide $change event
        * @defaultValue 0; */
-      debounceMs?: number;
+      debounceMs: number;
       /** Select whole text when input got focus (when input is not readonly and not disabled);
        * @defaultValue false */
       selectOnFocus: boolean;
@@ -46,9 +32,6 @@ declare global {
        * @see {@link ClearActions} from `web-ui-pack/baseControl`
        * @defaultValue true */
       clearButton: boolean;
-    }
-
-    interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
       /** Make input masked
        * @rules when mask is pointed and contains only numeric vars
        * * inputmode='numeric' so mobile device show numeric-keyboard
@@ -67,23 +50,27 @@ declare global {
        * '|0' // or '\x00' - static char '0'
        * '|#' // or '\x01' - static char '#'
        * '|*' // or '\x02' - static char '*'
-       * '|/' // or '\x03' - static char '/'
-       * */
-      mask?: string;
-      /** Placeholder for mask. By default it inherits from mask. To disabled it set 'false' or '' (empty string);
+       * '|/' // or '\x03' - static char '/' */
+      mask?: string | null | undefined;
+      /** Placeholder for mask. By default it inherits from mask. To disabled it set `false`;
        *  for date maskholder can be 'yyyy-mm-dd' */
-      maskholder?: string | false;
+      maskholder?: string | false | null | undefined;
       /** Part before input; for example for value "$ 123 USD" prefix is "$ " */
-      prefix?: string;
-      /** Part after input; for example for value "$ 123 USD" prefix is " USD" */
-      postfix?: string;
+      prefix?: string | null | undefined;
+      /** Part after input; for example for value "$ 123 USD" postfix is " USD" */
+      postfix?: string | null | undefined;
+    }
+    interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPTextControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      "w-debounceMs"?: number;
+      "w-selectOnFocus"?: boolean | "";
+      "w-clearButton"?: boolean | "";
+      "w-mask"?: string;
+      "w-maskholder"?: string | false;
+      "w-prefix"?: string;
+      "w-postfix"?: string;
     }
 
-    interface Attributes
-      extends WUP.BaseControl.Attributes,
-        Pick<Options, "mask" | "maskholder" | "prefix" | "postfix"> {}
-
-    interface JSXProps<C = WUPTextControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
     interface GotInputEvent extends InputEvent {
       target: HTMLInputElement;
       // /** Call it to prevent calling setValue by input event */
@@ -114,7 +101,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-text name="firstName" initvalue="Donny" validations="myValidations"/>
+    <wup-text w-name="firstName" w-initvalue="Donny" w-validations="myValidations"/>
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
@@ -133,22 +120,9 @@ export default class WUPTextControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Text.Options>;
-    arr.push("clearButton", "maskholder", "mask", "prefix", "postfix");
-    return arr;
-  }
-
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Text.Attributes>>;
-    arr.push("maskholder", "mask", "prefix", "postfix");
-    return arr;
-  }
-
   static get $styleRoot(): string {
     return `:root {
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-clear-hover-size: 22px;
      }`;
   }
 
@@ -272,8 +246,8 @@ export default class WUPTextControl<
           display: inline-block;
         }
         /* style for icons */
-        :host label button,
-        :host label button:after,
+        :host label>button,
+        :host label>button:after,
         :host label:after,
         :host label:before {
           ${WUPcssIcon}
@@ -288,20 +262,27 @@ export default class WUPTextControl<
           cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
-        :host label button {
+        :host label>button {
           contain: strict;
-          position: relative;
           z-index: 1;
           font-size: inherit;
         }
-        :host label>span + button {
-          margin-right: -0.5em;
-        }
         :host button[clear] {
+          display: none;
+          position: relative;
+          margin-right: -0.5em;
           align-self: center;
-          background: none;
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
+          background: none;
+          mask: none;
+          -webkit-mask: none;
+        }
+        :host:focus-within button[clear] {
+          display: block;
+        }
+        :host button[clear=back] {
+          --ctrl-icon-img: var(--wup-icon-back);
         }
         :host button[clear]:after {
           content: "";
@@ -309,44 +290,38 @@ export default class WUPTextControl<
           -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
         }
-        :host button[clear=back]:after {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
         :host button[clear]:after,
         :host button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-        }
-        :host button[clear]:before {
-          width: var(--ctrl-clear-hover-size);
-          padding-top: var(--ctrl-clear-hover-size);
-        }
-        :host[disabled] button[clear],
-        :host[readonly] button[clear],
-        :host[required] button[clear] {
-          display: none;
+          height: 100%;
+          border-radius: 50%;
         }
         @media (hover: hover) and (pointer: fine) {
-          :host button[clear]:hover {
-            box-shadow: none;
+          :host:hover button[clear] {
+            display: block;
           }
           :host button[clear]:hover:before {
             content: "";
-            border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           :host button[clear]:hover:after {
-            background-color: var(--ctrl-err-text);
+            background: var(--ctrl-err-text);
           }
-          :host[readonly] button[clear] {
-            pointer-events: none;
-          }
+        }
+        :host[disabled] button[clear],
+        :host[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }`;
   }
 
-  static $defaults: WUP.Text.Defaults = {
+  static $errorParse = "Invalid value";
+  static $errorMask = "Incomplete value";
+
+  static $defaults: WUP.Text.Options = {
     ...WUPBaseControl.$defaults,
     selectOnFocus: false,
     clearButton: true,
@@ -355,13 +330,12 @@ export default class WUPTextControl<
       min: (v, setV) => (v === undefined || v.length < setV) && `Min length is ${setV} characters`,
       max: (v, setV) => (v === undefined || v.length > setV) && `Max length is ${setV} characters`,
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
-      _mask: (_v, setV, c) => {
-        const { refMask } = c as WUPTextControl;
-        // WARN: mask ignores value === undefined otherwise it doesn't work with controls that $value !== input.value
-        return !!refMask && refMask.value !== refMask.prefix && !refMask.isCompleted && (setV || "Incomplete value");
-      },
-      _parse: (_v, setV) => setV || "Invalid value",
     },
+    debounceMs: 0,
+    mask: "",
+    maskholder: "",
+    prefix: "",
+    postfix: "",
   };
 
   $refBtnClear?: HTMLButtonElement;
@@ -372,12 +346,12 @@ export default class WUPTextControl<
   constructor() {
     super();
 
-    this.$refInput.placeholder = " ";
+    this.$refInput.placeholder = " "; // Without this css related styles doesn't work with browser autofill
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override parse(text: string): ValueType | undefined {
-    return (text || undefined) as unknown as ValueType;
+    return (text || undefined) as any;
   }
 
   /** Called before parseInput on gotInput event */
@@ -397,9 +371,8 @@ export default class WUPTextControl<
   }
 
   protected get validations(): WUP.Text.Options["validations"] {
-    const vls = (super.validations as WUP.Text.Options["validations"]) || {};
-    if (this._opts.mask && vls._mask === undefined) vls._mask = ""; // enable validation mask based on option mask
-    if (this._onceErrName === "_parse") vls._parse = "";
+    const vls = (super.validations as { [k: string]: WUP.BaseControl.ValidityFunction<any> }) || {};
+    vls._invalidInput = (_v, c) => (c as WUPTextControl)._inputError || false;
     return vls;
   }
 
@@ -440,7 +413,7 @@ export default class WUPTextControl<
   }
 
   /** Add/update/remove prefix part */
-  protected renderPrefix(text: string | undefined): void {
+  protected renderPrefix(text: string | undefined | null): void {
     let el = this.$refPrefix;
     if (!text) {
       if (el) {
@@ -461,7 +434,7 @@ export default class WUPTextControl<
   }
 
   /** Add/update or remove prefix part */
-  protected renderPostfix(text: string | undefined): void {
+  protected renderPostfix(text: string | undefined | null): void {
     let el = this.$refPostfix;
     if (!text) {
       if (el) {
@@ -541,13 +514,11 @@ export default class WUPTextControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Text.Options> | null): void {
     // apply mask options
-    this._opts.mask = this.getAttr("mask");
-    this._opts.maskholder = this.getAttr("maskholder");
     if (!this._opts.mask || this._opts.mask !== this.refMask?.pattern) {
       delete this.refMask; // delete if mask is removed or changed (it's recovered again on event)
     }
-    if (this._opts.mask && this._opts.maskholder == null) {
-      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, "");
+    if (this._opts.mask && !this._opts.maskholder && this._opts.maskholder !== false) {
+      this.refMask ??= new MaskTextInput(this._opts.mask, "");
       this._opts.maskholder = this.refMask.chunks.map((c) => c.pattern).join("");
     }
 
@@ -565,11 +536,9 @@ export default class WUPTextControl<
       this.$refBtnClear = undefined;
     }
     if (!propsChanged || propsChanged.includes("prefix")) {
-      this._opts.prefix = this.getAttr("prefix");
       this.renderPrefix(this._opts.prefix);
     }
     if (!propsChanged || propsChanged.includes("postfix")) {
-      this._opts.postfix = this.getAttr("postfix");
       this.renderPostfix(this._opts.postfix);
     }
   }
@@ -595,6 +564,7 @@ export default class WUPTextControl<
     }
   }
 
+  _inputError?: string;
   #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
@@ -602,44 +572,45 @@ export default class WUPTextControl<
     const el = e.target as WUP.Text.Mask.HandledInput;
     let txt = el.value;
 
+    let errMsg: string | undefined;
     if (this._opts.mask) {
       const prev = el._maskPrev?.value;
-      txt = this.maskInputProcess(e);
+      txt = this.maskInputProcess(e); // returns true value
       if (txt === prev) {
         // this.renderPostfix(this._opts.postfix);
         return; // skip because no changes from previous action
       }
+      const m = this.refMask!;
+      if (m.value !== m.prefix && !m.isCompleted) {
+        errMsg = this.#ctr.$errorMask;
+      }
     }
 
-    // if (e.setValuePrevented) { // use canParse instead
-    //   return;
-    // }
-
-    const canParse = !txt || this.canParseInput(txt);
     let v = this.$value;
-    let errMsg: boolean | string = "";
-    if (canParse) {
-      try {
-        v = !txt ? undefined : this.parseInput(txt);
-      } catch (err) {
-        errMsg = (err as Error).message || true;
+    let isParsedOrEmpty = false;
+    if (txt) {
+      if (this.canParseInput(txt)) {
+        try {
+          v = this.parseInput(txt);
+          isParsedOrEmpty = true;
+        } catch (err) {
+          v = this.$value;
+          errMsg ||= this.#ctr.$errorParse;
+        }
       }
+    } else {
+      isParsedOrEmpty = true;
+      v = undefined;
     }
 
     this.renderPostfix(this._opts.postfix);
-
-    if (this.#declineInputEnd && (!canParse || errMsg)) {
-      return; // don't allow changes if user types wrong char
-    }
-
+    const wasErr = !errMsg && !!this._inputError;
+    this._inputError = errMsg;
     const act = (): void => {
-      if (errMsg) {
-        this.validateOnce({ _parse: this.validations?._parse || "" }, true);
-      } else if (canParse) {
-        this.setValue(v, SetValueReasons.userInput, true);
-      } else if (this._opts.mask) {
-        this.validateOnce({ _mask: this.validations?._mask || "" });
+      if (this._inputError || wasErr) {
+        this.goValidate(ValidateFromCases.onChange);
       }
+      isParsedOrEmpty && this.setValue(v, SetValueReasons.userInput, true);
     };
 
     this._validTimer && clearTimeout(this._validTimer);
@@ -692,7 +663,7 @@ export default class WUPTextControl<
   }
 
   /** Add/update maskholder or skip if it's not defined */
-  private renderMaskHolder(text: string | false | undefined, leftLength: number): void {
+  private renderMaskHolder(text: string | false | undefined | null, leftLength: number): void {
     if (!text) {
       return;
     }
@@ -750,14 +721,17 @@ export default class WUPTextControl<
   /** Called to update/reset value for <input/> */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected setInputValue(v: string, reason: SetValueReasons): void {
+    this._inputError && this.goHideError(); // after focusLost value resets to prev valid but message left: combobox controls
+    delete this._inputError;
     const prev = this.$refInput.value;
     const str = v != null ? ((v as any).toString() as string) : "";
     this.$refInput.value = str;
-
-    this._opts.mask && this.maskInputProcess(null);
-    str !== prev && this._refHistory?.save(prev, this.$refInput.value);
-    this.renderPostfix(this._opts.postfix);
-    this._onceErrName === this._errName && this.goHideError(); // hide mask-message because value has higher priority than inputValue
+    // possible when element $initValue changed but element isn't rendered yet
+    if (this.$isReady) {
+      this._opts.mask && this.maskInputProcess(null);
+      str !== prev && this._refHistory?.save(prev, this.$refInput.value);
+      this.renderPostfix(this._opts.postfix);
+    }
   }
 
   protected override setClearState(): ValueType | undefined {
@@ -768,31 +742,12 @@ export default class WUPTextControl<
     return next;
   }
 
-  _onceErrName?: string;
-  /** Called when inputValue != $value and need to show error on the fly by input-change */
-  protected validateOnce(
-    rule: { [key: string]: boolean | string | WUP.BaseControl.ValidityFunction<string> },
-    force = false
-  ): void {
-    const prev = this._wasValidNotEmpty;
-    if (force) {
-      this._wasValidNotEmpty = true; // to ignore onChangeSmart and show error anyway
+  override focus(): boolean {
+    if (this.$isDisabled) {
+      return false;
     }
-
-    // redefine prototype getter once & fire validation
-    Object.defineProperty(this, "validations", { configurable: true, value: rule });
-    this.validateAfterChange();
-    delete (this as any).validations; // rollback to previous
-
-    if (force) {
-      this._wasValidNotEmpty = prev; // rollback to previous
-    }
-    this._onceErrName = this._errName;
-  }
-
-  protected override goHideError(): void {
-    this._onceErrName = undefined;
-    super.goHideError();
+    this.$refInput.focus();
+    return document.activeElement === this.$refInput;
   }
 }
 

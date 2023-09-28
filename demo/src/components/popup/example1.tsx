@@ -22,40 +22,40 @@ export default function Example1() {
             <br /> click me
           </small>
         </button>
-        <wup-popup target="#trg" placement="top-start" animation="default">
+        <wup-popup w-target="#trg" w-placement="top-start" w-animation="default">
           top.start
         </wup-popup>
-        <wup-popup target="#trg" placement="top-middle">
+        <wup-popup w-target="#trg" w-placement="top-middle">
           top.middle
         </wup-popup>
-        <wup-popup target="#trg" placement="top-end">
+        <wup-popup w-target="#trg" w-placement="top-end">
           top.end
         </wup-popup>
-        <wup-popup target="#trg" placement="right-start">
+        <wup-popup w-target="#trg" w-placement="right-start">
           right.start
         </wup-popup>
-        <wup-popup target="#trg" placement="right-middle">
+        <wup-popup w-target="#trg" w-placement="right-middle">
           right.middle
         </wup-popup>
-        <wup-popup target="#trg" placement="right-end">
+        <wup-popup w-target="#trg" w-placement="right-end">
           right.end
         </wup-popup>
-        <wup-popup target="#trg" placement="bottom-start">
+        <wup-popup w-target="#trg" w-placement="bottom-start">
           bottom.start
         </wup-popup>
-        <wup-popup target="#trg" placement="bottom-middle">
+        <wup-popup w-target="#trg" w-placement="bottom-middle">
           bottom.middle
         </wup-popup>
-        <wup-popup target="#trg" placement="bottom-end">
+        <wup-popup w-target="#trg" w-placement="bottom-end">
           bottom.end
         </wup-popup>
-        <wup-popup target="#trg" placement="left-start">
+        <wup-popup w-target="#trg" w-placement="left-start">
           left.start
         </wup-popup>
-        <wup-popup target="#trg" placement="left-middle">
+        <wup-popup w-target="#trg" w-placement="left-middle">
           left.middle
         </wup-popup>
-        <wup-popup target="#trg" placement="left-end">
+        <wup-popup w-target="#trg" w-placement="left-end">
           left.end
         </wup-popup>
       </div>

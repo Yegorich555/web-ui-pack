@@ -17,7 +17,13 @@ describe("control.pwd", () => {
       special: { set: { min: 1, chars: "#!-_?,.@:;'" }, failValue: "relax", trueValue: "re-l-ax" },
     },
     validationsSkip: ["confirm"],
-    attrs: { skey: { skip: true }, storage: { skip: true } },
+    attrs: {
+      "w-storagekey": null, //
+      "w-storage": null,
+      "w-mask": null,
+      "w-maskholder": null,
+      "w-reverse": { value: true, equalValue: "" },
+    },
   });
 
   test("validation confirm", async () => {
@@ -115,7 +121,7 @@ describe("control.pwd", () => {
     testEl.$options.reverse = true;
     jest.advanceTimersByTime(1);
     expect(testEl.outerHTML).toMatchInlineSnapshot(
-      `"<wup-pwd reverse=""><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd w-reverse=""><label for="txt1"><span><input placeholder=" " type="password" id="txt1" autocomplete="new-password"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
 
     testEl.$options.reverse = false;
@@ -128,7 +134,7 @@ describe("control.pwd", () => {
   test("storage not allowed", async () => {
     const onErr = h.mockConsoleError();
     const onSet = jest.spyOn(WUPPasswordControl.prototype, "storageSet");
-    testEl.$options.skey = "pw";
+    testEl.$options.storageKey = "pw";
     await h.wait(1);
     testEl.$value = "abcd";
     await h.wait(1);

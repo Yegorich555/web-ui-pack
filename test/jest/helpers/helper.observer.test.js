@@ -744,7 +744,7 @@ describe("helper.observer", () => {
   });
 
   test("option 'excludeNested'", async () => {
-    const getRaw = () => ({ v: 1, items: [{ v: 2 }, { v: 3 }], vobj: { v: 4, s: "str" } });
+    const getRaw = () => ({ v: 1, items: [{ v: 2 }, { v: 3 }], vobj: { v: 4, s: "str" }, dateVal: new Date() });
     let obj = observer.make(getRaw(), { excludeNested: ["items"] });
     expect(observer.isObserved(obj.items)).toBe(true);
     expect(observer.isObserved(obj.items[0])).toBe(false);
@@ -779,6 +779,38 @@ describe("helper.observer", () => {
     expect(fn).toBeCalledTimes(0);
     obj.vobj = "nothing new";
     jest.advanceTimersToNextTimer();
+    expect(fn).toBeCalledTimes(1);
+
+    // reassigned should be not observed
+    fn.mockClear();
+    obj.items = getRaw().items;
+    expect(observer.isObserved(obj)).toBe(true);
+    expect(observer.isObserved(obj.items)).toBe(false);
+    expect(fn).toBeCalledTimes(1);
+    // changing value
+    fn.mockClear();
+    obj.items[0] = {};
+    await h.wait(1);
+    expect(fn).toBeCalledTimes(0);
+    // deleting
+    delete obj.items;
+    await h.wait(1);
+    expect(fn).toBeCalledTimes(1);
+
+    // same for Date object
+    fn.mockClear();
+    expect(observer.isObserved(obj.dateVal)).toBe(false);
+    obj.dateVal = new Date();
+    expect(observer.isObserved(obj.dateVal)).toBe(false);
+    expect(fn).toBeCalledTimes(1);
+    // changing value
+    fn.mockClear();
+    obj.dateVal.setHours(0, 23, 56);
+    await h.wait(1);
+    expect(fn).toBeCalledTimes(0);
+    // deleting
+    delete obj.dateVal;
+    await h.wait(1);
     expect(fn).toBeCalledTimes(1);
   });
 });

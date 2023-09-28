@@ -591,6 +591,7 @@ describe("control.text: mask", () => {
     await h.userTypeText(el.$refInput, "5", { clearPrevious: false });
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("$ 5| USD");
+
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     await h.wait(150);
     expect(h.getInputCursor(el.$refInput)).toBe("$ 52| USD");
@@ -893,6 +894,19 @@ describe("control.text: mask", () => {
     expect(await h.userRedo(el.$refInput)).toBe("+1(234) |");
     expect(await h.userRedo(el.$refInput)).toBe("+1(234) 567|");
 
+    // extra tesе With undo
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.mask = "0000-00-00";
+    el.$value = "2012-02-20";
+    await h.wait(1);
+    h.setInputCursor(el.$refInput, "|2012-02-20|");
+    expect(await h.userTypeText(el.$refInput, "20160707", { clearPrevious: false })).toBe("2016-07-07|");
+    expect(await h.userUndo(el.$refInput)).toBe("2016-07-|");
+    expect(await h.userUndo(el.$refInput)).toBe("2016-0|");
+    expect(await h.userUndo(el.$refInput)).toBe("2016-|");
+    expect(await h.userUndo(el.$refInput)).toBe("201|");
+    expect(await h.userUndo(el.$refInput)).toBe("|2012-02-20|");
+
     // cover case when !selectionStart
     el = document.body.appendChild(document.createElement(el.tagName));
     el.$options.mask = "##0";
@@ -957,9 +971,9 @@ describe("control.text: mask", () => {
     el.focus();
     expect(el.$refMaskholder).toBeDefined();
 
-    el.$options.maskholder = "";
+    el.$options.maskholder = false;
     await h.wait(1);
-    expect(el.$options.maskholder).toBe("");
+    expect(el.$options.maskholder).toBeFalsy();
     expect(el.$refMaskholder).toBeUndefined();
 
     // mask works without maskholder

@@ -28,16 +28,16 @@ export default function CircleView() {
         <small>(single full circle segment with corners 3 and background circle)</small>
         <wup-circle
           style={{ maxWidth: "100px" }}
-          back
-          from={0}
-          to={360}
-          space={2}
-          minsize={10}
-          min={0}
-          max={100}
-          width={14}
-          corner={0.25}
-          items="window.circleItems"
+          w-back
+          w-from={0}
+          w-to={360}
+          w-space={2}
+          w-minSize={10}
+          w-min={0}
+          w-max={100}
+          w-width={14}
+          w-corner={0.25}
+          w-items="window.circleItems"
         />
       </section>
       <section>
@@ -50,10 +50,10 @@ export default function CircleView() {
         <div className={styles.group}>
           <wup-circle
             class={styles.half}
-            from={-90}
-            to={90}
-            corner={0.5}
-            width={20}
+            w-from={-90}
+            w-to={90}
+            w-corner={0.5}
+            w-width={20}
             ref={(el) => {
               if (el) {
                 el.$options.items = [{ value: 2 }];
@@ -75,10 +75,10 @@ export default function CircleView() {
           />
           <wup-circle
             class={styles.half}
-            from={-90}
-            to={90}
-            corner={0.5}
-            width={20}
+            w-from={-90}
+            w-to={90}
+            w-corner={0.5}
+            w-width={20}
             ref={(el) => {
               if (el) {
                 el.$options.items = [{ value: 5 }];
@@ -92,10 +92,10 @@ export default function CircleView() {
           />
           <wup-circle
             class={styles.half}
-            from={-90}
-            to={90}
-            corner={0.5}
-            width={20}
+            w-from={-90}
+            w-to={90}
+            w-corner={0.5}
+            w-width={20}
             ref={(el) => {
               if (el) {
                 el.$options.items = [{ value: 30 }];
@@ -117,10 +117,10 @@ export default function CircleView() {
           (point <b>label</b> per item to show tooltip)
         </small>
         <wup-circle
-          back={false}
           style={{ maxWidth: "120px" }}
-          from={-90}
-          to={270}
+          w-back={false}
+          w-from={-90}
+          w-to={270}
           ref={(el) => {
             if (el) {
               el.$options.items = [
@@ -144,9 +144,9 @@ export default function CircleView() {
         </small>
         <wup-circle
           class={styles.half}
-          back={false}
-          from={-90}
-          to={90}
+          w-back={false}
+          w-from={-90}
+          w-to={90}
           ref={(el) => {
             if (el) {
               el.$options.items = [

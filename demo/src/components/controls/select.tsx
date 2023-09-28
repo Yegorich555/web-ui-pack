@@ -1,6 +1,7 @@
 /* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
 import { WUPSelectControl, WUPSpinElement } from "web-ui-pack";
+import { ClearActions } from "web-ui-pack/controls/baseControl";
 import { spinUseDualRing } from "web-ui-pack/spinElement";
 
 const sideEffect = WUPSelectControl;
@@ -73,30 +74,20 @@ export default function SelectControlView() {
             el.$initModel = { asDropdown: items[3].value };
           }
         }}
+        w-autoFocus
       >
         <wup-select
-          items="window.inputSelect.items"
-          name="select"
-          label="Select"
-          initValue={items[items.length - 3].value.toString()}
-          multiple={false}
-          validations="window._someSelectValidations"
-          ref={(el) => {
-            if (el) {
-              // el.$options.autoFocus = true;
-            }
-          }}
+          w-items="window.inputSelect.items"
+          w-name="select"
+          w-label="Select"
+          w-initValue={items[items.length - 3].value.toString()}
+          w-multiple={false}
         />
         <wup-select
-          name="multiple"
-          initValue="window.inputSelect.initArr"
-          items="window.inputSelect.items"
-          multiple
-          ref={(el) => {
-            if (el) {
-              el.$options.allowNewValue = true;
-            }
-          }}
+          w-name="multiple"
+          w-initValue="window.inputSelect.initArr"
+          w-items="window.inputSelect.items"
+          w-multiple
         />
         <wup-select
           ref={(el) => {
@@ -109,7 +100,7 @@ export default function SelectControlView() {
           }}
         />
         <wup-select
-          initValue={13}
+          w-initValue={13}
           ref={(el) => {
             if (el) {
               el.$options.name = "customSpin";
@@ -134,6 +125,16 @@ export default function SelectControlView() {
               el.$options.items = items;
               // el.$initValue = ir - 3;
               el.$options.readOnlyInput = true;
+
+              // el.$options.autoFocus = true;
+              setTimeout(() => {
+                el.$options.clearActions = ClearActions.clear;
+                el.$options.items = [{ text: "Test", value: 1 }];
+                el.$value = [1];
+
+                el.$options.items = items;
+                el.$value = items[items.length - 3].value;
+              }, 10);
             }
           }}
         />
@@ -156,7 +157,7 @@ export default function SelectControlView() {
           }}
         />
         <wup-select
-          initValue="13"
+          w-initValue="13"
           ref={(el) => {
             if (el) {
               el.$options.name = "withoutClearButton";
@@ -166,7 +167,7 @@ export default function SelectControlView() {
           }}
         />
         <wup-select
-          initValue="14"
+          w-initValue="14"
           ref={(el) => {
             if (el) {
               el.$options.name = "allowNewValue";
@@ -177,10 +178,10 @@ export default function SelectControlView() {
           }}
         />
         <wup-select //
-          name="saveUrlSelect"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
-          storage="url"
+          w-name="saveUrlSelect"
+          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-storageKey
+          w-storage="url"
           ref={(el) => {
             if (el) {
               el.$options.items = items;

@@ -644,6 +644,7 @@ padding:0;}
      }
   
       WUP-RADIO {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -658,10 +659,15 @@ padding:0;}
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      WUP-RADIO[invalid],
+      WUP-RADIO[invalid] &gt; [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       WUP-RADIO:focus-within,
       WUP-RADIO:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-RADIO:focus-within strong,
       WUP-RADIO:focus-within legend {
@@ -678,10 +684,6 @@ padding:0;}
       [disabled] WUP-RADIO &gt; *,
       WUP-RADIO[disabled] &gt; * {
         pointer-events: none;
-      }
-      WUP-RADIO[invalid],
-      WUP-RADIO[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-RADIO label {
         display: flex;
@@ -723,7 +725,6 @@ padding:0;}
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -772,23 +773,11 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-RADIO:hover {
-          z-index: 90011;
-        }
-        WUP-RADIO:hover [error] {
-          max-height: none;
-        }*/
         WUP-RADIO:hover,
         WUP-RADIO:hover&gt;[menu],
         WUP-RADIO[hovered],
         WUP-RADIO[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-RADIO[invalid]:hover,
-        WUP-RADIO[invalid]:hover&gt;[menu],
-        WUP-RADIO[invalid][hovered],
-        WUP-RADIO[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
       WUP-RADIO {
@@ -855,10 +844,10 @@ padding:0;}
       WUP-RADIO fieldset[aria-required="true"] input + span:after {
         content: "";
       }
-      WUP-RADIO[reverse] input + span {
+      WUP-RADIO[w-reverse] input + span {
         flex-direction: row-reverse;
       }
-      WUP-RADIO[reverse] input + span:after {
+      WUP-RADIO[w-reverse] input + span:after {
         margin-left: 0;
         margin-right: 0.5em;
       }
@@ -886,6 +875,59 @@ padding:0;}
       }
      
 </style>
+`;
+
+exports[`control.radio common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "items": [],
+  "label": null,
+  "name": null,
+  "readOnly": false,
+  "reverse": false,
+  "storage": "local",
+  "storageKey": "",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.radio common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.radio common tests snapshot of $defaults 3`] = `
+[
+  "disabled",
+  "readonly",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-disabled",
+  "w-focusdebouncems",
+  "w-initvalue",
+  "w-items",
+  "w-label",
+  "w-name",
+  "w-readonly",
+  "w-reverse",
+  "w-storage",
+  "w-storagekey",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
+]
 `;
 
 exports[`control.radio validations $options.validationShowAll 1`] = `

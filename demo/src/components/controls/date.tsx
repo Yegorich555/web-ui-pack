@@ -5,10 +5,10 @@ const sideEffect = WUPDateControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 (window as any).myDateValidations = { required: true } as WUP.Calendar.Options["validations"];
 (window as any).myDateExcludeDays = [
-  new Date("2022-02-28"),
-  new Date("2022-03-16"),
-  new Date("2022-03-18"),
-  new Date("2022-04-01"),
+  new Date("2022-02-28T00:00:00.000Z"),
+  new Date("2022-03-16T00:00:00.000Z"),
+  new Date("2022-03-18T00:00:00.000Z"),
+  new Date("2022-04-01T00:00:00.000Z"),
 ];
 
 export default function DateControlView() {
@@ -39,26 +39,27 @@ export default function DateControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-date
-          name="date"
-          initValue="2022-03-01 23:50"
-          min="2016-01-02"
-          max="2034-05-01"
-          exclude="window.myDateExcludeDays"
-          startWith="day"
-          utc
-          validations="window.myDateValidations"
+          w-name="date"
+          w-initValue="2022-03-01 23:50"
+          w-min="2016-01-02"
+          w-max="2034-05-01"
+          w-exclude="window.myDateExcludeDays"
+          w-startWith="day"
+          w-utc
+          w-validations="window.myDateValidations"
         />
-        <wup-date name="empty" />
-        <wup-date name="another" label="Another format: yyyy-m-d" format="yyyy-m-d" />
-        <wup-date name="disabled" disabled />
-        <wup-date name="readonly" readOnly />
+        <wup-date w-name="empty" />
+        <wup-date w-name="another" w-label="Another format: yyyy-m-d" w-format="yyyy-m-d" />
+        <wup-date w-name="disabled" disabled />
+        <wup-date w-name="readonly" readonly />
         <wup-date //
-          name="saveUrl"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
-          storage="url"
+          w-name="saveUrl"
+          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-storageKey
+          w-storage="url"
         />
         <button type="submit">Submit</button>
       </wup-form>

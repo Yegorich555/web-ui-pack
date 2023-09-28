@@ -50,20 +50,21 @@ export default function SelectManyControlView() {
             el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-selectmany
-          items="window.inputSelectMany.items"
-          name="selectMany"
-          label="Select Many"
-          initValue="window.inputSelectMany.initValue"
-          validations="window._someSelectValidations"
-          autoComplete="off"
-          sortable={false}
-          autoFocus={false}
+          w-items="window.inputSelectMany.items"
+          w-name="selectMany"
+          w-label="Select Many"
+          w-initValue="window.inputSelectMany.initValue"
+          w-validations="window._someSelectValidations"
+          w-autoComplete="off"
+          w-sortable={false}
+          w-autoFocus={false}
         />
         <wup-selectmany
-          label="With option hideSelected"
-          items="inputSelectMany.items"
+          w-label="With option hideSelected"
+          w-items="inputSelectMany.items"
           ref={(el) => {
             if (el) {
               el.$options.hideSelected = true;
@@ -82,7 +83,7 @@ export default function SelectManyControlView() {
           }}
         />
         <wup-selectmany
-          name="disabled"
+          w-name="disabled"
           disabled
           ref={(el) => {
             if (el) {
@@ -92,8 +93,8 @@ export default function SelectManyControlView() {
           }}
         />
         <wup-selectmany
-          name="readonly"
-          readOnly
+          w-name="readonly"
+          readonly
           ref={(el) => {
             if (el) {
               el.$options.items = items;
@@ -102,17 +103,17 @@ export default function SelectManyControlView() {
           }}
         />
         <wup-selectmany
-          label="Allow New Value ($options.allowNewValue)"
-          allownewvalue
-          name="allowNewValue"
-          items="inputSelectMany.items"
-          initValue="window.inputSelectMany.initValue"
+          w-label="Allow New Value ($options.allowNewValue)"
+          w-allowNewValue
+          w-name="allowNewValue"
+          w-items="inputSelectMany.items"
+          w-initValue="window.inputSelectMany.initValue"
         />
         <wup-selectmany
-          label="Options sortable=true - use drag&drop OR keyboard arrows + Shift"
-          sortable
-          name="sorted"
-          items="inputSelectMany.items"
+          w-label="Options sortable=true - use drag&drop OR keyboard arrows + Shift"
+          w-sortable
+          w-name="sorted"
+          w-items="inputSelectMany.items"
           ref={(el) => {
             if (el) {
               el.$options.items = items;
@@ -121,10 +122,10 @@ export default function SelectManyControlView() {
           }}
         />
         <wup-selectmany //
-          name="saveUrlSmany"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
-          storage="url"
+          w-name="saveUrlSmany"
+          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-storageKey
+          w-storage="url"
           ref={(el) => {
             if (el) {
               el.$options.items = items;

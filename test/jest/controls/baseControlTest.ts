@@ -84,46 +84,69 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   const hasVldRequired = !cfg.validationsSkip?.includes("required");
 
   h.baseTestComponent(() => document.createElement(tagName), {
-    attrs: { initvalue: { skip: true }, ...cfg.attrs },
-    $options: cfg.$options,
+    attrs: {
+      "w-label": { value: "First Name" },
+      "w-name": { value: "firstN" },
+      "w-autocomplete": { value: true },
+      "w-autofocus": { value: true },
+      disabled: { value: true, equalValue: "" },
+      "w-disabled": { value: true, equalValue: "", skip: true },
+      readonly: { value: true, equalValue: "" },
+      "w-readonly": { value: true, equalValue: "", skip: true },
+      "w-validations": { value: { required: true } },
+      "w-validatedebouncems": { value: 13 },
+      "w-validationcase": { value: 1 },
+      "w-validationrules": { skip: true },
+      "w-validationshowall": { value: true },
+      "w-clearactions": { value: 1 },
+      "w-focusdebouncems": { value: 12 },
+      "w-storagekey": { value: "strg" },
+      "w-storage": { value: "session" },
+
+      "w-initvalue": { skip: true }, // manual testing
+      ...cfg.attrs,
+    },
   });
 
   describe("$initValue", () => {
     test("attr [initvalue] vs $initValue", async () => {
       expect(el.$isReady).toBe(true);
-      el.setAttribute("initvalue", cfg.initValues[0].attrValue);
-      expect(el.getAttribute("initValue")).toStrictEqual(cfg.initValues[0].attrValue);
+      el.setAttribute("w-initvalue", cfg.initValues[0].attrValue);
+      expect(el.getAttribute("w-initvalue")).toStrictEqual(cfg.initValues[0].attrValue);
       await h.wait(1);
       expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
 
       el.$initValue = cfg.initValues[1].value;
       await h.wait(1);
+      expect(el.getAttribute("w-initvalue")).toBe(null);
       expect(el.$initValue).toStrictEqual(cfg.initValues[1].value);
-      expect(el.getAttribute("initvalue")).toBe(null);
 
-      el.setAttribute("initvalue", cfg.initValues[2].attrValue);
+      el.setAttribute("w-initvalue", cfg.initValues[2].attrValue);
       await h.wait(1);
       expect(el.$initValue).toStrictEqual(cfg.initValues[2].value);
-      expect(el.getAttribute("initvalue")).toStrictEqual(cfg.initValues[2].attrValue);
+      expect(el.getAttribute("w-initvalue")).toStrictEqual(cfg.initValues[2].attrValue);
 
-      el.removeAttribute("initvalue");
+      el.removeAttribute("w-initvalue");
       await h.wait(1);
-      expect(el.getAttribute("initvalue")).toBe(null);
+      expect(el.getAttribute("w-initvalue")).toBe(null);
       expect(el.$initValue).toStrictEqual(cfg.emptyInitValue);
 
-      await h.wait();
-      el.setAttribute("initvalue", "");
-      expect(() => jest.advanceTimersByTime(1)).not.toThrow();
-      await h.wait(1);
-      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
-
-      el.parse = () => {
+      let prev = el.$initValue;
+      jest.spyOn(el, "parse").mockImplementationOnce(() => {
         throw new Error("Test err");
-      };
-      el.setAttribute("initvalue", "wrong value");
+      });
+      el.setAttribute("w-initvalue", "wrong value");
       expect(() => jest.advanceTimersByTime(1)).toThrow();
       await h.wait(1);
-      expect(el.$initValue).toStrictEqual(cfg.emptyValue);
+      expect(el.$initValue).toStrictEqual(prev);
+
+      el.setAttribute("w-initvalue", cfg.initValues[0].attrValue);
+      prev = el.$initValue;
+      await h.wait(1);
+      el.setAttribute("w-initvalue", ""); // set empty value must return undefined
+      await h.wait(1);
+      const isBool = typeof cfg.initValues[0].value === "boolean";
+      expect(el.$initValue).toStrictEqual(isBool ? true : prev);
     });
 
     test("$initValue vs $value", () => {
@@ -135,15 +158,15 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
       jest.advanceTimersByTime(1);
-      expect(spyChange).toBeCalledTimes(1); // change event happens even via $initValue
-      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.initValue);
+      expect(spyChange).toBeCalledTimes(0);
+      // expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.initValue);
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[1].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
       jest.advanceTimersByTime(1);
-      expect(spyChange).toBeCalledTimes(2); // change event happens even via $initValue
+      expect(spyChange).toBeCalledTimes(0);
 
       el.$value = cfg.initValues[2].value;
       expect(el.$initValue).toBe(cfg.initValues[1].value);
@@ -151,14 +174,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(true);
       jest.advanceTimersByTime(1);
-      expect(spyChange).toBeCalledTimes(3); // change event happens even via $initValue
+      expect(spyChange).toBeCalledTimes(1);
       expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.manual);
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[2].value);
       expect(el.$isChanged).toBe(true);
       jest.advanceTimersByTime(1);
-      expect(spyChange).toBeCalledTimes(3);
+      expect(spyChange).toBeCalledTimes(1);
 
       // checking when el not isReady
       spyChange.mockClear();
@@ -210,15 +233,15 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       jest.advanceTimersByTime(1);
       expect(el.$refInput.autocomplete).toBe(cfg.autoCompleteOff);
 
-      el.setAttribute("autocomplete", "false");
+      el.setAttribute("w-autocomplete", "false");
       jest.advanceTimersByTime(1);
       expect(el.$options.autoComplete).toBe(false);
 
-      el.setAttribute("autocomplete", "true");
+      el.setAttribute("w-autocomplete", "true");
       jest.advanceTimersByTime(1);
       expect(el.$options.autoComplete).toBe(true);
 
-      el.setAttribute("autocomplete", "email");
+      el.setAttribute("w-autocomplete", "email");
       jest.advanceTimersByTime(1);
       expect(el.$options.autoComplete).toBe("email");
     });
@@ -348,34 +371,41 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$refInput.getAttribute("aria-label")).toBe(null);
     });
 
-    test("skey", async () => {
+    test("storageKey", async () => {
       const onThrowErr = jest.spyOn(WUPBaseControl.prototype, "throwError");
-      if (cfg.attrs?.skey?.skip) {
+      if (cfg.attrs?.["w-storagekey"]?.skip || cfg.attrs?.["w-storagekey"] === null) {
         return; // for password isn't allowed
       }
+      const spyChange = jest.fn();
       // local storage
       const sSet = jest.spyOn(Storage.prototype, "setItem");
       const sGet = jest.spyOn(Storage.prototype, "getItem");
       const sRem = jest.spyOn(Storage.prototype, "removeItem");
       el.$options.clearActions = ClearActions.clear | 0;
       el.$options.name = "name1";
-      el.$options.skey = true;
+      el.$options.storageKey = true;
       el.$value = cfg.initValues[0].value;
       await h.wait(1);
+      expect(el.storageKey).toBe("name1");
       expect(sSet).toBeCalledTimes(1);
       expect(sSet).lastCalledWith("name1", cfg.initValues[0].urlValue ?? (cfg.initValues[0].value as any).toString());
       expect(window.localStorage.getItem("name1")).toBeDefined(); // (cfg.initValues[0].attrValue);
       // getItem on init
       jest.clearAllMocks();
       el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
+      el.$onChange = spyChange;
       cfg.onCreateNew?.call(cfg, el);
       el.$options.name = "name1";
-      el.$options.skey = true;
+      el.$options.storageKey = true;
       await h.wait(1);
+      expect(el.storageKey).toBe("name1");
       expect(sGet).toBeCalledTimes(1);
       expect(sGet).lastCalledWith("name1");
-      expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
+      expect(el.$value).toStrictEqual(cfg.initValues[0].value);
+      expect(el.$initValue).toBe(undefined);
       expect(onThrowErr).not.toBeCalled();
+      expect(spyChange).toBeCalledTimes(1);
+      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.storage);
 
       // clearing value
       el.clearValue();
@@ -386,9 +416,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // name is empty
       jest.clearAllMocks();
       el.$options.name = "";
-      el.$options.skey = true;
+      el.$options.storageKey = true;
       await h.wait(1);
       expect(sGet).toBeCalledTimes(0);
+
+      expect(el.storageKey).toBe("");
+      // @ts-ignore
+      expect(el.storageGet()).toStrictEqual(el.$initValue); // cover case when storageKey is falsy
       el.$value = cfg.initValues[2].value;
       await h.wait(1);
       expect(sSet).toBeCalledTimes(0); // because name is missed
@@ -410,12 +444,15 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
 
       // session storage
+      el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
+      // el.$onChange = spyChange;
+      cfg.onCreateNew?.call(cfg, el);
       el.$options.storage = "session";
-      el.$options.skey = "name2";
+      el.$options.storageKey = "name2";
       await h.wait(1);
-      jest.clearAllMocks();
-      expect(el.$initValue).toStrictEqual(cfg.initValues[0].value);
+      expect(el.$value).toStrictEqual(cfg.emptyValue);
       el.$value = cfg.initValues[0].value;
+      jest.clearAllMocks();
       el.$value = cfg.initValues[1].value; // to call change event
       await h.wait();
       if (cfg.initValues[1].urlValue === null) {
@@ -433,11 +470,11 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
       cfg.onCreateNew?.call(cfg, el);
       el.$options.storage = "session";
-      el.$options.skey = "name2";
+      el.$options.storageKey = "name2";
       await h.wait(1);
       expect(sGet).toBeCalledTimes(1);
       expect(sGet).lastCalledWith("name2");
-      expect(el.$initValue).toStrictEqual(cfg.initValues[2].value);
+      expect(el.$value).toStrictEqual(cfg.initValues[2].value);
       expect(onThrowErr).not.toBeCalled();
 
       window.localStorage.clear();
@@ -447,7 +484,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // browser url
       cfg.onCreateNew?.call(cfg, el);
       el.$options.storage = "url";
-      el.$options.skey = "su";
+      el.$options.storageKey = "su";
       await h.wait(1);
       expect(window.location.href).toBe("http://localhost/");
       const testValues = cfg.initValues[1];
@@ -460,9 +497,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el = document.body.appendChild(document.createElement(el.tagName)) as WUPBaseControl;
       cfg.onCreateNew?.call(cfg, el);
       el.$options.storage = "url";
-      el.$options.skey = "su";
+      el.$options.storageKey = "su";
       await h.wait(1);
-      expect(el.$initValue).toStrictEqual(cfg.initValues[1].urlValue === null ? undefined : testValues.value);
+      expect(el.$value).toStrictEqual(cfg.initValues[1].urlValue === null ? cfg.emptyValue : testValues.value);
       expect(onThrowErr).not.toBeCalled();
     });
   });
@@ -535,7 +572,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       test("via attr [validations]", () => {
         const vld = { required: true };
         (window as any)._testVld = vld;
-        el.setAttribute("validations", "_testVld");
+        el.setAttribute("w-validations", "_testVld");
         jest.advanceTimersByTime(1);
         expect((el as any).validations).toBe(vld);
 
@@ -552,7 +589,10 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el.$isValid).toBe(true);
 
         (window as any)._testVld = undefined;
+        (window as any)._testVld2 = undefined;
         const onErr = jest.spyOn(el, "throwError");
+        el.setAttribute("w-validations", "_testVld2");
+        expect(() => jest.advanceTimersByTime(1)).toThrow();
         expect(() => el.$validate()).not.toThrow(); // because key is pointed but value undefined
         expect(onErr).toBeCalled();
         h.unMockConsoleError();
@@ -632,7 +672,6 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$initValue = cfg.initValues[0].value;
       el.$options.validationCase = ValidationCases.onInit | 0;
       el.$options.validations = { custom: () => "custom err here", required: true, c2: () => false };
-      // @ts-expect-error
       const onVld = jest.spyOn(el.$options.validations!, "custom");
       await h.wait();
       expect(el.$refError).toBeDefined();
@@ -776,7 +815,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
         expect(el).toMatchSnapshot();
       });
 
-    ruleNames.forEach((ruleName) => {
+    ruleNames.forEach((ruleName: string) => {
       if ((cfg.validationsSkip as any)?.includes(ruleName)) {
         return;
       }
@@ -794,7 +833,6 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
           expect(el.$refInput.getAttribute("aria-required")).toBe("true");
         }
 
-        // @ts-expect-error
         const defMsg = elType.$defaults.validationRules![ruleName]!(vld.failValue as any, vld.set, el);
         expect(defMsg).toBeTruthy();
         expect(el.$validate()).toBe(defMsg);
@@ -897,7 +935,9 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
     expect(el.$autoComplete).toBeFalsy();
     expect(el.$refInput.autocomplete).toBe(cfg.autoCompleteOff);
 
+    // @ts-ignore
     form.$options.autoComplete = undefined;
+    // @ts-ignore
     el.$options.autoComplete = undefined;
     jest.advanceTimersByTime(1);
     expect(el.$autoComplete).toBeFalsy();

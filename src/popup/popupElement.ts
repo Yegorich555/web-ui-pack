@@ -1,6 +1,6 @@
 import { ShowCases, HideCases, Animations } from "./popupElement.types";
 import { WUPcssScrollSmall } from "../styles";
-import WUPBaseElement from "../baseElement";
+import WUPBaseElement, { AttributeMap, AttributeTypes } from "../baseElement";
 import { getOffset, PopupPlacements } from "./popupPlacements";
 import { findScrollParentAll } from "../helpers/findScrollParent";
 import WUPPopupArrowElement from "./popupArrowElement";
@@ -65,7 +65,7 @@ declare global {
  * ```html
  * <button id="btn1">Target</button>
  * <!-- You can skip pointing attribute 'target' if popup appended after target -->
- * <wup-popup target="#btn1" placement="top-start">Some content here</wup-popup>
+ * <wup-popup w-target="#btn1" w-placement="top-start">Some content here</wup-popup>
  * ```
  * @tutorial Troubleshooting:
  * * You can set minWidth, minHeight to prevent squizing of popup or don't use rule '.$adjust'
@@ -81,21 +81,48 @@ export default class WUPPopupElement<
   Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
 > extends WUPBaseElement<TOptions, Events> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
-  #ctr = this.constructor as typeof WUPPopupElement;
+  // #ctr = this.constructor as typeof WUPPopupElement;
 
   static get observedOptions(): Array<keyof WUP.Popup.Options> {
     return ["showCase", "target", "placement"];
   }
 
-  /* Array of attribute names to monitor for changes */
-  static get observedAttributes(): Array<LowerKeys<WUP.Popup.Options>> {
-    return ["target", "placement", "animation"];
+  static get observedAttributes(): Array<string> {
+    return ["w-target", "w-placement", "w-animation"];
+  }
+
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    return {
+      target: {
+        type: AttributeTypes.string,
+      },
+      placement: {
+        type: AttributeTypes.parseCustom,
+        parse: (attrValue) =>
+          this.$placementAttrs(attrValue as WUP.Popup.Attributes["w-placement"]) ?? [...this.$defaults.placement],
+      },
+      animation: {
+        type: AttributeTypes.parseCustom,
+        parse: (attrValue) => {
+          switch (attrValue) {
+            case "drawer":
+              return Animations.drawer;
+            case "stack":
+              return Animations.stack;
+            default:
+              return Animations.default;
+          }
+        },
+      },
+    }; // completely custom mapping used instead
   }
 
   static $placements = PopupPlacements;
 
   /** Returns placement */
-  static $placementAttrs = (attr: WUP.Popup.Attributes["placement"]): Array<WUP.Popup.Place.PlaceFunc> | undefined => {
+  static $placementAttrs = (
+    attr: WUP.Popup.Attributes["w-placement"]
+  ): Array<WUP.Popup.Place.PlaceFunc> | undefined => {
     switch (attr) {
       case "top-start":
         return [PopupPlacements.$top.$start.$adjust, PopupPlacements.$bottom.$start.$adjust];
@@ -129,8 +156,8 @@ export default class WUPPopupElement<
   static get $styleRoot(): string {
     return `
       :root {
-        --popup-shadow-size: 4px;
         --popup-anim: 300ms;
+        --popup-bg: white;
       }`;
   }
 
@@ -145,8 +172,8 @@ export default class WUPPopupElement<
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
-        box-shadow: 0 1px var(--popup-shadow-size) 0 #00000033;
-        background: white;
+        box-shadow: 0 1px 4px 0 #00000033;
+        background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       @media not all and (prefers-reduced-motion) {
@@ -166,10 +193,10 @@ export default class WUPPopupElement<
           to {opacity: 0;}
         }
       }
-      :host[animation=drawer] {
+      :host[w-animation=drawer] {
         animation-name: custom;
       }
-      :host[animation=stack] {
+      :host[w-animation=stack] {
         animation-name: custom;
         overflow: visible;
       }
@@ -177,7 +204,8 @@ export default class WUPPopupElement<
   }
 
   /** Default options. Change it to configure default behavior */
-  static $defaults: WUP.Popup.Defaults = {
+  static $defaults: WUP.Popup.Options = {
+    animation: Animations.default,
     placement: [
       WUPPopupElement.$placements.$top.$middle.$adjust, //
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
@@ -187,6 +215,12 @@ export default class WUPPopupElement<
     hoverShowTimeout: 200,
     hoverHideTimeout: 500,
   };
+
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.Popup.Options;
+    d.placement = [...d.placement];
+    return d as unknown as T;
+  }
 
   /** Listen for target according to showCase and create/remove popup when it's required (by show/hide).
    *  This helps to avoid tons of hidden popups on HTML;
@@ -444,31 +478,11 @@ export default class WUPPopupElement<
 
   protected override gotChanges(propsChanged: Array<string> | null): void {
     super.gotChanges(propsChanged);
-
-    propsChanged && this.$isShown && this.goHide(HideCases.onOptionChange, null);
-
-    // attr placement
-    const pAttr = this.getAttribute("placement") as keyof typeof WUPPopupElement.$placementAttrs;
-    const p = pAttr && WUPPopupElement.$placementAttrs(pAttr);
-    this._opts.placement = p || this._opts.placement || [...this.#ctr.$defaults.placement];
-    // attr animation
-    const aAnim = this.getAttribute("animation");
-    switch (aAnim) {
-      case "":
-      case "default":
-        this._opts.animation = Animations.default;
-        break;
-      case "drawer":
-        this._opts.animation = Animations.drawer;
-        break;
-      case "stack":
-        this._opts.animation = Animations.stack;
-        break;
-      default:
-        break;
+    if (propsChanged) {
+      // re-init
+      this.$isShown && this.goHide(HideCases.onOptionChange, null);
+      this.init(); // only if popup is hidden
     }
-    // re-init
-    propsChanged && this.init(); // only if popup is hidden
   }
 
   protected override connectedCallback(): void {
@@ -479,7 +493,7 @@ export default class WUPPopupElement<
   /** Defines target on show; @returns Element | Error */
   defineTarget(): HTMLElement | SVGElement {
     let el: Element | null;
-    const attrTrg = this.getAttribute("target");
+    const attrTrg = this.getAttribute("w-target"); // NiceToHave: re-use automated parseAttr()
     if (attrTrg) {
       el = document.querySelector(attrTrg);
     } else if (this._opts.target) {
@@ -625,7 +639,7 @@ export default class WUPPopupElement<
   protected goAnimate(animTime: number, isHidden: boolean): Promise<boolean> {
     this._isStopChanges = true;
     if (this._opts.animation === Animations.drawer) {
-      this.setAttribute("animation", "drawer");
+      this.setAttribute("w-animation", "drawer");
       this._isStopChanges = false;
 
       const pa = animateDropdown(this, animTime, isHidden);
@@ -637,7 +651,7 @@ export default class WUPPopupElement<
     }
 
     if (this._opts.animation === Animations.stack) {
-      this.setAttribute("animation", "stack");
+      this.setAttribute("w-animation", "stack");
       this._isStopChanges = false;
 
       const items =
@@ -656,7 +670,7 @@ export default class WUPPopupElement<
       return pa;
     }
 
-    this.removeAttribute("animation");
+    this.removeAttribute("w-animation");
     this._isStopChanges = false;
 
     return new Promise((resolve) => {
@@ -829,7 +843,7 @@ export default class WUPPopupElement<
     }
     this.#state!.prevScreenSize = { w: screenSize.vw, h: screenSize.vh };
 
-    const fitEl = this._opts.toFitElement || document.body;
+    const fitEl = this._opts.toFitElement; /* || document.body */
     const fit = getBoundingInternalRect(fitEl) as WUP.Popup.Place.Rect;
     fit.el = fitEl;
     const a = this._opts.offsetFitElement;

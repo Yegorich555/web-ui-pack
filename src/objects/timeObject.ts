@@ -7,6 +7,7 @@ import localeInfo from "./localeInfo";
 export default class WUPTimeObject {
   hours: number;
   minutes: number;
+  static $maxValue = 23 * 60 + 59;
 
   constructor();
   constructor(value: number | string);

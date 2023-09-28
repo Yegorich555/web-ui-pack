@@ -278,13 +278,13 @@ padding:0;}
       }
   :root {
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-clear-hover-size: 22px;
      }
   :root {
         --ctrl-date-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M652.801 76.8c42.24 0 76.8 34.56 76.8 76.8v537.601c0 42.24-34.56 76.8-76.8 76.8H115.2c-42.624 0-76.8-34.56-76.8-76.8l.384-537.601c0-42.24 33.792-76.8 76.416-76.8h38.4V0h76.8v76.8h307.2V0h76.8v76.8h38.4zM192 345.6h76.8v76.8H192v-76.8zm230.4 0v76.8h-76.8v-76.8h76.8zm153.601 0h-76.8v76.8h76.8v-76.8zM115.2 691.2h537.601V268.8H115.2v422.4z'/%3E%3C/svg%3E");
       }
   
       WUP-DATE {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -299,10 +299,15 @@ padding:0;}
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      WUP-DATE[invalid],
+      WUP-DATE[invalid] &gt; [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       WUP-DATE:focus-within,
       WUP-DATE:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-DATE:focus-within strong,
       WUP-DATE:focus-within legend {
@@ -319,10 +324,6 @@ padding:0;}
       [disabled] WUP-DATE &gt; *,
       WUP-DATE[disabled] &gt; * {
         pointer-events: none;
-      }
-      WUP-DATE[invalid],
-      WUP-DATE[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-DATE label {
         display: flex;
@@ -364,7 +365,6 @@ padding:0;}
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -413,23 +413,11 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-DATE:hover {
-          z-index: 90011;
-        }
-        WUP-DATE:hover [error] {
-          max-height: none;
-        }*/
         WUP-DATE:hover,
         WUP-DATE:hover&gt;[menu],
         WUP-DATE[hovered],
         WUP-DATE[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-DATE[invalid]:hover,
-        WUP-DATE[invalid]:hover&gt;[menu],
-        WUP-DATE[invalid][hovered],
-        WUP-DATE[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
         WUP-DATE {
@@ -550,8 +538,8 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-DATE label button,
-        WUP-DATE label button:after,
+        WUP-DATE label&gt;button,
+        WUP-DATE label&gt;button:after,
         WUP-DATE label:after,
         WUP-DATE label:before {
           
@@ -585,20 +573,27 @@ mask-image: var(--ctrl-icon-img);
           cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
-        WUP-DATE label button {
+        WUP-DATE label&gt;button {
           contain: strict;
-          position: relative;
           z-index: 1;
           font-size: inherit;
         }
-        WUP-DATE label&gt;span + button {
-          margin-right: -0.5em;
-        }
         WUP-DATE button[clear] {
+          display: none;
+          position: relative;
+          margin-right: -0.5em;
           align-self: center;
-          background: none;
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
+          background: none;
+          mask: none;
+          -webkit-mask: none;
+        }
+        WUP-DATE:focus-within button[clear] {
+          display: block;
+        }
+        WUP-DATE button[clear=back] {
+          --ctrl-icon-img: var(--wup-icon-back);
         }
         WUP-DATE button[clear]:after {
           content: "";
@@ -606,40 +601,31 @@ mask-image: var(--ctrl-icon-img);
           -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
         }
-        WUP-DATE button[clear=back]:after {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
         WUP-DATE button[clear]:after,
         WUP-DATE button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-        }
-        WUP-DATE button[clear]:before {
-          width: var(--ctrl-clear-hover-size);
-          padding-top: var(--ctrl-clear-hover-size);
-        }
-        WUP-DATE[disabled] button[clear],
-        WUP-DATE[readonly] button[clear],
-        WUP-DATE[required] button[clear] {
-          display: none;
+          height: 100%;
+          border-radius: 50%;
         }
         @media (hover: hover) and (pointer: fine) {
-          WUP-DATE button[clear]:hover {
-            box-shadow: none;
+          WUP-DATE:hover button[clear] {
+            display: block;
           }
           WUP-DATE button[clear]:hover:before {
             content: "";
-            border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           WUP-DATE button[clear]:hover:after {
-            background-color: var(--ctrl-err-text);
+            background: var(--ctrl-err-text);
           }
-          WUP-DATE[readonly] button[clear] {
-            pointer-events: none;
-          }
+        }
+        WUP-DATE[disabled] button[clear],
+        WUP-DATE[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }
       WUP-DATE {
         cursor: pointer;
@@ -679,6 +665,90 @@ mask-image: var(--ctrl-icon-img);
         margin: 0;
       }
 </style>
+`;
+
+exports[`control.date common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "exclude": null,
+  "firstWeekDay": 1,
+  "focusDebounceMs": 100,
+  "format": "yyyy-mm-dd",
+  "label": null,
+  "mask": "",
+  "maskholder": "",
+  "max": null,
+  "min": null,
+  "name": null,
+  "postfix": "",
+  "prefix": "",
+  "readOnly": false,
+  "readOnlyInput": false,
+  "selectOnFocus": false,
+  "showCase": 74,
+  "startWith": null,
+  "storage": "local",
+  "storageKey": "",
+  "utc": true,
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "exclude": [Function],
+    "max": [Function],
+    "min": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.date common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.date common tests snapshot of $defaults 3`] = `
+[
+  "disabled",
+  "readonly",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-clearbutton",
+  "w-debouncems",
+  "w-disabled",
+  "w-exclude",
+  "w-firstweekday",
+  "w-focusdebouncems",
+  "w-format",
+  "w-initvalue",
+  "w-label",
+  "w-mask",
+  "w-maskholder",
+  "w-max",
+  "w-min",
+  "w-name",
+  "w-postfix",
+  "w-prefix",
+  "w-readonly",
+  "w-readonlyinput",
+  "w-selectonfocus",
+  "w-showcase",
+  "w-startwith",
+  "w-storage",
+  "w-storagekey",
+  "w-utc",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
+]
 `;
 
 exports[`control.date validations $options.validationShowAll 1`] = `
@@ -933,278 +1003,111 @@ exports[`control.date validations options.validationCase 2`] = `
   </label>
   <wup-popup
     menu=""
-    style=""
+    style="opacity: 0;"
   >
     <wup-calendar
       required=""
     >
       <div
-        calendar="day"
+        calendar="year"
         id="txt2"
       >
         <header>
           <button
             aria-hidden="true"
+            disabled=""
             tabindex="-1"
             type="button"
           >
-            February 2022
+            2018 ... 2033
           </button>
         </header>
         <div>
           <div>
-            <ul
-              aria-hidden="true"
-            >
-              <li>
-                Mo
-              </li>
-              <li>
-                Tu
-              </li>
-              <li>
-                We
-              </li>
-              <li>
-                Th
-              </li>
-              <li>
-                Fr
-              </li>
-              <li>
-                Sa
-              </li>
-              <li>
-                Su
-              </li>
-            </ul>
             <ol
               role="grid"
               style="overflow: hidden;"
             >
               <li
-                prev=""
                 role="gridcell"
               >
-                31
+                2018
               </li>
               <li
                 role="gridcell"
               >
-                1
+                2019
               </li>
               <li
                 role="gridcell"
               >
-                2
+                2020
               </li>
               <li
                 role="gridcell"
               >
-                3
+                2021
+              </li>
+              <li
+                aria-current="date"
+                role="gridcell"
+              >
+                2022
               </li>
               <li
                 role="gridcell"
               >
-                4
+                2023
               </li>
               <li
                 role="gridcell"
               >
-                5
+                2024
               </li>
               <li
                 role="gridcell"
               >
-                6
+                2025
               </li>
               <li
                 role="gridcell"
               >
-                7
+                2026
               </li>
               <li
                 role="gridcell"
               >
-                8
+                2027
               </li>
               <li
                 role="gridcell"
               >
-                9
+                2028
               </li>
               <li
                 role="gridcell"
               >
-                10
+                2029
               </li>
               <li
                 role="gridcell"
               >
-                11
+                2030
               </li>
               <li
                 role="gridcell"
               >
-                12
+                2031
               </li>
               <li
                 role="gridcell"
               >
-                13
+                2032
               </li>
               <li
                 role="gridcell"
               >
-                14
-              </li>
-              <li
-                role="gridcell"
-              >
-                15
-              </li>
-              <li
-                role="gridcell"
-              >
-                16
-              </li>
-              <li
-                role="gridcell"
-              >
-                17
-              </li>
-              <li
-                role="gridcell"
-              >
-                18
-              </li>
-              <li
-                role="gridcell"
-              >
-                19
-              </li>
-              <li
-                role="gridcell"
-              >
-                20
-              </li>
-              <li
-                role="gridcell"
-              >
-                21
-              </li>
-              <li
-                role="gridcell"
-              >
-                22
-              </li>
-              <li
-                role="gridcell"
-              >
-                23
-              </li>
-              <li
-                role="gridcell"
-              >
-                24
-              </li>
-              <li
-                role="gridcell"
-              >
-                25
-              </li>
-              <li
-                role="gridcell"
-              >
-                26
-              </li>
-              <li
-                role="gridcell"
-              >
-                27
-              </li>
-              <li
-                role="gridcell"
-              >
-                28
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                1
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                2
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                3
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                4
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                5
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                6
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                7
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                8
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                9
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                10
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                11
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                12
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                13
+                2033
               </li>
             </ol>
           </div>
@@ -1253,9 +1156,185 @@ exports[`control.date validations options.validationCase 3`] = `
       </span>
       <input
         aria-autocomplete="list"
-        aria-controls="txt6"
+        aria-controls="txt2"
         aria-describedby="txt5"
         aria-expanded="true"
+        aria-haspopup="listbox"
+        aria-owns="txt2"
+        aria-required="true"
+        autocomplete="off"
+        id="txt1"
+        inputmode="numeric"
+        placeholder=" "
+        role="combobox"
+        type="text"
+      />
+      <strong>
+        First Input
+      </strong>
+    </span>
+    <button
+      aria-hidden="true"
+      clear=""
+      tabindex="-1"
+      type="button"
+    />
+  </label>
+  <wup-popup
+    menu=""
+    style=""
+  >
+    <wup-calendar
+      required=""
+    >
+      <div
+        calendar="year"
+        id="txt2"
+      >
+        <header>
+          <button
+            aria-hidden="true"
+            disabled=""
+            tabindex="-1"
+            type="button"
+          >
+            2018 ... 2033
+          </button>
+        </header>
+        <div>
+          <div>
+            <ol
+              role="grid"
+              style="overflow: hidden;"
+            >
+              <li
+                role="gridcell"
+              >
+                2018
+              </li>
+              <li
+                role="gridcell"
+              >
+                2019
+              </li>
+              <li
+                role="gridcell"
+              >
+                2020
+              </li>
+              <li
+                role="gridcell"
+              >
+                2021
+              </li>
+              <li
+                aria-current="date"
+                aria-selected="true"
+                role="gridcell"
+              >
+                2022
+              </li>
+              <li
+                role="gridcell"
+              >
+                2023
+              </li>
+              <li
+                role="gridcell"
+              >
+                2024
+              </li>
+              <li
+                role="gridcell"
+              >
+                2025
+              </li>
+              <li
+                role="gridcell"
+              >
+                2026
+              </li>
+              <li
+                role="gridcell"
+              >
+                2027
+              </li>
+              <li
+                role="gridcell"
+              >
+                2028
+              </li>
+              <li
+                role="gridcell"
+              >
+                2029
+              </li>
+              <li
+                role="gridcell"
+              >
+                2030
+              </li>
+              <li
+                role="gridcell"
+              >
+                2031
+              </li>
+              <li
+                role="gridcell"
+              >
+                2032
+              </li>
+              <li
+                role="gridcell"
+              >
+                2033
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </wup-calendar>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-date>
+`;
+
+exports[`control.date validations options.validationCase 4`] = `
+<wup-date
+  invalid=""
+  required=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <span
+        aria-hidden="true"
+        maskholder=""
+      >
+        <i />
+        yyyy-mm-dd
+      </span>
+      <input
+        aria-autocomplete="list"
+        aria-controls="txt6"
+        aria-describedby="txt7"
+        aria-expanded="false"
         aria-haspopup="listbox"
         aria-owns="txt6"
         aria-required="true"
@@ -1281,350 +1360,7 @@ exports[`control.date validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt5"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      custom err here
-    </span>
-  </wup-popup>
-  <wup-popup
-    menu=""
-    style=""
-  >
-    <wup-calendar
-      required=""
-    >
-      <div
-        calendar="day"
-        id="txt6"
-      >
-        <header>
-          <button
-            aria-hidden="true"
-            tabindex="-1"
-            type="button"
-          >
-            February 2022
-          </button>
-        </header>
-        <div>
-          <div>
-            <ul
-              aria-hidden="true"
-            >
-              <li>
-                Mo
-              </li>
-              <li>
-                Tu
-              </li>
-              <li>
-                We
-              </li>
-              <li>
-                Th
-              </li>
-              <li>
-                Fr
-              </li>
-              <li>
-                Sa
-              </li>
-              <li>
-                Su
-              </li>
-            </ul>
-            <ol
-              role="grid"
-              style="overflow: hidden;"
-            >
-              <li
-                prev=""
-                role="gridcell"
-              >
-                31
-              </li>
-              <li
-                role="gridcell"
-              >
-                1
-              </li>
-              <li
-                role="gridcell"
-              >
-                2
-              </li>
-              <li
-                role="gridcell"
-              >
-                3
-              </li>
-              <li
-                role="gridcell"
-              >
-                4
-              </li>
-              <li
-                role="gridcell"
-              >
-                5
-              </li>
-              <li
-                role="gridcell"
-              >
-                6
-              </li>
-              <li
-                role="gridcell"
-              >
-                7
-              </li>
-              <li
-                role="gridcell"
-              >
-                8
-              </li>
-              <li
-                role="gridcell"
-              >
-                9
-              </li>
-              <li
-                role="gridcell"
-              >
-                10
-              </li>
-              <li
-                role="gridcell"
-              >
-                11
-              </li>
-              <li
-                role="gridcell"
-              >
-                12
-              </li>
-              <li
-                role="gridcell"
-              >
-                13
-              </li>
-              <li
-                role="gridcell"
-              >
-                14
-              </li>
-              <li
-                role="gridcell"
-              >
-                15
-              </li>
-              <li
-                role="gridcell"
-              >
-                16
-              </li>
-              <li
-                role="gridcell"
-              >
-                17
-              </li>
-              <li
-                role="gridcell"
-              >
-                18
-              </li>
-              <li
-                role="gridcell"
-              >
-                19
-              </li>
-              <li
-                role="gridcell"
-              >
-                20
-              </li>
-              <li
-                role="gridcell"
-              >
-                21
-              </li>
-              <li
-                role="gridcell"
-              >
-                22
-              </li>
-              <li
-                role="gridcell"
-              >
-                23
-              </li>
-              <li
-                role="gridcell"
-              >
-                24
-              </li>
-              <li
-                role="gridcell"
-              >
-                25
-              </li>
-              <li
-                role="gridcell"
-              >
-                26
-              </li>
-              <li
-                role="gridcell"
-              >
-                27
-              </li>
-              <li
-                aria-selected="true"
-                role="gridcell"
-              >
-                28
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                1
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                2
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                3
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                4
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                5
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                6
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                7
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                8
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                9
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                10
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                11
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                12
-              </li>
-              <li
-                next=""
-                role="gridcell"
-              >
-                13
-              </li>
-            </ol>
-          </div>
-        </div>
-      </div>
-    </wup-calendar>
-  </wup-popup>
-</wup-date>
-`;
-
-exports[`control.date validations options.validationCase 4`] = `
-<wup-date
-  invalid=""
-  required=""
->
-  <label
-    for="txt1"
-  >
-    <span>
-      <span
-        aria-hidden="true"
-        maskholder=""
-      >
-        <i />
-        yyyy-mm-dd
-      </span>
-      <input
-        aria-autocomplete="list"
-        aria-controls="txt7"
-        aria-describedby="txt8"
-        aria-expanded="false"
-        aria-haspopup="listbox"
-        aria-owns="txt7"
-        aria-required="true"
-        autocomplete="off"
-        id="txt1"
-        inputmode="numeric"
-        placeholder=" "
-        role="combobox"
-        type="text"
-      />
-      <strong>
-        First Input
-      </strong>
-    </span>
-    <button
-      aria-hidden="true"
-      clear=""
-      tabindex="-1"
-      type="button"
-    />
-  </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt8"
+    id="txt7"
     role="alert"
     style=""
   >

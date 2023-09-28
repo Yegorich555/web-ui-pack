@@ -67,10 +67,11 @@ export default function ControlsView() {
       details={{ tag: "wup-form", linkDemo: "demo/src/components/controls/controlsView.tsx", customHTML, customJS }}
     >
       <wup-form
-        autoComplete={false}
-        autoSave="false"
+        w-autoComplete={false}
+        w-autoSave={false}
+        w-autoFocus
         disabled={false}
-        readOnly={false}
+        readonly={false}
         ref={(el) => {
           if (el) {
             // el.$initModel = { text: "test-me@google.com" };
@@ -83,43 +84,42 @@ export default function ControlsView() {
           }
         }}
       >
-        <wup-text name="text" />
-        <wup-pwd name="password" />
+        <wup-text w-name="text" />
+        <wup-pwd w-name="password" />
         <wup-select
+          w-name="select"
+          w-label="Select (combobox/dropdown)"
           ref={(el) => {
             if (el) {
-              el.$options.label = "Select (combobox/dropdown)";
               el.$options.items = items;
               el.$options.validations = {
                 required: true,
               };
-              el.$options.name = "select";
             }
           }}
         />
         <wup-selectmany
+          w-name="selectMany"
           ref={(el) => {
             if (el) {
               el.$options.items = items;
-              el.$options.name = "selectMany";
-              el.$options.label = "Select Many";
               el.$initValue = [items[0].value, items[2].value];
             }
           }}
         />
 
-        <wup-switch name="switch" />
-        <wup-check name="checkbox" />
+        <wup-switch w-name="switch" />
+        <wup-check w-name="checkbox" />
         <wup-radio
+          w-name="radioGroup"
           ref={(el) => {
             if (el) {
-              el.$options.name = "radioGroup";
               el.$options.items = items.slice(0, 4);
             }
           }}
         />
-        <wup-date name="date" />
-        <wup-time name="time" />
+        <wup-date w-name="date" />
+        <wup-time w-name="time" />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
@@ -129,16 +129,16 @@ export default function ControlsView() {
 const customHTML = [
   `html
 <wup-form
-  autoComplete="false"
-  autoSave="false"
-  readOnly="false"
+  w-autocomplete="false"
+  w-autosave="false"
+  w-autofocus="false"
+  readonly="false"
   disabled="false"
-  autoFocus="false"
 >
-  <wup-text name="firstName"/>
-  <wup-text name="lastName" />
-  <wup-text name="email"/>
-  <wup-pwd name="password"/>
+  <wup-text w-name="firstName"/>
+  <wup-text w-name="lastName" />
+  <wup-text w-name="email"/>
+  <wup-pwd w-name="password"/>
   ...
   <button type="submit">Submit</button>
 </wup-form>`,

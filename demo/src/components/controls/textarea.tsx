@@ -30,16 +30,13 @@ export default function TextControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-textarea
-          name="email"
-          label="Textarea control"
-          initValue=""
-          validations="window.myTextareaValidations"
-          // mask=""
-          // maskholder=""
-          // prefix=""
-          // postfix=""
+          w-name="email"
+          w-label="Textarea control"
+          w-initValue=""
+          w-validations="window.myTextareaValidations"
         />
         <wup-textarea
           id="testMe"
@@ -63,9 +60,9 @@ export default function TextControlView() {
         />
         <wup-textarea
           class={styles.autoh}
-          name="autoH" //
-          label="Autoheight"
-          initValue={[
+          w-name="autoH" //
+          w-label="Autoheight"
+          w-initValue={[
             "wup-textarea [contenteditable] { ", //
             "  max-height: 20em; // use css to limit",
             "}",
@@ -73,9 +70,9 @@ export default function TextControlView() {
           ].join("\n")}
         />
         <wup-textarea
-          name="withoutClearButton"
-          label="Without clear button"
-          initValue="Use $options.clearButton"
+          w-name="withoutClearButton"
+          w-label="Without clear button"
+          w-initValue="Use $options.clearButton"
           ref={(el) => {
             if (el) {
               el.$options.clearButton = false;
@@ -87,20 +84,20 @@ export default function TextControlView() {
         />
 
         <wup-textarea
-          initValue="init value here"
-          name="readonly"
+          w-initValue="init value here"
+          w-name="readonly"
           ref={(el) => {
             if (el) {
               el.$options.readOnly = true;
             }
           }}
         />
-        <wup-textarea name="disabled" disabled />
+        <wup-textarea w-name="disabled" disabled />
         <wup-textarea //
-          name="saveLsTa"
-          label="With saving to localStorage (see $options.skey & storage)"
-          skey
-          value="Type text & reload page"
+          w-name="saveLsTa"
+          w-label="With saving to localStorage (see $options.storageKey & storage)"
+          w-storageKey
+          w-initValue="Type text & reload page"
         />
         <button type="submit">Submit</button>
       </wup-form>

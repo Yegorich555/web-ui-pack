@@ -264,10 +264,10 @@ padding:0;}
       }
   :root {
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-clear-hover-size: 22px;
      }
   
       WUP-TEXTAREA {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -282,10 +282,15 @@ padding:0;}
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      WUP-TEXTAREA[invalid],
+      WUP-TEXTAREA[invalid] &gt; [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       WUP-TEXTAREA:focus-within,
       WUP-TEXTAREA:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-TEXTAREA:focus-within strong,
       WUP-TEXTAREA:focus-within legend {
@@ -302,10 +307,6 @@ padding:0;}
       [disabled] WUP-TEXTAREA &gt; *,
       WUP-TEXTAREA[disabled] &gt; * {
         pointer-events: none;
-      }
-      WUP-TEXTAREA[invalid],
-      WUP-TEXTAREA[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-TEXTAREA label {
         display: flex;
@@ -347,7 +348,6 @@ padding:0;}
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -396,23 +396,11 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-TEXTAREA:hover {
-          z-index: 90011;
-        }
-        WUP-TEXTAREA:hover [error] {
-          max-height: none;
-        }*/
         WUP-TEXTAREA:hover,
         WUP-TEXTAREA:hover&gt;[menu],
         WUP-TEXTAREA[hovered],
         WUP-TEXTAREA[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-TEXTAREA[invalid]:hover,
-        WUP-TEXTAREA[invalid]:hover&gt;[menu],
-        WUP-TEXTAREA[invalid][hovered],
-        WUP-TEXTAREA[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
         WUP-TEXTAREA {
@@ -533,8 +521,8 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-TEXTAREA label button,
-        WUP-TEXTAREA label button:after,
+        WUP-TEXTAREA label&gt;button,
+        WUP-TEXTAREA label&gt;button:after,
         WUP-TEXTAREA label:after,
         WUP-TEXTAREA label:before {
           
@@ -568,20 +556,27 @@ mask-image: var(--ctrl-icon-img);
           cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
-        WUP-TEXTAREA label button {
+        WUP-TEXTAREA label&gt;button {
           contain: strict;
-          position: relative;
           z-index: 1;
           font-size: inherit;
         }
-        WUP-TEXTAREA label&gt;span + button {
-          margin-right: -0.5em;
-        }
         WUP-TEXTAREA button[clear] {
+          display: none;
+          position: relative;
+          margin-right: -0.5em;
           align-self: center;
-          background: none;
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
+          background: none;
+          mask: none;
+          -webkit-mask: none;
+        }
+        WUP-TEXTAREA:focus-within button[clear] {
+          display: block;
+        }
+        WUP-TEXTAREA button[clear=back] {
+          --ctrl-icon-img: var(--wup-icon-back);
         }
         WUP-TEXTAREA button[clear]:after {
           content: "";
@@ -589,40 +584,31 @@ mask-image: var(--ctrl-icon-img);
           -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
         }
-        WUP-TEXTAREA button[clear=back]:after {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
         WUP-TEXTAREA button[clear]:after,
         WUP-TEXTAREA button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-        }
-        WUP-TEXTAREA button[clear]:before {
-          width: var(--ctrl-clear-hover-size);
-          padding-top: var(--ctrl-clear-hover-size);
-        }
-        WUP-TEXTAREA[disabled] button[clear],
-        WUP-TEXTAREA[readonly] button[clear],
-        WUP-TEXTAREA[required] button[clear] {
-          display: none;
+          height: 100%;
+          border-radius: 50%;
         }
         @media (hover: hover) and (pointer: fine) {
-          WUP-TEXTAREA button[clear]:hover {
-            box-shadow: none;
+          WUP-TEXTAREA:hover button[clear] {
+            display: block;
           }
           WUP-TEXTAREA button[clear]:hover:before {
             content: "";
-            border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           WUP-TEXTAREA button[clear]:hover:after {
-            background-color: var(--ctrl-err-text);
+            background: var(--ctrl-err-text);
           }
-          WUP-TEXTAREA[readonly] button[clear] {
-            pointer-events: none;
-          }
+        }
+        WUP-TEXTAREA[disabled] button[clear],
+        WUP-TEXTAREA[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }
         WUP-TEXTAREA strong { top: 1.6em; }
         WUP-TEXTAREA [contenteditable=true] {
@@ -668,6 +654,64 @@ WUP-AREAINPUT::-webkit-scrollbar-track-piece:horizontal:end {
   }
 }
 </style>
+`;
+
+exports[`control.textarea common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "label": null,
+  "name": null,
+  "readOnly": false,
+  "selectOnFocus": false,
+  "storage": "local",
+  "storageKey": "",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "email": [Function],
+    "max": [Function],
+    "min": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.textarea common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.textarea common tests snapshot of $defaults 3`] = `
+[
+  "disabled",
+  "readonly",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-clearbutton",
+  "w-debouncems",
+  "w-disabled",
+  "w-focusdebouncems",
+  "w-initvalue",
+  "w-label",
+  "w-name",
+  "w-readonly",
+  "w-selectonfocus",
+  "w-storage",
+  "w-storagekey",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
+]
 `;
 
 exports[`control.textarea options clearButton 1`] = `

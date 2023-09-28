@@ -36,22 +36,23 @@ export default function NumberControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-num
-          name="number"
-          label="Number"
-          initValue="1234"
-          validations="window.myNumberValidations"
-          mask=""
-          maskholder=""
-          prefix=""
-          postfix=""
+          w-name="number"
+          w-label="Number"
+          w-initValue="1234"
+          w-validations="window.myNumberValidations"
+          w-mask=""
+          w-maskholder=""
+          w-prefix=""
+          w-postfix=""
         />
         <wup-num
-          name="prefixPostfix"
-          label="With postfix prefix"
-          prefix="$ "
-          postfix=" USD"
+          w-name="prefixPostfix"
+          w-label="With postfix prefix"
+          w-prefix="$ "
+          w-postfix=" USD"
           ref={(el) => {
             if (el) {
               el.$options = { ...el.$options, format: { maxDecimal: 2 } };
@@ -59,10 +60,10 @@ export default function NumberControlView() {
             }
           }}
         />
-        <wup-num name="NumberRequired" validations="myRequiredValidations" />
-        <wup-num name="WithMask" label="With Mask (mask always ignores format)" mask="0000-0000" />
+        <wup-num w-name="NumberRequired" w-validations="myRequiredValidations" />
+        <wup-num w-name="WithMask" w-label="With Mask (mask always ignores format)" w-mask="0000-0000" />
         <wup-num
-          name="readonly"
+          w-name="readonly"
           ref={(el) => {
             if (el) {
               el.$options.name = "readonly";
@@ -70,12 +71,12 @@ export default function NumberControlView() {
             }
           }}
         />
-        <wup-num name="disabled" disabled />
+        <wup-num w-name="disabled" disabled />
         <wup-num //
-          name="saveUrlNum"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
-          storage="url"
+          w-name="saveUrlNum"
+          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-storageKey
+          w-storage="url"
         />
         <button type="submit">Submit</button>
       </wup-form>

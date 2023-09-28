@@ -344,7 +344,7 @@ export default function calendarTZtest() {
         el.$options.utc = opt.utc;
         el.$value = undefined;
         el.$initValue = undefined;
-        el.setAttribute("startwith", "1990");
+        el.setAttribute("w-startwith", "1990");
         document.body.appendChild(el);
         await h.wait();
         expect(el.$refCalenarTitle.textContent).toBe("1986 ... 2001");

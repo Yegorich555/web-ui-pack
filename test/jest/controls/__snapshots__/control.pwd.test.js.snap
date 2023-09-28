@@ -317,7 +317,6 @@ padding:0;}
       }
   :root {
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-clear-hover-size: 22px;
      }
   :root {
         --wup-icon-eye: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 122.182C209.455 122.182 60.392 230.749 0 384c60.392 153.251 209.455 261.818 384 261.818S707.608 537.251 768 384c-60.392-153.251-209.455-261.818-384-261.818zm0 436.363c-96.35 0-174.545-78.197-174.545-174.545S287.651 209.455 384 209.455 558.545 287.651 558.545 384 480.348 558.545 384 558.545zm0-279.272c-57.95 0-104.727 46.778-104.727 104.727S326.051 488.727 384 488.727 488.727 441.949 488.727 384 441.949 279.273 384 279.273z'/%3E%3C/svg%3E");
@@ -325,6 +324,7 @@ padding:0;}
      }
   
       WUP-PWD {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -339,10 +339,15 @@ padding:0;}
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      WUP-PWD[invalid],
+      WUP-PWD[invalid] &gt; [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       WUP-PWD:focus-within,
       WUP-PWD:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-PWD:focus-within strong,
       WUP-PWD:focus-within legend {
@@ -359,10 +364,6 @@ padding:0;}
       [disabled] WUP-PWD &gt; *,
       WUP-PWD[disabled] &gt; * {
         pointer-events: none;
-      }
-      WUP-PWD[invalid],
-      WUP-PWD[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-PWD label {
         display: flex;
@@ -404,7 +405,6 @@ padding:0;}
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -453,23 +453,11 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-PWD:hover {
-          z-index: 90011;
-        }
-        WUP-PWD:hover [error] {
-          max-height: none;
-        }*/
         WUP-PWD:hover,
         WUP-PWD:hover&gt;[menu],
         WUP-PWD[hovered],
         WUP-PWD[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-PWD[invalid]:hover,
-        WUP-PWD[invalid]:hover&gt;[menu],
-        WUP-PWD[invalid][hovered],
-        WUP-PWD[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
         WUP-PWD {
@@ -590,8 +578,8 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-PWD label button,
-        WUP-PWD label button:after,
+        WUP-PWD label&gt;button,
+        WUP-PWD label&gt;button:after,
         WUP-PWD label:after,
         WUP-PWD label:before {
           
@@ -625,20 +613,27 @@ mask-image: var(--ctrl-icon-img);
           cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
-        WUP-PWD label button {
+        WUP-PWD label&gt;button {
           contain: strict;
-          position: relative;
           z-index: 1;
           font-size: inherit;
         }
-        WUP-PWD label&gt;span + button {
-          margin-right: -0.5em;
-        }
         WUP-PWD button[clear] {
+          display: none;
+          position: relative;
+          margin-right: -0.5em;
           align-self: center;
-          background: none;
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
+          background: none;
+          mask: none;
+          -webkit-mask: none;
+        }
+        WUP-PWD:focus-within button[clear] {
+          display: block;
+        }
+        WUP-PWD button[clear=back] {
+          --ctrl-icon-img: var(--wup-icon-back);
         }
         WUP-PWD button[clear]:after {
           content: "";
@@ -646,45 +641,36 @@ mask-image: var(--ctrl-icon-img);
           -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
         }
-        WUP-PWD button[clear=back]:after {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
         WUP-PWD button[clear]:after,
         WUP-PWD button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-        }
-        WUP-PWD button[clear]:before {
-          width: var(--ctrl-clear-hover-size);
-          padding-top: var(--ctrl-clear-hover-size);
-        }
-        WUP-PWD[disabled] button[clear],
-        WUP-PWD[readonly] button[clear],
-        WUP-PWD[required] button[clear] {
-          display: none;
+          height: 100%;
+          border-radius: 50%;
         }
         @media (hover: hover) and (pointer: fine) {
-          WUP-PWD button[clear]:hover {
-            box-shadow: none;
+          WUP-PWD:hover button[clear] {
+            display: block;
           }
           WUP-PWD button[clear]:hover:before {
             content: "";
-            border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           WUP-PWD button[clear]:hover:after {
-            background-color: var(--ctrl-err-text);
+            background: var(--ctrl-err-text);
           }
-          WUP-PWD[readonly] button[clear] {
-            pointer-events: none;
-          }
+        }
+        WUP-PWD[disabled] button[clear],
+        WUP-PWD[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
         }
         WUP-PWD {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
-        WUP-PWD[reverse] {
+        WUP-PWD[w-reverse] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
         WUP-PWD input[type='password'] {
@@ -702,7 +688,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
-        WUP-PWD[reverse] button[eye="off"] {
+        WUP-PWD[w-reverse] button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
         @media (hover: hover) and (pointer: fine) {
@@ -715,6 +701,71 @@ mask-image: var(--ctrl-icon-img);
           margin: 0;
         }
 </style>
+`;
+
+exports[`control.pwd common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "label": null,
+  "name": null,
+  "postfix": "",
+  "prefix": "",
+  "readOnly": false,
+  "reverse": false,
+  "selectOnFocus": false,
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "confirm": [Function],
+    "email": [Function],
+    "max": [Function],
+    "min": [Function],
+    "minLower": [Function],
+    "minNumber": [Function],
+    "minUpper": [Function],
+    "required": [Function],
+    "special": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.pwd common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.pwd common tests snapshot of $defaults 3`] = `
+[
+  "disabled",
+  "readonly",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-clearbutton",
+  "w-debouncems",
+  "w-disabled",
+  "w-focusdebouncems",
+  "w-initvalue",
+  "w-label",
+  "w-name",
+  "w-postfix",
+  "w-prefix",
+  "w-readonly",
+  "w-reverse",
+  "w-selectonfocus",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
+]
 `;
 
 exports[`control.pwd options clearButton 1`] = `

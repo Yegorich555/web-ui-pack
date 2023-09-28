@@ -4,6 +4,7 @@
  */
 import { WUPDateControl } from "web-ui-pack";
 import { PickersEnum } from "web-ui-pack/controls/calendar";
+import { ShowCases } from "web-ui-pack/controls/baseCombo";
 // import { localeInfo } from "web-ui-pack/indexHelpers";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
@@ -36,6 +37,7 @@ initTestBaseControl({
   onInit: (e) => {
     jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
     el = e;
+    el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
 
     const height = 50;
     const width = 100;
@@ -69,16 +71,24 @@ describe("control.date", () => {
       exclude: { set: [new Date("2022-07-15")], failValue: new Date("2022-07-15"), trueValue: new Date("2022-07-16") },
     },
     attrs: {
-      min: { value: "2022-05-20" },
-      max: { value: "2022-05-21" },
-      exclude: { refGlobal: [new Date("2009-02-06")] },
-      mask: { skip: true },
-      maskholder: { skip: true },
-      format: { skip: true },
-    },
-    $options: {
-      mask: { skip: true },
-      maskholder: { skip: true },
+      "w-prefix": { value: "$" },
+      "w-postfix": { value: "USD" },
+      "w-clearbutton": { value: true },
+      "w-debouncems": { value: 5 },
+      "w-selectonfocus": { value: true },
+      "w-readonlyinput": { value: true },
+      "w-showcase": { value: 1 },
+
+      "w-mask": { value: "#0-#0-0000", nullValue: "0000-00-00" },
+      "w-maskholder": { value: "dd-mm-yyyy", nullValue: "YYYY-MM-DD" },
+      "w-format": { value: "dd-mm-yyyy", nullValue: "yyyy-mm-dd" },
+
+      "w-utc": { value: true },
+      "w-min": { value: "2022-05-20", parsedValue: new Date("2022-05-20") },
+      "w-max": { value: "2022-05-21", parsedValue: new Date("2022-05-21") },
+      "w-exclude": { value: [new Date("2009-02-06")] },
+      "w-startwith": { skip: true }, // tested manually
+      "w-firstweekday": { value: 1 },
     },
     validationsSkip: ["_parse", "_mask"],
   });
@@ -125,10 +135,10 @@ describe("control.date", () => {
     test("attr [startWith]", async () => {
       const set = async (s) => {
         el.remove();
-        el.setAttribute("startwith", s);
+        el.setAttribute("w-startwith", s);
         document.body.appendChild(el);
         await h.wait(1);
-        el.focus();
+        HTMLInputElement.prototype.focus.call(el.$refInput);
         await h.wait();
       };
 
@@ -150,29 +160,49 @@ describe("control.date", () => {
       el.$options.startWith = PickersEnum.Month;
       el.blur();
       await h.wait(1);
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$options.startWith).toBe(PickersEnum.Month);
       expect(el.$refPopup.firstChild.$options.startWith).toBe(PickersEnum.Month);
     });
 
     test("min/max/exclude affects on validations", async () => {
+      // el.$options.utc = true
       expect(el.validations).toBeTruthy(); // for coverage when el.$options.validations = undefined;
 
-      el.$options.min = new Date("2022-01-01");
-      expect(el.validations.min.valueOf()).toBe(new Date("2022-01-01").valueOf());
+      el.$options.min = new Date("2022-02-01T00:00:00.000Z");
+      expect(el.validations.min.valueOf()).toBe(new Date("2022-02-01T00:00:00.000Z").valueOf());
+      el.$value = new Date("2022-01-31T23:15:00.000Z");
+      expect(el.$validate()).toBe("Min value is 2022-02-01");
+      el.$value = new Date("2022-02-01T00:00:00.000Z");
+      expect(el.$validate()).toBeFalsy();
 
-      el.$options.max = new Date("2023-10-15");
-      expect(el.validations.max.valueOf()).toBe(new Date("2023-10-15").valueOf());
+      el.$options.max = new Date("2023-10-15T00:00:00.000Z");
+      expect(el.validations.max.valueOf()).toBe(new Date("2023-10-15T00:00:00.000Z").valueOf());
+      el.$value = new Date("2023-10-16T00:00:00.000Z");
+      expect(el.$validate()).toBe("Max value is 2023-10-15");
+      el.$value = new Date("2023-10-14T00:00:00.000Z");
+      expect(el.$validate()).toBeFalsy();
+      el.$value = new Date("2023-10-15T00:00:00.000Z");
+      expect(el.$validate()).toBeFalsy();
+      el.$value = new Date("2023-10-15T23:15:00.000Z");
+      expect(el.$validate()).toBeFalsy();
 
-      el.$options.exclude = [new Date("2022-07-12")];
-      expect(el.validations.exclude).toMatchInlineSnapshot(`
-        [
-          2022-07-12T00:00:00.000Z,
-        ]
-      `);
+      el.$options.exclude = [new Date("2022-07-12T00:00:00.000Z")];
+      expect(el.validations.exclude).toEqual([new Date("2022-07-12T00:00:00.000Z")]);
+      el.$value = new Date("2022-07-12T00:00:00.000Z");
+      expect(el.$validate()).toBe("This value is disabled");
+      el.$value = new Date("2022-07-12T23:16:00.000Z");
+      expect(el.$validate()).toBe("This value is disabled");
+      el.$value = new Date("2022-07-11T00:00:00.000Z");
+      expect(el.$validate()).toBeFalsy();
+      el.$value = new Date("2022-07-11T23:15:00.000Z");
+      expect(el.$validate()).toBeFalsy();
+      el.$value = new Date("2022-07-13T00:00:00.000Z");
+      expect(el.$validate()).toBeFalsy();
+
       await h.wait(1);
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       const clnd = el.$refPopup.firstChild;
       expect(clnd.$options.min).toBe(el.$options.min);
@@ -182,7 +212,7 @@ describe("control.date", () => {
 
     test("utc", async () => {
       expect(el.$options.utc).toBe(true);
-      el.setAttribute("min", "2022-10-15");
+      el.setAttribute("w-min", "2022-10-15");
       el.$options.utc = false;
       await h.wait(1);
       expect(el.$options.min.valueOf()).toBe(new Date("2022-10-15T00:00").valueOf()); // parse must be in local time
@@ -190,19 +220,20 @@ describe("control.date", () => {
       el.$value = new Date("2022-10-15T12:40:59.000Z"); // utc
       expect(el.$refInput.value).toBe("2022-10-15"); // just for coverage
 
-      el.setAttribute("min", "abc");
+      const prev = el.$options.min;
+      el.setAttribute("w-min", "abc");
       expect(() => jest.advanceTimersByTime(1)).toThrow();
       await h.wait(1);
-      expect(el.$options.min).toBe(undefined);
+      expect(el.$options.min).toBe(prev);
 
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$refPopup.firstChild.$options.utc).toBe(false);
       el.blur();
       await h.wait();
 
       el.$options.utc = true;
-      el.focus();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$refPopup.firstChild.$options.utc).toBe(true);
     });
@@ -216,7 +247,7 @@ describe("control.date", () => {
     el.$options.name = "testDate";
     await h.wait(1);
 
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     const onParse = jest.spyOn(el, "parseInput");
     const onChange = jest.fn();
     el.addEventListener("$change", onChange);
@@ -299,6 +330,36 @@ describe("control.date", () => {
     expect(el.parseInput("b022-10-16")).toBe(undefined);
     el.$options.utc = false;
     expect(el.parseInput("2022-10-16").toISOString()).toBe(new Date("2022-10-16").toISOString());
+
+    // user types invalid text
+    h.mockConsoleWarn();
+    el = document.body.appendChild(document.createElement(el.tagName));
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "99999999")).toBe("9999-99-99|");
+    expect(el.$isShown).toBe(true);
+
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Invalid value</span>"`
+    );
+    h.unMockConsoleWarn();
+
+    // user types incomplete text (msg: Incomplete value)
+    el = document.body.appendChild(document.createElement(el.tagName));
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "99")).toBe("99|");
+    expect(el.$isShown).toBe(true);
+    expect(el.$refError?.innerHTML).toBeFalsy();
+
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    await h.wait();
+    expect(el.$isShown).toBe(false);
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Incomplete value</span>"`
+    );
+    expect(el.$refInput.value).toBe("99");
   });
 
   test("menu navigation", async () => {
@@ -314,7 +375,7 @@ describe("control.date", () => {
 
     const onChanged = jest.fn();
     el.addEventListener("$change", onChanged);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(h.getInputCursor(el.$refInput)).toBe("|2022-10-12|");
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
@@ -383,7 +444,7 @@ describe("control.date", () => {
     // force to remove calendar (to startWith year again)
     el.blur();
     await h.wait(1);
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
 
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
@@ -404,7 +465,7 @@ describe("control.date", () => {
   });
 
   test("value change not affects on popup", async () => {
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     expect(el.$isShown).toBe(true);
 
@@ -414,7 +475,7 @@ describe("control.date", () => {
 
     el.blur();
     await h.wait();
-    el.focus();
+    HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
     const cur = el.$refPopup.querySelector("[aria-selected]");
     expect(cur).toBeDefined();

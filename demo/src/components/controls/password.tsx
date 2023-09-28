@@ -5,15 +5,12 @@ const sideEffect = WUPPasswordControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 
 (window as any)._somePasswordValidations = {
-  required: true,
   min: 8,
   minNumber: 1,
   minUpper: 1,
   minLower: 1,
   special: { min: 1, chars: "#!-_?,.@:;'" },
 } as WUP.Password.Options["validations"];
-
-(window as any).myPasswordValidations = { required: true, min: 4 } as WUP.Password.Options["validations"];
 
 export default function PasswordControlView() {
   return (
@@ -39,15 +36,13 @@ export default function PasswordControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-pwd
-          name="pwd"
-          label="Password"
-          initValue="someValue"
-          autoComplete="off"
-          autoFocus={false}
-          validations="window._somePasswordValidations"
-          reverse={false}
+          w-name="pwd"
+          w-label="Password"
+          w-initValue="someValue"
+          w-validations="window._somePasswordValidations"
           ref={(el) => {
             if (el) {
               el.$options.validationShowAll = true;
@@ -55,20 +50,30 @@ export default function PasswordControlView() {
             }
           }}
         />
-        <wup-pwd name="required" validations="myPasswordValidations" />
         <wup-pwd
-          name="withoutClearButton"
+          w-name="required"
+          ref={(el) => {
+            if (el) {
+              el.$options.validationShowAll = true;
+              el.$options.validations = {
+                required: true,
+              };
+            }
+          }}
+        />
+        <wup-pwd
+          w-name="withoutClearButton"
           ref={(el) => {
             if (el) {
               el.$options.clearButton = false;
             }
           }}
         />
-        <wup-pwd name="disabled" disabled />
-        <wup-pwd label="Reversed button eye" name="reversed" reverse initValue="someValue-ForReversed" />
+        <wup-pwd w-name="disabled" disabled />
+        <wup-pwd w-label="Reversed button eye" w-name="reversed" w-reverse w-initValue="someValue-ForReversed" />
         <wup-pwd
-          label="Confirm password"
-          name="confirm"
+          w-label="Confirm password"
+          w-name="confirm"
           ref={(el) => {
             if (el) {
               el.$options.validations = { confirm: true };

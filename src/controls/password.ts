@@ -18,19 +18,18 @@ declare global {
       /** If $value != with previous siblint wup-pwd.$value shows message 'Passwords must be equal' */
       confirm: boolean;
     }
-    interface Defaults<T = string, VM extends ValidityMap = ValidityMap> extends WUP.Text.Defaults<T, VM> {}
-    interface Options<T = string, VM extends ValidityMap = ValidityMap>
-      extends WUP.Text.Options<T, VM>,
-        Defaults<T, VM> {
+    interface Options<T = string, VM = ValidityMap>
+      extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "storageKey" | "storage"> {
       /** Reversed-style for button-eye
        * @defaultValue false */
-      reverse?: boolean;
+      reverse: boolean;
     }
-    interface Attributes extends WUP.Text.Attributes {
-      /** Reversed-style for button-eye */
-      reverse?: boolean | "";
+    interface JSXProps<C = WUPPasswordControl>
+      extends Omit<WUP.Text.JSXProps<C>, "mask" | "maskholder" | "prefix" | "postfix"> {
+      /** Reversed-style for button-eye
+       * @defaultValue false */
+      "w-reverse"?: boolean | string;
     }
-    interface JSXProps<C = WUPPasswordControl> extends WUP.Text.JSXProps<C>, Attributes {}
   }
 
   interface HTMLElementTagNameMap {
@@ -67,8 +66,8 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-pwd name="password" validations="myValidations"/>
-    <wup-pwd name="passwordConfirm" validations="myValidations2"/>
+    <wup-pwd w-name="password" w-validations="myValidations"/>
+    <wup-pwd w-name="passwordConfirm" w-validations="myValidations2"/>
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
@@ -86,12 +85,6 @@ export default class WUPPasswordControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPasswordControl;
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Password.Options>;
-    arr.push("reverse");
-    return arr;
-  }
-
   /** Text announced by screen-readers when input cleared; @defaultValue `input cleared` */
   static $ariaDescription = "press Alt + V to show/hide password";
 
@@ -107,7 +100,7 @@ export default class WUPPasswordControl<
         :host {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
-        :host[reverse] {
+        :host[w-reverse] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
         :host input[type='password'] {
@@ -125,7 +118,7 @@ export default class WUPPasswordControl<
         :host button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
-        :host[reverse] button[eye="off"] {
+        :host[w-reverse] button[eye="off"] {
           --ctrl-icon-img: var(--wup-icon-eye);
         }
         @media (hover: hover) and (pointer: fine) {
@@ -140,7 +133,7 @@ export default class WUPPasswordControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Password.Defaults = {
+  static $defaults: WUP.Password.Options = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPTextControl.$defaults.validationRules,
@@ -178,6 +171,7 @@ export default class WUPPasswordControl<
         return "Passwords must be equal";
       },
     },
+    reverse: false,
   };
 
   $refBtnEye = document.createElement("button");
@@ -218,14 +212,13 @@ export default class WUPPasswordControl<
     }); // otherwise selection is reset
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUP.Password.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<string> | null): void {
     super.gotChanges(propsChanged as any);
     this.$refInput.autocomplete = this.$autoComplete || "new-password"; // otherwise form with email+password ignores autocomplete: "off" if previously it was saved
     // it can be ignored by browsers. To fix > https://stackoverflow.com/questions/2530/how-do-you-disable-browser-autocomplete-on-web-form-field-input-tags
     // https://stackoverflow.com/questions/11708092/detecting-browser-autofill
 
-    this._opts.reverse = this.getAttr("reverse", "bool");
-    this.setAttr("reverse", this._opts.reverse, true);
+    this.setAttr("w-reverse", this._opts.reverse, true);
   }
 
   protected override gotKeyDown(e: KeyboardEvent): void {
@@ -236,9 +229,14 @@ export default class WUPPasswordControl<
   }
 
   protected override storageSet(): void {
-    console.error("Saving not allowed for password. Remove [skey]!");
+    console.error("Saving not allowed for password. Remove $options.storageKey");
   }
 }
+
+// prettify defaults before create
+let rr: Array<keyof WUP.Text.Options> | undefined = ["mask", "maskholder", "storageKey", "storage"];
+rr.forEach((k) => delete WUPPasswordControl.$defaults[k as keyof WUP.Password.Options]);
+rr = undefined;
 
 customElements.define(tagName, WUPPasswordControl);
 

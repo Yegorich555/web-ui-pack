@@ -205,6 +205,7 @@ padding:0;}
      }
   
       WUP-SWITCH {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -219,10 +220,15 @@ padding:0;}
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      WUP-SWITCH[invalid],
+      WUP-SWITCH[invalid] &gt; [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       WUP-SWITCH:focus-within,
       WUP-SWITCH:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-SWITCH:focus-within strong,
       WUP-SWITCH:focus-within legend {
@@ -239,10 +245,6 @@ padding:0;}
       [disabled] WUP-SWITCH &gt; *,
       WUP-SWITCH[disabled] &gt; * {
         pointer-events: none;
-      }
-      WUP-SWITCH[invalid],
-      WUP-SWITCH[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-SWITCH label {
         display: flex;
@@ -284,7 +286,6 @@ padding:0;}
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -333,23 +334,11 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-SWITCH:hover {
-          z-index: 90011;
-        }
-        WUP-SWITCH:hover [error] {
-          max-height: none;
-        }*/
         WUP-SWITCH:hover,
         WUP-SWITCH:hover&gt;[menu],
         WUP-SWITCH[hovered],
         WUP-SWITCH[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-SWITCH[invalid]:hover,
-        WUP-SWITCH[invalid]:hover&gt;[menu],
-        WUP-SWITCH[invalid][hovered],
-        WUP-SWITCH[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
       WUP-SWITCH {
@@ -405,14 +394,14 @@ padding:0; }
         background: var(--ctrl-switch-on);
         left: calc(100% - var(--ctrl-switch-size-w) + var(--ctrl-switch-size-spot) + 1px);
       }
-      WUP-SWITCH[reverse] label {
+      WUP-SWITCH[w-reverse] label {
         flex-direction: row-reverse;
       }
-      WUP-SWITCH[reverse] label&gt;span {
+      WUP-SWITCH[w-reverse] label&gt;span {
         margin-left: 0;
         margin-right: 0.5em;
       }
-      WUP-SWITCH[reverse] label&gt;strong {
+      WUP-SWITCH[w-reverse] label&gt;strong {
         margin-right: auto;
       }
       @media not all and (prefers-reduced-motion) {
@@ -425,6 +414,58 @@ padding:0; }
         }
       }
 </style>
+`;
+
+exports[`control.switch common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "label": null,
+  "name": null,
+  "readOnly": false,
+  "reverse": false,
+  "storage": "local",
+  "storageKey": "",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.switch common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.switch common tests snapshot of $defaults 3`] = `
+[
+  "defaultchecked",
+  "disabled",
+  "readonly",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-disabled",
+  "w-focusdebouncems",
+  "w-initvalue",
+  "w-label",
+  "w-name",
+  "w-readonly",
+  "w-reverse",
+  "w-storage",
+  "w-storagekey",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
+]
 `;
 
 exports[`control.switch validations options.validationCase 1`] = `

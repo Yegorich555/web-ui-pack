@@ -5,10 +5,8 @@ declare global {
   namespace WUP.Check {
     interface EventMap extends WUP.Switch.EventMap {}
     interface ValidityMap extends WUP.Switch.ValidityMap {}
-    interface Defaults<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {}
-    interface Options<T = boolean, VM = ValidityMap> extends WUP.Switch.Options<T, VM>, Defaults<T, VM> {}
-    interface Attributes extends WUP.Switch.Attributes {}
-    interface JSXProps<C = WUPCheckControl> extends WUP.Switch.JSXProps<C>, Attributes {}
+    interface Options<T = boolean, VM = ValidityMap> extends WUP.Switch.Options<T, VM> {}
+    interface JSXProps<C = WUPCheckControl> extends WUP.Switch.JSXProps<C> {}
   }
   interface HTMLElementTagNameMap {
     [tagName]: WUPCheckControl; // add element to document.createElement
@@ -32,7 +30,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-check name="accepted" label="Accept" initvalue="false"/>
+    <wup-check w-name="accepted" w-label="Accept" w-initvalue="false"/>
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
@@ -47,7 +45,7 @@ export default class WUPCheckControl<
   TOptions extends WUP.Check.Options = WUP.Check.Options,
   EventMap extends WUP.Check.EventMap = WUP.Check.EventMap
 > extends WUPSwitchControl<TOptions, EventMap> {
-  #ctr = this.constructor as typeof WUPCheckControl;
+  // #ctr = this.constructor as typeof WUPCheckControl;
 
   static get $styleRoot(): string {
     return `:root {
@@ -104,12 +102,12 @@ export default class WUPCheckControl<
       }`;
   }
 
-  static $defaults: WUP.Check.Defaults = {
+  static $defaults: WUP.Check.Options = {
     ...WUPSwitchControl.$defaults,
-    validationRules: { ...WUPSwitchControl.$defaults.validationRules },
+    // WARN: it's shared =>  validationRules: { ...WUPSwitchControl.$defaults.validationRules },
   };
 }
 
 customElements.define(tagName, WUPCheckControl);
 
-// todo add logic for checkbox-tree: also cache observedAttrs per each type to reduce memoryConsumption
+// todo add logic for checkbox-tree:

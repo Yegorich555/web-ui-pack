@@ -213,6 +213,7 @@ padding:0;}
       }
   
       WUP-CHECK {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -227,10 +228,15 @@ padding:0;}
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      WUP-CHECK[invalid],
+      WUP-CHECK[invalid] &gt; [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       WUP-CHECK:focus-within,
       WUP-CHECK:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-CHECK:focus-within strong,
       WUP-CHECK:focus-within legend {
@@ -247,10 +253,6 @@ padding:0;}
       [disabled] WUP-CHECK &gt; *,
       WUP-CHECK[disabled] &gt; * {
         pointer-events: none;
-      }
-      WUP-CHECK[invalid],
-      WUP-CHECK[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-CHECK label {
         display: flex;
@@ -292,7 +294,6 @@ padding:0;}
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -341,23 +342,11 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-CHECK:hover {
-          z-index: 90011;
-        }
-        WUP-CHECK:hover [error] {
-          max-height: none;
-        }*/
         WUP-CHECK:hover,
         WUP-CHECK:hover&gt;[menu],
         WUP-CHECK[hovered],
         WUP-CHECK[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-CHECK[invalid]:hover,
-        WUP-CHECK[invalid]:hover&gt;[menu],
-        WUP-CHECK[invalid][hovered],
-        WUP-CHECK[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
       WUP-CHECK {
@@ -413,14 +402,14 @@ padding:0; }
         background: var(--ctrl-switch-on);
         left: calc(100% - var(--ctrl-switch-size-w) + var(--ctrl-switch-size-spot) + 1px);
       }
-      WUP-CHECK[reverse] label {
+      WUP-CHECK[w-reverse] label {
         flex-direction: row-reverse;
       }
-      WUP-CHECK[reverse] label&gt;span {
+      WUP-CHECK[w-reverse] label&gt;span {
         margin-left: 0;
         margin-right: 0.5em;
       }
-      WUP-CHECK[reverse] label&gt;strong {
+      WUP-CHECK[w-reverse] label&gt;strong {
         margin-right: auto;
       }
       @media not all and (prefers-reduced-motion) {
@@ -473,6 +462,58 @@ padding:0; }
         }
       }
 </style>
+`;
+
+exports[`control.check common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "label": null,
+  "name": null,
+  "readOnly": false,
+  "reverse": false,
+  "storage": "local",
+  "storageKey": "",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.check common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.check common tests snapshot of $defaults 3`] = `
+[
+  "defaultchecked",
+  "disabled",
+  "readonly",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-disabled",
+  "w-focusdebouncems",
+  "w-initvalue",
+  "w-label",
+  "w-name",
+  "w-readonly",
+  "w-reverse",
+  "w-storage",
+  "w-storagekey",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
+]
 `;
 
 exports[`control.check validations options.validationCase 1`] = `

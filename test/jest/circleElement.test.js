@@ -26,17 +26,19 @@ afterEach(() => {
 describe("circleElement", () => {
   h.baseTestComponent(() => document.createElement("wup-circle"), {
     attrs: {
-      items: { refGlobal: getItems(), skip: true },
-      width: { value: "10" },
-      corner: { value: "0.4" },
-      from: { value: "-90" },
-      to: { value: "90" },
-      min: { value: "4" },
-      max: { value: "20" },
-      space: { value: "2" },
-      minsize: { value: "10" },
+      "w-items": { value: getItems() },
+      "w-width": { value: 10 },
+      "w-corner": { value: 0.4 },
+      "w-from": { value: -90 },
+      "w-to": { value: 90 },
+      "w-min": { value: 4 },
+      "w-max": { value: 20 },
+      "w-space": { value: 2 },
+      "w-minsize": { value: 10 },
+      "w-back": { value: true },
+      "w-hoverhidetimeout": { value: 100 },
+      "w-hovershowtimeout": { value: 107 },
     },
-    $options: { items: { refGlobal: getItems() } },
     onCreateNew: (e) => (e.$options.items = getItems()),
   });
 
@@ -422,7 +424,7 @@ describe("circleElement", () => {
       return orig(elem);
     });
 
-    el.$options.hoverShowTimeout = 0;
+    el._opts.hoverShowTimeout = 0;
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(el.$options.hoverHideTimeout);
     expect(el.querySelector("wup-popup").$isHiding).toBe(true);

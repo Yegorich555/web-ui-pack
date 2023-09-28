@@ -3,6 +3,7 @@ import { WUPcssHidden } from "../styles";
 import WUPScrolled from "../helpers/scrolled";
 import { dateCopyTime, dateFromString, dateToString } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
+import { AttributeMap, AttributeTypes } from "../baseElement";
 
 const tagName = "wup-calendar";
 
@@ -31,7 +32,7 @@ declare global {
       scrollTo?: number;
       min: Date | undefined;
       max: Date | undefined;
-      exclude: Date[] | undefined;
+      exclude: Date[] | undefined | null;
     }
     interface IMonthInfo {
       /** Total days in month */
@@ -45,45 +46,52 @@ declare global {
     }
     interface EventMap extends WUP.BaseControl.EventMap {}
     interface ValidityMap extends WUP.BaseControl.ValidityMap {}
-    interface Defaults<T = Date, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {
+    interface NewOptions {
       /** First day of week in calendar where 1-Monday, 7-Sunday;
        * @defaultValue localeInfo.firstWeekDay */
-      firstWeekDay?: number;
+      firstWeekDay: number | null;
       /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
        *  @defaultValue true */
-      utc?: boolean;
-    }
-    interface Options<T = Date, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
+      utc: boolean;
       /** User can't select date less than min; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
-      min?: Date;
+      min: Date | null;
       /** User can't select date more than max; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
-      max?: Date;
+      max: Date | null;
       /** Picker that must be rendered at first; if undefined & isEmpty - year, otherwise - day;
        * @tutorial
        * * point "2012" to start from year2012
        * * point "2012-05" to start from month5 year2012
        * * point "2012-05-02" to start from day2 month5 year2012
-       * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here)
-       * @not observed (affects only on init) */
-      startWith?: PickersEnum | string;
+       * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here) */
+      startWith: PickersEnum | string | null;
       /** Dates that user can't choose (disabled dates) */
-      exclude?: Date[];
-      firstWeekDay: number;
+      exclude: Date[] | null;
     }
-    interface Attributes extends WUP.BaseControl.Attributes, Pick<Options, "utc"> {
-      /** Picker that must be rendered at first */
-      startWith?: "year" | "month" | "day" | string;
+    interface Options<T = Date, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPCalendarControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      /** Default value in strict format yyyy-MM-dd hh:mm:ss.fff */
+      "w-initValue"?: string;
+      "w-firstWeekDay"?: number;
+      "w-utc"?: boolean | "";
+      /** Picker that must be rendered at first; if undefined & isEmpty - year, otherwise - day;
+       * @tutorial
+       * * point "2012" to start from year2012
+       * * point "2012-05" to start from month5 year2012
+       * * point "2012-05-02" to start from day2 month5 year2012
+       * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here) */
+      "w-startWith"?: "year" | "month" | "day" | string;
       /** User can't select date less than min; format yyyy-MM-dd */
-      min?: string;
+      "w-min"?: string;
       /** User can't select date more than max; format yyyy-MM-dd  */
-      max?: string;
-      /** Dates that user can't choose. Point global obj-key (window.myExclude = [] ) */
-      exclude?: string;
-      /** default value; format yyyy-MM-dd hh:mm:ss.fff */
-      initValue?: string;
-    }
-    interface JSXProps<C = WUPCalendarControl> extends WUP.BaseControl.JSXProps<C>, Attributes {
-      initValue?: string;
+      "w-max"?: string;
+      /** Dates that user can't choose
+      /** Global reference to object with array
+       * @example
+       * ```js
+       * window.exclude = [...];
+       * <wup-calendar w-exclude="window.exclude"></wup-calendar>
+       * ``` */
+      "w-exclude"?: string;
     }
   }
 
@@ -114,7 +122,7 @@ const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) 
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-calendar name="dateOfBirhday" utc initvalue="1990-10-24" min="1930-01-01" max="2010-01-01"/>
+    <wup-calendar w-name="dateOfBirhday" w-utc w-initvalue="1990-10-24" w-min="1930-01-01" w-max="2010-01-01"/>
   </wup-form>;
  */
 export default class WUPCalendarControl<
@@ -198,7 +206,7 @@ export default class WUPCalendarControl<
         border: none;
         border-radius: 2em;
         color: inherit;
-        background-color: white;
+        background: none;
         box-shadow: none;
         text-transform: inherit;
       }
@@ -294,18 +302,6 @@ export default class WUPCalendarControl<
       }`;
   }
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Calendar.Options>;
-    arr.push("utc", "min", "max", "exclude");
-    return arr;
-  }
-
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Calendar.Attributes>>;
-    arr.push("utc", "min", "max", "exclude");
-    return arr;
-  }
-
   /** Returns days of pointed number-of-month with placeholders of prev, next months
    * @param year 2022 etc.
    * @param month index of month (0-11)
@@ -355,18 +351,33 @@ export default class WUPCalendarControl<
     return v!; // null impossible here
   }
 
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.min = { type: AttributeTypes.parsedObject };
+    m.max = { type: AttributeTypes.parsedObject };
+    m.firstweekday = { type: AttributeTypes.number };
+    m.startwith = { type: AttributeTypes.string };
+    return m;
+  }
+
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Calendar.Defaults = {
+  static $defaults: WUP.Calendar.Options = {
     ...WUPBaseControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
     },
     utc: true,
+    firstWeekDay: null,
+    startWith: null,
+    min: null,
+    max: null,
+    exclude: null,
   };
 
   constructor() {
     super();
-    this._opts.firstWeekDay = this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay; // init here to depends on localeInfo
+    this.#ctr.$defaults.firstWeekDay ||= localeInfo.firstWeekDay;
+    this._opts.firstWeekDay ||= this.#ctr.$defaults.firstWeekDay; // init here to depends on localeInfo
   }
 
   /** Call when need to re-rended picker (min/max changed etc.) */
@@ -576,7 +587,7 @@ export default class WUPCalendarControl<
       days.setAttribute("aria-hidden", true);
       box.prepend(days);
       const names = localeInfo.namesDayShort;
-      for (let i = 0, n = this._opts.firstWeekDay - 1; i < 7; ++i, ++n) {
+      for (let i = 0, n = this._opts.firstWeekDay! - 1; i < 7; ++i, ++n) {
         const d = add(days, "li");
         if (n >= names.length) {
           n = 0;
@@ -597,7 +608,7 @@ export default class WUPCalendarControl<
       this.$refCalenarTitle.textContent = `${namesMonth[valMonth]} ${valYear}`;
 
       const items: WUP.Calendar.IItemElement[] = [];
-      const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstWeekDay);
+      const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstWeekDay!);
 
       let iPrev = -999;
       if (ol.children.length) {
@@ -959,8 +970,8 @@ export default class WUPCalendarControl<
   }
 
   /** Shift pointed date to UTC if $options.utc is false and user pointed localDate; @returns new object-date */
-  private normalizeToUTC(v: Date | undefined): Date;
-  private normalizeToUTC(v: Date | undefined): Date | undefined {
+  private normalizeToUTC(v: Date | undefined | null): Date;
+  private normalizeToUTC(v: Date | undefined | null): Date | undefined | null {
     if (v == null || this._opts.utc) {
       return v;
     }
@@ -979,7 +990,7 @@ export default class WUPCalendarControl<
         case 1: startWith = PickersEnum.Year; break;
         case 2: startWith = PickersEnum.Month; break;
         case 3: startWith = PickersEnum.Day; break;
-        default: startWith = undefined; break;
+        default: startWith = null; break;
       }
       if (startWith != null) {
         startDate = new Date(Date.UTC(+arr[0] || new Date().getFullYear(), (+arr[1] || 1) - 1, +arr[2] || 1));
@@ -1016,10 +1027,7 @@ export default class WUPCalendarControl<
     }
     const isNeedRecalc =
       propsChanged &&
-      (propsChanged.includes("min") ||
-        propsChanged.includes("max") ||
-        propsChanged.includes("exclude") ||
-        propsChanged.includes("utc"));
+      (["min", "max", "exclude", "utc"] as Array<keyof WUP.Calendar.Options>).some((a) => propsChanged.includes(a));
     if (!propsChanged || isNeedRecalc) {
       this.#disabled = this.calcDisabled();
     }
@@ -1027,19 +1035,16 @@ export default class WUPCalendarControl<
   }
 
   gotChangesSharable(): void {
-    this._opts.utc = this.getAttr("utc", "bool");
-    this._opts.min = this.getAttr("min", "obj");
-    this._opts.max = this.getAttr("max", "obj");
-    this._opts.exclude = this.getAttr<Date[]>("exclude", "ref");
+    this._opts.firstWeekDay ??= (this.constructor as typeof WUPCalendarControl).$defaults.firstWeekDay;
 
-    const attr = this.getAttribute("startwith");
+    const attr = this.getAttribute("w-startwith");
     if (attr != null) {
       // prettier-ignore
       switch (attr.toLowerCase()) {
         case "year": this._opts.startWith = PickersEnum.Year; break;
         case "month": this._opts.startWith = PickersEnum.Month; break;
         case "day": this._opts.startWith = PickersEnum.Day; break;
-        case "": delete this._opts.startWith; break;
+        case "": this._opts.startWith = null; break;
         default: this._opts.startWith = attr; break;
       }
     }

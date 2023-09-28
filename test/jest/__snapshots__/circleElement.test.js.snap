@@ -83,3 +83,39 @@ padding:0;}
       }
 </style>
 `;
+
+exports[`circleElement common tests snapshot of $defaults 1`] = `
+{
+  "back": true,
+  "corner": 0.25,
+  "from": 0,
+  "hoverHideTimeout": 0,
+  "hoverShowTimeout": 200,
+  "items": [],
+  "max": 100,
+  "min": 0,
+  "minSize": 10,
+  "space": 2,
+  "to": 360,
+  "width": 14,
+}
+`;
+
+exports[`circleElement common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`circleElement common tests snapshot of $defaults 3`] = `
+[
+  "w-back",
+  "w-corner",
+  "w-from",
+  "w-hoverhidetimeout",
+  "w-hovershowtimeout",
+  "w-items",
+  "w-max",
+  "w-min",
+  "w-minsize",
+  "w-space",
+  "w-to",
+  "w-width",
+]
+`;

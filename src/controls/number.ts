@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import onScroll from "../helpers/onScroll";
 import { mathSumFloat, onEvent } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
@@ -23,23 +24,30 @@ declare global {
       minDecimal?: number;
     }
     interface EventMap extends WUP.BaseControl.EventMap {}
-    interface ValidityMap
-      extends WUP.BaseControl.ValidityMap,
-        Pick<WUP.Text.ValidityMap, "_mask" | "min" | "max" /* | "_parse" */> {
+    interface ValidityMap extends WUP.Text.ValidityMap {
       /** If $value < pointed shows message 'Min value {x}` */
       min: number;
       /** If $value < pointed shows message 'Max value {x}` */
       max: number;
     }
-    interface Defaults<T = number, VM extends ValidityMap = ValidityMap> extends WUP.Text.Defaults<T, VM> {}
-    interface Options<T = number, VM extends ValidityMap = ValidityMap>
-      extends WUP.Text.Options<T, VM>,
-        Defaults<T, VM> {
-      /** String representation of displayed value */
-      format?: Format;
+    interface NewOptions {
+      /** String representation of displayed value
+       * @defaultValue no-decimal and separators from localeInfo */
+      format: Format | null;
     }
-    interface Attributes extends WUP.Text.Attributes {}
-    interface JSXProps<C = WUPNumberControl> extends WUP.Text.JSXProps<C>, Attributes {}
+    interface TextAnyOptions<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM> {}
+    interface Options<T = number, VM extends ValidityMap = ValidityMap> extends TextAnyOptions<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPNumberControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      /** String representation of displayed value
+       * Point Global reference to object @see {@link Format}
+       * @example
+       * ```js
+       * window.format = {};
+       * <wup-number w-items="window.format"></wup-number>
+       * ```
+       * @defaultValue no-decimal and separators from localeInfo */
+      "w-format"?: string; // NiceToHave: parse from string
+    }
   }
   interface HTMLElementTagNameMap {
     [tagName]: WUPNumberControl; // add element to document.createElement
@@ -52,6 +60,12 @@ declare global {
     }
   }
 }
+
+abstract class TextAnyControl<
+  ValueType,
+  TOptions extends WUP.Number.TextAnyOptions,
+  EventMap extends WUP.Text.EventMap
+> extends WUPTextControl<ValueType, TOptions, EventMap> {}
 
 /** Form-control with number-input
  * @example
@@ -66,38 +80,25 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-num name="number" validations="myValidations"/>
+    <wup-num w-name="number" w-validations="myValidations"/>
   </wup-form>;
  * @see {@link WUPTextControl} */
 export default class WUPNumberControl<
   ValueType = number,
   TOptions extends WUP.Number.Options = WUP.Number.Options,
   EventMap extends WUP.Number.EventMap = WUP.Number.EventMap
-> extends WUPTextControl<
-  ValueType,
-  // @ts-expect-error - because number & string incompatible
-  TOptions,
-  EventMap
-> {
-  #ctr = this.constructor as typeof WUPNumberControl;
-
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Number.Options>;
-    arr.push("format");
-    return arr;
-  }
+> extends TextAnyControl<ValueType, TOptions, EventMap> {
+  // #ctr = this.constructor as typeof WUPNumberControl;
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  // @ts-expect-error - min: string & min: number is invalid
-  static $defaults: WUP.Number.Defaults = {
-    ...WUPTextControl.$defaults,
+  static $defaults: WUP.Number.Options = {
+    ...(WUPTextControl.$defaults as any),
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
-      _mask: WUPTextControl.$defaults.validationRules._mask as any,
-      // _parse: WUPTextControl.$defaults.validationRules._parse as any,
       min: (v, setV, c) => (v == null || v < setV) && `Min value is ${(c as WUPNumberControl).valueToInput(setV)}`,
       max: (v, setV, c) => (v == null || v > setV) && `Max value is ${(c as WUPNumberControl).valueToInput(setV)}`,
     },
+    format: null,
   };
 
   /** Returns $options.format joined with defaults */

@@ -32,13 +32,22 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 
 It's developed with [Typescript](https://www.typescriptlang.org/) and has huge built-in documentation (JSDoc). Every method,property,event is documented well so you don't need extra resource to take an example to implement or configure elements. In build-result without comments you will see that it's small-enough
 
-## Installing
+## Installing & usage
 
-Using npm:
+1. Install with npm `npm install web-ui-pack`
+2. Add `import WUPPopupElement from "web-ui-pack";` into main.js file
+3. For usage with React see [CODESTYLE.md](CODESTYLE.md)
+4. For usage with HTML + VSCode extend VSCode settings
 
-```npm
-npm install web-ui-pack
-```
+   ```json
+   // .vscode/settings.json
+   {
+     // ...
+     "html.customData": ["node_modules/web-ui-pack/types.html.json"]
+   }
+   ```
+
+5. Type `<wup w-` to see suggestions (if it doesn't work reload VSCode). More details below
 
 ## TODO
 
@@ -163,7 +172,7 @@ HTML, JSX, TSX
 ```html
 <button id="btn1">Target</button>
 <!-- You can skip pointing attribute 'target' if popup appended after target -->
-<wup-popup target="#btn1" placement="top-start">Some content here</wup-popup>
+<wup-popup w-target="#btn1" w-placement="top-start">Some content here</wup-popup>
 ```
 
 How to extend/override
@@ -221,6 +230,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 
 - [**animateDropdown**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) element as dropdown via scale and counter-scale for children`
 - [**animateStack**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) every element via moving from target to own position`
+- [**dateCompareWithoutTime**](src/helpers/dateCompareWithoutTime.ts) ⇒ `Compare by Date-values without Time`
 - [**dateCopyTime**](src/helpers/dateCopyTime.ts) ⇒ `Copy hh:mm:ss.fff part from B to A`
 - [**dateFromString**](src/helpers/dateFromString.ts) ⇒ `Returns parsed date from string based on pointed format`
 - [**dateToString**](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`

@@ -48,7 +48,7 @@ export const enum Animations {
 
 declare global {
   namespace WUP.Popup {
-    interface Defaults {
+    interface Options {
       /** Placement rules relative to target;
        * @defaultValue `[
        *   WUPPopupElement.$placements.$top.$middle.$adjust, //
@@ -73,11 +73,9 @@ declare global {
       hoverHideTimeout: number;
       /** Animation applied to popup
        * @defaultValue `Animations.default (opacity)` */
-      animation?: Animations;
-    }
-    interface Options extends Defaults {
-      /** Anchor that popup uses for placement. If attr.target and $options.target are empty previousSibling will be attached.
-       * attr target="{querySelector}" has hire priority than .options.target */
+      animation: Animations;
+      /** Anchor that popup uses for placement
+       * @defaultValue previousSibling */
       target?: HTMLElement | SVGElement | null;
       /** Virtual margin of targetElement (relative to popup)
        *  [top, right, bottom, left] or [top/bottom, right/left] in px */
@@ -107,8 +105,7 @@ declare global {
        *   &::before {
        *      background: no-repeat url("someImageHere.png");
        *   }
-       * }
-       *  */
+       * } */
       arrowClass?: string;
       /** Virtual margin for targetElement related to arrow
        *  [top, right, bottom, left] or [top/bottom, right/left] in px */
@@ -116,7 +113,7 @@ declare global {
     }
 
     interface Attributes {
-      placement?:
+      "w-placement"?:
         | "top-start"
         | "top-middle"
         | "top-end"
@@ -134,7 +131,7 @@ declare global {
        * Popup defines target on show()
        *
        * attr `target` has hire priority than ref.options.target */
-      target?: string;
+      "w-target"?: string;
       /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
       onShow?: never;
@@ -149,7 +146,7 @@ declare global {
       /** @readonly Hide state; use this to hide-animation */
       readonly hide?: "";
       /** Animation applied to popup */
-      animation?: "" | "default" | "drawer" | "stack";
+      "w-animation"?: "" | "default" | "drawer" | "stack";
     }
 
     interface AttachOptions extends Partial<Omit<Options, "target">> {

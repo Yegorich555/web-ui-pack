@@ -32,33 +32,42 @@ declare global {
     }
 
     interface EventMap extends WUP.BaseCombo.EventMap {}
-    interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
-    interface Defaults<T = any, VM = ValidityMap> extends WUP.BaseCombo.Defaults<T, VM> {
-      /** Case when menu-popup to show
-       * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
-      showCase: ShowCases;
-      /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
-       * @tutorial
-       * * set number X to enable autoMode where `nput.readOnly = items.length < X` */
-      readOnlyInput?: boolean | number;
+    interface ValidityMap extends WUP.BaseCombo.ValidityMap {
+      minCount: number;
+      maxCount: number;
     }
-    interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
+    interface NewOptions<T = any> {
       /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
       items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>) | Promise<MenuItems<T>>;
       /** Allow user to create new value if value not found in items
        * @defaultValue false */
-      allowNewValue?: boolean;
+      allowNewValue: boolean;
       /** Allow to select multiple values; in this case $value & $initValue must contain Array<ValueType>
        * * @defaultValue false */
-      multiple?: boolean;
+      multiple: boolean;
     }
-    interface Attributes extends WUP.BaseCombo.Attributes, Pick<Options, "multiple"> {
-      /** Items showed in dropdown-menu. Point global obj-key with items (set `window.items` for `window.items = [{value: 1, text: 'Item 1'}]` ) */
-      items?: string;
-      /** Allow user to create new value if value not found in items */
-      allownewvalue?: boolean | "";
+    interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions<T> {
+      /** Case when menu-popup to show
+       * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
+      showCase: ShowCases;
+      /** Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
+       * @tutorial
+       * * set number X to enable autoMode where `input.readOnly = items.length < X` */
+      readOnlyInput: boolean | number;
     }
-    interface JSXProps<C = WUPSelectControl> extends WUP.BaseCombo.JSXProps<C>, Attributes {}
+    interface JSXProps<C = WUPSelectControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data!
+       * Global reference to object with array
+       * @see  {@link MenuItems}
+       * @example
+       * ```js
+       * window.myItems = [...];
+       * <wup-select w-items="window.myItems"></wup-select>
+       * ``` */
+      "w-items"?: string;
+      "w-allowNewValue"?: boolean | "";
+      "w-multiple"?: boolean | "";
+    }
   }
 
   interface HTMLElementTagNameMap {
@@ -88,7 +97,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-select name="gender" initvalue="3" validations="myValidations" items="myDropdownItems" />
+    <wup-select w-name="gender" w-initvalue="3" w-validations="myValidations" w-items="myDropdownItems" />
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
@@ -101,7 +110,7 @@ declare global {
  *      <ul>
  *          <li>Item 1</li>
  *          <li>Item 2</li>
- *          // etc/
+ *          // etc. /
  *      </ul>
  *   </wup-popup>
  * </label>
@@ -115,21 +124,10 @@ export default class WUPSelectControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPSelectControl;
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Select.Options>;
-    arr.push("items", "allowNewValue", "multiple");
-    return arr;
-  }
-
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Select.Attributes>>;
-    arr.push("items", "allownewvalue", "multiple");
-    return arr;
-  }
-
   static get $styleRoot(): string {
     return `:root {
         --ctrl-select-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
+        --ctrl-select-menu-hover: #f1f1f1;
       }`;
   }
 
@@ -146,13 +144,23 @@ export default class WUPSelectControl<
       :host[opened] label::after {
         transform: rotate(180deg);
       }
-      ${WUPcssMenu(":host [menu]")}`;
+      ${WUPcssMenu(":host [menu]", "var(--ctrl-select-menu-hover)")}`;
   }
 
   /** Text for listbox when no items are displayed */
   static $textNoItems: string | undefined = "No Items";
   /** Text for aria-label of <ul> element */
   static $ariaLabelItems = "Items";
+
+  static $isEqual(v1: unknown, v2: unknown, c: WUPSelectControl): boolean {
+    let isEq = super.$isEqual(v1, v2, c);
+    if (!isEq && c._opts.multiple && Array.isArray(v1) && Array.isArray(v2)) {
+      const isSortMatter = (c._opts as Record<string, any>).sortable; // option sortable is defined in selectMany but placed here to simplify logic
+      isEq =
+        v1.length === v2.length && (isSortMatter ? v1.every((v, i) => v2[i] === v) : v1.every((v) => v2.includes(v)));
+    }
+    return isEq;
+  }
 
   /** Function to filter menuItems based on inputValue
    * @param menuItemText textcontent in lowercase
@@ -172,15 +180,23 @@ export default class WUPSelectControl<
     return !inputValue || menuItemText.startsWith(inputValue) || menuItemText.includes(` ${inputValue}`);
   }
 
-  static $defaults: WUP.Select.Defaults = {
+  static $defaults: WUP.Select.Options = {
     ...WUPBaseComboControl.$defaults,
-    validationRules: { ...WUPBaseComboControl.$defaults.validationRules },
+    validationRules: {
+      ...WUPBaseComboControl.$defaults.validationRules,
+      minCount: (v, setV) => (v == null || v.length < setV) && `Min count is ${setV}`,
+      maxCount: (v, setV) => (v == null || v.length > setV) && `Max count is ${setV}`,
+    },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
+    allowNewValue: false,
+    multiple: false,
+    items: [],
   };
 
-  constructor() {
-    super();
-    this._opts.items = [];
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.Select.Options;
+    d.items = [];
+    return d as unknown as T;
   }
 
   /** Returns whether control in pending state or not (shows spinner) */
@@ -296,15 +312,11 @@ export default class WUPSelectControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
-    const isUpdateItems = !propsChanged || propsChanged.includes("items");
-    if (isUpdateItems) {
+    this._opts.items ??= [];
+    if (!propsChanged || propsChanged.includes("items")) {
       this.removePopup();
-      // it's important to be before super otherwise initValue won't work
-      this._opts.items = this.getAttr<WUP.Radio.Options["items"]>("items", "ref") || [];
-      this.fetchItems();
+      this.fetchItems(); // WARN: it's important to be before super otherwise initValue won't work
     }
-    this._opts.allowNewValue = this.getAttr("allownewvalue", "bool", this._opts.allowNewValue);
-    this._opts.multiple = this.getAttr("multiple", "bool", this._opts.multiple);
 
     super.gotChanges(propsChanged as any);
   }
@@ -437,7 +449,7 @@ export default class WUPSelectControl<
 
   /* Called when need to show text related to value */
   protected valueToText(v: ItemType, items: WUP.Select.MenuItems<ItemType>): string {
-    const i = items.findIndex((o) => this.#ctr.$isEqual(o.value, v));
+    const i = items.findIndex((o) => this.#ctr.$isEqual(o.value, v, this));
     if (i === -1) {
       if (this._opts.allowNewValue) {
         return v != null ? (v as any).toString() : "";
@@ -458,11 +470,16 @@ export default class WUPSelectControl<
     return item.text;
   }
 
+  #findValT?: ReturnType<typeof setTimeout>; // need to clear previous to avoid collission
   protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
+    this.#findValT && clearTimeout(this.#findValT);
+    this.#findValT = undefined;
     if (this._cachedItems) {
-      reason === SetValueReasons.manual
-        ? setTimeout(() => super.setInputValue(v, reason)) // timeout to fix case when el.$options.items=... el.$value=...
-        : super.setInputValue(v, reason);
+      if (reason === SetValueReasons.manual || reason === SetValueReasons.initValue) {
+        this.#findValT = setTimeout(() => super.setInputValue(v, reason), 2); // timeout to fix case when el.$options.items=... el.$value=...
+      } else {
+        super.setInputValue(v, reason);
+      }
     } else {
       // skip because it's fired from fetchItems()
     }
@@ -547,7 +564,7 @@ export default class WUPSelectControl<
     this._opts.multiple && this.clearFilterMenuItems();
   }
 
-  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
+  override canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
     if (this.$isPending) {
       return false;
     }
@@ -596,7 +613,7 @@ export default class WUPSelectControl<
   protected selectMenuItemByValue(v: ValueType | undefined): void {
     if (this.$isShown) {
       const findAndSelect = (vi: ValueType): number => {
-        const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, vi));
+        const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, vi, this));
         this.selectMenuItem(this._menuItems!.all[i] || null);
         return i;
       };
@@ -728,7 +745,7 @@ export default class WUPSelectControl<
 
   /** Returns if possible to de-select menu items when input is empty */
   private get canClearSelection(): boolean {
-    return !this.$refInput.value && !this.$isRequired && !this._opts.multiple;
+    return !this.$refInput.value && /*! this.$isRequired && */ !this._opts.multiple;
   }
 
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
@@ -784,7 +801,7 @@ export default class WUPSelectControl<
     this.canClearSelection && this.selectMenuItem(null); // allow user clear value without pressing Enter
   }
 
-  protected override clearValue(): void {
+  override clearValue(): void {
     super.clearValue();
     this.tryUpdateMenu();
   }
@@ -819,7 +836,6 @@ export default class WUPSelectControl<
         }
       }
     }
-
     this.tryUpdateMenu();
   }
 
@@ -836,7 +852,11 @@ export default class WUPSelectControl<
   protected override gotFocusLost(): void {
     this._opts.multiple &&
       this.setInputValueDirect(this.$refInput.value.replace(/, *$/, ""), SetValueReasons.userInput); // remove delimiter
-    this._opts.allowNewValue && this.setValue(this.parseInput(this.$refInput.value), SetValueReasons.userInput); // to allow user left value without pressing Enter
+    if (this._opts.allowNewValue) {
+      this.setValue(this.parseInput(this.$refInput.value), SetValueReasons.userInput); // to allow user left value without pressing Enter
+    } else {
+      this.resetInputValue(); // to update/rollback input according to result
+    }
     super.gotFocusLost();
   }
 

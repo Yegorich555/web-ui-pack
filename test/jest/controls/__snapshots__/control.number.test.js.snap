@@ -257,10 +257,10 @@ padding:0;}
       }
   :root {
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-clear-hover-size: 22px;
      }
   
       WUP-NUM {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -275,10 +275,15 @@ padding:0;}
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      WUP-NUM[invalid],
+      WUP-NUM[invalid] &gt; [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       WUP-NUM:focus-within,
       WUP-NUM:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-NUM:focus-within strong,
       WUP-NUM:focus-within legend {
@@ -295,10 +300,6 @@ padding:0;}
       [disabled] WUP-NUM &gt; *,
       WUP-NUM[disabled] &gt; * {
         pointer-events: none;
-      }
-      WUP-NUM[invalid],
-      WUP-NUM[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-NUM label {
         display: flex;
@@ -340,7 +341,6 @@ padding:0;}
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -389,23 +389,11 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-NUM:hover {
-          z-index: 90011;
-        }
-        WUP-NUM:hover [error] {
-          max-height: none;
-        }*/
         WUP-NUM:hover,
         WUP-NUM:hover&gt;[menu],
         WUP-NUM[hovered],
         WUP-NUM[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-NUM[invalid]:hover,
-        WUP-NUM[invalid]:hover&gt;[menu],
-        WUP-NUM[invalid][hovered],
-        WUP-NUM[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
         WUP-NUM {
@@ -526,8 +514,8 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-NUM label button,
-        WUP-NUM label button:after,
+        WUP-NUM label&gt;button,
+        WUP-NUM label&gt;button:after,
         WUP-NUM label:after,
         WUP-NUM label:before {
           
@@ -561,20 +549,27 @@ mask-image: var(--ctrl-icon-img);
           cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
-        WUP-NUM label button {
+        WUP-NUM label&gt;button {
           contain: strict;
-          position: relative;
           z-index: 1;
           font-size: inherit;
         }
-        WUP-NUM label&gt;span + button {
-          margin-right: -0.5em;
-        }
         WUP-NUM button[clear] {
+          display: none;
+          position: relative;
+          margin-right: -0.5em;
           align-self: center;
-          background: none;
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
+          background: none;
+          mask: none;
+          -webkit-mask: none;
+        }
+        WUP-NUM:focus-within button[clear] {
+          display: block;
+        }
+        WUP-NUM button[clear=back] {
+          --ctrl-icon-img: var(--wup-icon-back);
         }
         WUP-NUM button[clear]:after {
           content: "";
@@ -582,42 +577,100 @@ mask-image: var(--ctrl-icon-img);
           -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
         }
-        WUP-NUM button[clear=back]:after {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
         WUP-NUM button[clear]:after,
         WUP-NUM button[clear]:before {
           position: absolute;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           width: 100%;
-        }
-        WUP-NUM button[clear]:before {
-          width: var(--ctrl-clear-hover-size);
-          padding-top: var(--ctrl-clear-hover-size);
-        }
-        WUP-NUM[disabled] button[clear],
-        WUP-NUM[readonly] button[clear],
-        WUP-NUM[required] button[clear] {
-          display: none;
+          height: 100%;
+          border-radius: 50%;
         }
         @media (hover: hover) and (pointer: fine) {
-          WUP-NUM button[clear]:hover {
-            box-shadow: none;
+          WUP-NUM:hover button[clear] {
+            display: block;
           }
           WUP-NUM button[clear]:hover:before {
             content: "";
-            border-radius: 50%;
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           WUP-NUM button[clear]:hover:after {
-            background-color: var(--ctrl-err-text);
-          }
-          WUP-NUM[readonly] button[clear] {
-            pointer-events: none;
+            background: var(--ctrl-err-text);
           }
         }
+        WUP-NUM[disabled] button[clear],
+        WUP-NUM[readonly] button[clear] {
+          display: none;
+          pointer-events: none;
+        }
 </style>
+`;
+
+exports[`control.number common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "focusDebounceMs": 100,
+  "format": null,
+  "label": null,
+  "mask": "",
+  "maskholder": "",
+  "name": null,
+  "postfix": "",
+  "prefix": "",
+  "readOnly": false,
+  "selectOnFocus": false,
+  "storage": "local",
+  "storageKey": "",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "max": [Function],
+    "min": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.number common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.number common tests snapshot of $defaults 3`] = `
+[
+  "disabled",
+  "readonly",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-clearbutton",
+  "w-debouncems",
+  "w-disabled",
+  "w-focusdebouncems",
+  "w-format",
+  "w-initvalue",
+  "w-label",
+  "w-mask",
+  "w-maskholder",
+  "w-name",
+  "w-postfix",
+  "w-prefix",
+  "w-readonly",
+  "w-selectonfocus",
+  "w-storage",
+  "w-storagekey",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
+]
 `;
 
 exports[`control.number validations $options.validationShowAll 1`] = `

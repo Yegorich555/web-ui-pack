@@ -1,0 +1,2040 @@
+{
+  "version": 1.1,
+  "_details": "// https://github.com/microsoft/vscode-html-languageservice/blob/main/docs/customData.schema.json",
+  "_usage": "https://code.visualstudio.com/api/extension-guides/custom-data-extension",
+  "_buildAuto": "https://github.com/runem/web-component-analyzer => run: wca analyze src --format json --outFile custom-elements.json/",
+  "tags": [
+    {
+      "name": "wup-calendar",
+      "description": "Form-control represented by date picker",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/calendar"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-firstweekday",
+          "description": "First day of week in calendar where 1-Monday, 7-Sunday @defaultValue gathered from localeInfo.firstWeekDay",
+          "values": [
+            {
+              "name": "1"
+            },
+            {
+              "name": "2"
+            },
+            {
+              "name": "3"
+            },
+            {
+              "name": "4"
+            },
+            {
+              "name": "5"
+            },
+            {
+              "name": "6"
+            },
+            {
+              "name": "7"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see localeInfo",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/objects/localeInfo.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-utc",
+          "description": "Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this @defaultValue true"
+        },
+        {
+          "name": "w-startwith",
+          "description": "Picker that must be rendered at first; if undefined & isEmpty - `year`, otherwise - `day`",
+          "values": [
+            {
+              "name": "year"
+            },
+            {
+              "name": "month"
+            },
+            {
+              "name": "day"
+            },
+            {
+              "name": "2012"
+            },
+            {
+              "name": "2012-05"
+            },
+            {
+              "name": "2012-05-24"
+            }
+          ]
+        },
+        {
+          "name": "w-min",
+          "description": "User can't select date less than min; format `yyyy-MM-dd`"
+        },
+        {
+          "name": "w-max",
+          "description": "User can't select date more than max; format `yyyy-MM-dd`"
+        },
+        {
+          "name": "w-exclude",
+          "description": "Dates that user can't choose\n\r Global reference to object with array of dates",
+          "values": [
+            {
+              "name": "window.excludedDays"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Calendar.Options[exclude]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/calendar.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`"
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-check",
+      "description": "Form-control with toggle button",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/check"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-reverse",
+          "description": "Reversed-style (checkmark+label for true vs label+checkmark)"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value in boolean representation",
+          "values": [
+            {
+              "name": "true"
+            },
+            {
+              "name": "false"
+            }
+          ]
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-circle",
+      "description": "Arc/circle chart based on SVG",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/circle"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-items",
+          "description": "Global reference to object with array where `item: {value:any, color?:string, tooltip?:string}`",
+          "values": [
+            {
+              "name": "window.circleItems"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Circle.Item",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/circleElement.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-width",
+          "description": "Width of each segment; expected 1..100 (perecentage) \n\r @defaultValue 10"
+        },
+        {
+          "name": "w-back",
+          "description": "Enable background circle \n\r @defaultValue true"
+        },
+        {
+          "name": "w-corner",
+          "description": "Border/corner radius of each segment; expected 0..0.5 where 0.5 == 50% of `$options.width` \n\r @defaultValue 0.25"
+        },
+        {
+          "name": "w-from",
+          "description": "Angle from that rendering is started -360..360 (degrees) \n\r @defaultValue 0"
+        },
+        {
+          "name": "w-to",
+          "description": "Angle to that rendering is finished -360..360 (degrees) \n\r @defaultValue 360"
+        },
+        {
+          "name": "w-min",
+          "description": "Min possible value that fits `from` \n\r @defaultValue 0"
+        },
+        {
+          "name": "w-max",
+          "description": "Max possible value that fits `to` \n\r @defaultValue 100"
+        },
+        {
+          "name": "w-space",
+          "description": "Space between segments; expected 0..20 (degrees), \n\r @defaultValue 2"
+        },
+        {
+          "name": "w-minsize",
+          "description": "Min segment size - to avoid rendering extra-small segments; expected 0..20 (degrees) \n\r @defaultValue 10"
+        }
+      ]
+    },
+    {
+      "name": "wup-date",
+      "description": "Form-control with datepicker",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/date"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-format",
+          "description": "String representation of displayed date (enables mask, - to disable mask set $options.mask='') @defaultValue localeInfo",
+          "values": [
+            {
+              "name": "yyyy-mm-dd"
+            },
+            {
+              "name": "dd/mm/yyyy"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see localeInfo",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/objects/localeInfo.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-firstweekday",
+          "description": "First day of week in calendar where 1-Monday, 7-Sunday @defaultValue gathered from localeInfo.firstWeekDay",
+          "values": [
+            {
+              "name": "1"
+            },
+            {
+              "name": "2"
+            },
+            {
+              "name": "3"
+            },
+            {
+              "name": "4"
+            },
+            {
+              "name": "5"
+            },
+            {
+              "name": "6"
+            },
+            {
+              "name": "7"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see localeInfo",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/objects/localeInfo.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-utc",
+          "description": "Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this @defaultValue true"
+        },
+        {
+          "name": "w-startwith",
+          "description": "Picker that must be rendered at first; if undefined & isEmpty - `year`, otherwise - `day`",
+          "values": [
+            {
+              "name": "year"
+            },
+            {
+              "name": "month"
+            },
+            {
+              "name": "day"
+            },
+            {
+              "name": "2012"
+            },
+            {
+              "name": "2012-05"
+            },
+            {
+              "name": "2012-05-24"
+            }
+          ]
+        },
+        {
+          "name": "w-min",
+          "description": "User can't select date less than min; format `yyyy-MM-dd`"
+        },
+        {
+          "name": "w-max",
+          "description": "User can't select date more than max; format `yyyy-MM-dd`"
+        },
+        {
+          "name": "w-exclude",
+          "description": "Dates that user can't choose\n\r Global reference to object with array of dates",
+          "values": [
+            {
+              "name": "window.excludedDays"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Calendar.Options[exclude]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/calendar.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-showcase",
+          "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
+          "references": [
+            {
+              "name": "@see WUP.BaseCombo.ShowCases",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseCombo.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-readonlyinput",
+          "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+        },
+        {
+          "name": "w-debouncems",
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+        },
+        {
+          "name": "w-clearbutton",
+          "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-mask",
+          "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+          "references": [
+            {
+              "name": "@see WUP.TextControl.Options[mask]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/select.ts"
+            }
+          ],
+          "values": [
+            {
+              "name": "+1(000) 000-0000"
+            },
+            {
+              "name": "0000-00-00"
+            },
+            {
+              "name": "##0.##0.##0.##0"
+            },
+            {
+              "name": "00:00 /[AP]/M"
+            },
+            {
+              "name": "//[a-zA-Z]//{1,5}"
+            }
+          ]
+        },
+        {
+          "name": "w-maskholder",
+          "description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+        },
+        {
+          "name": "w-prefix",
+          "description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+        },
+        {
+          "name": "w-postfix",
+          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`"
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-dropdown",
+      "description": "Dropdown element",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/dropdown"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-hideonpopupclick",
+          "description": "Hide menu on popup click \n\r @defaultValue true"
+        }
+      ]
+    },
+    {
+      "name": "wup-form",
+      "description": "Wrapper of FormHTMLElement that collect values from controls",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/controls"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-submitactions",
+          "description": "Actions that enabled on submit event; You can point several like: `goToError | collectChanged` \n\r  @defaultValue goToError | validateUntiFirst | reset | lockOnPending",
+          "references": [
+            {
+              "name": "demo",
+              "url": "https://yegorich555.github.io/web-ui-pack/formElement"
+            }
+          ]
+        },
+        {
+          "name": "w-autosave",
+          "description": "Enable to store data in localStorage to prevent losing till submitted @defaultValue false"
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus first possible element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling @defaultValue false"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for stylin @defaultValue falseg"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherited from form @defaultValue false"
+        }
+      ]
+    },
+    {
+      "name": "wup-num",
+      "description": "Form-control with number-input",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/control/number"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-format",
+          "description": "String representation of displayed value by default inherits from localeInfo \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myformat"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.Number.Format",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/number.ts"
+            },
+            {
+              "name": "@see localeInfo",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/objects/localeInfo.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-debouncems",
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+        },
+        {
+          "name": "w-clearbutton",
+          "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-mask",
+          "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+          "references": [
+            {
+              "name": "@see WUP.TextControl.Options[mask]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/text.ts"
+            }
+          ],
+          "values": [
+            {
+              "name": "+1(000) 000-0000"
+            },
+            {
+              "name": "0000-00-00"
+            },
+            {
+              "name": "##0.##0.##0.##0"
+            },
+            {
+              "name": "00:00 /[AP]/M"
+            },
+            {
+              "name": "//[a-zA-Z]//{1,5}"
+            }
+          ]
+        },
+        {
+          "name": "w-maskholder",
+          "description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+        },
+        {
+          "name": "w-prefix",
+          "description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+        },
+        {
+          "name": "w-postfix",
+          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value"
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-popup",
+      "description": "Popup element",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/popup"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-target",
+          "description": "Anchor that popup uses for placement @defaultValue `previousSibling` Point querySelector, for example `#some-id`"
+        },
+        {
+          "name": "w-placement",
+          "description": "Placement rules relative to target @defaultValue `top-middle`",
+          "values": [
+            {
+              "name": "top-start"
+            },
+            {
+              "name": "top-middle"
+            },
+            {
+              "name": "top-end"
+            },
+            {
+              "name": "bottom-start"
+            },
+            {
+              "name": "bottom-middle"
+            },
+            {
+              "name": "bottom-end"
+            },
+            {
+              "name": "left-start"
+            },
+            {
+              "name": "left-middle"
+            },
+            {
+              "name": "left-end"
+            },
+            {
+              "name": "right-start"
+            },
+            {
+              "name": "right-middle"
+            },
+            {
+              "name": "right-end"
+            }
+          ]
+        },
+        {
+          "name": "w-animation",
+          "description": "Animation applied to popup @defaultValue `default`",
+          "values": [
+            {
+              "name": ""
+            },
+            {
+              "name": "default"
+            },
+            {
+              "name": "drawer"
+            },
+            {
+              "name": "stack"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-pwd",
+      "description": "Form-control with password input",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/control/password"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-debouncems",
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+        },
+        {
+          "name": "w-clearbutton",
+          "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value"
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-validationsshowall",
+          "description": "Show all validation-rules with checkpoints as list instead of single error @defaultValue false"
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-radio",
+      "description": "Form-control with radio buttons",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/radio"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-reverse",
+          "description": "Reversed-style (radio+label for true vs label+radio)"
+        },
+        {
+          "name": "w-items",
+          "description": "Global reference to object with array where `item: {value: any, text: string}`",
+          "values": [
+            {
+              "name": "window.radioItems"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Select.Item",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/selectElement.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value in string/boolean/number representation (depends on `control.prototype.parse()`) "
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-select",
+      "description": "Form-control with dropdown/combobox behavior",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/control/select"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-items",
+          "description": "Items showed in dropdown-menu. Provide Array OR promise/api-call to show pending status when control retrieves data! \n\r Point key to Global reference",
+          "references": [
+            {
+              "name": "WUP.Select.Item",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/selectElement.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-allownewvalue",
+          "description": "Allow user to create new value if value not found in items @defaultValue false"
+        },
+        {
+          "name": "w-multiple",
+          "description": "Allow to select multiple values; in this case `$value` & `$initValue` must contain `Array<ValueType>` @defaultValue fals"
+        },
+        {
+          "name": "w-showcase",
+          "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
+          "references": [
+            {
+              "name": "@see WUP.BaseCombo.ShowCases",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseCombo.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-readonlyinput",
+          "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+        },
+        {
+          "name": "w-debouncems",
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+        },
+        {
+          "name": "w-clearbutton",
+          "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-mask",
+          "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+          "references": [
+            {
+              "name": "@see WUP.TextControl.Options[mask]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/select.ts"
+            }
+          ],
+          "values": [
+            {
+              "name": "+1(000) 000-0000"
+            },
+            {
+              "name": "0000-00-00"
+            },
+            {
+              "name": "##0.##0.##0.##0"
+            },
+            {
+              "name": "00:00 /[AP]/M"
+            },
+            {
+              "name": "//[a-zA-Z]//{1,5}"
+            }
+          ]
+        },
+        {
+          "name": "w-maskholder",
+          "description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+        },
+        {
+          "name": "w-prefix",
+          "description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+        },
+        {
+          "name": "w-postfix",
+          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value"
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-selectmany",
+      "description": "Form-control with dropdown/combobox behavior",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/control/selectMany"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-hideselected",
+          "description": " Hide items in menu that selected @defaultValue false"
+        },
+        {
+          "name": "w-sortable",
+          "description": "Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position @defaultValue false"
+        },
+        {
+          "name": "w-items",
+          "description": "Items showed in dropdown-menu. Provide Array OR promise/api-call to show pending status when control retrieves data! \n\r Point key to Global reference",
+          "references": [
+            {
+              "name": "WUP.Select.Item",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/selectElement.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-allownewvalue",
+          "description": "Allow user to create new value if value not found in items @defaultValue false"
+        },
+        {
+          "name": "w-showcase",
+          "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
+          "references": [
+            {
+              "name": "@see WUP.BaseCombo.ShowCases",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseCombo.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-readonlyinput",
+          "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+        },
+        {
+          "name": "w-debouncems",
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+        },
+        {
+          "name": "w-clearbutton",
+          "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-mask",
+          "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+          "references": [
+            {
+              "name": "@see WUP.TextControl.Options[mask]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/select.ts"
+            }
+          ],
+          "values": [
+            {
+              "name": "+1(000) 000-0000"
+            },
+            {
+              "name": "0000-00-00"
+            },
+            {
+              "name": "##0.##0.##0.##0"
+            },
+            {
+              "name": "00:00 /[AP]/M"
+            },
+            {
+              "name": "//[a-zA-Z]//{1,5}"
+            }
+          ]
+        },
+        {
+          "name": "w-maskholder",
+          "description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+        },
+        {
+          "name": "w-prefix",
+          "description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+        },
+        {
+          "name": "w-postfix",
+          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value"
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-spin",
+      "description": "Flexible animated element with ability to place over target element without position relative",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/spin"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-inline",
+          "description": "Place inside parent as inline-block otherwise overflow target in the center (`position: relative` is not required); \n\r @defaultValue false"
+        },
+        {
+          "name": "w-fit",
+          "description": "Allow to reduce size to fit parent (for max-size change css-var --spin-size) \n\r @defaultValue `auto` => `false` when inline:true, `true` when inline:false"
+        },
+        {
+          "name": "w-overflowoffset",
+          "description": "Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px; \n\r Point Global reference to object with array \n\r @defaultValue [4,4]",
+          "values": [
+            {
+              "name": "window.overflowOffset"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Spin.Options['overflowOffset']",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/spinElement.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-overflowfade",
+          "description": "Allow to create shadowBox to partially hide target (only for `inline: false`) @defaultValue false"
+        },
+        {
+          "name": "w-overflowtarget",
+          "description": "Anchor element that need to oveflow by spinner \n\r Point querySelector to related element \n\r Ignored if option `inline='true'` \n\r @defaultValue 'auto' (parentElement)",
+          "values": [
+            {
+              "name": "auto"
+            },
+            {
+              "name": "#someId"
+            },
+            {
+              "name": ".someClass"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Spin.Options['overflowTarget']",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/spinElement.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-switch",
+      "description": "Form-control with toggle button",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/switch"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-reverse",
+          "description": "Reversed-style (switch+label for true vs label+switch)"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value in boolean representation",
+          "values": [
+            {
+              "name": "true"
+            },
+            {
+              "name": "false"
+            }
+          ]
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-text",
+      "description": "Form-control with text-input",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/control/text"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-debouncems",
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+        },
+        {
+          "name": "w-clearbutton",
+          "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-mask",
+          "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+          "references": [
+            {
+              "name": "@see WUP.TextControl.Options[mask]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/text.ts"
+            }
+          ],
+          "values": [
+            {
+              "name": "+1(000) 000-0000"
+            },
+            {
+              "name": "0000-00-00"
+            },
+            {
+              "name": "##0.##0.##0.##0"
+            },
+            {
+              "name": "00:00 /[AP]/M"
+            },
+            {
+              "name": "//[a-zA-Z]//{1,5}"
+            }
+          ]
+        },
+        {
+          "name": "w-maskholder",
+          "description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+        },
+        {
+          "name": "w-prefix",
+          "description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+        },
+        {
+          "name": "w-postfix",
+          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value"
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-textarea",
+      "description": "Form-control with multiline text-input",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/control/textarea"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-debouncems",
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+        },
+        {
+          "name": "w-clearbutton",
+          "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value"
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-time",
+      "description": "Form-control with timepicker",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/control/time"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-format",
+          "description": "String representation of displayed time (enables mask, - to disable mask set mask='' @defaultValue localeInfo.time",
+          "references": [
+            {
+              "name": "@see localeInfo",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/objects/localeInfo.ts"
+            }
+          ],
+          "values": [
+            {
+              "name": "hh:mm A"
+            },
+            {
+              "name": "hh:mm"
+            },
+            {
+              "name": "h:mm"
+            },
+            {
+              "name": "h:m"
+            }
+          ]
+        },
+        {
+          "name": "w-step",
+          "description": "Increment value in minutes @defaultValue 1",
+          "values": [
+            {
+              "name": "1"
+            },
+            {
+              "name": "5"
+            },
+            {
+              "name": "10"
+            }
+          ]
+        },
+        {
+          "name": "w-min",
+          "description": "User can't select date less than min; format `hh:mm`"
+        },
+        {
+          "name": "w-max",
+          "description": "User can't select date more than max; format `hh:mm`"
+        },
+        {
+          "name": "w-menubuttonsoff",
+          "description": "Set `false` to hide menu buttons 'Ok' & 'Cancel' @defaultValue `true`"
+        },
+        {
+          "name": "w-exclude",
+          "description": "Points that user can't choose. Global reference to object with array: `window.exclude = [new WUPTimeObject(`02:30`), ...]`",
+          "values": [
+            {
+              "name": "window.exclude"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUPTimeObject",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/objects/timeObject.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-debouncems",
+          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+        },
+        {
+          "name": "w-clearbutton",
+          "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-maskholder",
+          "description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+        },
+        {
+          "name": "w-prefix",
+          "description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+        },
+        {
+          "name": "w-postfix",
+          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value"
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout @defaultValue false"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

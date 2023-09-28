@@ -34,21 +34,22 @@ export default function TimeControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
+        w-autoFocus
       >
         <wup-time
-          name="time"
-          initValue="23:50"
-          min="02:30"
-          max="22:50"
-          exclude="window.myTimeExclude"
-          validations="window.myTimeValidations"
+          w-name="time"
+          w-initValue="23:50"
+          w-min="02:30"
+          w-max="23:50"
+          w-exclude="window.myTimeExclude"
+          w-validations="window.myTimeValidations"
         />
         <wup-time
-          label="Without buttons (see $options.menuButtonsOff)"
-          name="customized"
-          min="02:30"
-          max="22:50"
-          exclude="window.myTimeExclude"
+          w-label="Without buttons (see $options.menuButtonsOff)"
+          w-name="customized"
+          w-min="02:30"
+          w-max="22:50"
+          w-exclude="window.myTimeExclude"
           ref={(el) => {
             if (el) {
               el.$options.menuButtonsOff = true;
@@ -56,12 +57,12 @@ export default function TimeControlView() {
           }}
         />
         <wup-time
-          label="Menu in 3 rows (see demo source code)"
-          name="customized2"
-          initValue="23:50"
-          min="02:30"
-          max="22:50"
-          exclude="window.myTimeExclude"
+          w-label="Menu in 3 rows (see demo source code)"
+          w-name="customized2"
+          w-initValue="23:50"
+          w-min="02:30"
+          w-max="22:50"
+          w-exclude="window.myTimeExclude"
           ref={(el) => {
             if (el) {
               // @ts-expect-error - because protected
@@ -74,14 +75,14 @@ export default function TimeControlView() {
             }
           }}
         />
-        <wup-time name="another" label="Another format: h-m (options format)" format="h-m" />
-        <wup-time name="disabled" disabled />
-        <wup-time name="readonly" readOnly />
+        <wup-time w-name="another" w-label="Another format: h-m (options format)" w-format="h-m" />
+        <wup-time w-name="disabled" disabled />
+        <wup-time w-name="readonly" readonly />
         <wup-time //
-          name="saveUrlTime"
-          label="With saving to URL (see $options.skey & storage)"
-          skey
-          storage="url"
+          w-name="saveUrlTime"
+          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-storageKey
+          w-storage="url"
         />
         <button type="submit">Submit</button>
       </wup-form>

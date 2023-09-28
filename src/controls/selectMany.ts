@@ -14,21 +14,22 @@ declare global {
   namespace WUP.SelectMany {
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
-    interface Defaults<T = any, VM = ValidityMap> extends WUP.Select.Defaults<T, VM> {
+    interface NewOptions {
       /** Hide items in menu that selected
        * @defaultValue false */
-      hideSelected?: boolean;
+      hideSelected: boolean;
       /** Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position
        * @defaultValue false */
-      sortable?: boolean;
+      sortable: boolean;
     }
-
-    interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM>, Defaults<T, VM> {
-      /** Constant value that impossible to change */
+    interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM>, NewOptions {
+      /** @readonly Constant value that impossible to change */
       multiple: true;
     }
-    interface Attributes extends WUP.Select.Attributes, Pick<Partial<Options>, "sortable"> {}
-    interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, Attributes {}
+    interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      "w-hideSelected"?: boolean | "";
+      "w-sortable"?: boolean | "";
+    }
   }
 
   interface HTMLElementTagNameMap {
@@ -58,7 +59,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-selectmany name="gender" initvalue="window.myInitValue" validations="myValidations" items="window.myDropdownItems" />
+    <wup-selectmany w-name="gender" w-initvalue="window.myInitValue" w-validations="myValidations" w-items="window.myDropdownItems" />
   </wup-form>;
   @tutorial Troubleshooting
  * * Accessibility. Screen readers announce 'blank' when focus on not-empty control.
@@ -88,18 +89,6 @@ export default class WUPSelectManyControl<
   EventMap extends WUP.SelectMany.EventMap = WUP.SelectMany.EventMap
 > extends WUPSelectControl<ValueType[], ValueType, TOptions, EventMap> {
   #ctr = this.constructor as typeof WUPSelectManyControl;
-
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.SelectMany.Options>;
-    arr.push("sortable");
-    return arr;
-  }
-
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.SelectMany.Attributes>>;
-    arr.push("sortable");
-    return arr;
-  }
 
   static get $styleRoot(): string {
     return `:root {
@@ -235,10 +224,12 @@ export default class WUPSelectManyControl<
     return super.$filterMenuItem.call(this, menuItemText, menuItemValue, inputValue, inputRawValue);
   }
 
-  constructor() {
-    super();
-    this._opts.multiple = true; // init here to depend on localeInfo
-  }
+  static $defaults: WUP.SelectMany.Options = {
+    ...WUPSelectControl.$defaults,
+    multiple: true,
+    sortable: false,
+    hideSelected: false,
+  };
 
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
@@ -254,11 +245,11 @@ export default class WUPSelectManyControl<
 
   override parseInput(text: string): ValueType[] | undefined {
     // WARN must be called only on allowNewValue
-    // @ts-expect-error: because it's constant true
+    // @ts-expect-error: because declared as constant true
     this._opts.multiple = false;
     const vi = super.parseInput(text) as ValueType | undefined;
     this._opts.multiple = true;
-    if (vi === undefined || this.$value?.some((v) => this.#ctr.$isEqual(v, vi))) {
+    if (vi === undefined || this.$value?.some((v) => this.#ctr.$isEqual(v, vi, this))) {
       return this.$value; // no-changes, no-duplicates
     }
     return this.$value ? [...this.$value, vi] : [vi];
@@ -266,10 +257,10 @@ export default class WUPSelectManyControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
     this._opts.multiple = true;
-    this.removeAttribute("multiple");
+    this.removeAttribute("w-multiple");
     super.gotChanges(propsChanged);
 
-    this._opts.sortable = this.getAttr("sortable", "bool") ?? false;
+    this._opts.sortable ??= false;
     if (this._opts.sortable) {
       !this._disposeDragdrop && this.applyDragdrop();
     } else {
@@ -455,10 +446,7 @@ export default class WUPSelectManyControl<
     });
   }
 
-  override canShowMenu(
-    showCase: ShowCases,
-    e?: MouseEvent | FocusEvent | KeyboardEvent | null
-  ): boolean | Promise<boolean> {
+  override canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
     return !this._wasSortAfterClick && super.canShowMenu(showCase, e);
   }
 
@@ -570,8 +558,9 @@ export default class WUPSelectManyControl<
       this._focusIndex === index && this.focusItemByIndex(null);
     }
 
-    this.$value!.splice(index, 1);
-    this.setValue(this.$value!.length ? [...this.$value!] : undefined, SetValueReasons.userInput);
+    const v = [...this.$value!];
+    v.splice(index, 1);
+    this.setValue(v.length ? v : undefined, SetValueReasons.userInput);
   }
 
   protected override setValue(v: ValueType[] | undefined, reason: SetValueReasons, skipInput = false): boolean | null {

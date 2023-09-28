@@ -7,7 +7,7 @@ const WUPCalendarControl = require("web-ui-pack/controls/calendar").default;
 let testEl;
 beforeEach(async () => {
   await page.evaluate(() => {
-    renderHtml(`<wup-calendar startwith="day" initvalue="2022-09-05"></wup-calendar>`);
+    renderHtml(`<wup-calendar w-startwith="day" w-initvalue="2022-09-05"></wup-calendar>`);
   });
   await page.waitForTimeout(20); // timeout required because of debounceFilters
   await page.evaluate(() => (window.testEl = document.querySelector("wup-calendar")));

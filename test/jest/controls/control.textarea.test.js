@@ -42,8 +42,12 @@ describe("control.textarea", () => {
   testTextControl(() => el, {
     validations: {},
     noInputSelection: true,
-    attrs: { mask: { skip: true }, maskholder: { skip: true }, prefix: { skip: true }, postfix: { skip: true } },
-    $options: { mask: { skip: true }, maskholder: { skip: true }, prefix: { skip: true }, postfix: { skip: true } },
+    attrs: {
+      "w-mask": null,
+      "w-maskholder": null,
+      "w-prefix": null,
+      "w-postfix": null,
+    },
     // validationsSkip: [],
   });
 

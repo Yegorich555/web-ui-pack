@@ -280,6 +280,7 @@ export default class TextHistory {
         isUpdate = false;
         snap.pos1 = pos1;
         snap.pos2 = pos2;
+        snap.removed = "";
       }
       snap.action = InputTypes.replace;
     } else {

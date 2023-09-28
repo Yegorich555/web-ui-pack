@@ -7,19 +7,17 @@ declare global {
   namespace WUP.Switch {
     interface EventMap extends WUP.BaseControl.EventMap {}
     interface ValidityMap extends WUP.BaseControl.ValidityMap {}
-    interface Defaults<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Defaults<T, VM> {}
-    interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, Defaults<T, VM> {
+    interface NewOptions {
       /** Reversed-style (switch+label for true vs label+switch)
        * @defaultValue false */
-      reverse?: boolean;
+      reverse: boolean;
     }
-    interface Attributes extends WUP.BaseControl.Attributes {
-      /** InitValue for control */
+    interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      "w-reverse"?: boolean | "";
+      /** InitValue for control @deprecated use `initValue` instead */
       defaultChecked?: boolean;
-      /** Reversed-style (switch+label vs label+switch) */
-      reverse?: boolean | "";
     }
-    interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, Attributes {}
   }
 
   interface HTMLElementTagNameMap {
@@ -44,7 +42,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-switch name="isDarkMode" label="Dark Mode" initvalue="false"/>
+    <wup-switch w-name="isDarkMode" w-label="Dark Mode" w-initvalue="false"/>
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
@@ -124,14 +122,14 @@ export default class WUPSwitchControl<
         background: var(--ctrl-switch-on);
         left: calc(100% - var(--ctrl-switch-size-w) + var(--ctrl-switch-size-spot) + 1px);
       }
-      :host[reverse] label {
+      :host[w-reverse] label {
         flex-direction: row-reverse;
       }
-      :host[reverse] label>span {
+      :host[w-reverse] label>span {
         margin-left: 0;
         margin-right: 0.5em;
       }
-      :host[reverse] label>strong {
+      :host[w-reverse] label>strong {
         margin-right: auto;
       }
       @media not all and (prefers-reduced-motion) {
@@ -145,25 +143,20 @@ export default class WUPSwitchControl<
       }`;
   }
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Switch.Options>;
-    arr.push("reverse");
-    return arr;
-  }
-
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Switch.Attributes>>;
-    arr.push("reverse", "defaultchecked");
-    return arr;
-  }
-
   static $isEqual(v1: boolean | undefined, v2: boolean | undefined): boolean {
     return !!v1 === !!v2;
   }
 
-  static $defaults: WUP.Switch.Defaults = {
+  static get observedAttributes(): Array<string> {
+    const arr = super.observedAttributes;
+    arr.push("defaultchecked");
+    return arr;
+  }
+
+  static $defaults: WUP.Switch.Options = {
     ...WUPBaseControl.$defaults,
     validationRules: { ...WUPBaseControl.$defaults.validationRules },
+    reverse: false,
   };
 
   get $value(): boolean {
@@ -175,7 +168,7 @@ export default class WUPSwitchControl<
   }
 
   override parse(text: string): boolean | undefined {
-    return text === "1" || text.toLowerCase() === "true";
+    return text === "" || text === "1" || text.toLowerCase() === "true";
   }
 
   override valueToUrl(v: boolean): string | null {
@@ -216,26 +209,19 @@ export default class WUPSwitchControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Switch.Options | any> | null): void {
     super.gotChanges(propsChanged as any);
-
-    this._opts.reverse = this.getAttr("reverse", "bool");
-    this.setAttr("reverse", this._opts.reverse, true);
-
-    if (!propsChanged) {
-      this.$initValue = this.getAttr("defaultchecked", "bool", this.$initValue);
-    } else if (propsChanged.includes("defaultchecked")) {
-      this.$initValue = this.getAttr("defaultchecked", "bool", undefined);
-    }
-  }
-
-  protected override gotOptionsChanged(e: WUP.Base.OptionEvent): void {
-    this._isStopChanges = true;
-    e.props.includes("reverse") && this.setAttr("reverse", this._opts.reverse, true);
-    super.gotOptionsChanged(e);
+    this.setAttr("w-reverse", this._opts.reverse, true);
   }
 
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
     super.gotFormChanges(propsChanged);
     this.setAttr.call(this.$refInput, "aria-readonly", this.$isReadOnly);
+  }
+
+  protected override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    if (name === "defaultchecked") {
+      name = "initvalue";
+    }
+    super.attributeChangedCallback(name, oldValue, newValue);
   }
 }
 

@@ -14,8 +14,15 @@ describe("control.text", () => {
     el = document.body.appendChild(document.createElement("wup-text"));
     const spy = jest.spyOn(el, "gotFocus");
     el.focus();
-    await h.wait(1);
+    await h.wait(2);
     expect(spy).toBeCalledTimes(1);
+
+    el.blur();
+    jest.clearAllMocks();
+    el.$options.disabled = true;
+    el.focus();
+    await h.wait(2);
+    expect(spy).toBeCalledTimes(0);
   });
 
   test("validation: _mask", async () => {
@@ -51,15 +58,6 @@ describe("control.text", () => {
     el.blur();
     await h.wait();
     expect(el.$isValid).toBe(true);
-
-    el.$options.validations = { _mask: "Hello" }; // user can change defaults
-    el.$value = "";
-    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
-    el.blur();
-    await h.wait();
-    expect(el.$value).toBe("$ 2");
-    expect(el.$isValid).toBe(false);
-    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(`"<span class="wup-hidden"></span><span>Hello</span>"`);
   });
 
   test("validation: _parse", async () => {
@@ -68,7 +66,10 @@ describe("control.text", () => {
         return true;
       }
 
-      parseInput() {
+      parseInput(text) {
+        if (/^[0-9]*$/.test(text)) {
+          return text; // allow only digits
+        }
         throw new Error();
       }
     }
@@ -76,17 +77,17 @@ describe("control.text", () => {
     el = document.body.appendChild(document.createElement("test-text-el"));
     // el.$value = "Im valid";
     await h.wait(1);
-    await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
+    await h.userTypeText(el.$refInput, "2a", { clearPrevious: false });
     await h.wait();
     expect(el.$isValid).toBe(false);
     expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
       `"<span class="wup-hidden"></span><span>Invalid value</span>"`
     );
-    expect(el.$value).toBe(undefined);
+    expect(el.$value).toBe("2"); // stored only valid part
     // when user lefts control need to show error anyway
     el.blur();
     await h.wait();
-    expect(el.$refInput.value).toBe("2");
+    expect(el.$refInput.value).toBe("2a");
     expect(el.$isValid).toBe(false);
     expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
       `"<span class="wup-hidden"></span><span>Invalid value</span>"`
@@ -96,21 +97,24 @@ describe("control.text", () => {
     await h.wait();
     expect(el.$refInput.value).toBe("");
     expect(el.$isValid).toBe(true);
+    expect(el.$refError).toBeFalsy();
 
     // when need to show mask-error once
-    TestTextElement.prototype.canParseInput = () => false;
+    // TestTextElement.prototype.canParseInput = () => false;
     el.$options.mask = "$ 000";
-    el.focus();
-    await h.wait();
     await h.userTypeText(el.$refInput, "2", { clearPrevious: false });
     expect(el.$value).toBe(""); // because canParse = false
     await h.wait();
     expect(el.$isValid).toBe(false);
-    expect(el.$refError).toBeFalsy(); // because _wasValidNotEmpty = false + onChangeSmart
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Incomplete value</span>"`
+    );
+    // expect(el.$refError).toBeFalsy(); // because _wasValidNotEmpty = false + onChangeSmart
 
     el.$value = "$ 123";
     await h.wait();
     expect(el.$isValid).toBe(true);
+    expect(el.$refError).toBeFalsy();
     h.setInputCursor(el.$refInput, "$ 123|");
     await h.userRemove(el.$refInput);
     expect(el.$refInput.value).toBe("$ 12");
@@ -127,22 +131,29 @@ describe("control.text", () => {
       await h.wait(1);
     }).rejects.toThrow();
     class TestVldElement extends WUPTextControl {
-      $defaults = { ...WUPTextControl.$defaults };
-      $options = { ...TestVldElement.$defaults };
-      _opts = this.$options;
+      static $defaults = { ...WUPTextControl.$defaults };
     }
 
     customElements.define("test-vld", TestVldElement);
     el = document.body.appendChild(document.createElement("test-vld"));
-
+    /** Returns validations rules excluding built-in */
+    const definedVls = () => {
+      const vls = el.validations;
+      Object.keys(vls).forEach((k) => {
+        if (k.startsWith("_")) delete vls[k];
+      });
+      return vls;
+    };
+    expect(WUPTextControl.$defaults.validations).toBeFalsy();
     TestVldElement.$defaults.validations = { required: true };
-    expect(el.validations).toStrictEqual({ required: true });
+    expect(TestVldElement.$defaults.validations).not.toStrictEqual(WUPTextControl.$defaults.validations);
+    expect(definedVls()).toStrictEqual({ required: true });
 
     el.$options.validations = { min: 2 };
-    expect(el.validations).toStrictEqual({ required: true, min: 2 });
+    expect(definedVls()).toStrictEqual({ required: true, min: 2 });
 
     el.$options.validations = { required: false };
-    expect(el.validations).toStrictEqual({ required: false });
+    expect(definedVls()).toStrictEqual({ required: false });
     delete TestVldElement.$defaults.validations;
   });
 

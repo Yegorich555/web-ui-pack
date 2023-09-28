@@ -1,4 +1,5 @@
 /* eslint-disable prefer-destructuring */
+import { AttributeMap, AttributeTypes } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import WUPScrolled from "../helpers/scrolled";
 import localeInfo from "../objects/localeInfo";
@@ -13,7 +14,7 @@ const tagName = "wup-time";
 declare global {
   namespace WUP.Time {
     interface EventMap extends WUP.BaseCombo.EventMap {}
-    interface ValidityMap extends WUP.BaseCombo.ValidityMap, Pick<WUP.Text.ValidityMap, "_mask" | "_parse"> {
+    interface ValidityMap extends WUP.BaseCombo.ValidityMap {
       /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min time is {x}` */
       min: WUPTimeObject;
       /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max time is {x}` */
@@ -21,12 +22,13 @@ declare global {
       /** User can't select time in excluded range */
       exclude: { test: (v: WUPTimeObject) => boolean };
     }
-    interface Defaults<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Defaults<T, VM> {
+    interface NewOptions {
       /** String representation of displayed time (enables mask, - to disable mask set $options.mask="");
        * @defaultValue localeInfo.time
+       * @example `hh:mm a` or `h:m`
        * @tutorial Troubleshooting
        * * with changing $options.format need to change/reset mask/maskholder also */
-      format?: string;
+      format: string;
       /** Increment value in minutes
        *  @defaultValue 1
        * @tutorial Troubleshooting
@@ -37,22 +39,33 @@ declare global {
        * in this case any changing selection in menu changes value & input; so user don't need to press Enter
        * but if press escape: menu closed and value reverted to that was before
        * @defaultValue false */
-      menuButtonsOff?: boolean;
-    }
-    interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, Defaults<T, VM> {
+      menuButtonsOff: boolean;
       /** User can't select time less than min */
-      min?: WUPTimeObject;
+      min: WUPTimeObject | null;
       /** User can't select time more than max */
-      max?: WUPTimeObject;
+      max: WUPTimeObject | null;
       /** User can't select time in excluded range */
-      exclude?: { test: (v: WUPTimeObject) => boolean };
-      format: string;
+      exclude: { test: (v: WUPTimeObject) => boolean } | null;
     }
-    interface Attributes
-      extends WUP.BaseCombo.Attributes,
-        WUP.Base.toJSX<Partial<Pick<Options, "format" | "min" | "max" | "exclude" | "format" | "step">>> {}
-    interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, Attributes {
-      initValue?: string;
+    interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      /** Default value in format hh:mm or hh:mm a */
+      "w-initValue"?: string;
+      "w-format"?: string;
+      "w-step"?: number;
+      "w-menuButtonsOff"?: boolean | "";
+      /** User can't select date less than min; format hh:mm */
+      "w-min"?: string;
+      /** User can't select date more than max; format hh:mm */
+      "w-max"?: string;
+      /** Points that user can't choose
+      /** Global reference to object with array
+       * @example
+       * ```js
+       * window.exclude = [new WUPTimeObject("02:30"), ...];
+       * <wup-time w-exclude="window.exclude"></wup-time>
+       * ``` */
+      "w-exclude"?: string;
     }
 
     interface MenuListElement extends HTMLElement {
@@ -89,9 +102,8 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-time name="time" initvalue="22:15" min="01:05" max="23:00"/>
-  </wup-form>;
- */
+    <wup-time w-name="time" w-initvalue="22:15" w-min="01:05" w-max="23:00"/>
+  </wup-form>; */
 export default class WUPTimeControl<
   ValueType extends WUPTimeObject = WUPTimeObject,
   TOptions extends WUP.Time.Options = WUP.Time.Options,
@@ -258,21 +270,15 @@ export default class WUPTimeControl<
       }`;
   }
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Time.Options>;
-    arr.push("format", "step");
-    return arr;
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.min.type = AttributeTypes.parsedObject;
+    m.max.type = AttributeTypes.parsedObject;
+    return m;
   }
 
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Time.Attributes>>;
-    arr.push("format", "min", "max", "step");
-    return arr;
-  }
-
-  static $defaults: WUP.Time.Defaults = {
+  static $defaults: WUP.Time.Options = {
     ...WUPBaseComboControl.$defaults,
-    step: 1,
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
@@ -281,6 +287,12 @@ export default class WUPTimeControl<
         (v === undefined || v > setV) && `Max value is ${setV.format((c as WUPTimeControl)._opts.format)}`,
       exclude: (v, fn) => (v === undefined || fn.test(v)) && "This value is disabled",
     },
+    step: 1,
+    format: "",
+    min: null,
+    max: null,
+    exclude: null,
+    menuButtonsOff: false,
   };
 
   constructor() {
@@ -311,24 +323,21 @@ export default class WUPTimeControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Time.Options> | null): void {
-    this._opts.format = this.getAttr("format")?.replace(/\D{0,1}(ss|SS)/, "") || "hh:mm A";
+    this._opts.format = this._opts.format?.replace(/\D{0,1}(ss|SS)/, "") || "hh:mm A";
 
-    this._opts.mask ??= this._opts.format
+    this._opts.mask ||= this._opts.format
       .replace(/hh|HH/, "00") //
       .replace(/[hH]/, "#0")
       .replace(/mm|MM/, "00")
       .replace(/[mM]/, "#0") // convert hh-mm > 00-00; h/m > #0/#0
       .replace(/a/, "//[ap]//m")
       .replace(/A/, "//[AP]//M");
-    this._opts.maskholder ??= this._opts.format
+    this._opts.maskholder ||= this._opts.format
       .replace(/([mMhH]){1,2}/g, "$1$1")
       .replace(/a/, "*m")
       .replace(/A/, "*M");
 
-    this._opts.min = this.getAttr("min", "obj");
-    this._opts.max = this.getAttr("max", "obj");
-    this._opts.exclude = this.getAttr("exclude", "ref");
-    this._opts.step = this.getAttr("step", "number") || this.#ctr.$defaults.step;
+    this._opts.step ||= this.#ctr.$defaults.step;
     super.gotChanges(propsChanged as any);
   }
 
@@ -346,11 +355,14 @@ export default class WUPTimeControl<
 
   /** Set [disabled] for items according to $options.min & max */
   protected disableItems(): void {
-    const { min, max, exclude } = this._opts;
+    // eslint-disable-next-line prefer-const
+    let { min, max, exclude } = this._opts;
     if ((!min && !max && !exclude) || !this.$refMenuLists) {
       return;
     }
 
+    min ??= 0 as unknown as WUPTimeObject;
+    max ??= WUPTimeObject.$maxValue as unknown as WUPTimeObject;
     for (let n = 0; n < 2; ++n) {
       const lst = this.$refMenuLists[n];
       const was = lst._value;
@@ -358,7 +370,7 @@ export default class WUPTimeControl<
         const el = lst.children.item(i)!;
         lst._value = (el as any)._value;
         const v = this.getMenuValue();
-        const isDisabled = v < min! || v > max! || exclude?.test(v);
+        const isDisabled = v < min || v > max || exclude?.test(v);
         this.setAttr.call(el, "disabled", isDisabled, true);
       }
       lst._value = was;
@@ -368,12 +380,12 @@ export default class WUPTimeControl<
       for (let i = 0; i < lst.children.length; ++i) {
         const el = lst.children.item(i)!;
         const isPM = (el as any)._value === 2;
-        const isDisabled = (isPM && max! < new WUPTimeObject(12, 0)) || (!isPM && min! > new WUPTimeObject(11, 0));
+        const isDisabled = (isPM && max < new WUPTimeObject(12, 0)) || (!isPM && min > new WUPTimeObject(11, 0));
         this.setAttr.call(el, "disabled", isDisabled, true);
       }
     }
     const v = this.getMenuValue();
-    const isDisabled = v < min! || v > max! || exclude?.test(v);
+    const isDisabled = v < min || v > max || exclude?.test(v);
     this.$refButtonOk && this.setAttr.call(this.$refButtonOk!, "disabled", isDisabled, true);
   }
 
@@ -638,10 +650,6 @@ export default class WUPTimeControl<
     return v.format(this._opts.format);
   }
 
-  protected override resetInputValue(): void {
-    // don't call super because validation is appeared
-  }
-
   #lastInputChanged = false; // if press Enter: need to get value from last touched field (input OR menu)
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     this.#lastInputChanged = true;
@@ -732,6 +740,7 @@ export default class WUPTimeControl<
       e.preventDefault();
       if (this.#lastInputChanged || !this.$refButtonOk) {
         this.goHideMenu(HideCases.OnPressEnter);
+        this._inputError && this.resetInputValue(); // it will show err message
       } else if (!this.$refButtonOk!.disabled) {
         setTimeout(() =>
           this.$refButtonOk!.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }))
@@ -744,7 +753,7 @@ export default class WUPTimeControl<
   }
 
   protected override gotFocusLost(): void {
-    this.setInputValue(this.$value, SetValueReasons.userSelect); // case: h:m - try to input 01:23 => expected 1:23
+    !this._inputError && this.setInputValue(this.$value, SetValueReasons.userSelect); // case: h:m - try to input 01:23 => expected 1:23
     super.gotFocusLost();
   }
 }

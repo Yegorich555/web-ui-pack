@@ -7,11 +7,13 @@ import WUPTextControl from "./text";
 export const enum ShowCases {
   /** When $showMenu() called programmatically; Don't use it for $options (it's for nested cycle) */
   onManualCall = 1,
-  /** When control got focus; ignores case when user changed value by click on item on clearButton
+  /** When control got focus via user interaction; ignores case when user changed value by click on item on clearButton
    * to change such behavior update WUPBaseComboControl.prototype.canShowMenu */
   onFocus = 1 << 1,
+  /** When control got focus programmatically (via option `autofocus` or when called method 'focus()') */
+  onFocusAuto = 1 << 2,
   /** When user clicks on control (beside editable not-empty input) */
-  onClick = 1 << 2,
+  onClick = 1 << 3,
   /** When user clicks on input (by default it's disabled rule to allow user to work with input without popup hide/show blinks) */
   onClickInput = 1 << 4,
   /** When user types text */
@@ -39,16 +41,18 @@ declare global {
       $hideMenu: Event;
     }
     interface ValidityMap extends Omit<WUP.Text.ValidityMap, "min" | "max" | "email"> {}
-    interface Defaults<T = any, VM = ValidityMap> extends WUP.Text.Defaults<T, VM> {
+    interface NewOptions {
       /** Case when menu-popup to show; WARN ShowCases.inputClick doesn't work without ShowCases.click
        * @defaultValue onPressArrowKey | onClick | onFocus */
       showCase: ShowCases;
       /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode) */
-      readOnlyInput?: boolean | number;
+      readOnlyInput: boolean | number;
     }
-    interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, Defaults<T, VM> {}
-    interface Attributes extends WUP.Text.Attributes {}
-    interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, Attributes {}
+    interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+      "w-showCase"?: ShowCases | number;
+      "w-readOnlyInput"?: boolean | number;
+    }
   }
 }
 
@@ -57,20 +61,9 @@ export default abstract class WUPBaseComboControl<
   ValueType = any,
   TOptions extends WUP.BaseCombo.Options = WUP.BaseCombo.Options,
   EventMap extends WUP.BaseCombo.EventMap = WUP.BaseCombo.EventMap
-> extends WUPTextControl<
-  ValueType,
-  // @ts-expect-error - because validationRules is different
-  TOptions,
-  EventMap
-> {
+> extends WUPTextControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseComboControl;
-
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.BaseCombo.Options>;
-    arr.push("readOnlyInput");
-    return arr;
-  }
 
   static get $style(): string {
     return `${super.$style}
@@ -104,14 +97,13 @@ export default abstract class WUPBaseComboControl<
       }`;
   }
 
-  static $defaults: WUP.BaseCombo.Defaults<any> = {
+  static $defaults: WUP.BaseCombo.Options<any> = {
     ...WUPTextControl.$defaults,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
-      _mask: WUPTextControl.$defaults.validationRules._mask,
-      _parse: WUPTextControl.$defaults.validationRules._parse,
     },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
+    readOnlyInput: false,
   };
 
   /** Fires after popup-menu is shown (after animation finishes) */
@@ -148,6 +140,7 @@ export default abstract class WUPBaseComboControl<
     i.setAttribute("role", "combobox");
     i.setAttribute("aria-haspopup", "listbox");
     i.setAttribute("aria-expanded", false);
+    i.focus = this.inputFocus; // assign custom method to detect how focus called
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.BaseCombo.Options> | null): void {
@@ -171,7 +164,7 @@ export default abstract class WUPBaseComboControl<
 
   /** Called when need to create menu in opened popup */
   protected abstract renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement;
-  /** Called when need to transfer current value to text-input */
+  /** Called when need to transfer current value to text-input (or string-value) */
   protected abstract valueToInput(v: ValueType | undefined): string;
   /** Called on user's keyDown to apply focus on popup-menu items */
   protected abstract focusMenuItemByKeydown(e: KeyboardEvent): void;
@@ -188,7 +181,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   /** Override to change show-behavior */
-  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
+  canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
     if (this.$isReadOnly || this.$isDisabled) {
       return false;
     }
@@ -197,24 +190,8 @@ export default abstract class WUPBaseComboControl<
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
-    if (showCase === ShowCases.onClick) {
-      if (!(this._opts.showCase & ShowCases.onClick)) {
-        return false;
-      }
-    } else if (showCase === ShowCases.onFocus) {
-      if (!(this._opts.showCase & ShowCases.onFocus)) {
-        return false;
-      }
-      const was = this.$value;
-      return new Promise((res) => {
-        // WARN: if click on btnClear with control.emptyValue - no changes and popup appeares
-        setTimeout(() => {
-          const isChangedByClick = !this.#ctr.$isEqual(was, this.$value);
-          return res(!isChangedByClick); // click on item or btnClear & control gets focus: need to not open menu because user makes action for changing value
-        });
-      });
-    }
-    return true;
+    const can = !!(this._opts.showCase & showCase) || showCase === ShowCases.onManualCall;
+    return can;
   }
 
   protected async goShowMenu(
@@ -224,16 +201,12 @@ export default abstract class WUPBaseComboControl<
     if (this.#isShown) {
       return this.$refPopup!;
     }
-
-    let can = this.canShowMenu(showCase, e);
-    if (can instanceof Promise) {
-      can = await can;
-    }
+    const can = this.canShowMenu(showCase, e);
     if (!can) {
       return null;
     }
-
     this.#isShown = true;
+
     // this.$hideError(); // it resolves overflow menu vs error
 
     if (!this.$refPopup) {
@@ -264,7 +237,7 @@ export default abstract class WUPBaseComboControl<
 
       // const wasFcs = this.$isFocused;
       this.renderMenu(p, menuId);
-      // rollback the logic if renderMenu() returns Promise
+      // WARN: rollback the logic if renderMenu() returns Promise
       // const fcs = this.$isFocused;
       // if (!fcs && wasFcs) {
       //   this.#isShown = false;
@@ -279,7 +252,7 @@ export default abstract class WUPBaseComboControl<
       return null; // possible when user calls show & hide sync
     }
     this.$refPopup.$show().then(() => this.fireEvent("$showMenu", { cancelable: false }));
-    this.setAttribute("opened", ""); // possible when user calls show & hide sync
+    this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", true);
     // await r; // WARN: it's important don't wait for animation to assign onShow events fast
 
@@ -456,39 +429,51 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
-    const r = this.goShowMenu(ShowCases.onFocus, ev);
+
+    // known issue: _isFocusCall missed when el.focus() + browser-tab not active. Reason: 'focusin' called only when browser-tab gets focus
+    const sc = (this.$refInput as any)._isFocusCall ? ShowCases.onFocusAuto : ShowCases.onFocus;
+    delete (this.$refInput as any)._isFocusCall;
+
+    let isPreventedFromClick = false; // possible when user clicks on btnClear or on item inside input to remove it
+    setTimeout(() => this.$isFocused && !isPreventedFromClick && this.goShowMenu(sc, ev), 1); // filter in 1ms to avoid case when focusin + focusout at the same time
 
     let clickAfterFocus = true; // prevent clickAfterFocus
-    let lblClick: ReturnType<typeof setTimeout> | false = false; // fix when labelOnClick > inputOnClick > inputOnFocus
     let onInputStartClick = false; // mouseDown>selectText>mouseUp - without filter it closes/opens popup when user tries to select text
     const dsps0 = onEvent(this.$refInput, "mousedown", () => {
       const allow = !this.$refInput.readOnly && !(this._opts.showCase & ShowCases.onClickInput);
       onInputStartClick = allow;
     });
+
+    let isInsideClick = false; // fix when labelOnClick > inputOnClick (twice in loop)
     const dsps1 = onEvent(this, "click", (e) => {
-      const skip = e.defaultPrevented || e.button || lblClick || onInputStartClick; // e.button > 0 if not left-click
+      isPreventedFromClick = e.defaultPrevented;
+      const skip = e.defaultPrevented || e.button /* only left click */ || isInsideClick || onInputStartClick;
       if (!skip) {
-        if (clickAfterFocus) {
-          r.finally(() => this.$isFocused && this.goShowMenu(ShowCases.onClick, e)); // menu must be opened if openByFocus is rejected
-        } else {
-          !this.#isShown ? this.goShowMenu(ShowCases.onClick, e) : this.goHideMenu(HideCases.onClick, e);
-        }
+        !this.#isShown || clickAfterFocus
+          ? this.goShowMenu(ShowCases.onClick, e)
+          : this.goHideMenu(HideCases.onClick, e);
       }
-      lblClick = setTimeout(() => (lblClick = false));
+      isInsideClick = true;
+      setTimeout(() => (isInsideClick = false), 1);
     });
 
     const dsps2 = onEvent(document, "click", (e) => {
-      !lblClick && !onInputStartClick && setTimeout(() => this.$isFocused && this.goHideMenu(HideCases.onClick, e)); // timeout to prevent show before focusLost
+      // close by outside click
+      !onInputStartClick && !isInsideClick && this.goHideMenu(HideCases.onClick, e);
       onInputStartClick = false;
     });
 
-    document.addEventListener(
-      "pointerdown",
-      () => {
-        clickAfterFocus = false;
-      },
-      { once: true, passive: true, capture: true }
-    );
+    setTimeout(
+      () =>
+        document.addEventListener(
+          "pointerdown",
+          () => {
+            clickAfterFocus = false;
+          },
+          { once: true, passive: true, capture: true }
+        ),
+      10
+    ); // fix 10ms => testcase: point autofocus > remove browser focus (click outside browser) > reload page outside browser > click on ctrl with autofocus: menu blinks and hidden after a time but need to open in this case. Also ShowCases.onFocusAuto isn't detected in this case
 
     arr.push(dsps0, dsps1, dsps2);
     return arr;
@@ -497,7 +482,6 @@ export default abstract class WUPBaseComboControl<
   protected override gotFocusLost(): void {
     !this.#isShown && !this._isHiding && this.removePopup(); // otherwise it's removed by hidingMenu
     this.goHideMenu(HideCases.onFocusLost);
-    this.resetInputValue(); // to update/rollback input according to result
     super.gotFocusLost();
   }
 
@@ -507,8 +491,12 @@ export default abstract class WUPBaseComboControl<
     canHideMenu && setTimeout(() => this.goHideMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
   }
 
-  /** Reset input to currentValue; called on focusOut, pressing Escape or Enter */
+  /** Reset input to currentValue; called on pressing Escape or Enter */
   protected resetInputValue(): void {
+    if (this._inputError) {
+      this.$showError(this._inputError); // case when mask/parse applied and need to show input error without changing
+      return;
+    }
     const isClear = !this.$refInput.value && !this._selectedMenuItem; // if user cleared input and $hided menu - need to clearValue
     isClear
       ? this.setValue(undefined, SetValueReasons.clear)
@@ -542,6 +530,12 @@ export default abstract class WUPBaseComboControl<
   protected override gotRemoved(): void {
     this.removePopup();
     super.gotRemoved();
+  }
+
+  private inputFocus(this: HTMLInputElement & { _isFocusCall?: boolean }): void {
+    this._isFocusCall = true;
+    HTMLInputElement.prototype.focus.call(this);
+    delete this._isFocusCall;
   }
 }
 

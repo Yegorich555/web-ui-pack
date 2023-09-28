@@ -1,10 +1,12 @@
+import { AttributeMap, AttributeTypes } from "../baseElement";
+import dateCompareWithoutTime from "../helpers/dateCompareWithoutTime";
 import dateCopyTime from "../helpers/dateCopyTime";
 import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
 import localeInfo from "../objects/localeInfo";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl from "./baseCombo";
-import { SetValueReasons, ValidateFromCases } from "./baseControl";
+import { SetValueReasons } from "./baseControl";
 import WUPCalendarControl from "./calendar";
 
 /* c8 ignore next */
@@ -15,7 +17,7 @@ const tagName = "wup-date";
 declare global {
   namespace WUP.Date {
     interface EventMap extends WUP.BaseCombo.EventMap {}
-    interface ValidityMap extends WUP.BaseCombo.ValidityMap, Pick<WUP.Text.ValidityMap, "_mask" | "_parse"> {
+    interface ValidityMap extends WUP.BaseCombo.ValidityMap {
       /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min date is {x}` */
       min: Date;
       /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max date is {x}` */
@@ -23,23 +25,24 @@ declare global {
       /** Enabled if option [exclude] is pointed; If invalid shows "This date is disabled" */
       exclude: Date[];
     }
-    interface Defaults<T = Date, VM = ValidityMap> extends WUP.Calendar.Defaults<T, VM>, WUP.BaseCombo.Defaults<T, VM> {
+    interface NewOptions {
       /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
        * @defaultValue localeInfo.date
+       * @example `yyyy-mm-dd` or `dd/mm/yyyy`
        * @tutorial Troubleshooting
        * * with changing $options.format need to change/reset mask/maskholder also */
-      format?: string;
+      format: string;
     }
     interface Options<T = Date, VM = ValidityMap>
       extends WUP.Calendar.Options<T, VM>,
         WUP.BaseCombo.Options<T, VM>,
-        Defaults<T, VM> {
-      format: string;
-      firstWeekDay: number;
-    }
-    interface Attributes extends WUP.Calendar.Attributes, Pick<Defaults, "format"> {}
-    interface JSXProps<C = WUPDateControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Calendar.JSXProps<C>, Attributes {
-      initValue?: string;
+        NewOptions {}
+    interface JSXProps<C = WUPDateControl>
+      extends WUP.BaseCombo.JSXProps<C>,
+        WUP.Calendar.JSXProps<C>,
+        WUP.Base.OnlyNames<NewOptions> {
+      "w-initValue"?: string;
+      "w-format"?: string;
     }
   }
   interface HTMLElementTagNameMap {
@@ -67,7 +70,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-date name="dateOfBirhday" utc initvalue="1990-10-24" min="1930-01-01" max="2010-01-01"/>
+    <wup-date w-name="dateOfBirhday" w-utc w-initvalue="1990-10-24" w-min="1930-01-01" w-max="2010-01-01"/>
   </wup-form>; */
 export default class WUPDateControl<
   ValueType extends Date = Date,
@@ -96,41 +99,43 @@ export default class WUPDateControl<
       }`;
   }
 
-  static get observedOptions(): Array<string> {
-    const arr = super.observedOptions as Array<keyof WUP.Date.Options>;
-    arr.push("format");
-    return arr;
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.min = { type: AttributeTypes.parsedObject };
+    m.max = { type: AttributeTypes.parsedObject };
+    m.firstweekday = { type: AttributeTypes.number };
+    m.startwith = { type: AttributeTypes.string };
+    return m;
   }
 
-  static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<LowerKeys<WUP.Date.Attributes>>;
-    arr.push("format", "min", "max", "utc", "exclude");
-    return arr;
-  }
-
-  static $defaults: WUP.Date.Defaults = {
+  static $defaults: WUP.Date.Options = {
     ...WUPBaseComboControl.$defaults,
+    ...WUPCalendarControl.$defaults,
     // debounceMs: 500,
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
-        (v === undefined || v < setV) &&
-        `Min value is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
+        (v === undefined || dateCompareWithoutTime(v, setV, (c as WUPDateControl)._opts.utc) === -1) &&
+        `Min value is ${(c as WUPDateControl).valueToInput(setV)}`,
       max: (v, setV, c) =>
-        (v === undefined || v > setV) &&
-        `Max value is ${dateToString(setV, (c as WUPDateControl)._opts.format.toUpperCase())}`,
-      exclude: (v, setV) =>
-        (v === undefined || setV.some((d) => d.valueOf() === v.valueOf())) && `This value is disabled`,
+        (v === undefined || dateCompareWithoutTime(v, setV, (c as WUPDateControl)._opts.utc) === 1) &&
+        `Max value is ${(c as WUPDateControl).valueToInput(setV)}`,
+      exclude: (v, setV, c) =>
+        (v === undefined || setV.some((d) => dateCompareWithoutTime(v, d, (c as WUPDateControl)._opts.utc) === 0)) &&
+        `This value is disabled`,
     },
+    format: "",
     // firstWeekDay: 1,
     // format: localeInfo.date.toLowerCase()
-    utc: true,
   };
 
   constructor() {
     super();
-    this._opts.format = this.#ctr.$defaults.format || localeInfo.date.toLowerCase();
-    this._opts.firstWeekDay = this.#ctr.$defaults.firstWeekDay || localeInfo.firstWeekDay; // init here to depends on localeInfo
+    this.#ctr.$defaults.firstWeekDay ||= localeInfo.firstWeekDay;
+    this._opts.firstWeekDay ||= this.#ctr.$defaults.firstWeekDay; // init here to depends on localeInfo
+
+    this.#ctr.$defaults.format ||= localeInfo.date.toLowerCase();
+    this._opts.format ||= this.#ctr.$defaults.format; // init here to depends on localeInfo
   }
 
   /** Parse string to Date
@@ -157,26 +162,24 @@ export default class WUPDateControl<
   }
 
   override valueToUrl(v: ValueType): string {
-    return dateToString(v, "yyyy-MM-dd");
+    return dateToString(v, `yyyy-MM-dd${this._opts.utc ? "Z" : ""}`);
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Date.Options> | null): void {
     WUPCalendarControl.prototype.gotChangesSharable.call(this);
 
-    this._opts.format = this.getAttr("format") || "YYYY-MM-DD";
+    this._opts.format ||= "YYYY-MM-DD";
     if (this._opts.format.toUpperCase().includes("MMM")) {
       this.throwError(`'MMM' in format isn't supported`);
       this._opts.format = "YYYY-MM-DD";
     }
-    this._opts.mask =
-      this._opts.mask ??
-      this._opts.format
-        .replace(/[yY]/g, "0")
-        .replace(/dd|DD/, "00")
-        .replace(/[dD]/, "#0")
-        .replace(/mm|MM/, "00")
-        .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
-    this._opts.maskholder = this._opts.maskholder ?? this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
+    this._opts.mask ||= this._opts.format
+      .replace(/[yY]/g, "0")
+      .replace(/dd|DD/, "00")
+      .replace(/[dD]/, "#0")
+      .replace(/mm|MM/, "00")
+      .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
+    this._opts.maskholder ||= this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
 
     super.gotChanges(propsChanged as any);
   }
@@ -188,22 +191,6 @@ export default class WUPDateControl<
     if (this._opts.max) vls.max = this._opts.max;
     if (this._opts.exclude) vls.exclude = this._opts.exclude;
     return vls as WUP.BaseControl.Options["validations"];
-  }
-
-  protected goValidate(fromCase: ValidateFromCases, silent = false): string | false {
-    // reset hours for validations
-    const v = this.$value as Date | undefined;
-    const key = this._opts.utc ? "UTC" : "";
-    const hh = v && [
-      v[`get${key}Hours`](),
-      v[`get${key}Minutes`](),
-      v[`get${key}Seconds`](),
-      v[`get${key}Milliseconds`](),
-    ];
-    v && v[`set${key}Hours`](0, 0, 0, 0);
-    const r = super.goValidate(fromCase, silent);
-    hh && v[`set${key}Hours`](hh[0], hh[1], hh[2], hh[3]);
-    return r;
   }
 
   protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
@@ -266,10 +253,6 @@ export default class WUPDateControl<
       return "";
     }
     return dateToString(v, this._opts.format.toUpperCase() + (this._opts.utc ? "Z" : ""));
-  }
-
-  protected override resetInputValue(): void {
-    // don't call super because validation is appeared
   }
 
   protected override focusMenuItem(next: HTMLElement | null): void {

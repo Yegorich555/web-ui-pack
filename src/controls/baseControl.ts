@@ -1,4 +1,4 @@
-import WUPBaseElement from "../baseElement";
+import WUPBaseElement, { AttributeMap, AttributeTypes } from "../baseElement";
 import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";
 import nestedProperty from "../helpers/nestedProperty";
@@ -21,6 +21,8 @@ export const enum SetValueReasons {
   userSelect,
   /** When $initValue is changed */
   initValue,
+  /** When value changed from storage (on init if `$options.storageKey` is pointed) */
+  storage,
 }
 
 /** Cases of validation for WUP Controls */
@@ -71,6 +73,7 @@ type StoredRefError = HTMLElement & { _wupVldItems?: StoredItem[] };
 
 declare global {
   namespace WUP.BaseControl {
+    type AutoComplete = AutoFill; // remove after half year with new version TS
     interface EventMap extends WUP.Base.EventMap {
       /** Called on value change */
       $change: CustomEvent & { detail: SetValueReasons };
@@ -86,23 +89,37 @@ declare global {
       reason: ValidateFromCases | null
     ) => false | string;
 
-    interface Defaults<T = any, VM = ValidityMap> {
-      /** When to validate control and show error. Validation by onSubmit impossible to disable
-       *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit */
-      validationCase: ValidationCases;
-      /** Wait for pointed time after valueChange before showError (it's sumarized with $options.debounce); WARN: hide error without debounce
-       *  @defaultValue 500 */
-      validateDebounceMs: number;
-      /** Debounce option for onFocustLost event (for validationCases.onFocusLost); More details @see onFocusLostOptions.debounceMs in helpers/onFocusLost;
+    interface Options<T = any, VM = ValidityMap> {
+      /** Title/label of control;
+       * @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string) */
+      label: string | undefined | null;
+      /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
+       * * @tutorial
+       * * point `undefined` to completely detach from FormElement
+       * * point `''`(empty string) to partially detach (exlcude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
+      name: string | undefined | null;
+      /** Focus element when it's appended to layout @defaultValue false */
+      autoFocus: boolean;
+      /** Name to autocomplete by browser; Point `true` to inherit from `$options.name` or some string
+       *  if control has no autocomplete option then it's inherited from `form`
+       * @see {@link HTMLInputElement.autocomplete}
+       * @defaultValue null - means false if form.$options.autoComplete false also */
+      autoComplete: AutoComplete | boolean | null;
+      /** Disallow edit/copy value; adds attr [disabled] for styling */
+      disabled: boolean;
+      /** Disallow copy value; adds attr [readonly] for styling @defaultValue false */
+      readOnly: boolean;
+      /** Debounce option for onFocustLost event (for validationCases.onFocusLost);
+       * @see {@link onFocusLostOptions.debounceMs} in helpers/onFocusLost;
        * @defaultValue 100ms */
-      focusDebounceMs?: number;
+      focusDebounceMs: number;
       /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
        * @defaultValue ClearActions.initClearBack */
       clearActions: ClearActions;
-      /** Rules defined for control;
+      /** Rules defined for control. Impossible to override via `$options`. Use static `$dfaults` instead
        * * all functions must return error-message when value === undefined
        * * all functions must return error-message if setValue is `true/enabled` or value doesn't fit a rule
-       * * value can be undefined only when a rule named as 'required' or need to collect error-messages @see $options.validationShowAll
+       * * value can be undefined only when a rule named as 'required' or need to collect error-messages @see {@link Options.validationShowAll}
        * @example
        * ```
        * WUPTextControl.$defaults.validationRules.isNumber = (v === undefined || !/^[0-9]*$/.test(v)) && "Please enter a valid number";
@@ -113,8 +130,7 @@ declare global {
         };
        * ``` */
       validationRules: {
-        [K in keyof VM]: (
-          this: IBaseControl,
+        [K in keyof VM]?: (
           value: T,
           setValue: VM[K],
           control: IBaseControl,
@@ -132,58 +148,76 @@ declare global {
        * ```
        * @tutorial Troubleshooting
        ** If setup validations via attr it doesn't affect on $options.validations directly. Instead use el.validations getter instead */
-      validations?: { [K in keyof VM]?: VM[K] | ValidityFunction<T> } | { [k: string]: ValidityFunction<T> };
-      /** Storage for saving value
+      validations:
+        | { [K in keyof VM]?: VM[K] | ValidityFunction<T> }
+        | { [k: string]: ValidityFunction<T> }
+        | null
+        | undefined;
+      /** When to validate control and show error. Validation by onSubmit impossible to disable
+       *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit */
+      validationCase: ValidationCases;
+      /** Wait for pointed time after valueChange before showError (it's sumarized with $options.debounce); WARN: hide error without debounce
+       *  @defaultValue 500 */
+      validateDebounceMs: number;
+      /** Show all validation-rules with checkpoints as list instead of single error @defaultValue false */
+      validationShowAll: boolean;
+      /** Storage key for auto saving value in storage;
+       * @tutorial rules
+       * * On init value from storage applies to `$value` and triggers onChange event
+       * * Point empty string or `true` to inherit from $options.name
+       * * Expected value can be converted toString & parsed from string itself.
+       * * Override `valueFromUrl` & `valueToUrl` to change serializing (for complex objects, arrays etc.)
+       * * Before API-call gather form.$model on init OR use $onChange event
+       * @see {@link WUP.BaseControl.Options.storage}
+       * @defaultValue emptyString (means `false`) */
+      storageKey?: boolean | string | null;
+      /** Type of storage for saving value (if pointed storageKey)
        * @see {@link WUP.BaseControl.Options.storekey}
        * @defaultValue "local" */
       storage?: "local" | "session" | "url";
     }
-    interface Options<T = any, VM = ValidityMap> extends Defaults<T, VM> {
-      /** Title/label of control; if label is missed it's parsed from option [name]. To skip point `label=''` (empty string) */
-      label?: string;
-      /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
-       * * @tutorial
-       * * point `undefined` to completely detach from FormElement
-       * * point `''`(empty string) to partially detach (exlcude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
-      name?: string;
-      /** Focus element when it's appended to layout */
-      autoFocus?: boolean;
-      /** Name to autocomplete by browser; Point `true` to inherit from $options.name or some string
-       *  if control has no autocomplete option then it's inherited from form
-       * @defaultValue false */
-      autoComplete?: string | boolean;
-      /** Disallow edit/copy value; adds attr [disabled] for styling */
-      disabled?: boolean;
-      /** Disallow copy value; adds attr [readonly] for styling */
-      readOnly?: boolean;
-      /** Show all validation-rules with checkpoints as list instead of single error */
-      validationShowAll?: boolean;
-      /** Storage key for auto saving value in storage;
-       * @tutorial rules
-       * * Point empty string or `true` to inherit from $options.name
-       * * Expected value can be converted toString & parsed from string itself.
-       * * Override valueFromUrl & valueToUrl to change serializing (for complex objects, arrays etc.)
-       * * Before API-call gather form.$model on init
-       * @see {@link WUP.BaseControl.Defaults.storage} */
-      skey?: boolean | string;
-    }
 
-    interface Attributes
-      extends Pick<
-        Options,
-        "label" | "name" | "autoFocus" | "disabled" | "readOnly" | "autoComplete" | "skey" | "storage"
-      > {
-      /** default value in string/boolean or number representation (depends on `control.prototype.parse()`) */
-      initValue?: string | boolean | number;
-      /** Rules enabled for current control. Point global obj-key with validations (use `window.myValidations` where `window.validations = {required: true}` ) */
-      validations?: string;
+    interface JSXProps<C = WUPBaseControl> extends WUP.Base.JSXProps<C>, WUP.Base.OnlyNames<Options> {
+      /** Default value in string/boolean/number representation (depends on `control.prototype.parse()`) */
+      "w-initValue"?: string | boolean | number;
+      "w-label"?: string;
+      "w-name"?: string;
+      "w-autoFocus"?: boolean;
+      "w-autoComplete"?: string | boolean;
+
+      /** @deprecated use [disabled] instead since related to CSS-styles */
+      "w-disabled"?: boolean | "";
+      disabled?: boolean | "";
+      /** @deprecated use [disabled] instead since related to CSS-styles */
+      "w-readonly"?: boolean | "";
+      readonly?: boolean | "";
+
+      "w-clearActions"?: ClearActions | number;
+      /** @deprecated use static `.$defaults.validationCase` instead */
+      "w-validationCase"?: never;
+      /** @deprecated use static `.$defaults.validationCase` instead */
+      "w-focusDebounceMs"?: never;
+      /** @deprecated use static `.$defaults.validationCase` instead */
+      "w-validationRules"?: never;
+      /** Rules enabled for current control (related to $defaults.validationRules);
+       * * Point Global reference to object
+       * @example
+       * ```js
+       * window.someRules = { required: true };
+       * <wup-text w-validations="window.someRules"></wup-text>
+       * ```
+       * @defaultValue [4,4] */
+      "w-validations"?: string;
+      "w-validateDebounceMs"?: number;
+      "w-validationShowAll"?: boolean | "";
+      "w-storageKey"?: boolean | string;
+      "w-storage"?: "local" | "session" | "url";
+      /** @deprecated Use [required] for styling */
+      readonly required?: "";
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
-    }
-
-    interface JSXProps<C = WUPBaseControl> extends WUP.Base.JSXProps<C>, Attributes {
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      onChange?: never;
+      "w-onChange"?: never;
     }
   }
 }
@@ -204,32 +238,6 @@ export default abstract class WUPBaseControl<
   static $ariaCleared = "cleared";
   /** Text announced by screen-readers; @defaultValue `Error for` */
   static $ariaError = "Error for";
-
-  static get observedOptions(): Array<string> {
-    return <Array<keyof WUP.BaseControl.Options>>[
-      "label",
-      "name",
-      "autoComplete",
-      "disabled",
-      "readOnly",
-      "validations",
-      "skey",
-      "clearActions",
-    ];
-  }
-
-  static get observedAttributes(): Array<string> {
-    return <Array<LowerKeys<WUP.BaseControl.Attributes>>>[
-      "label", //
-      "name",
-      "autocomplete",
-      "disabled",
-      "readonly",
-      "initvalue",
-      "skey",
-      "storage",
-    ];
-  }
 
   /** Css-variables related to component */
   static get $styleRoot(): string {
@@ -261,6 +269,7 @@ export default abstract class WUPBaseControl<
     // WARN: 'contain:style' is tricky rule
     return `${super.$style}
       :host {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -277,10 +286,15 @@ export default abstract class WUPBaseControl<
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      :host[invalid],
+      :host[invalid] > [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       :host:focus-within,
       :host:focus-within > [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       :host:focus-within strong,
       :host:focus-within legend {
@@ -297,10 +311,6 @@ export default abstract class WUPBaseControl<
       [disabled] :host > *,
       :host[disabled] > * {
         pointer-events: none;
-      }
-      :host[invalid],
-      :host[invalid] > [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       :host label {
         display: flex;
@@ -342,7 +352,6 @@ export default abstract class WUPBaseControl<
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -372,36 +381,19 @@ export default abstract class WUPBaseControl<
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*:host:hover {
-          z-index: 90011;
-        }
-        :host:hover [error] {
-          max-height: none;
-        }*/
         :host:hover,
         :host:hover>[menu],
         :host[hovered],
         :host[hovered]>[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        :host[invalid]:hover,
-        :host[invalid]:hover>[menu],
-        :host[invalid][hovered],
-        :host[invalid][hovered]>[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
-        }${
-          //  :host:hover label:before,
-          //  :host:hover label:after {
-          //     background-color: var(--ctrl-focus-label);
-          //  }
-          ""
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }`;
   }
 
   /** Default function to compare values/changes; It compares by valueOf() & by {id}
    *  Redefine/define `valueOf()` for complex values to improve comparison */
-  static $isEqual(v1: unknown, v2: unknown): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static $isEqual(v1: unknown, v2: unknown, control: WUPBaseControl): boolean {
     return isEqual(v1, v2) || (v1 != null && (v1 as any).id != null && v2 != null && (v1 as any).id === (v2 as any).id);
   }
 
@@ -410,18 +402,54 @@ export default abstract class WUPBaseControl<
     return v === "" || v === undefined;
   }
 
-  // todo changing global-common-defaults from another project doesn't affect on controls - need to figure out way when user can setup everything in one palce
-  static $defaults: WUP.BaseControl.Defaults = {
+  static get observedAttributes(): Array<string> {
+    const a = super.observedAttributes;
+    a.push("w-initvalue", "disabled", "readonly"); // support for `readonly` & `w-readonly`
+    return a;
+  }
+
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.autocomplete.type = AttributeTypes.string;
+    m.label.type = AttributeTypes.string;
+    m.name.type = AttributeTypes.string;
+    m.initvalue = {
+      type: AttributeTypes.parseCustom, // it's parsed manually on gotChanges
+      parse: (v) => v,
+    };
+    return m;
+  }
+
+  // todo changing global-common-defaults from another project doesn't affect on controls - need to figure out way when user can setup everything in one place
+  static $defaults: WUP.BaseControl.Options = {
+    autoComplete: null, // WARN: without null impossible to use with form.autoComplete: possible to change is user options will be empty/not cloned by default
+    autoFocus: false,
     clearActions: ClearActions.initClearBack,
+    focusDebounceMs: 100,
     validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
     validationRules: {
       required: (v, setV) => setV === true && this.$isEmpty(v) && "This field is required",
     },
+    validations: null,
+    validationShowAll: false,
+    disabled: false,
+    readOnly: false,
+    label: null,
+    name: null,
+    storage: "local",
+    storageKey: "",
   };
 
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.BaseControl.Options;
+    // @ts-expect-error
+    d.validationRules = undefined;
+    return d as unknown as T;
+  }
+
   /** Called on value change */
-  $onChange?: (e: CustomEvent & { detail: SetValueReasons }) => void;
+  $onChange?: (e: CustomEvent<SetValueReasons>) => void;
 
   #value?: ValueType;
   /** Current value of control; You can change it without affecting on $isDirty state */
@@ -444,14 +472,14 @@ export default abstract class WUPBaseControl<
     const was = this.#initValue;
     const canUpdate = (!this.$isReady && this.$value === undefined) || (!this.$isDirty && !this.$isChanged);
     this.#initValue = v;
-    let needUpdate = !this.#ctr.$isEqual(v, was); // WARN: comparing required for SelectControl when during the parse it waits for promise
+    let needUpdate = !this.#ctr.$isEqual(v, was, this); // WARN: comparing required for SelectControl when during the parse it waits for promise
     if (canUpdate && needUpdate) {
       needUpdate = !this.setValue(v, SetValueReasons.initValue);
     }
     needUpdate && this.setClearState();
     if (!(this as any)._noDelInitValueAttr) {
       this._isStopChanges = true;
-      this.removeAttribute("initvalue");
+      this.removeAttribute("w-initvalue");
       this._isStopChanges = false;
     }
   }
@@ -474,7 +502,7 @@ export default abstract class WUPBaseControl<
   /** Returns if value changed (by comparisson with $initValue via static.isEqual option)
    *  By default values compared by valueOf if it's possible */
   get $isChanged(): boolean {
-    return !this.#ctr.$isEqual(this.$value, this.#initValue);
+    return !this.#ctr.$isEqual(this.$value, this.#initValue, this);
   }
 
   _isValid?: boolean;
@@ -494,12 +522,16 @@ export default abstract class WUPBaseControl<
 
   /** Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled) */
   get $isDisabled(): boolean {
-    return this.$form?.$options.disabled || this._opts.disabled || false;
+    // @ts-expect-error
+    const o = this.$form?._opts;
+    return o?.disabled || this._opts.disabled || false;
   }
 
   /** Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly) */
   get $isReadOnly(): boolean {
-    return this.$form?.$options.readOnly || this._opts.readOnly || false;
+    // @ts-expect-error
+    const o = this.$form?._opts;
+    return o?.readOnly || this._opts.readOnly || false;
   }
 
   /** Returns if value is required - can't be undefined (depends on $options.validations.required) */
@@ -508,9 +540,11 @@ export default abstract class WUPBaseControl<
   }
 
   /** Returns autoComplete name if related form or control option is enabled (and control.$options.autoComplete !== false ) */
-  get $autoComplete(): string | false {
-    const af = this._opts.autoComplete ?? (this.$form?.$options.autoComplete || false);
-    return (af === true ? this._opts.name : af) || false;
+  get $autoComplete(): WUP.BaseControl.AutoComplete | false {
+    // @ts-expect-error
+    const o = this.$form?._opts;
+    const af = this._opts.autoComplete ?? (o?.autoComplete || false);
+    return ((af === true ? this._opts.name : af) as WUP.BaseControl.AutoComplete) || false;
   }
 
   /** Check validity and show error if silent is false (by default)
@@ -595,17 +629,6 @@ export default abstract class WUPBaseControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
-    this._opts.label = this.getAttr("label");
-    this._opts.name = this.getAttr("name");
-
-    // NiceToHave it extends $options object to big size where almost ever prop is undefined - need somehow prettify ot
-    this._opts.autoComplete = this.getAttr("autocomplete", "boolOrString", this._opts.autoComplete);
-    this._opts.disabled = this.getAttr("disabled", "bool");
-    this._opts.readOnly = this.getAttr("readonly", "bool", this._opts.readOnly);
-    this._opts.autoFocus = this.getAttr("autofocus", "bool", this._opts.autoFocus);
-    this._opts.skey = this.getAttr("skey", "boolOrString", this._opts.skey);
-    this._opts.storage = this.getAttr("storage", "string", this._opts.storage) as "local";
-
     const i = this.$refInput;
     // set label
     const label = (this._opts.label ?? (this._opts.name && stringPrettify(this._opts.name))) || null;
@@ -621,6 +644,10 @@ export default abstract class WUPBaseControl<
     this.setAttr.call(this.$refInput, "aria-required", isReq);
 
     this.setupInitValue(propsChanged);
+    // retrieve value from store
+    if (!propsChanged && this._opts.storageKey) {
+      this.setValue(this.storageGet(), SetValueReasons.storage);
+    }
     propsChanged?.includes("clearActions") && this.setClearState();
     this.gotFormChanges(propsChanged);
   }
@@ -636,6 +663,7 @@ export default abstract class WUPBaseControl<
   setupInput(): void {
     const i = this.$refInput;
     i.disabled = this.$isDisabled;
+    // @ts-ignore
     i.autocomplete = this.$autoComplete || "off";
     this.setupInputReadonly();
   }
@@ -649,8 +677,9 @@ export default abstract class WUPBaseControl<
   setupInitValue(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     // lowercase for attribute-changes otherwise it's wrong
     if (!propsChanged || propsChanged.includes("initvalue")) {
-      const attr = this.getAttribute("initvalue");
-      if (attr !== null) {
+      // @ts-expect-error - because initvalue not defined but possible from attributes
+      const attr = this._opts.initvalue; // this value from attribute in string
+      if (attr != null) {
         (this as any)._noDelInitValueAttr = true;
         try {
           this.$initValue = this.parse(attr);
@@ -667,10 +696,6 @@ export default abstract class WUPBaseControl<
       if (!propsChanged || propsChanged.includes("name")) {
         this.$initValue = nestedProperty.get(this.$form._initModel as any, this._opts.name);
       }
-    }
-    // retrieve value from store
-    if (this.$initValue === undefined && this._opts.skey) {
-      this.$initValue = this.storageGet();
     }
   }
 
@@ -753,7 +778,7 @@ export default abstract class WUPBaseControl<
   /** Returns validations enabled by user & defaults */
   protected get validations(): WUP.BaseControl.Options["validations"] | undefined {
     const def = this.#ctr.$defaults.validations;
-    const opt = this.getAttr<WUP.BaseControl.Options["validations"]>("validations", "ref");
+    const opt = this._opts.validations;
     return def ? { ...def, ...opt } : opt;
   }
 
@@ -762,11 +787,11 @@ export default abstract class WUPBaseControl<
     (v: ValueType | undefined, reason: ValidateFromCases | null) => string | false
   > {
     const vls = this.validations;
-
     if (!vls) {
       return [];
     }
 
+    const rules = this.#ctr.$defaults.validationRules;
     const check = (v: ValueType | undefined, k: string | number, reason: ValidateFromCases | null): string | false => {
       const vl = vls[k as "required"];
 
@@ -774,7 +799,6 @@ export default abstract class WUPBaseControl<
       if (typeof vl === "function") {
         err = vl(v as any, this, reason);
       } else {
-        const rules = this.#ctr.$defaults.validationRules;
         const r = rules[k as "required"];
         if (!r) {
           const n = this._opts.name ? `.[${this._opts.name}]` : "";
@@ -999,7 +1023,7 @@ export default abstract class WUPBaseControl<
     if (typeof v === "object") {
       this.throwError(
         new Error(
-          "Option `skey` with object-values are not supported. Override `valueToUrl` & `valueFromUrl` to fix it"
+          "Option `storageKey` with object-values are not supported. Override `valueToUrl` & `valueFromUrl` to fix it"
         )
       );
       return null;
@@ -1007,12 +1031,12 @@ export default abstract class WUPBaseControl<
     return v.toString();
   }
 
-  /** Returns storage key based on options `skey` and `name` */
-  get storageKey(): string | undefined | false {
-    return this._opts.skey === true ? this._opts.name : this._opts.skey;
+  /** Returns storage key based on options `storageKey` and `name` */
+  get storageKey(): string | undefined | null | false {
+    return this._opts.storageKey === true ? this._opts.name : this._opts.storageKey;
   }
 
-  /** Get & parse value from storage according to options `skey`, `storage` and `name` */
+  /** Get & parse value from storage according to options `storageKey`, `storage` and `name` */
   protected storageGet(): ValueType | undefined {
     const key = this.storageKey;
     if (key) {
@@ -1036,8 +1060,9 @@ export default abstract class WUPBaseControl<
     return this.$initValue;
   }
 
-  /** Save value to storage storage according to options `skey`, `storage` and `name` */
+  /** Save value to storage storage according to options `storageKey`, `storage` and `name` */
   protected storageSet(v: ValueType | undefined): void {
+    // NiceToHave: option to sync ctrls with same storage & key: if 'personType` is changed need to update all ctrls with same key `personType`
     const key = this.storageKey;
     if (!key) {
       return; // possible when _opts.name is empty
@@ -1087,10 +1112,14 @@ export default abstract class WUPBaseControl<
       this.setClearState();
       return null;
     }
-    if (reason !== SetValueReasons.initValue && reason !== SetValueReasons.manual) {
+    if (
+      reason !== SetValueReasons.initValue &&
+      reason !== SetValueReasons.manual &&
+      reason !== SetValueReasons.storage
+    ) {
       this.$isDirty = true;
     }
-    const isChanged = !this.#ctr.$isEqual(v, prev);
+    const isChanged = !this.#ctr.$isEqual(v, prev, this);
     if (!isChanged) {
       return false;
     }
@@ -1099,9 +1128,13 @@ export default abstract class WUPBaseControl<
     this._isValid = undefined;
     const canVld = reason !== SetValueReasons.manual;
     (canVld || this.$refError) && this.validateAfterChange();
-    // save to storage
-    this._opts.skey && this.storageSet(v);
-    setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
+
+    if (reason !== SetValueReasons.initValue) {
+      // save to storage
+      reason !== SetValueReasons.storage && this._opts.storageKey && this.storageSet(v);
+      setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
+    }
+
     return true;
   }
 
@@ -1140,7 +1173,7 @@ export default abstract class WUPBaseControl<
   }
 
   /* Called when user pressed Esc-key or button-clear */
-  protected clearValue(): void {
+  clearValue(): void {
     const next = this._nextClearValue;
     this._nextClearValue = this.#value;
     this.setValue(next, SetValueReasons.clear);

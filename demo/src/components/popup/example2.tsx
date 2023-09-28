@@ -48,7 +48,7 @@ function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
   Place useTitle hook into global place and reuse accross react-app
   This hook helps to avoid useless renders for popup via attach-bind on listeners and render only when popup need to show
 */
-const set = new Map<any, { el: HTMLElement; delTimeId?: number }>();
+const set = new Map<any, { el: HTMLElement; delTimeId?: ReturnType<typeof setTimeout> }>();
 /** Custom hook for react. it's filter for callbacks by re-render */
 function useTitle() {
   return useCallback(

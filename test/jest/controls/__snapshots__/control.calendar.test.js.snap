@@ -992,6 +992,7 @@ padding:0;}
     }
   
       WUP-CALENDAR {
+        --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
         margin-bottom: 20px;
@@ -1006,10 +1007,15 @@ padding:0;}
         color: var(--ctrl-label);
         pointer-events: none;
       }
+      WUP-CALENDAR[invalid],
+      WUP-CALENDAR[invalid] &gt; [menu] {
+        --ctrl-focus-border: var( --ctrl-invalid-border);
+        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+      }
       WUP-CALENDAR:focus-within,
       WUP-CALENDAR:focus-within &gt; [menu] {
         z-index: 90010;
-        box-shadow: 0 0 0 1px var(--ctrl-focus);
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-CALENDAR:focus-within strong,
       WUP-CALENDAR:focus-within legend {
@@ -1026,10 +1032,6 @@ padding:0;}
       [disabled] WUP-CALENDAR &gt; *,
       WUP-CALENDAR[disabled] &gt; * {
         pointer-events: none;
-      }
-      WUP-CALENDAR[invalid],
-      WUP-CALENDAR[invalid] &gt; [menu] {
-        box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
       }
       WUP-CALENDAR label {
         display: flex;
@@ -1071,7 +1073,6 @@ padding:0;}
         font-size: small;
         color: var(--ctrl-err-text);
         background: var(--ctrl-err-bg);
-        max-height: 3em;
         overflow: auto;
         overflow: overlay;
       }
@@ -1120,23 +1121,11 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
-        /*WUP-CALENDAR:hover {
-          z-index: 90011;
-        }
-        WUP-CALENDAR:hover [error] {
-          max-height: none;
-        }*/
         WUP-CALENDAR:hover,
         WUP-CALENDAR:hover&gt;[menu],
         WUP-CALENDAR[hovered],
         WUP-CALENDAR[hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-        }
-        WUP-CALENDAR[invalid]:hover,
-        WUP-CALENDAR[invalid]:hover&gt;[menu],
-        WUP-CALENDAR[invalid][hovered],
-        WUP-CALENDAR[invalid][hovered]&gt;[menu] {
-          box-shadow: 0 0 3px 1px var(--ctrl-invalid-border);
+          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
       WUP-CALENDAR {
@@ -1206,7 +1195,7 @@ padding:0;}
         border: none;
         border-radius: 2em;
         color: inherit;
-        background-color: white;
+        background: none;
         box-shadow: none;
         text-transform: inherit;
       }
@@ -1301,6 +1290,67 @@ padding:0;}
         WUP-CALENDAR [zoom="in2"] { animation-name: WUP-ZOOM-IN-2; }
       }
 </style>
+`;
+
+exports[`control.calendar common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "disabled": false,
+  "exclude": null,
+  "firstWeekDay": 1,
+  "focusDebounceMs": 100,
+  "label": null,
+  "max": null,
+  "min": null,
+  "name": null,
+  "readOnly": false,
+  "startWith": null,
+  "storage": "local",
+  "storageKey": "",
+  "utc": true,
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.calendar common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.calendar common tests snapshot of $defaults 3`] = `
+[
+  "disabled",
+  "readonly",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-disabled",
+  "w-exclude",
+  "w-firstweekday",
+  "w-focusdebouncems",
+  "w-initvalue",
+  "w-label",
+  "w-max",
+  "w-min",
+  "w-name",
+  "w-readonly",
+  "w-startwith",
+  "w-storage",
+  "w-storagekey",
+  "w-utc",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
+]
 `;
 
 exports[`control.calendar keyboard 1`] = `
