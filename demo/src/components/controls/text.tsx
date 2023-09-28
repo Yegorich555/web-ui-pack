@@ -146,11 +146,13 @@ export default function TextControlView() {
           <ul>
             <li>
               Formats example:
-              <br /> $options.mask=<b>"+0 (000) 000-0000"</b> - for phone number
-              <br /> $options.mask=<b>"##0.##0.##0.##0"</b> - for IP address
-              <br /> $options.mask=<b>"*{"{1,5}"}"</b> - any 1..5 chars
-              <br /> $options.mask=<b>"//[a-zA-Z]//{"{1,5}"}"</b> - regex /[a-zA-Z]/: 1..5 letters
-              <br /> where <b>#</b> - optional digit, <b>0</b> - required digit, <b>*</b> - any char
+              <br /> $options.mask=<b className={styles.text2}>"+0 (000) 000-0000"</b> - for phone number
+              <br /> $options.mask=<b className={styles.text2}>"##0.##0.##0.##0"</b> - for IP address
+              <br /> $options.mask=<b className={styles.text2}>"*{"{1,5}"}"</b> - any 1..5 chars
+              <br /> $options.mask=<b className={styles.text2}>"//[a-zA-Z]//{"{1,5}"}"</b> - regex /[a-zA-Z]/: 1..5
+              letters
+              <br /> where <b className={styles.text2}>#</b> - optional digit, <b className={styles.text2}>0</b> -
+              required digit, <b className={styles.text2}>*</b> - any char
             </li>
             <li>prediction: all static chars append automatically</li>
             <li>lazy: type next separator on press Space to fill rest required digits with zeros</li>
@@ -158,7 +160,8 @@ export default function TextControlView() {
             <li>shows typed declined chars (so user can see that keyboard works) and rollback after 100ms</li>
             <li>possible to delete/append chars in the middle of text</li>
             <li>
-              enables <b>validations.mask</b> by default with message <b>Incomplete value</b>
+              enables <b className={styles.text2}>validations.mask</b> by default with message{" "}
+              <b style={{ color: "#ff5f5f", opacity: 0.8 }}>Incomplete value</b>
             </li>
             <li>usage details see during the coding (via jsdoc)</li>
           </ul>

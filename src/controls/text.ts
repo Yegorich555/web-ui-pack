@@ -122,7 +122,7 @@ export default class WUPTextControl<
 
   static get $styleRoot(): string {
     return `:root {
-      --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-clear-hover: rgba(255,0,0,0.2);
      }`;
   }
 
