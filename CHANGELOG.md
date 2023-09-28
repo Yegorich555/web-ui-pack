@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.1 (\_\_\_)
+## 0.9.1 (Sep 28, 2023)
 
 **BREAKING CHANGES**:
 
