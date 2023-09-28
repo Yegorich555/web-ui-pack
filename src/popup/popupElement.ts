@@ -158,6 +158,7 @@ export default class WUPPopupElement<
       :root {
         --popup-anim: 300ms;
         --popup-bg: white;
+        --popup-fg: inherit;
       }`;
   }
 
@@ -174,6 +175,7 @@ export default class WUPPopupElement<
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 #00000033;
         background: var(--popup-bg);
+        color: var(--popup-fg);
         text-overflow: ellipsis;
       }
       @media not all and (prefers-reduced-motion) {

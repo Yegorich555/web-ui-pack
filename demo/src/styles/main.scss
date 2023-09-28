@@ -134,5 +134,13 @@ body[data-theme="dark"] {
   --borderColor2: white;
 
   // web-ui-pack styles
+  --popup-bg: #104652;
+  --popup-fg: #dad9d9;
   --base-btn-focus: #25a1b6;
+  --ctrl-label: #86aba6;
+  --ctrl-border: #161b24;
+  // radio
+  // todo fix style
+  // --ctrl-radio-bg: #ababab;
+  // --ctrl-radio-off: var(--ctrl-radio-bg);
 }

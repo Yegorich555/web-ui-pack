@@ -83,7 +83,7 @@ $dropdownAnimation: 300ms;
   border: none;
   display: flex;
   flex-wrap: wrap;
-  background: #fff;
+  background: var(--basicBgColor, #fff);
   border-radius: var(--border-radius);
   margin: 0;
   padding: 2em 1em 0.5em 1em;
@@ -91,7 +91,7 @@ $dropdownAnimation: 300ms;
   gap: 8px;
 
   > legend {
-    color: #5e5e5e;
+    color: var(--basicTextColor2, #5e5e5e);
     display: block;
     position: absolute;
     left: 0.3em;
@@ -107,22 +107,23 @@ $dropdownAnimation: 300ms;
     position: relative;
 
     > span {
-      color: #5e5e5e;
       display: block;
       position: absolute;
       padding: 0 0.2em;
-      background: white;
       left: 0.3em;
       top: -0.5em;
       transform-origin: top left;
       transform: scale(0.9);
+      background: var(--basicBgColor, #fff);
     }
 
     > input {
       padding: 0.5em;
       border-radius: 4px;
-      box-shadow: none;
       border: 1px solid #5e5e5e;
+      box-shadow: none;
+      background: none;
+      color: var(--basicTextColor, black);
     }
   }
 }
@@ -132,4 +133,5 @@ $dropdownAnimation: 300ms;
 wup-radio + .inputs {
   margin-top: 10px;
   margin-bottom: 0;
+  background: var(--basicBgColor, #fff);
 }
