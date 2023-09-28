@@ -105,6 +105,12 @@ code {
   .token.deleted {
     color: var(--codeTagColor, #905);
   }
+
+  .token.atrule,
+  .token.attr-value,
+  .token.keyword {
+    color: var(--cssVarColor, #07a);
+  }
 }
 
 a {
@@ -131,11 +137,16 @@ body[data-theme="dark"] {
 
   --section-shadow-color: rgba(137, 137, 137, 0.4);
   --codeTagColor: #e19191;
+  --cssVarColor: #1f8add;
   --borderColor2: white;
 
   // web-ui-pack styles
+  // popup
   --popup-bg: #104652;
   --popup-fg: #dad9d9;
+  // circle
+  --circle-0: #104652;
+  // common
   --base-btn-focus: #25a1b6;
   --ctrl-label: #86aba6;
   --ctrl-border: #161b24;

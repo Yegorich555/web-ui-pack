@@ -22,6 +22,7 @@ export default function CircleView() {
         "Highly configurable (via css-vars, attrs)",
         "Fits parent size",
       ]}
+      className={styles.page}
     >
       <section>
         <h3>Default</h3>

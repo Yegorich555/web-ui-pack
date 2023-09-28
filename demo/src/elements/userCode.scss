@@ -20,7 +20,7 @@
       overflow: hidden;
 
       span:first-child {
-        color: #1973b8;
+        color: var(--cssVarColor, #1973b8);
       }
 
       span:last-child {
