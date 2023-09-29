@@ -143,7 +143,7 @@ body[data-theme="dark"] {
   /*** web-ui-pack styles ***/
 
   // popup
-  --popup-bg: #104652;
+  --popup-bg: #104652; // todo refactor to --tooltip on wup side
   --popup: #dad9d9;
   // circle
   --circle-0: #104652;
@@ -151,16 +151,16 @@ body[data-theme="dark"] {
   --base-focus: #25a1b6;
   --base-btn-focus: #25a1b6;
   --ctrl-bg: none;
+  --ctrl-border: #104652;
   --ctrl-label: #86aba6;
   --ctrl-icon: #86aba6;
   --ctrl-focus-label: #25a1b6;
-  --ctrl-border: #104652;
   --ctrl-clear-hover: rgba(255, 0, 0, 0.2);
   // --ctrl-err: #fff4fa;
   // --ctrl-err-bg: #ad0000;
 
   // radio
-  // todo add for radio
+  // todo add for radio - // todo refactor radio bg/on/off to use without off
   // --ctrl-radio-bg: #ababab;
   // --ctrl-radio-off: var(--ctrl-radio-bg);
   // todo add for dropdown

@@ -243,7 +243,7 @@ form.addEventListener("$change", (e) => {
     console.warn("this control is attached and changed", e);
   }
 });`;
-
+// todo need to extend interface ValidityMap + need point to CODESTYLE.md + point CODESTYLE.md in README.md
 const codeVldRules = `js
 // to define new rule add new property to validationRules
 WUPTextControl.$defaults.validationRules.isNumber = (v) =>
