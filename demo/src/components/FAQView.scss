@@ -2,4 +2,8 @@
   max-width: 700px !important;
   /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
   max-width: fit-content !important;
+
+  i {
+    color: $basicTextColor2;
+  }
 }

@@ -14,7 +14,7 @@ export default function FAQView() {
             question: "How to use this? Need always look into source code to get details",
             answer: (
               <>
-                You do it in a wrong way OR intellisense in editor does not work. So check these rules:
+                <i>You do it in a wrong way OR intellisense in editor does not work. So check these rules:</i>
                 <section>
                   <ol>
                     <li>
@@ -51,7 +51,7 @@ export default function FAQView() {
             question: "How to redefine styles",
             answer: (
               <>
-                Redefine css variables
+                <i>Redefine css variables</i>
                 <Code code={codeCssVars} />
               </>
             ),
@@ -61,11 +61,13 @@ export default function FAQView() {
             question: "What attributes possible to use instead of $options",
             answer: (
               <>
-                See details on demo for each element. Section <b>HTML</b> contains example with all supported
-                attributes.
-                <br />
-                Every attribute has reflected option. So changing attribute affects on $options (but changing $options
-                clears attribute to make HTML clearer)
+                <i>
+                  See details on demo for each element. Section <b>HTML</b> contains example with all supported
+                  attributes.
+                  <br />
+                  Every attribute has reflected option. So changing attribute affects on $options (but changing $options
+                  clears attribute to make HTML clearer)
+                </i>
                 <Code code={codeAttrs} />
               </>
             ),
@@ -110,8 +112,10 @@ export default function FAQView() {
             question: "Controls. How to detach from FormElement (exclude from model, validation, changes etc.)",
             answer: (
               <>
-                Use $options.<b>name</b> per each control (<b>readonly</b>, <b>disabled</b> applies even to detached
-                controls inside form)
+                <i>
+                  Use $options.<b>name</b> per each control (<b>readonly</b>, <b>disabled</b> applies even to detached
+                  controls inside form)
+                </i>
                 <Code code={codeControlDetach} />
               </>
             ),
@@ -121,7 +125,7 @@ export default function FAQView() {
             question: "Controls. How to change default validation rules/messages and add new",
             answer: (
               <>
-                Every control-type has $defaults.validationRules
+                <i>Every control-type has $defaults.validationRules</i>
                 <Code code={codeVldRules} />
               </>
             ),
@@ -160,7 +164,7 @@ export default function FAQView() {
               "Controls. How to remove asterisk at the end of label for controls with validationRule [required]",
             answer: (
               <>
-                Apply styles below
+                <i>Apply styles below</i>
                 <Code code={codeRemoveRequired} />
               </>
             ),
@@ -170,8 +174,10 @@ export default function FAQView() {
             question: "Controls. How to change parsing attribute [initvalue]",
             answer: (
               <>
-                When applied attribute [initvalue] controls use method parseValue(). By default it&apos;s search by
-                string-type. But you can override behavior
+                <i>
+                  When applied attribute [initvalue] controls use method parseValue(). By default it&apos;s search by
+                  string-type. But you can override behavior
+                </i>
                 <Code code={codeParseInitValue} />
               </>
             ),
@@ -181,7 +187,7 @@ export default function FAQView() {
             question: "Styles. How to reuse built-in styles",
             answer: (
               <>
-                Some styles (scroll, button submit etc.) are shared and placed in web-ui-pack/styles.js
+                <i>Some styles (scroll, button submit etc.) are shared and placed in web-ui-pack/styles.js</i>
                 <Code code={codeSharedStyles} />
               </>
             ),
