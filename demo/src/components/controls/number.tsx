@@ -1,5 +1,6 @@
 import Page from "src/elements/page";
 import { WUPNumberControl } from "web-ui-pack";
+import stylesCom from "./controls.scss";
 
 const sideEffect = WUPNumberControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -32,7 +33,7 @@ export default function NumberControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$initModel = { pwd: "somePwdHere", required: "yes" };
+            el.$initModel = { pwd: "somePwdHere" };
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
@@ -48,6 +49,11 @@ export default function NumberControlView() {
           w-prefix=""
           w-postfix=""
         />
+        <div className={stylesCom.group}>
+          <wup-num w-name="readonly" readonly w-initValue="123" />
+          <wup-num w-name="disabled" disabled w-initValue="123" />
+          <wup-num w-name="required" w-validations="myRequiredValidations" />
+        </div>
         <wup-num
           w-name="prefixPostfix"
           w-label="With postfix prefix"
@@ -60,18 +66,7 @@ export default function NumberControlView() {
             }
           }}
         />
-        <wup-num w-name="NumberRequired" w-validations="myRequiredValidations" />
         <wup-num w-name="WithMask" w-label="With Mask (mask always ignores format)" w-mask="0000-0000" />
-        <wup-num
-          w-name="readonly"
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "readonly";
-              el.$options.readOnly = true;
-            }
-          }}
-        />
-        <wup-num w-name="disabled" disabled />
         <wup-num //
           w-name="saveUrlNum"
           w-label="With saving to URL (see $options.storageKey & storage)"

@@ -2,6 +2,7 @@
 import Code from "src/elements/code";
 import Page from "src/elements/page";
 import { WUPRadioControl } from "web-ui-pack";
+import stylesCom from "./controls.scss";
 
 const sideEffect = WUPRadioControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -22,11 +23,16 @@ const items = [
 ];
 
 (window as any)._someRadioValidations = {
+  required: false,
+} as WUP.Radio.Options["validations"];
+
+(window as any)._someRadioValidations2 = {
   required: true,
 } as WUP.Radio.Options["validations"];
 
 (window as any).storedRadioItems = {
   items,
+  small: items.slice(0, 3),
 };
 
 export default function RadioControlView() {
@@ -63,26 +69,26 @@ export default function RadioControlView() {
           w-reverse={false}
           w-autoFocus={false}
         />
-        <wup-radio
-          w-name="disabled"
-          disabled
-          ref={(el) => {
-            if (el) {
-              el.$options.items = items.slice(0, 4);
-              el.$initValue = el.$options.items[1].value;
-            }
-          }}
-        />
-        <wup-radio
-          w-initValue="13"
-          w-name="readonly"
-          readonly
-          ref={(el) => {
-            if (el) {
-              el.$options.items = items.slice(0, 4);
-            }
-          }}
-        />
+        <div className={stylesCom.group}>
+          <wup-radio
+            w-name="readonly"
+            readonly
+            w-items="storedRadioItems.small"
+            w-initValue={items[2].value.toString()}
+          />
+          <wup-radio
+            w-name="disabled"
+            disabled
+            w-items="storedRadioItems.small"
+            w-initValue={items[2].value.toString()}
+          />
+          <wup-radio
+            w-name="required"
+            readonly
+            w-items="storedRadioItems.small"
+            w-validations="window._someRadioValidations2"
+          />
+        </div>
         <wup-radio
           ref={(el) => {
             if (el) {

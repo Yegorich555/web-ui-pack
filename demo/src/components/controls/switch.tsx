@@ -1,5 +1,6 @@
 import Page from "src/elements/page";
 import { WUPSwitchControl } from "web-ui-pack";
+import stylesCom from "./controls.scss";
 
 const sideEffect = WUPSwitchControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -36,6 +37,11 @@ export default function SwitchControlView() {
           w-initValue={false}
           w-reverse={false}
         />
+        <div className={stylesCom.group}>
+          <wup-switch w-name="readonly" readonly />
+          <wup-switch w-name="disabled" disabled />
+          <wup-switch w-name="defaultChecked" w-initValue />
+        </div>
         <wup-switch w-label="Very very very incredible long label to check if it has ellipsis rule and it works as expected" />
         <wup-switch w-name="reversed" w-reverse="" />
         <wup-switch
@@ -43,10 +49,6 @@ export default function SwitchControlView() {
           w-reverse=""
           w-label="Very very very incredible long label to check if it has ellipsis rule and it works as expected"
         />
-        {/* otherwise in React inline [defaultChecked] doesn't work */}
-        <wup-switch w-name="defaultChecked" ref={(el) => el?.setAttribute("defaultChecked", "")} />
-        <wup-switch w-name="disabled" disabled />
-        <wup-switch w-name="readonly" readonly w-initValue />
         <wup-switch //
           w-name="saveUrlSwitch"
           w-label="With saving to URL (see $options.storageKey & storage)"

@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPTextControl } from "web-ui-pack";
+import stylesCom from "./controls.scss";
 import styles from "./text.scss";
 
 const sideEffect = WUPTextControl;
@@ -33,7 +34,7 @@ export default function TextControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$initModel = { email: "test@google.com", required: "yes" };
+            el.$initModel = { email: "test@google.com" };
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
@@ -49,7 +50,27 @@ export default function TextControlView() {
           w-prefix=""
           w-postfix=""
         />
-        <wup-text w-name="required" w-validations="myTextValidations2" />
+        <div className={stylesCom.group}>
+          <wup-text
+            w-initValue="init value here"
+            w-name="readonly"
+            ref={(el) => {
+              if (el) {
+                el.$options.readOnly = true;
+              }
+            }}
+          />
+          <wup-text
+            w-name="disabled"
+            w-initValue="init value here"
+            ref={(el) => {
+              if (el) {
+                el.$options.disabled = true;
+              }
+            }}
+          />
+          <wup-text w-name="required" w-validations="myTextValidations2" />
+        </div>
         <wup-text
           ref={(el) => {
             if (el) {
@@ -91,16 +112,6 @@ export default function TextControlView() {
           w-postfix=" USD"
           w-initValue="1234"
         />
-        <wup-text
-          w-initValue="init value here"
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "readonly";
-              el.$options.readOnly = true;
-            }
-          }}
-        />
-        <wup-text w-name="disabled" disabled />
         <wup-text //
           w-name="saveUrl"
           w-label="With saving to URL (see $options.storageKey & storage)"
