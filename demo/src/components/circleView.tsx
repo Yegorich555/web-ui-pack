@@ -26,7 +26,7 @@ export default function CircleView() {
     >
       <section>
         <h3>Default</h3>
-        <small>(single full circle segment with corners 3 and background circle)</small>
+        <small>single full circle segment with corners 3 and background circle</small>
         <wup-circle
           style={{ maxWidth: "100px" }}
           w-back
@@ -44,7 +44,7 @@ export default function CircleView() {
       <section>
         <h3>Gauge style</h3>
         <small>
-          (single segment with corners 50% and custom <b>$options.from</b> & <b>to</b>)
+          single segment with corners 50% and custom <b>$options.from</b> & <b>to</b>
           <br />
           <b>WARN:</b> don't forget to reduce height in half of size (via styles)
         </small>
@@ -112,10 +112,9 @@ export default function CircleView() {
       </section>
       <section>
         <h3>Segmented</h3>
-        <small>(point several items in $options.items)</small>
-        <br />
+        <small>point several items in $options.items</small>
         <small>
-          (point <b>label</b> per item to show tooltip)
+          point <b>label</b> per item to show tooltip
         </small>
         <wup-circle
           style={{ maxWidth: "120px" }}

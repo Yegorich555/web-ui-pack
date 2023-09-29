@@ -6,4 +6,13 @@
   i {
     color: $basicTextColor2;
   }
+
+  > section {
+    box-shadow: none;
+  }
+
+  pre {
+    box-shadow: 0 0 4px 1px var(--section-shadow-color, rgba(0, 0, 0, 0.1));
+    border-radius: $borderRadius;
+  }
 }
