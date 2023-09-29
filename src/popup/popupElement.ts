@@ -175,7 +175,7 @@ export default class WUPPopupElement<
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 #00000033;
         background: var(--popup-bg);
-        color: var(--popup-fg);
+        color: var(--popup);
         text-overflow: ellipsis;
       }
       @media not all and (prefers-reduced-motion) {
