@@ -145,8 +145,10 @@ body[data-theme="dark"] {
   /*** web-ui-pack styles ***/
 
   // popup
-  --popup-bg: #104652; // todo refactor to --tooltip on wup side
-  --popup: #dad9d9;
+  --popup: lightgray;
+  --popup-bg: #104652;
+  --tooltip: white;
+  --tooltip-bg: rgba(16, 70, 82, 0.8);
   // circle
   --circle-0: #104652;
   // common
@@ -165,5 +167,4 @@ body[data-theme="dark"] {
   // todo add for radio - // todo refactor radio bg/on/off to use without off
   // --ctrl-radio-bg: #ababab;
   // --ctrl-radio-off: var(--ctrl-radio-bg);
-  // todo add for dropdown
 }

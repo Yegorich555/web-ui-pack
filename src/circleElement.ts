@@ -181,7 +181,6 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         pointer-events: none;
         user-select: none;
         touch-action: none;
-        opacity: 0.9;
       }`;
   }
 
@@ -380,6 +379,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   /** Called when need to show popup over segment */
   renderTooltip(segment: WUP.Circle.SVGItem): WUPPopupElement {
     const popup = document.createElement("wup-popup");
+    popup.setAttribute("tooltip", "");
     popup.$options.showCase = ShowCases.always;
     popup.$options.target = segment;
     popup.$options.arrowEnable = true;

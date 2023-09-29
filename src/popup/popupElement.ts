@@ -157,8 +157,10 @@ export default class WUPPopupElement<
     return `
       :root {
         --popup-anim: 300ms;
-        --popup-bg: white;
         --popup: inherit;
+        --popup-bg: #fff;
+        --tooltip: inherit;
+        --tooltip-bg: rgba(255,255,255,0.8);
       }`;
   }
 
@@ -174,9 +176,14 @@ export default class WUPPopupElement<
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 #00000033;
-        background: var(--popup-bg);
         color: var(--popup);
+        background: var(--popup-bg);
         text-overflow: ellipsis;
+      }
+      :host[tooltip],
+      :host[tooltip]+:host-arrow {
+        --popup: var(--tooltip);
+        --popup-bg: var(--tooltip-bg);
       }
       @media not all and (prefers-reduced-motion) {
         :host,
