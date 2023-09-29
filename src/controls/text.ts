@@ -166,7 +166,7 @@ export default class WUPTextControl<
         }
         :host [prefix],
         :host [postfix] {
-          color: var(--ctrl-label);
+          color: inherit;
           flex-shrink: 0;
         }
         :host [maskholder],
