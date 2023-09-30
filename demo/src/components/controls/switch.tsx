@@ -55,6 +55,11 @@ export default function SwitchControlView() {
           w-storageKey
           w-storage="url"
         />
+        <div className={stylesCom.group}>
+          <wup-switch w-autoFocus class={stylesCom.noBorders} w-name="No borders" />
+          <wup-switch class={stylesCom.noBorders} w-name="No borders2" w-initValue />
+          <wup-switch class={stylesCom.noBorders} w-name="No borders3" />
+        </div>
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

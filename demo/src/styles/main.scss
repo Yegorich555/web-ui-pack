@@ -153,17 +153,32 @@ body[data-theme="dark"] {
   --circle-0: #104652;
   // common
   --base-focus: #25a1b6;
+  --ctrl-focus: var(--base-focus);
   --base-btn-focus: #25a1b6;
   --ctrl-bg: none;
   --ctrl-border: #104652;
-  --ctrl-label: #86aba6;
+  --ctrl-label: #ababab;
   --ctrl-icon: #86aba6;
   --ctrl-focus-label: #25a1b6;
   --ctrl-clear: red;
   --ctrl-err: #fff4fa;
   --ctrl-err-bg: #6e3939;
   --ctrl-err-icon-valid: #54d754;
+  // switch
+  --ctrl-switch-off: #d5d5d5;
+  --ctrl-switch-off-bg: #707070;
+  --ctrl-switch-on: #38b9d6;
+  --ctrl-switch-shadow: black;
+  --ctrl-switch-hover: #fff2;
+  // check
+  // --ctrl-check-off-bg: none;
+  // --ctrl-check-on-bg: var(--ctrl-check-off-bg);
+  // --ctrl-check-on: #38b9d6;
+  // --ctrl-check-shadow: #38b9d6;
   // radio
+  // wup-check label > span {
+  //   box-shadow: 0 0 2px 0px var(--ctrl-check-shadow);
+  // }
   // todo add for radio - // todo refactor radio bg/on/off to use without off
   // --ctrl-radio-bg: #ababab;
   // --ctrl-radio-off: var(--ctrl-radio-bg);

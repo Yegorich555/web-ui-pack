@@ -54,13 +54,14 @@ export default class WUPCheckControl<
         --ctrl-check-on: #fff;
         --ctrl-check-radius: 3px;
         --ctrl-check-shadow: #0003;
-        --ctrl-check-size: calc(var(--ctrl-icon-size) * 1.2);
+        --ctrl-check-size: calc(var(--ctrl-icon-size) * 1.1);
       }`;
   }
 
+  // todo fix styles + hover
   static get $style(): string {
     return `${super.$style}
-      :host label>span {
+      :host [icon] {
         position: initial;
         height: var(--ctrl-check-size);
         width: var(--ctrl-check-size);
@@ -69,13 +70,13 @@ export default class WUPCheckControl<
         background: var(--ctrl-check-off-bg);
         box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);
       }
-      :host label>span:before {
+      :host [icon]:before {
         content: none;
       }
-      :host input:checked + * + * {
+      :host[checked] [icon] {
         background: var(--ctrl-check-on-bg);
       }
-      :host input:checked + * + *:before {
+      :host[checked] [icon]:before {
         content: "";
         position: initial;
         top: 0; left: 0;
@@ -96,8 +97,11 @@ export default class WUPCheckControl<
         mask-position: center;
       }
       @media (hover: hover) and (pointer: fine) {
-        :host:hover label>span {
+        :host:hover [icon] {
           box-shadow: 0 0 4px 0 var(--ctrl-focus);
+        }
+        :host:hover [icon]:after {
+          content: none;
         }
       }`;
   }

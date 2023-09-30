@@ -38,7 +38,7 @@ export default function CheckControlView() {
           w-reverse=""
           w-label="Very very very incredible long label to check if it has ellipsis rule and it works as expected"
         />
-        <wup-switch //
+        <wup-check //
           w-name="saveUrlCheck"
           w-label="With saving to URL (see $options.storageKey & storage)"
           w-storageKey

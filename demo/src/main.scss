@@ -56,6 +56,8 @@ h1 {
     background-color: $basicBgColor;
     border: $borderStyle;
     border-top: none;
+    border-left: none;
+    border-bottom: none;
     height: calc(100vh - #{$h1Height} - 2px);
 
     > div:last-child {

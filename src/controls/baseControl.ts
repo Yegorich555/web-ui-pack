@@ -382,6 +382,10 @@ export default abstract class WUPBaseControl<
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
+        :host:hover strong,
+        :host[hovered] strong{
+          color: var(--ctrl-focus-label);
+        }
         :host:hover,
         :host:hover>[menu],
         :host[hovered],

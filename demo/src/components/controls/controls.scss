@@ -6,3 +6,11 @@
     flex: 1 1 100%;
   }
 }
+
+.noBorders {
+  box-shadow: none !important;
+  border: none !important;
+  --ctrl-switch-padding: 1em 4px;
+
+  // todo need to add several customized: with different spot sizes
+}
