@@ -71,7 +71,7 @@ export default class WUPSwitchControl<
       --ctrl-switch-w: calc(var(--ctrl-switch-r) * 2);
       --ctrl-switch-r: calc(var(--ctrl-switch-h) * 1.4);
       --ctrl-switch-r-hover: calc(var(--ctrl-switch-r) * 1.6);
-      --ctrl-switch-hover: rgba(0, 0, 0, 0.07);
+      --ctrl-switch-hover: #0001;
      }`;
   }
 
@@ -96,52 +96,54 @@ export default class WUPSwitchControl<
         text-decoration: none;
         color: var(--ctrl-label);
       }
-      :host [icon] {
+      :host [bar] {
+        display: inline-flex;
+        align-items: center;
+        overflow: visible;
         margin-left: 0.5em;
-        position: relative;
         width: var(--ctrl-switch-w);
         min-width: var(--ctrl-switch-w);
         height: var(--ctrl-switch-h);
         border-radius: 999px;
         background: var(--ctrl-switch-off-bg);
       }
-      :host [icon]:before,
-      :host [icon]:after {
-        content: "";
-        position: absolute;
-        z-index: 2;
+      :host [thumb] {
+        display: inline-block;
         height: var(--ctrl-switch-r);
         width: var(--ctrl-switch-r);
-        left: -1px; top: 50%;
-        transform: translateY(-50%);
         background: var(--ctrl-switch-off);
         box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
         border-radius: 50%;
       }
-      :host [icon]:after {
-        content: none;
-        z-index: 1;
+      :host [thumb]:before {
+        z-index: -1;
+        position: absolute;
+        transform: translate(-50%, -50%) translateZ(-1px);
+        left: 50%; top: 50%;
         width: var(--ctrl-switch-r-hover);
         height: var(--ctrl-switch-r-hover);
-        left: calc(-1px + (var(--ctrl-switch-r) - var(--ctrl-switch-r-hover)) / 2);
-        box-shadow: none;
         background: var(--ctrl-switch-hover);
+        border-radius: 50%;
+      }
+      :host:focus-within [thumb] {
+        position: relative;
+        transform-style: preserve-3d;
+      }
+      :host:focus-within [thumb]:before {
+        content: "";
       }
       :host input { ${WUPcssHidden} }
-      :host[checked] [icon] {
+      :host[checked] [bar] {
         background-color: var(--ctrl-switch-on-bg);
       }
-      :host[checked] [icon]:before {
+      :host[checked] [thumb] {
         background: var(--ctrl-switch-on);
-        left: calc(100% - var(--ctrl-switch-w) + var(--ctrl-switch-r) + 1px);
-      }
-      :host[checked] [icon]:after {
-        left: calc(100% - (var(--ctrl-switch-r) + var(--ctrl-switch-r-hover)) / 2 + 1px);
+        transform: translateX(calc(100% + 1px));
       }
       :host[w-reverse] label {
         flex-direction: row-reverse;
       }
-      :host[w-reverse] [icon] {
+      :host[w-reverse] [bar] {
         margin-left: 0;
         margin-right: 0.5em;
       }
@@ -149,15 +151,17 @@ export default class WUPSwitchControl<
         margin-right: auto;
       }
       @media not all and (prefers-reduced-motion) {
-        :host [icon] { transition: background-color var(--anim); }
-        :host [icon]:before,
-        :host [icon]:after {
-           transition: left var(--anim);
-        }
+        :host [bar] { transition: background-color var(--anim); }
+        :host [thumb] { transition: transform var(--anim); }
       }
       @media (hover: hover) and (pointer: fine) {
-        :host:hover [icon]:after {
+        :host:hover [thumb] {
+          position: relative;
+          transform-style: preserve-3d;
+        }
+        :host:hover [thumb]:before {
            content: "";
+           opacity: 0.8;
         }
       }`;
   }
@@ -201,13 +205,16 @@ export default class WUPSwitchControl<
     this.$refInput.type = "checkbox";
     this.$refLabel.appendChild(this.$refInput);
     this.$refLabel.appendChild(this.$refTitle);
-    this.$refLabel.appendChild(document.createElement("span")).setAttribute("icon", ""); // for icon
+    const sp = document.createElement("span");
+    sp.setAttribute("bar", "");
+    sp.appendChild(document.createElement("span")).setAttribute("thumb", ""); // for icon
+    this.$refLabel.appendChild(sp);
     this.appendChild(this.$refLabel);
   }
 
   protected override gotReady(): void {
     super.gotReady();
-    this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e));
+    this.$refInput.oninput = (e) => this.gotInput(e);
   }
 
   /** Called when user changes value via click or keyboard */

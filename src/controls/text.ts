@@ -377,7 +377,7 @@ export default class WUPTextControl<
   }
 
   protected override renderControl(): void {
-    (this.$refInput as HTMLInputElement).type = "text";
+    (this.$refInput as HTMLInputElement).type = "text"; // todo set type 'email' when validation email is set
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
@@ -467,6 +467,7 @@ export default class WUPTextControl<
       this._refHistory = this._refHistory ?? new TextHistory(this.$refInput);
     }
 
+    // todo browser autofill can fire input without focus: need listen for input event every time
     const r = this.appendEvent(this.$refInput, "input", (e) => {
       // (e as WUP.Text.GotInputEvent).setValuePrevented = false;
       // (e as WUP.Text.GotInputEvent).preventSetValue = () => ((e as WUP.Text.GotInputEvent).setValuePrevented = true);

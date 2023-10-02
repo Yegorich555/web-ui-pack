@@ -125,6 +125,7 @@ a {
 
 // todo add toggler on UI
 body[data-theme="dark"] {
+  // todo fix btnClear on lightMode
   --basicTextColor: #ababab;
   --basicTextColor2: #86aba6;
   --bodyBgColor: #161b24;
@@ -162,14 +163,20 @@ body[data-theme="dark"] {
   --ctrl-focus-label: #25a1b6;
   --ctrl-clear: red;
   --ctrl-err: #fff4fa;
-  --ctrl-err-bg: #6e3939;
+  --ctrl-err-bg: #6e3939; // todo improve styles
   --ctrl-err-icon-valid: #54d754;
   // switch
   --ctrl-switch-off: #d5d5d5;
   --ctrl-switch-off-bg: #707070;
   --ctrl-switch-on: #38b9d6;
+
+  // todo add ones for [wup-dark]
   --ctrl-switch-shadow: black;
   --ctrl-switch-hover: #fff2;
+  // todo add color for darkmode
+
+  // todo need fix checkboxes
+
   // check
   // --ctrl-check-off-bg: none;
   // --ctrl-check-on-bg: var(--ctrl-check-off-bg);
