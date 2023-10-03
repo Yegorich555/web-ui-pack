@@ -134,7 +134,7 @@ body[data-theme="dark"] {
   --basicBgColor: #222a36;
   --headerBgColor: #104652;
   --headerBgColor2: #222a36;
-  --borderColor: #161b24;
+  --borderColor: #161b24; // todo need fix border for CommonStyles
   --activeLinkColor: #38b9d6;
   --activeLinkBgColor: rgba(0, 160, 188, 0.218);
   --hoverColor: #ababab;
@@ -164,8 +164,9 @@ body[data-theme="dark"] {
   --ctrl-label: #919191;
   --ctrl-icon: #919191; // #86aba6;
   --ctrl-focus-label: #25a1b6;
-  --ctrl-err: #fff4fa;
-  --ctrl-err-bg: #dc3545; // todo fix colors for err-popup
+  --ctrl-err: #ed8370; //#f72b08; //#ed8370 //#fff4fa;
+  --ctrl-err-bg: #161111; //#dc3545
+  --ctrl-clear-hover: rgba(255, 0, 0, 0.2);
   --ctrl-err-icon-valid: #54d754;
   // switch
   --ctrl-switch-off: #d5d5d5;

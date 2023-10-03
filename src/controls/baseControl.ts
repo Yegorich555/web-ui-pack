@@ -354,6 +354,7 @@ export default abstract class WUPBaseControl<
         background: var(--ctrl-err-bg);
         overflow: auto;
         overflow: overlay;
+        // text-shadow: 0 0 0 var(--ctrl-err);
       }
       :host [error] ul {
         margin:0; padding:2px 4px 2px;

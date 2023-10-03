@@ -31,7 +31,14 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
     return <small>{alt}</small>;
   }
   let isColor = v[0] === "#" || v.startsWith("rgb");
-  if (!isColor && v && !v.startsWith("url") && !v.startsWith("var(--anim-time)")) {
+  if (
+    !isColor &&
+    v &&
+    !v.startsWith("url") &&
+    !v.startsWith("var(--anim-time)") &&
+    !v.startsWith("calc") &&
+    !v.includes("size")
+  ) {
     // set style as color-value and check if color is changed
     const el = document.createElement("span");
     const def = "rgb(1, 1, 1)";
