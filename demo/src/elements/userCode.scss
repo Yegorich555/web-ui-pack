@@ -30,6 +30,27 @@
   }
 }
 
+.btnCommon {
+  padding: 4px 10px;
+  margin: 4px 0;
+  color: $activeLinkColor;
+  background: none;
+  cursor: pointer;
+  border-radius: $borderRadius;
+  border: $borderStyle;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.cssCommon {
+  max-width: 400px;
+  padding: 10px;
+  background: $bodyBgColor;
+  box-shadow: 0 1px 4px var(--section-shadow-color, #00000033);
+}
+
 .colorBlock {
   display: inline-block;
   width: 10px;

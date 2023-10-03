@@ -13,7 +13,15 @@ interface Props {
 
 export default function Page(props: React.PropsWithChildren<Props>) {
   return (
-    <div className={props.className}>
+    <div
+      className={props.className}
+      ref={(el) => {
+        if (el) {
+          el.style.opacity = "0";
+          setTimeout(() => (el.style.opacity = ""), 100); // to prevent awful blink
+        }
+      }}
+    >
       <h2>
         <MyLink href={props.link} gitIcon>
           {props.header}
@@ -31,8 +39,10 @@ export default function Page(props: React.PropsWithChildren<Props>) {
           </ul>
         </section>
       )}
-      {props.details ? <UserCode {...props.details} /> : null}
-      {props.children}
+      {props.details ? (
+        <UserCode {...props.details} tag={props.details.tag && (`#example ${props.details.tag}` as any)} />
+      ) : null}
+      <div id="example">{props.children}</div>
     </div>
   );
 }

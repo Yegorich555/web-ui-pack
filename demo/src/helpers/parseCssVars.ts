@@ -81,11 +81,30 @@ interface Options {
 }
 
 /** Returns all css-vars thar used by pointed element */
-export default function getUsedCssVars(scanEl: WUPBaseElement<any>, opts?: Options): CssVar[] {
+export default function getUsedCssVars(scanEl: WUPBaseElement<any>): { own: CssVar[]; common: CssVar[] } {
+  const allProto = WUPBaseElement.findAllProtos(scanEl, []);
+  const getOwnStyles = (proto: typeof WUPBaseElement): CssVar[] => {
+    if (Object.prototype.hasOwnProperty.call(proto, "$styleRoot")) {
+      return parseCssVars(proto.$styleRoot);
+    }
+    return [];
+  };
+  const own = getOwnStyles(allProto.splice(0, 1)[0]);
+
+  const common: CssVar[] = [];
+  allProto.reverse().forEach((p) => {
+    common.push(...getOwnStyles(p));
+  });
+  return { own, common };
+}
+
+/** Returns all css-vars thar used by pointed element */
+function getUsedCssVarsOld(scanEl: WUPBaseElement<any>, opts?: Options): CssVar[] {
   const styleEl = (scanEl.constructor as typeof WUPBaseElement).$refStyle!;
   const str = styleEl.textContent!;
   const usedSet = parseUsedCssVars(str, scanEl.tagName);
   const allVars = parseCssVars(str);
+
   const usedVars = allVars.filter(
     (v) => usedSet.has(v.name) && v.tagName === scanEl.tagName /* || v.tagName === ":root" || v.tagName === "body" */
   );
