@@ -144,7 +144,7 @@ body[data-theme="dark"] {
   --borderColor2: white;
 
   /*** web-ui-pack styles ***/
-
+  // todo add ones for [wup-dark]
   // popup
   --popup: lightgray;
   --popup-bg: #104652;
@@ -169,8 +169,7 @@ body[data-theme="dark"] {
   --ctrl-switch-off: #d5d5d5;
   --ctrl-switch-off-bg: #707070;
   --ctrl-switch-on: #38b9d6;
-
-  // todo add ones for [wup-dark]
+  --ctrl-switch-on-bg: #00778d;
   --ctrl-switch-shadow: black;
   --ctrl-switch-hover: #fff2;
   // todo add color for darkmode

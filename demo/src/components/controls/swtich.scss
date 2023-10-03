@@ -1,0 +1,21 @@
+.big {
+  --ctrl-switch-r: 1.4em;
+  --ctrl-switch-r-hover: 2em;
+  --ctrl-switch-h: 2em;
+  --ctrl-switch-w: 3.2em;
+
+  [bar] {
+    padding: 0 calc((var(--ctrl-switch-h) - var(--ctrl-switch-r)) / 2);
+    box-sizing: border-box;
+    // container-type: inline-size; // poor support https://caniuse.com/?search=cqw
+  }
+
+  [thumb] {
+    transform: translateX(0);
+  }
+
+  &[checked] [thumb] {
+    // transform: translateX(calc(100cqw - 100%));  // poor support https://caniuse.com/?search=cqw
+    transform: translateX(var(--ctrl-switch-w)) translateX(-150%);
+  }
+}

@@ -1,6 +1,7 @@
 .group {
   display: flex;
   gap: 1em;
+  align-items: center;
 
   > * {
     flex: 1 1 100%;

@@ -114,6 +114,7 @@ export default class WUPSwitchControl<
         background: var(--ctrl-switch-off);
         box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
         border-radius: 50%;
+        transform: translateX(-1px);
       }
       :host [thumb]:before {
         z-index: -1;
@@ -138,7 +139,7 @@ export default class WUPSwitchControl<
       }
       :host[checked] [thumb] {
         background: var(--ctrl-switch-on);
-        transform: translateX(calc(100% + 1px));
+        transform: translateX(var(--ctrl-switch-w)) translateX(calc(-100% + 1px));
       }
       :host[w-reverse] label {
         flex-direction: row-reverse;

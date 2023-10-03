@@ -1,6 +1,7 @@
 import Page from "src/elements/page";
 import { WUPSwitchControl } from "web-ui-pack";
 import stylesCom from "./controls.scss";
+import styles from "./swtich.scss";
 
 const sideEffect = WUPSwitchControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -55,11 +56,14 @@ export default function SwitchControlView() {
           w-storageKey
           w-storage="url"
         />
-        <div className={stylesCom.group}>
-          <wup-switch w-autoFocus class={stylesCom.noBorders} w-name="No borders" />
-          <wup-switch class={stylesCom.noBorders} w-name="No borders2" w-initValue />
-          <wup-switch class={stylesCom.noBorders} w-name="No borders3" />
-        </div>
+        <section>
+          <h3>Customized</h3>
+          <div className={stylesCom.group}>
+            <wup-switch w-autoFocus class={stylesCom.noBorders} w-name="No borders" />
+            <wup-switch class={[stylesCom.noBorders, styles.big].join(" ")} w-name="anotherSize" w-initValue />
+            <wup-switch class={stylesCom.noBorders} w-name="No borders3" />
+          </div>
+        </section>
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
