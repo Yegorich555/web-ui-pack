@@ -1,3 +1,7 @@
+/* stylelint-disable scss/at-import-partial-extension */
+$icomoon-font-path: "src/assets/icomoon/fonts";
+@import "src/assets/icomoon/style.scss";
+
 body {
   margin: 0;
   padding: 0;

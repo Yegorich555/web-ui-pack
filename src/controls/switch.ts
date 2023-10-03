@@ -105,9 +105,11 @@ export default class WUPSwitchControl<
         min-width: var(--ctrl-switch-w);
         height: var(--ctrl-switch-h);
         border-radius: 999px;
+        color: whitesmoke;
         background: var(--ctrl-switch-off-bg);
       }
       :host [thumb] {
+        z-index: 2;
         display: inline-block;
         height: var(--ctrl-switch-r);
         width: var(--ctrl-switch-r);

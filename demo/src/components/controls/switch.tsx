@@ -60,8 +60,8 @@ export default function SwitchControlView() {
           <h3>Customized</h3>
           <div className={stylesCom.group}>
             <wup-switch w-autoFocus class={stylesCom.noBorders} w-name="No borders" />
-            <wup-switch class={[stylesCom.noBorders, styles.big].join(" ")} w-name="anotherSize" w-initValue />
-            <wup-switch class={stylesCom.noBorders} w-name="No borders3" />
+            <wup-switch class={styles.big} w-name="anotherSize" w-initValue />
+            <wup-switch class={[styles.big, styles.withIcons].join(" ")} w-name="withIcons" />
           </div>
         </section>
         <button type="submit">Submit</button>

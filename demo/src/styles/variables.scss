@@ -1,3 +1,6 @@
+/* stylelint-disable-next-line scss/at-import-partial-extension */
+@import "src/assets/icomoon/variables.scss";
+
 $focusFrameColor: var(--focusFrameColor, #005365);
 
 $basicTextColor: var(--basicTextColor, #232323);
@@ -22,3 +25,23 @@ $borderStyle: $borderWidth solid $borderColor;
 $headerColor: var(--headerColor, #dcfaff);
 $headerBgColor: var(--headerBgColor, #218ba3);
 $headerBgColor2: var(--headerBgColor2, #38b9d6);
+
+@mixin iconBefore($name) {
+  &:before {
+    font-family: "#{$icomoon-font-family}" !important;
+    content: $name;
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@mixin iconAfter($name) {
+  &:after {
+    font-family: "#{$icomoon-font-family}" !important;
+    content: $name;
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

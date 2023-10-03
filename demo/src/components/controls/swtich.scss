@@ -1,11 +1,19 @@
+/* stylelint-disable no-descending-specificity */
 .big {
   --ctrl-switch-r: 1.4em;
   --ctrl-switch-r-hover: 2em;
   --ctrl-switch-h: 2em;
   --ctrl-switch-w: 3.2em;
+  --ctrl-switch-padding: 1em 4px; // padding of control itself
+
+  --padding: calc(
+    (var(--ctrl-switch-h) - var(--ctrl-switch-r)) / 2
+  ); // WARN: ordinary padding works with box-sizing: content-box but in this case need ctrl-switch-w recalc
+  box-shadow: none !important;
+  border: none !important;
 
   [bar] {
-    padding: 0 calc((var(--ctrl-switch-h) - var(--ctrl-switch-r)) / 2);
+    padding: var(--padding);
     box-sizing: border-box;
     // container-type: inline-size; // poor support https://caniuse.com/?search=cqw
   }
@@ -16,6 +24,26 @@
 
   &[checked] [thumb] {
     // transform: translateX(calc(100cqw - 100%));  // poor support https://caniuse.com/?search=cqw
-    transform: translateX(var(--ctrl-switch-w)) translateX(-150%);
+    transform: translateX(calc(var(--ctrl-switch-w) - var(--padding) * 2)) translateX(-100%);
+  }
+}
+
+.withIcons {
+  --ctrl-switch-w: 3.6em;
+  --padding: calc((var(--ctrl-switch-h) - var(--ctrl-switch-r)) / 2);
+
+  [bar] {
+    @include iconBefore($icon-moon);
+    @include iconAfter($icon-sun);
+
+    &:before,
+    &:after {
+      position: absolute;
+      padding: 1px; // to be sure the thumb overrides icons on small devices
+    }
+
+    &::after {
+      transform: translateX(calc(var(--ctrl-switch-w) - var(--padding) * 2)) translateX(-100%);
+    }
   }
 }
