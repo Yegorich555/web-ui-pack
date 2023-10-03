@@ -31,7 +31,7 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
     return <small>{alt}</small>;
   }
   let isColor = v[0] === "#" || v.startsWith("rgb");
-  if (!isColor && v) {
+  if (!isColor && v && !v.startsWith("url") && !v.startsWith("var(--anim-time)")) {
     // set style as color-value and check if color is changed
     const el = document.createElement("span");
     const def = "rgb(1, 1, 1)";
@@ -41,7 +41,7 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
     document.body.appendChild(el);
     const gotColor = window.getComputedStyle(el).color;
     if (def !== gotColor && gotColor !== "rgb(0, 0, 0)") {
-      isColor = true; // todo it's wrong for --anim: var
+      isColor = true; // WARN it's wrong for 'var(--anim-time)'
     }
     el.remove();
   }

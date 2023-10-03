@@ -241,5 +241,3 @@ rr = undefined;
 customElements.define(tagName, WUPPasswordControl);
 
 // manual testcase: form with email+password ignores autocomplete: "off" if previously it was saved
-
-// todo validationsShowAll must be true by default here

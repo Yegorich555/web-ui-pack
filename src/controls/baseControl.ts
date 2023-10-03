@@ -239,7 +239,6 @@ export default abstract class WUPBaseControl<
   /** Text announced by screen-readers; @defaultValue `Error for` */
   static $ariaError = "Error for";
 
-  // todo ctrl--invalid-border is missed on Demo.cssVars (see userCode.tsx)
   /** Css-variables related to component */
   static get $styleRoot(): string {
     return `:root {
