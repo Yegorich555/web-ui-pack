@@ -1,15 +1,16 @@
 import linkGit from "src/helpers/linkGit";
-import styles from "./gitIconLink.scss";
+import styles from "./myLink.scss";
 
 interface Props {
   href: string | null;
   className?: string;
+  gitIcon?: boolean;
 }
-export default function GitIconLink({ href, children, className }: React.PropsWithChildren<Props>) {
+export default function MyLink({ href, children, className, gitIcon }: React.PropsWithChildren<Props>) {
   href = linkGit(href);
   return (
     <a
-      className={[styles.gitLink, className].filter((s) => s).join(" ")} //
+      className={[gitIcon ? styles.gitLink : null, className].filter((s) => s).join(" ")} //
       href={href}
       target="_blank"
       rel="noreferrer"

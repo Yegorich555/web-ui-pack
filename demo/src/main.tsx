@@ -28,7 +28,7 @@ import TimeControlView from "./components/controls/time";
 import NumberControlView from "./components/controls/number";
 import FAQView from "./components/FAQView";
 import SelectManyControlView from "./components/controls/selectMany";
-import GitIconLink from "./elements/gitIconLink";
+import MyLink from "./elements/myLink";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -83,10 +83,10 @@ export default function AppContainer() {
   return (
     <>
       <h1>
-        <GitIconLink href="https://github.com/Yegorich555/web-ui-pack" className={styles.headerLink}>
+        <MyLink href="https://github.com/Yegorich555/web-ui-pack" className={styles.headerLink} gitIcon>
           <img src={imgLogo} alt="logo" />
           web-ui-pack
-        </GitIconLink>
+        </MyLink>
         {/* <a href="https://github.com/Yegorich555/web-ui-pack" target="_blank" rel="noreferrer" aria-label="Go to github">
           <img src={iconGit} alt="github" />
         </a> */}

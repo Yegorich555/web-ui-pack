@@ -1,7 +1,7 @@
 /* eslint-disable react/destructuring-assignment */
 import UserCode, { UserCodeProps } from "./userCode";
 import styles from "./page.scss";
-import GitIconLink from "./gitIconLink";
+import MyLink from "./myLink";
 
 interface Props {
   header: string;
@@ -15,7 +15,9 @@ export default function Page(props: React.PropsWithChildren<Props>) {
   return (
     <div className={props.className}>
       <h2>
-        <GitIconLink href={props.link}>{props.header}</GitIconLink>
+        <MyLink href={props.link} gitIcon>
+          {props.header}
+        </MyLink>
       </h2>
 
       {props.features === null ? null : (

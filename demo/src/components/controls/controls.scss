@@ -8,6 +8,10 @@
   }
 }
 
+section .group > * {
+  margin-bottom: 0;
+}
+
 .noBorders {
   box-shadow: none !important;
   border: none !important;

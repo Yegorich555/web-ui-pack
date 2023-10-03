@@ -1,7 +1,8 @@
 import Page from "src/elements/page";
 import { WUPSwitchControl } from "web-ui-pack";
+import MyLink from "src/elements/myLink";
 import stylesCom from "./controls.scss";
-import styles from "./swtich.scss";
+import styles from "./switch.scss";
 
 const sideEffect = WUPSwitchControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -12,8 +13,8 @@ export default function SwitchControlView() {
       header="SwitchControl"
       link="src/controls/switch.ts"
       features={[
-        "Easy to change size of items via css-variables (ctrl-switch-size...)", //
-        "Possible to reverse label",
+        "Easy to change size of items via css-variables (ctrl-switch-h...)", //
+        "Easy to reverse label",
         "Powerful accessibility support (keyboard, announcenement)",
         "Ability to save value to localStorage, sessionStorage, URL (options storageKey & storage)",
       ]}
@@ -58,6 +59,9 @@ export default function SwitchControlView() {
         />
         <section>
           <h3>Customized</h3>
+          <small>
+            See details in <MyLink href="/demo/src/components/controls/switch.scss">demo/src...</MyLink>
+          </small>
           <div className={stylesCom.group}>
             <wup-switch w-autoFocus class={stylesCom.noBorders} w-name="No borders" />
             <wup-switch class={styles.big} w-name="anotherSize" w-initValue />

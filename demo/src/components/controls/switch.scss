@@ -5,10 +5,8 @@
   --ctrl-switch-h: 2em;
   --ctrl-switch-w: 3.2em;
   --ctrl-switch-padding: 1em 4px; // padding of control itself
-
-  --padding: calc(
-    (var(--ctrl-switch-h) - var(--ctrl-switch-r)) / 2
-  ); // WARN: ordinary padding works with box-sizing: content-box but in this case need ctrl-switch-w recalc
+  // WARN: ordinary padding works with box-sizing: content-box but in this case need ctrl-switch-w recalc
+  --padding: calc((var(--ctrl-switch-h) - var(--ctrl-switch-r)) / 2);
   box-shadow: none !important;
   border: none !important;
 

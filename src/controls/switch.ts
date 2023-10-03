@@ -64,13 +64,13 @@ export default class WUPSwitchControl<
       --ctrl-switch-padding: 1em;
       --ctrl-switch-on: #fff;
       --ctrl-switch-off: #fff;
-      --ctrl-switch-shadow: #0003;
       --ctrl-switch-off-bg: #9f9f9f;
       --ctrl-switch-on-bg: var(--ctrl-focus);
+      --ctrl-switch-shadow: #0003;
       --ctrl-switch-h: var(--ctrl-icon-size);
-      --ctrl-switch-w: calc(var(--ctrl-switch-r) * 2);
-      --ctrl-switch-r: calc(var(--ctrl-switch-h) * 1.4);
-      --ctrl-switch-r-hover: calc(var(--ctrl-switch-r) * 1.6);
+      --ctrl-switch-w: calc(var(--ctrl-icon-size) * 2.8);
+      --ctrl-switch-r: calc(var(--ctrl-icon-size) * 1.4);
+      --ctrl-switch-r-hover: calc(var(--ctrl-icon-size) * 2.2);
       --ctrl-switch-hover: #0001;
      }`;
   }
