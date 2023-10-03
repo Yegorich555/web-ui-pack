@@ -7,6 +7,11 @@
 - **Controls**
   - Renamed css-var `ctrl-err-text` to `ctrl-err`
 
+**Fixes**:
+
+- **TypeScript**
+  - Updated CustomEvents `$onWillShow`, `$onWillHide`, `$onChange`
+
 ## 0.9.1 (\_\_\_)
 
 **BREAKING CHANGES**:

@@ -160,14 +160,14 @@ declare global {
        * @tutorial rules
        * * can be prevented via e.preventDefault()
        * * use event.detail.showCase to filter by showCase */
-      $willShow: CustomEvent;
+      $willShow: CustomEvent<{ showCase: HideCases }>;
       /** Fires after popup is shown (after animation finishes) */
       $show: Event;
       /** Fires before hide is happened;
        * @tutorial rules
        * * can be prevented via e.preventDefault()
        * * use event.detail.hideCase to filter by hideCase */
-      $willHide: CustomEvent;
+      $willHide: CustomEvent<{ hideCase: HideCases }>;
       /** Fires after popup is hidden (after animation finishes) */
       $hide: Event;
     }

@@ -76,7 +76,7 @@ declare global {
     type AutoComplete = AutoFill; // remove after half year with new version TS
     interface EventMap extends WUP.Base.EventMap {
       /** Called on value change */
-      $change: CustomEvent & { detail: SetValueReasons };
+      $change: CustomEvent<SetValueReasons>;
     }
 
     interface ValidityMap {
@@ -453,7 +453,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Called on value change */
-  $onChange?: (e: CustomEvent & { detail: SetValueReasons }) => void;
+  $onChange?: (e: CustomEvent<SetValueReasons>) => void;
 
   #value?: ValueType;
   /** Current value of control; You can change it without affecting on $isDirty state */

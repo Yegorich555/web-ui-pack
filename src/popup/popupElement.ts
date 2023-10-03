@@ -342,14 +342,14 @@ export default class WUPPopupElement<
    * @tutorial rules
    * * can be prevented via e.preventDefault()
    * * use event.detail.showCase to filter by showCase */
-  $onWillShow?: (e: CustomEvent) => void;
+  $onWillShow?: (e: CustomEvent<{ showCase: HideCases }>) => void;
   /** Fires after popup is shown (after animation finishes) */
   $onShow?: (e: Event) => void;
   /** Fires before hide is happened;
    * @tutorial rules
    * * can be prevented via e.preventDefault()
    * * use event.detail.hideCase to filter by hideCase */
-  $onWillHide?: (e: CustomEvent) => void;
+  $onWillHide?: (e: CustomEvent<{ hideCase: HideCases }>) => void;
   /** Fires after popup is hidden (after animation finishes) */
   $onHide?: (e: Event) => void;
 
