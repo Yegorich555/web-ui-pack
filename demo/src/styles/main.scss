@@ -127,9 +127,7 @@ a {
   }
 }
 
-// todo add toggler on UI
 body[data-theme="dark"] {
-  // todo fix btnClear on lightMode
   --basicTextColor: #ababab;
   --basicTextColor2: #86aba6;
   --bodyBgColor: #161b24;
@@ -163,12 +161,11 @@ body[data-theme="dark"] {
   --base-btn-focus: #25a1b6;
   --ctrl-bg: none;
   --ctrl-border: #104652;
-  --ctrl-label: #ababab;
-  --ctrl-icon: #86aba6;
+  --ctrl-label: #919191;
+  --ctrl-icon: #919191; // #86aba6;
   --ctrl-focus-label: #25a1b6;
-  --ctrl-clear: red;
   --ctrl-err: #fff4fa;
-  --ctrl-err-bg: #6e3939; // todo improve styles
+  --ctrl-err-bg: #dc3545; // todo fix colors for err-popup
   --ctrl-err-icon-valid: #54d754;
   // switch
   --ctrl-switch-off: #d5d5d5;
@@ -177,7 +174,6 @@ body[data-theme="dark"] {
   --ctrl-switch-on-bg: #00778d;
   --ctrl-switch-shadow: black;
   --ctrl-switch-hover: #fff2;
-
   // todo need fix checkboxes
 
   // check

@@ -3,7 +3,7 @@ import "./styles/main.scss";
 import React, { useEffect } from "react";
 import ReactDom from "react-dom";
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from "react-router-dom";
-import { WUPHelpers } from "web-ui-pack";
+import { WUPHelpers, WUPSwitchControl } from "web-ui-pack";
 import { useBuiltinStyle, WUPcssButton, WUPcssScrollSmall } from "web-ui-pack/styles";
 import PopupView from "./components/popup/popupView";
 
@@ -68,6 +68,20 @@ function last(arr: string[]) {
   return arr[arr.length - 1];
 }
 
+!WUPSwitchControl && console.error("!");
+
+function changeDarkMode(isDark: boolean): void {
+  if (isDark) {
+    document.body.setAttribute("data-theme", "dark");
+    document.body.setAttribute("wupdark", ""); // attr wup-dark will be further
+  } else {
+    document.body.removeAttribute("data-theme");
+    document.body.removeAttribute("wupdark");
+  }
+}
+// WARN: init darkMode required because $onChange triggers only after some timeout and blink visible on the screen
+changeDarkMode(!!localStorage.getItem("darkmode"));
+
 export default function AppContainer() {
   const navigate = useNavigate();
 
@@ -83,13 +97,21 @@ export default function AppContainer() {
   return (
     <>
       <h1>
+        <div />
         <MyLink href="https://github.com/Yegorich555/web-ui-pack" className={styles.headerLink} gitIcon>
           <img src={imgLogo} alt="logo" />
           web-ui-pack
         </MyLink>
-        {/* <a href="https://github.com/Yegorich555/web-ui-pack" target="_blank" rel="noreferrer" aria-label="Go to github">
-          <img src={iconGit} alt="github" />
-        </a> */}
+        <wup-switch
+          class={styles.darkMode}
+          w-storageKey="darkmode"
+          ref={(el) => {
+            if (el) {
+              // NiceToHave: prevent toggle animation on init
+              el.$onChange = () => changeDarkMode(el.$value);
+            }
+          }}
+        />
       </h1>
       <div className={styles.page}>
         <nav className={`${styles.leftBar} scrolled`}>

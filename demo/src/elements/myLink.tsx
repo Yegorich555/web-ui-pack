@@ -7,7 +7,7 @@ interface Props {
   gitIcon?: boolean;
 }
 export default function MyLink({ href, children, className, gitIcon }: React.PropsWithChildren<Props>) {
-  href = linkGit(href);
+  href = href?.startsWith("http") ? href : linkGit(href);
   return (
     <a
       className={[gitIcon ? styles.gitLink : null, className].filter((s) => s).join(" ")} //

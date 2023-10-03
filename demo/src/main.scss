@@ -14,7 +14,7 @@ h1 {
 
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   text-align: center;
   position: relative;
 
@@ -40,6 +40,39 @@ h1 {
 
   &::after {
     right: 0;
+  }
+}
+
+.darkMode {
+  font-size: 14px;
+  margin: 0 4px;
+  box-shadow: none !important;
+  border: none !important;
+
+  --ctrl-switch-r: 1.4em;
+  --ctrl-switch-r-hover: 2em;
+  --ctrl-switch-h: 2em;
+  --ctrl-switch-w: 3.6em;
+  --ctrl-switch-padding: 1em 4px; // padding of control itself
+
+  [bar] {
+    --padding: calc((var(--ctrl-switch-h) - var(--ctrl-switch-r)) / 2);
+    padding: var(--padding);
+    box-sizing: border-box;
+
+    @include iconBefore($icon-moon);
+    @include iconAfter($icon-sun);
+
+    &:before,
+    &:after {
+      position: absolute;
+      padding: 1px; // to be sure the thumb overrides icons on small devices
+    }
+  }
+
+  &[checked] [thumb],
+  [bar]::after {
+    transform: translateX(calc(var(--ctrl-switch-w) - var(--padding) * 2)) translateX(-100%);
   }
 }
 

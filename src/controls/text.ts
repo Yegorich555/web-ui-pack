@@ -122,7 +122,8 @@ export default class WUPTextControl<
 
   static get $styleRoot(): string {
     return `:root {
-      --ctrl-clear-hover: rgba(255,0,0,0.2);
+      --ctrl-clear: red;
+      --ctrl-clear-hover: rgba(255,0,0,0.1);
      }`;
   }
 
@@ -308,7 +309,7 @@ export default class WUPTextControl<
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           :host button[clear]:hover:after {
-            background: var(--ctrl-clear,--ctrl-err);
+            background: var(--ctrl-clear);
           }
         }
         :host[disabled] button[clear],
