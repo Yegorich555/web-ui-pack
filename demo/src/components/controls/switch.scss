@@ -25,6 +25,14 @@
     // transform: translateX(calc(100cqw - 100%));  // poor support https://caniuse.com/?search=cqw
     transform: translateX(calc(var(--ctrl-switch-w) - var(--padding) * 2)) translateX(-100%);
   }
+
+  &:hover [bar] {
+    box-shadow: 0 0 0 1px var(--ctrl-switch-off-bg);
+  }
+
+  &[checked]:hover [bar] {
+    box-shadow: 0 0 0 1px var(--ctrl-switch-on-bg);
+  }
 }
 
 .withIcons {
