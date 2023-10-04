@@ -268,6 +268,7 @@ export default abstract class WUPBaseControl<
         --ctrl-label: #919191;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-focus-label: #25a1b6;
+        --ctrl-selected: #25a1b6;
       }`;
     // NiceToHave: change icons to fonts: wupfont: in this case possible to improve btnClear: hover
   }

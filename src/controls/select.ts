@@ -128,6 +128,9 @@ export default class WUPSelectControl<
     return `:root {
         --ctrl-select-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
         --ctrl-select-menu-hover: #f1f1f1;
+      }
+      [wupdark] {
+        --ctrl-select-menu-hover: #222a36;
       }`;
   }
 
