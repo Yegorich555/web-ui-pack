@@ -148,16 +148,10 @@ body[wupdark] {
   /*** web-ui-pack styles ***/
   // circle
   --circle-0: #104652;
-  // common
-  // todo re-check popup[error], selectMany[item]:hover, btnClear, time[disabled], calendar[disabled
-  // --ctrl-err: #ed8370; //#f72b08; //#ed8370 //#fff4fa;
-  // --ctrl-err-bg: #161111; //#dc3545
-  // --ctrl-err-icon-valid: #54d754;
-
   // radio
   // todo refactor radio bg/on/off to use without off
   // --ctrl-radio-bg: #ababab;
   // --ctrl-radio-off: var(--ctrl-radio-bg);
 
-  // todo calendar
+  // todo add for btnSubmit
 }
