@@ -145,7 +145,7 @@ export default class WUPCalendarControl<
     }
     [wupdark] {
       --ctrl-clr-off: var(--ctrl-err);
-      --ctrl-clr-off-bg: var(--ctrl-err-bg);
+      --ctrl-clr-off-bg: none;
     }`;
   }
 
