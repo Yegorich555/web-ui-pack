@@ -130,6 +130,10 @@ export default class WUPTimeControl<
         --ctrl-time-icon-img: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==');
         --ctrl-time-current: black;
         --ctrl-time-current-bg: #d9f7fd;
+      }
+      [wupdark] {
+        --ctrl-time-current: #25a1b6;
+        --ctrl-time-current-bg: #fff1;
       }`;
   }
 
@@ -155,7 +159,7 @@ export default class WUPTimeControl<
       :host > [menu] {
         overflow: hidden;
       }
-      :host > [menu]>div:first-child {
+      :host > [menu] > div:first-child {
         position: relative;
       }
       :host > [menu] ul {
@@ -219,13 +223,11 @@ export default class WUPTimeControl<
         --ctrl-focus: var(--ctrl-err);
         //background-color: var(--ctrl-err-bg);
       }
-      :host > [menu] [group] {
+      :host [group] {
         display: flex;
-        gap: 1px;
-        padding-top: 1px;
-        background: var(--base-sep);
+        border-top: 1px solid var(--base-sep);
       }
-      :host > [menu] button {
+      :host [group] > button {
         cursor: pointer;
         flex: 1 1 50%;
         display: inline-flex;
@@ -237,17 +239,18 @@ export default class WUPTimeControl<
         padding: 0; margin: 0;
         background: var(--base-btn3-bg);
       }
-      :host > [menu] button:first-child {
+      :host [group] > button:first-child {
         --ctrl-icon-img: var(--wup-icon-check);
         --ctrl-icon: var(--ctrl-err-icon-valid);
         border-bottom-left-radius: var(--border-radius);
+        border-right: 1px solid var(--base-sep);
       }
-      :host > [menu] button:last-child {
+      :host [group] > button:last-child {
         --ctrl-icon-img: var(--wup-icon-cross);
         --ctrl-icon: var(--ctrl-err);
         border-bottom-right-radius: var(--border-radius);
       }
-      :host > [menu] button:after {
+      :host [group] > button:after {
         ${WUPcssIcon}
         content: "";
         padding:0;
@@ -260,11 +263,11 @@ export default class WUPTimeControl<
          ${focusStyle}
         }
         :host > [menu] button:hover {
-          box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
+          box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
         }
       }
       :host > [menu] button[disabled] {
-         box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 5%);
+         box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
          cursor: not-allowed;
          --ctrl-icon: inherit;
       }`;

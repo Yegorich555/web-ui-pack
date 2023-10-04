@@ -67,6 +67,8 @@ export default abstract class WUPBaseElement<
           --base-btn-focus: #005766;
           --base-btn2-bg: var(--base-btn-text);
           --base-btn2-text: var(--base-btn-bg);
+          --base-btn3-bg: none;
+          --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
@@ -76,6 +78,7 @@ export default abstract class WUPBaseElement<
         }
         [wupdark] {
           --base-btn-focus: #25a1b6;
+          --base-sep: #141414;
           --icon-hover: #fff3;
         }`;
   }
