@@ -77,7 +77,7 @@ export default abstract class WUPBaseElement<
           --icon-hover: #0001;
         }
         [wupdark] {
-          --base-btn-focus: #25a1b6;
+          --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
           --icon-hover: #fff3;
         }`;
