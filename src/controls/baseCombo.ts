@@ -77,13 +77,13 @@ export default abstract class WUPBaseComboControl<
       :host input:read-only {
         cursor: pointer;
       }
-      :host label::after {
+      :host label:after {
         content: "";
         -webkit-mask-image: var(--ctrl-icon-img);
         mask-image: var(--ctrl-icon-img);
       }
       @media not all and (prefers-reduced-motion) {
-        :host label::after {
+        :host label:after {
           transition: transform var(--anim);
         }
       }

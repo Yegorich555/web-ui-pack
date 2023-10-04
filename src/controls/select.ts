@@ -137,11 +137,11 @@ export default class WUPSelectControl<
       :host {
         --ctrl-icon-img: var(--ctrl-select-icon-img);
       }
-      :host label::after {
+      :host label:after {
         height: 100%;
         align-self: center;
       }
-      :host[opened] label::after {
+      :host[opened] label:after {
         transform: rotate(180deg);
       }
       ${WUPcssMenu(":host [menu]", "var(--ctrl-select-menu-hover)")}`;

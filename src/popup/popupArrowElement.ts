@@ -32,7 +32,7 @@ export default class WUPPopupArrowElement extends HTMLElement {
             overflow: visible;
             filter: drop-shadow(0 3px 2px var(--popup-shadow));
           }
-          wup-popup-arrow::before {
+          wup-popup-arrow:before {
             content: "";
             display: block;
             width: 100%; height: 100%;

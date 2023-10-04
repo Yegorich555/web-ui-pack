@@ -228,8 +228,8 @@ export default class WUPTextControl<
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        :host input:not(:focus)::placeholder,
-        :host textarea:not(:focus)::placeholder {
+        :host input:not(:focus):placeholder,
+        :host textarea:not(:focus):placeholder {
           color: transparent;
         }
         :host:focus-within strong,
@@ -279,8 +279,8 @@ export default class WUPTextControl<
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
           background: none;
-          mask: none;
           -webkit-mask: none;
+          mask: none;
         }
         :host:focus-within button[clear] {
           display: block;
