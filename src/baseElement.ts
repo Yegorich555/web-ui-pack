@@ -71,9 +71,12 @@ export default abstract class WUPBaseElement<
           --border-radius: 6px;
           --anim-time: 200ms;
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --icon-hover-r: 30px;
+          --icon-hover: #0001;
         }
         [wupdark] {
           --base-btn-focus: #25a1b6;
+          --icon-hover: #fff3;
         }`;
   }
 

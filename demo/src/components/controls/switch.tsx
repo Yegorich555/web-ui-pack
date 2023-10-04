@@ -63,7 +63,7 @@ export default function SwitchControlView() {
             See details in <MyLink href="/demo/src/components/controls/switch.scss">demo/src...</MyLink>
           </small>
           <div className={stylesCom.group}>
-            <wup-switch w-autoFocus class={stylesCom.noBorders} w-name="No borders" />
+            <wup-switch class={stylesCom.noBorders} w-name="No borders" />
             <wup-switch class={styles.big} w-name="anotherSize" w-initValue />
             <wup-switch class={[styles.big, styles.withIcons].join(" ")} w-name="withIcons" />
           </div>

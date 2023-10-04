@@ -8,8 +8,7 @@ declare global {
 
   namespace JSX {
     interface IntrinsicElements {
-      /**  Internal arrow element for {@link WUPPopupElement}
-       *  @see {@link WUPCircleElement} */
+      /**  Internal arrow element for {@link WUPPopupElement} */
       [tag]: WUP.Base.JSXProps<WUPPopupArrowElement>; // add element to tsx/jsx intellisense
     }
   }

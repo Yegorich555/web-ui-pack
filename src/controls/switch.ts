@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { WUPcssHidden } from "../styles";
+import { WUPCssIconHover, WUPcssHidden } from "../styles";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-switch";
@@ -46,13 +46,12 @@ declare global {
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
- *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
- *      <input/>
- *      <strong>{$options.label}</strong>
- *      <span icon></span>
- *   </span>
- * </label>
- */
+ *    <input type='checkbox'/>
+ *    <strong>{$options.label}</strong>
+ *    <span bar>
+ *        <span thumb></span>
+ *    </span>
+ * </label> */
 export default class WUPSwitchControl<
   TOptions extends WUP.Switch.Options = WUP.Switch.Options,
   EventMap extends WUP.Switch.EventMap = WUP.Switch.EventMap
@@ -70,15 +69,12 @@ export default class WUPSwitchControl<
       --ctrl-switch-h: var(--ctrl-icon-size);
       --ctrl-switch-w: calc(var(--ctrl-icon-size) * 2.8);
       --ctrl-switch-r: calc(var(--ctrl-icon-size) * 1.4);
-      --ctrl-switch-r-hover: calc(var(--ctrl-icon-size) * 2.2);
-      --ctrl-switch-hover: #0001;
      }
     [wupdark] {
       --ctrl-switch-on: #e7e7e7;
       --ctrl-switch-off: #e7e7e7;
       --ctrl-switch-off-bg: #707070;
       --ctrl-switch-shadow: #000;
-      --ctrl-switch-hover: #fff3;
     }`;
   }
 
@@ -92,6 +88,8 @@ export default class WUPSwitchControl<
         cursor: initial;
       }
       :host label {
+        display: flex;
+        gap: 0.5em;
         padding: var(--ctrl-switch-padding);
       }
       :host strong {
@@ -107,7 +105,6 @@ export default class WUPSwitchControl<
         display: inline-flex;
         align-items: center;
         overflow: visible;
-        margin-left: 0.5em;
         width: var(--ctrl-switch-w);
         min-width: var(--ctrl-switch-w);
         height: var(--ctrl-switch-h);
@@ -115,8 +112,8 @@ export default class WUPSwitchControl<
         color: whitesmoke;
         background: var(--ctrl-switch-off-bg);
       }
+      ${WUPCssIconHover(":host", "[thumb]")}
       :host [thumb] {
-        z-index: 2;
         display: inline-block;
         height: var(--ctrl-switch-r);
         width: var(--ctrl-switch-r);
@@ -124,23 +121,6 @@ export default class WUPSwitchControl<
         box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
         border-radius: 50%;
         transform: translateX(-1px);
-      }
-      :host [thumb]:before {
-        z-index: -1;
-        position: absolute;
-        transform: translate(-50%, -50%) translateZ(-1px);
-        left: 50%; top: 50%;
-        width: var(--ctrl-switch-r-hover);
-        height: var(--ctrl-switch-r-hover);
-        background: var(--ctrl-switch-hover);
-        border-radius: 50%;
-      }
-      :host:focus-within [thumb] {
-        position: relative;
-        transform-style: preserve-3d;
-      }
-      :host:focus-within [thumb]:before {
-        content: "";
       }
       :host input { ${WUPcssHidden} }
       :host[checked] [bar] {
@@ -153,26 +133,12 @@ export default class WUPSwitchControl<
       :host[w-reverse] label {
         flex-direction: row-reverse;
       }
-      :host[w-reverse] [bar] {
-        margin-left: 0;
-        margin-right: 0.5em;
-      }
       :host[w-reverse] strong {
         margin-right: auto;
       }
       @media not all and (prefers-reduced-motion) {
         :host [bar] { transition: background-color var(--anim); }
         :host [thumb] { transition: transform var(--anim); }
-      }
-      @media (hover: hover) and (pointer: fine) {
-        :host:hover [thumb] {
-          position: relative;
-          transform-style: preserve-3d;
-        }
-        :host:hover [thumb]:before {
-           content: "";
-           opacity: 0.8;
-        }
       }`;
   }
 
@@ -217,7 +183,7 @@ export default class WUPSwitchControl<
     this.$refLabel.appendChild(this.$refTitle);
     const sp = document.createElement("span");
     sp.setAttribute("bar", "");
-    sp.appendChild(document.createElement("span")).setAttribute("thumb", ""); // for icon
+    sp.appendChild(document.createElement("span")).setAttribute("thumb", "");
     this.$refLabel.appendChild(sp);
     this.appendChild(this.$refLabel);
   }

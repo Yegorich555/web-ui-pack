@@ -72,10 +72,8 @@ function last(arr: string[]) {
 
 function changeDarkMode(isDark: boolean): void {
   if (isDark) {
-    document.body.setAttribute("data-theme", "dark");
-    document.body.setAttribute("wupdark", ""); // attr wup-dark will be further
+    document.body.setAttribute("wupdark", ""); // attr wupdark will be further
   } else {
-    document.body.removeAttribute("data-theme");
     document.body.removeAttribute("wupdark");
   }
 }
