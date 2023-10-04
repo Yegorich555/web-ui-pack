@@ -317,8 +317,8 @@ export default abstract class WUPBaseControl<
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled] :host > *,
-      :host[disabled] > * {
+      [disabled] :host > label,
+      :host[disabled] > label {
         pointer-events: none;
       }
       :host label {
