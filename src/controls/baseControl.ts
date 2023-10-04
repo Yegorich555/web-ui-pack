@@ -271,6 +271,7 @@ export default abstract class WUPBaseControl<
         --ctrl-selected: #25a1b6;
         --ctrl-err: #ff6666;
         --ctrl-err-bg: black;
+        --ctrl-err-icon-valid: #54d754;
       }`;
     // NiceToHave: change icons to fonts: wupfont: in this case possible to improve btnClear: hover
   }

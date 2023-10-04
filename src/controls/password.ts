@@ -109,6 +109,7 @@ export default class WUPPasswordControl<
           ${"margin-bottom: -1px;" /* font Verdana affects on height */}
         }
         :host button[eye] {
+          cursor: pointer;
           margin-right: -0.5em;
           -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);

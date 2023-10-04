@@ -130,10 +130,14 @@ export default class WUPTimeControl<
         --ctrl-time-icon-img: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==');
         --ctrl-time-current: black;
         --ctrl-time-current-bg: #d9f7fd;
+        --ctrl-time-off: var(--ctrl-err);
+        --ctrl-time-off-bg: none;
       }
       [wupdark] {
         --ctrl-time-current: #25a1b6;
         --ctrl-time-current-bg: #fff1;
+        --ctrl-time-off: var(--ctrl-err);
+        --ctrl-time-off-bg: none;
       }`;
   }
 
@@ -219,9 +223,10 @@ export default class WUPTimeControl<
         opacity: 0;
       }
       :host > [menu] li[disabled] {
-        color: var(--ctrl-err);
-        --ctrl-focus: var(--ctrl-err);
-        //background-color: var(--ctrl-err-bg);
+        border-radius: 999px;
+        color: var(--ctrl-time-off);
+        --ctrl-focus: var(--ctrl-time-off);
+        background-color: var(--ctrl-time-off-bg);
       }
       :host [group] {
         display: flex;

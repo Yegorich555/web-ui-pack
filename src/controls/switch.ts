@@ -114,6 +114,7 @@ export default class WUPSwitchControl<
       }
       ${WUPCssIconHover(":host", "[thumb]")}
       :host [thumb] {
+        z-index: 2;
         display: inline-block;
         height: var(--ctrl-switch-r);
         width: var(--ctrl-switch-r);
