@@ -124,7 +124,10 @@ export default class WUPTextControl<
     return `:root {
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-     }`;
+     }
+     [wupdark] {
+        --ctrl-clear-hover: rgba(255,0,0,0.2);
+      }`;
   }
 
   static get $style(): string {

@@ -72,7 +72,14 @@ export default class WUPSwitchControl<
       --ctrl-switch-r: calc(var(--ctrl-icon-size) * 1.4);
       --ctrl-switch-r-hover: calc(var(--ctrl-icon-size) * 2.2);
       --ctrl-switch-hover: #0001;
-     }`;
+     }
+    [wupdark] {
+      --ctrl-switch-on: #e7e7e7;
+      --ctrl-switch-off: #e7e7e7;
+      --ctrl-switch-off-bg: #707070;
+      --ctrl-switch-shadow: #000;
+      --ctrl-switch-hover: #fff3;
+    }`;
   }
 
   static get $style(): string {
@@ -94,7 +101,7 @@ export default class WUPSwitchControl<
         white-space: nowrap;
         font-weight: normal;
         text-decoration: none;
-        color: var(--ctrl-label);
+        color: inherit;
       }
       :host [bar] {
         display: inline-flex;

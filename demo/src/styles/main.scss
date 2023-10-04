@@ -128,7 +128,7 @@ a {
 }
 
 body[data-theme="dark"] {
-  --basicTextColor: #ababab;
+  --basicTextColor: #bdbdbd;
   --basicTextColor2: #86aba6;
   --bodyBgColor: #161b24;
   --basicBgColor: #222a36;
@@ -149,25 +149,10 @@ body[data-theme="dark"] {
   // circle
   --circle-0: #104652;
   // common
-  --base-focus: #25a1b6;
-  --ctrl-focus: var(--base-focus);
-  --base-btn-focus: #25a1b6;
-  --ctrl-bg: none;
-  --ctrl-border: #104652;
-  --ctrl-label: #919191;
-  --ctrl-icon: #919191; // #86aba6;
-  --ctrl-focus-label: #25a1b6;
-  --ctrl-err: #ed8370; //#f72b08; //#ed8370 //#fff4fa;
-  --ctrl-err-bg: #161111; //#dc3545
-  --ctrl-clear-hover: rgba(255, 0, 0, 0.2);
-  --ctrl-err-icon-valid: #54d754;
-  // switch
-  --ctrl-switch-off: #d5d5d5;
-  --ctrl-switch-off-bg: #707070;
-  --ctrl-switch-on: #38b9d6;
-  --ctrl-switch-on-bg: #00778d;
-  --ctrl-switch-shadow: black;
-  --ctrl-switch-hover: #fff2;
+  // --ctrl-err: #ed8370; //#f72b08; //#ed8370 //#fff4fa;
+  // --ctrl-err-bg: #161111; //#dc3545
+  // --ctrl-err-icon-valid: #54d754;
+
   // todo need fix checkboxes
 
   // check

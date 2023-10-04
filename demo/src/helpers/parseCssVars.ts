@@ -95,6 +95,7 @@ export default function getUsedCssVars(scanEl: WUPBaseElement<any>): { own: CssV
   allProto.reverse().forEach((p) => {
     common.push(...getOwnStyles(p));
   });
+  // todo need split dark && root
   return { own, common };
 }
 

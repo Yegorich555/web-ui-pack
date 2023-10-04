@@ -159,8 +159,8 @@ Use css variables globally
 
 ```css
 body {
-  --base-focus: #00778d;
   --border-radius: 6px;
+  --ctrl-focus: #00778d;
   --ctrl-label: #5e5e5e;
   --ctrl-err: #ad0000;
   --ctrl-invalid-border: red;

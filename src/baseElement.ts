@@ -61,20 +61,19 @@ export default abstract class WUPBaseElement<
   /** StyleContent related to component & inherited components */
   static get $styleRoot(): string {
     return `:root {
-          --base-bg: #fff;
-          --base-text: #232323;
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
           --base-btn-text: #fff;
           --base-btn-focus: #005766;
           --base-btn2-bg: var(--base-btn-text);
           --base-btn2-text: var(--base-btn-bg);
-          --base-btn3-bg: var(--base-bg);
-          --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }
+        [wupdark] {
+          --base-btn-focus: #25a1b6;
         }`;
   }
 
