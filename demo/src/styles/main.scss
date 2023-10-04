@@ -149,6 +149,7 @@ body[wupdark] {
   // circle
   --circle-0: #104652;
   // common
+  // todo re-check popup[error], selectMany[item]:hover, btnClear
   // --ctrl-err: #ed8370; //#f72b08; //#ed8370 //#fff4fa;
   // --ctrl-err-bg: #161111; //#dc3545
   // --ctrl-err-icon-valid: #54d754;
@@ -157,4 +158,6 @@ body[wupdark] {
   // todo refactor radio bg/on/off to use without off
   // --ctrl-radio-bg: #ababab;
   // --ctrl-radio-off: var(--ctrl-radio-bg);
+
+  // --ctrl-select-item-del: #919191;
 }

@@ -99,6 +99,10 @@ export default class WUPSelectManyControl<
         --ctrl-select-item-del-img: var(--wup-icon-cross);
         --ctrl-select-item-del-size: 0.8em;
         --ctrl-select-gap: 6px;
+      }
+      [wupdark] {
+        --ctrl-select-item-bg: #fff2;
+        --ctrl-select-item-del: var(--ctrl-icon);
       }`;
   }
 
