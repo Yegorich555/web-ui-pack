@@ -106,6 +106,7 @@ export default function AppContainer() {
           ref={(el) => {
             if (el) {
               // NiceToHave: prevent toggle animation on init
+              el.$refInput.ariaLabel = "toggle between light and darkmode";
               el.$onChange = () => changeDarkMode(el.$value);
             }
           }}

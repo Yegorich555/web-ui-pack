@@ -174,8 +174,8 @@ ${parentTag}:focus-within ${iconTag}:before {
     position: relative;
   }
   ${parentTag}:hover ${iconTag}:before {
-      content: "";
-      opacity: 0.8;
+    content: "";
+    opacity: 0.8;
   }
 }`;
 }
