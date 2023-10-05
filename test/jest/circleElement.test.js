@@ -388,7 +388,7 @@ describe("circleElement", () => {
     await h.wait(300);
     expect(onTooltip).toBeCalledTimes(2);
     expect(el.querySelector("wup-popup").outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="background: red;">Me 24 &amp; 82.75862068965517 %</wup-popup>"`
+      `"<wup-popup tooltip="" style="background: red;">Me 24 &amp; 82.75862068965517 %</wup-popup>"`
     );
 
     // checking debounce timeouts
