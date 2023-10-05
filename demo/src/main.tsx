@@ -3,11 +3,10 @@ import "./styles/main.scss";
 import React, { useEffect } from "react";
 import ReactDom from "react-dom";
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from "react-router-dom";
-import { WUPHelpers } from "web-ui-pack";
+import { WUPHelpers, WUPSwitchControl } from "web-ui-pack";
 import { useBuiltinStyle, WUPcssButton, WUPcssScrollSmall } from "web-ui-pack/styles";
 import PopupView from "./components/popup/popupView";
 
-import iconGit from "./assets/gitIcon.svg";
 import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
 
@@ -29,6 +28,7 @@ import TimeControlView from "./components/controls/time";
 import NumberControlView from "./components/controls/number";
 import FAQView from "./components/FAQView";
 import SelectManyControlView from "./components/controls/selectMany";
+import MyLink from "./elements/myLink";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -68,6 +68,27 @@ function last(arr: string[]) {
   return arr[arr.length - 1];
 }
 
+!WUPSwitchControl && console.error("!");
+
+declare global {
+  interface Window {
+    onDarkModeChanged?: (isDark: boolean) => void;
+    isDark?: boolean;
+  }
+}
+
+function changeDarkMode(isDark: boolean): void {
+  if (isDark) {
+    document.body.setAttribute("wupdark", ""); // attr wupdark will be further
+  } else {
+    document.body.removeAttribute("wupdark");
+  }
+  window.isDark = isDark;
+  window.onDarkModeChanged?.call(window, isDark);
+}
+// WARN: init darkMode required because $onChange triggers only after some timeout and blink visible on the screen
+changeDarkMode(!!localStorage.getItem("darkmode"));
+
 export default function AppContainer() {
   const navigate = useNavigate();
 
@@ -83,11 +104,22 @@ export default function AppContainer() {
   return (
     <>
       <h1>
-        <img src={imgLogo} alt="logo" />
-        web-ui-pack
-        <a href="https://github.com/Yegorich555/web-ui-pack" target="_blank" rel="noreferrer" aria-label="Go to github">
-          <img src={iconGit} alt="github" />
-        </a>
+        <div />
+        <MyLink href="https://github.com/Yegorich555/web-ui-pack" className={styles.headerLink} gitIcon>
+          <img src={imgLogo} alt="logo" />
+          web-ui-pack
+        </MyLink>
+        <wup-switch
+          class={styles.darkMode}
+          w-storageKey="darkmode"
+          ref={(el) => {
+            if (el) {
+              // NiceToHave: prevent toggle animation on init
+              el.$refInput.ariaLabel = "toggle between light and darkmode";
+              el.$onChange = () => changeDarkMode(el.$value);
+            }
+          }}
+        />
       </h1>
       <div className={styles.page}>
         <nav className={`${styles.leftBar} scrolled`}>

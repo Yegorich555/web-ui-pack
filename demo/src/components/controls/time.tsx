@@ -1,9 +1,11 @@
 import Page from "src/elements/page";
 import { WUPTimeControl, WUPTimeObject } from "web-ui-pack";
+import stylesCom from "./controls.scss";
 
 const sideEffect = WUPTimeControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
 (window as any).myTimeValidations = { required: true } as WUP.Time.Options["validations"];
+(window as any).myTimeValidations2 = { required: false } as WUP.Time.Options["validations"];
 (window as any).myTimeExclude = { test: (v: WUPTimeObject) => v.hours === 12 && v.minutes === 48 };
 
 export default function TimeControlView() {
@@ -42,19 +44,20 @@ export default function TimeControlView() {
           w-min="02:30"
           w-max="23:50"
           w-exclude="window.myTimeExclude"
-          w-validations="window.myTimeValidations"
+          w-validations="window.myTimeValidations2"
         />
+        <div className={stylesCom.group}>
+          <wup-time w-name="readonly" readonly w-initValue="02:43" />
+          <wup-time w-name="disabled" disabled w-initValue="02:43" />
+          <wup-date w-name="required" w-validations="window.myTimeValidations" />
+        </div>
         <wup-time
           w-label="Without buttons (see $options.menuButtonsOff)"
           w-name="customized"
           w-min="02:30"
           w-max="22:50"
           w-exclude="window.myTimeExclude"
-          ref={(el) => {
-            if (el) {
-              el.$options.menuButtonsOff = true;
-            }
-          }}
+          w-menuButtonsOff
         />
         <wup-time
           w-label="Menu in 3 rows (see demo source code)"
@@ -75,12 +78,10 @@ export default function TimeControlView() {
             }
           }}
         />
-        <wup-time w-name="another" w-label="Another format: h-m (options format)" w-format="h-m" />
-        <wup-time w-name="disabled" disabled />
-        <wup-time w-name="readonly" readonly />
+        <wup-time w-name="another" w-label="Another format: h-m ($options.format)" w-format="h-m" />
         <wup-time //
           w-name="saveUrlTime"
-          w-label="With saving to URL (see $options.storageKey & storage)"
+          w-label="With saving to URL ($options.storageKey & storage)"
           w-storageKey
           w-storage="url"
         />

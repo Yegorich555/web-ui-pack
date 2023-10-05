@@ -1,3 +1,4 @@
+import { WUPCssIconHover, WUPcssIcon } from "../styles";
 import WUPSwitchControl from "./switch";
 
 const tagName = "wup-check";
@@ -34,71 +35,58 @@ declare global {
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
- *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
- *      <input/>
- *      <strong>{$options.label}</strong>
- *      <span></span> // this icon
- *   </span>
- * </label>
- */
+ *    <input type='checkbox'/>
+ *    <strong>{$options.label}</strong>
+ *    <span icon></span>
+ * </label> */
 export default class WUPCheckControl<
   TOptions extends WUP.Check.Options = WUP.Check.Options,
   EventMap extends WUP.Check.EventMap = WUP.Check.EventMap
 > extends WUPSwitchControl<TOptions, EventMap> {
-  // #ctr = this.constructor as typeof WUPCheckControl;
+  #ctr = this.constructor as typeof WUPCheckControl;
 
   static get $styleRoot(): string {
     return `:root {
         --ctrl-check-off-bg: #fff;
         --ctrl-check-on-bg: var(--ctrl-focus);
         --ctrl-check-on: #fff;
-        --ctrl-check-radius: 3px;
+        --ctrl-check-border-r: 3px;
         --ctrl-check-shadow: #0003;
-        --ctrl-check-size: calc(var(--ctrl-icon-size) * 1.2);
+        --ctrl-check-size: 16px;
+      }
+      [wupdark] {
+        --ctrl-check-off-bg: #e7e7e7;
+        --ctrl-check-shadow: #000;
       }`;
   }
 
   static get $style(): string {
     return `${super.$style}
-      :host label>span {
+       ${WUPCssIconHover(":host", "[icon]")}
+      :host [icon] {
         position: initial;
         height: var(--ctrl-check-size);
         width: var(--ctrl-check-size);
         min-width: var(--ctrl-check-size);
-        border-radius: var(--ctrl-check-radius);
+        border-radius: var(--ctrl-check-border-r);
         background: var(--ctrl-check-off-bg);
         box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);
       }
-      :host label>span:before {
-        content: none;
-      }
-      :host input:checked + * + * {
+      :host[checked] [icon] {
         background: var(--ctrl-check-on-bg);
       }
-      :host input:checked + * + *:before {
+      :host[checked] [icon]:after {
+        --ctrl-icon: var(--ctrl-check-on);
+        --ctrl-icon-img: var(--wup-icon-check);
+        ${WUPcssIcon}
         content: "";
-        position: initial;
         top: 0; left: 0;
+        padding: 0;
         border-radius: 0;
-        box-shadow: none;
-        display: block;
         height: 100%; width: 100%;
-        transform: scale(0.8);
-
-        background: var(--ctrl-check-on);
-        -webkit-mask-image: var(--wup-icon-check);
-        mask-image: var(--wup-icon-check);
-        -webkit-mask-size: contain;
-        mask-size: contain;
-        -webkit-mask-repeat: no-repeat;
-        mask-repeat: no-repeat;
-        -webkit-mask-position: center;
-        mask-position: center;
       }
-      @media (hover: hover) and (pointer: fine) {
-        :host:hover label>span {
-          box-shadow: 0 0 4px 0 var(--ctrl-focus);
-        }
+      @media not all and (prefers-reduced-motion) {
+        :host [icon] { transition: background-color var(--anim); }
       }`;
   }
 
@@ -106,6 +94,17 @@ export default class WUPCheckControl<
     ...WUPSwitchControl.$defaults,
     // WARN: it's shared =>  validationRules: { ...WUPSwitchControl.$defaults.validationRules },
   };
+
+  protected override renderControl(): void {
+    this.$refInput.id = this.#ctr.$uniqueId;
+    this.$refLabel.setAttribute("for", this.$refInput.id);
+
+    this.$refInput.type = "checkbox";
+    this.$refLabel.appendChild(this.$refInput);
+    this.$refLabel.appendChild(this.$refTitle);
+    this.$refLabel.appendChild(document.createElement("span")).setAttribute("icon", "");
+    this.appendChild(this.$refLabel);
+  }
 }
 
 customElements.define(tagName, WUPCheckControl);

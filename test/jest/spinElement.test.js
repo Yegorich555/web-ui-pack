@@ -86,20 +86,25 @@ describe("spinElement", () => {
       clip:rect(1px,1px,1px,1px);
       min-width:initial;
       padding:0;}:root {
-                --base-bg: #fff;
-                --base-text: #232323;
                 --base-focus: #00778d;
                 --base-btn-bg: #009fbc;
                 --base-btn-text: #fff;
                 --base-btn-focus: #005766;
                 --base-btn2-bg: var(--base-btn-text);
                 --base-btn2-text: var(--base-btn-bg);
-                --base-btn3-bg: var(--base-bg);
+                --base-btn3-bg: none;
                 --base-btn3-text: inherit;
                 --base-sep: #e4e4e4;
                 --border-radius: 6px;
                 --anim-time: 200ms;
                 --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+                --icon-hover-r: 30px;
+                --icon-hover: #0001;
+              }
+              [wupdark] {
+                --base-btn-focus: #bdbdbd;
+                --base-sep: #141414;
+                --icon-hover: #fff3;
               }:root {
                 --spin-1: #ffa500;
                 --spin-2: #fff;
@@ -141,7 +146,7 @@ describe("spinElement", () => {
                z-index: -1;
                background: var(--spin-fade);
             }
-            WUP-SPIN>div[fade]::after { content: none; }
+            WUP-SPIN>div[fade]:after { content: none; }
             WUP-SPIN>div {
               border: var(--spin-item-size) solid var(--spin-1);
               border-top-color: var(--spin-2);
@@ -329,7 +334,7 @@ describe("spinElement", () => {
                z-index: -1;
                background: var(--spin-fade);
             }
-            SPIN-A>div[fade]::after { content: none; }
+            SPIN-A>div[fade]:after { content: none; }
             :root { --spin-2: transparent; }
              SPIN-A>div {
                border: var(--spin-item-size) solid;
@@ -385,7 +390,7 @@ describe("spinElement", () => {
                z-index: -1;
                background: var(--spin-fade);
             }
-            SPIN-B>div[fade]::after { content: none; }
+            SPIN-B>div[fade]:after { content: none; }
             @keyframes WUP-SPIN-2-2 {
                 0% { transform: translate(-50%, -50%) rotate(360deg); }
                 100% { transform: translate(-50%, -50%) rotate(0deg); }
@@ -459,7 +464,7 @@ describe("spinElement", () => {
                z-index: -1;
                background: var(--spin-fade);
             }
-            SPIN-C>div[fade]::after { content: none; }
+            SPIN-C>div[fade]:after { content: none; }
             SPIN-C { position: relative; }
                   SPIN-C>div {
                     animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
@@ -521,14 +526,14 @@ describe("spinElement", () => {
                z-index: -1;
                background: var(--spin-fade);
             }
-            SPIN-D>div[fade]::after { content: none; }
+            SPIN-D>div[fade]:after { content: none; }
             :root { --spin-step: 24deg; }
                   SPIN-D { position: relative; }
                   SPIN-D>div {
                     animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
                     position: absolute;
                   }
-                  SPIN-D>div::after {
+                  SPIN-D>div:after {
                     content: " ";
                     display: block;
                     position: absolute;
@@ -541,19 +546,19 @@ describe("spinElement", () => {
                     background: var(--spin-1);
                   }
                   SPIN-D>div:nth-child(1) { animation-delay: -0.036s; }
-                  SPIN-D>div:nth-child(1)::after { transform: rotate(calc(45deg + var(--spin-step) * 0)); }
+                  SPIN-D>div:nth-child(1):after { transform: rotate(calc(45deg + var(--spin-step) * 0)); }
                   SPIN-D>div:nth-child(2) { animation-delay: -0.072s; }
-                  SPIN-D>div:nth-child(2)::after { transform: rotate(calc(45deg + var(--spin-step) * 1)); }
+                  SPIN-D>div:nth-child(2):after { transform: rotate(calc(45deg + var(--spin-step) * 1)); }
                   SPIN-D>div:nth-child(3) { animation-delay: -0.10799999999999998s; }
-                  SPIN-D>div:nth-child(3)::after { transform: rotate(calc(45deg + var(--spin-step) * 2)); }
+                  SPIN-D>div:nth-child(3):after { transform: rotate(calc(45deg + var(--spin-step) * 2)); }
                   SPIN-D>div:nth-child(4) { animation-delay: -0.144s; }
-                  SPIN-D>div:nth-child(4)::after { transform: rotate(calc(45deg + var(--spin-step) * 3)); }
+                  SPIN-D>div:nth-child(4):after { transform: rotate(calc(45deg + var(--spin-step) * 3)); }
                   SPIN-D>div:nth-child(5) { animation-delay: -0.18s; }
-                  SPIN-D>div:nth-child(5)::after { transform: rotate(calc(45deg + var(--spin-step) * 4)); }
+                  SPIN-D>div:nth-child(5):after { transform: rotate(calc(45deg + var(--spin-step) * 4)); }
                   SPIN-D>div:nth-child(6) { animation-delay: -0.21599999999999997s; }
-                  SPIN-D>div:nth-child(6)::after { transform: rotate(calc(45deg + var(--spin-step) * 5)); }
+                  SPIN-D>div:nth-child(6):after { transform: rotate(calc(45deg + var(--spin-step) * 5)); }
                   SPIN-D>div:nth-child(7) { animation-delay: -0.252s; }
-                  SPIN-D>div:nth-child(7)::after { transform: rotate(calc(45deg + var(--spin-step) * 6)); }
+                  SPIN-D>div:nth-child(7):after { transform: rotate(calc(45deg + var(--spin-step) * 6)); }
                   </style>"
     `);
   });
@@ -605,7 +610,7 @@ describe("spinElement", () => {
                z-index: -1;
                background: var(--spin-fade);
             }
-            SPIN-E>div[fade]::after { content: none; }
+            SPIN-E>div[fade]:after { content: none; }
             @keyframes WUP-SPIN-2 {
                     0%,20%,80%,100% { transform: scale(1); background: var(--spin-1) }
                     50% { transform: scale(1.4); background: var(--spin-2) }
@@ -619,7 +624,7 @@ describe("spinElement", () => {
                     animation: none;
                     top:50%; left:50%;
                   }
-                  SPIN-E>div::after {
+                  SPIN-E>div:after {
                     animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
                     content: " ";
                     display: block;
@@ -628,25 +633,25 @@ describe("spinElement", () => {
                     border-radius: 50%;
                     background: var(--spin-1);
                   }
-                  SPIN-E>div:nth-child(1)::after { animation-delay: 0s; }
+                  SPIN-E>div:nth-child(1):after { animation-delay: 0s; }
                   SPIN-E>div:nth-child(1) { transform: translate(-50%,-50%) rotate(0deg) }
-                  SPIN-E>div:nth-child(2)::after { animation-delay: 0.1s; }
+                  SPIN-E>div:nth-child(2):after { animation-delay: 0.1s; }
                   SPIN-E>div:nth-child(2) { transform: translate(-50%,-50%) rotate(36deg) }
-                  SPIN-E>div:nth-child(3)::after { animation-delay: 0.2s; }
+                  SPIN-E>div:nth-child(3):after { animation-delay: 0.2s; }
                   SPIN-E>div:nth-child(3) { transform: translate(-50%,-50%) rotate(72deg) }
-                  SPIN-E>div:nth-child(4)::after { animation-delay: 0.30000000000000004s; }
+                  SPIN-E>div:nth-child(4):after { animation-delay: 0.30000000000000004s; }
                   SPIN-E>div:nth-child(4) { transform: translate(-50%,-50%) rotate(108deg) }
-                  SPIN-E>div:nth-child(5)::after { animation-delay: 0.4s; }
+                  SPIN-E>div:nth-child(5):after { animation-delay: 0.4s; }
                   SPIN-E>div:nth-child(5) { transform: translate(-50%,-50%) rotate(144deg) }
-                  SPIN-E>div:nth-child(6)::after { animation-delay: 0.5s; }
+                  SPIN-E>div:nth-child(6):after { animation-delay: 0.5s; }
                   SPIN-E>div:nth-child(6) { transform: translate(-50%,-50%) rotate(180deg) }
-                  SPIN-E>div:nth-child(7)::after { animation-delay: 0.6000000000000001s; }
+                  SPIN-E>div:nth-child(7):after { animation-delay: 0.6000000000000001s; }
                   SPIN-E>div:nth-child(7) { transform: translate(-50%,-50%) rotate(216deg) }
-                  SPIN-E>div:nth-child(8)::after { animation-delay: 0.7000000000000001s; }
+                  SPIN-E>div:nth-child(8):after { animation-delay: 0.7000000000000001s; }
                   SPIN-E>div:nth-child(8) { transform: translate(-50%,-50%) rotate(252deg) }
-                  SPIN-E>div:nth-child(9)::after { animation-delay: 0.8s; }
+                  SPIN-E>div:nth-child(9):after { animation-delay: 0.8s; }
                   SPIN-E>div:nth-child(9) { transform: translate(-50%,-50%) rotate(288deg) }
-                  SPIN-E>div:nth-child(10)::after { animation-delay: 0.9s; }
+                  SPIN-E>div:nth-child(10):after { animation-delay: 0.9s; }
                   SPIN-E>div:nth-child(10) { transform: translate(-50%,-50%) rotate(324deg) }
                   </style>"
     `);
@@ -699,7 +704,7 @@ describe("spinElement", () => {
                z-index: -1;
                background: var(--spin-fade);
             }
-            SPIN-F>div[fade]::after { content: none; }
+            SPIN-F>div[fade]:after { content: none; }
             @keyframes WUP-SPIN-3 {
                     100% { opacity: 0; background: var(--spin-2); }
                   }
@@ -815,7 +820,7 @@ describe("spinElement", () => {
                z-index: -1;
                background: var(--spin-fade);
             }
-            SPIN-G>div[fade]::after { content: none; }
+            SPIN-G>div[fade]:after { content: none; }
             @keyframes WUP-SPIN-4-1 {
                   0% {
                     width: var(--spin-item-size);

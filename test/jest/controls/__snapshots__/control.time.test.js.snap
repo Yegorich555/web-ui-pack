@@ -241,33 +241,39 @@ clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
   :root {
-          --base-bg: #fff;
-          --base-text: #232323;
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
           --base-btn-text: #fff;
           --base-btn-focus: #005766;
           --base-btn2-bg: var(--base-btn-text);
           --base-btn2-text: var(--base-btn-bg);
-          --base-btn3-bg: var(--base-bg);
+          --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --icon-hover-r: 30px;
+          --icon-hover: #0001;
+        }
+        [wupdark] {
+          --base-btn-focus: #bdbdbd;
+          --base-sep: #141414;
+          --icon-hover: #fff3;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
         --ctrl-focus: var(--base-focus);
-        --ctrl-focus-label: var(--base-focus);
-        --ctrl-selected: var(--ctrl-focus-label);
+        --ctrl-focus-label: var(--ctrl-focus);
+        --ctrl-selected: var(--ctrl-focus);
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl-bg: var(--base-bg);
+        --ctrl: inherit;
+        --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
-        --ctrl-err-text: #ad0000;
+        --ctrl-err: #ad0000;
         --ctrl-err-bg: #fff4fa;
         --ctrl-err-icon-valid: green;
         --ctrl-invalid-border: red;
@@ -276,23 +282,47 @@ padding:0;}
         --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
         --wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
       }
+      [wupdark] {
+        --ctrl-bg: none;
+        --ctrl-border: #104652;
+        --ctrl-label: #919191;
+        --ctrl-icon: var(--ctrl-label);
+        --ctrl-focus-label: #25a1b6;
+        --ctrl-selected: #25a1b6;
+        --ctrl-err: #ff6666;
+        --ctrl-err-bg: #000;
+        --ctrl-err-icon-valid: #54d754;
+      }
   :root {
+      --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
      }
+     [wupdark] {
+        --ctrl-clear-hover: rgba(255,0,0,0.2);
+      }
   :root {
         --ctrl-time-icon-img-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
         --ctrl-time-icon-img: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==');
-        --ctrl-time-current: var(--base-text);
+        --ctrl-time-current: #000;
         --ctrl-time-current-bg: #d9f7fd;
+        --ctrl-time-off: var(--ctrl-err);
+        --ctrl-time-off-bg: none;
+      }
+      [wupdark] {
+        --ctrl-time-current: #25a1b6;
+        --ctrl-time-current-bg: #fff1;
+        --ctrl-time-off: var(--ctrl-err);
+        --ctrl-time-off-bg: none;
       }
   
       WUP-TIME {
         --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
-        margin-bottom: 20px;
+        margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
+        color: var(--ctrl);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -324,8 +354,8 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled] WUP-TIME &gt; *,
-      WUP-TIME[disabled] &gt; * {
+      [disabled] WUP-TIME &gt; label,
+      WUP-TIME[disabled] &gt; label {
         pointer-events: none;
       }
       WUP-TIME label {
@@ -366,10 +396,11 @@ padding:0;}
       WUP-TIME [error] {
         cursor: pointer;
         font-size: small;
-        color: var(--ctrl-err-text);
+        color: var(--ctrl-err);
         background: var(--ctrl-err-bg);
         overflow: auto;
         overflow: overlay;
+        // text-shadow: 0 0 0 var(--ctrl-err);
       }
       WUP-TIME [error] ul {
         margin:0; padding:2px 4px 2px;
@@ -382,7 +413,7 @@ padding:0;}
       WUP-TIME [error] li:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         
 display: inline-block;
 width: var(--ctrl-icon-size);
@@ -416,6 +447,10 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
+        WUP-TIME:hover strong,
+        WUP-TIME[hovered] strong{
+          color: var(--ctrl-focus-label);
+        }
         WUP-TIME:hover,
         WUP-TIME:hover&gt;[menu],
         WUP-TIME[hovered],
@@ -461,7 +496,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TIME [prefix],
         WUP-TIME [postfix] {
-          color: var(--ctrl-label);
+          color: inherit;
           flex-shrink: 0;
         }
         WUP-TIME [maskholder],
@@ -519,8 +554,8 @@ mask-image: var(--ctrl-icon-img);
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-TIME input:not(:focus)::placeholder,
-        WUP-TIME textarea:not(:focus)::placeholder {
+        WUP-TIME input:not(:focus):placeholder,
+        WUP-TIME textarea:not(:focus):placeholder {
           color: transparent;
         }
         WUP-TIME:focus-within strong,
@@ -589,8 +624,8 @@ mask-image: var(--ctrl-icon-img);
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
           background: none;
-          mask: none;
           -webkit-mask: none;
+          mask: none;
         }
         WUP-TIME:focus-within button[clear] {
           display: block;
@@ -622,7 +657,7 @@ mask-image: var(--ctrl-icon-img);
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           WUP-TIME button[clear]:hover:after {
-            background: var(--ctrl-err-text);
+            background: var(--ctrl-clear);
           }
         }
         WUP-TIME[disabled] button[clear],
@@ -640,13 +675,13 @@ mask-image: var(--ctrl-icon-img);
       WUP-TIME input:read-only {
         cursor: pointer;
       }
-      WUP-TIME label::after {
+      WUP-TIME label:after {
         content: "";
         -webkit-mask-image: var(--ctrl-icon-img);
         mask-image: var(--ctrl-icon-img);
       }
       @media not all and (prefers-reduced-motion) {
-        WUP-TIME label::after {
+        WUP-TIME label:after {
           transition: transform var(--anim);
         }
       }
@@ -665,7 +700,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-TIME &gt; [menu] {
         overflow: hidden;
       }
-      WUP-TIME &gt; [menu]&gt;div:first-child {
+      WUP-TIME &gt; [menu] &gt; div:first-child {
         position: relative;
       }
       WUP-TIME &gt; [menu] ul {
@@ -736,17 +771,16 @@ mask-image: var(--ctrl-icon-img);
         opacity: 0;
       }
       WUP-TIME &gt; [menu] li[disabled] {
-        color: var(--ctrl-err-text);
-        --ctrl-focus: var(--ctrl-err-text);
-        //background-color: var(--ctrl-err-bg);
+        border-radius: 999px;
+        color: var(--ctrl-time-off);
+        --ctrl-focus: var(--ctrl-time-off);
+        background-color: var(--ctrl-time-off-bg);
       }
-      WUP-TIME &gt; [menu] [group] {
+      WUP-TIME [group] {
         display: flex;
-        gap: 1px;
-        padding-top: 1px;
-        background: var(--base-sep);
+        border-top: 1px solid var(--base-sep);
       }
-      WUP-TIME &gt; [menu] button {
+      WUP-TIME [group] &gt; button {
         cursor: pointer;
         flex: 1 1 50%;
         display: inline-flex;
@@ -758,17 +792,18 @@ mask-image: var(--ctrl-icon-img);
         padding: 0; margin: 0;
         background: var(--base-btn3-bg);
       }
-      WUP-TIME &gt; [menu] button:first-child {
+      WUP-TIME [group] &gt; button:first-child {
         --ctrl-icon-img: var(--wup-icon-check);
         --ctrl-icon: var(--ctrl-err-icon-valid);
         border-bottom-left-radius: var(--border-radius);
+        border-right: 1px solid var(--base-sep);
       }
-      WUP-TIME &gt; [menu] button:last-child {
+      WUP-TIME [group] &gt; button:last-child {
         --ctrl-icon-img: var(--wup-icon-cross);
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         border-bottom-right-radius: var(--border-radius);
       }
-      WUP-TIME &gt; [menu] button:after {
+      WUP-TIME [group] &gt; button:after {
         
 display: inline-block;
 width: var(--ctrl-icon-size);
@@ -811,11 +846,11 @@ mask-image: var(--ctrl-icon-img);
     
         }
         WUP-TIME &gt; [menu] button:hover {
-          box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
+          box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
         }
       }
       WUP-TIME &gt; [menu] button[disabled] {
-         box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 5%);
+         box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
          cursor: not-allowed;
          --ctrl-icon: inherit;
       }

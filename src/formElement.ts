@@ -170,8 +170,13 @@ export default class WUPFormElement<
 
   static get $styleRoot(): string {
     return `:root {
+      --btn-submit: var(--base-btn-text);
       --btn-submit-bg: var(--base-btn-bg);
-      --btn-submit-text: var(--base-btn-text);
+      --btn-submit-focus: var(--base-btn-focus);
+    }
+    [wupdark] {
+      --btn-submit: var(--base-btn-text);
+      --btn-submit-bg: var(--base-btn-bg);
       --btn-submit-focus: var(--base-btn-focus);
     }`;
   }
@@ -184,7 +189,12 @@ export default class WUPFormElement<
           max-width: 500px;
           margin: auto;
         }
-        ${WUPcssButton(":host [type='submit']")}`;
+        ${WUPcssButton(":host button[type=submit]")}
+        :host button[type=submit] {
+          --base-btn-text: var(--btn-submit);
+          --base-btn-bg: var(--btn-submit-bg);
+          --base-btn-focus: var(--btn-submit-focus);
+        }`;
   }
 
   static get mappedAttributes(): Record<string, AttributeMap> {

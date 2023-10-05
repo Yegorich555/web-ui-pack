@@ -99,6 +99,10 @@ export default class WUPSelectManyControl<
         --ctrl-select-item-del-img: var(--wup-icon-cross);
         --ctrl-select-item-del-size: 0.8em;
         --ctrl-select-gap: 6px;
+      }
+      [wupdark] {
+        --ctrl-select-item-bg: #fff2;
+        --ctrl-select-item-del: var(--ctrl-icon);
       }`;
   }
 
@@ -159,9 +163,9 @@ export default class WUPSelectManyControl<
       }
       :host [item][removed],
       :host [item][drag][remove]  {
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         text-decoration: line-through;
-        color: var(--ctrl-err-text);
+        color: var(--ctrl-err);
         background-color: var(--ctrl-err-bg);
       }
       :host[readonly] [item] {
@@ -170,9 +174,9 @@ export default class WUPSelectManyControl<
       }
       @media (hover: hover) and (pointer: fine) {
         :host [item]:hover {
-          --ctrl-icon: var(--ctrl-err-text);
+          --ctrl-icon: var(--ctrl-err);
           text-decoration: line-through;
-          color: var(--ctrl-err-text);
+          color: var(--ctrl-err);
           background-color: var(--ctrl-err-bg);
         }
       }

@@ -14,6 +14,7 @@ exports[`control.radio $ariaDetails 1`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         autocomplete="off"
         id="txt2"
@@ -21,45 +22,48 @@ exports[`control.radio $ariaDetails 1`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
 </wup-radio>
@@ -74,6 +78,7 @@ exports[`control.radio $ariaDetails 2`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         autocomplete="off"
         id="txt2"
@@ -81,45 +86,48 @@ exports[`control.radio $ariaDetails 2`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
 </wup-radio>
@@ -134,6 +142,7 @@ exports[`control.radio $ariaSpeak 1`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         aria-describedby="my-test-id txt6 my-test-id2"
         autocomplete="off"
@@ -142,45 +151,48 @@ exports[`control.radio $ariaSpeak 1`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
   <section
@@ -203,6 +215,7 @@ exports[`control.radio $ariaSpeak 2`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         aria-describedby="my-test-id my-test-id2"
         autocomplete="off"
@@ -211,45 +224,48 @@ exports[`control.radio $ariaSpeak 2`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
 </wup-radio>
@@ -264,6 +280,7 @@ exports[`control.radio $show/$hide error 1`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         autocomplete="off"
         id="txt2"
@@ -271,45 +288,48 @@ exports[`control.radio $show/$hide error 1`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
 </wup-radio>
@@ -328,6 +348,7 @@ exports[`control.radio $show/$hide error 2`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         autocomplete="off"
         id="txt2"
@@ -335,45 +356,48 @@ exports[`control.radio $show/$hide error 2`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
   <wup-popup
@@ -403,6 +427,7 @@ exports[`control.radio $show/$hide error 3`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         autocomplete="off"
         id="txt2"
@@ -410,45 +435,48 @@ exports[`control.radio $show/$hide error 3`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
 </wup-radio>
@@ -470,6 +498,7 @@ exports[`control.radio base options readonly 1`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         autocomplete="off"
         id="txt2"
@@ -478,48 +507,51 @@ exports[`control.radio base options readonly 1`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         readonly=""
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         readonly=""
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         readonly=""
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
 </wup-radio>
@@ -534,6 +566,7 @@ exports[`control.radio base options readonly 2`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         autocomplete="off"
         id="txt2"
@@ -541,45 +574,48 @@ exports[`control.radio base options readonly 2`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
 </wup-radio>
@@ -597,33 +633,39 @@ clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
   :root {
-          --base-bg: #fff;
-          --base-text: #232323;
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
           --base-btn-text: #fff;
           --base-btn-focus: #005766;
           --base-btn2-bg: var(--base-btn-text);
           --base-btn2-text: var(--base-btn-bg);
-          --base-btn3-bg: var(--base-bg);
+          --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --icon-hover-r: 30px;
+          --icon-hover: #0001;
+        }
+        [wupdark] {
+          --base-btn-focus: #bdbdbd;
+          --base-sep: #141414;
+          --icon-hover: #fff3;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
         --ctrl-focus: var(--base-focus);
-        --ctrl-focus-label: var(--base-focus);
-        --ctrl-selected: var(--ctrl-focus-label);
+        --ctrl-focus-label: var(--ctrl-focus);
+        --ctrl-selected: var(--ctrl-focus);
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl-bg: var(--base-bg);
+        --ctrl: inherit;
+        --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
-        --ctrl-err-text: #ad0000;
+        --ctrl-err: #ad0000;
         --ctrl-err-bg: #fff4fa;
         --ctrl-err-icon-valid: green;
         --ctrl-invalid-border: red;
@@ -632,24 +674,38 @@ padding:0;}
         --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
         --wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
       }
+      [wupdark] {
+        --ctrl-bg: none;
+        --ctrl-border: #104652;
+        --ctrl-label: #919191;
+        --ctrl-icon: var(--ctrl-label);
+        --ctrl-focus-label: #25a1b6;
+        --ctrl-selected: #25a1b6;
+        --ctrl-err: #ff6666;
+        --ctrl-err-bg: #000;
+        --ctrl-err-icon-valid: #54d754;
+      }
   :root {
-      --ctrl-radio-size: 1em;
-      --ctrl-radio-spot-size: calc(var(--ctrl-radio-size) * 0.5);
-      --ctrl-radio-bg: #fff;
-      --ctrl-radio-off: #fff;
-      --ctrl-radio-on: var(--ctrl-focus);
-      --ctrl-radio-border: #0003;
-      --ctrl-radio-border-size: 2px;
+      --ctrl-radio-item-r: 14px;
+      --ctrl-radio-item-r-on: 8px;
+      --ctrl-radio-item-bg: none;
+      --ctrl-radio-item-on: var(--ctrl-focus);
+      --ctrl-radio-item-border: #0003;
+      --ctrl-radio-item-border-w: 2px;
       --ctrl-radio-gap: 7px;
      }
+     [wupdark] {
+        --ctrl-radio-item-border: var(--ctrl-label);
+      }
   
       WUP-RADIO {
         --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
-        margin-bottom: 20px;
+        margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
+        color: var(--ctrl);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -681,8 +737,8 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled] WUP-RADIO &gt; *,
-      WUP-RADIO[disabled] &gt; * {
+      [disabled] WUP-RADIO &gt; label,
+      WUP-RADIO[disabled] &gt; label {
         pointer-events: none;
       }
       WUP-RADIO label {
@@ -723,10 +779,11 @@ padding:0;}
       WUP-RADIO [error] {
         cursor: pointer;
         font-size: small;
-        color: var(--ctrl-err-text);
+        color: var(--ctrl-err);
         background: var(--ctrl-err-bg);
         overflow: auto;
         overflow: overlay;
+        // text-shadow: 0 0 0 var(--ctrl-err);
       }
       WUP-RADIO [error] ul {
         margin:0; padding:2px 4px 2px;
@@ -739,7 +796,7 @@ padding:0;}
       WUP-RADIO [error] li:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         
 display: inline-block;
 width: var(--ctrl-icon-size);
@@ -773,6 +830,10 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
+        WUP-RADIO:hover strong,
+        WUP-RADIO[hovered] strong{
+          color: var(--ctrl-focus-label);
+        }
         WUP-RADIO:hover,
         WUP-RADIO:hover&gt;[menu],
         WUP-RADIO[hovered],
@@ -811,7 +872,11 @@ mask-image: var(--ctrl-icon-img);
         font: inherit;
       }
       WUP-RADIO label {
-        padding: 0;
+        padding: var(--ctrl-radio-gap);
+        gap: var(--ctrl-radio-gap);
+      }
+      WUP-RADIO[w-reverse] label {
+        flex-direction: row-reverse;
       }
       WUP-RADIO input {
 position: absolute;
@@ -820,57 +885,53 @@ overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
-      WUP-RADIO input + span {
-        padding: var(--ctrl-radio-gap);
-        display: inline-flex;
-        align-items: center;
-      }
       WUP-RADIO[readonly],
       WUP-RADIO[readonly] legend,
       WUP-RADIO[readonly] label {
          cursor: default;
       }
-      WUP-RADIO input + span:after {
-        content: "";
-        width: var(--ctrl-radio-size);
-        height: var(--ctrl-radio-size);
-        border: calc((var(--ctrl-radio-size) - var(--ctrl-radio-spot-size)) / 2) solid var(--ctrl-radio-bg);
+      WUP-RADIO [icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--ctrl-radio-item-r);
+        height: var(--ctrl-radio-item-r);
         box-sizing: border-box;
-        background: var(--ctrl-radio-off);
-        box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-radio-border);
+        background: var(--ctrl-radio-item-bg);
+        box-shadow: 0 0 1px var(--ctrl-radio-item-border-w) var(--ctrl-radio-item-border);
         border-radius: 50%;
-        margin-left: 0.5em;
       }
-      WUP-RADIO fieldset[aria-required="true"] input + span:after {
+      WUP-RADIO [icon]:after {
         content: "";
-      }
-      WUP-RADIO[w-reverse] input + span {
-        flex-direction: row-reverse;
-      }
-      WUP-RADIO[w-reverse] input + span:after {
-        margin-left: 0;
-        margin-right: 0.5em;
-      }
-      WUP-RADIO input:checked + span:after {
-        background-color: var(--ctrl-radio-on);
+        display: inline-block;
+        width: var(--ctrl-radio-item-r-on);
+        height: var(--ctrl-radio-item-r-on);
+        border-radius: 50%;
+        transition: background-color var(--anim);
+       }
+      WUP-RADIO input:checked + [icon]:after {
+        background: var(--ctrl-radio-item-on);
       }
       @media not all and (prefers-reduced-motion) {
-        WUP-RADIO input + span:after {
+        WUP-RADIO label {
+          transition: color var(--anim);
+        }
+        WUP-RADIO [icon] {
           transition: background-color var(--anim);
         }
       }
-      WUP-RADIO input:focus + span {
+      WUP-RADIO label:focus-within {
         color: var(--ctrl-selected);
       }
-      WUP-RADIO input:focus + span:after {
-         box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
+      WUP-RADIO label:focus-within [icon] {
+        --ctrl-radio-item-border: var(--ctrl-selected);
       }
       @media (hover: hover) and (pointer: fine) {
-        WUP-RADIO input + span:hover {
+        WUP-RADIO label:hover {
           color: var(--ctrl-selected);
         }
-        WUP-RADIO input + span:hover:after {
-          box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
+        WUP-RADIO label:hover [icon] {
+          --ctrl-radio-item-border: var(--ctrl-selected);
         }
       }
      
@@ -945,6 +1006,7 @@ exports[`control.radio validations $options.validationShowAll 1`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         aria-required="true"
         autocomplete="off"
@@ -953,45 +1015,48 @@ exports[`control.radio validations $options.validationShowAll 1`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
   <wup-popup
@@ -1025,6 +1090,7 @@ exports[`control.radio validations $options.validationShowAll 2`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         aria-required="true"
         autocomplete="off"
@@ -1033,45 +1099,48 @@ exports[`control.radio validations $options.validationShowAll 2`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
 </wup-radio>
@@ -1094,6 +1163,7 @@ exports[`control.radio validations $options.validationShowAll 3`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         aria-required="true"
         autocomplete="off"
@@ -1102,45 +1172,48 @@ exports[`control.radio validations $options.validationShowAll 3`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
   <wup-popup
@@ -1172,6 +1245,7 @@ exports[`control.radio validations options.validationCase 1`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         autocomplete="off"
         id="txt2"
@@ -1179,45 +1253,48 @@ exports[`control.radio validations options.validationCase 1`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
 </wup-radio>
@@ -1240,6 +1317,7 @@ exports[`control.radio validations options.validationCase 2`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         aria-required="true"
         autocomplete="off"
@@ -1248,45 +1326,48 @@ exports[`control.radio validations options.validationCase 2`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
   <wup-popup
@@ -1326,6 +1407,7 @@ exports[`control.radio validations options.validationCase 3`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         aria-required="true"
         autocomplete="off"
@@ -1334,45 +1416,48 @@ exports[`control.radio validations options.validationCase 3`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
   <wup-popup
@@ -1411,6 +1496,7 @@ exports[`control.radio validations options.validationCase 4`] = `
     <label
       for="txt2"
     >
+      Donny
       <input
         aria-required="true"
         autocomplete="off"
@@ -1419,45 +1505,48 @@ exports[`control.radio validations options.validationCase 4`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt3"
     >
+      Mikky
       <input
         id="txt3"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt4"
     >
+      Leo
       <input
         id="txt4"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt5"
     >
+      Splinter
       <input
         id="txt5"
         name="txt1473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
   <wup-popup
@@ -1494,6 +1583,7 @@ exports[`control.radio with form 1`] = `
       <label
         for="txt7"
       >
+        Donny
         <input
           autocomplete="off"
           id="txt7"
@@ -1501,45 +1591,48 @@ exports[`control.radio with form 1`] = `
           tabindex="0"
           type="radio"
         />
-        <span>
-          Donny
-        </span>
+        <span
+          icon=""
+        />
       </label>
       <label
         for="txt8"
       >
+        Mikky
         <input
           id="txt8"
           name="txt6473"
           type="radio"
         />
-        <span>
-          Mikky
-        </span>
+        <span
+          icon=""
+        />
       </label>
       <label
         for="txt9"
       >
+        Leo
         <input
           id="txt9"
           name="txt6473"
           type="radio"
         />
-        <span>
-          Leo
-        </span>
+        <span
+          icon=""
+        />
       </label>
       <label
         for="txt10"
       >
+        Splinter
         <input
           id="txt10"
           name="txt6473"
           type="radio"
         />
-        <span>
-          Splinter
-        </span>
+        <span
+          icon=""
+        />
       </label>
     </fieldset>
   </wup-radio>
@@ -1566,6 +1659,7 @@ exports[`control.radio with form 2`] = `
     <label
       for="txt7"
     >
+      Donny
       <input
         autocomplete="off"
         id="txt7"
@@ -1574,48 +1668,51 @@ exports[`control.radio with form 2`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt8"
     >
+      Mikky
       <input
         id="txt8"
         name="txt6473"
         readonly=""
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt9"
     >
+      Leo
       <input
         id="txt9"
         name="txt6473"
         readonly=""
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt10"
     >
+      Splinter
       <input
         id="txt10"
         name="txt6473"
         readonly=""
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
 </wup-radio>
@@ -1636,6 +1733,7 @@ exports[`control.radio with form 3`] = `
     <label
       for="txt7"
     >
+      Donny
       <input
         autocomplete="off"
         id="txt7"
@@ -1643,45 +1741,48 @@ exports[`control.radio with form 3`] = `
         tabindex="0"
         type="radio"
       />
-      <span>
-        Donny
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt8"
     >
+      Mikky
       <input
         id="txt8"
         name="txt6473"
         type="radio"
       />
-      <span>
-        Mikky
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt9"
     >
+      Leo
       <input
         id="txt9"
         name="txt6473"
         type="radio"
       />
-      <span>
-        Leo
-      </span>
+      <span
+        icon=""
+      />
     </label>
     <label
       for="txt10"
     >
+      Splinter
       <input
         id="txt10"
         name="txt6473"
         type="radio"
       />
-      <span>
-        Splinter
-      </span>
+      <span
+        icon=""
+      />
     </label>
   </fieldset>
 </wup-radio>

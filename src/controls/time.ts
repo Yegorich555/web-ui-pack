@@ -128,8 +128,16 @@ export default class WUPTimeControl<
     return `:root {
         --ctrl-time-icon-img-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
         --ctrl-time-icon-img: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==');
-        --ctrl-time-current: var(--base-text);
+        --ctrl-time-current: #000;
         --ctrl-time-current-bg: #d9f7fd;
+        --ctrl-time-off: var(--ctrl-err);
+        --ctrl-time-off-bg: none;
+      }
+      [wupdark] {
+        --ctrl-time-current: #25a1b6;
+        --ctrl-time-current-bg: #fff1;
+        --ctrl-time-off: var(--ctrl-err);
+        --ctrl-time-off-bg: none;
       }`;
   }
 
@@ -155,7 +163,7 @@ export default class WUPTimeControl<
       :host > [menu] {
         overflow: hidden;
       }
-      :host > [menu]>div:first-child {
+      :host > [menu] > div:first-child {
         position: relative;
       }
       :host > [menu] ul {
@@ -215,17 +223,16 @@ export default class WUPTimeControl<
         opacity: 0;
       }
       :host > [menu] li[disabled] {
-        color: var(--ctrl-err-text);
-        --ctrl-focus: var(--ctrl-err-text);
-        //background-color: var(--ctrl-err-bg);
+        border-radius: 999px;
+        color: var(--ctrl-time-off);
+        --ctrl-focus: var(--ctrl-time-off);
+        background-color: var(--ctrl-time-off-bg);
       }
-      :host > [menu] [group] {
+      :host [group] {
         display: flex;
-        gap: 1px;
-        padding-top: 1px;
-        background: var(--base-sep);
+        border-top: 1px solid var(--base-sep);
       }
-      :host > [menu] button {
+      :host [group] > button {
         cursor: pointer;
         flex: 1 1 50%;
         display: inline-flex;
@@ -237,17 +244,18 @@ export default class WUPTimeControl<
         padding: 0; margin: 0;
         background: var(--base-btn3-bg);
       }
-      :host > [menu] button:first-child {
+      :host [group] > button:first-child {
         --ctrl-icon-img: var(--wup-icon-check);
         --ctrl-icon: var(--ctrl-err-icon-valid);
         border-bottom-left-radius: var(--border-radius);
+        border-right: 1px solid var(--base-sep);
       }
-      :host > [menu] button:last-child {
+      :host [group] > button:last-child {
         --ctrl-icon-img: var(--wup-icon-cross);
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         border-bottom-right-radius: var(--border-radius);
       }
-      :host > [menu] button:after {
+      :host [group] > button:after {
         ${WUPcssIcon}
         content: "";
         padding:0;
@@ -260,11 +268,11 @@ export default class WUPTimeControl<
          ${focusStyle}
         }
         :host > [menu] button:hover {
-          box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 10%);
+          box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
         }
       }
       :host > [menu] button[disabled] {
-         box-shadow: inset 0 0 0 99999px rgb(0 0 0 / 5%);
+         box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
          cursor: not-allowed;
          --ctrl-icon: inherit;
       }`;

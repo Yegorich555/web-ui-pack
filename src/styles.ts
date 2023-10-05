@@ -142,6 +142,44 @@ ${tag} li[focused] {
 }`;
 }
 
+/** Add hover & focus style on pointed item (via :before) */
+export function WUPCssIconHover(
+  parentTag: string,
+  iconTag: string,
+  hoverSize = "var(--icon-hover-r, 2.4em)",
+  hoverColor = "var(--icon-hover, #0001)"
+): string {
+  return `
+${parentTag} ${iconTag} {
+    transform-style: preserve-3d;
+  }
+${parentTag} ${iconTag}:before {
+  z-index: -1;
+  position: absolute;
+  transform: translate(-50%, -50%) translateZ(-1px);
+  left: 50%; top: 50%;
+  width: ${hoverSize};
+  height: ${hoverSize};
+  background: ${hoverColor};
+  border-radius: 50%;
+}
+${parentTag}:focus-within ${iconTag} {
+  position: relative;
+}
+${parentTag}:focus-within ${iconTag}:before {
+  content: "";
+}
+@media (hover: hover) and (pointer: fine) {
+  ${parentTag}:hover ${iconTag} {
+    position: relative;
+  }
+  ${parentTag}:hover ${iconTag}:before {
+    content: "";
+    opacity: 0.8;
+  }
+}`;
+}
+
 let refStyle: HTMLStyleElement | undefined;
 /** Use this function to prepend css-style via JS into document.head */
 export function useBuiltinStyle(cssString: string): HTMLStyleElement {

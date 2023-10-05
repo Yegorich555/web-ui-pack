@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPTextControl } from "web-ui-pack";
+import stylesCom from "./controls.scss";
 import styles from "./text.scss";
 
 const sideEffect = WUPTextControl;
@@ -33,7 +34,7 @@ export default function TextControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$initModel = { email: "test@google.com", required: "yes" };
+            el.$initModel = { email: "test@google.com" };
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
@@ -49,7 +50,27 @@ export default function TextControlView() {
           w-prefix=""
           w-postfix=""
         />
-        <wup-text w-name="required" w-validations="myTextValidations2" />
+        <div className={stylesCom.group}>
+          <wup-text
+            w-initValue="init value here"
+            w-name="readonly"
+            ref={(el) => {
+              if (el) {
+                el.$options.readOnly = true;
+              }
+            }}
+          />
+          <wup-text
+            w-name="disabled"
+            w-initValue="init value here"
+            ref={(el) => {
+              if (el) {
+                el.$options.disabled = true;
+              }
+            }}
+          />
+          <wup-text w-name="required" w-validations="myTextValidations2" />
+        </div>
         <wup-text
           ref={(el) => {
             if (el) {
@@ -91,16 +112,6 @@ export default function TextControlView() {
           w-postfix=" USD"
           w-initValue="1234"
         />
-        <wup-text
-          w-initValue="init value here"
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "readonly";
-              el.$options.readOnly = true;
-            }
-          }}
-        />
-        <wup-text w-name="disabled" disabled />
         <wup-text //
           w-name="saveUrl"
           w-label="With saving to URL (see $options.storageKey & storage)"
@@ -109,7 +120,6 @@ export default function TextControlView() {
         />
         <section>
           <h3>Masked inputs</h3>
-          <br />
           <wup-text
             w-name="phone"
             w-label="Phone number"
@@ -146,11 +156,13 @@ export default function TextControlView() {
           <ul>
             <li>
               Formats example:
-              <br /> $options.mask=<b>"+0 (000) 000-0000"</b> - for phone number
-              <br /> $options.mask=<b>"##0.##0.##0.##0"</b> - for IP address
-              <br /> $options.mask=<b>"*{"{1,5}"}"</b> - any 1..5 chars
-              <br /> $options.mask=<b>"//[a-zA-Z]//{"{1,5}"}"</b> - regex /[a-zA-Z]/: 1..5 letters
-              <br /> where <b>#</b> - optional digit, <b>0</b> - required digit, <b>*</b> - any char
+              <br /> $options.mask=<b className={styles.text2}>"+0 (000) 000-0000"</b> - for phone number
+              <br /> $options.mask=<b className={styles.text2}>"##0.##0.##0.##0"</b> - for IP address
+              <br /> $options.mask=<b className={styles.text2}>"*{"{1,5}"}"</b> - any 1..5 chars
+              <br /> $options.mask=<b className={styles.text2}>"//[a-zA-Z]//{"{1,5}"}"</b> - regex /[a-zA-Z]/: 1..5
+              letters
+              <br /> where <b className={styles.text2}>#</b> - optional digit, <b className={styles.text2}>0</b> -
+              required digit, <b className={styles.text2}>*</b> - any char
             </li>
             <li>prediction: all static chars append automatically</li>
             <li>lazy: type next separator on press Space to fill rest required digits with zeros</li>
@@ -158,7 +170,8 @@ export default function TextControlView() {
             <li>shows typed declined chars (so user can see that keyboard works) and rollback after 100ms</li>
             <li>possible to delete/append chars in the middle of text</li>
             <li>
-              enables <b>validations.mask</b> by default with message <b>Incomplete value</b>
+              enables <b className={styles.text2}>validations.mask</b> by default with message{" "}
+              <b style={{ color: "#ff5f5f", opacity: 0.8 }}>Incomplete value</b>
             </li>
             <li>usage details see during the coding (via jsdoc)</li>
           </ul>

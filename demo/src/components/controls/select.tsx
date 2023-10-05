@@ -3,6 +3,7 @@ import Page from "src/elements/page";
 import { WUPSelectControl, WUPSpinElement } from "web-ui-pack";
 import { ClearActions } from "web-ui-pack/controls/baseControl";
 import { spinUseDualRing } from "web-ui-pack/spinElement";
+import stylesCom from "./controls.scss";
 
 const sideEffect = WUPSelectControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -35,9 +36,8 @@ const items = [
   initArr: [items[0].value, items[1].value],
 };
 
-(window as any)._someSelectValidations = {
-  required: true,
-} as WUP.Select.Options["validations"];
+(window as any)._someSelectValidations = { required: true } as WUP.Select.Options["validations"];
+(window as any)._someSelectValidations2 = { required: false } as WUP.Select.Options["validations"];
 
 class WUPSpinSelElement extends WUPSpinElement {}
 spinUseDualRing(WUPSpinSelElement);
@@ -83,6 +83,25 @@ export default function SelectControlView() {
           w-initValue={items[items.length - 3].value.toString()}
           w-multiple={false}
         />
+        <div className={stylesCom.group}>
+          <wup-select
+            w-name="readonly"
+            readonly
+            w-items="window.inputSelect.items"
+            w-initValue={items[2].value.toString()}
+          />
+          <wup-select
+            w-name="disabled"
+            disabled
+            w-items="window.inputSelect.items"
+            w-initValue={items[2].value.toString()}
+          />
+          <wup-select
+            w-name="required"
+            w-items="window.inputSelect.items"
+            w-validations="window._someSelectValidations"
+          />
+        </div>
         <wup-select
           w-name="multiple"
           w-initValue="window.inputSelect.initArr"
@@ -135,34 +154,6 @@ export default function SelectControlView() {
                 el.$options.items = items;
                 el.$value = items[items.length - 3].value;
               }, 10);
-            }
-          }}
-        />
-        <wup-select
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "disabled";
-              el.$options.items = items;
-              el.$options.disabled = true;
-            }
-          }}
-        />
-        <wup-select
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "readonly";
-              el.$options.items = items;
-              el.$options.readOnly = true;
-            }
-          }}
-        />
-        <wup-select
-          w-initValue="13"
-          ref={(el) => {
-            if (el) {
-              el.$options.name = "withoutClearButton";
-              el.$options.items = items;
-              el.$options.clearButton = false;
             }
           }}
         />

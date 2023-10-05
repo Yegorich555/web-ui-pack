@@ -157,8 +157,22 @@ export default class WUPPopupElement<
     return `
       :root {
         --popup-anim: 300ms;
-        --popup-bg: white;
-      }`;
+        --popup: inherit;
+        --popup-bg: #fff;
+        --popup-shadow: #0003;
+        --tooltip: inherit;
+        --tooltip-bg: #fff8;
+        --tooltip-shadow: #0003;
+      }
+      [wupdark] {
+        --popup: #d8d8d8;
+        --popup-bg: #2b3645;
+        --popup-shadow: #0006;
+        --tooltip: #d8d8d8;
+        --tooltip-bg: rgba(16,70,82,0.8);
+        --tooltip-shadow: #0006;
+      }
+      `;
   }
 
   static get $style(): string {
@@ -172,9 +186,16 @@ export default class WUPPopupElement<
         overflow: auto;
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
-        box-shadow: 0 1px 4px 0 #00000033;
+        box-shadow: 0 1px 4px 0 var(--popup-shadow);
+        color: var(--popup);
         background: var(--popup-bg);
         text-overflow: ellipsis;
+      }
+      :host[tooltip],
+      :host[tooltip]+:host-arrow {
+        --popup: var(--tooltip);
+        --popup-bg: var(--tooltip-bg);
+        --popup-shadow: var(--tooltip-shadow);
       }
       @media not all and (prefers-reduced-motion) {
         :host,
@@ -333,14 +354,14 @@ export default class WUPPopupElement<
    * @tutorial rules
    * * can be prevented via e.preventDefault()
    * * use event.detail.showCase to filter by showCase */
-  $onWillShow?: (e: CustomEvent) => void;
+  $onWillShow?: (e: CustomEvent<{ showCase: HideCases }>) => void;
   /** Fires after popup is shown (after animation finishes) */
   $onShow?: (e: Event) => void;
   /** Fires before hide is happened;
    * @tutorial rules
    * * can be prevented via e.preventDefault()
    * * use event.detail.hideCase to filter by hideCase */
-  $onWillHide?: (e: CustomEvent) => void;
+  $onWillHide?: (e: CustomEvent<{ hideCase: HideCases }>) => void;
   /** Fires after popup is hidden (after animation finishes) */
   $onHide?: (e: Event) => void;
 
@@ -1104,3 +1125,4 @@ customElements.define(tagName, WUPPopupElement);
 
 // NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore
 // NiceToHave 2 popups can oveflow each other: need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors
+// NiceToHave animation.default animates to opacity: 1 but need to animate to opacityFromCss

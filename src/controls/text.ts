@@ -122,8 +122,12 @@ export default class WUPTextControl<
 
   static get $styleRoot(): string {
     return `:root {
+      --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-     }`;
+     }
+     [wupdark] {
+        --ctrl-clear-hover: rgba(255,0,0,0.2);
+      }`;
   }
 
   static get $style(): string {
@@ -166,7 +170,7 @@ export default class WUPTextControl<
         }
         :host [prefix],
         :host [postfix] {
-          color: var(--ctrl-label);
+          color: inherit;
           flex-shrink: 0;
         }
         :host [maskholder],
@@ -224,8 +228,8 @@ export default class WUPTextControl<
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        :host input:not(:focus)::placeholder,
-        :host textarea:not(:focus)::placeholder {
+        :host input:not(:focus):placeholder,
+        :host textarea:not(:focus):placeholder {
           color: transparent;
         }
         :host:focus-within strong,
@@ -275,8 +279,8 @@ export default class WUPTextControl<
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
           background: none;
-          mask: none;
           -webkit-mask: none;
+          mask: none;
         }
         :host:focus-within button[clear] {
           display: block;
@@ -308,7 +312,7 @@ export default class WUPTextControl<
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           :host button[clear]:hover:after {
-            background: var(--ctrl-err-text);
+            background: var(--ctrl-clear);
           }
         }
         :host[disabled] button[clear],
@@ -377,7 +381,7 @@ export default class WUPTextControl<
   }
 
   protected override renderControl(): void {
-    (this.$refInput as HTMLInputElement).type = "text";
+    (this.$refInput as HTMLInputElement).type = "text"; // todo set type 'email' when validation email is set
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
@@ -467,6 +471,7 @@ export default class WUPTextControl<
       this._refHistory = this._refHistory ?? new TextHistory(this.$refInput);
     }
 
+    // todo browser autofill can fire input without focus: need listen for input event every time
     const r = this.appendEvent(this.$refInput, "input", (e) => {
       // (e as WUP.Text.GotInputEvent).setValuePrevented = false;
       // (e as WUP.Text.GotInputEvent).preventSetValue = () => ((e as WUP.Text.GotInputEvent).setValuePrevented = true);
@@ -754,3 +759,5 @@ export default class WUPTextControl<
 customElements.define(tagName, WUPTextControl);
 // todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
+
+// todo display of btnClear changes control size

@@ -18,7 +18,7 @@
 
       &:hover,
       &:focus {
-        box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 0 4px 1px var(--section-shadow-color, rgba(0, 0, 0, 0.1));
         border-color: var(--base-btn-focus);
       }
 

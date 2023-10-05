@@ -213,33 +213,39 @@ clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
   :root {
-          --base-bg: #fff;
-          --base-text: #232323;
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
           --base-btn-text: #fff;
           --base-btn-focus: #005766;
           --base-btn2-bg: var(--base-btn-text);
           --base-btn2-text: var(--base-btn-bg);
-          --base-btn3-bg: var(--base-bg);
+          --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --icon-hover-r: 30px;
+          --icon-hover: #0001;
+        }
+        [wupdark] {
+          --base-btn-focus: #bdbdbd;
+          --base-sep: #141414;
+          --icon-hover: #fff3;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
         --ctrl-focus: var(--base-focus);
-        --ctrl-focus-label: var(--base-focus);
-        --ctrl-selected: var(--ctrl-focus-label);
+        --ctrl-focus-label: var(--ctrl-focus);
+        --ctrl-selected: var(--ctrl-focus);
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl-bg: var(--base-bg);
+        --ctrl: inherit;
+        --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
-        --ctrl-err-text: #ad0000;
+        --ctrl-err: #ad0000;
         --ctrl-err-bg: #fff4fa;
         --ctrl-err-icon-valid: green;
         --ctrl-invalid-border: red;
@@ -248,17 +254,33 @@ padding:0;}
         --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
         --wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
       }
+      [wupdark] {
+        --ctrl-bg: none;
+        --ctrl-border: #104652;
+        --ctrl-label: #919191;
+        --ctrl-icon: var(--ctrl-label);
+        --ctrl-focus-label: #25a1b6;
+        --ctrl-selected: #25a1b6;
+        --ctrl-err: #ff6666;
+        --ctrl-err-bg: #000;
+        --ctrl-err-icon-valid: #54d754;
+      }
   :root {
+      --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
      }
+     [wupdark] {
+        --ctrl-clear-hover: rgba(255,0,0,0.2);
+      }
   
       WUP-TEXT {
         --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
-        margin-bottom: 20px;
+        margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
+        color: var(--ctrl);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -290,8 +312,8 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled] WUP-TEXT &gt; *,
-      WUP-TEXT[disabled] &gt; * {
+      [disabled] WUP-TEXT &gt; label,
+      WUP-TEXT[disabled] &gt; label {
         pointer-events: none;
       }
       WUP-TEXT label {
@@ -332,10 +354,11 @@ padding:0;}
       WUP-TEXT [error] {
         cursor: pointer;
         font-size: small;
-        color: var(--ctrl-err-text);
+        color: var(--ctrl-err);
         background: var(--ctrl-err-bg);
         overflow: auto;
         overflow: overlay;
+        // text-shadow: 0 0 0 var(--ctrl-err);
       }
       WUP-TEXT [error] ul {
         margin:0; padding:2px 4px 2px;
@@ -348,7 +371,7 @@ padding:0;}
       WUP-TEXT [error] li:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         
 display: inline-block;
 width: var(--ctrl-icon-size);
@@ -382,6 +405,10 @@ mask-image: var(--ctrl-icon-img);
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
+        WUP-TEXT:hover strong,
+        WUP-TEXT[hovered] strong{
+          color: var(--ctrl-focus-label);
+        }
         WUP-TEXT:hover,
         WUP-TEXT:hover&gt;[menu],
         WUP-TEXT[hovered],
@@ -427,7 +454,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-TEXT [prefix],
         WUP-TEXT [postfix] {
-          color: var(--ctrl-label);
+          color: inherit;
           flex-shrink: 0;
         }
         WUP-TEXT [maskholder],
@@ -485,8 +512,8 @@ mask-image: var(--ctrl-icon-img);
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-TEXT input:not(:focus)::placeholder,
-        WUP-TEXT textarea:not(:focus)::placeholder {
+        WUP-TEXT input:not(:focus):placeholder,
+        WUP-TEXT textarea:not(:focus):placeholder {
           color: transparent;
         }
         WUP-TEXT:focus-within strong,
@@ -555,8 +582,8 @@ mask-image: var(--ctrl-icon-img);
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
           background: none;
-          mask: none;
           -webkit-mask: none;
+          mask: none;
         }
         WUP-TEXT:focus-within button[clear] {
           display: block;
@@ -588,7 +615,7 @@ mask-image: var(--ctrl-icon-img);
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           WUP-TEXT button[clear]:hover:after {
-            background: var(--ctrl-err-text);
+            background: var(--ctrl-clear);
           }
         }
         WUP-TEXT[disabled] button[clear],

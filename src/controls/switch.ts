@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { WUPcssHidden } from "../styles";
+import { WUPCssIconHover, WUPcssHidden } from "../styles";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-switch";
@@ -46,13 +46,12 @@ declare global {
   </wup-form>;
  * @tutorial innerHTML @example
  * <label>
- *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
- *      <input/>
- *      <strong>{$options.label}</strong>
- *      <span></span> // this icon
- *   </span>
- * </label>
- */
+ *    <input type='checkbox'/>
+ *    <strong>{$options.label}</strong>
+ *    <span bar>
+ *        <span thumb></span>
+ *    </span>
+ * </label> */
 export default class WUPSwitchControl<
   TOptions extends WUP.Switch.Options = WUP.Switch.Options,
   EventMap extends WUP.Switch.EventMap = WUP.Switch.EventMap
@@ -64,13 +63,19 @@ export default class WUPSwitchControl<
       --ctrl-switch-padding: 1em;
       --ctrl-switch-on: #fff;
       --ctrl-switch-off: #fff;
-      --ctrl-switch-shadow: #0003;
       --ctrl-switch-off-bg: #9f9f9f;
       --ctrl-switch-on-bg: var(--ctrl-focus);
-      --ctrl-switch-size-h: var(--ctrl-icon-size);
-      --ctrl-switch-size-w: calc(var(--ctrl-switch-size-spot) * 2);
-      --ctrl-switch-size-spot: calc(var(--ctrl-switch-size-h) * 1.4);
-     }`;
+      --ctrl-switch-shadow: #0003;
+      --ctrl-switch-h: var(--ctrl-icon-size);
+      --ctrl-switch-w: calc(var(--ctrl-icon-size) * 2.8);
+      --ctrl-switch-r: calc(var(--ctrl-icon-size) * 1.4);
+     }
+    [wupdark] {
+      --ctrl-switch-on: #e7e7e7;
+      --ctrl-switch-off: #e7e7e7;
+      --ctrl-switch-off-bg: #707070;
+      --ctrl-switch-shadow: #000;
+    }`;
   }
 
   static get $style(): string {
@@ -83,6 +88,8 @@ export default class WUPSwitchControl<
         cursor: initial;
       }
       :host label {
+        display: flex;
+        gap: 0.5em;
         padding: var(--ctrl-switch-padding);
       }
       :host strong {
@@ -92,54 +99,47 @@ export default class WUPSwitchControl<
         white-space: nowrap;
         font-weight: normal;
         text-decoration: none;
-        color: var(--ctrl-label);
+        color: inherit;
       }
-      :host label>span {
-        margin-left: 0.5em;
-        position: relative;
-        width: var(--ctrl-switch-size-w);
-        min-width: var(--ctrl-switch-size-w);
-        height: var(--ctrl-switch-size-h);
+      :host [bar] {
+        display: inline-flex;
+        align-items: center;
+        overflow: visible;
+        width: var(--ctrl-switch-w);
+        min-width: var(--ctrl-switch-w);
+        height: var(--ctrl-switch-h);
         border-radius: 999px;
+        color: whitesmoke;
         background: var(--ctrl-switch-off-bg);
       }
-      :host label>span:before {
-        content: "";
-        position: absolute;
-        height: var(--ctrl-switch-size-spot);
-        width: var(--ctrl-switch-size-spot);
-        left: -1px; top: 50%;
-        transform: translateY(-50%);
+      ${WUPCssIconHover(":host", "[thumb]")}
+      :host [thumb] {
+        z-index: 2;
+        display: inline-block;
+        height: var(--ctrl-switch-r);
+        width: var(--ctrl-switch-r);
         background: var(--ctrl-switch-off);
         box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
         border-radius: 50%;
+        transform: translateX(-1px);
       }
       :host input { ${WUPcssHidden} }
-      :host input:checked + * + * {
+      :host[checked] [bar] {
         background-color: var(--ctrl-switch-on-bg);
       }
-      :host input:checked + * + *:before {
+      :host[checked] [thumb] {
         background: var(--ctrl-switch-on);
-        left: calc(100% - var(--ctrl-switch-size-w) + var(--ctrl-switch-size-spot) + 1px);
+        transform: translateX(var(--ctrl-switch-w)) translateX(calc(-100% + 1px));
       }
       :host[w-reverse] label {
         flex-direction: row-reverse;
       }
-      :host[w-reverse] label>span {
-        margin-left: 0;
-        margin-right: 0.5em;
-      }
-      :host[w-reverse] label>strong {
+      :host[w-reverse] strong {
         margin-right: auto;
       }
       @media not all and (prefers-reduced-motion) {
-        :host label>span { transition: background-color var(--anim); }
-        :host label>span:before { transition: left var(--anim); }
-      }
-      @media (hover: hover) and (pointer: fine) {
-        :host:hover label>span:before {
-           box-shadow: 0 0 4px 0 var(--ctrl-focus);
-        }
+        :host [bar] { transition: background-color var(--anim); }
+        :host [thumb] { transition: transform var(--anim); }
       }`;
   }
 
@@ -182,13 +182,16 @@ export default class WUPSwitchControl<
     this.$refInput.type = "checkbox";
     this.$refLabel.appendChild(this.$refInput);
     this.$refLabel.appendChild(this.$refTitle);
-    this.$refLabel.appendChild(document.createElement("span")); // for icon
+    const sp = document.createElement("span");
+    sp.setAttribute("bar", "");
+    sp.appendChild(document.createElement("span")).setAttribute("thumb", "");
+    this.$refLabel.appendChild(sp);
     this.appendChild(this.$refLabel);
   }
 
   protected override gotReady(): void {
     super.gotReady();
-    this.appendEvent(this.$refInput, "input", (e) => this.gotInput(e));
+    this.$refInput.oninput = (e) => this.gotInput(e);
   }
 
   /** Called when user changes value via click or keyboard */
@@ -204,6 +207,7 @@ export default class WUPSwitchControl<
   protected override setValue(v: boolean, reason: SetValueReasons): boolean | null {
     const r = super.setValue(v, reason);
     this.$refInput.checked = !!v;
+    this.setAttr("checked", this.$refInput.checked, true);
     return r;
   }
 

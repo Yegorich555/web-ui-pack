@@ -27,8 +27,8 @@ export default function movable(refEl: HTMLElement): (x: number, y: number) => v
   const el = refEl as unknown as HTMLElement & { posX: number; posY: number };
   el.posX = 0;
   el.posY = 0;
+  el.setAttribute("movable", "");
   el.style.outline = "none";
-  el.style.background = "red";
   el.style.cursor = "grab";
   el.addEventListener("mousedown", () => {
     isDown = true;

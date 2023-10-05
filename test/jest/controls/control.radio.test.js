@@ -65,7 +65,7 @@ describe("control.radio", () => {
     expect(el.$refItems.length).toBe(1);
     expect(el.querySelectorAll("input").length).toBe(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for="txt13"><input id="txt13" type="radio" name="txt12473" tabindex="0" autocomplete="off"><span>Don</span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for="txt13">Don<input id="txt13" type="radio" name="txt12473" tabindex="0" autocomplete="off"><span icon=""></span></label></fieldset>"`
     );
 
     el.$options.items = [
@@ -78,7 +78,7 @@ describe("control.radio", () => {
     ];
     jest.advanceTimersByTime(1);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for="txt15"><input id="txt15" type="radio" name="txt14473" tabindex="0" autocomplete="off"><span>testVal123_0</span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for="txt15">testVal123_0<input id="txt15" type="radio" name="txt14473" tabindex="0" autocomplete="off"><span icon=""></span></label></fieldset>"`
     );
 
     const prev = el.$options.items;
@@ -101,7 +101,7 @@ describe("control.radio", () => {
     jest.advanceTimersByTime(2);
     expect(onErr).not.toBeCalled();
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for="txt7"><input id="txt7" type="radio" name="txt6473" tabindex="0" autocomplete="off"><span>Helica</span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for="txt7">Helica<input id="txt7" type="radio" name="txt6473" tabindex="0" autocomplete="off"><span icon=""></span></label></fieldset>"`
     );
     // after ready
     el.$options.items = [{ text: "Harry", value: 11 }];
@@ -109,7 +109,7 @@ describe("control.radio", () => {
     jest.advanceTimersByTime(2);
     expect(onErr).not.toBeCalled();
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for="txt9"><input id="txt9" type="radio" name="txt8473" tabindex="0" autocomplete="off"><span>Harry</span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for="txt9">Harry<input id="txt9" type="radio" name="txt8473" tabindex="0" autocomplete="off"><span icon=""></span></label></fieldset>"`
     );
 
     const item = { text: "Helica", value: 5 };
@@ -128,7 +128,7 @@ describe("control.radio", () => {
     el.$value = { id: 2 };
     jest.advanceTimersByTime(2);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for="txt13"><input id="txt13" type="radio" name="txt12473" tabindex="0"><span>Helica</span></label><label for="txt14"><input id="txt14" type="radio" name="txt12473"><span>Diana</span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for="txt13">Helica<input id="txt13" type="radio" name="txt12473" tabindex="0"><span icon=""></span></label><label for="txt14">Diana<input id="txt14" type="radio" name="txt12473"><span icon=""></span></label></fieldset>"`
     );
   });
 
@@ -297,52 +297,56 @@ describe("control.radio", () => {
               <label
                 for="txt7"
               >
+                Donny
                 <input
                   id="txt7"
                   name="txt6473"
                   tabindex="0"
                   type="radio"
                 />
-                <span>
-                  Donny
-                </span>
+                <span
+                  icon=""
+                />
               </label>
               <label
                 for="txt8"
               >
+                Mikky
                 <input
                   autocomplete="off"
                   id="txt8"
                   name="txt6473"
                   type="radio"
                 />
-                <span>
-                  Mikky
-                </span>
+                <span
+                  icon=""
+                />
               </label>
               <label
                 for="txt9"
               >
+                Leo
                 <input
                   id="txt9"
                   name="txt6473"
                   type="radio"
                 />
-                <span>
-                  Leo
-                </span>
+                <span
+                  icon=""
+                />
               </label>
               <label
                 for="txt10"
               >
+                Splinter
                 <input
                   id="txt10"
                   name="txt6473"
                   type="radio"
                 />
-                <span>
-                  Splinter
-                </span>
+                <span
+                  icon=""
+                />
               </label>
             </fieldset>
           </wup-radio>
