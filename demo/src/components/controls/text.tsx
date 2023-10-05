@@ -120,7 +120,6 @@ export default function TextControlView() {
         />
         <section>
           <h3>Masked inputs</h3>
-          <br />
           <wup-text
             w-name="phone"
             w-label="Phone number"
