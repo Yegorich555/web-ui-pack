@@ -12,6 +12,7 @@
 - **TypeScript**. Updated CustomEvents `$onWillShow`, `$onWillHide`, `$onChange`
 - **Text based controls**
   - _Label doesn't change position on browser autofill_
+  - _Input type `email` missed if validation.email is ON (affects on autofill)_
 
 **New/Features**:
 
