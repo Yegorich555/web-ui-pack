@@ -10,7 +10,7 @@ export default function MyLink({ href, children, className, gitIcon }: React.Pro
   href = href?.startsWith("http") ? href : linkGit(href);
   return (
     <a
-      className={[gitIcon ? styles.gitLink : null, className].filter((s) => s).join(" ")} //
+      className={[gitIcon ? styles.link : null, className].filter((s) => s).join(" ")} //
       href={href}
       target="_blank"
       rel="noreferrer"

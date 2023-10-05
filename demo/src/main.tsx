@@ -7,9 +7,6 @@ import { WUPHelpers, WUPSwitchControl } from "web-ui-pack";
 import { useBuiltinStyle, WUPcssButton, WUPcssScrollSmall } from "web-ui-pack/styles";
 import PopupView from "./components/popup/popupView";
 
-import imgLogo from "./assets/logo.png";
-import styles from "./main.scss";
-
 import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
 import CircleView from "./components/circleView";
@@ -29,6 +26,9 @@ import NumberControlView from "./components/controls/number";
 import FAQView from "./components/FAQView";
 import SelectManyControlView from "./components/controls/selectMany";
 import MyLink from "./elements/myLink";
+
+import imgLogo from "./assets/logo.png";
+import styles from "./main.scss";
 
 (window as any).WUPHelpers = WUPHelpers;
 
