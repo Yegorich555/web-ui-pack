@@ -10,6 +10,26 @@ body {
   font-size: 14px;
 }
 
+body[wupdark] {
+  // common styles - other styles defined in [wupdark] per each element
+  --basicTextColor: #bdbdbd;
+  --basicTextColor2: #86aba6;
+  --bodyBgColor: #161b24;
+  --basicBgColor: #222a36;
+  --headerBgColor: #104652;
+  --headerBgColor2: #222a36;
+  --borderColor: #222a36;
+  --activeLinkColor: #38b9d6;
+  --activeLinkBgColor: rgba(0, 160, 188, 0.218);
+  --hoverColor: white;
+  --hoverBgColor: rgba(0, 160, 188, 0.15);
+
+  --section-shadow-color: rgba(137, 137, 137, 0.4);
+  --codeTagColor: #e19191;
+  --cssVarColor: #1f8add;
+  --borderColor2: white;
+}
+
 h1 {
   margin: auto;
   text-align: center;
@@ -125,28 +145,4 @@ a {
   &:hover {
     opacity: 0.9;
   }
-}
-
-body[wupdark] {
-  --basicTextColor: #bdbdbd;
-  --basicTextColor2: #86aba6;
-  --bodyBgColor: #161b24;
-  --basicBgColor: #222a36;
-  --headerBgColor: #104652;
-  --headerBgColor2: #222a36;
-  --borderColor: #222a36;
-  --activeLinkColor: #38b9d6;
-  --activeLinkBgColor: rgba(0, 160, 188, 0.218);
-  --hoverColor: white;
-  --hoverBgColor: rgba(0, 160, 188, 0.15);
-
-  --section-shadow-color: rgba(137, 137, 137, 0.4);
-  --codeTagColor: #e19191;
-  --cssVarColor: #1f8add;
-  --borderColor2: white;
-
-  /*** web-ui-pack styles ***/
-  // circle
-  --circle-0: #104652;
-  // radio
 }

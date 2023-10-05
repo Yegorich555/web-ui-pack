@@ -133,13 +133,16 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
 
   static get $styleRoot(): string {
     return `:root {
-          --circle-0: var(--base-sep);
-          --circle-1: var(--base-btn-bg);
+          --circle-0: #e4e4e4;
+          --circle-1: #009fbc;
           --circle-2: #ff9f00;
           --circle-3: #1fb13f;
           --circle-4: #9482bd;
           --circle-5: #8bc4d7;
           --circle-6: #1abdb5;
+        }
+        [wupdark] {
+          --circle-0: #104652;
         }`;
   }
 
