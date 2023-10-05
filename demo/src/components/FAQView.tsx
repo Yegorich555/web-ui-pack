@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import Code from "src/elements/code";
 import FAQ from "src/elements/faq";
 import Page from "src/elements/page";
@@ -18,8 +19,9 @@ export default function FAQView() {
                 <section>
                   <ol>
                     <li>
-                      Intellisense must work - otherwise coding in notepad does not make sense at all. Try import
+                      Intellisense must work - otherwise coding in 'notepad' does not make sense at all. Try import
                       required component at first. Check{" "}
+                      <a href="https://github.com/Yegorich555/web-ui-pack/tree/master/CODESTYLE.md">CodeStyle</a> and{" "}
                       <a href="https://github.com/Yegorich555/web-ui-pack/tree/master/demo">source-code of demo</a> to
                       compare with your solution
                     </li>
@@ -125,7 +127,10 @@ export default function FAQView() {
             question: "Controls. How to change default validation rules/messages and add new",
             answer: (
               <>
-                <i>Every control-type has $defaults.validationRules</i>
+                <i>
+                  Every control-type has $defaults.validationRules. Also check{" "}
+                  <a href="https://github.com/Yegorich555/web-ui-pack/tree/master/CODESTYLE.md">CodeStyle</a>
+                </i>
                 <Code code={codeVldRules} />
               </>
             ),
@@ -200,14 +205,21 @@ export default function FAQView() {
 
 const codeCssVars = `css
 body { /* Redefine css variables */
+  background: #f3f6f9;
+  color: black;
   --base-btn-bg: #009fbc;
   --border-radius: 0;
-  --ctrl-label: blue; /* etc. */
+  --ctrl-label: #028198; /* etc. */
+}
+body[wupdark] {
+  background: #161b24;
+  color: white;
+  --ctrl-label: #919191; /* etc. */
 }`;
 
 const codeAttrs = `js
 // HTML code
-<wup-text name="email"></wup-text>
+<wup-text w-name="email"></wup-text>
 // equal to
 const el = document.querySelector("wup-text");
 el.$options.name = "email";`;
@@ -249,9 +261,16 @@ form.addEventListener("$change", (e) => {
     console.warn("this control is attached and changed", e);
   }
 });`;
-// todo need to extend interface ValidityMap + need point to CODESTYLE.md + point CODESTYLE.md in README.md
+// todo fix horizontal scrollbars on FAQ
 const codeVldRules = `js
 // to define new rule add new property to validationRules
+declare global {
+  namespace WUP.Text {  // WUP.Text for WUPTextControl, WUP.Number for WUPNumberControl etc.
+    interface ValidityMap {
+      isNumber: boolean; // it's required for intellisense
+    }
+  }
+}
 WUPTextControl.$defaults.validationRules.isNumber = (v) =>
     (!v || !/^[0-9]*$/.test(v)) && "Please enter a valid number";
 const el = document.createElement("wup-text");
@@ -262,7 +281,7 @@ el.$options.validations = {
   isNumber: (v) => (!v || !/^[0-9]*$/.test(v)) && "Please enter a valid number",
 };
 
-// to redefine default error message need to redefine the whole rule
+// to re-define default message need to update the whole rule
 const origMin = WUPTextControl.$defaults.validationRules.min!;
 WUPTextControl.$defaults.validationRules.min = (v, setV) =>
    origMin(v, setV) && 'Your custom error message';

@@ -5,8 +5,7 @@
 **BREAKING CHANGES**:
 
 - **Controls**
-  - Renamed css-var `ctrl-err-text` to `ctrl-err`
-  - Renamed some css-vars
+  - Renamed some css-vars (it's last hust change)
 
 **Fixes**:
 
@@ -15,7 +14,7 @@
 
 **New/Features**:
 
-- Added built-in colors for darkMode. _Append attr `[wupdark]` to body to use it. Don't forget to define general textColor & backgroundColor yourself_
+- Added built-in colors for darkMode. _Append attr `[wupdark]` to body to use it. Don't forget to define general text & background colors yourself_
 
 ## 0.9.1 (Sep 28, 2023)
 

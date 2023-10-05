@@ -65,7 +65,7 @@ WUPTextControl.$ariaError = "Error for";
 declare global {
   namespace WUP.Text {
     interface ValidityMap {
-      isNumber?: boolean; // it's required to extend default validationRules
+      isNumber: boolean; // it's required to extend default validationRules
     }
   }
 }
