@@ -29,6 +29,7 @@ import MyLink from "./elements/myLink";
 
 import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
+import Login from "./components/controls/login";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -143,6 +144,7 @@ export default function AppContainer() {
             {routes.map((r) => (
               <Route key={r.path} path={r.url} element={React.createElement(r.el)} />
             ))}
+            <Route path="login" element={<Login />} />
             <Route path="*" element={<Navigate to={routes[DEV ? routes.length - 1 : 0].url as string} />} />
           </Routes>
         </main>
