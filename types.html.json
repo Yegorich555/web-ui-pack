@@ -891,6 +891,14 @@
               "name": "stack"
             }
           ]
+        },
+        {
+          "name": "menu",
+          "description": "Custom attribute used for internal behavior"
+        },
+        {
+          "name": "tooltip",
+          "description": "Custom attribute used for styling"
         }
       ]
     },
