@@ -261,7 +261,7 @@ form.addEventListener("$change", (e) => {
     console.warn("this control is attached and changed", e);
   }
 });`;
-// todo fix horizontal scrollbars on FAQ
+
 const codeVldRules = `js
 // to define new rule add new property to validationRules
 declare global {

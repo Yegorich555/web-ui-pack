@@ -167,4 +167,5 @@ useBuiltinStyle(
 );
 
 useBuiltinStyle(WUPcssScrollSmall(".scrolled"));
+useBuiltinStyle(WUPcssScrollSmall(".code pre"));
 useBuiltinStyle(WUPcssButton(".btn"));
