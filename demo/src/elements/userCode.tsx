@@ -121,7 +121,14 @@ function RenderHTMLCode({
 }
 
 function RenderCssVars(props: UserCodeProps & { el: WUPBaseElement }): JSX.Element {
+  const [, updateState] = useState({});
+  useEffect(() => {
+    window.onDarkModeChanged = () => updateState({});
+    return () => (window.onDarkModeChanged = undefined);
+  }, []);
+
   const css = getUsedCssVars(props.el);
+
   // it's not required anymore props.excludeCssVars && console.error("defined excluded css-vars", props.excludeCssVars);
   const defined = css.own.length ? css.own : css.common;
   return (

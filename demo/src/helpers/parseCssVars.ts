@@ -85,7 +85,20 @@ export default function getUsedCssVars(scanEl: WUPBaseElement<any>): { own: CssV
   const allProto = WUPBaseElement.findAllProtos(scanEl, []);
   const getOwnStyles = (proto: typeof WUPBaseElement): CssVar[] => {
     if (Object.prototype.hasOwnProperty.call(proto, "$styleRoot")) {
-      return parseCssVars(proto.$styleRoot);
+      const raw = proto.$styleRoot;
+      const attr = "[wupdark]";
+      const i = raw.indexOf(attr);
+      const css = parseCssVars(i !== -1 ? raw.substring(0, i) : raw);
+      if (i !== -1 && window.isDark) {
+        const cssDark = parseCssVars(raw.substring(i));
+        cssDark.forEach((c2) => {
+          const c = css.find((c1) => c1.name === c2.name);
+          if (c) {
+            c.value = c2.value; // WARN: it doesn't replace parent > child
+          }
+        });
+      }
+      return css;
     }
     return [];
   };
@@ -95,7 +108,6 @@ export default function getUsedCssVars(scanEl: WUPBaseElement<any>): { own: CssV
   allProto.reverse().forEach((p) => {
     common.push(...getOwnStyles(p));
   });
-  // todo need split dark && root
   return { own, common };
 }
 

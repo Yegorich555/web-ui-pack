@@ -70,12 +70,21 @@ function last(arr: string[]) {
 
 !WUPSwitchControl && console.error("!");
 
+declare global {
+  interface Window {
+    onDarkModeChanged?: (isDark: boolean) => void;
+    isDark?: boolean;
+  }
+}
+
 function changeDarkMode(isDark: boolean): void {
   if (isDark) {
     document.body.setAttribute("wupdark", ""); // attr wupdark will be further
   } else {
     document.body.removeAttribute("wupdark");
   }
+  window.isDark = isDark;
+  window.onDarkModeChanged?.call(window, isDark);
 }
 // WARN: init darkMode required because $onChange triggers only after some timeout and blink visible on the screen
 changeDarkMode(!!localStorage.getItem("darkmode"));
