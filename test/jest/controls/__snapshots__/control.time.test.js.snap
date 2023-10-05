@@ -294,6 +294,7 @@ padding:0;}
         --ctrl-err-icon-valid: #54d754;
       }
   :root {
+      --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
      }
@@ -525,12 +526,14 @@ mask-image: var(--ctrl-icon-img);
         WUP-TIME [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
+          -webkit-text-fill-color: var(--ctrl-autofill);
         }
         WUP-TIME input:autofill,
         WUP-TIME textarea:autofill,
         WUP-TIME [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
+          text-fill-color: var(--ctrl-autofill);
         }
         WUP-TIME strong {
           display: block;
@@ -565,6 +568,18 @@ mask-image: var(--ctrl-icon-img);
         WUP-TIME legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        WUP-TIME input:-webkit-autofill + strong
+        WUP-TIME textarea:-webkit-autofill + strong
+        WUP-TIME [contenteditable=true]:-webkit-autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
+        }
+        WUP-TIME input:autofill + strong,
+        WUP-TIME textarea:autofill + strong,
+        WUP-TIME [contenteditable=true]:autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
         }
         WUP-TIME:focus-within [maskholder],
         WUP-TIME:focus-within [prefix],

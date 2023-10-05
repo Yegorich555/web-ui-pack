@@ -294,6 +294,7 @@ padding:0;}
         --ctrl-err-icon-valid: #54d754;
       }
   :root {
+      --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
      }
@@ -531,12 +532,14 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECTMANY [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
+          -webkit-text-fill-color: var(--ctrl-autofill);
         }
         WUP-SELECTMANY input:autofill,
         WUP-SELECTMANY textarea:autofill,
         WUP-SELECTMANY [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
+          text-fill-color: var(--ctrl-autofill);
         }
         WUP-SELECTMANY strong {
           display: block;
@@ -571,6 +574,18 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECTMANY legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        WUP-SELECTMANY input:-webkit-autofill + strong
+        WUP-SELECTMANY textarea:-webkit-autofill + strong
+        WUP-SELECTMANY [contenteditable=true]:-webkit-autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
+        }
+        WUP-SELECTMANY input:autofill + strong,
+        WUP-SELECTMANY textarea:autofill + strong,
+        WUP-SELECTMANY [contenteditable=true]:autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
         }
         WUP-SELECTMANY:focus-within [maskholder],
         WUP-SELECTMANY:focus-within [prefix],

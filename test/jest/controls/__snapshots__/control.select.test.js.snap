@@ -294,6 +294,7 @@ padding:0;}
         --ctrl-err-icon-valid: #54d754;
       }
   :root {
+      --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
      }
@@ -518,12 +519,14 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
+          -webkit-text-fill-color: var(--ctrl-autofill);
         }
         WUP-SELECT input:autofill,
         WUP-SELECT textarea:autofill,
         WUP-SELECT [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
+          text-fill-color: var(--ctrl-autofill);
         }
         WUP-SELECT strong {
           display: block;
@@ -558,6 +561,18 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        WUP-SELECT input:-webkit-autofill + strong
+        WUP-SELECT textarea:-webkit-autofill + strong
+        WUP-SELECT [contenteditable=true]:-webkit-autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
+        }
+        WUP-SELECT input:autofill + strong,
+        WUP-SELECT textarea:autofill + strong,
+        WUP-SELECT [contenteditable=true]:autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
         }
         WUP-SELECT:focus-within [maskholder],
         WUP-SELECT:focus-within [prefix],

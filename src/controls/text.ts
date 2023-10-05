@@ -122,6 +122,7 @@ export default class WUPTextControl<
 
   static get $styleRoot(): string {
     return `:root {
+      --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
      }
@@ -199,12 +200,14 @@ export default class WUPTextControl<
         :host [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
+          -webkit-text-fill-color: var(--ctrl-autofill);
         }
         :host input:autofill,
         :host textarea:autofill,
         :host [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
+          text-fill-color: var(--ctrl-autofill);
         }
         :host strong {
           display: block;
@@ -239,6 +242,18 @@ export default class WUPTextControl<
         :host legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        :host input:-webkit-autofill + strong
+        :host textarea:-webkit-autofill + strong
+        :host [contenteditable=true]:-webkit-autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
+        }
+        :host input:autofill + strong,
+        :host textarea:autofill + strong,
+        :host [contenteditable=true]:autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
         }
         :host:focus-within [maskholder],
         :host:focus-within [prefix],

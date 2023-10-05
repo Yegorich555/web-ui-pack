@@ -9,8 +9,9 @@
 
 **Fixes**:
 
-- **TypeScript**
-  - Updated CustomEvents `$onWillShow`, `$onWillHide`, `$onChange`
+- **TypeScript**. Updated CustomEvents `$onWillShow`, `$onWillHide`, `$onChange`
+- **Text based controls**
+  - _Label doesn't change position on browser autofill_
 
 **New/Features**:
 
