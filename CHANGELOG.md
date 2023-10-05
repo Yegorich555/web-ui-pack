@@ -6,11 +6,16 @@
 
 - **Controls**
   - Renamed css-var `ctrl-err-text` to `ctrl-err`
+  - Renamed some css-vars
 
 **Fixes**:
 
 - **TypeScript**
   - Updated CustomEvents `$onWillShow`, `$onWillHide`, `$onChange`
+
+**New/Features**:
+
+- Added built-in colors for darkMode. _Append attr `[wupdark]` to body to use it. Don't forget to define general textColor & backgroundColor yourself_
 
 ## 0.9.1 (\_\_\_)
 

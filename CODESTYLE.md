@@ -38,7 +38,6 @@ useBuiltinStyle(
      overflow: auto;
   }`
 );
-
 ```
 
 ## Step 2 - override/extend defaults
@@ -164,6 +163,9 @@ body {
   --ctrl-label: #5e5e5e;
   --ctrl-err: #ad0000;
   --ctrl-invalid-border: red;
+}
+body[wupdark] {
+  /* this is built-in styles for darkMode: set attr [wupdark] to body to use it; Don't forget to define general background & text colors */
 }
 /* OR */
 wup-num,
