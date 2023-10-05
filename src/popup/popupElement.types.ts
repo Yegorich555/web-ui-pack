@@ -147,6 +147,8 @@ declare global {
       readonly hide?: "";
       /** Animation applied to popup */
       "w-animation"?: "" | "default" | "drawer" | "stack";
+
+      // todo add attr [menu] to allow to use with other elements
     }
 
     interface AttachOptions extends Partial<Omit<Options, "target">> {

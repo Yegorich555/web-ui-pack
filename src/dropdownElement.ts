@@ -105,6 +105,7 @@ export default class WUPDropdownElement<
     minHeightByTarget: true,
     minWidthByTarget: true,
     placement: [
+      // todo this is ignored by popup
       WUPPopupElement.$placements.$bottom.$start,
       WUPPopupElement.$placements.$bottom.$end,
       WUPPopupElement.$placements.$top.$start,
