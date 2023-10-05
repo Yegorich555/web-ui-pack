@@ -87,19 +87,21 @@ export default class WUPRadioControl<
 
   static get $styleRoot(): string {
     return `:root {
-      --ctrl-radio-size: 1em;
-      --ctrl-radio-spot-size: calc(var(--ctrl-radio-size) * 0.5);
-      --ctrl-radio-bg: #fff;
-      --ctrl-radio-off: #fff;
-      --ctrl-radio-on: var(--ctrl-focus);
-      --ctrl-radio-border: #0003;
-      --ctrl-radio-border-size: 2px;
+      --ctrl-radio-item-r: 14px;
+      --ctrl-radio-item-r-on: 8px;
+      --ctrl-radio-item-bg: none;
+      --ctrl-radio-item-on: var(--ctrl-focus);
+      --ctrl-radio-item-border: #0003;
+      --ctrl-radio-item-border-w: 2px;
       --ctrl-radio-gap: 7px;
-     }`;
+     }
+     [wupdark] {
+        --ctrl-radio-item-border: var(--ctrl-label);
+      }`;
   }
 
   static get $style(): string {
-    // :host input + span:after >> not relative because 1.2em of 14px provides round-pixel-issue and not always rounded items
+    // :host input + [icon]:after >> not relative because 1.2em of 14px provides round-pixel-issue and not always rounded items
     return `${super.$style}
       :host {
         position: relative;
@@ -132,60 +134,60 @@ export default class WUPRadioControl<
         font: inherit;
       }
       :host label {
-        padding: 0;
+        padding: var(--ctrl-radio-gap);
+        gap: var(--ctrl-radio-gap);
+      }
+      :host[w-reverse] label {
+        flex-direction: row-reverse;
       }
       :host input {${WUPcssHidden}}
-      :host input + span {
-        padding: var(--ctrl-radio-gap);
-        display: inline-flex;
-        align-items: center;
-      }
       :host[readonly],
       :host[readonly] legend,
       :host[readonly] label {
          cursor: default;
       }
-      :host input + span:after {
-        content: "";
-        width: var(--ctrl-radio-size);
-        height: var(--ctrl-radio-size);
-        border: calc((var(--ctrl-radio-size) - var(--ctrl-radio-spot-size)) / 2) solid var(--ctrl-radio-bg);
+      :host [icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--ctrl-radio-item-r);
+        height: var(--ctrl-radio-item-r);
         box-sizing: border-box;
-        background: var(--ctrl-radio-off);
-        box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-radio-border);
+        background: var(--ctrl-radio-item-bg);
+        box-shadow: 0 0 1px var(--ctrl-radio-item-border-w) var(--ctrl-radio-item-border);
         border-radius: 50%;
-        margin-left: 0.5em;
       }
-      :host fieldset[aria-required="true"] input + span:after {
+      :host [icon]:after {
         content: "";
-      }
-      :host[w-reverse] input + span {
-        flex-direction: row-reverse;
-      }
-      :host[w-reverse] input + span:after {
-        margin-left: 0;
-        margin-right: 0.5em;
-      }
-      :host input:checked + span:after {
-        background-color: var(--ctrl-radio-on);
+        display: inline-block;
+        width: var(--ctrl-radio-item-r-on);
+        height: var(--ctrl-radio-item-r-on);
+        border-radius: 50%;
+        transition: background-color var(--anim);
+       }
+      :host input:checked + [icon]:after {
+        background: var(--ctrl-radio-item-on);
       }
       @media not all and (prefers-reduced-motion) {
-        :host input + span:after {
+        :host label {
+          transition: color var(--anim);
+        }
+        :host [icon] {
           transition: background-color var(--anim);
         }
       }
-      :host input:focus + span {
+      :host label:focus-within {
         color: var(--ctrl-selected);
       }
-      :host input:focus + span:after {
-         box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
+      :host label:focus-within [icon] {
+        --ctrl-radio-item-border: var(--ctrl-selected);
       }
       @media (hover: hover) and (pointer: fine) {
-        :host input + span:hover {
+        :host label:hover {
           color: var(--ctrl-selected);
         }
-        :host input + span:hover:after {
-          box-shadow: 0 0 1px var(--ctrl-radio-border-size) var(--ctrl-selected);
+        :host label:hover [icon] {
+          --ctrl-radio-item-border: var(--ctrl-selected);
         }
       }
      `;
@@ -251,10 +253,16 @@ export default class WUPRadioControl<
       return;
     }
     const nm = this.#ctr.$uniqueId + (Date.now() % 1000);
-    const arrLi = arr.map((_item, i) => {
+    const isFunc = arr[0].text && typeof arr[0].text === "function";
+    arr.forEach((item, i) => {
       const lbl = document.createElement("label");
+      if (isFunc) {
+        (item as WUP.Select.MenuItemFn<ValueType>).text(item.value, lbl, i);
+      } else {
+        lbl.appendChild(document.createTextNode(item.text as string));
+      }
       const inp = lbl.appendChild(document.createElement("input")) as ExtInputElement;
-      const tit = lbl.appendChild(document.createElement("span"));
+      lbl.appendChild(document.createElement("span")).setAttribute("icon", "");
       this.$refItems.push(inp);
       inp.id = this.#ctr.$uniqueId;
       inp._index = i;
@@ -262,14 +270,7 @@ export default class WUPRadioControl<
       inp.type = "radio";
       inp.name = nm; // required otherwise tabbing, arrow-keys doesn't work inside single fieldset
       parent.appendChild(lbl);
-      return tit;
     });
-
-    if (arr[0].text && typeof arr[0].text === "function") {
-      arr.forEach((v, i) => (v as WUP.Select.MenuItemFn<ValueType>).text(v.value, arrLi[i], i));
-    } else {
-      arr.forEach((v, i) => (arrLi[i].textContent = (v as WUP.Select.MenuItemText<ValueType>).text));
-    }
 
     this.$refItems[0].tabIndex = 0;
     // when user changed items

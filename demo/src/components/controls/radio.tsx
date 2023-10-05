@@ -2,7 +2,9 @@
 import Code from "src/elements/code";
 import Page from "src/elements/page";
 import { WUPRadioControl } from "web-ui-pack";
+import MyLink from "src/elements/myLink";
 import stylesCom from "./controls.scss";
+import styles from "./radio.scss";
 
 const sideEffect = WUPRadioControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -82,19 +84,14 @@ export default function RadioControlView() {
             w-items="storedRadioItems.small"
             w-initValue={items[2].value.toString()}
           />
-          <wup-radio
-            w-name="required"
-            readonly
-            w-items="storedRadioItems.small"
-            w-validations="window._someRadioValidations2"
-          />
+          <wup-radio w-name="required" w-items="storedRadioItems.small" w-validations="window._someRadioValidations2" />
         </div>
         <wup-radio
+          w-name="reversed"
+          w-reverse
           ref={(el) => {
             if (el) {
-              el.$options.name = "reversed";
               el.$options.items = items.slice(0, 4);
-              el.$options.reverse = true;
             }
           }}
         />
@@ -110,13 +107,24 @@ export default function RadioControlView() {
           }}
         />
         <section>
+          <h3>Customized</h3>
+          <small>
+            See details in <MyLink href="/demo/src/components/controls/radio.scss">demo/src...</MyLink>
+          </small>
+          <wup-radio
+            class={styles.custom}
+            w-name="customView"
+            w-initValue={items[1].value.toString()}
+            w-items="storedRadioItems.items"
+          />
+
           <wup-radio
             ref={(el) => {
               if (el) {
-                el.$options.name = "customized";
+                el.$options.name = "With custom render function";
                 el.$options.items = () => {
                   const renderText: WUP.Select.MenuItemFn<number>["text"] = (value, li, i) => {
-                    li.innerHTML = `<b>Value</b>: ${value}, <span style="color: red">index</span>: ${i}`;
+                    li.innerHTML = `<span><b>Value</b>: ${value}, <span style="color: red">index</span>: ${i}</span>`;
                     return li.textContent as string;
                   };
                   return [
@@ -129,6 +137,13 @@ export default function RadioControlView() {
           />
           <Code code={codeTypes} />
         </section>
+        {/* NiceToHave radio: allow full customization */}
+        {/* <section>
+          <wup-radio>
+            <label>Item 1</label>
+            <label>Item 2<input /><span icon/></label>
+          </wup-radio>
+        </section> */}
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
@@ -145,8 +160,8 @@ el.$options.name = "customized";
 el.$options.items = () => {
   const renderText: WUPSelect.MenuItemFn<number>["text"] =
   (value, li, i) => {
-    li.innerHTML = \`<b>Value</b>: \${value},
-       <span style="color: red">index</span>: \${i}\`;
+    li.innerHTML = \`<span><b>Value</b>: \${value},
+       <span style="color: red">index</span>: \${i}</span>\`;
     return value.toString();
   };
   return [
