@@ -63,7 +63,7 @@ export default function SelectManyControlView() {
           w-sortable={false}
           w-autoFocus={false}
         />
-        <div className={stylesCom.group}>
+        <div className={`${stylesCom.group} ${styles.sameHeight}`}>
           <wup-selectmany
             w-name="readonly"
             readonly
