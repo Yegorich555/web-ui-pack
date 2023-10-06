@@ -396,7 +396,7 @@ export default class WUPTextControl<
   }
 
   protected override renderControl(): void {
-    this.$refInput.type = "text";
+    (this.$refInput as HTMLInputElement).type = "text"; // todo set type 'email' when validation email is set
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
@@ -560,15 +560,6 @@ export default class WUPTextControl<
     }
     if (!propsChanged || propsChanged.includes("postfix")) {
       this.renderPostfix(this._opts.postfix);
-    }
-    if (!propsChanged || propsChanged.includes("validations")) {
-      const isEmail = !!this._opts.validations?.email;
-      const itype = this.$refInput.type;
-      if (isEmail && itype === "text") {
-        this.$refInput.type = "email"; // change type "email" only if it wasn't redefined
-      } else if (!isEmail && itype === "email") {
-        this.$refInput.type = "text"; // validation isEmail is removed => revert typ
-      }
     }
   }
 
