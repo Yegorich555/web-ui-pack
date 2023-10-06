@@ -120,8 +120,6 @@ export default class WUPTextControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
-  // todo add --ctrl-autofill: #89bc55; for dark
-  // todo caret invisible if click on input after autofill + click on dark mode
   static get $styleRoot(): string {
     return `:root {
       --ctrl-autofill: #00869e;
@@ -130,6 +128,8 @@ export default class WUPTextControl<
      }
      [wupdark] {
         --ctrl-clear-hover: rgba(255,0,0,0.2);
+        --ctrl-autofill: #89bc55;
+        --ctrl-autofill-caret: #fff;
       }`;
   }
 
@@ -203,6 +203,7 @@ export default class WUPTextControl<
           font: inherit;
           -webkit-background-clip: text;
           -webkit-text-fill-color: var(--ctrl-autofill);
+          caret-color: var(--ctrl-autofill-caret, auto);
         }
         :host input:autofill,
         :host textarea:autofill,
@@ -210,6 +211,7 @@ export default class WUPTextControl<
           font: inherit;
           background-clip: text;
           text-fill-color: var(--ctrl-autofill);
+          caret-color: var(--ctrl-autofill-caret, auto);
         }
         :host strong {
           display: block;
