@@ -5,13 +5,14 @@
 **BREAKING CHANGES**:
 
 - **Controls**
-  - Renamed some css-vars (it's last hust change)
+  - Renamed some css-vars (last huge change)
 
 **Fixes**:
 
 - **TypeScript**. Updated CustomEvents `$onWillShow`, `$onWillHide`, `$onChange`
 - **Text based controls**
-  - _Label doesn't change position on browser autofill_
+  - _Label doesn't go to top on browser autofill_
+  - _Value missed & undo/redo failed on browser autofill_
 
 **New/Features**:
 

@@ -120,6 +120,8 @@ export default class WUPTextControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextControl;
 
+  // todo add --ctrl-autofill: #89bc55; for dark
+  // todo caret invisible if click on input after autofill + click on dark mode
   static get $styleRoot(): string {
     return `:root {
       --ctrl-autofill: #00869e;
@@ -365,7 +367,7 @@ export default class WUPTextControl<
   constructor() {
     super();
 
-    this.$refInput.placeholder = " "; // Without this css related styles doesn't work with browser autofill
+    this.$refInput.placeholder = " "; // Without this css related styles don't work with browser autofill
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -396,7 +398,7 @@ export default class WUPTextControl<
   }
 
   protected override renderControl(): void {
-    (this.$refInput as HTMLInputElement).type = "text"; // todo set type 'email' when validation email is set
+    (this.$refInput as HTMLInputElement).type = "text";
     this.$refInput.id = this.#ctr.$uniqueId;
     this.$refLabel.setAttribute("for", this.$refInput.id);
 
@@ -404,6 +406,9 @@ export default class WUPTextControl<
     s.appendChild(this.$refInput); // input appended to span to allow user user :after,:before without padding adjust
     s.appendChild(this.$refTitle);
     this.appendChild(this.$refLabel);
+    // WARN: browser autofill can fire input without focus: need listen for input event every time
+    this.$refInput.addEventListener("beforeinput", (e) => this.gotBeforeInput(e as WUP.Text.GotInputEvent)); // WARN: method `onbeforeinput` poor supported
+    this.$refInput.addEventListener("input", (e) => this.gotInput(e as WUP.Text.GotInputEvent), { passive: true });
   }
 
   /** Create & append element to control */
@@ -483,27 +488,14 @@ export default class WUPTextControl<
     const arr = super.gotFocus(ev);
 
     if (this.canHandleUndo()) {
-      this._refHistory = this._refHistory ?? new TextHistory(this.$refInput);
+      this._refHistory ??= new TextHistory(this.$refInput);
     }
-
-    // todo browser autofill can fire input without focus: need listen for input event every time
-    const r = this.appendEvent(this.$refInput, "input", (e) => {
-      // (e as WUP.Text.GotInputEvent).setValuePrevented = false;
-      // (e as WUP.Text.GotInputEvent).preventSetValue = () => ((e as WUP.Text.GotInputEvent).setValuePrevented = true);
-      this.gotInput(e as WUP.Text.GotInputEvent);
-    });
-    const r2 = this.appendEvent(
-      this.$refInput,
-      "beforeinput",
-      (e) => this.gotBeforeInput(e as WUP.Text.GotInputEvent),
-      { passive: false }
-    );
 
     if (!this.$refInput.readOnly) {
       let canSelectAll = this._opts.selectOnFocus;
       if (this._opts.mask) {
         this.maskInputProcess(null); // to apply prefix + maskholder
-        canSelectAll = canSelectAll && this.refMask!.isCompleted;
+        canSelectAll &&= this.refMask!.isCompleted;
         this.renderPostfix(this._opts.postfix);
         if (!canSelectAll) {
           const end = this.$refInput.value.length;
@@ -514,9 +506,6 @@ export default class WUPTextControl<
     }
     const hasOnlyNums = this.refMask?.chunks.every((c) => !c.isVar || c.pattern[0] !== "*");
     this.setAttr.call(this.$refInput, "inputmode", hasOnlyNums ? "numeric" : "");
-
-    arr.push(() => setTimeout(r)); // timeout required to handle Event on gotFocusLost
-    arr.push(r2);
     return arr;
   }
 
@@ -588,7 +577,12 @@ export default class WUPTextControl<
   #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
+    const isBrowserAutofill = e.isTrusted && e.inputType == null;
+    if (isBrowserAutofill && !this._refHistory && this.canHandleUndo()) {
+      this._refHistory = new TextHistory(this.$refInput);
+    }
     this._refHistory?.handleInput(e);
+
     const el = e.target as WUP.Text.Mask.HandledInput;
     let txt = el.value;
 

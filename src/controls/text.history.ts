@@ -216,6 +216,16 @@ export default class TextHistory {
   /** Call this handler on input.on('input'); */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleInput(e: InputEvent): void {
+    const isBrowserAutofill = e.isTrusted && e.inputType == null; // browserAutoFill doesn't fire beforeInput
+    if (isBrowserAutofill) {
+      this._stateBeforeInput = {
+        action: InputTypes.replace,
+        pos1: 0,
+        pos2: 0,
+        inserted: this.refInput.value,
+        value: "",
+      };
+    }
     if (this._stateBeforeInput) {
       const was = this._stateBeforeInput.value;
       this.save(this._stateBeforeInput);

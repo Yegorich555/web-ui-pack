@@ -7,7 +7,7 @@ export default function Login() {
         w-label="Email"
         ref={(el) => {
           if (el) {
-            el.$options.validations = { email: true };
+            el.$options.validations = { email: true, required: true };
           }
         }}
       />
@@ -15,7 +15,7 @@ export default function Login() {
         w-name="password"
         ref={(el) => {
           if (el) {
-            //
+            el.$options.validations = { required: true };
           }
         }}
       />
