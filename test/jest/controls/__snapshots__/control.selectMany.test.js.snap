@@ -655,7 +655,8 @@ mask-image: var(--ctrl-icon-img);
           mask: none;
         }
         WUP-SELECTMANY:focus-within button[clear] {
-          display: block;
+          display: inline-block;
+          opacity: 1;
         }
         WUP-SELECTMANY button[clear=back] {
           --ctrl-icon-img: var(--wup-icon-back);
@@ -677,7 +678,8 @@ mask-image: var(--ctrl-icon-img);
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-SELECTMANY:hover button[clear] {
-            display: block;
+            display: inline-block;
+            opacity: 1;
           }
           WUP-SELECTMANY button[clear]:hover:before {
             content: "";
@@ -897,6 +899,10 @@ mask-image: var(--ctrl-icon-img);
         pointer-events: none;
         touch-action: none;
       }
+      WUP-SELECTMANY button[clear] {
+        display: inline-block;
+        opacity: 0;
+      }
       @media (hover: hover) and (pointer: fine) {
         WUP-SELECTMANY [item]:hover {
           --ctrl-icon: var(--ctrl-err);
@@ -907,8 +913,8 @@ mask-image: var(--ctrl-icon-img);
       }
       @media not all and (pointer: fine) {
         WUP-SELECTMANY [item] {
-          user-select: none;
           -webkit-user-select: none;
+          user-select: none;
         }
       }
       @media not all and (prefers-reduced-motion) {

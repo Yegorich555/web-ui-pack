@@ -172,6 +172,10 @@ export default class WUPSelectManyControl<
         pointer-events: none;
         touch-action: none;
       }
+      :host button[clear] {
+        display: inline-block;
+        opacity: 0;
+      }
       @media (hover: hover) and (pointer: fine) {
         :host [item]:hover {
           --ctrl-icon: var(--ctrl-err);
@@ -182,8 +186,8 @@ export default class WUPSelectManyControl<
       }
       @media not all and (pointer: fine) {
         :host [item] {
-          user-select: none;
           -webkit-user-select: none;
+          user-select: none;
         }${/* don't allow select text on blocks to allow custom touch-logic */ ""}
       }
       @media not all and (prefers-reduced-motion) {

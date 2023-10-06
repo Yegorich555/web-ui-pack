@@ -638,7 +638,8 @@ mask-image: var(--ctrl-icon-img);
           mask: none;
         }
         WUP-DATE:focus-within button[clear] {
-          display: block;
+          display: inline-block;
+          opacity: 1;
         }
         WUP-DATE button[clear=back] {
           --ctrl-icon-img: var(--wup-icon-back);
@@ -660,7 +661,8 @@ mask-image: var(--ctrl-icon-img);
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-DATE:hover button[clear] {
-            display: block;
+            display: inline-block;
+            opacity: 1;
           }
           WUP-DATE button[clear]:hover:before {
             content: "";

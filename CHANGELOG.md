@@ -13,6 +13,7 @@
 - **Text based controls**
   - _Label doesn't go to top on browser autofill_
   - _Value missed & undo/redo failed on browser autofill_
+- [SelectManyControl](src/controls/selectMany.ts). _Showing button[clear] on hover changes height_
 
 **New/Features**:
 

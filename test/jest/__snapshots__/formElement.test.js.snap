@@ -461,7 +461,8 @@ mask-image: var(--ctrl-icon-img);
           mask: none;
         }
         WUP-TEXT:focus-within button[clear] {
-          display: block;
+          display: inline-block;
+          opacity: 1;
         }
         WUP-TEXT button[clear=back] {
           --ctrl-icon-img: var(--wup-icon-back);
@@ -483,7 +484,8 @@ mask-image: var(--ctrl-icon-img);
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-TEXT:hover button[clear] {
-            display: block;
+            display: inline-block;
+            opacity: 1;
           }
           WUP-TEXT button[clear]:hover:before {
             content: "";

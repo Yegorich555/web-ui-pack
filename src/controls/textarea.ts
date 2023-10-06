@@ -192,3 +192,5 @@ rr.forEach((k) => delete WUPTextareaControl.$defaults[k as keyof WUP.Textarea.Op
 rr = undefined;
 
 customElements.define(tagName, WUPTextareaControl);
+
+// NiceToHave display of btnClear affects on internal width - is it ok ???
