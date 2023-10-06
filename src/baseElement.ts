@@ -80,6 +80,8 @@ export default abstract class WUPBaseElement<
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
           --icon-hover: #fff3;
+          --scroll: #fff2;
+          --scroll-hover: #fff3;
         }`;
   }
 
