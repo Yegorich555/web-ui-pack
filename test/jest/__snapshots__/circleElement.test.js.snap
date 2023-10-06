@@ -31,6 +31,8 @@ padding:0;}
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
           --icon-hover: #fff3;
+          --scroll: #fff2;
+          --scroll-hover: #fff3;
         }
   :root {
           --circle-0: #e4e4e4;

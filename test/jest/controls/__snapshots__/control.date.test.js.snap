@@ -260,6 +260,8 @@ padding:0;}
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
           --icon-hover: #fff3;
+          --scroll: #fff2;
+          --scroll-hover: #fff3;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
@@ -300,6 +302,8 @@ padding:0;}
      }
      [wupdark] {
         --ctrl-clear-hover: rgba(255,0,0,0.2);
+        --ctrl-autofill: #89bc55;
+        --ctrl-autofill-caret: #fff;
       }
   :root {
         --ctrl-date-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M652.801 76.8c42.24 0 76.8 34.56 76.8 76.8v537.601c0 42.24-34.56 76.8-76.8 76.8H115.2c-42.624 0-76.8-34.56-76.8-76.8l.384-537.601c0-42.24 33.792-76.8 76.416-76.8h38.4V0h76.8v76.8h307.2V0h76.8v76.8h38.4zM192 345.6h76.8v76.8H192v-76.8zm230.4 0v76.8h-76.8v-76.8h76.8zm153.601 0h-76.8v76.8h76.8v-76.8zM115.2 691.2h537.601V268.8H115.2v422.4z'/%3E%3C/svg%3E");
@@ -516,6 +520,7 @@ mask-image: var(--ctrl-icon-img);
           font: inherit;
           -webkit-background-clip: text;
           -webkit-text-fill-color: var(--ctrl-autofill);
+          caret-color: var(--ctrl-autofill-caret, auto);
         }
         WUP-DATE input:autofill,
         WUP-DATE textarea:autofill,
@@ -523,6 +528,7 @@ mask-image: var(--ctrl-icon-img);
           font: inherit;
           background-clip: text;
           text-fill-color: var(--ctrl-autofill);
+          caret-color: var(--ctrl-autofill-caret, auto);
         }
         WUP-DATE strong {
           display: block;

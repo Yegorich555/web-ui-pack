@@ -246,6 +246,8 @@ padding:0;}
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
           --icon-hover: #fff3;
+          --scroll: #fff2;
+          --scroll-hover: #fff3;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
@@ -286,6 +288,8 @@ padding:0;}
      }
      [wupdark] {
         --ctrl-clear-hover: rgba(255,0,0,0.2);
+        --ctrl-autofill: #89bc55;
+        --ctrl-autofill-caret: #fff;
       }
   
       WUP-TEXTAREA {
@@ -499,6 +503,7 @@ mask-image: var(--ctrl-icon-img);
           font: inherit;
           -webkit-background-clip: text;
           -webkit-text-fill-color: var(--ctrl-autofill);
+          caret-color: var(--ctrl-autofill-caret, auto);
         }
         WUP-TEXTAREA input:autofill,
         WUP-TEXTAREA textarea:autofill,
@@ -506,6 +511,7 @@ mask-image: var(--ctrl-icon-img);
           font: inherit;
           background-clip: text;
           text-fill-color: var(--ctrl-autofill);
+          caret-color: var(--ctrl-autofill-caret, auto);
         }
         WUP-TEXTAREA strong {
           display: block;

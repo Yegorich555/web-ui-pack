@@ -105,6 +105,8 @@ describe("spinElement", () => {
                 --base-btn-focus: #bdbdbd;
                 --base-sep: #141414;
                 --icon-hover: #fff3;
+                --scroll: #fff2;
+                --scroll-hover: #fff3;
               }:root {
                 --spin-1: #ffa500;
                 --spin-2: #fff;
