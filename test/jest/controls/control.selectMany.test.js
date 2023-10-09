@@ -21,26 +21,11 @@ initTestBaseControl({
     el = e;
     el.$options.items = getItems();
     el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
+    h.setupLayout(el, { x: 140, y: 100, w: 100, h: 50 });
 
     window.$1Value = [10];
     window.$2Value = [20, 40];
     window.$3Value = [30];
-
-    const height = 50;
-    const width = 100;
-    const x = 140;
-    const y = 100;
-    jest.spyOn(el, "getBoundingClientRect").mockReturnValue({
-      x,
-      left: x,
-      y,
-      top: y,
-      bottom: y + height,
-      right: x + width,
-      height,
-      width,
-      toJSON: () => "",
-    });
   },
 });
 
@@ -262,8 +247,15 @@ describe("control.selectMany", () => {
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
       `"<span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
     );
+    expect(handledKeydown("Backspace")).toBe(true); // 1st time - focus, 2nd - delete
+    expect(handledKeydown("Backspace")).toBe(true); // 1st time - focus, 2nd - delete
+    expect(el.$value).toStrictEqual(undefined);
+    expect(handledKeydown("Backspace")).toBe(false);
+    expect(handledKeydown("Delete")).toBe(false);
 
     // without animation
+    el.$value = [30];
+    await h.wait();
     jest.spyOn(window, "matchMedia").mockImplementation(() => ({ matches: true })); // simulate 'prefers-reduced-motion' === true
     expect(isAnimEnabled()).toBe(false);
     jest.spyOn(el.$refItems[0], "offsetWidth", "get").mockReturnValue("33px");
@@ -279,6 +271,14 @@ describe("control.selectMany", () => {
       `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
     );
     expect(el.$isShown).toBe(false); // because not-open by value-change
+
+    el.$value = [10, 30];
+    await h.wait();
+    expect(handledKeydown("ArrowLeft")).toBe(true);
+    expect(handledKeydown("Delete")).toBe(true);
+    expect(el.$value).toStrictEqual([10]);
+    expect(handledKeydown("Delete")).toBe(true);
+    expect(el.$value).toStrictEqual(undefined);
   });
 
   test("menu: focus behavior", async () => {

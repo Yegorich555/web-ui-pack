@@ -554,17 +554,18 @@ export default class WUPSelectManyControl<
 
   /** Called to remove item with animation */
   protected removeValue(index: number): void {
-    const item = this.$refItems![index];
+    const item = this.$refItems!.splice(index, 1)[0]; // otherwise item is replaced
+    this._focusIndex === index && this.focusItemByIndex(null);
+
+    let ms = 0;
     const isAnim = isAnimEnabled();
     if (isAnim) {
-      this.$refItems!.splice(index, 1); // otherwise item is replaced
       item.style.width = `${item.offsetWidth}px`;
       item.setAttribute("removed", "");
       setTimeout(() => (item.style.width = ""));
-      const ms = parseMsTime(window.getComputedStyle(item).getPropertyValue("--anim-time"));
-      setTimeout(() => item.remove(), ms); // otherwise item is removed immediately in setValue...
-      this._focusIndex === index && this.focusItemByIndex(null);
+      ms = parseMsTime(window.getComputedStyle(item).getPropertyValue("--anim-time"));
     }
+    setTimeout(() => item.remove(), ms);
 
     const v = [...this.$value!];
     v.splice(index, 1);
@@ -669,6 +670,7 @@ export default class WUPSelectManyControl<
     }
 
     let next = this._focusIndex ?? null;
+    const len = this.$refItems.length;
     switch (e.key) {
       case "Enter":
         if (next != null) {
@@ -681,10 +683,8 @@ export default class WUPSelectManyControl<
       case "Backspace":
         if (next != null) {
           this.removeValue(next);
-          if (!this.$refItems.length) {
-            next = null; // WARN: focus prev in the next "ArrowLeft" block
-            break;
-          }
+          next = !this.$refItems.length ? null : Math.max(0, next - 1);
+          break;
         }
       // eslint-disable-next-line no-fallthrough
       case "ArrowLeft":
@@ -693,11 +693,8 @@ export default class WUPSelectManyControl<
       case "Delete":
         if (next != null) {
           this.removeValue(next);
-          if (!this.$refItems.length) {
-            next = null;
-            break;
-          }
-          --next; // WARN: focus prev in the next "ArrowLeft" block
+          next = !this.$refItems.length ? null : Math.min(next, this.$refItems.length - 1);
+          break;
         }
       // eslint-disable-next-line no-fallthrough
       case "ArrowRight":
@@ -714,7 +711,8 @@ export default class WUPSelectManyControl<
         handled = false;
         break;
     }
-    if (handled && this._focusIndex !== next) {
+
+    if (handled && (this._focusIndex !== next || len !== this.$refItems.length)) {
       e.preventDefault();
       this.focusItemByIndex(next);
     }
