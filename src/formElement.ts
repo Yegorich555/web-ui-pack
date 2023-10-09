@@ -58,7 +58,7 @@ declare global {
        * * It doesn't save values that are complex objects. So `wup-select.$options.items = [{text: "N1",value: {id:1,name:'Nik'} }]` is skipped
        * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see{@link WUPFormElement.storageKey}
        * @defaultValue false */
-      autoSave: boolean | string;
+      autoStore: boolean | string;
       /** Focus first possible element when it's appended to layout
        * @defaultValue false */
       autoFocus: boolean;
@@ -74,10 +74,10 @@ declare global {
     }
 
     interface JSXProps<T extends WUPFormElement>
-      extends Omit<WUP.Base.JSXProps<T>, "autoSave">,
+      extends Omit<WUP.Base.JSXProps<T>, "autoStore">,
         WUP.Base.OnlyNames<Options> {
       "w-submitActions"?: SubmitActions | number;
-      "w-autoSave"?: boolean | string;
+      "w-autoStore"?: boolean | string;
       "w-autoFocus"?: boolean | "";
       "w-autoComplete"?: boolean | "";
 
@@ -199,7 +199,7 @@ export default class WUPFormElement<
 
   static get mappedAttributes(): Record<string, AttributeMap> {
     const m = super.mappedAttributes;
-    m.autosave.type = AttributeTypes.string;
+    m.autostore.type = AttributeTypes.string;
     return m;
   }
 
@@ -257,7 +257,7 @@ export default class WUPFormElement<
       SubmitActions.goToError | SubmitActions.validateUntiFirst | SubmitActions.reset | SubmitActions.lockOnPending,
     autoComplete: false,
     autoFocus: false,
-    autoSave: false,
+    autoStore: false,
     disabled: false,
     readOnly: false,
   };
@@ -430,7 +430,7 @@ export default class WUPFormElement<
       this.dispatchEvent(ev2);
 
       promiseWait(Promise.all([p1, ev.$waitFor]), 300, (v: boolean) => this.changePending(v)).then(() => {
-        this._opts.autoSave && this.storageSave(null); // clear storage after submit
+        this._opts.autoStore && this.storageSave(null); // clear storage after submit
         if (needReset) {
           arrCtrl.forEach((v) => (v.$isDirty = false));
           this.$initModel = this.$model;
@@ -440,21 +440,21 @@ export default class WUPFormElement<
   }
 
   /** Auto-safe debounce timeout */
-  #autoSaveT?: ReturnType<typeof setTimeout>;
-  #autoSaveRemEv?: () => void;
+  #autoStoreT?: ReturnType<typeof setTimeout>;
+  #autoStoreRemEv?: () => void;
   protected override gotChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
     super.gotChanges(propsChanged);
 
     this.setAttr("readonly", this._opts.readOnly, true);
     this.setAttr("disabled", this._opts.disabled, true);
 
-    if (this._opts.autoSave) {
-      this.#autoSaveRemEv = this.appendEvent(this, "$change", () => {
+    if (this._opts.autoStore) {
+      this.#autoStoreRemEv = this.appendEvent(this, "$change", () => {
         if (this._preventStorageSave) {
           return;
         }
-        this.#autoSaveT && clearTimeout(this.#autoSaveT);
-        this.#autoSaveT = setTimeout(() => this._opts.autoSave && this.storageSave(), 700);
+        this.#autoStoreT && clearTimeout(this.#autoStoreT);
+        this.#autoStoreT = setTimeout(() => this._opts.autoStore && this.storageSave(), 700);
       });
 
       // works only on init
@@ -467,9 +467,9 @@ export default class WUPFormElement<
             setTimeout(() => delete this._preventStorageSave);
           }
         }, 2); // timeout required to wait for init controls
-    } else if (this.#autoSaveRemEv) {
-      this.#autoSaveRemEv.call(this);
-      this.#autoSaveRemEv = undefined;
+    } else if (this.#autoStoreRemEv) {
+      this.#autoStoreRemEv.call(this);
+      this.#autoStoreRemEv = undefined;
     }
 
     const p = propsChanged;
@@ -518,9 +518,9 @@ export default class WUPFormElement<
     formStore.push(this);
   }
 
-  /** Returns storage key based on url+control-names or `$options.autoSave` if `string` */
+  /** Returns storage key based on url+control-names or `$options.autoStore` if `string` */
   get storageKey(): string {
-    const sn = this._opts.autoSave;
+    const sn = this._opts.autoStore;
     return typeof sn === "string"
       ? sn
       : `${window.location.pathname}?${this.$controls
@@ -530,7 +530,7 @@ export default class WUPFormElement<
           .join(",")}`;
   }
 
-  /** Get & parse value from storage according to option `autoSave`, $model */
+  /** Get & parse value from storage according to option `autoStore`, $model */
   storageGet(): Partial<Model> | null {
     try {
       const key = this.storageKey;
@@ -566,7 +566,7 @@ export default class WUPFormElement<
   }
 
   _preventStorageSave?: boolean;
-  /** Save/remove model (only changes) to storage according to option `autoSave`, $model
+  /** Save/remove model (only changes) to storage according to option `autoStore`, $model
    * @returns model saved to localStorage or Null if removed */
   storageSave(model: null | Record<string, any> = {}): Partial<Model> | null {
     try {

@@ -4,8 +4,8 @@
 
 **BREAKING CHANGES**:
 
-- **Controls**
-  - Renamed some css-vars (last huge change)
+- **Controls**. Renamed some css-vars (this is last big breaking change)
+- [FormElement](src/formElement.ts). Option `autoSave` renamed to `autoStore`
 
 **Fixes**:
 

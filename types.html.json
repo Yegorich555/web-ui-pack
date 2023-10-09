@@ -639,7 +639,7 @@
           ]
         },
         {
-          "name": "w-autosave",
+          "name": "w-autostore",
           "description": "Enable to store data in localStorage to prevent losing till submitted @defaultValue false"
         },
         {

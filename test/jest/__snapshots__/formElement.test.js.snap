@@ -507,7 +507,7 @@ exports[`formElement common tests snapshot of $defaults 1`] = `
 {
   "autoComplete": false,
   "autoFocus": false,
-  "autoSave": false,
+  "autoStore": false,
   "disabled": false,
   "readOnly": false,
   "submitActions": 27,
@@ -522,7 +522,7 @@ exports[`formElement common tests snapshot of $defaults 3`] = `
   "readonly",
   "w-autocomplete",
   "w-autofocus",
-  "w-autosave",
+  "w-autostore",
   "w-disabled",
   "w-readonly",
   "w-submitactions",
