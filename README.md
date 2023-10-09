@@ -65,27 +65,33 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
   - [x] [CheckControl (Checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
     - [ ] CheckTreeControl
   - [x] [RadioControl (RadioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
+    - [ ] Full customized items
   - [x] [SelectControl (ComboBox)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
+    - [ ] Full customized menu
   - [x] [SelectManyControl (MultiSelect)](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
   - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
   - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
+    - [ ] option `multiSelect`
+    - [ ] DateRangeControl
   - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
   - [ ] DateTimeControl
   - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
+    - [ ] TextRichControl
   - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
   - [ ] SliderControl (progress bar)
   - [ ] FileControl
-  - [ ] SearchControl ?
+  - [ ] SearchControl
   - [ ] ImageControl (AvatarEditor)
+  - [ ] ColorControl (ColorPicker) ?
 - [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
-- [ ] MediaPlayer
+- [ ] MediaPlayer (Video player)
 - [ ] ModalElement
 - [ ] ConfirmModalElement
 - [ ] FormModalElement
 - [ ] InfiniteScroll
 - [ ] VirtualScroll
 - [ ] CarouselElement (Slide show)
-- [ ] TableElement ?
+- [ ] TableElement
 
 ## Components
 
