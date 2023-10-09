@@ -1,0 +1,29 @@
+.anotherStyle {
+  --ctrl-padding: 1em 4px;
+  --ctrl-check-size: 20px;
+  --ctrl-check-on-bg: #009fbc;
+
+  box-shadow: none !important;
+  border: none !important;
+
+  [icon] {
+    border: 2px solid #818181;
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+
+  &[checked] [icon] {
+    border-color: #009fbc;
+  }
+
+  @media not all and (prefers-reduced-motion) {
+    [icon] {
+      transition: background-color var(--anim);
+    }
+  }
+}
+
+[wupdark] .anotherStyle {
+  --ctrl-check-off-bg: none;
+  --ctrl-check-on: #000;
+}

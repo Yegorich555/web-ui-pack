@@ -254,7 +254,7 @@ padding:0;}
         --ctrl-err-icon-valid: #54d754;
       }
   :root {
-      --ctrl-switch-padding: 1em;
+      --ctrl-padding: 1em;
       --ctrl-switch-on: #fff;
       --ctrl-switch-off: #fff;
       --ctrl-switch-off-bg: #9f9f9f;
@@ -424,7 +424,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-SWITCH label {
         display: flex;
         gap: 0.5em;
-        padding: var(--ctrl-switch-padding);
+        padding: var(--ctrl-padding);
       }
       WUP-SWITCH strong {
         box-sizing: border-box;

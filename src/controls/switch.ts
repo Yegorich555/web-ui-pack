@@ -60,7 +60,7 @@ export default class WUPSwitchControl<
 
   static get $styleRoot(): string {
     return `:root {
-      --ctrl-switch-padding: 1em;
+      --ctrl-padding: 1em;
       --ctrl-switch-on: #fff;
       --ctrl-switch-off: #fff;
       --ctrl-switch-off-bg: #9f9f9f;
@@ -90,7 +90,7 @@ export default class WUPSwitchControl<
       :host label {
         display: flex;
         gap: 0.5em;
-        padding: var(--ctrl-switch-padding);
+        padding: var(--ctrl-padding);
       }
       :host strong {
         box-sizing: border-box;

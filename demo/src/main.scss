@@ -53,7 +53,7 @@ a.headerLink {
   --ctrl-switch-r-hover: 2em;
   --ctrl-switch-h: 2em;
   --ctrl-switch-w: 3.6em;
-  --ctrl-switch-padding: 1em 4px; // padding of control itself
+  --ctrl-padding: 1em 4px; // padding of control itself
 
   [bar] {
     --padding: calc((var(--ctrl-switch-h) - var(--ctrl-switch-r)) / 2);
