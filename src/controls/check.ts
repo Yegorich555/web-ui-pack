@@ -60,10 +60,10 @@ export default class WUPCheckControl<
       }`;
   }
 
+  /** NiceToHave: split to wup-icheck to resut with wup-table etc. */
   static get $style(): string {
     return `${super.$style}
-       ${WUPCssIconHover(":host", "[icon]")}
-      :host [icon] {
+       :host [icon] {
         position: initial;
         height: var(--ctrl-check-size);
         width: var(--ctrl-check-size);
@@ -85,6 +85,7 @@ export default class WUPCheckControl<
         border-radius: 0;
         height: 100%; width: 100%;
       }
+      ${WUPCssIconHover(":host", "[icon]")}
       @media not all and (prefers-reduced-motion) {
         :host [icon] { transition: background-color var(--anim); }
       }`;

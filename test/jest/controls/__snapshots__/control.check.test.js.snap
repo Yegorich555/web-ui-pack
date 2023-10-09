@@ -493,36 +493,7 @@ padding:0; }
         WUP-CHECK [bar] { transition: background-color var(--anim); }
         WUP-CHECK [thumb] { transition: transform var(--anim); }
       }
-       
-WUP-CHECK [icon] {
-    transform-style: preserve-3d;
-  }
-WUP-CHECK [icon]:before {
-  z-index: -1;
-  position: absolute;
-  transform: translate(-50%, -50%) translateZ(-1px);
-  left: 50%; top: 50%;
-  width: var(--icon-hover-r, 2.4em);
-  height: var(--icon-hover-r, 2.4em);
-  background: var(--icon-hover, #0001);
-  border-radius: 50%;
-}
-WUP-CHECK:focus-within [icon] {
-  position: relative;
-}
-WUP-CHECK:focus-within [icon]:before {
-  content: "";
-}
-@media (hover: hover) and (pointer: fine) {
-  WUP-CHECK:hover [icon] {
-    position: relative;
-  }
-  WUP-CHECK:hover [icon]:before {
-    content: "";
-    opacity: 0.8;
-  }
-}
-      WUP-CHECK [icon] {
+       WUP-CHECK [icon] {
         position: initial;
         height: var(--ctrl-check-size);
         width: var(--ctrl-check-size);
@@ -563,6 +534,35 @@ mask-image: var(--ctrl-icon-img);
         border-radius: 0;
         height: 100%; width: 100%;
       }
+      
+WUP-CHECK [icon] {
+    transform-style: preserve-3d;
+  }
+WUP-CHECK [icon]:before {
+  z-index: -1;
+  position: absolute;
+  transform: translate(-50%, -50%) translateZ(-1px);
+  left: 50%; top: 50%;
+  width: var(--icon-hover-r, 2.4em);
+  height: var(--icon-hover-r, 2.4em);
+  background: var(--icon-hover, #0001);
+  border-radius: 50%;
+}
+WUP-CHECK:focus-within [icon] {
+  position: relative;
+}
+WUP-CHECK:focus-within [icon]:before {
+  content: "";
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-CHECK:hover [icon] {
+    position: relative;
+  }
+  WUP-CHECK:hover [icon]:before {
+    content: "";
+    opacity: 0.8;
+  }
+}
       @media not all and (prefers-reduced-motion) {
         WUP-CHECK [icon] { transition: background-color var(--anim); }
       }
