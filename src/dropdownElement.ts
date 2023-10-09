@@ -105,7 +105,6 @@ export default class WUPDropdownElement<
     minHeightByTarget: true,
     minWidthByTarget: true,
     placement: [
-      // todo this is ignored by popup
       WUPPopupElement.$placements.$bottom.$start,
       WUPPopupElement.$placements.$bottom.$end,
       WUPPopupElement.$placements.$top.$start,
@@ -141,13 +140,11 @@ export default class WUPDropdownElement<
       this.$refPopup.getAttributeNames().forEach((a) => {
         a = a.startsWith("w-") ? a.substring(2) : a;
         const m = mappedAttr[a];
-        if (m) {
-          excluded.add(m.prop ?? a);
-        }
+        m && excluded.add(m.prop ?? a);
       });
       Object.keys(this._opts).forEach((k) => {
         if (!excluded.has(k)) {
-          // @ts-expect-error - because hideOnPopupClick not exists on popup
+          // @ts-expect-error - because hideOnPopupClick doesn't exist on popup
           this.$refPopup.$options[k] = this._opts[k];
         }
       });
