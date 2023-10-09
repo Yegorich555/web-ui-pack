@@ -159,6 +159,7 @@ export default class WUPSelectManyControl<
       :host [item][focused],
       :host [item][drag],
       :host [item][drop] {
+        color: var(--ctrl-focus-label);
         box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
       }
       :host [item][removed],
