@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.10.1 (\_\_\_)
+## 0.10.1 (Oct 10, 2023)
 
 **BREAKING CHANGES**:
 
