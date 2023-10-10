@@ -246,7 +246,7 @@ export default class WUPTimeControl<
       }
       :host [group] > button:first-child {
         --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-icon-valid);
+        --ctrl-icon: var(--ctrl-err-valid);
         border-bottom-left-radius: var(--border-radius);
         border-right: 1px solid var(--base-sep);
       }

@@ -277,7 +277,7 @@ padding:0;}
         --ctrl-border-radius: var(--border-radius);
         --ctrl-err: #ad0000;
         --ctrl-err-bg: #fff4fa;
-        --ctrl-err-icon-valid: green;
+        --ctrl-err-valid: green;
         --ctrl-invalid-border: red;
         --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
         --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
@@ -293,7 +293,7 @@ padding:0;}
         --ctrl-selected: #25a1b6;
         --ctrl-err: #ff6666;
         --ctrl-err-bg: #000;
-        --ctrl-err-icon-valid: #54d754;
+        --ctrl-err-valid: #54d754;
       }
   :root {
       --ctrl-autofill: #00869e;
@@ -430,12 +430,12 @@ mask-position: center;
 mask-image: var(--ctrl-icon-img);
       }
       WUP-DATE [error] li[valid] {
-        color: var(--ctrl-err-icon-valid);
+        color: var(--ctrl-err-valid);
       }
       WUP-DATE [error] li[valid]:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-icon-valid);
+        --ctrl-icon: var(--ctrl-err-valid);
       }
       WUP-DATE:focus-within [error] {
         max-height: none;
