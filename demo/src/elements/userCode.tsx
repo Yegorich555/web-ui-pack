@@ -1,12 +1,14 @@
+/* eslint-disable react/no-unused-prop-types */
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable react/destructuring-assignment */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import getUsedCssVars from "src/helpers/parseCssVars";
-import WUPBaseElement from "web-ui-pack/baseElement";
 import { WUPFormElement, WUPPasswordControl, WUPRadioControl, WUPSwitchControl } from "web-ui-pack";
 import linkGit from "src/helpers/linkGit";
 import WUPBaseControl from "web-ui-pack/controls/baseControl";
+import { HideCases } from "web-ui-pack/popup/popupElement.types";
+import WUPBaseElement from "web-ui-pack/baseElement";
 import styles from "./userCode.scss";
 import Code from "./code";
 import Tabs from "./tabs";
@@ -20,6 +22,7 @@ export interface UserCodeProps {
   // eslint-disable-next-line react/no-unused-prop-types
   cssVarAlt?: Map<string, string>;
   // eslint-disable-next-line react/no-unused-prop-types
+  /** @deprecated all css vars parsed from $styleRoot now */
   excludeCssVars?: string[];
 }
 
@@ -28,7 +31,14 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
     return <small>{alt}</small>;
   }
   let isColor = v[0] === "#" || v.startsWith("rgb");
-  if (v) {
+  if (
+    !isColor &&
+    v &&
+    !v.startsWith("url") &&
+    !v.startsWith("var(--anim-time)") &&
+    !v.startsWith("calc") &&
+    !v.includes("size")
+  ) {
     // set style as color-value and check if color is changed
     const el = document.createElement("span");
     const def = "rgb(1, 1, 1)";
@@ -38,7 +48,7 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
     document.body.appendChild(el);
     const gotColor = window.getComputedStyle(el).color;
     if (def !== gotColor && gotColor !== "rgb(0, 0, 0)") {
-      isColor = true;
+      isColor = true; // WARN it's wrong for 'var(--anim-time)'
     }
     el.remove();
   }
@@ -53,21 +63,23 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
   return v;
 }
 
-function renderHTMLCode(tag: string, customHTML: string[] | undefined): string | JSX.Element | JSX.Element[] {
+function RenderHTMLCode({
+  el,
+  customHTML,
+}: {
+  el: WUPBaseElement;
+  customHTML: string[] | undefined;
+}): JSX.Element | null {
   if (customHTML) {
-    // eslint-disable-next-line react/no-array-index-key
-    return customHTML.map((c, i) => <Code code={c} key={i.toString()} />);
+    return (
+      <>
+        {customHTML.map((c, i) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <Code code={c} key={i.toString()} />
+        ))}
+      </>
+    );
   }
-  const [, updateState] = useState<number>();
-  useEffect(() => {
-    setTimeout(() => updateState(1));
-  }, []);
-
-  const el = document.querySelector(tag);
-  if (!el) {
-    return "";
-  }
-
   let parsedAttrs: Array<{ name: string; value: string | null }> = [];
   const attrs = el.attributes;
   for (let i = 0; i < attrs.length; ++i) {
@@ -99,7 +111,7 @@ function renderHTMLCode(tag: string, customHTML: string[] | undefined): string |
   }
 
   // parsedAttrs.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
-
+  const tag = el.tagName.toLowerCase();
   const parsedCode = `html
 <${tag}
   ${parsedAttrs.map((a) => a.name + (!a.value ? "" : `="${a.value}"`)).join("\n  ")}
@@ -108,42 +120,82 @@ function renderHTMLCode(tag: string, customHTML: string[] | undefined): string |
   return <Code code={parsedCode} />;
 }
 
-function renderCssVars(props: UserCodeProps) {
-  const el = document.createElement(props.tag!);
-  if (!(el instanceof WUPBaseElement)) {
-    throw new Error("Only WUPBaseElement expected");
-  }
+function RenderCssVars(props: UserCodeProps & { el: WUPBaseElement }): JSX.Element {
+  const [, updateState] = useState({});
+  useEffect(() => {
+    window.onDarkModeChanged = () => updateState({});
+    return () => (window.onDarkModeChanged = undefined);
+  }, []);
 
-  const usedVars = getUsedCssVars(el, { isDistinct: true });
+  const css = getUsedCssVars(props.el);
+
+  // it's not required anymore props.excludeCssVars && console.error("defined excluded css-vars", props.excludeCssVars);
+  const defined = css.own.length ? css.own : css.common;
   return (
     <code className={styles.cssVars}>
+      {!css.own.length ? null : (
+        <>
+          <button className={styles.btnCommon} type="button">
+            Common Styles
+          </button>
+          <wup-popup
+            class={styles.cssCommon}
+            ref={(p) => {
+              if (p) {
+                p.$onWillHide = (e) => {
+                  (e.detail.hideCase === HideCases.onPopupClick || e.detail.hideCase === HideCases.onFocusOut) &&
+                    e.preventDefault();
+                };
+              }
+            }}
+          >
+            <ul>
+              {css.common.map((v) => (
+                <li key={v.name + v.value}>
+                  <span>{v.name}</span>: <span>{renderCssValue(v.value, props.cssVarAlt?.get(v.name))}</span>;
+                </li>
+              ))}
+            </ul>
+          </wup-popup>
+        </>
+      )}
       <ul>
-        {(props.excludeCssVars ? usedVars.filter((v) => !props.excludeCssVars!.includes(v.name)) : usedVars).map(
-          (v) => (
-            <li key={v.name + v.value}>
-              <span>{v.name}</span>: <span>{renderCssValue(v.value, props.cssVarAlt?.get(v.name))}</span>;
-            </li>
-          )
-        )}
+        {defined.map((v) => (
+          <li key={v.name + v.value}>
+            <span>{v.name}</span>: <span>{renderCssValue(v.value, props.cssVarAlt?.get(v.name))}</span>;
+          </li>
+        ))}
       </ul>
     </code>
   );
 }
 
-export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) {
+function UserCode(props: React.PropsWithChildren<UserCodeProps>) {
   if (!props.tag) {
     return null;
+  }
+  const el = document.querySelector(props.tag);
+  const [, updateState] = useState<number>();
+  useEffect(() => {
+    !el && setTimeout(() => updateState(1));
+  }, []);
+
+  if (!el) {
+    return null;
+  }
+  if (!(el instanceof WUPBaseElement)) {
+    throw new Error("Only WUPBaseElement expected");
   }
   return (
     <Tabs
       items={[
         {
           label: "HTML",
-          render: renderHTMLCode(props.tag!, props.customHTML),
+          render: <RenderHTMLCode {...(props as any)} el={el} />,
         },
         {
           label: "CSS vars",
-          render: renderCssVars(props),
+          render: <RenderCssVars {...(props as any)} el={el} />,
         },
         {
           label: "JS/TS",
@@ -152,11 +204,11 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
           ) : (
             <div style={{ padding: "1em" }}>
               See common example{" "}
-              <a href={linkGit("CODESTYLE.md")} target="_blank" rel="noreferrer">
+              <a href={linkGit("CODESTYLE.md")} target="_blank" rel="noreferrer" className={styles.defLink}>
                 here
               </a>{" "}
               and{" "}
-              <a href={linkGit(props.linkDemo)} target="_blank" rel="noreferrer">
+              <a href={linkGit(props.linkDemo)} target="_blank" rel="noreferrer" className={styles.defLink}>
                 demo code here
               </a>
             </div>
@@ -166,3 +218,5 @@ export default function UserCode(props: React.PropsWithChildren<UserCodeProps>) 
     />
   );
 }
+
+export default memo(UserCode, () => true);

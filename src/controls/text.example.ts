@@ -5,7 +5,7 @@ import WUPTextControl from "./text";
 declare global {
   namespace WUP.Text {
     interface ValidityMap {
-      isNumber?: boolean;
+      isNumber: boolean;
     }
   }
 }

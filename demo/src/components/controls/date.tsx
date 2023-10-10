@@ -1,9 +1,12 @@
 import Page from "src/elements/page";
 import { WUPDateControl } from "web-ui-pack";
+import stylesCom from "./controls.scss";
 
 const sideEffect = WUPDateControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
-(window as any).myDateValidations = { required: true } as WUP.Calendar.Options["validations"];
+(window as any).myDateValidations = { required: true } as WUP.Date.Options["validations"];
+(window as any).myDateValidations2 = { required: false } as WUP.Date.Options["validations"];
+
 (window as any).myDateExcludeDays = [
   new Date("2022-02-28T00:00:00.000Z"),
   new Date("2022-03-16T00:00:00.000Z"),
@@ -49,12 +52,14 @@ export default function DateControlView() {
           w-exclude="window.myDateExcludeDays"
           w-startWith="day"
           w-utc
-          w-validations="window.myDateValidations"
+          w-validations="window.myDateValidations2"
         />
-        <wup-date w-name="empty" />
+        <div className={stylesCom.group}>
+          <wup-date w-name="readonly" readonly w-initValue="2022-03-01 23:50" />
+          <wup-date w-name="disabled" disabled w-initValue="2022-03-01" />
+          <wup-date w-name="required" w-validations="window.myDateValidations" />
+        </div>
         <wup-date w-name="another" w-label="Another format: yyyy-m-d" w-format="yyyy-m-d" />
-        <wup-date w-name="disabled" disabled />
-        <wup-date w-name="readonly" readonly />
         <wup-date //
           w-name="saveUrl"
           w-label="With saving to URL (see $options.storageKey & storage)"

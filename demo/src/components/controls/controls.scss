@@ -1,0 +1,15 @@
+.group {
+  display: flex;
+  gap: 1em;
+
+  > * {
+    flex: 1 1 100%;
+    margin: 0;
+  }
+}
+
+.noBorders {
+  box-shadow: none !important;
+  border: none !important;
+  --ctrl-switch-padding: 1em 4px;
+}

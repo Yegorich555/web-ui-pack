@@ -11,7 +11,13 @@ exports[`control.switch $ariaDetails 1`] = `
       type="checkbox"
     />
     <strong />
-    <span />
+    <span
+      bar=""
+    >
+      <span
+        thumb=""
+      />
+    </span>
     <span
       class="wup-hidden"
     >
@@ -32,7 +38,13 @@ exports[`control.switch $ariaDetails 2`] = `
       type="checkbox"
     />
     <strong />
-    <span />
+    <span
+      bar=""
+    >
+      <span
+        thumb=""
+      />
+    </span>
   </label>
 </wup-switch>
 `;
@@ -49,7 +61,13 @@ exports[`control.switch $ariaSpeak 1`] = `
       type="checkbox"
     />
     <strong />
-    <span />
+    <span
+      bar=""
+    >
+      <span
+        thumb=""
+      />
+    </span>
   </label>
   <section
     aria-atomic="true"
@@ -74,7 +92,13 @@ exports[`control.switch $ariaSpeak 2`] = `
       type="checkbox"
     />
     <strong />
-    <span />
+    <span
+      bar=""
+    >
+      <span
+        thumb=""
+      />
+    </span>
   </label>
 </wup-switch>
 `;
@@ -90,7 +114,13 @@ exports[`control.switch $show/$hide error 1`] = `
       type="checkbox"
     />
     <strong />
-    <span />
+    <span
+      bar=""
+    >
+      <span
+        thumb=""
+      />
+    </span>
   </label>
 </wup-switch>
 `;
@@ -109,7 +139,13 @@ exports[`control.switch $show/$hide error 2`] = `
       type="checkbox"
     />
     <strong />
-    <span />
+    <span
+      bar=""
+    >
+      <span
+        thumb=""
+      />
+    </span>
   </label>
   <wup-popup
     aria-atomic="true"
@@ -140,7 +176,13 @@ exports[`control.switch $show/$hide error 3`] = `
       type="checkbox"
     />
     <strong />
-    <span />
+    <span
+      bar=""
+    >
+      <span
+        thumb=""
+      />
+    </span>
   </label>
 </wup-switch>
 `;
@@ -157,60 +199,86 @@ clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
   :root {
-          --base-bg: #fff;
-          --base-text: #232323;
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
           --base-btn-text: #fff;
           --base-btn-focus: #005766;
           --base-btn2-bg: var(--base-btn-text);
           --base-btn2-text: var(--base-btn-bg);
-          --base-btn3-bg: var(--base-bg);
+          --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --icon-hover-r: 30px;
+          --icon-hover: #0001;
+        }
+        [wupdark] {
+          --base-btn-focus: #bdbdbd;
+          --base-sep: #141414;
+          --icon-hover: #fff3;
+          --scroll: #fff2;
+          --scroll-hover: #fff3;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
         --ctrl-focus: var(--base-focus);
-        --ctrl-focus-label: var(--base-focus);
-        --ctrl-selected: var(--ctrl-focus-label);
+        --ctrl-focus-label: var(--ctrl-focus);
+        --ctrl-selected: var(--ctrl-focus);
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl-bg: var(--base-bg);
+        --ctrl: inherit;
+        --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
-        --ctrl-err-text: #ad0000;
+        --ctrl-err: #ad0000;
         --ctrl-err-bg: #fff4fa;
-        --ctrl-err-icon-valid: green;
+        --ctrl-err-valid: green;
         --ctrl-invalid-border: red;
         --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
         --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
         --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
         --wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
       }
+      [wupdark] {
+        --ctrl-bg: none;
+        --ctrl-border: #104652;
+        --ctrl-label: #919191;
+        --ctrl-icon: var(--ctrl-label);
+        --ctrl-focus-label: #25a1b6;
+        --ctrl-selected: #25a1b6;
+        --ctrl-err: #ff6666;
+        --ctrl-err-bg: #000;
+        --ctrl-err-valid: #54d754;
+      }
   :root {
       --ctrl-switch-padding: 1em;
       --ctrl-switch-on: #fff;
       --ctrl-switch-off: #fff;
-      --ctrl-switch-shadow: #0003;
       --ctrl-switch-off-bg: #9f9f9f;
       --ctrl-switch-on-bg: var(--ctrl-focus);
-      --ctrl-switch-size-h: var(--ctrl-icon-size);
-      --ctrl-switch-size-w: calc(var(--ctrl-switch-size-spot) * 2);
-      --ctrl-switch-size-spot: calc(var(--ctrl-switch-size-h) * 1.4);
+      --ctrl-switch-shadow: #0003;
+      --ctrl-switch-h: var(--ctrl-icon-size);
+      --ctrl-switch-w: calc(var(--ctrl-icon-size) * 2.8);
+      --ctrl-switch-r: calc(var(--ctrl-icon-size) * 1.4);
      }
+    [wupdark] {
+      --ctrl-switch-on: #e7e7e7;
+      --ctrl-switch-off: #e7e7e7;
+      --ctrl-switch-off-bg: #707070;
+      --ctrl-switch-shadow: #000;
+    }
   
       WUP-SWITCH {
         --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
-        margin-bottom: 20px;
+        margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
+        color: var(--ctrl);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -242,8 +310,8 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled] WUP-SWITCH &gt; *,
-      WUP-SWITCH[disabled] &gt; * {
+      [disabled] WUP-SWITCH &gt; label,
+      WUP-SWITCH[disabled] &gt; label {
         pointer-events: none;
       }
       WUP-SWITCH label {
@@ -284,10 +352,11 @@ padding:0;}
       WUP-SWITCH [error] {
         cursor: pointer;
         font-size: small;
-        color: var(--ctrl-err-text);
+        color: var(--ctrl-err);
         background: var(--ctrl-err-bg);
         overflow: auto;
         overflow: overlay;
+        // text-shadow: 0 0 0 var(--ctrl-err);
       }
       WUP-SWITCH [error] ul {
         margin:0; padding:2px 4px 2px;
@@ -300,7 +369,7 @@ padding:0;}
       WUP-SWITCH [error] li:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         
 display: inline-block;
 width: var(--ctrl-icon-size);
@@ -323,17 +392,21 @@ mask-position: center;
 mask-image: var(--ctrl-icon-img);
       }
       WUP-SWITCH [error] li[valid] {
-        color: var(--ctrl-err-icon-valid);
+        color: var(--ctrl-err-valid);
       }
       WUP-SWITCH [error] li[valid]:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-icon-valid);
+        --ctrl-icon: var(--ctrl-err-valid);
       }
       WUP-SWITCH:focus-within [error] {
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
+        WUP-SWITCH:hover strong,
+        WUP-SWITCH[hovered] strong{
+          color: var(--ctrl-focus-label);
+        }
         WUP-SWITCH:hover,
         WUP-SWITCH:hover&gt;[menu],
         WUP-SWITCH[hovered],
@@ -349,6 +422,8 @@ mask-image: var(--ctrl-icon-img);
         cursor: initial;
       }
       WUP-SWITCH label {
+        display: flex;
+        gap: 0.5em;
         padding: var(--ctrl-switch-padding);
       }
       WUP-SWITCH strong {
@@ -358,27 +433,57 @@ mask-image: var(--ctrl-icon-img);
         white-space: nowrap;
         font-weight: normal;
         text-decoration: none;
-        color: var(--ctrl-label);
+        color: inherit;
       }
-      WUP-SWITCH label&gt;span {
-        margin-left: 0.5em;
-        position: relative;
-        width: var(--ctrl-switch-size-w);
-        min-width: var(--ctrl-switch-size-w);
-        height: var(--ctrl-switch-size-h);
+      WUP-SWITCH [bar] {
+        display: inline-flex;
+        align-items: center;
+        overflow: visible;
+        width: var(--ctrl-switch-w);
+        min-width: var(--ctrl-switch-w);
+        height: var(--ctrl-switch-h);
         border-radius: 999px;
+        color: whitesmoke;
         background: var(--ctrl-switch-off-bg);
       }
-      WUP-SWITCH label&gt;span:before {
-        content: "";
-        position: absolute;
-        height: var(--ctrl-switch-size-spot);
-        width: var(--ctrl-switch-size-spot);
-        left: -1px; top: 50%;
-        transform: translateY(-50%);
+      
+WUP-SWITCH [thumb] {
+    transform-style: preserve-3d;
+  }
+WUP-SWITCH [thumb]:before {
+  z-index: -1;
+  position: absolute;
+  transform: translate(-50%, -50%) translateZ(-1px);
+  left: 50%; top: 50%;
+  width: var(--icon-hover-r, 2.4em);
+  height: var(--icon-hover-r, 2.4em);
+  background: var(--icon-hover, #0001);
+  border-radius: 50%;
+}
+WUP-SWITCH:focus-within [thumb] {
+  position: relative;
+}
+WUP-SWITCH:focus-within [thumb]:before {
+  content: "";
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-SWITCH:hover [thumb] {
+    position: relative;
+  }
+  WUP-SWITCH:hover [thumb]:before {
+    content: "";
+    opacity: 0.8;
+  }
+}
+      WUP-SWITCH [thumb] {
+        z-index: 2;
+        display: inline-block;
+        height: var(--ctrl-switch-r);
+        width: var(--ctrl-switch-r);
         background: var(--ctrl-switch-off);
         box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
         border-radius: 50%;
+        transform: translateX(-1px);
       }
       WUP-SWITCH input { 
 position: absolute;
@@ -387,31 +492,22 @@ overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0; }
-      WUP-SWITCH input:checked + * + * {
+      WUP-SWITCH[checked] [bar] {
         background-color: var(--ctrl-switch-on-bg);
       }
-      WUP-SWITCH input:checked + * + *:before {
+      WUP-SWITCH[checked] [thumb] {
         background: var(--ctrl-switch-on);
-        left: calc(100% - var(--ctrl-switch-size-w) + var(--ctrl-switch-size-spot) + 1px);
+        transform: translateX(var(--ctrl-switch-w)) translateX(calc(-100% + 1px));
       }
       WUP-SWITCH[w-reverse] label {
         flex-direction: row-reverse;
       }
-      WUP-SWITCH[w-reverse] label&gt;span {
-        margin-left: 0;
-        margin-right: 0.5em;
-      }
-      WUP-SWITCH[w-reverse] label&gt;strong {
+      WUP-SWITCH[w-reverse] strong {
         margin-right: auto;
       }
       @media not all and (prefers-reduced-motion) {
-        WUP-SWITCH label&gt;span { transition: background-color var(--anim); }
-        WUP-SWITCH label&gt;span:before { transition: left var(--anim); }
-      }
-      @media (hover: hover) and (pointer: fine) {
-        WUP-SWITCH:hover label&gt;span:before {
-           box-shadow: 0 0 4px 0 var(--ctrl-focus);
-        }
+        WUP-SWITCH [bar] { transition: background-color var(--anim); }
+        WUP-SWITCH [thumb] { transition: transform var(--anim); }
       }
 </style>
 `;
@@ -469,7 +565,9 @@ exports[`control.switch common tests snapshot of $defaults 3`] = `
 `;
 
 exports[`control.switch validations options.validationCase 1`] = `
-<wup-switch>
+<wup-switch
+  checked=""
+>
   <label
     for="txt1"
   >
@@ -479,13 +577,20 @@ exports[`control.switch validations options.validationCase 1`] = `
       type="checkbox"
     />
     <strong />
-    <span />
+    <span
+      bar=""
+    >
+      <span
+        thumb=""
+      />
+    </span>
   </label>
 </wup-switch>
 `;
 
 exports[`control.switch validations options.validationCase 2`] = `
 <wup-switch
+  checked=""
   invalid=""
   required=""
 >
@@ -502,7 +607,13 @@ exports[`control.switch validations options.validationCase 2`] = `
     <strong>
       First Input
     </strong>
-    <span />
+    <span
+      bar=""
+    >
+      <span
+        thumb=""
+      />
+    </span>
   </label>
   <wup-popup
     aria-atomic="true"
@@ -539,7 +650,13 @@ exports[`control.switch validations options.validationCase 3`] = `
     <strong>
       First Input
     </strong>
-    <span />
+    <span
+      bar=""
+    >
+      <span
+        thumb=""
+      />
+    </span>
   </label>
   <wup-popup
     aria-atomic="true"
@@ -577,7 +694,13 @@ exports[`control.switch with form 1`] = `
       <strong>
         First Input
       </strong>
-      <span />
+      <span
+        bar=""
+      >
+        <span
+          thumb=""
+        />
+      </span>
     </label>
   </wup-switch>
 </wup-form>

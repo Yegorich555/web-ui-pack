@@ -140,6 +140,12 @@ export default class WUPCalendarControl<
       --ctrl-clr-width: 17em;
       --ctrl-clr-cell-gap: 0px;
       --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
+      --ctrl-clr-off: var(--ctrl-err);
+      --ctrl-clr-off-bg: var(--ctrl-err-bg);
+    }
+    [wupdark] {
+      --ctrl-clr-off: var(--ctrl-err);
+      --ctrl-clr-off-bg: none;
     }`;
   }
 
@@ -148,8 +154,8 @@ export default class WUPCalendarControl<
       :host {
         max-width: fit-content;
         margin: auto auto 20px;
+        box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
-        box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
         background: none;
         text-transform: capitalize;
       }
@@ -268,8 +274,8 @@ export default class WUPCalendarControl<
         }
       }
       :host li[disabled] {
-        color: var(--ctrl-err-text);
-        background-color: var(--ctrl-err-bg);
+        color: var(--ctrl-clr-off);
+        background-color: var(--ctrl-clr-off-bg);
       }
       :host li[disabled][aria-selected] {
         font-weight: bold;

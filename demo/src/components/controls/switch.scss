@@ -1,0 +1,60 @@
+/* stylelint-disable no-descending-specificity */
+.customGroup {
+  align-items: center;
+}
+
+.big {
+  --ctrl-switch-r: 1.4em;
+  --ctrl-switch-r-hover: 2em;
+  --ctrl-switch-h: 2em;
+  --ctrl-switch-w: 3.2em;
+  --ctrl-switch-padding: 1em 4px; // padding of control itself
+  // WARN: ordinary padding works with box-sizing: content-box but in this case need ctrl-switch-w recalc
+  --padding: calc((var(--ctrl-switch-h) - var(--ctrl-switch-r)) / 2);
+  box-shadow: none !important;
+  border: none !important;
+
+  [bar] {
+    padding: var(--padding);
+    box-sizing: border-box;
+    // container-type: inline-size; // poor support https://caniuse.com/?search=cqw
+  }
+
+  [thumb] {
+    transform: translateX(0);
+  }
+
+  &[checked] [thumb] {
+    // transform: translateX(calc(100cqw - 100%));  // poor support https://caniuse.com/?search=cqw
+    transform: translateX(calc(var(--ctrl-switch-w) - var(--padding) * 2)) translateX(-100%);
+  }
+
+  &:hover [bar] {
+    box-shadow: 0 0 0 1px var(--ctrl-switch-off-bg);
+  }
+
+  &[checked]:hover [bar] {
+    box-shadow: 0 0 0 1px var(--ctrl-switch-on-bg);
+  }
+}
+
+.withIcons {
+  --ctrl-switch-on: #38b9d6;
+  --ctrl-switch-w: 3.6em;
+  --padding: calc((var(--ctrl-switch-h) - var(--ctrl-switch-r)) / 2);
+
+  [bar] {
+    @include iconBefore($icon-moon);
+    @include iconAfter($icon-sun);
+
+    &:before,
+    &:after {
+      position: absolute;
+      padding: 1px; // to be sure the thumb overrides icons on small devices
+    }
+
+    &::after {
+      transform: translateX(calc(var(--ctrl-switch-w) - var(--padding) * 2)) translateX(-100%);
+    }
+  }
+}

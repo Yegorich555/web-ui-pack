@@ -1,5 +1,6 @@
 import Page from "src/elements/page";
 import { WUPPasswordControl } from "web-ui-pack";
+import stylesCom from "./controls.scss";
 
 const sideEffect = WUPPasswordControl;
 !sideEffect && console.error("!"); // required otherwise import is ignored by webpack
@@ -32,11 +33,11 @@ export default function PasswordControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$initModel = { pwd: "somePwdHere", required: "yes" };
+            el.$initModel = { pwd: "somePwdHere" };
             el.$onSubmit = (e) => console.warn("submitted model", e.$model);
           }
         }}
-        w-autoFocus
+        w-autoFocus={false}
       >
         <wup-pwd
           w-name="pwd"
@@ -46,31 +47,9 @@ export default function PasswordControlView() {
           ref={(el) => {
             if (el) {
               el.$options.validationShowAll = true;
-              el.$options.autoFocus = true;
             }
           }}
         />
-        <wup-pwd
-          w-name="required"
-          ref={(el) => {
-            if (el) {
-              el.$options.validationShowAll = true;
-              el.$options.validations = {
-                required: true,
-              };
-            }
-          }}
-        />
-        <wup-pwd
-          w-name="withoutClearButton"
-          ref={(el) => {
-            if (el) {
-              el.$options.clearButton = false;
-            }
-          }}
-        />
-        <wup-pwd w-name="disabled" disabled />
-        <wup-pwd w-label="Reversed button eye" w-name="reversed" w-reverse w-initValue="someValue-ForReversed" />
         <wup-pwd
           w-label="Confirm password"
           w-name="confirm"
@@ -80,6 +59,30 @@ export default function PasswordControlView() {
             }
           }}
         />
+        <div className={stylesCom.group}>
+          <wup-pwd w-name="readonly" w-initValue="someValue" />
+          <wup-pwd w-name="disabled" w-initValue="someValue" />
+          <wup-pwd
+            w-name="required"
+            ref={(el) => {
+              if (el) {
+                el.$options.validationShowAll = true;
+                el.$options.validations = {
+                  required: true,
+                };
+              }
+            }}
+          />
+        </div>
+        <wup-pwd
+          w-name="withoutClearButton"
+          ref={(el) => {
+            if (el) {
+              el.$options.clearButton = false;
+            }
+          }}
+        />
+        <wup-pwd w-label="Reversed button eye" w-name="reversed" w-reverse w-initValue="someValue-ForReversed" />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

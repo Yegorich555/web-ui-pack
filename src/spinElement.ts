@@ -140,7 +140,7 @@ export default class WUPSpinElement<
          z-index: -1;
          background: var(--spin-fade);
       }
-      :host>div[fade]::after { content: none; }
+      :host>div[fade]:after { content: none; }
       ${this.$styleApplied}`;
   }
 
@@ -446,7 +446,7 @@ export function spinUseDotRoller(cls: typeof WUPSpinElement<any>): void {
     let s = "";
     for (let i = 1; i <= cnt; ++i) {
       s += `:host>div:nth-child(${i}) { animation-delay: -${0.036 * i}s; }
-            :host>div:nth-child(${i})::after { transform: rotate(calc(45deg + var(--spin-step) * ${i - 1})); }
+            :host>div:nth-child(${i}):after { transform: rotate(calc(45deg + var(--spin-step) * ${i - 1})); }
             `;
     }
     return `:root { --spin-step: 24deg; }
@@ -455,7 +455,7 @@ export function spinUseDotRoller(cls: typeof WUPSpinElement<any>): void {
               animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
               position: absolute;
             }
-            :host>div::after {
+            :host>div:after {
               content: " ";
               display: block;
               position: absolute;
@@ -477,7 +477,7 @@ export function spinUseDotRing(cls: typeof WUPSpinElement<any>): void {
   spinSetStyle(cls, cnt, () => {
     let s = "";
     for (let i = 1; i <= cnt; ++i) {
-      s += `:host>div:nth-child(${i})::after { animation-delay: ${0.1 * (i - 1)}s; }
+      s += `:host>div:nth-child(${i}):after { animation-delay: ${0.1 * (i - 1)}s; }
             :host>div:nth-child(${i}) { transform: translate(-50%,-50%) rotate(${(360 / cnt) * (i - 1)}deg) }
             `;
     }
@@ -494,7 +494,7 @@ export function spinUseDotRing(cls: typeof WUPSpinElement<any>): void {
               animation: none;
               top:50%; left:50%;
             }
-            :host>div::after {
+            :host>div:after {
               animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
               content: " ";
               display: block;

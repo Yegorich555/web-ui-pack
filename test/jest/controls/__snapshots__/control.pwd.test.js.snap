@@ -280,44 +280,70 @@ clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
   :root {
-          --base-bg: #fff;
-          --base-text: #232323;
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
           --base-btn-text: #fff;
           --base-btn-focus: #005766;
           --base-btn2-bg: var(--base-btn-text);
           --base-btn2-text: var(--base-btn-bg);
-          --base-btn3-bg: var(--base-bg);
+          --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --icon-hover-r: 30px;
+          --icon-hover: #0001;
+        }
+        [wupdark] {
+          --base-btn-focus: #bdbdbd;
+          --base-sep: #141414;
+          --icon-hover: #fff3;
+          --scroll: #fff2;
+          --scroll-hover: #fff3;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
         --ctrl-focus: var(--base-focus);
-        --ctrl-focus-label: var(--base-focus);
-        --ctrl-selected: var(--ctrl-focus-label);
+        --ctrl-focus-label: var(--ctrl-focus);
+        --ctrl-selected: var(--ctrl-focus);
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl-bg: var(--base-bg);
+        --ctrl: inherit;
+        --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
-        --ctrl-err-text: #ad0000;
+        --ctrl-err: #ad0000;
         --ctrl-err-bg: #fff4fa;
-        --ctrl-err-icon-valid: green;
+        --ctrl-err-valid: green;
         --ctrl-invalid-border: red;
         --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
         --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
         --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
         --wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
       }
+      [wupdark] {
+        --ctrl-bg: none;
+        --ctrl-border: #104652;
+        --ctrl-label: #919191;
+        --ctrl-icon: var(--ctrl-label);
+        --ctrl-focus-label: #25a1b6;
+        --ctrl-selected: #25a1b6;
+        --ctrl-err: #ff6666;
+        --ctrl-err-bg: #000;
+        --ctrl-err-valid: #54d754;
+      }
   :root {
+      --ctrl-autofill: #00869e;
+      --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
      }
+     [wupdark] {
+        --ctrl-clear-hover: rgba(255,0,0,0.2);
+        --ctrl-autofill: #89bc55;
+        --ctrl-autofill-caret: #fff;
+      }
   :root {
         --wup-icon-eye: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 122.182C209.455 122.182 60.392 230.749 0 384c60.392 153.251 209.455 261.818 384 261.818S707.608 537.251 768 384c-60.392-153.251-209.455-261.818-384-261.818zm0 436.363c-96.35 0-174.545-78.197-174.545-174.545S287.651 209.455 384 209.455 558.545 287.651 558.545 384 480.348 558.545 384 558.545zm0-279.272c-57.95 0-104.727 46.778-104.727 104.727S326.051 488.727 384 488.727 488.727 441.949 488.727 384 441.949 279.273 384 279.273z'/%3E%3C/svg%3E");
         --wup-icon-eye-off: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 209.375c96.393 0 174.625 78.232 174.625 174.625 0 22.701-4.54 44.005-12.573 63.913l101.981 101.981C700.77 505.889 742.331 448.961 767.826 384c-60.42-153.321-209.55-261.938-384.174-261.938-48.895 0-95.695 8.731-139.001 24.448l75.438 75.438c19.907-8.032 41.212-12.573 63.913-12.573zM34.75 114.03l95.695 95.695C72.469 254.778 27.067 314.85-.174 384.001 60.246 537.322 209.376 645.938 384 645.938c54.133 0 105.823-10.477 152.971-29.337l14.668 14.668 102.33 101.981 44.355-44.355L79.105 69.676 34.75 114.031zm193.135 193.135 54.133 54.133c-1.746 7.334-2.794 15.018-2.794 22.701 0 57.976 46.799 104.775 104.775 104.775 7.684 0 15.367-1.048 22.701-2.794l54.134 54.134c-23.4 11.525-49.244 18.51-76.835 18.51-96.393 0-174.625-78.232-174.625-174.625 0-27.591 6.985-53.435 18.51-76.835zm150.527-27.242 110.014 110.014.698-5.588c0-57.976-46.799-104.775-104.775-104.775l-5.937.349z'/%3E%3C/svg%3E");
@@ -327,9 +353,10 @@ padding:0;}
         --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
-        margin-bottom: 20px;
+        margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
+        color: var(--ctrl);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -361,8 +388,8 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled] WUP-PWD &gt; *,
-      WUP-PWD[disabled] &gt; * {
+      [disabled] WUP-PWD &gt; label,
+      WUP-PWD[disabled] &gt; label {
         pointer-events: none;
       }
       WUP-PWD label {
@@ -403,10 +430,11 @@ padding:0;}
       WUP-PWD [error] {
         cursor: pointer;
         font-size: small;
-        color: var(--ctrl-err-text);
+        color: var(--ctrl-err);
         background: var(--ctrl-err-bg);
         overflow: auto;
         overflow: overlay;
+        // text-shadow: 0 0 0 var(--ctrl-err);
       }
       WUP-PWD [error] ul {
         margin:0; padding:2px 4px 2px;
@@ -419,7 +447,7 @@ padding:0;}
       WUP-PWD [error] li:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         
 display: inline-block;
 width: var(--ctrl-icon-size);
@@ -442,17 +470,21 @@ mask-position: center;
 mask-image: var(--ctrl-icon-img);
       }
       WUP-PWD [error] li[valid] {
-        color: var(--ctrl-err-icon-valid);
+        color: var(--ctrl-err-valid);
       }
       WUP-PWD [error] li[valid]:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-icon-valid);
+        --ctrl-icon: var(--ctrl-err-valid);
       }
       WUP-PWD:focus-within [error] {
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
+        WUP-PWD:hover strong,
+        WUP-PWD[hovered] strong{
+          color: var(--ctrl-focus-label);
+        }
         WUP-PWD:hover,
         WUP-PWD:hover&gt;[menu],
         WUP-PWD[hovered],
@@ -498,7 +530,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-PWD [prefix],
         WUP-PWD [postfix] {
-          color: var(--ctrl-label);
+          color: inherit;
           flex-shrink: 0;
         }
         WUP-PWD [maskholder],
@@ -527,12 +559,16 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
+          -webkit-text-fill-color: var(--ctrl-autofill);
+          caret-color: var(--ctrl-autofill-caret, auto);
         }
         WUP-PWD input:autofill,
         WUP-PWD textarea:autofill,
         WUP-PWD [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
+          text-fill-color: var(--ctrl-autofill);
+          caret-color: var(--ctrl-autofill-caret, auto);
         }
         WUP-PWD strong {
           display: block;
@@ -556,8 +592,8 @@ mask-image: var(--ctrl-icon-img);
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        WUP-PWD input:not(:focus)::placeholder,
-        WUP-PWD textarea:not(:focus)::placeholder {
+        WUP-PWD input:not(:focus):placeholder,
+        WUP-PWD textarea:not(:focus):placeholder {
           color: transparent;
         }
         WUP-PWD:focus-within strong,
@@ -567,6 +603,18 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        WUP-PWD input:-webkit-autofill + strong
+        WUP-PWD textarea:-webkit-autofill + strong
+        WUP-PWD [contenteditable=true]:-webkit-autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
+        }
+        WUP-PWD input:autofill + strong,
+        WUP-PWD textarea:autofill + strong,
+        WUP-PWD [contenteditable=true]:autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
         }
         WUP-PWD:focus-within [maskholder],
         WUP-PWD:focus-within [prefix],
@@ -626,11 +674,12 @@ mask-image: var(--ctrl-icon-img);
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
           background: none;
-          mask: none;
           -webkit-mask: none;
+          mask: none;
         }
         WUP-PWD:focus-within button[clear] {
-          display: block;
+          display: inline-block;
+          opacity: 1;
         }
         WUP-PWD button[clear=back] {
           --ctrl-icon-img: var(--wup-icon-back);
@@ -652,14 +701,15 @@ mask-image: var(--ctrl-icon-img);
         }
         @media (hover: hover) and (pointer: fine) {
           WUP-PWD:hover button[clear] {
-            display: block;
+            display: inline-block;
+            opacity: 1;
           }
           WUP-PWD button[clear]:hover:before {
             content: "";
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           WUP-PWD button[clear]:hover:after {
-            background: var(--ctrl-err-text);
+            background: var(--ctrl-clear);
           }
         }
         WUP-PWD[disabled] button[clear],
@@ -679,6 +729,7 @@ mask-image: var(--ctrl-icon-img);
           margin-bottom: -1px;
         }
         WUP-PWD button[eye] {
+          cursor: pointer;
           margin-right: -0.5em;
           -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);

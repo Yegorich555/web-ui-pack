@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.10.1 (\_\_\_)
+
+**BREAKING CHANGES**:
+
+- **Controls**. Renamed some css-vars (this is last big breaking change)
+- [FormElement](src/formElement.ts). Option `autoSave` renamed to `autoStore`
+
+**Fixes**:
+
+- **TypeScript**. Updated CustomEvents `$onWillShow`, `$onWillHide`, `$onChange`
+- **Text based controls**
+  - _Label doesn't go to top on browser autofill_
+  - _Value missed & undo/redo failed on browser autofill_
+- [SelectManyControl](src/controls/selectMany.ts).
+  - _Showing button[clear] on hover changes height_
+  - _Focus sometimes is wrong when user removes item & reverts changes via click on button[clear=back]_
+
+**New/Features**:
+
+- Added built-in colors for darkMode. _Append attr `[wupdark]` to body to use it. Don't forget to define general text & background colors yourself_
+
 ## 0.9.1 (Sep 28, 2023)
 
 **BREAKING CHANGES**:

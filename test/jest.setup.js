@@ -85,3 +85,27 @@ window.DOMRect = {
     return { x, y, left: x, top: y, width, height, right: width + x, bottom: height + y };
   },
 };
+
+const origDispatch = HTMLElement.prototype.dispatchEvent;
+HTMLElement.prototype.dispatchEvent = function dispatchEventFix(/** @type Event */ e) {
+  const needFix = e.type === "beforeinput" && this.onbeforeinput;
+  if (needFix) {
+    const n = this.onbeforeinput;
+    this.onbeforeinput = () => {
+      throw new Error("Event 'beforeinput' is fixed internally. Please remove this fix");
+    };
+
+    this.addEventListener(
+      "beforeinput",
+      (ev) => {
+        this.onbeforeinput = n;
+        return this.onbeforeinput?.call(this, ev);
+      },
+      { once: true }
+    );
+
+    return origDispatch.call(this, e);
+  }
+
+  return origDispatch.call(this, e);
+};

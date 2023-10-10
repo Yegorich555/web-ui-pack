@@ -348,4 +348,44 @@ describe("control.text", () => {
     expect(() => jest.advanceTimersByTime(10000)).not.toThrow();
     expect(el.outerHTML).toBe(prev); // input state must be returned to prev
   });
+
+  test("browser autofill", async () => {
+    // simulate browser autofill: isTrusted=true + inputType=null
+    Element.prototype._addEventListener = Element.prototype.addEventListener;
+    Element.prototype.addEventListener = function trusted(type, listener, options) {
+      if (type !== "input") {
+        return Element.prototype._addEventListener.call(this, type, listener, options);
+      }
+      function listenerWrap(e) {
+        const fakeObj = { ...e, isTrusted: true, inputType: e.inputType || undefined };
+        // eslint-disable-next-line no-restricted-syntax, guard-for-in
+        for (const p in Object.getPrototypeOf(e)) {
+          const skip = p === "isTrusted" || p === "inputType";
+          !skip && Object.defineProperty(fakeObj, p, { enumerable: false, value: e[p] });
+        }
+        return listener.call(this, fakeObj);
+      }
+      return Element.prototype._addEventListener.call(this, type, listenerWrap, options);
+    };
+
+    el = document.body.appendChild(document.createElement("wup-text"));
+    await h.wait(10);
+    const onErr = h.mockConsoleError();
+    const onWarn = h.mockConsoleWarn();
+    el.$refInput.value = "some@email.com";
+    el.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: undefined }));
+    Element.prototype.addEventListener = Element.prototype._addEventListener;
+    h.unMockConsoleError();
+    h.unMockConsoleWarn();
+
+    expect(el._refHistory).toBeDefined();
+    expect(el.$refInput.value).toBe("some@email.com");
+    el.$refInput.focus();
+    await h.wait();
+    expect(await h.userUndo(el.$refInput)).toBe("|");
+    expect(await h.userRedo(el.$refInput)).toBe("some@email.com|");
+
+    expect(onErr).not.toBeCalled();
+    expect(onWarn).not.toBeCalled();
+  });
 });

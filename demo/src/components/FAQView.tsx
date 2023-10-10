@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import Code from "src/elements/code";
 import FAQ from "src/elements/faq";
 import Page from "src/elements/page";
@@ -14,12 +15,13 @@ export default function FAQView() {
             question: "How to use this? Need always look into source code to get details",
             answer: (
               <>
-                You do it in a wrong way OR intellisense in editor does not work. So check these rules:
+                <i>You do it in a wrong way OR intellisense in editor does not work. So check these rules:</i>
                 <section>
                   <ol>
                     <li>
-                      Intellisense must work - otherwise coding in notepad does not make sense at all. Try import
+                      Intellisense must work - otherwise coding in 'notepad' does not make sense at all. Try import
                       required component at first. Check{" "}
+                      <a href="https://github.com/Yegorich555/web-ui-pack/tree/master/CODESTYLE.md">CodeStyle</a> and{" "}
                       <a href="https://github.com/Yegorich555/web-ui-pack/tree/master/demo">source-code of demo</a> to
                       compare with your solution
                     </li>
@@ -51,7 +53,7 @@ export default function FAQView() {
             question: "How to redefine styles",
             answer: (
               <>
-                Redefine css variables
+                <i>Redefine css variables</i>
                 <Code code={codeCssVars} />
               </>
             ),
@@ -61,11 +63,13 @@ export default function FAQView() {
             question: "What attributes possible to use instead of $options",
             answer: (
               <>
-                See details on demo for each element. Section <b>HTML</b> contains example with all supported
-                attributes.
-                <br />
-                Every attribute has reflected option. So changing attribute affects on $options (but changing $options
-                clears attribute to make HTML clearer)
+                <i>
+                  See details on demo for each element. Section <b>HTML</b> contains example with all supported
+                  attributes.
+                  <br />
+                  Every attribute has reflected option. So changing attribute affects on $options (but changing $options
+                  clears attribute to make HTML clearer)
+                </i>
                 <Code code={codeAttrs} />
               </>
             ),
@@ -110,8 +114,10 @@ export default function FAQView() {
             question: "Controls. How to detach from FormElement (exclude from model, validation, changes etc.)",
             answer: (
               <>
-                Use $options.<b>name</b> per each control (<b>readonly</b>, <b>disabled</b> applies even to detached
-                controls inside form)
+                <i>
+                  Use $options.<b>name</b> per each control (<b>readonly</b>, <b>disabled</b> applies even to detached
+                  controls inside form)
+                </i>
                 <Code code={codeControlDetach} />
               </>
             ),
@@ -121,7 +127,10 @@ export default function FAQView() {
             question: "Controls. How to change default validation rules/messages and add new",
             answer: (
               <>
-                Every control-type has $defaults.validationRules
+                <i>
+                  Every control-type has $defaults.validationRules. Also check{" "}
+                  <a href="https://github.com/Yegorich555/web-ui-pack/tree/master/CODESTYLE.md">CodeStyle</a>
+                </i>
                 <Code code={codeVldRules} />
               </>
             ),
@@ -160,7 +169,7 @@ export default function FAQView() {
               "Controls. How to remove asterisk at the end of label for controls with validationRule [required]",
             answer: (
               <>
-                Apply styles below
+                <i>Apply styles below</i>
                 <Code code={codeRemoveRequired} />
               </>
             ),
@@ -170,8 +179,10 @@ export default function FAQView() {
             question: "Controls. How to change parsing attribute [initvalue]",
             answer: (
               <>
-                When applied attribute [initvalue] controls use method parseValue(). By default it&apos;s search by
-                string-type. But you can override behavior
+                <i>
+                  When applied attribute [initvalue] controls use method parseValue(). By default it&apos;s search by
+                  string-type. But you can override behavior
+                </i>
                 <Code code={codeParseInitValue} />
               </>
             ),
@@ -181,7 +192,7 @@ export default function FAQView() {
             question: "Styles. How to reuse built-in styles",
             answer: (
               <>
-                Some styles (scroll, button submit etc.) are shared and placed in web-ui-pack/styles.js
+                <i>Some styles (scroll, button submit etc.) are shared and placed in web-ui-pack/styles.js</i>
                 <Code code={codeSharedStyles} />
               </>
             ),
@@ -194,14 +205,21 @@ export default function FAQView() {
 
 const codeCssVars = `css
 body { /* Redefine css variables */
+  background: #f3f6f9;
+  color: black;
   --base-btn-bg: #009fbc;
   --border-radius: 0;
-  --ctrl-label: blue; /* etc. */
+  --ctrl-label: #028198; /* etc. */
+}
+body[wupdark] {
+  background: #161b24;
+  color: white;
+  --ctrl-label: #919191; /* etc. */
 }`;
 
 const codeAttrs = `js
 // HTML code
-<wup-text name="email"></wup-text>
+<wup-text w-name="email"></wup-text>
 // equal to
 const el = document.querySelector("wup-text");
 el.$options.name = "email";`;
@@ -246,6 +264,13 @@ form.addEventListener("$change", (e) => {
 
 const codeVldRules = `js
 // to define new rule add new property to validationRules
+declare global {
+  namespace WUP.Text {  // WUP.Text for WUPTextControl, WUP.Number for WUPNumberControl etc.
+    interface ValidityMap {
+      isNumber: boolean; // it's required for intellisense
+    }
+  }
+}
 WUPTextControl.$defaults.validationRules.isNumber = (v) =>
     (!v || !/^[0-9]*$/.test(v)) && "Please enter a valid number";
 const el = document.createElement("wup-text");
@@ -256,7 +281,7 @@ el.$options.validations = {
   isNumber: (v) => (!v || !/^[0-9]*$/.test(v)) && "Please enter a valid number",
 };
 
-// to redefine default error message need to redefine the whole rule
+// to re-define default message need to update the whole rule
 const origMin = WUPTextControl.$defaults.validationRules.min!;
 WUPTextControl.$defaults.validationRules.min = (v, setV) =>
    origMin(v, setV) && 'Your custom error message';

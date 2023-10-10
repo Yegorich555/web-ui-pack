@@ -122,8 +122,15 @@ export default class WUPTextControl<
 
   static get $styleRoot(): string {
     return `:root {
+      --ctrl-autofill: #00869e;
+      --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
-     }`;
+     }
+     [wupdark] {
+        --ctrl-clear-hover: rgba(255,0,0,0.2);
+        --ctrl-autofill: #89bc55;
+        --ctrl-autofill-caret: #fff;
+      }`;
   }
 
   static get $style(): string {
@@ -166,7 +173,7 @@ export default class WUPTextControl<
         }
         :host [prefix],
         :host [postfix] {
-          color: var(--ctrl-label);
+          color: inherit;
           flex-shrink: 0;
         }
         :host [maskholder],
@@ -195,12 +202,16 @@ export default class WUPTextControl<
         :host [contenteditable=true]:-webkit-autofill {
           font: inherit;
           -webkit-background-clip: text;
+          -webkit-text-fill-color: var(--ctrl-autofill);
+          caret-color: var(--ctrl-autofill-caret, auto);
         }
         :host input:autofill,
         :host textarea:autofill,
         :host [contenteditable=true]:autofill {
           font: inherit;
           background-clip: text;
+          text-fill-color: var(--ctrl-autofill);
+          caret-color: var(--ctrl-autofill-caret, auto);
         }
         :host strong {
           display: block;
@@ -224,8 +235,8 @@ export default class WUPTextControl<
             transition: top var(--anim), transform var(--anim), color var(--anim);
           }
         }
-        :host input:not(:focus)::placeholder,
-        :host textarea:not(:focus)::placeholder {
+        :host input:not(:focus):placeholder,
+        :host textarea:not(:focus):placeholder {
           color: transparent;
         }
         :host:focus-within strong,
@@ -235,6 +246,18 @@ export default class WUPTextControl<
         :host legend {
           top: 0.2em;
           transform: scale(0.9);
+        }
+        :host input:-webkit-autofill + strong
+        :host textarea:-webkit-autofill + strong
+        :host [contenteditable=true]:-webkit-autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
+        }
+        :host input:autofill + strong,
+        :host textarea:autofill + strong,
+        :host [contenteditable=true]:autofill + strong {
+           top: 0.2em;
+           transform: scale(0.9);
         }
         :host:focus-within [maskholder],
         :host:focus-within [prefix],
@@ -275,11 +298,12 @@ export default class WUPTextControl<
           cursor: pointer;
           --ctrl-icon-img: var(--wup-icon-cross);
           background: none;
-          mask: none;
           -webkit-mask: none;
+          mask: none;
         }
         :host:focus-within button[clear] {
-          display: block;
+          display: inline-block;
+          opacity: 1;
         }
         :host button[clear=back] {
           --ctrl-icon-img: var(--wup-icon-back);
@@ -301,14 +325,15 @@ export default class WUPTextControl<
         }
         @media (hover: hover) and (pointer: fine) {
           :host:hover button[clear] {
-            display: block;
+            display: inline-block;
+            opacity: 1;
           }
           :host button[clear]:hover:before {
             content: "";
             box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
           }
           :host button[clear]:hover:after {
-            background: var(--ctrl-err-text);
+            background: var(--ctrl-clear);
           }
         }
         :host[disabled] button[clear],
@@ -346,7 +371,7 @@ export default class WUPTextControl<
   constructor() {
     super();
 
-    this.$refInput.placeholder = " "; // Without this css related styles doesn't work with browser autofill
+    this.$refInput.placeholder = " "; // Without this css related styles don't work with browser autofill
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -385,6 +410,9 @@ export default class WUPTextControl<
     s.appendChild(this.$refInput); // input appended to span to allow user user :after,:before without padding adjust
     s.appendChild(this.$refTitle);
     this.appendChild(this.$refLabel);
+    // WARN: browser autofill can fire input without focus: need listen for input event every time
+    this.$refInput.addEventListener("beforeinput", (e) => this.gotBeforeInput(e as WUP.Text.GotInputEvent)); // WARN: method `onbeforeinput` poor supported
+    this.$refInput.addEventListener("input", (e) => this.gotInput(e as WUP.Text.GotInputEvent), { passive: true });
   }
 
   /** Create & append element to control */
@@ -464,26 +492,14 @@ export default class WUPTextControl<
     const arr = super.gotFocus(ev);
 
     if (this.canHandleUndo()) {
-      this._refHistory = this._refHistory ?? new TextHistory(this.$refInput);
+      this._refHistory ??= new TextHistory(this.$refInput);
     }
-
-    const r = this.appendEvent(this.$refInput, "input", (e) => {
-      // (e as WUP.Text.GotInputEvent).setValuePrevented = false;
-      // (e as WUP.Text.GotInputEvent).preventSetValue = () => ((e as WUP.Text.GotInputEvent).setValuePrevented = true);
-      this.gotInput(e as WUP.Text.GotInputEvent);
-    });
-    const r2 = this.appendEvent(
-      this.$refInput,
-      "beforeinput",
-      (e) => this.gotBeforeInput(e as WUP.Text.GotInputEvent),
-      { passive: false }
-    );
 
     if (!this.$refInput.readOnly) {
       let canSelectAll = this._opts.selectOnFocus;
       if (this._opts.mask) {
         this.maskInputProcess(null); // to apply prefix + maskholder
-        canSelectAll = canSelectAll && this.refMask!.isCompleted;
+        canSelectAll &&= this.refMask!.isCompleted;
         this.renderPostfix(this._opts.postfix);
         if (!canSelectAll) {
           const end = this.$refInput.value.length;
@@ -494,9 +510,6 @@ export default class WUPTextControl<
     }
     const hasOnlyNums = this.refMask?.chunks.every((c) => !c.isVar || c.pattern[0] !== "*");
     this.setAttr.call(this.$refInput, "inputmode", hasOnlyNums ? "numeric" : "");
-
-    arr.push(() => setTimeout(r)); // timeout required to handle Event on gotFocusLost
-    arr.push(r2);
     return arr;
   }
 
@@ -568,7 +581,12 @@ export default class WUPTextControl<
   #inputTimer?: ReturnType<typeof setTimeout>;
   /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
+    const isBrowserAutofill = e.isTrusted && e.inputType == null;
+    if (isBrowserAutofill && !this._refHistory && this.canHandleUndo()) {
+      this._refHistory = new TextHistory(this.$refInput);
+    }
     this._refHistory?.handleInput(e);
+
     const el = e.target as WUP.Text.Mask.HandledInput;
     let txt = el.value;
 

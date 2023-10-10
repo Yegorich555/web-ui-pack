@@ -16,9 +16,10 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 
 - Possible to use **with/without** any frameworks like Angular, React, Vue etc. (because it's js-native logic)
 - Form/controls are ready to use and has built-in completed validation logic for any case that you can imagine (see [demo/controls](https://yegorich555.github.io/web-ui-pack/controls))
-- Focus on accessibility (best practices), other packages has low-accessibility support
+- Focus on accessibility best practices, most of popular packages has low-accessibility support
 - High scalable and easy customizable (every component is developed to easy inherit and redefine/extend default logic)
 - Built-in css-variables to use custom color-themes with native ordinary styling (css, scss etc.)
+- Built-in dark color scheme. To use need to add attr `wupdark` (`<body wupdark>`) and define general background & text colors
 - Built-in Typescript (coverage types 100%)
 - Built-in `.jsx/.tsx` support (for React/Vue)
 - Supports different locales (based on [localeInfo](src/objects/localeInfo.ts) helper)
@@ -64,27 +65,33 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
   - [x] [CheckControl (Checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
     - [ ] CheckTreeControl
   - [x] [RadioControl (RadioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
+    - [ ] Full customized items
   - [x] [SelectControl (ComboBox)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
+    - [ ] Full customized menu
   - [x] [SelectManyControl (MultiSelect)](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
   - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
   - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
+    - [ ] option `multiSelect`
+    - [ ] DateRangeControl
   - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
-  - [ ] DateTimeControl ?
+  - [ ] DateTimeControl
   - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
+    - [ ] TextRichControl
   - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
   - [ ] SliderControl (progress bar)
   - [ ] FileControl
-  - [ ] SearchControl ?
+  - [ ] SearchControl
   - [ ] ImageControl (AvatarEditor)
+  - [ ] ColorControl (ColorPicker) ?
 - [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
-- [ ] MediaPlayer
+- [ ] MediaPlayer (Video player)
 - [ ] ModalElement
 - [ ] ConfirmModalElement
 - [ ] FormModalElement
 - [ ] InfiniteScroll
 - [ ] VirtualScroll
 - [ ] CarouselElement (Slide show)
-- [ ] TableElement ?
+- [ ] TableElement
 
 ## Components
 

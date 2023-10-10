@@ -76,16 +76,48 @@ export function parseReusedVars(usedVars: CssVar[]): Set<string> {
 }
 
 interface Options {
-  /** Skip duplicates kind of --ctrl-icon: var(--ctrl-label); --ctrl-icon: var(--ctrl-err-text); */
+  /** Skip duplicates kind of --ctrl-icon: var(--ctrl-label); --ctrl-icon: var(--ctrl-err); */
   isDistinct?: boolean;
 }
 
 /** Returns all css-vars thar used by pointed element */
-export default function getUsedCssVars(scanEl: WUPBaseElement<any>, opts?: Options): CssVar[] {
+export default function getUsedCssVars(scanEl: WUPBaseElement<any>): { own: CssVar[]; common: CssVar[] } {
+  const allProto = WUPBaseElement.findAllProtos(scanEl, []);
+  const getOwnStyles = (proto: typeof WUPBaseElement): CssVar[] => {
+    if (Object.prototype.hasOwnProperty.call(proto, "$styleRoot")) {
+      const raw = proto.$styleRoot;
+      const attr = "[wupdark]";
+      const i = raw.indexOf(attr);
+      const css = parseCssVars(i !== -1 ? raw.substring(0, i) : raw);
+      if (i !== -1 && window.isDark) {
+        const cssDark = parseCssVars(raw.substring(i));
+        cssDark.forEach((c2) => {
+          const c = css.find((c1) => c1.name === c2.name);
+          if (c) {
+            c.value = c2.value; // WARN: it doesn't replace parent > child
+          }
+        });
+      }
+      return css;
+    }
+    return [];
+  };
+  const own = getOwnStyles(allProto.splice(0, 1)[0]);
+
+  const common: CssVar[] = [];
+  allProto.reverse().forEach((p) => {
+    common.push(...getOwnStyles(p));
+  });
+  return { own, common };
+}
+
+/** Returns all css-vars thar used by pointed element */
+function getUsedCssVarsOld(scanEl: WUPBaseElement<any>, opts?: Options): CssVar[] {
   const styleEl = (scanEl.constructor as typeof WUPBaseElement).$refStyle!;
   const str = styleEl.textContent!;
   const usedSet = parseUsedCssVars(str, scanEl.tagName);
   const allVars = parseCssVars(str);
+
   const usedVars = allVars.filter(
     (v) => usedSet.has(v.name) && v.tagName === scanEl.tagName /* || v.tagName === ":root" || v.tagName === "body" */
   );

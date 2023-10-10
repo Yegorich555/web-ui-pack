@@ -20,7 +20,7 @@
       overflow: hidden;
 
       span:first-child {
-        color: #1973b8;
+        color: var(--cssVarColor, #1973b8);
       }
 
       span:last-child {
@@ -30,11 +30,40 @@
   }
 }
 
+.btnCommon {
+  padding: 4px 10px;
+  margin: 10px 0 4px 0;
+  color: $activeLinkColor;
+  background: none;
+  cursor: pointer;
+  border-radius: $borderRadius;
+  border: $borderStyle;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.cssCommon {
+  max-width: 400px;
+  padding: 10px;
+  background: $bodyBgColor;
+  box-shadow: 0 1px 4px var(--section-shadow-color, #00000033);
+}
+
 .colorBlock {
   display: inline-block;
   width: 10px;
   height: 10px;
   user-select: none;
-  box-shadow: 0 0 1px 0 gray;
+  box-shadow: 0 0 1px 0 var(--borderColor2, gray);
   margin: 0 2px;
+}
+
+.defLink {
+  color: $activeLinkColor;
+
+  &:hover {
+    opacity: 0.8;
+  }
 }

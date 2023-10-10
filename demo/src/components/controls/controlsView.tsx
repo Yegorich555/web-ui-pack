@@ -61,14 +61,14 @@ export default function ControlsView() {
           Pending state with spinner if return promise for <b>$onSubmit()</b> method
         </>,
         <>
-          Option <b>autoSave</b> prevents losing not-sumbitted data
+          Option <b>autoStore</b> prevents losing not-sumbitted data
         </>,
       ]}
       details={{ tag: "wup-form", linkDemo: "demo/src/components/controls/controlsView.tsx", customHTML, customJS }}
     >
       <wup-form
         w-autoComplete={false}
-        w-autoSave={false}
+        w-autoStore={false}
         w-autoFocus
         disabled={false}
         readonly={false}
@@ -130,7 +130,7 @@ const customHTML = [
   `html
 <wup-form
   w-autocomplete="false"
-  w-autosave="false"
+  w-autostore="false"
   w-autofocus="false"
   readonly="false"
   disabled="false"

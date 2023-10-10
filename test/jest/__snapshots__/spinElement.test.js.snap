@@ -12,20 +12,27 @@ clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
   :root {
-          --base-bg: #fff;
-          --base-text: #232323;
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
           --base-btn-text: #fff;
           --base-btn-focus: #005766;
           --base-btn2-bg: var(--base-btn-text);
           --base-btn2-text: var(--base-btn-bg);
-          --base-btn3-bg: var(--base-bg);
+          --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
           --border-radius: 6px;
           --anim-time: 200ms;
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --icon-hover-r: 30px;
+          --icon-hover: #0001;
+        }
+        [wupdark] {
+          --base-btn-focus: #bdbdbd;
+          --base-sep: #141414;
+          --icon-hover: #fff3;
+          --scroll: #fff2;
+          --scroll-hover: #fff3;
         }
   :root {
           --spin-1: #ffa500;
@@ -69,7 +76,7 @@ padding:0;}
          z-index: -1;
          background: var(--spin-fade);
       }
-      WUP-SPIN&gt;div[fade]::after { content: none; }
+      WUP-SPIN&gt;div[fade]:after { content: none; }
       WUP-SPIN&gt;div {
         border: var(--spin-item-size) solid var(--spin-1);
         border-top-color: var(--spin-2);

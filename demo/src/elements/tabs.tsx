@@ -39,4 +39,4 @@ export default function Tabs(props: Props): JSX.Element {
   );
 }
 
-useBuiltinStyle(WUPcssButton(`.${styles.tabs} button`));
+useBuiltinStyle(WUPcssButton(`.${styles.tabs} button[role=tab]`));

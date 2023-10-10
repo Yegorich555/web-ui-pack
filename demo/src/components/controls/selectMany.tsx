@@ -1,6 +1,7 @@
 /* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
 import { WUPSelectManyControl } from "web-ui-pack";
+import stylesCom from "./controls.scss";
 import styles from "./selectMany.scss";
 
 const sideEffect = WUPSelectManyControl;
@@ -57,11 +58,30 @@ export default function SelectManyControlView() {
           w-name="selectMany"
           w-label="Select Many"
           w-initValue="window.inputSelectMany.initValue"
-          w-validations="window._someSelectValidations"
+          w-validations="window._someSelectValidations2"
           w-autoComplete="off"
           w-sortable={false}
           w-autoFocus={false}
         />
+        <div className={`${stylesCom.group} ${styles.sameHeight}`}>
+          <wup-selectmany
+            w-name="readonly"
+            readonly
+            w-items="window.inputSelect.items"
+            w-initValue="window.inputSelectMany.initValue"
+          />
+          <wup-selectmany
+            w-name="disabled"
+            disabled
+            w-items="window.inputSelect.items"
+            w-initValue="window.inputSelectMany.initValue"
+          />
+          <wup-selectmany
+            w-name="required"
+            w-items="window.inputSelect.items"
+            w-validations="window._someSelectValidations"
+          />
+        </div>
         <wup-selectmany
           w-label="With option hideSelected"
           w-items="inputSelectMany.items"
@@ -83,26 +103,6 @@ export default function SelectManyControlView() {
           }}
         />
         <wup-selectmany
-          w-name="disabled"
-          disabled
-          ref={(el) => {
-            if (el) {
-              el.$options.items = items;
-              el.$initValue = [12, 15];
-            }
-          }}
-        />
-        <wup-selectmany
-          w-name="readonly"
-          readonly
-          ref={(el) => {
-            if (el) {
-              el.$options.items = items;
-              el.$initValue = [12, 15];
-            }
-          }}
-        />
-        <wup-selectmany
           w-label="Allow New Value ($options.allowNewValue)"
           w-allowNewValue
           w-name="allowNewValue"
@@ -110,7 +110,7 @@ export default function SelectManyControlView() {
           w-initValue="window.inputSelectMany.initValue"
         />
         <wup-selectmany
-          w-label="Options sortable=true - use drag&drop OR keyboard arrows + Shift"
+          w-label="Options sortable: true - use drag&drop OR keyboard arrows + Shift"
           w-sortable
           w-name="sorted"
           w-items="inputSelectMany.items"

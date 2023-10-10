@@ -9,14 +9,28 @@ h1 {
   margin: 0;
   border-bottom: 1px solid $borderColor;
   /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
-  background: linear-gradient(270deg, $headerBgColor, #38b9d6);
+  background: linear-gradient(270deg, $headerBgColor, $headerBgColor2);
   color: $headerColor;
 
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   text-align: center;
   position: relative;
+
+  @media (max-width: 410px) {
+    padding: 0 20px;
+    justify-content: flex-start;
+  }
+}
+
+a.headerLink {
+  font-size: 24px;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 
   > img {
     max-width: 40px;
@@ -24,25 +38,50 @@ h1 {
     margin-right: 10px;
   }
 
-  > a {
-    position: absolute;
-    transform: translateY(-50%);
-    top: 50%;
-    left: calc(100% - 40px);
+  &::after {
+    right: 0;
+  }
+}
 
-    display: flex;
-    text-decoration: none;
+.darkMode {
+  font-size: 14px;
+  margin: 0 4px;
+  box-shadow: none !important;
+  border: none !important;
 
-    &:hover {
-      /* stylelint-disable-next-line scss/no-global-function-names */
-      filter: invert(0.95);
+  --ctrl-switch-r: 1.4em;
+  --ctrl-switch-r-hover: 2em;
+  --ctrl-switch-h: 2em;
+  --ctrl-switch-w: 3.6em;
+  --ctrl-padding: 1em 4px; // padding of control itself
+
+  [bar] {
+    --padding: calc((var(--ctrl-switch-h) - var(--ctrl-switch-r)) / 2);
+    padding: var(--padding);
+    box-sizing: border-box;
+
+    @include iconBefore($icon-moon);
+    @include iconAfter($icon-sun);
+
+    &:before,
+    &:after {
+      position: absolute;
+      padding: 1px; // to be sure the thumb overrides icons on small devices
     }
   }
 
-  @media (max-width: 410px) {
-    padding: 0 20px;
-    justify-content: flex-start;
+  &[checked] [thumb],
+  [bar]::after {
+    transform: translateX(calc(var(--ctrl-switch-w) - var(--padding) * 2)) translateX(-100%);
   }
+
+  // &:hover [bar] {
+  //   box-shadow: 0 0 0 1px var(--ctrl-switch-off-bg);
+  // }
+
+  // &[checked]:hover [bar] {
+  //   box-shadow: 0 0 0 1px var(--ctrl-switch-on-bg);
+  // }
 }
 
 .page {
@@ -58,6 +97,8 @@ h1 {
     background-color: $basicBgColor;
     border: $borderStyle;
     border-top: none;
+    border-left: none;
+    border-bottom: none;
     height: calc(100vh - #{$h1Height} - 2px);
 
     > div:last-child {

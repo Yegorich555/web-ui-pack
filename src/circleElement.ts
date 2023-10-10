@@ -133,13 +133,16 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
 
   static get $styleRoot(): string {
     return `:root {
-          --circle-0: var(--base-sep);
-          --circle-1: var(--base-btn-bg);
+          --circle-0: #e4e4e4;
+          --circle-1: #009fbc;
           --circle-2: #ff9f00;
           --circle-3: #1fb13f;
           --circle-4: #9482bd;
           --circle-5: #8bc4d7;
           --circle-6: #1abdb5;
+        }
+        [wupdark] {
+          --circle-0: #104652;
         }`;
   }
 
@@ -181,13 +184,6 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         pointer-events: none;
         user-select: none;
         touch-action: none;
-      }
-      :host>wup-popup {
-        background: rgba(255,255,255,0.9)
-      }
-      :host>wup-popup-arrow:before {
-        opacity: 0.9;
-        margin: 0;
       }`;
   }
 
@@ -386,6 +382,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   /** Called when need to show popup over segment */
   renderTooltip(segment: WUP.Circle.SVGItem): WUPPopupElement {
     const popup = document.createElement("wup-popup");
+    popup.setAttribute("tooltip", "");
     popup.$options.showCase = ShowCases.always;
     popup.$options.target = segment;
     popup.$options.arrowEnable = true;

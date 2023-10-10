@@ -76,7 +76,7 @@ declare global {
     type AutoComplete = AutoFill; // remove after half year with new version TS
     interface EventMap extends WUP.Base.EventMap {
       /** Called on value change */
-      $change: CustomEvent & { detail: SetValueReasons };
+      $change: CustomEvent<SetValueReasons>;
     }
 
     interface ValidityMap {
@@ -244,24 +244,36 @@ export default abstract class WUPBaseControl<
     return `:root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
         --ctrl-focus: var(--base-focus);
-        --ctrl-focus-label: var(--base-focus);
-        --ctrl-selected: var(--ctrl-focus-label);
+        --ctrl-focus-label: var(--ctrl-focus);
+        --ctrl-selected: var(--ctrl-focus);
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl-bg: var(--base-bg);
+        --ctrl: inherit;
+        --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
-        --ctrl-err-text: #ad0000;
+        --ctrl-err: #ad0000;
         --ctrl-err-bg: #fff4fa;
-        --ctrl-err-icon-valid: green;
+        --ctrl-err-valid: green;
         --ctrl-invalid-border: red;
         --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
         --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
         --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
         --wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
+      }
+      [wupdark] {
+        --ctrl-bg: none;
+        --ctrl-border: #104652;
+        --ctrl-label: #919191;
+        --ctrl-icon: var(--ctrl-label);
+        --ctrl-focus-label: #25a1b6;
+        --ctrl-selected: #25a1b6;
+        --ctrl-err: #ff6666;
+        --ctrl-err-bg: #000;
+        --ctrl-err-valid: #54d754;
       }`;
-    // NiceToHave: change icons to fonts: wupfont
+    // NiceToHave: change icons to fonts: wupfont: in this case possible to improve btnClear: hover
   }
 
   /** StyleContent related to component */
@@ -272,9 +284,10 @@ export default abstract class WUPBaseControl<
         --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
-        margin-bottom: 20px;
+        margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
+        color: var(--ctrl);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;${
@@ -308,8 +321,8 @@ export default abstract class WUPBaseControl<
         -webkit-user-select: none;
         user-select: none;
       }
-      [disabled] :host > *,
-      :host[disabled] > * {
+      [disabled] :host > label,
+      :host[disabled] > label {
         pointer-events: none;
       }
       :host label {
@@ -350,10 +363,11 @@ export default abstract class WUPBaseControl<
       :host [error] {
         cursor: pointer;
         font-size: small;
-        color: var(--ctrl-err-text);
+        color: var(--ctrl-err);
         background: var(--ctrl-err-bg);
         overflow: auto;
         overflow: overlay;
+        // text-shadow: 0 0 0 var(--ctrl-err);
       }
       :host [error] ul {
         margin:0; padding:2px 4px 2px;
@@ -366,21 +380,25 @@ export default abstract class WUPBaseControl<
       :host [error] li:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-dot);
-        --ctrl-icon: var(--ctrl-err-text);
+        --ctrl-icon: var(--ctrl-err);
         ${WUPcssIcon}
       }
       :host [error] li[valid] {
-        color: var(--ctrl-err-icon-valid);
+        color: var(--ctrl-err-valid);
       }
       :host [error] li[valid]:before {
         content: '';
         --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-icon-valid);
+        --ctrl-icon: var(--ctrl-err-valid);
       }
       :host:focus-within [error] {
         max-height: none;
       }
       @media (hover: hover) and (pointer: fine) {
+        :host:hover strong,
+        :host[hovered] strong{
+          color: var(--ctrl-focus-label);
+        }
         :host:hover,
         :host:hover>[menu],
         :host[hovered],

@@ -1,0 +1,32 @@
+.link {
+  position: relative;
+  padding: 4px 10px;
+  padding-right: 34px;
+  margin-right: -24px;
+  border-radius: $borderRadius;
+  text-decoration: none;
+  color: $activeLinkColor;
+
+  &::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    /* stylelint-disable plugin/no-unsupported-browser-features */
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-image: url("../assets/gitIcon.svg");
+    /* stylelint-enable plugin/no-unsupported-browser-features */
+    background: $basicTextColor;
+  }
+
+  &:hover {
+    opacity: 0.8;
+  }
+}

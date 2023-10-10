@@ -95,14 +95,14 @@ declare global {
       /** Set true to show arrow with popup; @false by default;
        *  Arrow is placed after popup so it's easy to access (via style @see {@link arrowClass} or @see {@link WUPPopupElement.$refArrow) */
       arrowEnable?: boolean;
-      /** Setup arrow class and use ::before to add background-image or content;
-       * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only ::before, ::after to reach you goal
+      /** Setup arrow class and use :before to add background-image or content;
+       * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only :before, :after to reach you goal
        *
        * To customize arrow style you can use also the following scss logic
        * @example
        * wup-popup + wup-popup-arrow {
        *   opacity: 0.5
-       *   &::before {
+       *   &:before {
        *      background: no-repeat url("someImageHere.png");
        *   }
        * } */
@@ -147,6 +147,10 @@ declare global {
       readonly hide?: "";
       /** Animation applied to popup */
       "w-animation"?: "" | "default" | "drawer" | "stack";
+      /* Custom attribute used for internal behavior */
+      menu?: "";
+      /* Custom attribute used for styling */
+      tooltip?: "";
     }
 
     interface AttachOptions extends Partial<Omit<Options, "target">> {
@@ -160,14 +164,14 @@ declare global {
        * @tutorial rules
        * * can be prevented via e.preventDefault()
        * * use event.detail.showCase to filter by showCase */
-      $willShow: CustomEvent;
+      $willShow: CustomEvent<{ showCase: HideCases }>;
       /** Fires after popup is shown (after animation finishes) */
       $show: Event;
       /** Fires before hide is happened;
        * @tutorial rules
        * * can be prevented via e.preventDefault()
        * * use event.detail.hideCase to filter by hideCase */
-      $willHide: CustomEvent;
+      $willHide: CustomEvent<{ hideCase: HideCases }>;
       /** Fires after popup is hidden (after animation finishes) */
       $hide: Event;
     }

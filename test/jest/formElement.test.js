@@ -42,7 +42,7 @@ describe("formElement", () => {
     attrs: {
       "w-autocomplete": { value: true },
       "w-autofocus": { value: true },
-      "w-autosave": { value: true },
+      "w-autostore": { value: true },
       disabled: { value: true, equalValue: "" },
       "w-disabled": { value: true, equalValue: "", skip: true },
       readonly: { value: true, equalValue: "" },
@@ -670,12 +670,12 @@ describe("formElement", () => {
       });
     });
 
-    test("option 'autoSave'", async () => {
+    test("option 'autoStore'", async () => {
       const sSet = jest.spyOn(Storage.prototype, "setItem");
       const sRem = jest.spyOn(Storage.prototype, "removeItem");
       // storageKey depends on options
       expect(el.storageKey).toMatchInlineSnapshot(`"/?email,firstName"`);
-      el.$options.autoSave = "customKey";
+      el.$options.autoStore = "customKey";
       expect(el.storageKey).toBe("customKey");
 
       expect(el.storageGet()).toBe(null); // because nothing stored
@@ -700,7 +700,7 @@ describe("formElement", () => {
         document.body.innerHTML = "";
         inputs.length = 0;
         el = document.body.appendChild(document.createElement(el.tagName));
-        el.$options.autoSave = "customKey";
+        el.$options.autoStore = "customKey";
 
         const inp1 = el.appendChild(document.createElement("wup-text"));
         inp1.$options.name = "email";
