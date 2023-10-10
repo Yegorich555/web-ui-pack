@@ -201,7 +201,7 @@ export default class WUPNumberControl<
 
     if (!this._opts.mask) {
       // otherwise it conflicts with mask
-      const next = this.valueToInput(v as any);
+      const next = this.valueToInput(v as any); // todo it's poor that parse depends on valueToInput: need fix this cycle...
       const hasDeclined = this._canShowDeclined && text.length > next.length;
       if (hasDeclined && next === this.valueToInput(this.$value)) {
         // WARN: don't compare v === this.$value because $value=4.567 but format can be 4.56
@@ -368,7 +368,7 @@ export default class WUPNumberControl<
     } else if (this._isShiftDown) dval *= 10;
     else if (this._isCtrlDown) dval *= 100;
 
-    const v = +(this.$value ?? 0);
+    const v = +(this.$value ?? 0); // todo got increment depends on realValue but better to depend on input value directly
     const hasFloat = this._isAltDown || v % 1 !== 0;
     const next = hasFloat ? mathSumFloat(v, dval) : v + dval;
 

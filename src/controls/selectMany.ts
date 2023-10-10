@@ -742,3 +742,5 @@ customElements.define(tagName, WUPSelectManyControl);
 /* todo popup can change position during the hiding by focuslost when input is goes invisible and control size is reduced - need somehow block changing position-priority
 when popup is opened => don't change bottom...top if menu or control height changed. Change bottom to top only during the scrolling
  */
+
+// NiceToHave: Ctrl+Z must should work for the whole control. Not only for `input`
