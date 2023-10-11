@@ -106,7 +106,7 @@ export default class WUPPasswordControl<
         :host input[type='password'] {
           font-family: Verdana, sans-serif;
           letter-spacing: 0.125;
-          ${"margin-bottom: -1px;" /* font Verdana affects on height */}
+          ${"margin-bottom: -1px;" /* font Verdana affects on height // todo somehow it's wrong on other apps */}
         }
         :host button[eye] {
           cursor: pointer;

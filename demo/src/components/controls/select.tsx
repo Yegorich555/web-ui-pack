@@ -113,8 +113,10 @@ export default function SelectControlView() {
             if (el) {
               el.$options.name = "withPending";
               el.$options.label = "With pending (set Promise to $options.items)";
-              el.$options.items = () => new Promise((resolve) => setTimeout(() => resolve(items), 3000));
-              // el.$initValue = 13;
+              setTimeout(() => {
+                el.$options.items = () => new Promise((res) => setTimeout(() => res(items), 3000));
+                el.$initValue = 13; // todo issue here - items not fetched yet
+              }, 100);
             }
           }}
         />
