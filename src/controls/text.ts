@@ -125,6 +125,7 @@ export default class WUPTextControl<
       --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
      }
      [wupdark] {
         --ctrl-clear-hover: rgba(255,0,0,0.2);
@@ -229,6 +230,8 @@ export default class WUPTextControl<
           transform: translateY(-50%);
           font-weight: normal;
           text-decoration: none;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden; ${/* to fix sometimes blink during the animation */ ""}
         }
         @media not all and (prefers-reduced-motion) {
           :host strong {
@@ -244,20 +247,17 @@ export default class WUPTextControl<
         :host textarea:not(:placeholder-shown) + strong,
         :host [contenteditable=true]:not(:empty) + strong,
         :host legend {
-          top: 0.2em;
-          transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         :host input:-webkit-autofill + strong
         :host textarea:-webkit-autofill + strong
         :host [contenteditable=true]:-webkit-autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         :host input:autofill + strong,
         :host textarea:autofill + strong,
         :host [contenteditable=true]:autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         :host:focus-within [maskholder],
         :host:focus-within [prefix],

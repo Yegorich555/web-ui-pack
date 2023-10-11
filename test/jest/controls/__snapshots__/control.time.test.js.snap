@@ -299,6 +299,7 @@ padding:0;}
       --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
      }
      [wupdark] {
         --ctrl-clear-hover: rgba(255,0,0,0.2);
@@ -557,6 +558,8 @@ mask-image: var(--ctrl-icon-img);
           transform: translateY(-50%);
           font-weight: normal;
           text-decoration: none;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden; 
         }
         @media not all and (prefers-reduced-motion) {
           WUP-TIME strong {
@@ -572,20 +575,17 @@ mask-image: var(--ctrl-icon-img);
         WUP-TIME textarea:not(:placeholder-shown) + strong,
         WUP-TIME [contenteditable=true]:not(:empty) + strong,
         WUP-TIME legend {
-          top: 0.2em;
-          transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-TIME input:-webkit-autofill + strong
         WUP-TIME textarea:-webkit-autofill + strong
         WUP-TIME [contenteditable=true]:-webkit-autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-TIME input:autofill + strong,
         WUP-TIME textarea:autofill + strong,
         WUP-TIME [contenteditable=true]:autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-TIME:focus-within [maskholder],
         WUP-TIME:focus-within [prefix],

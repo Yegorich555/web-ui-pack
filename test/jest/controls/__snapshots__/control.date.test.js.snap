@@ -299,6 +299,7 @@ padding:0;}
       --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
      }
      [wupdark] {
         --ctrl-clear-hover: rgba(255,0,0,0.2);
@@ -546,6 +547,8 @@ mask-image: var(--ctrl-icon-img);
           transform: translateY(-50%);
           font-weight: normal;
           text-decoration: none;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden; 
         }
         @media not all and (prefers-reduced-motion) {
           WUP-DATE strong {
@@ -561,20 +564,17 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE textarea:not(:placeholder-shown) + strong,
         WUP-DATE [contenteditable=true]:not(:empty) + strong,
         WUP-DATE legend {
-          top: 0.2em;
-          transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-DATE input:-webkit-autofill + strong
         WUP-DATE textarea:-webkit-autofill + strong
         WUP-DATE [contenteditable=true]:-webkit-autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-DATE input:autofill + strong,
         WUP-DATE textarea:autofill + strong,
         WUP-DATE [contenteditable=true]:autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-DATE:focus-within [maskholder],
         WUP-DATE:focus-within [prefix],

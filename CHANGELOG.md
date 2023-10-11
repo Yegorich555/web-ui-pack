@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.10.3 (\_\_\_)
+
+**Fixes**:
+
+- Text based controls
+  - _Sometimes weird blink & poor render during the animation on focus_
+
+**New/Features**:
+
+- Text based controls
+  - Added css variable `ctrl-label-active-pos` to simplify customization of label position
+
 ## 0.10.2 (Oct 11, 2023)
 
 **Fixes**:

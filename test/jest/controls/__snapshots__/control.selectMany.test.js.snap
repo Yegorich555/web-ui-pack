@@ -299,6 +299,7 @@ padding:0;}
       --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
      }
      [wupdark] {
         --ctrl-clear-hover: rgba(255,0,0,0.2);
@@ -563,6 +564,8 @@ mask-image: var(--ctrl-icon-img);
           transform: translateY(-50%);
           font-weight: normal;
           text-decoration: none;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden; 
         }
         @media not all and (prefers-reduced-motion) {
           WUP-SELECTMANY strong {
@@ -578,20 +581,17 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECTMANY textarea:not(:placeholder-shown) + strong,
         WUP-SELECTMANY [contenteditable=true]:not(:empty) + strong,
         WUP-SELECTMANY legend {
-          top: 0.2em;
-          transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-SELECTMANY input:-webkit-autofill + strong
         WUP-SELECTMANY textarea:-webkit-autofill + strong
         WUP-SELECTMANY [contenteditable=true]:-webkit-autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-SELECTMANY input:autofill + strong,
         WUP-SELECTMANY textarea:autofill + strong,
         WUP-SELECTMANY [contenteditable=true]:autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-SELECTMANY:focus-within [maskholder],
         WUP-SELECTMANY:focus-within [prefix],

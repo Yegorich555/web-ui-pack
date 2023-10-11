@@ -278,6 +278,7 @@ padding:0;}
       --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
      }
      [wupdark] {
         --ctrl-clear-hover: rgba(255,0,0,0.2);
@@ -522,6 +523,8 @@ mask-image: var(--ctrl-icon-img);
           transform: translateY(-50%);
           font-weight: normal;
           text-decoration: none;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden; 
         }
         @media not all and (prefers-reduced-motion) {
           WUP-NUM strong {
@@ -537,20 +540,17 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM textarea:not(:placeholder-shown) + strong,
         WUP-NUM [contenteditable=true]:not(:empty) + strong,
         WUP-NUM legend {
-          top: 0.2em;
-          transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-NUM input:-webkit-autofill + strong
         WUP-NUM textarea:-webkit-autofill + strong
         WUP-NUM [contenteditable=true]:-webkit-autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-NUM input:autofill + strong,
         WUP-NUM textarea:autofill + strong,
         WUP-NUM [contenteditable=true]:autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-NUM:focus-within [maskholder],
         WUP-NUM:focus-within [prefix],
