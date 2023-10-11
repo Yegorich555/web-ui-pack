@@ -4,7 +4,7 @@
 
 **Fixes**:
 
--[SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). _Error message in console if `$options.items = new Promise` & `$initValue = ...`_
+- [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). _Error message in console if `$options.items = new Promise` & `$initValue = ...`_
 
 ## 0.10.1 (Oct 10, 2023)
 

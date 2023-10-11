@@ -2,6 +2,7 @@
   --ctrl-switch-padding: 1em 4px;
   --ctrl-check-size: 20px;
   --ctrl-check-on-bg: #009fbc;
+  --ctrl-check-border-hover: #009fbc;
 
   box-shadow: none !important;
   border: none !important;
@@ -10,10 +11,18 @@
     border: 2px solid #818181;
     border-radius: 6px;
     box-sizing: border-box;
+    position: initial;
+
+    &:before {
+      content: none !important;
+    }
   }
 
-  &[checked] [icon] {
-    border-color: #009fbc;
+  &[checked],
+  &:focus-within {
+    [icon] {
+      border-color: var(--ctrl-check-on-bg);
+    }
   }
 
   @media not all and (prefers-reduced-motion) {
@@ -21,8 +30,15 @@
       transition: background-color var(--anim);
     }
   }
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      opacity: 0.9;
 
-  // todo change hover style
+      [icon] {
+        border-color: var(--ctrl-check-on-bg);
+      }
+    }
+  }
 }
 
 [wupdark] .anotherStyle {
