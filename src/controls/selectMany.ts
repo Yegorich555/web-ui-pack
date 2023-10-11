@@ -744,3 +744,6 @@ when popup is opened => don't change bottom...top if menu or control height chan
  */
 
 // NiceToHave: Ctrl+Z must should work for the whole control. Not only for `input`
+
+// todo don't allow items affects on width - sometimes flex: wrap doesn't work
+// todo add option autoheight & use vert-scroll if it's disabled (now it works with autoheight: true)

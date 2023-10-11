@@ -100,7 +100,7 @@ describe("control.select", () => {
     expect(el.$refInput.value).toBe("Donny");
   });
 
-  test("$options.items & $value", () => {
+  test("$options.items & $value", async () => {
     el = document.body.appendChild(document.createElement(el.tagName));
     const onErr = h.mockConsoleError();
     // before ready
@@ -132,6 +132,46 @@ describe("control.select", () => {
     el.$value = { id: 2 };
     jest.advanceTimersByTime(2);
     expect(el.$refInput.value).toBe("Diana");
+
+    // different $initValue & items
+    onErr.mockClear();
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = [
+      { text: "Helica", value: 1 },
+      { text: "Diana", value: 2 },
+      { text: "Ann", value: 3 },
+    ];
+    el.$initValue = 2;
+    await h.wait();
+    expect(el.$refInput.value).toBe("Diana");
+    expect(onErr).toBeCalledTimes(0);
+    // set init value after a time
+    el.$options.items = [
+      { text: "A", value: 4 },
+      { text: "B", value: 5 },
+    ];
+    el.$initValue = 4;
+    await h.wait();
+    expect(el.$refInput.value).toBe("A");
+    expect(onErr).toBeCalledTimes(0);
+    // set items as Promise
+    el.$options.items = new Promise((res) => {
+      setTimeout(
+        () =>
+          res([
+            { text: "C", value: 10 },
+            { text: "D", value: 20 },
+            { text: "f", value: 30 },
+          ]),
+        100
+      );
+    });
+    el.$initValue = 30;
+    await h.wait();
+    expect(el.$refInput.value).toBe("f");
+    expect(onErr).toBeCalledTimes(0);
+
+    h.unMockConsoleError();
   });
 
   test("pending state", async () => {
