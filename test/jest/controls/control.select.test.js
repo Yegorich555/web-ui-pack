@@ -100,7 +100,7 @@ describe("control.select", () => {
     expect(el.$refInput.value).toBe("Donny");
   });
 
-  test("$options.items & $value", () => {
+  test("$options.items & $value", async () => {
     el = document.body.appendChild(document.createElement(el.tagName));
     const onErr = h.mockConsoleError();
     // before ready
@@ -132,6 +132,46 @@ describe("control.select", () => {
     el.$value = { id: 2 };
     jest.advanceTimersByTime(2);
     expect(el.$refInput.value).toBe("Diana");
+
+    // different $initValue & items
+    onErr.mockClear();
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = [
+      { text: "Helica", value: 1 },
+      { text: "Diana", value: 2 },
+      { text: "Ann", value: 3 },
+    ];
+    el.$initValue = 2;
+    await h.wait();
+    expect(el.$refInput.value).toBe("Diana");
+    expect(onErr).toBeCalledTimes(0);
+    // set init value after a time
+    el.$options.items = [
+      { text: "A", value: 4 },
+      { text: "B", value: 5 },
+    ];
+    el.$initValue = 4;
+    await h.wait();
+    expect(el.$refInput.value).toBe("A");
+    expect(onErr).toBeCalledTimes(0);
+    // set items as Promise
+    el.$options.items = new Promise((res) => {
+      setTimeout(
+        () =>
+          res([
+            { text: "C", value: 10 },
+            { text: "D", value: 20 },
+            { text: "f", value: 30 },
+          ]),
+        100
+      );
+    });
+    el.$initValue = 30;
+    await h.wait();
+    expect(el.$refInput.value).toBe("f");
+    expect(onErr).toBeCalledTimes(0);
+
+    h.unMockConsoleError();
   });
 
   test("pending state", async () => {
@@ -160,7 +200,7 @@ describe("control.select", () => {
     const mockRequest = jest.fn();
     el.$options.items = () => {
       mockRequest();
-      return new Promise((resolve) => setTimeout(() => resolve(getItems()), 100));
+      return new Promise((res) => setTimeout(() => res(getItems()), 100));
     };
     await h.wait(1);
     expect(el.$refInput.value).toBe("");
@@ -173,6 +213,7 @@ describe("control.select", () => {
     // await h.userClick(el); // WARN; somehow it blocks Promise.resolve - it's test-issue
     await h.wait();
     expect(el.$isShown).toBe(false);
+    expect(el.$isPending).toBe(false);
     expect(el.$refInput.value).toBe("Donny");
     expect(mockRequest).toBeCalledTimes(1);
 
@@ -198,6 +239,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isShown).toBe(false);
 
+    el.$value = undefined;
     el.$options.items = () => Promise.resolve(null);
     await h.wait();
     expect(el._cachedItems).toStrictEqual([]); // empty array to avoid future bugs if somehow fetch returns nothing

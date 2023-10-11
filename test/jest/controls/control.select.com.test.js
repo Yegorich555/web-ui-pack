@@ -642,11 +642,14 @@ describe("control.select common", () => {
       await h.wait(1);
       expect(el.$refInput.readOnly).toBe(true);
 
+      el.$options.readOnlyInput = false;
       el.$options.items = Promise.resolve(getItems());
       jest.advanceTimersByTime(1); // WARN: jest can catch exception here after tests are finished
       expect(el.$isPending).toBe(true);
       expect(el.$refInput.readOnly).toBe(true); // because isPending
       await h.wait();
+      expect(el.$isPending).toBe(false);
+      expect(el.$isReadOnly).toBe(false);
       expect(el.$refInput.readOnly).toBe(false);
     });
   });
