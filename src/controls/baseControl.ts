@@ -235,9 +235,9 @@ export default abstract class WUPBaseControl<
   #ctr = this.constructor as typeof WUPBaseControl;
 
   /** Text announced by screen-readers when control cleared; @defaultValue `cleared` */
-  static $ariaCleared = "cleared";
+  static $ariaCleared = __wupln("cleared", "aria");
   /** Text announced by screen-readers; @defaultValue `Error for` */
-  static $ariaError = "Error for";
+  static $ariaError = __wupln("Error for", "aria");
 
   /** Css-variables related to component */
   static get $styleRoot(): string {
@@ -447,7 +447,7 @@ export default abstract class WUPBaseControl<
     validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
     validationRules: {
-      required: (v, setV) => setV === true && this.$isEmpty(v) && "This field is required",
+      required: (v, setV) => setV === true && this.$isEmpty(v) && __wupln("This field is required", "validation"),
     },
     validations: null,
     validationShowAll: false,
@@ -649,9 +649,10 @@ export default abstract class WUPBaseControl<
 
     const i = this.$refInput;
     // set label
-    const label = (this._opts.label ?? (this._opts.name && stringPrettify(this._opts.name))) || null;
+    const label =
+      (this._opts.label ?? (this._opts.name && __wupln(stringPrettify(this._opts.name), "content"))) || null;
     this.$refTitle.textContent = label;
-    const n = !label && this._opts.name ? stringPrettify(this._opts.name) : null;
+    const n = !label && this._opts.name ? __wupln(stringPrettify(this._opts.name), "aria") : null;
     this.setAttr.call(i, "aria-label", n);
 
     // set other props

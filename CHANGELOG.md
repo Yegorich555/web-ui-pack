@@ -9,6 +9,8 @@
 
 **New/Features**:
 
+-**Global**. Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
+
 - Text based controls
   - Added css variable `ctrl-label-active-pos` to simplify customization of label position
 

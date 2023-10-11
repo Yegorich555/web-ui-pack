@@ -95,8 +95,10 @@ export default class WUPNumberControl<
     ...(WUPTextControl.$defaults as any),
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
-      min: (v, setV, c) => (v == null || v < setV) && `Min value is ${(c as WUPNumberControl).valueToInput(setV)}`,
-      max: (v, setV, c) => (v == null || v > setV) && `Max value is ${(c as WUPNumberControl).valueToInput(setV)}`,
+      min: (v, setV, c) =>
+        (v == null || v < setV) && __wupln(`Min value is ${(c as WUPNumberControl).valueToInput(setV)}`, "validation"),
+      max: (v, setV, c) =>
+        (v == null || v > setV) && __wupln(`Max value is ${(c as WUPNumberControl).valueToInput(setV)}`, "validation"),
     },
     format: null,
   };

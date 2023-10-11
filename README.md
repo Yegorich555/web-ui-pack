@@ -14,7 +14,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 
 ## Features
 
-- Possible to use **with/without** any frameworks like Angular, React, Vue etc. (because it's js-native logic)
+- Possible to use **with any frameworks** like Angular, React, Vue etc. **or even directly with HTML & JS** (because it's js-native logic that doesn't required anything extrernal)
 - Form/controls are ready to use and has built-in completed validation logic for any case that you can imagine (see [demo/controls](https://yegorich555.github.io/web-ui-pack/controls))
 - Focus on accessibility best practices, most of popular packages has low-accessibility support
 - High scalable and easy customizable (every component is developed to easy inherit and redefine/extend default logic)
@@ -22,7 +22,7 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 - Built-in dark color scheme. To use need to add attr `wupdark` (`<body wupdark>`) and define general background & text colors
 - Built-in Typescript (coverage types 100%)
 - Built-in `.jsx/.tsx` support (for React/Vue)
-- Supports different locales (based on [localeInfo](src/objects/localeInfo.ts) helper)
+- Supports different locales (based on [localeInfo](src/objects/localeInfo.ts) helper). For changing built-in messages override global function `window.__wupln` (detials you can see in your editor via built-in entellisense)
 - Well documented via JSDoc (use intellisense power of your editor to get details about each property/option/usage)
 - Optimized for webpack (build includes only used components and helpers via **side-effects** option)
 - Zero dependancy (don't need to wait for bug-fixing of other packages)

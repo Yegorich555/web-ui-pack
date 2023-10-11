@@ -151,9 +151,9 @@ export default class WUPSelectControl<
   }
 
   /** Text for listbox when no items are displayed */
-  static $textNoItems: string | undefined = "No Items";
+  static $textNoItems: string | undefined = __wupln("No Items", "content");
   /** Text for aria-label of <ul> element */
-  static $ariaLabelItems = "Items";
+  static $ariaLabelItems = __wupln("Items", "aria");
 
   static $isEqual(v1: unknown, v2: unknown, c: WUPSelectControl): boolean {
     let isEq = super.$isEqual(v1, v2, c);
@@ -187,8 +187,8 @@ export default class WUPSelectControl<
     ...WUPBaseComboControl.$defaults,
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
-      minCount: (v, setV) => (v == null || v.length < setV) && `Min count is ${setV}`,
-      maxCount: (v, setV) => (v == null || v.length > setV) && `Max count is ${setV}`,
+      minCount: (v, setV) => (v == null || v.length < setV) && __wupln(`Min count is ${setV}`, "validation"),
+      maxCount: (v, setV) => (v == null || v.length > setV) && __wupln(`Max count is ${setV}`, "validation"),
     },
     showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
     allowNewValue: false,

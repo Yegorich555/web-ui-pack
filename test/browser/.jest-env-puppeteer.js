@@ -77,6 +77,8 @@ class PuppeteerEnvironment extends Env {
     this.global.customElements = {
       define: function fake() {},
     };
+    this.global.window ??= {};
+    this.global.__wupln = (s) => s;
 
     // declare empty document for avoiding wrong-test-bug in detectFocusLeft
     // this.global.document = { addEventListener: () => {} };

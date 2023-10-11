@@ -83,7 +83,7 @@ export default class WUPRadioControl<
   #ctr = this.constructor as typeof WUPRadioControl;
 
   /** Custom text that announced by screen-readers. Redefine it to use with another language */
-  static $ariaReadonly = "readonly";
+  static $ariaReadonly = __wupln("readonly", "aria");
 
   static get $styleRoot(): string {
     return `:root {

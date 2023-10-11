@@ -25,11 +25,14 @@ import { WUPTextControl } from "web-ui-pack";
 // main.ts
 import { localeInfo } from "web-ui-pack";
 import { useBuiltinStyle, WUPcssScrollSmall } from "web-ui-pack/styles";
-// use this to update date & number formats according to user locale
+// use this to update `date & number` formats according to user locale
 localeInfo.refresh();
 // OR setup specific locale that doesn't depend on user OS settings
 // localeInfo.refresh("fr-FR");
 // OR skip this if you satisfied with defaults "en-US"
+
+// override global __wuln if you need another language
+window.__wupln = (text, type) => someTranslateFunction(text);
 
 // use this to apply scroll-style from web-ui-pack to all elements with class=".scrolled"
 useBuiltinStyle(
@@ -53,12 +56,12 @@ WUPTextControl.$defaults.clearButton = true;
 const defVld = { ...WUPTextControl.$defaults.validationRules };
 const vld = WUPTextControl.$defaults.validationRules;
 // rule "min"
-vld.min = (v, setV, c) => defVld.min.call(c, v, setV, c) && `Min length ${setV} chars`;
+vld.min = (v, setV, c) => defVld.min.call(c, v, setV, c) && __wupln(`Min length ${setV} chars`, "validation");
 // rule "email"
-vld.email = (v, setV) => setV && (!v || !v.includes("@")) && "Invalid email address";
+vld.email = (v, setV) => setV && (!v || !v.includes("@")) && __wupln("Invalid email address", "validation");
 
 // #2.1 override ariaMessages according to required language
-WUPTextControl.$ariaError = "Error for";
+WUPTextControl.$ariaError = __wupln("Error for", "aria");
 // check also other props started with `$aria...`: `WUPTextControl.$aria...`
 
 // #3 extend default validations
@@ -69,7 +72,20 @@ declare global {
     }
   }
 }
-vld.isNumber = (v) => !/^[0-9]*$/.test(v) && "Please enter a valid number";
+vld.isNumber = (v) => !/^[0-9]*$/.test(v) && __wupln("Please enter a valid number", "validation");
+
+// WARN to override default messages/textContent you can use `window.__wupln` only and skip overriding above. Example:
+window.__wupln = (text, type) => {
+  switch (type) {
+    case "aria":
+      return text; // leave it as is
+    case "validation":
+      // customize messages here
+      return text;
+    default:
+      return text;
+  }
+};
 ```
 
 ## Step 3 - use inside component

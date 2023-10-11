@@ -116,13 +116,13 @@ export default class WUPDateControl<
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
         (v === undefined || dateCompareWithoutTime(v, setV, (c as WUPDateControl)._opts.utc) === -1) &&
-        `Min value is ${(c as WUPDateControl).valueToInput(setV)}`,
+        __wupln(`Min value is ${(c as WUPDateControl).valueToInput(setV)}`, "validation"),
       max: (v, setV, c) =>
         (v === undefined || dateCompareWithoutTime(v, setV, (c as WUPDateControl)._opts.utc) === 1) &&
-        `Max value is ${(c as WUPDateControl).valueToInput(setV)}`,
+        __wupln(`Max value is ${(c as WUPDateControl).valueToInput(setV)}`, "validation"),
       exclude: (v, setV, c) =>
         (v === undefined || setV.some((d) => dateCompareWithoutTime(v, d, (c as WUPDateControl)._opts.utc) === 0)) &&
-        `This value is disabled`,
+        __wupln(`This value is disabled`, "validation"),
     },
     format: "",
     // firstWeekDay: 1,

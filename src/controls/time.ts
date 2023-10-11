@@ -113,15 +113,15 @@ export default class WUPTimeControl<
   #ctr = this.constructor as typeof WUPTimeControl;
 
   /** Text announced by screen-readers when button Ok pressed in menu; @defaultValue `Ok` */
-  static $ariaOk = "Ok";
+  static $ariaOk = __wupln("Ok", "aria");
   /** Text announced by screen-readers when button Cancel pressed in menu; @defaultValue `Cancel` */
-  static $ariaCancel = "Cancel";
+  static $ariaCancel = __wupln("Cancel", "aria");
   /** Aria-label for list in menu; @defaultValue `Hours` */
-  static $ariaHours = "Hours";
+  static $ariaHours = __wupln("Hours", "aria");
   /** Aria-label for list in menu; @defaultValue `Minutes` */
-  static $ariaMinutes = "Minutes";
+  static $ariaMinutes = __wupln("Minutes", "aria");
   /** Aria-label for list in menu; @defaultValue `AM PM` */
-  static $ariaHours12 = "AM PM";
+  static $ariaHours12 = __wupln("AM PM", "aria");
 
   // --ctrl-time-icon-img-png-20: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAABiAAAAYgH4krHQAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAYJJREFUOI2l1L9qVUEQBvCf5+JFUBBbJQi2SSW+gLFV88ck2tmaBJE8gen8h/gCWklInzZ5h4BKIkkUtFD7BDGF91jsHLJe7tl70Q+GPTvzzcfOnJ1lMLq4h3V8xFHYLtawEJyRMI/PqIfYAWZKQh28zBLe4RHGcTZsPHzvM95zVIMEG7FfWGwjBSos4ThynvUT5jKx66Uy+jCZiU43zi4+hfNBS2KN1ZbYcsT3Q8tdJz1rK7Mk2MGH4MxX2VFfo9eSVMJvvInvqQpXY7P1D2INNmO9VuFibL7+h+CXWC9VUu1wakjSTUwM4dQVvsdmrEC8hQvYxiuc74tfjvUbaTZraQJKOIPH+IkfuJ/FVkLjLWnQa2mcOkNE4Qo24iD8fW3mSJfxIBxLIwg2aF6bh5G7h9NNcDacx9I4jYobkdPD7f7gi0x0Wbn8TpysmeMng0hVJlpLfVmRrsq5sInwNT3r4anyy2TWSU9LtoepklCOrvT316Rn/wiH2JGuxh3ZD8jxB6xmcQf6l8SZAAAAAElFTkSuQmCC');
   static get $styleRoot(): string {
@@ -290,10 +290,12 @@ export default class WUPTimeControl<
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
-        (v === undefined || v < setV) && `Min value is ${setV.format((c as WUPTimeControl)._opts.format)}`,
+        (v === undefined || v < setV) &&
+        __wupln(`Min value is ${setV.format((c as WUPTimeControl)._opts.format)}`, "validation"),
       max: (v, setV, c) =>
-        (v === undefined || v > setV) && `Max value is ${setV.format((c as WUPTimeControl)._opts.format)}`,
-      exclude: (v, fn) => (v === undefined || fn.test(v)) && "This value is disabled",
+        (v === undefined || v > setV) &&
+        __wupln(`Max value is ${setV.format((c as WUPTimeControl)._opts.format)}`, "validation"),
+      exclude: (v, fn) => (v === undefined || fn.test(v)) && __wupln("This value is disabled", "validation"),
     },
     step: 1,
     format: "",
@@ -523,6 +525,7 @@ export default class WUPTimeControl<
             return null;
           }
           lh12._value = next.index;
+          // AM/PM in other cultures and do we need to use __wupln ???
           const txt = (lower ? ["pm", "am", "pm", "am"] : ["PM", "AM", "PM", "AM"])[v];
           const item = append(lh12, txt, false, v);
           if (v === 0 || v === 3) {
