@@ -200,7 +200,7 @@ describe("control.select", () => {
     const mockRequest = jest.fn();
     el.$options.items = () => {
       mockRequest();
-      return new Promise((resolve) => setTimeout(() => resolve(getItems()), 100));
+      return new Promise((res) => setTimeout(() => res(getItems()), 100));
     };
     await h.wait(1);
     expect(el.$refInput.value).toBe("");
@@ -213,6 +213,7 @@ describe("control.select", () => {
     // await h.userClick(el); // WARN; somehow it blocks Promise.resolve - it's test-issue
     await h.wait();
     expect(el.$isShown).toBe(false);
+    expect(el.$isPending).toBe(false);
     expect(el.$refInput.value).toBe("Donny");
     expect(mockRequest).toBeCalledTimes(1);
 
@@ -238,6 +239,7 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$isShown).toBe(false);
 
+    el.$value = undefined;
     el.$options.items = () => Promise.resolve(null);
     await h.wait();
     expect(el._cachedItems).toStrictEqual([]); // empty array to avoid future bugs if somehow fetch returns nothing

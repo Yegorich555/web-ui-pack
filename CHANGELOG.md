@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.2 (\_\_\_)
+
+**Fixes**:
+
+-[SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). _Error message in console if `$options.items = new Promise` & `$initValue = ...`_
+
 ## 0.10.1 (Oct 10, 2023)
 
 **BREAKING CHANGES**:
@@ -13,7 +19,7 @@
 - **Text based controls**
   - _Label doesn't go to top on browser autofill_
   - _Value missed & undo/redo failed on browser autofill_
-- [SelectManyControl](src/controls/selectMany.ts).
+- [SelectManyControl](src/controls/selectMany.ts)
   - _Showing button[clear] on hover changes height_
   - _Focus sometimes is wrong when user removes item & reverts changes via click on button[clear=back]_
 

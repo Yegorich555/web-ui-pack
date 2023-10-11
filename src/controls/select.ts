@@ -289,6 +289,8 @@ export default class WUPSelectControl<
   /** Called to get/fetch items based on $options.items */
   fetchItems(): Promise<WUP.Select.MenuItems<ValueType>> | WUP.Select.MenuItems<ValueType> {
     this._cachedItems = undefined;
+    this.#findValT && clearTimeout(this.#findValT); // prevent setIinputValue if fetchItems is started
+    this.#findValT = undefined;
     const { items } = this._opts;
 
     let d: any = items;
@@ -298,14 +300,16 @@ export default class WUPSelectControl<
     const act = (): void => {
       this._onPendingInitValue?.call(this);
       delete this._onPendingInitValue;
-      this.setInputValue(this.$value, SetValueReasons.clear);
+      this.setInputValue(this.$value, SetValueReasons.clear); // NiceToHave: .clear is wrong need new reason
       this.setupInputReadonly(); // call it because opt readonlyInput can depends on items.length
     };
     if (d instanceof Promise) {
       return promiseWait(d, 300, (v) => this.changePending(v)).then((data) => {
-        this._cachedItems = data || [];
-        act();
-        this.$isFocused && setTimeout(() => this.goShowMenu(ShowCases.onFocus, null)); // timeout required to showMenu after pending changes
+        Promise.resolve().finally(() => {
+          this._cachedItems = data || [];
+          act();
+          this.$isFocused && this.goShowMenu(ShowCases.onFocus, null);
+        }); // empty promise required to showMenu after pending changes
         return data;
       });
     }
@@ -477,14 +481,13 @@ export default class WUPSelectControl<
   protected override setInputValue(v: ValueType | undefined, reason: SetValueReasons): void {
     this.#findValT && clearTimeout(this.#findValT);
     this.#findValT = undefined;
-    if (this._cachedItems) {
-      if (reason === SetValueReasons.manual || reason === SetValueReasons.initValue) {
-        this.#findValT = setTimeout(() => super.setInputValue(v, reason), 2); // timeout to fix case when el.$options.items=... el.$value=...
-      } else {
-        super.setInputValue(v, reason);
-      }
+    if (this.$isPending) {
+      return; // decline because setInputValue will be fired after pending
+    }
+    if (reason === SetValueReasons.manual || reason === SetValueReasons.initValue) {
+      this.#findValT = setTimeout(() => super.setInputValue(v, reason), 2); // timeout to fix case when el.$options.items=... el.$value=...
     } else {
-      // skip because it's fired from fetchItems()
+      super.setInputValue(v, reason);
     }
   }
 
