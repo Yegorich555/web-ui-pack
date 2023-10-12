@@ -13,7 +13,7 @@ let onHide = jest.fn();
 /** @type PopupListener */
 let ref;
 
-!WUPPopupElement && console.error("!");
+WUPPopupElement.$use();
 
 beforeEach(() => {
   jest.useFakeTimers();

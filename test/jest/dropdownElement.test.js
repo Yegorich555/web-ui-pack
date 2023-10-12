@@ -5,7 +5,7 @@ let el;
 /** @type HTMLButtonElement */
 let trg;
 
-!WUPDropdownElement && console.error("missed");
+WUPDropdownElement.$use();
 beforeEach(async () => {
   jest.useFakeTimers();
   // fix case when popup rect must be changed according to transform

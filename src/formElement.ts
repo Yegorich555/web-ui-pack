@@ -4,10 +4,6 @@ import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
 import WUPSpinElement from "./spinElement";
 import { WUPcssButton } from "./styles";
 
-/* c8 ignore next */
-/* istanbul ignore next */
-!WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
-
 export const enum SubmitActions {
   /** Disable any action */
   none = 0,
@@ -327,6 +323,7 @@ export default class WUPFormElement<
 
   /** Called on every spin-render */
   renderSpin(target: HTMLElement): WUPSpinElement {
+    WUPSpinElement.$use();
     const spin = document.createElement("wup-spin");
     spin.$options.fit = true;
     spin.$options.overflowFade = false;

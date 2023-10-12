@@ -1,8 +1,8 @@
 import Page from "src/elements/page";
 import { WUPCalendarControl } from "web-ui-pack";
 
-const sideEffect = WUPCalendarControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPCalendarControl.$use();
+
 (window as any).myCalendarValidations = { required: true } as WUP.Calendar.Options["validations"];
 (window as any).myCalendarExcludeDays = [
   new Date("2022-02-28"),

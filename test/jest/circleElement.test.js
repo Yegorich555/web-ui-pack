@@ -8,7 +8,7 @@ let el;
 const getItems = () => [{ value: 50 }];
 
 beforeEach(() => {
-  !WUPCircleElement && console.error("missed");
+  WUPCircleElement.$use();
   jest.useFakeTimers();
   const a = h.useFakeAnimation();
   nextFrame = a.nextFrame;

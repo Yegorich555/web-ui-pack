@@ -5,8 +5,7 @@ import { ClearActions } from "web-ui-pack/controls/baseControl";
 import { spinUseDualRing } from "web-ui-pack/spinElement";
 import stylesCom from "./controls.scss";
 
-const sideEffect = WUPSelectControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPSelectControl.$use();
 
 let ir = 10;
 const items = [

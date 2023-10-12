@@ -2,8 +2,8 @@ import Page from "src/elements/page";
 import { WUPTimeControl, WUPTimeObject } from "web-ui-pack";
 import stylesCom from "./controls.scss";
 
-const sideEffect = WUPTimeControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPTimeControl.$use();
+
 (window as any).myTimeValidations = { required: true } as WUP.Time.Options["validations"];
 (window as any).myTimeValidations2 = { required: false } as WUP.Time.Options["validations"];
 (window as any).myTimeExclude = { test: (v: WUPTimeObject) => v.hours === 12 && v.minutes === 48 };

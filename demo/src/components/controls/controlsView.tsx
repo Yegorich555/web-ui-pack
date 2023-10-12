@@ -12,17 +12,15 @@ import {
   WUPFormElement,
 } from "web-ui-pack";
 
-const sideEffect =
-  WUPFormElement &&
-  WUPTextControl &&
-  WUPPasswordControl &&
-  WUPSelectControl &&
-  WUPSelectManyControl &&
-  WUPSpinElement &&
-  WUPSwitchControl &&
-  WUPCheckControl &&
-  WUPRadioControl;
-!sideEffect && console.error("!"); // It's required otherwise import is ignored by webpack
+WUPFormElement.$use();
+WUPTextControl.$use();
+WUPPasswordControl.$use();
+WUPSelectControl.$use();
+WUPSelectManyControl.$use();
+WUPSpinElement.$use();
+WUPSwitchControl.$use();
+WUPCheckControl.$use();
+WUPRadioControl.$use();
 
 let ir = 10;
 const items = [

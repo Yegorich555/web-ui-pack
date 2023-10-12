@@ -142,14 +142,14 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
 
 ### Example
 
-Check how you can use every element/control (popupElement for example)
-Also check [code style example](/CODESTYLE.md)
+More details you can find in [CODESTYLE.md](/CODESTYLE.md) and [FAQ](#faq)
 
 Typescript
 
 ```typescript
 import WUPPopupElement, { ShowCases } from "web-ui-pack/popup/popupElement";
 
+WUPPopupElement.$use(); // call it to register in the system
 // redefine some defaults; WARN: you can change placement rules here without changing $options per each element!!!
 WUPPopupElement.$defaults.offset = [2, 2];
 WUPPopupElement.$defaults.minWidthByTarget = true;
@@ -294,14 +294,13 @@ Be sure that you familiar with [common rules](#components)
 
 #### UI doesn't recognize html tags like `<wup-popup />` etc
 
-> It's possible if you missed import or it was removed by optimizer of wepback etc. To fix this you need to force import at least once
+> It's possible if you missed import or it was removed by optimizer of wepback etc. To fix this you need to force import at least once and don't forget to call `.$use()`
 >
 > ```js
 > import { WUPSelectControl, WUPTextControl } from "web-ui-pack";
 >
-> // this force webpack not ignore imports (if imported used only as html-tags without direct access)
-> const sideEffect = WUPTextControl && WUPSelectControl;
-> !sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
+> WUPTextControl.$use(); // register element
+> WUPSelectControl.$use(); // register element
 > // or
 > WUPTextControl.$defaults.validateDebounceMs = 500;
 > WUPSelectControl.$defaults.validateDebounceMs = 500;

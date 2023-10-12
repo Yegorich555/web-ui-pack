@@ -69,7 +69,7 @@ function last(arr: string[]) {
   return arr[arr.length - 1];
 }
 
-!WUPSwitchControl && console.error("!");
+WUPSwitchControl.$use();
 
 declare global {
   interface Window {

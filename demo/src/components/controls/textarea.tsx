@@ -3,8 +3,7 @@ import Page from "src/elements/page";
 import { WUPTextareaControl } from "web-ui-pack";
 import styles from "./textarea.scss";
 
-const sideEffect = WUPTextareaControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPTextareaControl.$use();
 
 (window as any).myTextareaValidations = { min: 4 } as WUP.Textarea.Options["validations"];
 

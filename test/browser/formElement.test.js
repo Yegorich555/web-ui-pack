@@ -8,7 +8,8 @@ let testEl;
 beforeEach(async () => {
   jest.spyOn(document, "createElement").getMockImplementation(() => ({ append: () => {} }));
   await page.evaluate(() => {
-    !WUPFormElement && !WUPTextControl && console.error("missed");
+    WUPFormElement.$use();
+    WUPTextControl.$use();
     renderHtml(
       `<wup-form>
         <wup-text w-name="firstName" id="inp1"></wup-text>

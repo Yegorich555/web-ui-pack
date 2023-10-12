@@ -8,6 +8,10 @@ export default class WUPTextareaInput extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextareaInput;
 
+  static $use(): void {
+    // it's for sideEffects component self-registered
+  }
+
   static get $style(): string {
     return `:host {
           display: inline-block; ${/* it removes extra space below */ ""}

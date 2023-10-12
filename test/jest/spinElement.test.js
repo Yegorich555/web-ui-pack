@@ -46,7 +46,7 @@ function targetAppend(targetW = 100, targetH = 20) {
 }
 
 beforeEach(() => {
-  !WUPSpinElement && console.error("missed");
+  WUPSpinElement.$use();
   const a = h.useFakeAnimation();
   nextFrame = a.nextFrame;
 

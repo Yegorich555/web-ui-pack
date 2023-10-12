@@ -60,6 +60,11 @@ export default abstract class WUPBaseElement<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
 
+  /** Register control in the web to allow use */
+  static $use(): void {
+    // todo customElements.define(...) and protected from calling several times
+  }
+
   /** Reference to global style element used by web-ui-pack */
   static get $refStyle(): HTMLStyleElement | null {
     return window.WUPrefStyle || null;

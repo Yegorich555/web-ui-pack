@@ -4,8 +4,7 @@ import { WUPDropdownElement } from "web-ui-pack";
 import MyLink from "src/elements/myLink";
 import styles from "./dropdownView.scss";
 
-const sideEffect = WUPDropdownElement;
-!sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
+WUPDropdownElement.$use();
 
 export default function DropdownView() {
   return (

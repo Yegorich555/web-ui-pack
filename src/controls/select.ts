@@ -7,10 +7,6 @@ import { WUPcssMenu } from "../styles";
 import WUPBaseComboControl, { ShowCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 
-/* c8 ignore next */
-/* istanbul ignore next */
-!WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
-
 const tagName = "wup-select";
 declare global {
   namespace WUP.Select {
@@ -276,6 +272,7 @@ export default class WUPSelectControl<
 
   /** Called on every spin-render */
   renderSpin(): WUPSpinElement {
+    WUPSpinElement.$use();
     const spin = document.createElement("wup-spin");
     spin.$options.fit = true;
     spin.$options.overflowFade = true;

@@ -9,9 +9,7 @@ import WUPBaseComboControl from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 import WUPCalendarControl from "./calendar";
 
-/* c8 ignore next */
-/* istanbul ignore next */
-!WUPCalendarControl && console.error("!"); // It's required otherwise import is ignored by webpack
+WUPCalendarControl.$use();
 
 const tagName = "wup-date";
 declare global {

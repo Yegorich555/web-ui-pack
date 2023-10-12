@@ -14,7 +14,11 @@ beforeEach(() => {
   let lastUniqueNum = 0;
   jest.spyOn(WUPTextControl, "$uniqueId", "get").mockImplementation(() => `txt${++lastUniqueNum}`);
 
-  (!WUPFormElement || !WUPTextControl || !WUPDateControl || !WUPSelectControl) && console.errr("missed");
+  WUPFormElement.$use();
+  WUPTextControl.$use();
+  WUPDateControl.$use();
+  WUPSelectControl.$use();
+
   el = document.body.appendChild(document.createElement("wup-form"));
   const inp1 = el.appendChild(document.createElement("wup-text"));
   inp1.$options.name = "email";

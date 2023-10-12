@@ -2,6 +2,10 @@
 
 ## 0.10.3 (\_\_\_)
 
+**BREAKING CHANGES**:
+
+- **Global**. Added static `.$use()`. Call it before using element: `WUPTextControl.$use()` (_self-registration by import_ works now and will be removed in the future)
+
 **Fixes**:
 
 - Text based controls
@@ -9,8 +13,7 @@
 
 **New/Features**:
 
--**Global**. Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
-
+- **Global**. Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
 - Text based controls
   - Added css variable `ctrl-label-active-pos` to simplify customization of label position
 

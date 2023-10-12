@@ -2,8 +2,8 @@ import Page from "src/elements/page";
 import { WUPDateControl } from "web-ui-pack";
 import stylesCom from "./controls.scss";
 
-const sideEffect = WUPDateControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPDateControl.$use();
+
 (window as any).myDateValidations = { required: true } as WUP.Date.Options["validations"];
 (window as any).myDateValidations2 = { required: false } as WUP.Date.Options["validations"];
 

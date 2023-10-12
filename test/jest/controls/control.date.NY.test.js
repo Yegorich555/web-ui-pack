@@ -5,7 +5,7 @@
 import { WUPDateControl } from "web-ui-pack";
 import * as h from "../../testHelper";
 
-!WUPDateControl && console.error("missed");
+WUPDateControl.$use();
 
 /** @type WUPDateControl */
 let el;

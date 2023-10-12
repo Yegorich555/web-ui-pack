@@ -4,8 +4,7 @@ import MyLink from "src/elements/myLink";
 import stylesCom from "./controls.scss";
 import styles from "./switch.scss";
 
-const sideEffect = WUPSwitchControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPSwitchControl.$use();
 
 export default function SwitchControlView() {
   return (

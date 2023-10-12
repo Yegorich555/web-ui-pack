@@ -2,7 +2,7 @@ import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 import WUPTextareaInput from "./textarea.input";
 
-(WUPTextareaInput as any).sideEffects = true; // to fix sideEffects
+WUPTextareaInput.$use();
 
 const tagName = "wup-textarea";
 declare global {
