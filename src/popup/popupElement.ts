@@ -472,6 +472,10 @@ export default class WUPPopupElement<
     this.init();
   }
 
+  protected override gotRender(): void {
+    // empty because the logic is different
+  }
+
   #isShown = false;
   #refListener?: PopupListener;
   #attach?: () => PopupListener; // func to use alternative target

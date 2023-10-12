@@ -775,7 +775,6 @@ export default abstract class WUPBaseControl<
   }
 
   protected override gotRender(): void {
-    super.gotRender();
     this.renderControl();
   }
 

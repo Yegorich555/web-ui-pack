@@ -463,7 +463,6 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
 
   /** Called on every changeEvent */
   protected override gotRender(): void {
-    super.gotRender();
     this.$refSVG.setAttribute("viewBox", `0 0 100 100`);
     this.$refSVG.setAttribute("role", "img");
     this.appendChild(this.$refSVG);
