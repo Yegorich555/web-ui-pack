@@ -217,7 +217,7 @@ declare global {
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      "w-onChange"?: never;
+      onChange?: never;
     }
   }
 }

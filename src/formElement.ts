@@ -85,7 +85,7 @@ declare global {
       readonly?: boolean | "";
 
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      onChange?: never;
+      onChange?: never; // NiceToHave: controls doesn't fire form.$onChange method - need to implement chaining
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */
       onWillSubmit?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead */
