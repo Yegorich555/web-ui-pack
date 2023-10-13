@@ -146,3 +146,16 @@ a {
     opacity: 0.9;
   }
 }
+
+wup-modal {
+  position: fixed;
+  width: 100%;
+  max-width: 600px;
+  min-height: 100px;
+  background: #fff;
+  border-radius: var(--border-radius);
+  // margin: auto;
+}
+
+.wup-modal-fade {
+}
