@@ -381,7 +381,7 @@ export default abstract class WUPBaseElement<
   }
 
   /** Called once on Init */
-  protected abstract gotRender(): void;
+  protected gotRender(): void {}
 
   #isFirstConn = true;
   #readyTimeout?: ReturnType<typeof setTimeout>;

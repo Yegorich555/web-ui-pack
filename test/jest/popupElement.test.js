@@ -340,7 +340,6 @@ describe("popupElement", () => {
     trgInput.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(50);
     expect(el.$isShown).toBe(false);
-    expect(el.$isOpen).toBe(false); // deprecate it
 
     el.remove();
     el.$hide();

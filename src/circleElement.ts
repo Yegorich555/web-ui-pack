@@ -445,7 +445,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
               t._tid = setTimeout(() => {
                 t._tooltip?.$hide().finally(() => {
                   // popup can be opened when user returns mouse back in a short time
-                  if (t._tooltip && !t._tooltip!.$isOpen) {
+                  if (t._tooltip && !t._tooltip!.$isShown) {
                     t._tooltip!.remove();
                     t._tooltip = undefined;
                   }

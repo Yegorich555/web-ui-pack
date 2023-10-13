@@ -398,10 +398,10 @@ export default class WUPPopupElement<
     if (this.#whenShow) {
       return this.#whenShow;
     }
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean>((res, rej) => {
       const f = async (): Promise<void> => {
         if (!this.$isReady) {
-          reject(new Error(`${this.tagName}. Impossible to show: not appended to document`));
+          rej(new Error(`${this.tagName}. Impossible to show: not appended to document`));
         } else {
           try {
             let isOk = true;
@@ -411,9 +411,9 @@ export default class WUPPopupElement<
             } else {
               isOk = await this.goShow(ShowCases.always, null);
             }
-            resolve(isOk);
+            res(isOk);
           } catch (err) {
-            reject(err); // here promise in promise. So handling is required
+            rej(err); // here promise in promise. So handling is required
           }
         }
       };
@@ -427,12 +427,7 @@ export default class WUPPopupElement<
     this.#state && this.buildState();
   }
 
-  /** @deprecated use `$isShown` */
-  get $isOpen(): boolean {
-    return this.#isShown;
-  }
-
-  /** Returns if popup is opened (before show-animation is started)
+  /** Returns if popup is opened (before show-animation started)
    * @tutorial Troubleshooting
    * * stack: $show() > `$isShown:true` > showing > shown
    * * stack: $hide() > hiding > hidden > `$isShown:false`
@@ -441,7 +436,7 @@ export default class WUPPopupElement<
     return this.#isShown;
   }
 
-  /** Returns if popup is closed (after hide-animation is ended)
+  /** Returns if popup is closed (after hide-animation finished)
    * @tutorial Troubleshooting
    * * stack: $show() > `$isHidden:false` >  showing > shown
    * * stack: $hide() > hiding > hidden > `$isHidden:true`
