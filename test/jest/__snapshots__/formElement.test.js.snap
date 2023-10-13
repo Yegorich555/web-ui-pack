@@ -43,15 +43,18 @@ padding:0;}
   -webkit-mask-image: var(--icon-img);
   mask-image: var(--icon-img);
 }
-[wup-icon]:focus,
-[wup-icon]:focus-within {
-   --icon: var(--icon-focus);
+[wup-icon]:focus {
    box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+[wup-icon]:focus:after {
+   background: var(--icon-hover, var(--icon, #000));
 }
 @media (hover: hover) and (pointer: fine) {
   [wup-icon]:hover {
-   --icon: var(--icon-hover);
    box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  [wup-icon]:hover:after {
+    background: var(--icon-hover, var(--icon, #000));
   }
   [wup-icon]:focus:hover {
    opacity: 0.9;

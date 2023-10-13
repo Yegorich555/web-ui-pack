@@ -62,22 +62,24 @@ ${tag}:after {
   -webkit-mask-image: var(--icon-img);
   mask-image: var(--icon-img);
 }
-${tag}:focus,
-${tag}:focus-within {
-   --icon: var(--icon-focus);
+${tag}:focus {
    box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+${tag}:focus:after {
+   background: var(--icon-hover, var(--icon, #000));
 }
 @media (hover: hover) and (pointer: fine) {
   ${tag}:hover {
-   --icon: var(--icon-hover);
    box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  ${tag}:hover:after {
+    background: var(--icon-hover, var(--icon, #000));
   }
   ${tag}:focus:hover {
    opacity: 0.9;
   }
 }`;
 }
-console.warn(WUPcssBtnIcon("[wup-icon]"));
 
 // todo re-check why it's required inject per each element
 /** Style for small-scroll; vars --scroll, --scroll-hover to customize styling
