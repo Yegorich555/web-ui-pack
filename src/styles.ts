@@ -29,6 +29,56 @@ mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);`;
 
+/** Style for button with icons */
+export function WUPcssBtnIcon(tag: string): string {
+  return `
+${tag} {
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+}
+${tag}:after {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: var(--icon, #000);
+  -webkit-mask-size: var(--icon-size, 1em);
+  mask-size: var(--icon-size, 1em);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-image: var(--icon-img);
+  mask-image: var(--icon-img);
+}
+${tag}:focus,
+${tag}:focus-within {
+   --icon: var(--icon-focus);
+   box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+@media (hover: hover) and (pointer: fine) {
+  ${tag}:hover {
+   --icon: var(--icon-hover);
+   box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  ${tag}:focus:hover {
+   opacity: 0.9;
+  }
+}`;
+}
+console.warn(WUPcssBtnIcon("[wup-icon]"));
+
 // todo re-check why it's required inject per each element
 /** Style for small-scroll; vars --scroll, --scroll-hover to customize styling
  * @tutorial Troubleshooting

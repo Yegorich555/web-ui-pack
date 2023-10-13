@@ -5,7 +5,7 @@ import focusFirst from "./helpers/focusFirst";
 import nestedProperty from "./helpers/nestedProperty";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
-import { WUPcssHidden } from "./styles";
+import { WUPcssHidden, WUPcssBtnIcon } from "./styles";
 
 // theoritcally such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
@@ -95,12 +95,16 @@ export default abstract class WUPBaseElement<
           --anim-time: 200ms;
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
-          --icon-hover: #0001;
+          --icon-hover-bg: #0001;
+          --icon-focus-bg: #0002;
+          --icon-size: 14px;
         }
         [wupdark] {
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
-          --icon-hover: #fff3;
+          --icon: #fff;
+          --icon-hover-bg: #fff1;
+          --icon-focus-bg: #fff2;
           --scroll: #fff2;
           --scroll-hover: #fff3;
         }`;
@@ -111,8 +115,14 @@ export default abstract class WUPBaseElement<
     return `wup${++lastUniqueNum}`;
   }
 
+  /** Returns default class name for visually hidden element */
   static get classNameHidden(): string {
     return "wup-hidden";
+  }
+
+  /** Returns default class name for buttons with icons */
+  static get classNameBtnIcon(): string {
+    return "wup-icon";
   }
 
   /** Returns map-type based on value */
@@ -294,7 +304,9 @@ export default abstract class WUPBaseElement<
     if (!this.#ctr.$refStyle) {
       this.#ctr.$refStyle = document.createElement("style");
       /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
-      this.#ctr.$refStyle.append(`.${this.#ctr.classNameHidden}, [${this.#ctr.classNameHidden}] {${WUPcssHidden}}`);
+      this.#ctr.$refStyle.append(`.${this.#ctr.classNameHidden}, [${this.#ctr.classNameHidden}] {${WUPcssHidden}}\r\n`);
+      this.#ctr.$refStyle.append(`${WUPcssBtnIcon(`[${this.#ctr.classNameBtnIcon}]`)}\r\n`);
+
       document.head.prepend(this.#ctr.$refStyle);
     }
     const refStyle = this.#ctr.$refStyle;
