@@ -111,6 +111,7 @@ export default function TextControlView() {
           w-postfix=" USD"
           w-initValue="1234"
         />
+        {/*  todo it doesn't work afte reloading page: because of react-routers */}
         <wup-text //
           w-name="saveUrl"
           w-label="With saving to URL (see $options.storageKey & storage)"

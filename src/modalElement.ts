@@ -1,10 +1,13 @@
-import WUPBaseElement from "./baseElement";
+import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
+import { parseMsTime } from "./helpers/styleHelpers";
 
 export const enum OpenCases {
   /** When $open() is called programmatically */
   onManuallCall,
   /** On init (when appended to layout) */
   onInit,
+  /** When click on target @see {@link WUP.Modal.Options.target} */
+  onTargetClick,
 }
 
 export const enum CloseCases {
@@ -21,8 +24,11 @@ export const enum CloseCases {
 const tagName = "wup-modal";
 declare global {
   namespace WUP.Modal {
+    // todo add details to types.html.json
     interface Options {
-      // todo add details to types.html.json
+      /** Element that modal need to listen for click. If `target` missed modal will be opened on init
+       * @defaultValue null */
+      target?: Element | null;
     }
     interface EventMap extends WUP.Base.EventMap {
       /** Fires before show is happened;
@@ -39,6 +45,10 @@ declare global {
       $close: Event;
     }
     interface JSXProps<T = WUPModalElement> extends WUP.Base.JSXProps<T>, WUP.Base.OnlyNames<Options> {
+      /** QuerySelector to find target - element that modal need to listen for click. If `target` missed modal will be opened on init
+       * @tutorial rules
+       * * point 'prev' to select previousSibling */
+      "w-target"?: string;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willOpen') instead */
       onWillOpen?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$open') instead */
@@ -98,7 +108,12 @@ export default class WUPModalElement<
 
   static get $styleRoot(): string {
     return `:root {
-
+        --modal: inherit;
+        --modal-bg: #fff;
+        --modal-fade: #0007;
+      }
+      [wupdark] {
+        --modal-bg: #222a36;
       }`;
   }
 
@@ -106,21 +121,72 @@ export default class WUPModalElement<
     return `${super.$style}
       :host {
         z-index: 9002;
+        display: none;
+        position: fixed;
+        width: 100%;
+        max-width: 600px;
+        min-height: 150px;
+        border-radius: var(--border-radius);
+        color: var(--modal);
+        background: var(--modal-bg);
+        border: 1px solid #0002;
+        padding: 1em;
+        box-sizing: border-box;
+        opacity: 0;
+        user-select: none;
+        pointer-events: none;
+        touch-action: none;
+      }
+      :host[open] { display: block; }
+      :host[show] {
+        opacity: 1;
+        user-select: initial;
+        pointer-events: initial;
+        touch-action: initial;
       }
       .${this.$classFade} {
         z-index: 9000;
+        display: none;
         position: fixed;
-        top: 0;
-        left: 0;
+        top:0;left:0;right:0;bottom:0;
+        background: var(--modal-fade);
+        opacity: 0;
+        pointer-events: none;
+        touch-action: none;
+      }
+      .${this.$classFade} { display: block; }
+      .${this.$classFade}[show] {
+        opacity: 1;
+        pointer-events: initial;
+        touch-action: initial;
+       }
+      :host > button[close] {
+        --icon-img: var(--wup-icon-cross);
+        position: absolute;
         right: 0;
-        bottom: 0;
-        background: #0007;
+        margin: 0 1em;
+      }
+      :host h2 {
+        padding-right: 1.8em;
+      }
+      @media not all and (prefers-reduced-motion) {
+        :host,
+        .${this.$classFade} {
+          transition: opacity var(--anim);
+        }
       }`;
   }
 
   static $defaults: WUP.Modal.Options = {
+    target: null,
     // todo placement, selfDestroy
   };
+
+  static get mappedAttributes(): Record<string, AttributeMap> {
+    const m = super.mappedAttributes;
+    m.target = { type: AttributeTypes.selector };
+    return m;
+  }
 
   #isOpened = false;
   /** Returns if modal is open (before show-animation started)
@@ -167,7 +233,6 @@ export default class WUPModalElement<
   $onClose?: (e: Event) => void;
 
   #whenOpen?: Promise<any>;
-  $refFade?: HTMLElement;
   /** Open modal
    * @returns Promise resolved by animation-end */
   $open(): Promise<boolean> {
@@ -179,14 +244,34 @@ export default class WUPModalElement<
     return this.goClose(CloseCases.onManuallCall, null);
   }
 
+  /** Reference to fade element */
+  $refFade?: HTMLElement;
+  /** Reference to button[close] */
+  $refClose?: HTMLButtonElement;
+
   protected override gotRender(): void {
-    this.tabIndex = -1; // WA: to allow scroll modal
-    this.role = "dialog";
-    this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
+    /** empty because component is hidden by defaults */
   }
 
+  _prevTarget?: Element | null;
+  _prevTargetClick?: () => void;
+
   protected override gotChanges(propsChanged: string[] | null): void {
-    !propsChanged && this.goOpen(OpenCases.onInit); // call here to wait options
+    const trg = this._opts.target;
+    const isTrgChange = this._prevTarget !== trg;
+    if (isTrgChange) {
+      this._prevTarget?.removeEventListener("click", this._prevTargetClick!);
+      this._prevTarget = trg;
+    }
+
+    if (!trg) {
+      !propsChanged && this.goOpen(OpenCases.onInit); // call here to wait for options before opening
+    } else if (isTrgChange) {
+      this._prevTargetClick = (): void => {
+        this.goOpen(OpenCases.onTargetClick);
+      };
+      trg.addEventListener("click", this._prevTargetClick);
+    }
   }
 
   /** Hide modal. @openCase as reason of open() */
@@ -196,37 +281,74 @@ export default class WUPModalElement<
     }
     const e = this.fireEvent("$willOpen", { cancelable: true, detail: { openCase } });
     if (e.defaultPrevented) {
-      this.setAttribute("aria-hidden", true);
       return Promise.resolve(false);
     }
+    // clear state
     this.#whenClose = undefined;
     this.#isClosing = undefined;
     this.#isOpened = true;
-
-    this.removeAttribute("aria-hidden");
-    document.body.classList.add(this.#ctr.$classOpened); // todo so possible to hide scroll-bars
-    this.$refFade = document.body.appendChild(document.createElement("div"));
-    this.$refFade.className = this.#ctr.$classFade;
-
+    // setup Accesibility attrs
+    this.tabIndex = -1; // WA: to allow scroll modal
+    this.role = "dialog"; // todo alertdialog for Confirm modal
+    this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
+    // todo implement this.setAttribute("w-placement", this._opts.placement);
     const header = this.querySelector("h1,h2,h3,h4,h5,h6,[role=heading]");
     if (!header) {
-      console.error("WA: header missed. Add <h1>..<h6> or role='heading' to modal content");
+      console.error("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
     } else {
       header.id ??= this.#ctr.$uniqueId;
       this.setAttribute("aria-labelledby", header.id);
     }
+    // init button[close]
+    this.$refClose ??= document.createElement("button");
+    this.$refClose.type = "button";
+    this.$refClose.setAttribute("aria-label", __wupln("close", "aria"));
+    this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
+    this.$refClose.setAttribute("close", "");
+    this.prepend(this.$refClose);
+    // init fade - // todo need to prevent it if prev modal still here
+    this.$refFade ??= document.body.appendChild(document.createElement("div"));
+    this.$refFade.className = this.#ctr.$classFade;
+    this.$refFade.setAttribute("open", "");
 
+    // apply open styles
+    this.setAttribute("open", "");
+    setTimeout(() => {
+      this.setAttribute("show", "");
+      this.$refFade!.setAttribute("show", "");
+    });
+    document.body.classList.add(this.#ctr.$classOpened); // todo maybe hide scroll-bars
+
+    // listen for close-events
+    this.$refClose.onclick = (ev) => this.goClose(CloseCases.onCloseClick, ev);
+    this.$refFade.onclick = (ev) => this.goClose(CloseCases.onOutsideClick, ev);
+    this.appendEvent(
+      this,
+      "keydown",
+      (ev) => {
+        ev.key === "Escape" && !ev.defaultPrevented && this.goClose(CloseCases.onPressEsc, ev);
+        ev.preventDefault();
+      },
+      { passive: false }
+    );
+    this.focus(); // todo skip autofocus on self and for btnClose if possible to focus on another
+
+    // wait for animation
     this.#isOpening = true;
     this.#whenOpen = new Promise((res) => {
-      if (!this.#whenOpen) {
-        res(false); // possible when call $close during the opening
-        return;
-      }
-      // todo listen for clicks to close
-      // todo animation here
-      this.#isOpening = undefined;
-      res(true);
-      setTimeout(() => this.fireEvent("$open"));
+      const animTime = parseMsTime(getComputedStyle(this).transitionDuration);
+      console.warn(animTime, getComputedStyle(this).transitionDuration);
+
+      setTimeout(() => {
+        if (!this.#whenOpen) {
+          res(false); // possible when call $close during the opening
+          return;
+        }
+
+        this.#isOpening = undefined;
+        res(true);
+        setTimeout(() => this.fireEvent("$open"));
+      }, animTime);
     });
     return this.#whenOpen;
   }
@@ -241,36 +363,48 @@ export default class WUPModalElement<
     if (e.defaultPrevented) {
       return Promise.resolve(false);
     }
-
+    // clear state
     this.#whenOpen = undefined;
     this.#isOpening = undefined;
     this.#isClosing = true;
+    // remove events
+    this.$refClose!.onclick = null;
+    this.$refFade!.onclick = null;
+    super.dispose(); // remove only events WARN: don't call this!
+    // apply animation
+    document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
+    !document.body.className && document.body.removeAttribute("class");
+    this.removeAttribute("show");
+    this.$refFade!.removeAttribute("show"); // todo only if last
+
     this.#whenClose = new Promise((res) => {
-      if (!this.#whenClose) {
-        res(false); // possible when call $open during the hiding
-        return;
-      }
-      // todo animation here
-      this.clearState();
-      delete this.$refFade;
-      this.#isOpened = false;
-      this.#isClosing = undefined;
-      res(true);
-      setTimeout(() => this.fireEvent("$close")); // todo add option 'selfDestroy' to remove self by close
+      const animTime = parseMsTime(getComputedStyle(this).transitionDuration);
+      setTimeout(() => {
+        if (!this.#whenClose) {
+          res(false); // possible when call $open during the hiding
+          return;
+        }
+
+        this.dispose();
+        // this.remove(); // todo only if self-destroy enabled
+        res(true);
+        setTimeout(() => this.fireEvent("$close"));
+      }, animTime);
     });
     return this.#whenClose;
   }
 
-  protected override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this.clearState();
-  }
-
-  /** Rollback classes/focus to state before modal is opened */
-  protected clearState(): void {
-    this.$refFade?.remove();
+  protected override dispose(): void {
     document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
-    // todo try to move focus back to actor
+    this.removeAttribute("open");
+    this.$refFade!.remove(); // todo only if last
+    this.$refFade = undefined;
+    this.#isOpened = false;
+    this.#isClosing = undefined;
+    this.#isOpening = undefined;
+    this.#whenClose = undefined;
+    this.#whenOpen = undefined;
+    super.dispose();
   }
 }
 
@@ -281,7 +415,6 @@ customElements.define(tagName, WUPModalElement);
   2. Hide scroll on the body
   4. On close return focus back but element can be missed: So need to store id, classNames and any selectors to find such item in the future
   5. Cycling tab + shift-tab inside
-  6. Close by $close, outsideClick, btnClose click, Esc
 
   7. Ctrl+S, Meta+S submit & close ???
 
@@ -289,3 +422,5 @@ customElements.define(tagName, WUPModalElement);
   Remove modal margins and borders for small screens
 */
 // todo update other popup z-indexes to be less than modal
+
+// testcase: impossible to close same window 2nd time
