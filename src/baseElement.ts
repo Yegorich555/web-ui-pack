@@ -606,10 +606,11 @@ export default abstract class WUPBaseElement<
         if (!attrValue) {
           return undefined;
         }
-        let el = document.querySelector(attrValue);
+        const isPrev = attrValue === "prev";
+        let el = isPrev ? this.previousElementSibling : document.querySelector(attrValue);
         if (!el) {
           setTimeout(() => {
-            el = document.querySelector(attrValue);
+            el = isPrev ? this.previousElementSibling : document.querySelector(attrValue);
             if (el) {
               this._opts[propName as keyof TOptions] = el as any;
             } else {
