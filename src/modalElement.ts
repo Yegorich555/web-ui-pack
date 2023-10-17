@@ -1,5 +1,6 @@
 import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
 import { parseMsTime } from "./helpers/styleHelpers";
+import { WUPcssScrollSmall } from "./styles";
 
 export const enum OpenCases {
   /** When $open() is called programmatically */
@@ -29,6 +30,9 @@ declare global {
       /** Element that modal need to listen for click. If `target` missed modal will be opened on init
        * @defaultValue null */
       target?: Element | null;
+      /** Modal position on the screen
+       * @defaultValue 'center' */
+      placement: "center" | "top" | "left" | "right";
     }
     interface EventMap extends WUP.Base.EventMap {
       /** Fires before show is happened;
@@ -49,6 +53,7 @@ declare global {
        * @tutorial rules
        * * point 'prev' to select previousSibling */
       "w-target"?: string;
+      "w-placement"?: Options["placement"];
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willOpen') instead */
       onWillOpen?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$open') instead */
@@ -111,6 +116,7 @@ export default class WUPModalElement<
         --modal: inherit;
         --modal-bg: #fff;
         --modal-fade: #0007;
+        --modal-margin: 2em;
       }
       [wupdark] {
         --modal-bg: #222a36;
@@ -120,6 +126,8 @@ export default class WUPModalElement<
   static get $style(): string {
     return `${super.$style}
       :host {
+        --anim-time: 400ms;
+        --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms; ${/* todo impossible to only change anim-time */ ""}
         z-index: 9002;
         display: none;
         position: fixed;
@@ -133,16 +141,58 @@ export default class WUPModalElement<
         padding: 1em;
         box-sizing: border-box;
         opacity: 0;
+        white-space: pre-line;
+        overflow: auto;
+        overflow: overlay;
         user-select: none;
         pointer-events: none;
         touch-action: none;
+        outline: none;
       }
-      :host[open] { display: block; }
-      :host[show] {
-        opacity: 1;
+      ${WUPcssScrollSmall(":host")}
+      :host[open] {
+        display: block;
         user-select: initial;
         pointer-events: initial;
         touch-action: initial;
+       }
+      :host[show] { opacity: 1; }
+      :host[w-placement="top"] {
+        top: 0; left: 50%;
+        transform: translate(-50%, -100%);
+        margin: var(--modal-margin);
+        max-height: calc(100% - var(--modal-margin) * 2);
+      }
+      :host[w-placement="top"][show] {
+        transform: translate(-50%, 0);
+      }
+      :host[w-placement="center"] {
+        top: 50%; left: 50%;
+        transform: translate(-50%, -150%);
+        max-height: calc(100% - var(--modal-margin) * 2);
+      }
+      :host[w-placement="center"][show] {
+        transform: translate(-50%, -50%);
+      }
+      :host[w-placement="right"] {
+        right:0;top:0;bottom:0;
+        border-radius: 0;
+        transform: translateX(100%);
+      }
+      :host[w-placement="left"] {
+        left:0;top:0;bottom:0;
+        border-radius: 0;
+        transform: translateX(-100%);
+      }
+      :host[w-placement="right"][show],
+      :host[w-placement="left"][show] {
+        transform: translateX(0);
+      }
+      @media (max-width: 600px) {
+        :host {
+          --modal-margin: 0px;
+          border-radius: 0;
+        }
       }
       .${this.$classFade} {
         z-index: 9000;
@@ -154,12 +204,12 @@ export default class WUPModalElement<
         pointer-events: none;
         touch-action: none;
       }
-      .${this.$classFade} { display: block; }
-      .${this.$classFade}[show] {
-        opacity: 1;
-        pointer-events: initial;
-        touch-action: initial;
-       }
+      .${this.$classFade} {
+         display: block;
+         pointer-events: initial;
+         touch-action: initial;
+      }
+      .${this.$classFade}[show] { opacity: 1; }
       :host > button[close] {
         --icon-img: var(--wup-icon-cross);
         position: absolute;
@@ -167,19 +217,21 @@ export default class WUPModalElement<
         margin: 0 1em;
       }
       :host h2 {
+        margin: 0 0 1em;
         padding-right: 1.8em;
       }
       @media not all and (prefers-reduced-motion) {
         :host,
         .${this.$classFade} {
-          transition: opacity var(--anim);
+          transition: opacity var(--anim), transform var(--anim);
         }
       }`;
   }
 
   static $defaults: WUP.Modal.Options = {
     target: null,
-    // todo placement, selfDestroy
+    placement: "center",
+    // todo selfDestroy
   };
 
   static get mappedAttributes(): Record<string, AttributeMap> {
@@ -291,7 +343,6 @@ export default class WUPModalElement<
     this.tabIndex = -1; // WA: to allow scroll modal
     this.role = "dialog"; // todo alertdialog for Confirm modal
     this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
-    // todo implement this.setAttribute("w-placement", this._opts.placement);
     const header = this.querySelector("h1,h2,h3,h4,h5,h6,[role=heading]");
     if (!header) {
       console.error("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
@@ -312,12 +363,13 @@ export default class WUPModalElement<
     this.$refFade.setAttribute("open", "");
 
     // apply open styles
+    this.setAttribute("w-placement", this._opts.placement);
     this.setAttribute("open", "");
     setTimeout(() => {
       this.setAttribute("show", "");
       this.$refFade!.setAttribute("show", "");
     });
-    document.body.classList.add(this.#ctr.$classOpened); // todo maybe hide scroll-bars
+    document.body.classList.add(this.#ctr.$classOpened); // to maybe hide scroll-bars
 
     // listen for close-events
     this.$refClose.onclick = (ev) => this.goClose(CloseCases.onCloseClick, ev);
@@ -331,14 +383,14 @@ export default class WUPModalElement<
       },
       { passive: false }
     );
+    // todo focus.scorll can be wrong if focused content at the bottom of scrolled
     this.focus(); // todo skip autofocus on self and for btnClose if possible to focus on another
+    this.scroll({ left: 0, top: 0, behavior: "instant" });
 
     // wait for animation
     this.#isOpening = true;
     this.#whenOpen = new Promise((res) => {
       const animTime = parseMsTime(getComputedStyle(this).transitionDuration);
-      console.warn(animTime, getComputedStyle(this).transitionDuration);
-
       setTimeout(() => {
         if (!this.#whenOpen) {
           res(false); // possible when call $close during the opening
