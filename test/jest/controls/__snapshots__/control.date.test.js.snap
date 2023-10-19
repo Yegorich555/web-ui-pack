@@ -456,6 +456,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE {
           contain: style;
           cursor: text;
+          flex: 1;
         }
         WUP-DATE label &gt; span {
           width: 100%;

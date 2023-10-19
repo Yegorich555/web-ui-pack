@@ -467,6 +467,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TIME {
           contain: style;
           cursor: text;
+          flex: 1;
         }
         WUP-TIME label &gt; span {
           width: 100%;

@@ -432,6 +432,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM {
           contain: style;
           cursor: text;
+          flex: 1;
         }
         WUP-NUM label &gt; span {
           width: 100%;

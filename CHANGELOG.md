@@ -10,6 +10,7 @@
 
 - Text based controls
   - _Sometimes weird blink & poor render during the animation on focus_
+  - _Button clear changes control size on hover if parent is flexbox_
 
 **New/Features**:
 

@@ -496,6 +496,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD {
           contain: style;
           cursor: text;
+          flex: 1;
         }
         WUP-PWD label &gt; span {
           width: 100%;

@@ -473,6 +473,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECTMANY {
           contain: style;
           cursor: text;
+          flex: 1;
         }
         WUP-SELECTMANY label &gt; span {
           width: 100%;

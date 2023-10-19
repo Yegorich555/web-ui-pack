@@ -460,6 +460,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT {
           contain: style;
           cursor: text;
+          flex: 1;
         }
         WUP-SELECT label &gt; span {
           width: 100%;
