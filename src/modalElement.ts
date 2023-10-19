@@ -345,9 +345,9 @@ export default class WUPModalElement<
     this.#isClosing = undefined;
     this.#isOpened = true;
     // setup Accesibility attrs
-    // this.tabIndex = -1; // WA: to allow scroll modal - WARN: tabindex: -1 doesn't allow tabbing inside
-    this.role = "dialog"; // possible alertdialog for Confirm modal
-    this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
+    this.tabIndex = -1; // WA: to allow scroll modal - possible that tabindex: -1 doesn't allow tabbing inside
+    // this.role = "dialog"; // possible alertdialog for Confirm modal
+    // this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
     const header = this.querySelector("h1,h2,h3,h4,h5,h6,[role=heading]");
     if (!header) {
       console.error("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
@@ -383,8 +383,12 @@ export default class WUPModalElement<
       this,
       "keydown",
       (ev) => {
-        ev.key === "Escape" && !ev.defaultPrevented && this.goClose(CloseCases.onPressEsc, ev);
-        ev.preventDefault();
+        // todo it works together on control where Escape clears input
+        // todo need confirm window if user has unsaved changes
+        if (ev.key === "Escape" && !ev.defaultPrevented) {
+          ev.preventDefault();
+          this.goClose(CloseCases.onPressEsc, ev);
+        }
       },
       { passive: false }
     );
@@ -458,6 +462,10 @@ export default class WUPModalElement<
       const isOk = this.focus();
       this.$refClose!.disabled = false;
       !isOk && this.$refClose!.focus();
+      // if (document.activeElement !== this.$refClose) {
+      //   this.tabIndex = 0;
+      //   HTMLElement.prototype.focus.call(this);
+      // }
     }
   }
 
@@ -487,9 +495,9 @@ customElements.define(tagName, WUPModalElement);
 */
 
 // todo update other popup z-indexes to be less than modal
-// todo ordinary tabbing doesn't work
 
 // testcase: impossible to close same window 2nd time
 // testcase: onOpen with autofocus btnClose must be ignored | any content
 // testcase: onClose focus must return back
 // testcase: add modal with target and remove after 100ms  expected 0 exceptions
+// testcase: close on Escape + when control is in edit mode + when dropdown is opened
