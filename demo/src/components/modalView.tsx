@@ -52,7 +52,9 @@ export default function ModalView() {
       // todo fix parsed html according to defaults
       features={[
         "Built-in close by: outside click, button[close] click, key Escape",
-        "Built-in styles & animation for different screens",
+        "Built-in styles & animation for different screen sizes",
+        "Built-in accessibility: autofocus, tab-cycling, focus-back on closing etc.",
+        "Built-in wup-form support",
       ]}
     >
       <h3>Different placemenets</h3>
@@ -62,15 +64,7 @@ export default function ModalView() {
         <button className={`btn ${styles.left}`} type="button">
           Left
         </button>
-        <wup-modal
-          w-target="prev"
-          w-placement="left"
-          // ref={(el) => {
-          //   if (el) {
-          //     el.$options.placement = "left";
-          //   }
-          // }}
-        >
+        <wup-modal w-target="prev" w-placement="left">
           <h2>Modal with placement: left</h2>
           <div>{bigContent}</div>
         </wup-modal>
@@ -99,6 +93,21 @@ export default function ModalView() {
           <div>{bigContent}</div>
         </wup-modal>
       </div>
+
+      <h3>Built-in form support</h3>
+      <small>Just place wup-form with controls inside</small>
+      <br />
+      <button className="btn" type="button">
+        Login
+      </button>
+      <wup-modal w-target="prev">
+        <h2>Ordinary form</h2>
+        <wup-form>
+          <wup-text w-name="email" w-initValue="yegor.golubchik@mail.com" />
+          <wup-pwd w-name="password" w-initValue="123456" />
+          <button type="submit">Submit </button>
+        </wup-form>
+      </wup-modal>
     </Page>
   );
 }

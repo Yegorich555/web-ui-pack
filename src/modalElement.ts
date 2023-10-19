@@ -33,6 +33,8 @@ declare global {
       /** Modal position on the screen
        * @defaultValue 'center' */
       placement: "center" | "top" | "left" | "right";
+      /** Autofocus first possible content with skipping focus on button[close] if there is another focusable content */
+      autoFocus: boolean;
     }
     interface EventMap extends WUP.Base.EventMap {
       /** Fires before show is happened;
@@ -54,6 +56,7 @@ declare global {
        * * point 'prev' to select previousSibling */
       "w-target"?: string;
       "w-placement"?: Options["placement"];
+      "w-autofocus"?: boolean | "";
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willOpen') instead */
       onWillOpen?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$open') instead */
@@ -92,9 +95,10 @@ declare global {
  * <!-- You can skip pointing attribute 'target' if popup appended after target -->
  * <wup-modal>Some content here</wup-popup>
  * ```
- * @tutorial Troubleshooting:
- * * ...
- */
+ * @tutorial Troubleshooting known issues:
+ * * for very long content with 1st focusable item at the bottom it won't be visible because user must see top of the modal at first
+ * To fix the issue set `<h2 tabindex="-1">...</h2>` and hide focus frame via styles OR disable `$options.autoFocus`
+ * * accessibility: NVDA reads modal content twice. To fix you can follow the recomendations: https://github.com/nvaccess/nvda/issues/8971 */
 export default class WUPModalElement<
   TOptions extends WUP.Modal.Options = WUP.Modal.Options,
   Events extends WUP.Modal.EventMap = WUP.Modal.EventMap
@@ -231,6 +235,7 @@ export default class WUPModalElement<
   static $defaults: WUP.Modal.Options = {
     target: null,
     placement: "center",
+    autoFocus: true,
     // todo selfDestroy
   };
 
@@ -302,7 +307,7 @@ export default class WUPModalElement<
   $refClose?: HTMLButtonElement;
 
   protected override gotRender(): void {
-    /** empty because component is hidden by defaults */
+    /** empty because component is hidden by default and need to focus on speed of init-phase */
   }
 
   _prevTarget?: Element | null;
@@ -340,15 +345,15 @@ export default class WUPModalElement<
     this.#isClosing = undefined;
     this.#isOpened = true;
     // setup Accesibility attrs
-    this.tabIndex = -1; // WA: to allow scroll modal
-    this.role = "dialog"; // todo alertdialog for Confirm modal
+    // this.tabIndex = -1; // WA: to allow scroll modal - WARN: tabindex: -1 doesn't allow tabbing inside
+    this.role = "dialog"; // possible alertdialog for Confirm modal
     this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
     const header = this.querySelector("h1,h2,h3,h4,h5,h6,[role=heading]");
     if (!header) {
       console.error("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
     } else {
-      header.id ??= this.#ctr.$uniqueId;
-      this.setAttribute("aria-labelledby", header.id);
+      header.id ||= this.#ctr.$uniqueId;
+      this.setAttribute("aria-labelledby", header.id); // issue: NVDA reads content twice if modal has aria-labelledby: https://github.com/nvaccess/nvda/issues/8971
     }
     // init button[close]
     this.$refClose ??= document.createElement("button");
@@ -383,8 +388,8 @@ export default class WUPModalElement<
       },
       { passive: false }
     );
-    // todo focus.scorll can be wrong if focused content at the bottom of scrolled
-    this.focus(); // todo skip autofocus on self and for btnClose if possible to focus on another
+
+    this._opts.autoFocus ? this.focusAny() : this.focus();
     this.scroll({ left: 0, top: 0, behavior: "instant" });
 
     // wait for animation
@@ -446,6 +451,16 @@ export default class WUPModalElement<
     return this.#whenClose;
   }
 
+  /** Focus any content excluding button[close] if possible */
+  focusAny(): void {
+    if (this.$isOpened) {
+      this.$refClose!.disabled = true;
+      const isOk = this.focus();
+      this.$refClose!.disabled = false;
+      !isOk && this.$refClose!.focus();
+    }
+  }
+
   protected override dispose(): void {
     document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
     this.removeAttribute("open");
@@ -463,16 +478,17 @@ export default class WUPModalElement<
 customElements.define(tagName, WUPModalElement);
 
 /*  todo WA
-  1. Autofocus: true by default
-  2. Hide scroll on the body
+  2. Hide scroll on the body ???
   4. On close return focus back but element can be missed: So need to store id, classNames and any selectors to find such item in the future
   5. Cycling tab + shift-tab inside
 
   7. Ctrl+S, Meta+S submit & close ???
-
-  modal placement top/center/left/right
-  Remove modal margins and borders for small screens
 */
+
 // todo update other popup z-indexes to be less than modal
+// todo ordinary tabbing doesn't work
+// todo issue with dispose
 
 // testcase: impossible to close same window 2nd time
+// testcase: onOpen with autofocus btnClose must be ignored | any content
+// testcase: onClose focus must return back
