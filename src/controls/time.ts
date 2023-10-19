@@ -770,3 +770,5 @@ export default class WUPTimeControl<
 }
 
 customElements.define(tagName, WUPTimeControl);
+
+// todo fix animation-dropdown: buttons looks ugly on darkMode because don't have bg
