@@ -7,11 +7,11 @@ WUPModalElement.$use();
 const dbgSmall = (
   <>
     <div className={styles.block}>
-      <button className={`btn ${styles.center}`} type="button">
-        Center
+      <button className={`btn ${styles.left}`} type="button">
+        Left
       </button>
-      <wup-modal w-target="prev" w-placement="center">
-        <h2>Modal with placement: center</h2>
+      <wup-modal w-target="prev" w-placement="left">
+        <h2>Modal with placement: left</h2>
       </wup-modal>
       {/*  */}
       <button className={`btn ${styles.top}`} type="button">
@@ -21,11 +21,11 @@ const dbgSmall = (
         <h2>Modal with placement: top</h2>
       </wup-modal>
       {/*  */}
-      <button className={`btn ${styles.left}`} type="button">
-        Left
+      <button className={`btn ${styles.center}`} type="button">
+        Center
       </button>
-      <wup-modal w-target="prev" w-placement="left">
-        <h2>Modal with placement: left</h2>
+      <wup-modal w-target="prev" w-placement="center">
+        <h2>Modal with placement: center</h2>
       </wup-modal>
       {/*  */}
       <button className={`btn ${styles.right}`} type="button">
@@ -59,22 +59,6 @@ export default function ModalView() {
       <small>Use $options.placement or attribute [w-placement]</small>
       {DEV ? dbgSmall : null}
       <div className={styles.block}>
-        <button className={`btn ${styles.center}`} type="button">
-          Center
-        </button>
-        <wup-modal w-target="prev" w-placement="center">
-          <h2>Modal with placement: center</h2>
-          <div>{bigContent}</div>
-        </wup-modal>
-        {/*  */}
-        <button className={`btn ${styles.top}`} type="button">
-          Top
-        </button>
-        <wup-modal w-target="prev" w-placement="top">
-          <h2>Modal with placement: top</h2>
-          <div>{bigContent}</div>
-        </wup-modal>
-        {/*  */}
         <button className={`btn ${styles.left}`} type="button">
           Left
         </button>
@@ -88,6 +72,22 @@ export default function ModalView() {
           // }}
         >
           <h2>Modal with placement: left</h2>
+          <div>{bigContent}</div>
+        </wup-modal>
+        {/*  */}
+        <button className={`btn ${styles.top}`} type="button">
+          Top
+        </button>
+        <wup-modal w-target="prev" w-placement="top">
+          <h2>Modal with placement: top</h2>
+          <div>{bigContent}</div>
+        </wup-modal>
+        {/*  */}
+        <button className={`btn ${styles.center}`} type="button">
+          Center
+        </button>
+        <wup-modal w-target="prev" w-placement="center">
+          <h2>Modal with placement: center</h2>
           <div>{bigContent}</div>
         </wup-modal>
         {/*  */}

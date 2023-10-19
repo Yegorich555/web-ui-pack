@@ -10,6 +10,7 @@
   > button {
     position: absolute;
     min-height: 30px;
+    margin: 0;
   }
 }
 
@@ -19,7 +20,8 @@
   bottom: 0;
   min-width: initial;
   width: 20%;
-  border-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .right {
@@ -28,7 +30,8 @@
   bottom: 0;
   min-width: initial;
   width: 20%;
-  border-radius: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .center {

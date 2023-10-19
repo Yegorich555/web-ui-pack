@@ -20,7 +20,8 @@
   border-radius: $borderRadius;
 
   > button[movable] {
-    background: #bb2b2b;
+    --base-btn-bg: #bb2b2b;
+    --base-btn-focus: #ff9f9f;
   }
 }
 
