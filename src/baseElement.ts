@@ -96,7 +96,7 @@ export default abstract class WUPBaseElement<
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
           --icon-hover-bg: #0001;
-          --icon-focus-bg: #0002;
+          --icon-focus-bg: #0000001a;
           --icon-size: 14px;
         }
         [wupdark] {

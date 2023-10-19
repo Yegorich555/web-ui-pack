@@ -76,7 +76,7 @@ padding:0;}
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
           --icon-hover-bg: #0001;
-          --icon-focus-bg: #0002;
+          --icon-focus-bg: #0000001a;
           --icon-size: 14px;
         }
         [wupdark] {
@@ -108,7 +108,7 @@ padding:0;}
         
 WUP-FORM button[type=submit] {
   box-shadow: none;
-  border: 1px solid var(--base-btn-bg);
+  border: none;
   border-radius: var(--border-radius);
   box-sizing: border-box;
   padding: 0.5em;
@@ -122,7 +122,7 @@ WUP-FORM button[type=submit] {
   outline: none;
 }
 WUP-FORM button[type=submit]:focus {
-  border-color: var(--base-btn-focus);
+  box-shadow: inset 0 0 0 2px var(--base-btn-focus);
 }
 @media (hover: hover) and (pointer: fine) {
   WUP-FORM button[type=submit]:hover {

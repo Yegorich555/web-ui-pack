@@ -122,7 +122,7 @@ export function WUPcssButton(tag: string): string {
   return `
 ${tag} {
   box-shadow: none;
-  border: 1px solid var(--base-btn-bg);
+  border: none;
   border-radius: var(--border-radius);
   box-sizing: border-box;
   padding: 0.5em;
@@ -136,7 +136,7 @@ ${tag} {
   outline: none;
 }
 ${tag}:focus {
-  border-color: var(--base-btn-focus);
+  box-shadow: inset 0 0 0 2px var(--base-btn-focus);
 }
 @media (hover: hover) and (pointer: fine) {
   ${tag}:hover {
