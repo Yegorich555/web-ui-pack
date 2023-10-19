@@ -463,8 +463,9 @@ export default class WUPModalElement<
 
   protected override dispose(): void {
     document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
+    !document.body.className && document.body.removeAttribute("class");
     this.removeAttribute("open");
-    this.$refFade!.remove(); // todo only if last
+    this.$refFade?.remove(); // todo only if last
     this.$refFade = undefined;
     this.#isOpened = false;
     this.#isClosing = undefined;
@@ -487,8 +488,8 @@ customElements.define(tagName, WUPModalElement);
 
 // todo update other popup z-indexes to be less than modal
 // todo ordinary tabbing doesn't work
-// todo issue with dispose
 
 // testcase: impossible to close same window 2nd time
 // testcase: onOpen with autofocus btnClose must be ignored | any content
 // testcase: onClose focus must return back
+// testcase: add modal with target and remove after 100ms  expected 0 exceptions
