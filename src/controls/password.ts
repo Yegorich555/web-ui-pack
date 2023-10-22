@@ -1,5 +1,6 @@
 import onEvent from "../helpers/onEvent";
 import { stringLowerCount, stringUpperCount } from "../helpers/string";
+import { WUPcssIcon } from "../styles";
 import WUPTextControl from "./text";
 
 const tagName = "wup-pwd";
@@ -111,8 +112,7 @@ export default class WUPPasswordControl<
         :host button[eye] {
           cursor: pointer;
           margin-right: -0.5em;
-          -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
+          ${WUPcssIcon}
           -webkit-mask-size: calc(var(--ctrl-icon-size) * 1.3);
           mask-size: calc(var(--ctrl-icon-size) * 1.3);
         }
@@ -247,5 +247,3 @@ rr = undefined;
 customElements.define(tagName, WUPPasswordControl);
 
 // manual testcase: form with email+password ignores autocomplete: "off" if previously it was saved
-
-// todo: rendering of btn[eye] is broken
