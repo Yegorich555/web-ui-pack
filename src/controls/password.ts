@@ -110,9 +110,9 @@ export default class WUPPasswordControl<
           ${"margin-bottom: -1px;" /* font Verdana affects on height // todo somehow it's wrong on other apps */}
         }
         :host button[eye] {
+          ${WUPcssIcon}
           cursor: pointer;
           margin-right: -0.5em;
-          ${WUPcssIcon}
           -webkit-mask-size: calc(var(--ctrl-icon-size) * 1.3);
           mask-size: calc(var(--ctrl-icon-size) * 1.3);
         }

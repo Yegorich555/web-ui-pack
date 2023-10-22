@@ -765,8 +765,6 @@ mask-image: var(--ctrl-icon-img);
           margin-bottom: -1px;
         }
         WUP-PWD button[eye] {
-          cursor: pointer;
-          margin-right: -0.5em;
           
 display: inline-block;
 width: var(--ctrl-icon-size);
@@ -787,6 +785,8 @@ mask-repeat: no-repeat;
 mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
+          cursor: pointer;
+          margin-right: -0.5em;
           -webkit-mask-size: calc(var(--ctrl-icon-size) * 1.3);
           mask-size: calc(var(--ctrl-icon-size) * 1.3);
         }
