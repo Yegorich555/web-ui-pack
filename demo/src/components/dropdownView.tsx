@@ -79,6 +79,7 @@ export default function DropdownView() {
             </ul>
           </wup-popup>
         </wup-dropdown>
+        {/* todo: not enough space at the bottom for show good demo */}
         <wup-dropdown class={`${styles.custom} ${styles.vertical}`}>
           <button type="button" style={{ transform: "rotate(90deg)" }}>
             {">"}
