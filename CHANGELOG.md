@@ -5,7 +5,9 @@
 **BREAKING CHANGES**:
 
 - **Global**. Added static `.$use()`. Call it before using element: `WUPTextControl.$use()` (_self-registration by import_ works now and will be removed in the future)
-- [PopupElement](src/popup/popupElement.ts). Removed `$isOpen` in favor of `$isShown`
+- [PopupElement](src/popup/popupElement.ts).
+  - Removed `$isOpen` in favor of `$isShown`
+  - **z-index** is changed from `90000` to `8000`
 
 **Fixes**:
 

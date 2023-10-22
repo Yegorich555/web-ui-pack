@@ -202,7 +202,7 @@ export default class WUPSelectManyControl<
         }
       }
       :host [item][drag] {
-        z-index: 99999;
+        z-index: 9999;
         position: fixed;
         left:0; top:0;
         cursor: grabbing;

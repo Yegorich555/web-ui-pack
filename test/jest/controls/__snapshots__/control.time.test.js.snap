@@ -406,7 +406,6 @@ padding:0;}
       }
       WUP-TIME:focus-within,
       WUP-TIME:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-TIME:focus-within strong,
@@ -751,7 +750,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-TIME &gt; [menu] {
         padding: 0;
         max-height: 300px;
-        z-index: 90010;
+        z-index: 8010;
       }
       WUP-TIME {
         --ctrl-icon-img: var(--ctrl-time-icon-img-lg);

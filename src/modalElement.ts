@@ -494,8 +494,6 @@ customElements.define(tagName, WUPModalElement);
   7. Ctrl+S, Meta+S submit & close ???
 */
 
-// todo update other popup z-indexes to be less than modal
-
 // testcase: impossible to close same window 2nd time
 // testcase: onOpen with autofocus btnClose must be ignored | any content
 // testcase: onClose focus must return back

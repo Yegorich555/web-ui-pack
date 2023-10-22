@@ -412,7 +412,6 @@ padding:0;}
       }
       WUP-SELECTMANY:focus-within,
       WUP-SELECTMANY:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-SELECTMANY:focus-within strong,
@@ -757,7 +756,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECTMANY &gt; [menu] {
         padding: 0;
         max-height: 300px;
-        z-index: 90010;
+        z-index: 8010;
       }
       WUP-SELECTMANY {
         --ctrl-icon-img: var(--ctrl-select-icon-img);
@@ -966,7 +965,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
       WUP-SELECTMANY [item][drag] {
-        z-index: 99999;
+        z-index: 9999;
         position: fixed;
         left:0; top:0;
         cursor: grabbing;

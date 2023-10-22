@@ -435,7 +435,6 @@ padding:0;}
       }
       WUP-PWD:focus-within,
       WUP-PWD:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-PWD:focus-within strong,

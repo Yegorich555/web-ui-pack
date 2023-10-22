@@ -109,7 +109,7 @@ padding:0;}
       
   
       WUP-POPUP {
-        z-index: 90000;
+        z-index: 8000;
         display: none;
         position: fixed!important;
         top: 0; left: 0;
@@ -183,7 +183,7 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
 }
   
       TEST-EL {
-        z-index: 90000;
+        z-index: 8000;
         display: none;
         position: fixed!important;
         top: 0; left: 0;
@@ -407,7 +407,7 @@ padding:0;}
       
   
       WUP-POPUP {
-        z-index: 90000;
+        z-index: 8000;
         display: none;
         position: fixed!important;
         top: 0; left: 0;
@@ -481,7 +481,7 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
 }
   
       TEST-EL {
-        z-index: 90000;
+        z-index: 8000;
         display: none;
         position: fixed!important;
         top: 0; left: 0;
