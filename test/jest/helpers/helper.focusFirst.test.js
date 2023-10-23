@@ -84,5 +84,30 @@ describe("helper.focusFirst", () => {
     expect(document.activeElement).toBe(inp);
   });
 
+  test("option: isFocusLast", () => {
+    document.body.innerHTML = `
+      <main>
+        <button id='a1'>Submit</button>
+        <input id='b2' ></input>
+        <a id="c3" href='somelink'>Some link</a>
+      </main>
+    `;
+    focusFirst(document.body.firstElementChild, { isFocusLast: true });
+    expect(document.activeElement.id).toBe("c3");
+
+    focusFirst(document.body.firstElementChild, { isFocusLast: false });
+    expect(document.activeElement.id).toBe("a1");
+
+    focusFirst(document.body.firstElementChild, {});
+    expect(document.activeElement.id).toBe("a1");
+
+    // test when element can't be focused
+    const brokenFocus = document.body.querySelector("a");
+    brokenFocus.focus = () => {}; // prevent default focus behavior
+    brokenFocus.focus();
+    expect(document.activeElement.id).not.toBe(brokenFocus.id);
+    focusFirst(document.body.firstElementChild, { isFocusLast: true });
+    expect(document.activeElement.id).toBe("b2");
+  });
   // testing child with invisible element see in test/browser/..
 });

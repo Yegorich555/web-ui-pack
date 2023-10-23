@@ -17,7 +17,8 @@
 **New/Features**:
 
 - **Global**. Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
-- Text based controls
+- helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector possible to get from  `focusFirst.$selector`
+- **Text based controls**
   - Added css variable `ctrl-label-active-pos` to simplify customization of label position
 
 ## 0.10.2 (Oct 11, 2023)
