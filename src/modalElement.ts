@@ -333,6 +333,8 @@ export default class WUPModalElement<
     }
   }
 
+  /** Id of last focused item on item itself */
+  _lastFocused?: Element | string | null;
   /** Hide modal. @openCase as reason of open() */
   protected goOpen(openCase: OpenCases): Promise<boolean> {
     if (this.#whenOpen) {
@@ -342,6 +344,10 @@ export default class WUPModalElement<
     if (e.defaultPrevented) {
       return Promise.resolve(false);
     }
+    // store id of focused element
+    const ael = document.activeElement;
+    this._lastFocused = ael?.id || ael;
+
     // clear state
     this.#whenClose = undefined;
     this.#isClosing = undefined;
@@ -409,6 +415,7 @@ export default class WUPModalElement<
   /** Hide modal. @closeCase as reason of close() */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   goClose(closeCase: CloseCases, ev: MouseEvent | KeyboardEvent | null): Promise<boolean> {
+    // todo need confirm window if user has unsaved changes
     if (this.#whenClose) {
       return this.#whenClose;
     }
@@ -444,7 +451,26 @@ export default class WUPModalElement<
         setTimeout(() => this.fireEvent("$close"));
       }, animTime);
     });
+
+    this.focusBack();
     return this.#whenClose;
+  }
+
+  /** Called on close to return focus to previously focused item */
+  focusBack(): void {
+    let el: Element | null | undefined;
+    if (typeof this._lastFocused === "string") {
+      el = document.getElementById(this._lastFocused);
+    } else {
+      el = this._lastFocused;
+    }
+    if (!(el as HTMLElement)?.focus) {
+      this.throwError(
+        "Impossible to return focus back: element is missed. Before opening modal set 'id' to focused element"
+      );
+      el = document.body;
+    }
+    (el as HTMLElement).focus();
   }
 
   // WARN: the focus block work better because not handles keyboard but looks for focus behavior but it's buggy in FF and maybe other browsers since focusOut can be outside the modal
@@ -468,7 +494,6 @@ export default class WUPModalElement<
         if (!e.defaultPrevented) {
           e.preventDefault();
           // todo it works together on control where Escape clears input
-          // todo need confirm window if user has unsaved changes
           this.goClose(CloseCases.onPressEsc, e);
         }
         break;
@@ -532,7 +557,6 @@ customElements.define(tagName, WUPModalElement);
 
 /*  todo WA
   2. Hide scroll on the body ???
-  4. On close return focus back but element can be missed: So need to store id, classNames and any selectors to find such item in the future
 
   7. Ctrl+S, Meta+S submit & close ???
 */
@@ -543,3 +567,4 @@ customElements.define(tagName, WUPModalElement);
 // testcase: add modal with target and remove after 100ms  expected 0 exceptions
 // testcase: close on Escape + when control is in edit mode + when dropdown is opened
 // testcase: tab-cycling
+// testcase: focusBack
