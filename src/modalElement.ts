@@ -1,4 +1,5 @@
 import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
+import focusFirst from "./helpers/focusFirst";
 import { parseMsTime } from "./helpers/styleHelpers";
 import { WUPcssScrollSmall } from "./styles";
 
@@ -127,11 +128,12 @@ export default class WUPModalElement<
       }`;
   }
 
+  /* NiceToHave: impossible to only change anim-time need also to oveeride --anim: need somehow improve this */
   static get $style(): string {
     return `${super.$style}
       :host {
         --anim-time: 400ms;
-        --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms; ${/* todo impossible to only change anim-time */ ""}
+        --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 9002;
         display: none;
         position: fixed;
@@ -355,6 +357,7 @@ export default class WUPModalElement<
       header.id ||= this.#ctr.$uniqueId;
       this.setAttribute("aria-labelledby", header.id); // issue: NVDA reads content twice if modal has aria-labelledby: https://github.com/nvaccess/nvda/issues/8971
     }
+
     // init button[close]
     this.$refClose ??= document.createElement("button");
     this.$refClose.type = "button";
@@ -379,21 +382,10 @@ export default class WUPModalElement<
     // listen for close-events
     this.$refClose.onclick = (ev) => this.goClose(CloseCases.onCloseClick, ev);
     this.$refFade.onclick = (ev) => this.goClose(CloseCases.onOutsideClick, ev);
-    this.appendEvent(
-      this,
-      "keydown",
-      (ev) => {
-        // todo it works together on control where Escape clears input
-        // todo need confirm window if user has unsaved changes
-        if (ev.key === "Escape" && !ev.defaultPrevented) {
-          ev.preventDefault();
-          this.goClose(CloseCases.onPressEsc, ev);
-        }
-      },
-      { passive: false }
-    );
+    // this.appendEvent(this, "focusout", (ev) => this.gotFocusOut(ev), { passive: false });
+    this.appendEvent(this, "keydown", (ev) => this.gotKeyDown(ev), { passive: false });
 
-    this._opts.autoFocus ? this.focusAny() : this.focus();
+    this._opts.autoFocus ? this.focusAny() : this.focus(); // bug: FF doesn't adjust suggest-popup according to animation
     this.scroll({ left: 0, top: 0, behavior: "instant" });
 
     // wait for animation
@@ -412,6 +404,58 @@ export default class WUPModalElement<
       }, animTime);
     });
     return this.#whenOpen;
+  }
+
+  // WARN: the focus block work better because not handles keyboard but looks for focus behavior but it's buggy in FF and maybe other browsers since focusOut can be outside the modal
+  // /** Required for tab-cycle behavior */
+  // _willFocusPrev?: boolean;
+  // /** Called on focusout event */
+  // gotFocusOut(e: FocusEvent): void {
+  //   const t = e.relatedTarget;
+  //   const isOut = !t || !this.includes(t); // a-todo includes can be wrong for absolute items ???
+  //   const isFocusLast = this._willFocusPrev;
+  //   isOut && isFocusLast != null && focusFirst(this, { isFocusLast }); // bug: FF doesn't remove focus-style on btn[close] when focus goes outside
+  //   delete this._willFocusPrev;
+  //   console.warn("blur", { isFocusLast, relatedTarget: t, hasFocus: document.hasFocus() });
+  //   // WARN: browser can ignore focus action and move focus to the tab panel - it's ok and even better than whole cycling
+  // }
+
+  /** Called on keydown event */
+  gotKeyDown(e: KeyboardEvent): void {
+    switch (e.key) {
+      case "Escape":
+        if (!e.defaultPrevented) {
+          e.preventDefault();
+          // todo it works together on control where Escape clears input
+          // todo need confirm window if user has unsaved changes
+          this.goClose(CloseCases.onPressEsc, e);
+        }
+        break;
+      case "Tab": {
+        if (!e.altKey && !e.ctrlKey && !e.metaKey) {
+          let isFocusLast: boolean | undefined;
+          if (e.shiftKey) {
+            const isFirst = document.activeElement === this.querySelector(focusFirst.$selector);
+            if (isFirst) {
+              isFocusLast = true; // to cycle focus-behavior
+            }
+          } else {
+            const all = this.querySelectorAll(focusFirst.$selector);
+            const isLast = document.activeElement === all.item(all.length - 1);
+            if (isLast) {
+              isFocusLast = false; // to cycle focus-behavior
+            }
+          }
+          if (isFocusLast != null) {
+            e.preventDefault(); // prevent default focus behavior
+            focusFirst(this, { isFocusLast });
+          }
+        }
+        break;
+      }
+      default:
+        break;
+    }
   }
 
   /** Hide modal. @closeCase as reason of close() */
@@ -489,7 +533,6 @@ customElements.define(tagName, WUPModalElement);
 /*  todo WA
   2. Hide scroll on the body ???
   4. On close return focus back but element can be missed: So need to store id, classNames and any selectors to find such item in the future
-  5. Cycling tab + shift-tab inside
 
   7. Ctrl+S, Meta+S submit & close ???
 */
@@ -499,3 +542,4 @@ customElements.define(tagName, WUPModalElement);
 // testcase: onClose focus must return back
 // testcase: add modal with target and remove after 100ms  expected 0 exceptions
 // testcase: close on Escape + when control is in edit mode + when dropdown is opened
+// testcase: tab-cycling
