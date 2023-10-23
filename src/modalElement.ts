@@ -348,8 +348,8 @@ export default class WUPModalElement<
     this.#isOpened = true;
     // setup Accesibility attrs
     this.tabIndex = -1; // WA: to allow scroll modal - possible that tabindex: -1 doesn't allow tabbing inside
-    // this.role = "dialog"; // possible alertdialog for Confirm modal
-    // this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
+    this.role = "dialog"; // possible alertdialog for Confirm modal
+    this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
     const header = this.querySelector("h1,h2,h3,h4,h5,h6,[role=heading]");
     if (!header) {
       console.error("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
@@ -406,6 +406,47 @@ export default class WUPModalElement<
     return this.#whenOpen;
   }
 
+  /** Hide modal. @closeCase as reason of close() */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  goClose(closeCase: CloseCases, ev: MouseEvent | KeyboardEvent | null): Promise<boolean> {
+    if (this.#whenClose) {
+      return this.#whenClose;
+    }
+    const e = this.fireEvent("$willClose", { cancelable: true, detail: { closeCase } });
+    if (e.defaultPrevented) {
+      return Promise.resolve(false);
+    }
+    // clear state
+    this.#whenOpen = undefined;
+    this.#isOpening = undefined;
+    this.#isClosing = true;
+    // remove events
+    this.$refClose!.onclick = null;
+    this.$refFade!.onclick = null;
+    super.dispose(); // remove only events WARN: don't call this!
+    // apply animation
+    document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
+    !document.body.className && document.body.removeAttribute("class");
+    this.removeAttribute("show");
+    this.$refFade!.removeAttribute("show"); // todo only if last
+
+    this.#whenClose = new Promise((res) => {
+      const animTime = parseMsTime(getComputedStyle(this).transitionDuration);
+      setTimeout(() => {
+        if (!this.#whenClose) {
+          res(false); // possible when call $open during the hiding
+          return;
+        }
+
+        this.dispose();
+        // this.remove(); // todo only if self-destroy enabled
+        res(true);
+        setTimeout(() => this.fireEvent("$close"));
+      }, animTime);
+    });
+    return this.#whenClose;
+  }
+
   // WARN: the focus block work better because not handles keyboard but looks for focus behavior but it's buggy in FF and maybe other browsers since focusOut can be outside the modal
   // /** Required for tab-cycle behavior */
   // _willFocusPrev?: boolean;
@@ -456,47 +497,6 @@ export default class WUPModalElement<
       default:
         break;
     }
-  }
-
-  /** Hide modal. @closeCase as reason of close() */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  goClose(closeCase: CloseCases, ev: MouseEvent | KeyboardEvent | null): Promise<boolean> {
-    if (this.#whenClose) {
-      return this.#whenClose;
-    }
-    const e = this.fireEvent("$willClose", { cancelable: true, detail: { closeCase } });
-    if (e.defaultPrevented) {
-      return Promise.resolve(false);
-    }
-    // clear state
-    this.#whenOpen = undefined;
-    this.#isOpening = undefined;
-    this.#isClosing = true;
-    // remove events
-    this.$refClose!.onclick = null;
-    this.$refFade!.onclick = null;
-    super.dispose(); // remove only events WARN: don't call this!
-    // apply animation
-    document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
-    !document.body.className && document.body.removeAttribute("class");
-    this.removeAttribute("show");
-    this.$refFade!.removeAttribute("show"); // todo only if last
-
-    this.#whenClose = new Promise((res) => {
-      const animTime = parseMsTime(getComputedStyle(this).transitionDuration);
-      setTimeout(() => {
-        if (!this.#whenClose) {
-          res(false); // possible when call $open during the hiding
-          return;
-        }
-
-        this.dispose();
-        // this.remove(); // todo only if self-destroy enabled
-        res(true);
-        setTimeout(() => this.fireEvent("$close"));
-      }, animTime);
-    });
-    return this.#whenClose;
   }
 
   /** Focus any content excluding button[close] if possible */
