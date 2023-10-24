@@ -1,6 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modalElement common tests render + styles 1`] = `<wup-modal />`;
+exports[`modalElement common tests render + styles 1`] = `
+<wup-modal>
+  <h2 />
+</wup-modal>
+`;
 
 exports[`modalElement common tests render + styles 2`] = `
 <style>

@@ -171,8 +171,7 @@ export default class WUPPopupElement<
         --tooltip: #d8d8d8;
         --tooltip-bg: rgba(16,70,82,0.8);
         --tooltip-shadow: #0006;
-      }
-      `;
+      }`;
   }
 
   static get $style(): string {

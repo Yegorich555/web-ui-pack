@@ -1,16 +1,14 @@
 import { WUPModalElement } from "web-ui-pack";
 import * as h from "../testHelper";
 
-let nextFrame = async () => {};
 /** @type WUPModalElement */
 let el;
 
 beforeEach(() => {
   WUPModalElement.$use();
   jest.useFakeTimers();
-  const a = h.useFakeAnimation();
-  nextFrame = a.nextFrame;
   el = document.body.appendChild(document.createElement("wup-modal"));
+  el.appendChild(document.createElement("h2"));
   jest.advanceTimersToNextTimer(); // gotReady has timeout
   jest.spyOn(window, "matchMedia").mockReturnValue({ matches: true }); // simulate 'prefers-reduced-motion'
 });
@@ -22,12 +20,21 @@ afterEach(() => {
 });
 
 describe("modalElement", () => {
-  h.baseTestComponent(() => document.createElement("wup-modal"), {
-    attrs: {
-      // todo point supported attrs here
+  h.baseTestComponent(
+    () => {
+      const a = document.createElement("wup-modal");
+      a.appendChild(document.createElement("h2"));
+      return a;
     },
-    // onCreateNew: (e) => (e.$options.items = getItems()),
-  });
+    {
+      attrs: {
+        "w-autofocus": { value: true },
+        "w-placement": { value: "center" },
+        "w-target": { value: "body", parsedValue: document.body },
+      },
+      // onCreateNew: (e) => (e.$options.items = getItems()),
+    }
+  );
 
   // todo add tests
 });
