@@ -107,7 +107,6 @@ padding:0;}
         --tooltip-bg: rgba(16,70,82,0.8);
         --tooltip-shadow: #0006;
       }
-      
   
       WUP-POPUP {
         z-index: 8000;
@@ -406,7 +405,6 @@ padding:0;}
         --tooltip-bg: rgba(16,70,82,0.8);
         --tooltip-shadow: #0006;
       }
-      
   
       WUP-POPUP {
         z-index: 8000;
