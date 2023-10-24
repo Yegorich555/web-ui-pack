@@ -75,7 +75,7 @@ declare global {
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
  * * During the closing attr 'hide' is appended only if css-animation-duration is detected
  * * Popup can't be more than 100vw & 100vh (impossible to disable the rule)
- */
+ * * known issue: popup can be positioned wrong if parent has transfrom style: https://stackoverflow.com/revisions/15256339/2 this is css-core issue. To fix: place popup outside such parent or remove transform style on parent */
 export default class WUPPopupElement<
   TOptions extends WUP.Popup.Options = WUP.Popup.Options,
   Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
