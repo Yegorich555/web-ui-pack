@@ -57,7 +57,7 @@ declare global {
        * * point 'prev' to select previousSibling */
       "w-target"?: string;
       "w-placement"?: Options["placement"];
-      "w-autofocus"?: boolean | "";
+      "w-autoFocus"?: boolean | "";
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willOpen') instead */
       onWillOpen?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$open') instead */
