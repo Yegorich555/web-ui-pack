@@ -164,21 +164,21 @@ export default class WUPModalElement<
        }
       :host[show] { opacity: 1; }
       :host[w-placement="top"] {
-        top: 0; left: 50%;
-        transform: translate(-50%, -100%);
+        top:0;left:0;right:0;
         margin: var(--modal-margin);
+        margin-left: auto;
+        margin-right: auto;
         max-height: calc(100% - var(--modal-margin) * 2);
-      }
-      :host[w-placement="top"][show] {
-        transform: translate(-50%, 0);
+        transform: translateY(-50%);
       }
       :host[w-placement="center"] {
-        top: 50%; left: 50%;
-        transform: translate(-50%, -150%);
+        top:0;left:0;right:0;bottom:0;
+        margin: auto;
+        height: fit-content ${
+          /* This is tricky rule. If it will buggy need to rewrite centering logic via js-core like it works with popup  */ ""
+        };
         max-height: calc(100% - var(--modal-margin) * 2);
-      }
-      :host[w-placement="center"][show] {
-        transform: translate(-50%, -50%);
+        transform: translateY(-150%);
       }
       :host[w-placement="right"] {
         right:0;top:0;bottom:0;
@@ -190,9 +190,8 @@ export default class WUPModalElement<
         border-radius: 0;
         transform: translateX(-100%);
       }
-      :host[w-placement="right"][show],
-      :host[w-placement="left"][show] {
-        transform: translateX(0);
+      :host[show] {
+        transform: none;
       }
       @media (max-width: 600px) {
         :host {
@@ -225,6 +224,13 @@ export default class WUPModalElement<
       :host h2 {
         margin: 0 0 1em;
         padding-right: 1.8em;
+      }
+      :host wup-form {
+        max-width: initial;
+      }
+      :host wup-form button[type=submit] {
+        margin-bottom: 0;
+        margin-left: auto;
       }
       @media not all and (prefers-reduced-motion) {
         :host,

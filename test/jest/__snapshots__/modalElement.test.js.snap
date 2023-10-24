@@ -101,7 +101,7 @@ padding:0;}
   
       WUP-MODAL {
         --anim-time: 400ms;
-        --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms; 
+        --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 9002;
         display: none;
         position: fixed;
@@ -160,21 +160,19 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
        }
       WUP-MODAL[show] { opacity: 1; }
       WUP-MODAL[w-placement="top"] {
-        top: 0; left: 50%;
-        transform: translate(-50%, -100%);
+        top:0;left:0;right:0;
         margin: var(--modal-margin);
+        margin-left: auto;
+        margin-right: auto;
         max-height: calc(100% - var(--modal-margin) * 2);
-      }
-      WUP-MODAL[w-placement="top"][show] {
-        transform: translate(-50%, 0);
+        transform: translateY(-50%);
       }
       WUP-MODAL[w-placement="center"] {
-        top: 50%; left: 50%;
-        transform: translate(-50%, -150%);
+        top:0;left:0;right:0;bottom:0;
+        margin: auto;
+        height: fit-content;
         max-height: calc(100% - var(--modal-margin) * 2);
-      }
-      WUP-MODAL[w-placement="center"][show] {
-        transform: translate(-50%, -50%);
+        transform: translateY(-150%);
       }
       WUP-MODAL[w-placement="right"] {
         right:0;top:0;bottom:0;
@@ -186,9 +184,8 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
         border-radius: 0;
         transform: translateX(-100%);
       }
-      WUP-MODAL[w-placement="right"][show],
-      WUP-MODAL[w-placement="left"][show] {
-        transform: translateX(0);
+      WUP-MODAL[show] {
+        transform: none;
       }
       @media (max-width: 600px) {
         WUP-MODAL {
@@ -221,6 +218,13 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
       WUP-MODAL h2 {
         margin: 0 0 1em;
         padding-right: 1.8em;
+      }
+      WUP-MODAL wup-form {
+        max-width: initial;
+      }
+      WUP-MODAL wup-form button[type=submit] {
+        margin-bottom: 0;
+        margin-left: auto;
       }
       @media not all and (prefers-reduced-motion) {
         WUP-MODAL,

@@ -100,11 +100,14 @@ export default function ModalView() {
       <button className="btn" type="button">
         Login
       </button>
-      <wup-modal w-target="prev">
+      <wup-modal w-target="prev" w-placement="center">
         <h2>Ordinary form</h2>
         <wup-form>
           <wup-text w-name="email" w-initValue="yegor.golubchik@mail.com" />
           <wup-pwd w-name="password" w-initValue="123456" />
+          <wup-select w-name="role" />
+          <wup-date w-name="dob" />
+          {/* <wup-selectmany w-name="selectMany" w-items="inputSelectMany.items" /> */}
           <button type="submit">Submit </button>
         </wup-form>
       </wup-modal>
