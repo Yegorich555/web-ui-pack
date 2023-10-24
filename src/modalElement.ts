@@ -26,16 +26,16 @@ export const enum CloseCases {
 const tagName = "wup-modal";
 declare global {
   namespace WUP.Modal {
-    // todo add details to types.html.json
     interface Options {
       /** Element that modal need to listen for click. If `target` missed modal will be opened on init
        * @defaultValue null */
       target?: Element | null;
-      /** Modal position on the screen
+      /** Position on the screen
        * @defaultValue 'center' */
       placement: "center" | "top" | "left" | "right";
       /** Autofocus first possible content with skipping focus on button[close] if there is another focusable content */
       autoFocus: boolean;
+      // todo modalInModal: replace OR overflow
     }
     interface EventMap extends WUP.Base.EventMap {
       /** Fires before show is happened;
@@ -80,26 +80,24 @@ declare global {
   }
 }
 
-// todo prettify example here
-/** Popup element
+/** Modal element
  * @example
  * JS/TS
  * ```js
  * WUPModalElement.$defaults.placement = ...;
  *
  * const el = document.createElement('wup-modal');
- * el.$options.placement = ...;
+ * el.textContent = ...;
  * document.body.append(el);
  *```
  * HTML
  * ```html
- * <!-- You can skip pointing attribute 'target' if popup appended after target -->
- * <wup-modal>Some content here</wup-popup>
+ * <wup-modal>Some content here</wup-modal>
  * ```
  * @tutorial Troubleshooting known issues:
  * * for very long content with 1st focusable item at the bottom it won't be visible because user must see top of the modal at first
  * To fix the issue set `<h2 tabindex="-1">...</h2>` and hide focus frame via styles OR disable `$options.autoFocus`
- * * accessibility: NVDA reads modal content twice. To fix you can follow the recomendations: https://github.com/nvaccess/nvda/issues/8971 */
+ * * accessibility: NVDA reads modal content twice. To fix follow the recomendations: https://github.com/nvaccess/nvda/issues/8971 */
 export default class WUPModalElement<
   TOptions extends WUP.Modal.Options = WUP.Modal.Options,
   Events extends WUP.Modal.EventMap = WUP.Modal.EventMap
@@ -561,9 +559,9 @@ export default class WUPModalElement<
 
 customElements.define(tagName, WUPModalElement);
 
+// tod: during the closing impossible to click on smt through the [fade]
 /*  todo WA
   2. Hide scroll on the body ???
-
   7. Ctrl+S, Meta+S submit & close ???
 */
 

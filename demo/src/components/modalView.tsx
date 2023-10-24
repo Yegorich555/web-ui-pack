@@ -48,13 +48,20 @@ export default function ModalView() {
       details={{
         tag: "wup-modal",
         linkDemo: "demo/src/components/modalView.tsx",
+        customHTML: [
+          `html
+<wup-modal w-target w-placement="center">
+  Some content here...
+</wup-modal>`,
+        ],
       }}
-      // todo fix parsed html according to defaults
       features={[
-        "Built-in close by: outside click, button[close] click, key Escape",
+        "Close by: outside click, button[close] click, key Escape",
         "Built-in styles & animation for different screen sizes",
-        "Built-in accessibility: autofocus, tab-cycling, focus-back on closing etc.",
-        "Built-in wup-form support",
+        "Accessibility: autofocus, tab-cycling, focus-back on closing etc.",
+        <>
+          Integrated with <b>wup-form</b> (pending + close after submit-end + confirm window if unsaved changes)
+        </>,
       ]}
     >
       <h3>Different placemenets</h3>

@@ -669,7 +669,53 @@
           "url": "https://yegorich555.github.io/web-ui-pack/modal"
         }
       ],
-      "attributes": []
+      "attributes": [
+        {
+          "name": "w-target",
+          "description": "Element that modal need to listen for click. If `target` missed modal will be opened on init",
+          "values": [
+            {
+              "name": "prev"
+            },
+            {
+              "name": "#someId"
+            }
+          ]
+        },
+        {
+          "name": "w-placement",
+          "description": "Position on the screen @defaultValue `center`",
+          "values": [
+            {
+              "name": "left"
+            },
+            {
+              "name": "right"
+            },
+            {
+              "name": "top"
+            },
+            {
+              "name": "center"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Autofocus first possible content with skipping focus on button[close] if there is another focusable content",
+          "values": [
+            {
+              "name": ""
+            },
+            {
+              "name": "true"
+            },
+            {
+              "name": "false"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "wup-num",
@@ -841,7 +887,12 @@
       "attributes": [
         {
           "name": "w-target",
-          "description": "Anchor that popup uses for placement @defaultValue `previousSibling` Point querySelector, for example `#some-id`"
+          "description": "Anchor that popup uses for placement @defaultValue `previousSibling` Point querySelector, for example `#some-id`",
+          "values": [
+            {
+              "name": "#someId"
+            }
+          ]
         },
         {
           "name": "w-placement",
