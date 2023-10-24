@@ -195,7 +195,7 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
       }
       .wup-modal-fade {
         z-index: 9000;
-        display: none;
+        display: block;
         position: fixed;
         top:0;left:0;right:0;bottom:0;
         background: var(--modal-fade);
@@ -203,12 +203,11 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
         pointer-events: none;
         touch-action: none;
       }
-      .wup-modal-fade {
-         display: block;
+      .wup-modal-fade[show] {
          pointer-events: initial;
          touch-action: initial;
+         opacity: 1;
       }
-      .wup-modal-fade[show] { opacity: 1; }
       WUP-MODAL &gt; button[close] {
         --icon-img: var(--wup-icon-cross);
         position: absolute;

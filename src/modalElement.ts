@@ -172,7 +172,7 @@ export default class WUPModalElement<
       :host[w-placement="center"] {
         top:0;left:0;right:0;bottom:0;
         margin: auto;
-        height: fit-content ${
+        height: fit-content${
           /* This is tricky rule. If it will buggy need to rewrite centering logic via js-core like it works with popup  */ ""
         };
         max-height: calc(100% - var(--modal-margin) * 2);
@@ -199,7 +199,7 @@ export default class WUPModalElement<
       }
       .${this.$classFade} {
         z-index: 9000;
-        display: none;
+        display: block;
         position: fixed;
         top:0;left:0;right:0;bottom:0;
         background: var(--modal-fade);
@@ -207,12 +207,11 @@ export default class WUPModalElement<
         pointer-events: none;
         touch-action: none;
       }
-      .${this.$classFade} {
-         display: block;
+      .${this.$classFade}[show] {
          pointer-events: initial;
          touch-action: initial;
+         opacity: 1;
       }
-      .${this.$classFade}[show] { opacity: 1; }
       :host > button[close] {
         --icon-img: var(--wup-icon-cross);
         position: absolute;
@@ -559,7 +558,6 @@ export default class WUPModalElement<
 
 customElements.define(tagName, WUPModalElement);
 
-// tod: during the closing impossible to click on smt through the [fade]
 /*  todo WA
   2. Hide scroll on the body ???
   7. Ctrl+S, Meta+S submit & close ???
