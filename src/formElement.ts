@@ -190,6 +190,7 @@ export default class WUPFormElement<
           --base-btn-text: var(--btn-submit);
           --base-btn-bg: var(--btn-submit-bg);
           --base-btn-focus: var(--btn-submit-focus);
+          display: block;
         }`;
   }
 

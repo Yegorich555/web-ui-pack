@@ -71,6 +71,7 @@ padding:0;}
           --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
+          --base-margin: 20px;
           --border-radius: 6px;
           --anim-time: 200ms;
           --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -111,7 +112,7 @@ padding:0;}
         color: var(--modal);
         background: var(--modal-bg);
         border: 1px solid #0002;
-        padding: 1em;
+        padding: var(--base-margin);
         box-sizing: border-box;
         opacity: 0;
         white-space: pre-line;

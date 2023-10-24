@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.10.3 (\_\_\_)
+## 1.0.0 (\_\_\_)
 
 **BREAKING CHANGES**:
 
@@ -16,10 +16,14 @@
 
 **New/Features**:
 
-- **Global**. Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
-- helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector possible to get from  `focusFirst.$selector`
+- **Global**
+
+  - Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
+  - Added css variable `--base-margin` to unify margins for all elements
+- helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector possible to get from `focusFirst.$selector`
+- [FormElement](src/formElement.ts). Increased height of `button[type=submit]`
 - **Text based controls**
-  - Added css variable `ctrl-label-active-pos` to simplify customization of label position
+  - Added css variable `--ctrl-label-active-pos` to simplify customization of label position
 
 ## 0.10.2 (Oct 11, 2023)
 

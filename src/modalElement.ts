@@ -144,7 +144,7 @@ export default class WUPModalElement<
         color: var(--modal);
         background: var(--modal-bg);
         border: 1px solid #0002;
-        padding: 1em;
+        padding: var(--base-margin);
         box-sizing: border-box;
         opacity: 0;
         white-space: pre-line;

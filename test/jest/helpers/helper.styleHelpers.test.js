@@ -142,8 +142,8 @@ describe("helper.styleHelpers", () => {
         border: none;
         border-radius: var(--border-radius);
         box-sizing: border-box;
-        padding: 0.5em;
-        margin: 1em 0;
+        padding: 11px;
+        margin: var(--base-margin) 0;
         min-width: 10em;
         cursor: pointer;
         font: inherit;
