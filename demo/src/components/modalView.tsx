@@ -122,6 +122,8 @@ export default function ModalView() {
   );
 }
 
+// todo: testcase: render modal in scrollable parent so when modal is opened: wup-select must be placed outside the rect of such parent: bug - popup is hidden because detect scrollable parents in a wrong way
+
 const bigContent = `I LOOKED AT MY NOTES AND I DIDN’T LIKE THEM. I’d spent three days at U. S. Robots and might as
 well have spent them at home with the Encyclopedia Tellurica.
 
