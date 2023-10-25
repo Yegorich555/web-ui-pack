@@ -79,6 +79,7 @@ export default abstract class WUPBaseElement<
     return "";
   }
 
+  // todo refactor vars anim-time to anim-t + text-color to modal-fg as foreground
   /** StyleContent related to component & inherited components */
   static get $styleRoot(): string {
     return `:root {

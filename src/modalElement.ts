@@ -89,6 +89,7 @@ declare global {
  * const el = document.createElement('wup-modal');
  * el.textContent = ...;
  * document.body.append(el);
+ * el.$onClose = () => el.remove(); // self-remove after close
  *```
  * HTML
  * ```html
@@ -114,8 +115,10 @@ export default class WUPModalElement<
    * @defaultValue "wup-modal-open" */
   static $classOpened = "wup-modal-open";
 
+  // WARN: modal-anim shouldn't affect on animation of nested
   static get $styleRoot(): string {
     return `:root {
+        --modal-anim-time: 400ms;
         --modal: inherit;
         --modal-bg: #fff;
         --modal-fade: #0007;
@@ -126,12 +129,10 @@ export default class WUPModalElement<
       }`;
   }
 
-  /* NiceToHave: impossible to only change anim-time need also to oveeride --anim: need somehow improve this */
   static get $style(): string {
     return `${super.$style}
       :host {
-        --anim-time: 400ms;
-        --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        --modal-anim: var(--modal-anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 9002;
         display: none;
         position: fixed;
@@ -232,7 +233,7 @@ export default class WUPModalElement<
       @media not all and (prefers-reduced-motion) {
         :host,
         .${this.$classFade} {
-          transition: opacity var(--anim), transform var(--anim);
+          transition: opacity var(--modal-anim), transform var(--modal-anim);
         }
       }`;
   }
