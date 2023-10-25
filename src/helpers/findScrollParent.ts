@@ -7,7 +7,7 @@ export default function findScrollParent(el: Element): HTMLElement | null {
   if (!p) {
     return null;
   }
-  // todo it's wrong if parent:withScroll>div+position:fixed>el
+
   // it means it's changed
   if (p.scrollTop > 0 || p.scrollLeft > 0) {
     return p;
@@ -17,7 +17,7 @@ export default function findScrollParent(el: Element): HTMLElement | null {
   p.scrollTop += 10; // 10 to fix case when zoom applied
   if (prev !== p.scrollTop) {
     p.scrollTop = prev;
-    return p; // todo scroll changeable even if css overflow:hidden
+    return p; // WARN: scroll changeable even if css overflow:hidden
   }
 
   prev = p.scrollLeft;
@@ -25,6 +25,10 @@ export default function findScrollParent(el: Element): HTMLElement | null {
   if (prev !== p.scrollLeft) {
     p.scrollLeft = prev;
     return p;
+  }
+  const ipos = p.style.position;
+  if (ipos === "fixed" || (!ipos && window.getComputedStyle(p).position === "fixed")) {
+    return null; // skip search if current element with fixed position
   }
   return findScrollParent(p);
 }
