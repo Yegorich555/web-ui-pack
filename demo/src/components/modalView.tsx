@@ -59,9 +59,10 @@ export default function ModalView() {
         "Close by: outside click, button[close] click, key Escape",
         "Built-in styles & animation for different screen sizes",
         "Accessibility: autofocus, tab-cycling, focus-back on closing etc.",
-        <>
-          Integrated with <b>wup-form</b> (pending + close after submit-end + confirm window if unsaved changes)
-        </>,
+        // todo uncomment when will be implemented
+        // <>
+        //   Integrated with <b>wup-form</b> (pending + close after submit-end + confirm window if unsaved changes)
+        // </>,
       ]}
     >
       <h3>Different placemenets</h3>
@@ -105,15 +106,14 @@ export default function ModalView() {
       <small>Just place wup-form with controls inside</small>
       <br />
       <button className="btn" type="button">
-        Login
+        Sign Up
       </button>
       <wup-modal w-target="prev" w-placement="center">
         <h2>Ordinary form</h2>
         <wup-form>
           <wup-text w-name="email" w-initValue="yegor.golubchik@mail.com" />
           <wup-pwd w-name="password" w-initValue="123456" />
-          <wup-select w-name="role" />
-          <wup-date w-name="dob" />
+          <wup-date w-name="dob" w-label="Date of birthday" />
           {/* <wup-selectmany w-name="selectMany" w-items="inputSelectMany.items" /> */}
           <button type="submit">Submit </button>
         </wup-form>

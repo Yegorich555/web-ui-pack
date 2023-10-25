@@ -702,7 +702,7 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Autofocus first possible content with skipping focus on button[close] if there is another focusable content",
+          "description": "Autofocus first possible content with skipping focus on button[close] if there is another focusable content @defaultValue true",
           "values": [
             {
               "name": ""

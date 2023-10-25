@@ -340,6 +340,7 @@ export default abstract class WUPBaseElement<
 
   /** Try to focus self or first possible children; returns true if succesful */
   focus(): boolean {
+    delete this._willFocus;
     return focusFirst(this);
   }
 
@@ -358,6 +359,8 @@ export default abstract class WUPBaseElement<
     return text;
   }
 
+  /** Clear this to prevent autofocus */
+  _willFocus?: ReturnType<typeof setTimeout>;
   #isReady = false;
   /** Called when element is added to document (after empty timeout - at the end of call stack) */
   protected gotReady(): void {
@@ -366,10 +369,9 @@ export default abstract class WUPBaseElement<
     this._isStopChanges = true;
     this.gotChanges(null);
     this._isStopChanges = false;
-    this.#readyTimeout = setTimeout(() => {
-      (this.autofocus || this._opts.autoFocus) && this.focus();
-      this.#readyTimeout = undefined;
-    }); // timeout to wait for options
+    if (this.autofocus || this._opts.autoFocus) {
+      this._willFocus = setTimeout(() => this.focus(), 2);
+    }
   }
 
   /** Called when element is removed from document */

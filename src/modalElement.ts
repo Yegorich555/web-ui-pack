@@ -33,7 +33,10 @@ declare global {
       /** Position on the screen
        * @defaultValue 'center' */
       placement: "center" | "top" | "left" | "right";
-      /** Autofocus first possible content with skipping focus on button[close] if there is another focusable content */
+      /** Autofocus first possible content with skipping focus on button[close] if there is another focusable content
+       * Point `false` to autofocus on button[close].
+       * If you don't need any visual focus by default override method focus() and call `HTMLElement.prototype.focus.call(this)` to focus modal-box itself
+       * @defaultValue true */
       autoFocus: boolean;
       // todo modalInModal: replace OR overflow
     }
@@ -319,7 +322,15 @@ export default class WUPModalElement<
   _prevTarget?: Element | null;
   _prevTargetClick?: () => void;
 
+  protected override gotReady(): void {
+    super.gotReady();
+    this._willFocus && clearTimeout(this._willFocus);
+    delete this._willFocus; // prevent default autofocus behavior since here need to use it only on open
+  }
+
   protected override gotChanges(propsChanged: string[] | null): void {
+    super.gotChanges(propsChanged);
+
     const trg = this._opts.target;
     const isTrgChange = this._prevTarget !== trg;
     if (isTrgChange) {
@@ -385,7 +396,7 @@ export default class WUPModalElement<
     this.setAttribute("open", "");
     setTimeout(() => {
       this.setAttribute("show", "");
-      this.$refFade!.setAttribute("show", "");
+      this.$refFade?.setAttribute("show", "");
     });
     document.body.classList.add(this.#ctr.$classOpened); // to maybe hide scroll-bars
 
@@ -528,6 +539,13 @@ export default class WUPModalElement<
     }
   }
 
+  focus(): boolean {
+    if (!this.$isOpened) {
+      return false;
+    }
+    return super.focus();
+  }
+
   /** Focus any content excluding button[close] if possible */
   focusAny(): void {
     if (this.$isOpened) {
@@ -559,15 +577,7 @@ export default class WUPModalElement<
 
 customElements.define(tagName, WUPModalElement);
 
-/*  todo WA
-  2. Hide scroll on the body ???
-  7. Ctrl+S, Meta+S submit & close ???
-*/
+// NiceToHave: handle  Ctrl+S, Meta+S for submit & close ???
 
-// testcase: impossible to close same window 2nd time
-// testcase: onOpen with autofocus btnClose must be ignored | any content
-// testcase: onClose focus must return back
 // testcase: add modal with target and remove after 100ms  expected 0 exceptions
 // testcase: close on Escape + when control is in edit mode + when dropdown is opened
-// testcase: tab-cycling
-// testcase: focusBack

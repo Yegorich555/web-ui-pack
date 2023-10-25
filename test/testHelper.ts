@@ -761,9 +761,9 @@ export async function userPressKey(el: Element, opts: Partial<KeyboardEvent>, be
 }
 
 /** Simulate pressing key Tab + focus event */
-export async function userPressTab(next: HTMLElement | null) {
+export async function userPressTab(next: HTMLElement | null, opts: Partial<KeyboardEvent>) {
   const el = document.activeElement || document.body;
-  userPressKey(el, { key: "Tab" }, () => {
+  userPressKey(el, { key: "Tab", ...opts }, () => {
     // el.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: next }));
     if (!next) {
       (document.activeElement as HTMLElement)?.blur?.call(document.activeElement);
@@ -771,5 +771,13 @@ export async function userPressTab(next: HTMLElement | null) {
       HTMLElement.prototype.focus.call(next);
       next.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
     }
+  });
+}
+
+const origGetComputedStyle = window.getComputedStyle;
+export async function setupCssCompute(el: HTMLElement, cssObj: Partial<CSSStyleDeclaration>) {
+  jest.spyOn(window, "getComputedStyle").mockImplementation((elt) => {
+    const r = origGetComputedStyle(elt);
+    return elt === el ? Object.assign(r, cssObj) : r;
   });
 }
