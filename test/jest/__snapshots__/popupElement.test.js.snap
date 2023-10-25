@@ -73,8 +73,8 @@ padding:0;}
           --base-sep: #e4e4e4;
           --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
           --icon-hover-bg: #0001;
           --icon-focus-bg: #0000001a;
@@ -91,19 +91,19 @@ padding:0;}
         }
   
       :root {
-        --popup-anim: 300ms;
-        --popup: inherit;
+        --popup-anim-t: 300ms;
+        --popup-text: inherit;
         --popup-bg: #fff;
         --popup-shadow: #0003;
-        --tooltip: inherit;
+        --tooltip-text: inherit;
         --tooltip-bg: #fff8;
         --tooltip-shadow: #0003;
       }
       [wupdark] {
-        --popup: #d8d8d8;
+        --popup-text: #d8d8d8;
         --popup-bg: #2b3645;
         --popup-shadow: #0006;
-        --tooltip: #d8d8d8;
+        --tooltip-text: #d8d8d8;
         --tooltip-bg: rgba(16,70,82,0.8);
         --tooltip-shadow: #0006;
       }
@@ -118,20 +118,20 @@ padding:0;}
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup);
+        color: var(--popup-text);
         background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       WUP-POPUP[tooltip],
       WUP-POPUP[tooltip]+WUP-POPUP-arrow {
-        --popup: var(--tooltip);
+        --popup: var(--tooltip-text);
         --popup-bg: var(--tooltip-bg);
         --popup-shadow: var(--tooltip-shadow);
       }
       @media not all and (prefers-reduced-motion) {
         WUP-POPUP,
         WUP-POPUP+WUP-POPUP-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out;
+          animation: WUP-POPUP-a1 var(--popup-anim-t) ease-in-out;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
@@ -139,7 +139,7 @@ padding:0;}
         }
         WUP-POPUP[hide],
         WUP-POPUP[hide]+WUP-POPUP-arrow {
-          animation: WUP-POPUP-a2 var(--popup-anim) ease-in-out forwards;
+          animation: WUP-POPUP-a2 var(--popup-anim-t) ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
@@ -192,20 +192,20 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup);
+        color: var(--popup-text);
         background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       TEST-EL[tooltip],
       TEST-EL[tooltip]+TEST-EL-arrow {
-        --popup: var(--tooltip);
+        --popup: var(--tooltip-text);
         --popup-bg: var(--tooltip-bg);
         --popup-shadow: var(--tooltip-shadow);
       }
       @media not all and (prefers-reduced-motion) {
         TEST-EL,
         TEST-EL+TEST-EL-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out;
+          animation: WUP-POPUP-a1 var(--popup-anim-t) ease-in-out;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
@@ -213,7 +213,7 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         }
         TEST-EL[hide],
         TEST-EL[hide]+TEST-EL-arrow {
-          animation: WUP-POPUP-a2 var(--popup-anim) ease-in-out forwards;
+          animation: WUP-POPUP-a2 var(--popup-anim-t) ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
@@ -371,8 +371,8 @@ padding:0;}
           --base-sep: #e4e4e4;
           --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
           --icon-hover-bg: #0001;
           --icon-focus-bg: #0000001a;
@@ -389,19 +389,19 @@ padding:0;}
         }
   
       :root {
-        --popup-anim: 300ms;
-        --popup: inherit;
+        --popup-anim-t: 300ms;
+        --popup-text: inherit;
         --popup-bg: #fff;
         --popup-shadow: #0003;
-        --tooltip: inherit;
+        --tooltip-text: inherit;
         --tooltip-bg: #fff8;
         --tooltip-shadow: #0003;
       }
       [wupdark] {
-        --popup: #d8d8d8;
+        --popup-text: #d8d8d8;
         --popup-bg: #2b3645;
         --popup-shadow: #0006;
-        --tooltip: #d8d8d8;
+        --tooltip-text: #d8d8d8;
         --tooltip-bg: rgba(16,70,82,0.8);
         --tooltip-shadow: #0006;
       }
@@ -416,20 +416,20 @@ padding:0;}
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup);
+        color: var(--popup-text);
         background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       WUP-POPUP[tooltip],
       WUP-POPUP[tooltip]+WUP-POPUP-arrow {
-        --popup: var(--tooltip);
+        --popup: var(--tooltip-text);
         --popup-bg: var(--tooltip-bg);
         --popup-shadow: var(--tooltip-shadow);
       }
       @media not all and (prefers-reduced-motion) {
         WUP-POPUP,
         WUP-POPUP+WUP-POPUP-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out;
+          animation: WUP-POPUP-a1 var(--popup-anim-t) ease-in-out;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
@@ -437,7 +437,7 @@ padding:0;}
         }
         WUP-POPUP[hide],
         WUP-POPUP[hide]+WUP-POPUP-arrow {
-          animation: WUP-POPUP-a2 var(--popup-anim) ease-in-out forwards;
+          animation: WUP-POPUP-a2 var(--popup-anim-t) ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
@@ -490,20 +490,20 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup);
+        color: var(--popup-text);
         background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       TEST-EL[tooltip],
       TEST-EL[tooltip]+TEST-EL-arrow {
-        --popup: var(--tooltip);
+        --popup: var(--tooltip-text);
         --popup-bg: var(--tooltip-bg);
         --popup-shadow: var(--tooltip-shadow);
       }
       @media not all and (prefers-reduced-motion) {
         TEST-EL,
         TEST-EL+TEST-EL-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out;
+          animation: WUP-POPUP-a1 var(--popup-anim-t) ease-in-out;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
@@ -511,7 +511,7 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         }
         TEST-EL[hide],
         TEST-EL[hide]+TEST-EL-arrow {
-          animation: WUP-POPUP-a2 var(--popup-anim) ease-in-out forwards;
+          animation: WUP-POPUP-a2 var(--popup-anim-t) ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}

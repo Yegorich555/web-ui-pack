@@ -156,19 +156,19 @@ export default class WUPPopupElement<
   static get $styleRoot(): string {
     return `
       :root {
-        --popup-anim: 300ms;
-        --popup: inherit;
+        --popup-anim-t: 300ms;
+        --popup-text: inherit;
         --popup-bg: #fff;
         --popup-shadow: #0003;
-        --tooltip: inherit;
+        --tooltip-text: inherit;
         --tooltip-bg: #fff8;
         --tooltip-shadow: #0003;
       }
       [wupdark] {
-        --popup: #d8d8d8;
+        --popup-text: #d8d8d8;
         --popup-bg: #2b3645;
         --popup-shadow: #0006;
-        --tooltip: #d8d8d8;
+        --tooltip-text: #d8d8d8;
         --tooltip-bg: rgba(16,70,82,0.8);
         --tooltip-shadow: #0006;
       }`;
@@ -186,20 +186,20 @@ export default class WUPPopupElement<
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup);
+        color: var(--popup-text);
         background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       :host[tooltip],
       :host[tooltip]+:host-arrow {
-        --popup: var(--tooltip);
+        --popup: var(--tooltip-text);
         --popup-bg: var(--tooltip-bg);
         --popup-shadow: var(--tooltip-shadow);
       }
       @media not all and (prefers-reduced-motion) {
         :host,
         :host+:host-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out;
+          animation: WUP-POPUP-a1 var(--popup-anim-t) ease-in-out;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
@@ -207,7 +207,7 @@ export default class WUPPopupElement<
         }
         :host[hide],
         :host[hide]+:host-arrow {
-          animation: WUP-POPUP-a2 var(--popup-anim) ease-in-out forwards;
+          animation: WUP-POPUP-a2 var(--popup-anim-t) ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}

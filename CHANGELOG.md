@@ -8,6 +8,17 @@
 - [PopupElement](src/popup/popupElement.ts).
   - Removed `$isOpen` in favor of `$isShown`
   - **z-index** is changed from `90000` to `8000`
+- Renamed css-vars:
+    `--anim-time` >>> `--anim-t`
+    `--popup` >>> `popup-text`
+    `--popup-anim` >>> `popup-anim-t`
+    `--tooltip` >>> `tooltip-text`
+    `--spin-speed` >>> `spin-t`
+    `--btn-submit` >>> `--btn-submit-text`
+    `--ctrl` >>> `--ctrl-text`
+    `--ctrl-clr-width` >>> `--ctrl-clr-w`
+    `--ctrl-select-item` >>> `--ctrl-select-item-text`
+    `--ctrl-time-off` >>> `--ctrl-time-off-text`
 
 **Fixes**:
 

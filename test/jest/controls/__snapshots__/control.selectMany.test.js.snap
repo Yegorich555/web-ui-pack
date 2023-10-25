@@ -309,8 +309,8 @@ padding:0;}
           --base-sep: #e4e4e4;
           --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
           --icon-hover-bg: #0001;
           --icon-focus-bg: #0000001a;
@@ -333,7 +333,7 @@ padding:0;}
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl: inherit;
+        --ctrl-text: inherit;
         --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
@@ -376,7 +376,7 @@ padding:0;}
         --ctrl-select-menu-hover: #222a36;
       }
   :root {
-        --ctrl-select-item: inherit;
+        --ctrl-select-item-text: inherit;
         --ctrl-select-item-bg: rgba(0,0,0,0.04);
         --ctrl-select-item-del-display: none;
         --ctrl-select-item-del: var(--ctrl-icon);
@@ -396,7 +396,7 @@ padding:0;}
         margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl);
+        color: var(--ctrl-text);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -886,7 +886,7 @@ WUP-SELECTMANY [menu] li[focused] {
         --ctrl-icon: var(--ctrl-select-item-del);
         --ctrl-icon-size: var(--ctrl-select-item-del-size);
         --ctrl-icon-img: var(--ctrl-select-item-del-img);
-        color: var(--ctrl-select-item);
+        color: var(--ctrl-select-item-text);
         background-color: var(--ctrl-select-item-bg);
         border-radius: var(--ctrl-border-radius);
         cursor: pointer;
@@ -957,7 +957,7 @@ mask-image: var(--ctrl-icon-img);
       }
       @media not all and (prefers-reduced-motion) {
         WUP-SELECTMANY [item][removed] {
-          transition: all var(--anim-time) ease-in-out;
+          transition: all var(--anim-t) ease-in-out;
           transition-property: margin, padding, width, opacity;
           padding-left: 0; padding-right: 0;
           margin-left: 0; margin-right: 0;
@@ -972,7 +972,7 @@ mask-image: var(--ctrl-icon-img);
         cursor: grabbing;
         text-decoration: none;
         --ctrl-icon: var(--ctrl-select-item-del);
-        color: var(--ctrl-select-item);
+        color: var(--ctrl-select-item-text);
         background-color: var(--ctrl-select-item-bg);
       }
       WUP-SELECTMANY [item][drop] {

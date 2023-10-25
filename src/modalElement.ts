@@ -118,8 +118,8 @@ export default class WUPModalElement<
   // WARN: modal-anim shouldn't affect on animation of nested
   static get $styleRoot(): string {
     return `:root {
-        --modal-anim-time: 400ms;
-        --modal: inherit;
+        --modal-anim-t: 400ms;
+        --modal-text: inherit;
         --modal-bg: #fff;
         --modal-fade: #0007;
         --modal-margin: 2em;
@@ -132,7 +132,7 @@ export default class WUPModalElement<
   static get $style(): string {
     return `${super.$style}
       :host {
-        --modal-anim: var(--modal-anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 9002;
         display: none;
         position: fixed;
@@ -140,7 +140,7 @@ export default class WUPModalElement<
         max-width: 600px;
         min-height: 150px;
         border-radius: var(--border-radius);
-        color: var(--modal);
+        color: var(--modal-text);
         background: var(--modal-bg);
         border: 1px solid #0002;
         padding: var(--base-margin);

@@ -73,8 +73,8 @@ padding:0;}
           --base-sep: #e4e4e4;
           --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
           --icon-hover-bg: #0001;
           --icon-focus-bg: #0000001a;
@@ -90,12 +90,12 @@ padding:0;}
           --scroll-hover: #fff3;
         }
   :root {
-      --btn-submit: var(--base-btn-text);
+      --btn-submit-text: var(--base-btn-text);
       --btn-submit-bg: var(--base-btn-bg);
       --btn-submit-focus: var(--base-btn-focus);
     }
     [wupdark] {
-      --btn-submit: var(--base-btn-text);
+      --btn-submit-text: var(--base-btn-text);
       --btn-submit-bg: var(--base-btn-bg);
       --btn-submit-focus: var(--base-btn-focus);
     }
@@ -140,7 +140,7 @@ WUP-FORM button[type=submit][aria-busy] {
   cursor: wait;
 }
         WUP-FORM button[type=submit] {
-          --base-btn-text: var(--btn-submit);
+          --base-btn-text: var(--btn-submit-text);
           --base-btn-bg: var(--btn-submit-bg);
           --base-btn-focus: var(--btn-submit-focus);
           display: block;
@@ -153,7 +153,7 @@ WUP-FORM button[type=submit][aria-busy] {
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl: inherit;
+        --ctrl-text: inherit;
         --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
@@ -196,7 +196,7 @@ WUP-FORM button[type=submit][aria-busy] {
         margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl);
+        color: var(--ctrl-text);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;

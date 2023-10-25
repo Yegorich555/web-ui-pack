@@ -73,8 +73,8 @@ padding:0;}
           --base-sep: #e4e4e4;
           --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
           --icon-hover-bg: #0001;
           --icon-focus-bg: #0000001a;
@@ -92,7 +92,7 @@ padding:0;}
   :root {
           --spin-1: #ffa500;
           --spin-2: #fff;
-          --spin-speed: 1.2s;
+          --spin-t: 1.2s;
           --spin-size: 3em;
           --spin-item-size: calc(var(--spin-size) / 8);
           --spin-fade: rgba(255,255,255,0.43);
@@ -116,7 +116,7 @@ padding:0;}
         border-radius: 50%;
       }
       WUP-SPIN&gt;div {
-        animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+        animation: WUP-SPIN-1 var(--spin-t) linear infinite;
         width: 100%; height: 100%;
         left:0; top:0;
       }

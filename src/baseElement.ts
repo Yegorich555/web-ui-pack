@@ -79,7 +79,6 @@ export default abstract class WUPBaseElement<
     return "";
   }
 
-  // todo refactor vars anim-time to anim-t + text-color to modal-fg as foreground
   /** StyleContent related to component & inherited components */
   static get $styleRoot(): string {
     return `:root {
@@ -94,8 +93,8 @@ export default abstract class WUPBaseElement<
           --base-sep: #e4e4e4;
           --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
           --icon-hover-bg: #0001;
           --icon-focus-bg: #0000001a;

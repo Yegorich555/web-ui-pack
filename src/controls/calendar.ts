@@ -137,7 +137,7 @@ export default class WUPCalendarControl<
     return `:root {
       --ctrl-clr-selected: #fff;
       --ctrl-clr-selected-bg: #009fbc;
-      --ctrl-clr-width: 17em;
+      --ctrl-clr-w: 17em;
       --ctrl-clr-cell-gap: 0px;
       --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
       --ctrl-clr-off: var(--ctrl-err);
@@ -160,7 +160,7 @@ export default class WUPCalendarControl<
         text-transform: capitalize;
       }
       :host label {
-        max-width: var(--ctrl-clr-width);
+        max-width: var(--ctrl-clr-w);
         display: block;
         padding-right: 0;
       }
@@ -174,9 +174,9 @@ export default class WUPCalendarControl<
       }
       :host input {${WUPcssHidden}}
       :host [calendar] {
-        --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-width) / 7 - var(--ctrl-clr-cell-gap));
+        --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-w) / 7 - var(--ctrl-clr-cell-gap));
         --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
-        width: var(--ctrl-clr-width);
+        width: var(--ctrl-clr-w);
         padding: var(--ctrl-clr-padding);
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
@@ -188,7 +188,7 @@ export default class WUPCalendarControl<
       }
       :host [calendar="month"],
       :host [calendar="year"] {
-        --ctrl-clr-cell-w: calc(var(--ctrl-clr-width) / 4 - var(--ctrl-clr-cell-gap));
+        --ctrl-clr-cell-w: calc(var(--ctrl-clr-w) / 4 - var(--ctrl-clr-cell-gap));
         --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
       }
       :host [calendar="month"] ul,
@@ -300,7 +300,7 @@ export default class WUPCalendarControl<
         :host [calendar]>div {
           overflow: hidden;
         }
-        :host [zoom] { animation: none var(--anim-time) linear forwards; }
+        :host [zoom] { animation: none var(--anim-t) linear forwards; }
         :host [zoom="out"] { animation-name: WUP-ZOOM-OUT-1; }
         :host [zoom="out2"] { animation-name: WUP-ZOOM-OUT-2; }
         :host [zoom="in"] { animation-name: WUP-ZOOM-IN-1; }
