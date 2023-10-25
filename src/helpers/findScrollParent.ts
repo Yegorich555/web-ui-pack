@@ -1,6 +1,13 @@
 // Discussion: https://stackoverflow.com/questions/35939886/find-first-scrollable-parent
 // best solution: https://stackoverflow.com/questions/4880381/check-whether-html-element-has-scrollbars
 
+/** Returns whether element has position fixed OR not */
+function hasFixedPos(el: HTMLElement): boolean {
+  const p = el.style.position;
+  const n = "fixed";
+  return p === n || (!p && window.getComputedStyle(el).position === n);
+}
+
 /** Find first parent with active scroll X/Y */
 export default function findScrollParent(el: Element): HTMLElement | null {
   const p = el.parentElement;
@@ -26,8 +33,7 @@ export default function findScrollParent(el: Element): HTMLElement | null {
     p.scrollLeft = prev;
     return p;
   }
-  const ipos = p.style.position;
-  if (ipos === "fixed" || (!ipos && window.getComputedStyle(p).position === "fixed")) {
+  if (hasFixedPos(p)) {
     return null; // skip search if current element with fixed position
   }
   return findScrollParent(p);
@@ -39,9 +45,13 @@ export function findScrollParentAll(el: Element): HTMLElement[] | null {
   const arr: HTMLElement[] = [];
   // eslint-disable-next-line no-constant-condition
   while (1) {
-    l = findScrollParent(l);
-    if (l) arr.push(l as HTMLElement);
-    else break;
+    l = findScrollParent(l) as HTMLElement | null;
+    if (l) {
+      arr.push(l as HTMLElement);
+      if (hasFixedPos(l as HTMLElement)) {
+        break; // skip search if current element with fixed position
+      }
+    } else break;
   }
   return arr.length ? arr : null;
 }

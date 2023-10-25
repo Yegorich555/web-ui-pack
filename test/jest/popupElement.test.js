@@ -1851,7 +1851,7 @@ describe("popupElement", () => {
     );
   });
 
-  test("update on screesize changes", async () => {
+  test("update on screen size changes", async () => {
     const { nextFrame } = h.useFakeAnimation();
 
     h.mockConsoleError(); // error on not-enough space
@@ -1873,7 +1873,7 @@ describe("popupElement", () => {
     window.innerWidth = 600;
     window.innerHeight = 800;
     await nextFrame();
-    expect(spyStyle).toBeCalledTimes(1);
+    expect(spyStyle).toBeCalledTimes(3); // 3 instead of 1 because findScrollParent calls it also for checking position
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="display: block; max-width: 600px; max-height: 800px; transform: translate(0px, 0px);" position="top"></wup-popup>"`
     );
@@ -1881,7 +1881,7 @@ describe("popupElement", () => {
     window.innerHeight -= 80; // simulate mobile-keyboard opening
     await nextFrame();
     await nextFrame();
-    expect(spyStyle).toBeCalledTimes(2);
+    expect(spyStyle).toBeCalledTimes(6); // 6 instead of 1 because findScrollParent calls it also for checking position
     expect(el.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup style="display: block; max-width: 600px; max-height: 720px; transform: translate(0px, 0px);" position="top"></wup-popup>"`
     );
