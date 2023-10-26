@@ -28,6 +28,7 @@ exports[`control.time $ariaDetails 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-time>
@@ -56,6 +57,7 @@ exports[`control.time $ariaDetails 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-time>
@@ -85,6 +87,7 @@ exports[`control.time $ariaSpeak 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <section
@@ -122,6 +125,7 @@ exports[`control.time $ariaSpeak 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-time>
@@ -150,6 +154,7 @@ exports[`control.time $show/$hide error 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-time>
@@ -181,6 +186,7 @@ exports[`control.time $show/$hide error 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -224,6 +230,7 @@ exports[`control.time $show/$hide error 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-time>
@@ -240,6 +247,56 @@ overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
+
+  
+[wup-icon] {
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+}
+[wup-icon]:after {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: var(--icon, #000);
+  -webkit-mask-size: var(--icon-size, 1em);
+  mask-size: var(--icon-size, 1em);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-image: var(--icon-img);
+  mask-image: var(--icon-img);
+}
+[wup-icon]:focus {
+   box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+[wup-icon]:focus:after {
+   background: var(--icon-hover, var(--icon, #000));
+}
+@media (hover: hover) and (pointer: fine) {
+  [wup-icon]:hover {
+   box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  [wup-icon]:hover:after {
+    background: var(--icon-hover, var(--icon, #000));
+  }
+  [wup-icon]:focus:hover {
+   opacity: 0.9;
+  }
+}
+
   :root {
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
@@ -250,16 +307,21 @@ padding:0;}
           --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
+          --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
-          --icon-hover: #0001;
+          --icon-hover-bg: #0001;
+          --icon-focus-bg: #0000001a;
+          --icon-size: 14px;
         }
         [wupdark] {
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
-          --icon-hover: #fff3;
+          --icon: #fff;
+          --icon-hover-bg: #fff1;
+          --icon-focus-bg: #fff2;
           --scroll: #fff2;
           --scroll-hover: #fff3;
         }
@@ -271,7 +333,7 @@ padding:0;}
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl: inherit;
+        --ctrl-text: inherit;
         --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
@@ -311,13 +373,13 @@ padding:0;}
         --ctrl-time-icon-img: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==');
         --ctrl-time-current: #000;
         --ctrl-time-current-bg: #d9f7fd;
-        --ctrl-time-off: var(--ctrl-err);
+        --ctrl-time-off-text: var(--ctrl-err);
         --ctrl-time-off-bg: none;
       }
       [wupdark] {
         --ctrl-time-current: #25a1b6;
         --ctrl-time-current-bg: #fff1;
-        --ctrl-time-off: var(--ctrl-err);
+        --ctrl-time-off-text: var(--ctrl-err);
         --ctrl-time-off-bg: none;
       }
   
@@ -328,7 +390,7 @@ padding:0;}
         margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl);
+        color: var(--ctrl-text);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -345,7 +407,6 @@ padding:0;}
       }
       WUP-TIME:focus-within,
       WUP-TIME:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-TIME:focus-within strong,
@@ -598,8 +659,6 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-TIME label&gt;button,
-        WUP-TIME label&gt;button:after,
         WUP-TIME label:after,
         WUP-TIME label:before {
           
@@ -622,66 +681,44 @@ mask-repeat: no-repeat;
 mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
+          cursor: pointer;
           -webkit-mask-image: none;
           mask-image: none;
         }
         WUP-TIME label:after {
-          cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-TIME label:before {
-          cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-TIME label&gt;button {
-          contain: strict;
           z-index: 1;
+          contain: strict;
           font-size: inherit;
+          flex: 0 0 auto;
+          align-self: center;
         }
         WUP-TIME button[clear] {
+          --icon-size: var(--ctrl-icon-size);
+          --icon-hover-r: 24px;
+          --icon-img: var(--wup-icon-cross);
+          --icon: var(--ctrl-label);
+          --icon-hover: var(--ctrl-clear);
+          --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
-          position: relative;
           margin-right: -0.5em;
-          align-self: center;
-          cursor: pointer;
-          --ctrl-icon-img: var(--wup-icon-cross);
-          background: none;
-          -webkit-mask: none;
-          mask: none;
+        }
+        WUP-TIME button[clear=back] {
+          --icon-img: var(--wup-icon-back);
         }
         WUP-TIME:focus-within button[clear] {
           display: inline-block;
           opacity: 1;
         }
-        WUP-TIME button[clear=back] {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
-        WUP-TIME button[clear]:after {
-          content: "";
-          padding: 0;
-          -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
-        }
-        WUP-TIME button[clear]:after,
-        WUP-TIME button[clear]:before {
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-TIME:hover button[clear] {
             display: inline-block;
             opacity: 1;
-          }
-          WUP-TIME button[clear]:hover:before {
-            content: "";
-            box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
-          }
-          WUP-TIME button[clear]:hover:after {
-            background: var(--ctrl-clear);
           }
         }
         WUP-TIME[disabled] button[clear],
@@ -715,7 +752,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-TIME &gt; [menu] {
         padding: 0;
         max-height: 300px;
-        z-index: 90010;
+        z-index: 8010;
       }
       WUP-TIME {
         --ctrl-icon-img: var(--ctrl-time-icon-img-lg);
@@ -796,8 +833,8 @@ mask-image: var(--ctrl-icon-img);
       }
       WUP-TIME &gt; [menu] li[disabled] {
         border-radius: 999px;
-        color: var(--ctrl-time-off);
-        --ctrl-focus: var(--ctrl-time-off);
+        color: var(--ctrl-time-off-text);
+        --ctrl-focus: var(--ctrl-time-off-text);
         background-color: var(--ctrl-time-off-bg);
       }
       WUP-TIME [group] {
@@ -991,6 +1028,7 @@ exports[`control.time validations $options.validationShowAll 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1050,6 +1088,7 @@ exports[`control.time validations $options.validationShowAll 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-time>
@@ -1085,6 +1124,7 @@ exports[`control.time validations $options.validationShowAll 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1130,6 +1170,7 @@ exports[`control.time validations options.validationCase 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-time>
@@ -1174,6 +1215,7 @@ exports[`control.time validations options.validationCase 2`] = `
       clear="back"
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1329,6 +1371,7 @@ exports[`control.time validations options.validationCase 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1480,6 +1523,7 @@ exports[`control.time validations options.validationCase 4`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1530,6 +1574,7 @@ exports[`control.time with form 1`] = `
         clear=""
         tabindex="-1"
         type="button"
+        wup-icon=""
       />
     </label>
   </wup-time>

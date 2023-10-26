@@ -216,7 +216,7 @@ describe("circleElement", () => {
         /** @type CSSStyleDeclaration */
         return {
           getPropertyValue: (s) => {
-            if (s === "--anim-time") {
+            if (s === "--anim-t") {
               return `32ms`; // 3steps
             }
             return orig(elem).getPropertyValue(s);

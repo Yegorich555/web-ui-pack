@@ -1,5 +1,6 @@
 import onEvent from "../helpers/onEvent";
 import { stringLowerCount, stringUpperCount } from "../helpers/string";
+import { WUPcssIcon } from "../styles";
 import WUPTextControl from "./text";
 
 const tagName = "wup-pwd";
@@ -109,10 +110,9 @@ export default class WUPPasswordControl<
           ${"margin-bottom: -1px;" /* font Verdana affects on height // todo somehow it's wrong on other apps */}
         }
         :host button[eye] {
+          ${WUPcssIcon}
           cursor: pointer;
           margin-right: -0.5em;
-          -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
           -webkit-mask-size: calc(var(--ctrl-icon-size) * 1.3);
           mask-size: calc(var(--ctrl-icon-size) * 1.3);
         }

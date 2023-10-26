@@ -75,7 +75,7 @@ declare global {
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
  * * During the closing attr 'hide' is appended only if css-animation-duration is detected
  * * Popup can't be more than 100vw & 100vh (impossible to disable the rule)
- */
+ * * known issue: popup can be positioned wrong if parent has transfrom style: https://stackoverflow.com/revisions/15256339/2 this is css-core issue. To fix: place popup outside such parent or remove transform style on parent */
 export default class WUPPopupElement<
   TOptions extends WUP.Popup.Options = WUP.Popup.Options,
   Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
@@ -156,29 +156,28 @@ export default class WUPPopupElement<
   static get $styleRoot(): string {
     return `
       :root {
-        --popup-anim: 300ms;
-        --popup: inherit;
+        --popup-anim-t: 300ms;
+        --popup-text: inherit;
         --popup-bg: #fff;
         --popup-shadow: #0003;
-        --tooltip: inherit;
+        --tooltip-text: inherit;
         --tooltip-bg: #fff8;
         --tooltip-shadow: #0003;
       }
       [wupdark] {
-        --popup: #d8d8d8;
+        --popup-text: #d8d8d8;
         --popup-bg: #2b3645;
         --popup-shadow: #0006;
-        --tooltip: #d8d8d8;
+        --tooltip-text: #d8d8d8;
         --tooltip-bg: rgba(16,70,82,0.8);
         --tooltip-shadow: #0006;
-      }
-      `;
+      }`;
   }
 
   static get $style(): string {
     return `${super.$style}
       :host {
-        z-index: 90000;
+        z-index: 8000;
         display: none;
         position: fixed!important;
         top: 0; left: 0;
@@ -187,20 +186,20 @@ export default class WUPPopupElement<
         box-sizing: border-box;
         border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup);
+        color: var(--popup-text);
         background: var(--popup-bg);
         text-overflow: ellipsis;
       }
       :host[tooltip],
       :host[tooltip]+:host-arrow {
-        --popup: var(--tooltip);
+        --popup: var(--tooltip-text);
         --popup-bg: var(--tooltip-bg);
         --popup-shadow: var(--tooltip-shadow);
       }
       @media not all and (prefers-reduced-motion) {
         :host,
         :host+:host-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim) ease-in-out;
+          animation: WUP-POPUP-a1 var(--popup-anim-t) ease-in-out;
         }
         @keyframes WUP-POPUP-a1 {
           from {opacity: 0;}
@@ -208,7 +207,7 @@ export default class WUPPopupElement<
         }
         :host[hide],
         :host[hide]+:host-arrow {
-          animation: WUP-POPUP-a2 var(--popup-anim) ease-in-out forwards;
+          animation: WUP-POPUP-a2 var(--popup-anim-t) ease-in-out forwards;
         }
         @keyframes WUP-POPUP-a2 {
           to {opacity: 0;}
@@ -398,10 +397,10 @@ export default class WUPPopupElement<
     if (this.#whenShow) {
       return this.#whenShow;
     }
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean>((res, rej) => {
       const f = async (): Promise<void> => {
         if (!this.$isReady) {
-          reject(new Error(`${this.tagName}. Impossible to show: not appended to document`));
+          rej(new Error(`${this.tagName}. Impossible to show: not appended to document`));
         } else {
           try {
             let isOk = true;
@@ -411,9 +410,9 @@ export default class WUPPopupElement<
             } else {
               isOk = await this.goShow(ShowCases.always, null);
             }
-            resolve(isOk);
+            res(isOk);
           } catch (err) {
-            reject(err); // here promise in promise. So handling is required
+            rej(err); // here promise in promise. So handling is required
           }
         }
       };
@@ -427,12 +426,7 @@ export default class WUPPopupElement<
     this.#state && this.buildState();
   }
 
-  /** @deprecated use `$isShown` */
-  get $isOpen(): boolean {
-    return this.#isShown;
-  }
-
-  /** Returns if popup is opened (before show-animation is started)
+  /** Returns if popup is opened (before show-animation started)
    * @tutorial Troubleshooting
    * * stack: $show() > `$isShown:true` > showing > shown
    * * stack: $hide() > hiding > hidden > `$isShown:false`
@@ -441,7 +435,7 @@ export default class WUPPopupElement<
     return this.#isShown;
   }
 
-  /** Returns if popup is closed (after hide-animation is ended)
+  /** Returns if popup is closed (after hide-animation finished)
    * @tutorial Troubleshooting
    * * stack: $show() > `$isHidden:false` >  showing > shown
    * * stack: $hide() > hiding > hidden > `$isHidden:true`
@@ -470,6 +464,10 @@ export default class WUPPopupElement<
   protected override gotReady(): void {
     super.gotReady();
     this.init();
+  }
+
+  protected override gotRender(): void {
+    // empty because the logic is different
   }
 
   #isShown = false;

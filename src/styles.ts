@@ -29,6 +29,59 @@ mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);`;
 
+/** Style for button with icons */
+export function WUPcssBtnIcon(tag: string): string {
+  return `
+${tag} {
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+}
+${tag}:after {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: var(--icon, #000);
+  -webkit-mask-size: var(--icon-size, 1em);
+  mask-size: var(--icon-size, 1em);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-image: var(--icon-img);
+  mask-image: var(--icon-img);
+}
+${tag}:focus {
+   box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+${tag}:focus:after {
+   background: var(--icon-hover, var(--icon, #000));
+}
+@media (hover: hover) and (pointer: fine) {
+  ${tag}:hover {
+   box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  ${tag}:hover:after {
+    background: var(--icon-hover, var(--icon, #000));
+  }
+  ${tag}:focus:hover {
+   opacity: 0.9;
+  }
+}`;
+}
+
+// todo re-check why it's required inject per each element
 /** Style for small-scroll; vars --scroll, --scroll-hover to customize styling
  * @tutorial Troubleshooting
  * * cursor:pointer; doesn't work - this Chromium issue https://stackoverflow.com/questions/64402424/why-does-the-css-cursor-property-not-work-for-the-styled-scrollbar */
@@ -69,11 +122,11 @@ export function WUPcssButton(tag: string): string {
   return `
 ${tag} {
   box-shadow: none;
-  border: 1px solid var(--base-btn-bg);
+  border: none;
   border-radius: var(--border-radius);
   box-sizing: border-box;
-  padding: 0.5em;
-  margin: 1em 0;
+  padding: 11px;
+  margin: var(--base-margin) 0;
   min-width: 10em;
   cursor: pointer;
   font: inherit;
@@ -83,7 +136,7 @@ ${tag} {
   outline: none;
 }
 ${tag}:focus {
-  border-color: var(--base-btn-focus);
+  box-shadow: inset 0 0 0 2px var(--base-btn-focus);
 }
 @media (hover: hover) and (pointer: fine) {
   ${tag}:hover {

@@ -1,0 +1,51 @@
+.block {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  margin: 20px auto;
+  box-sizing: border-box;
+  border: 1px solid $basicActiveBgColor;
+  border-radius: $borderRadius;
+
+  > button {
+    position: absolute;
+    min-height: 30px;
+    margin: 0;
+  }
+}
+
+.left {
+  left: 0;
+  top: 0;
+  bottom: 0;
+  min-width: initial;
+  width: 20%;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.right {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  min-width: initial;
+  width: 20%;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.top {
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mform {
+  max-width: 540px;
+}

@@ -252,7 +252,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$options.autoFocus = true;
       document.body.appendChild(el);
       expect(el.$isFocused).toBe(false);
-      jest.advanceTimersByTime(1);
+      jest.advanceTimersByTime(100);
       expect(document.activeElement).toBe(el.$refInput);
       expect(el.$isFocused).toBe(true);
     });

@@ -92,7 +92,7 @@ export default class WUPSpinElement<
     return `:root {
           --spin-1: #ffa500;
           --spin-2: #fff;
-          --spin-speed: 1.2s;
+          --spin-t: 1.2s;
           --spin-size: 3em;
           --spin-item-size: calc(var(--spin-size) / 8);
           --spin-fade: rgba(255,255,255,0.43);
@@ -125,7 +125,7 @@ export default class WUPSpinElement<
         border-radius: 50%;
       }
       :host>div {
-        animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+        animation: WUP-SPIN-1 var(--spin-t) linear infinite;
         width: 100%; height: 100%;
         left:0; top:0;
       }
@@ -414,7 +414,7 @@ export function spinUseTwinDualRing(cls: typeof WUPSpinElement<any>): void {
           height: calc(100% - var(--spin-item-size) * 3);
           left: 50%; top: 50%;
           transform: translate(-50%,-50%);
-          animation: WUP-SPIN-2-2 var(--spin-speed) linear infinite;
+          animation: WUP-SPIN-2-2 var(--spin-t) linear infinite;
        }`
   );
 }
@@ -495,7 +495,7 @@ export function spinUseDotRing(cls: typeof WUPSpinElement<any>): void {
               top:50%; left:50%;
             }
             :host>div:after {
-              animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
+              animation: WUP-SPIN-2 var(--spin-t) linear infinite;
               content: " ";
               display: block;
               width: var(--spin-item-size);
@@ -525,7 +525,7 @@ export function spinUseSpliceRing(cls: typeof WUPSpinElement<any>): void {
             :root { --spin-item-size: calc(var(--spin-size) / 10); }
             :host { position: relative; }
             :host>div {
-              animation: WUP-SPIN-3 var(--spin-speed) linear infinite;
+              animation: WUP-SPIN-3 var(--spin-t) linear infinite;
               position: absolute;
               width: calc(var(--spin-size) / 4);
               height: var(--spin-item-size);
@@ -595,10 +595,10 @@ export function spinUseHash(cls: typeof WUPSpinElement<any>): void {
             border-radius: calc(var(--spin-item-size) / 2);
           }
           :host>div:nth-child(1) {
-            animation: var(--spin-speed) ease 0s infinite normal none running WUP-SPIN-4-1;
+            animation: var(--spin-t) ease 0s infinite normal none running WUP-SPIN-4-1;
           }
           :host>div:nth-child(2) {
-            animation: var(--spin-speed) ease 0s infinite normal none running WUP-SPIN-4-2;
+            animation: var(--spin-t) ease 0s infinite normal none running WUP-SPIN-4-2;
           }`
   );
 }

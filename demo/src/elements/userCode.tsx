@@ -35,7 +35,7 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
     !isColor &&
     v &&
     !v.startsWith("url") &&
-    !v.startsWith("var(--anim-time)") &&
+    !v.startsWith("var(--anim-t)") &&
     !v.startsWith("calc") &&
     !v.includes("size")
   ) {
@@ -48,7 +48,7 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
     document.body.appendChild(el);
     const gotColor = window.getComputedStyle(el).color;
     if (def !== gotColor && gotColor !== "rgb(0, 0, 0)") {
-      isColor = true; // WARN it's wrong for 'var(--anim-time)'
+      isColor = true; // WARN it's wrong for 'var(--anim-t)'
     }
     el.remove();
   }

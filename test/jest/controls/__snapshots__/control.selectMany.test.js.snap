@@ -28,6 +28,7 @@ exports[`control.selectMany $ariaDetails 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-selectmany>
@@ -56,6 +57,7 @@ exports[`control.selectMany $ariaDetails 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-selectmany>
@@ -85,6 +87,7 @@ exports[`control.selectMany $ariaSpeak 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <section
@@ -122,6 +125,7 @@ exports[`control.selectMany $ariaSpeak 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-selectmany>
@@ -150,6 +154,7 @@ exports[`control.selectMany $show/$hide error 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-selectmany>
@@ -181,6 +186,7 @@ exports[`control.selectMany $show/$hide error 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -224,6 +230,7 @@ exports[`control.selectMany $show/$hide error 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-selectmany>
@@ -240,6 +247,56 @@ overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
+
+  
+[wup-icon] {
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+}
+[wup-icon]:after {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: var(--icon, #000);
+  -webkit-mask-size: var(--icon-size, 1em);
+  mask-size: var(--icon-size, 1em);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-image: var(--icon-img);
+  mask-image: var(--icon-img);
+}
+[wup-icon]:focus {
+   box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+[wup-icon]:focus:after {
+   background: var(--icon-hover, var(--icon, #000));
+}
+@media (hover: hover) and (pointer: fine) {
+  [wup-icon]:hover {
+   box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  [wup-icon]:hover:after {
+    background: var(--icon-hover, var(--icon, #000));
+  }
+  [wup-icon]:focus:hover {
+   opacity: 0.9;
+  }
+}
+
   :root {
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
@@ -250,16 +307,21 @@ padding:0;}
           --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
+          --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
-          --icon-hover: #0001;
+          --icon-hover-bg: #0001;
+          --icon-focus-bg: #0000001a;
+          --icon-size: 14px;
         }
         [wupdark] {
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
-          --icon-hover: #fff3;
+          --icon: #fff;
+          --icon-hover-bg: #fff1;
+          --icon-focus-bg: #fff2;
           --scroll: #fff2;
           --scroll-hover: #fff3;
         }
@@ -271,7 +333,7 @@ padding:0;}
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl: inherit;
+        --ctrl-text: inherit;
         --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
@@ -314,7 +376,7 @@ padding:0;}
         --ctrl-select-menu-hover: #222a36;
       }
   :root {
-        --ctrl-select-item: inherit;
+        --ctrl-select-item-text: inherit;
         --ctrl-select-item-bg: rgba(0,0,0,0.04);
         --ctrl-select-item-del-display: none;
         --ctrl-select-item-del: var(--ctrl-icon);
@@ -334,7 +396,7 @@ padding:0;}
         margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl);
+        color: var(--ctrl-text);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -351,7 +413,6 @@ padding:0;}
       }
       WUP-SELECTMANY:focus-within,
       WUP-SELECTMANY:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-SELECTMANY:focus-within strong,
@@ -604,8 +665,6 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-SELECTMANY label&gt;button,
-        WUP-SELECTMANY label&gt;button:after,
         WUP-SELECTMANY label:after,
         WUP-SELECTMANY label:before {
           
@@ -628,66 +687,44 @@ mask-repeat: no-repeat;
 mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
+          cursor: pointer;
           -webkit-mask-image: none;
           mask-image: none;
         }
         WUP-SELECTMANY label:after {
-          cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-SELECTMANY label:before {
-          cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-SELECTMANY label&gt;button {
-          contain: strict;
           z-index: 1;
+          contain: strict;
           font-size: inherit;
+          flex: 0 0 auto;
+          align-self: center;
         }
         WUP-SELECTMANY button[clear] {
+          --icon-size: var(--ctrl-icon-size);
+          --icon-hover-r: 24px;
+          --icon-img: var(--wup-icon-cross);
+          --icon: var(--ctrl-label);
+          --icon-hover: var(--ctrl-clear);
+          --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
-          position: relative;
           margin-right: -0.5em;
-          align-self: center;
-          cursor: pointer;
-          --ctrl-icon-img: var(--wup-icon-cross);
-          background: none;
-          -webkit-mask: none;
-          mask: none;
+        }
+        WUP-SELECTMANY button[clear=back] {
+          --icon-img: var(--wup-icon-back);
         }
         WUP-SELECTMANY:focus-within button[clear] {
           display: inline-block;
           opacity: 1;
         }
-        WUP-SELECTMANY button[clear=back] {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
-        WUP-SELECTMANY button[clear]:after {
-          content: "";
-          padding: 0;
-          -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
-        }
-        WUP-SELECTMANY button[clear]:after,
-        WUP-SELECTMANY button[clear]:before {
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-SELECTMANY:hover button[clear] {
             display: inline-block;
             opacity: 1;
-          }
-          WUP-SELECTMANY button[clear]:hover:before {
-            content: "";
-            box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
-          }
-          WUP-SELECTMANY button[clear]:hover:after {
-            background: var(--ctrl-clear);
           }
         }
         WUP-SELECTMANY[disabled] button[clear],
@@ -721,7 +758,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-SELECTMANY &gt; [menu] {
         padding: 0;
         max-height: 300px;
-        z-index: 90010;
+        z-index: 8010;
       }
       WUP-SELECTMANY {
         --ctrl-icon-img: var(--ctrl-select-icon-img);
@@ -850,7 +887,7 @@ WUP-SELECTMANY [menu] li[focused] {
         --ctrl-icon: var(--ctrl-select-item-del);
         --ctrl-icon-size: var(--ctrl-select-item-del-size);
         --ctrl-icon-img: var(--ctrl-select-item-del-img);
-        color: var(--ctrl-select-item);
+        color: var(--ctrl-select-item-text);
         background-color: var(--ctrl-select-item-bg);
         border-radius: var(--ctrl-border-radius);
         cursor: pointer;
@@ -921,7 +958,7 @@ mask-image: var(--ctrl-icon-img);
       }
       @media not all and (prefers-reduced-motion) {
         WUP-SELECTMANY [item][removed] {
-          transition: all var(--anim-time) ease-in-out;
+          transition: all var(--anim-t) ease-in-out;
           transition-property: margin, padding, width, opacity;
           padding-left: 0; padding-right: 0;
           margin-left: 0; margin-right: 0;
@@ -930,13 +967,13 @@ mask-image: var(--ctrl-icon-img);
         }
       }
       WUP-SELECTMANY [item][drag] {
-        z-index: 99999;
+        z-index: 9999;
         position: fixed;
         left:0; top:0;
         cursor: grabbing;
         text-decoration: none;
         --ctrl-icon: var(--ctrl-select-item-del);
-        color: var(--ctrl-select-item);
+        color: var(--ctrl-select-item-text);
         background-color: var(--ctrl-select-item-bg);
       }
       WUP-SELECTMANY [item][drop] {
@@ -1073,6 +1110,7 @@ exports[`control.selectMany sortable: drag&drop 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-selectmany>
@@ -1137,6 +1175,7 @@ exports[`control.selectMany sortable: drag&drop 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-selectmany>
@@ -1191,6 +1230,7 @@ exports[`control.selectMany sortable: drag&drop 14`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-selectmany>
@@ -1239,6 +1279,7 @@ exports[`control.selectMany sortable: drag&drop 16`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-selectmany>
@@ -1272,6 +1313,7 @@ exports[`control.selectMany validations $options.validationShowAll 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1337,6 +1379,7 @@ exports[`control.selectMany validations $options.validationShowAll 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1401,6 +1444,7 @@ exports[`control.selectMany validations $options.validationShowAll 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1448,6 +1492,7 @@ exports[`control.selectMany validations options.validationCase 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-selectmany>
@@ -1485,6 +1530,7 @@ exports[`control.selectMany validations options.validationCase 2`] = `
       clear="back"
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1580,6 +1626,7 @@ exports[`control.selectMany validations options.validationCase 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1667,6 +1714,7 @@ exports[`control.selectMany validations options.validationCase 4`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1717,6 +1765,7 @@ exports[`control.selectMany with form 1`] = `
         clear=""
         tabindex="-1"
         type="button"
+        wup-icon=""
       />
     </label>
   </wup-selectmany>

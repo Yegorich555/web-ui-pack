@@ -1,22 +1,43 @@
 # Changelog
 
-## 0.10.3 (\_\_\_)
+## 1.0.0 (\_\_\_)
 
 **BREAKING CHANGES**:
 
 - **Global**. Added static `.$use()`. Call it before using element: `WUPTextControl.$use()` (_self-registration by import_ works now and will be removed in the future)
+- [PopupElement](src/popup/popupElement.ts).
+  - Removed `$isOpen` in favor of `$isShown`
+  - **z-index** is changed from `90000` to `8000`
+- Renamed css-vars:
+    `--anim-time` >>> `--anim-t`
+    `--popup` >>> `popup-text`
+    `--popup-anim` >>> `popup-anim-t`
+    `--tooltip` >>> `tooltip-text`
+    `--spin-speed` >>> `spin-t`
+    `--btn-submit` >>> `--btn-submit-text`
+    `--ctrl` >>> `--ctrl-text`
+    `--ctrl-clr-width` >>> `--ctrl-clr-w`
+    `--ctrl-select-item` >>> `--ctrl-select-item-text`
+    `--ctrl-time-off` >>> `--ctrl-time-off-text`
 
 **Fixes**:
 
+- helper [findScrollParent](src/helpers/findScrollParent.ts). _Returns parent despite on parent.child with position: fixed_
+- [PopupElement](src/popup/popupElement.ts). _Popup hidden if target inside content with position: fixed and target.parent.parent is scrollable_
 - Text based controls
   - _Sometimes weird blink & poor render during the animation on focus_
   - _Button clear changes control size on hover if parent is flexbox_
 
 **New/Features**:
 
-- **Global**. Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
-- Text based controls
-  - Added css variable `ctrl-label-active-pos` to simplify customization of label position
+- [ModalElement](src/modalElement.ts.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
+- **Global**
+  - Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
+  - Added css variable `--base-margin` to unify margins for all elements
+- helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector possible to get from `focusFirst.$selector`
+- [FormElement](src/formElement.ts). Increased height of `button[type=submit]`
+- **Text based controls**
+  - Added css variable `--ctrl-label-active-pos` to simplify customization of label position
 
 ## 0.10.2 (Oct 11, 2023)
 

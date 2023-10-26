@@ -85,7 +85,7 @@ declare global {
       readonly?: boolean | "";
 
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      onChange?: never;
+      onChange?: never; // NiceToHave: controls doesn't fire form.$onChange method - need to implement chaining
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */
       onWillSubmit?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead */
@@ -166,12 +166,12 @@ export default class WUPFormElement<
 
   static get $styleRoot(): string {
     return `:root {
-      --btn-submit: var(--base-btn-text);
+      --btn-submit-text: var(--base-btn-text);
       --btn-submit-bg: var(--base-btn-bg);
       --btn-submit-focus: var(--base-btn-focus);
     }
     [wupdark] {
-      --btn-submit: var(--base-btn-text);
+      --btn-submit-text: var(--base-btn-text);
       --btn-submit-bg: var(--base-btn-bg);
       --btn-submit-focus: var(--base-btn-focus);
     }`;
@@ -187,9 +187,10 @@ export default class WUPFormElement<
         }
         ${WUPcssButton(":host button[type=submit]")}
         :host button[type=submit] {
-          --base-btn-text: var(--btn-submit);
+          --base-btn-text: var(--btn-submit-text);
           --base-btn-bg: var(--btn-submit-bg);
           --base-btn-focus: var(--btn-submit-focus);
+          display: block;
         }`;
   }
 

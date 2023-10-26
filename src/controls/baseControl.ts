@@ -217,7 +217,7 @@ declare global {
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      "w-onChange"?: never;
+      onChange?: never;
     }
   }
 }
@@ -249,7 +249,7 @@ export default abstract class WUPBaseControl<
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl: inherit;
+        --ctrl-text: inherit;
         --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
@@ -287,7 +287,7 @@ export default abstract class WUPBaseControl<
         margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl);
+        color: var(--ctrl-text);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;${
@@ -306,7 +306,6 @@ export default abstract class WUPBaseControl<
       }
       :host:focus-within,
       :host:focus-within > [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       :host:focus-within strong,
@@ -775,7 +774,6 @@ export default abstract class WUPBaseControl<
   }
 
   protected override gotRender(): void {
-    super.gotRender();
     this.renderControl();
   }
 

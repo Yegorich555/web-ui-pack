@@ -92,7 +92,7 @@ export default class WUPSelectManyControl<
 
   static get $styleRoot(): string {
     return `:root {
-        --ctrl-select-item: inherit;
+        --ctrl-select-item-text: inherit;
         --ctrl-select-item-bg: rgba(0,0,0,0.04);
         --ctrl-select-item-del-display: none;
         --ctrl-select-item-del: var(--ctrl-icon);
@@ -141,7 +141,7 @@ export default class WUPSelectManyControl<
         --ctrl-icon: var(--ctrl-select-item-del);
         --ctrl-icon-size: var(--ctrl-select-item-del-size);
         --ctrl-icon-img: var(--ctrl-select-item-del-img);
-        color: var(--ctrl-select-item);
+        color: var(--ctrl-select-item-text);
         background-color: var(--ctrl-select-item-bg);
         border-radius: var(--ctrl-border-radius);
         cursor: pointer;
@@ -193,7 +193,7 @@ export default class WUPSelectManyControl<
       }
       @media not all and (prefers-reduced-motion) {
         :host [item][removed] {
-          transition: all var(--anim-time) ease-in-out;
+          transition: all var(--anim-t) ease-in-out;
           transition-property: margin, padding, width, opacity;
           padding-left: 0; padding-right: 0;
           margin-left: 0; margin-right: 0;
@@ -202,13 +202,13 @@ export default class WUPSelectManyControl<
         }
       }
       :host [item][drag] {
-        z-index: 99999;
+        z-index: 9999;
         position: fixed;
         left:0; top:0;
         cursor: grabbing;
         text-decoration: none;
         --ctrl-icon: var(--ctrl-select-item-del);
-        color: var(--ctrl-select-item);
+        color: var(--ctrl-select-item-text);
         background-color: var(--ctrl-select-item-bg);
       }
       :host [item][drop] {
@@ -426,7 +426,7 @@ export default class WUPSelectManyControl<
             dr.remove();
             this.removeValue(eli);
           } else {
-            const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-time"));
+            const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-t"));
             const from = dr.getBoundingClientRect();
             const to = el.getBoundingClientRect();
             const diff = { x: to.x - from.x, y: to.y - from.y };
@@ -564,7 +564,7 @@ export default class WUPSelectManyControl<
       item.style.width = `${item.offsetWidth}px`;
       item.setAttribute("removed", "");
       setTimeout(() => (item.style.width = ""));
-      ms = parseMsTime(window.getComputedStyle(item).getPropertyValue("--anim-time"));
+      ms = parseMsTime(window.getComputedStyle(item).getPropertyValue("--anim-t"));
     }
     setTimeout(() => item.remove(), ms);
 

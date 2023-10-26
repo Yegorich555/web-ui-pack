@@ -154,7 +154,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         position: relative;
         overflow: visible;
         margin: auto;
-        --anim-time: 400ms;
+        --anim-t: 400ms;
       }
       :host>strong {
         display: block;
@@ -313,7 +313,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     const { items, minSize: minsize, corner, width } = this._opts;
 
     const style = getComputedStyle(this);
-    const animTime = parseMsTime(style.getPropertyValue("--anim-time"));
+    const animTime = parseMsTime(style.getPropertyValue("--anim-t"));
 
     // calc min possible segment size so cornerR can fit
     const inR = radius - width + corner * width;
@@ -445,7 +445,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
               t._tid = setTimeout(() => {
                 t._tooltip?.$hide().finally(() => {
                   // popup can be opened when user returns mouse back in a short time
-                  if (t._tooltip && !t._tooltip!.$isOpen) {
+                  if (t._tooltip && !t._tooltip!.$isShown) {
                     t._tooltip!.remove();
                     t._tooltip = undefined;
                   }
@@ -463,7 +463,6 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
 
   /** Called on every changeEvent */
   protected override gotRender(): void {
-    super.gotRender();
     this.$refSVG.setAttribute("viewBox", `0 0 100 100`);
     this.$refSVG.setAttribute("role", "img");
     this.appendChild(this.$refSVG);

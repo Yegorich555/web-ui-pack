@@ -93,7 +93,7 @@ export default abstract class WUPBaseComboControl<
       :host > [menu] {
         padding: 0;
         max-height: 300px;
-        z-index: 90010;
+        z-index: 8010;
       }`;
   }
 

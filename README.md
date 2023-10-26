@@ -85,9 +85,9 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
   - [ ] ColorControl (ColorPicker) ?
 - [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
 - [ ] MediaPlayer (Video player)
-- [ ] ModalElement
-- [ ] ConfirmModalElement
-- [ ] FormModalElement
+- [x] [ModalElement](src/modalElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
+  - [ ] Built-in form support
+  - [ ] ConfirmModalElement
 - [ ] InfiniteScroll
 - [ ] VirtualScroll
 - [ ] CarouselElement (Slide show)

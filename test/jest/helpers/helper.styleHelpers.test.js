@@ -139,11 +139,11 @@ describe("helper.styleHelpers", () => {
       }
       .btn {
         box-shadow: none;
-        border: 1px solid var(--base-btn-bg);
+        border: none;
         border-radius: var(--border-radius);
         box-sizing: border-box;
-        padding: 0.5em;
-        margin: 1em 0;
+        padding: 11px;
+        margin: var(--base-margin) 0;
         min-width: 10em;
         cursor: pointer;
         font: inherit;
@@ -153,7 +153,7 @@ describe("helper.styleHelpers", () => {
         outline: none;
       }
       .btn:focus {
-        border-color: var(--base-btn-focus);
+        box-shadow: inset 0 0 0 2px var(--base-btn-focus);
       }
       @media (hover: hover) and (pointer: fine) {
         .btn:hover {

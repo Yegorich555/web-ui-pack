@@ -270,71 +270,47 @@ export default class WUPTextControl<
           display: inline-block;
         }
         /* style for icons */
-        :host label>button,
-        :host label>button:after,
         :host label:after,
         :host label:before {
           ${WUPcssIcon}
+          cursor: pointer;
           -webkit-mask-image: none;
           mask-image: none;
         }
         :host label:after {
-          cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
         :host label:before {
-          cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         :host label>button {
-          contain: strict;
           z-index: 1;
+          contain: strict;
           font-size: inherit;
+          flex: 0 0 auto;
+          align-self: center;
         }
         :host button[clear] {
+          --icon-size: var(--ctrl-icon-size);
+          --icon-hover-r: 24px;
+          --icon-img: var(--wup-icon-cross);
+          --icon: var(--ctrl-label);
+          --icon-hover: var(--ctrl-clear);
+          --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
-          position: relative;
           margin-right: -0.5em;
-          align-self: center;
-          cursor: pointer;
-          --ctrl-icon-img: var(--wup-icon-cross);
-          background: none;
-          -webkit-mask: none;
-          mask: none;
+        }
+        :host button[clear=back] {
+          --icon-img: var(--wup-icon-back);
         }
         :host:focus-within button[clear] {
           display: inline-block;
           opacity: 1;
         }
-        :host button[clear=back] {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
-        :host button[clear]:after {
-          content: "";
-          padding: 0;
-          -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
-        }
-        :host button[clear]:after,
-        :host button[clear]:before {
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-        }
         @media (hover: hover) and (pointer: fine) {
           :host:hover button[clear] {
             display: inline-block;
             opacity: 1;
-          }
-          :host button[clear]:hover:before {
-            content: "";
-            box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
-          }
-          :host button[clear]:hover:after {
-            background: var(--ctrl-clear);
           }
         }
         :host[disabled] button[clear],
@@ -427,6 +403,7 @@ export default class WUPTextControl<
     } else {
       this.$refLabel.appendChild(bc);
     }
+    bc.setAttribute(this.#ctr.classNameBtnIcon, "");
     bc.setAttribute("clear", "");
     bc.setAttribute("tabindex", -1);
     bc.setAttribute("aria-hidden", true);

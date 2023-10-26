@@ -275,7 +275,7 @@ describe("control.radio", () => {
         <wup-radio w-initvalue="20" w-items="window.items"></wup-radio>
       </wup-form>
     `;
-    jest.advanceTimersByTime(1);
+    jest.advanceTimersByTime(10);
     expect(document.body).toMatchInlineSnapshot(`
       <body>
         

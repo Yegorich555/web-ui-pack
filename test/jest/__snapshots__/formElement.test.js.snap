@@ -11,6 +11,56 @@ overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
+
+  
+[wup-icon] {
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+}
+[wup-icon]:after {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: var(--icon, #000);
+  -webkit-mask-size: var(--icon-size, 1em);
+  mask-size: var(--icon-size, 1em);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-image: var(--icon-img);
+  mask-image: var(--icon-img);
+}
+[wup-icon]:focus {
+   box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+[wup-icon]:focus:after {
+   background: var(--icon-hover, var(--icon, #000));
+}
+@media (hover: hover) and (pointer: fine) {
+  [wup-icon]:hover {
+   box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  [wup-icon]:hover:after {
+    background: var(--icon-hover, var(--icon, #000));
+  }
+  [wup-icon]:focus:hover {
+   opacity: 0.9;
+  }
+}
+
   :root {
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
@@ -21,26 +71,31 @@ padding:0;}
           --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
+          --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
-          --icon-hover: #0001;
+          --icon-hover-bg: #0001;
+          --icon-focus-bg: #0000001a;
+          --icon-size: 14px;
         }
         [wupdark] {
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
-          --icon-hover: #fff3;
+          --icon: #fff;
+          --icon-hover-bg: #fff1;
+          --icon-focus-bg: #fff2;
           --scroll: #fff2;
           --scroll-hover: #fff3;
         }
   :root {
-      --btn-submit: var(--base-btn-text);
+      --btn-submit-text: var(--base-btn-text);
       --btn-submit-bg: var(--base-btn-bg);
       --btn-submit-focus: var(--base-btn-focus);
     }
     [wupdark] {
-      --btn-submit: var(--base-btn-text);
+      --btn-submit-text: var(--base-btn-text);
       --btn-submit-bg: var(--base-btn-bg);
       --btn-submit-focus: var(--base-btn-focus);
     }
@@ -54,11 +109,11 @@ padding:0;}
         
 WUP-FORM button[type=submit] {
   box-shadow: none;
-  border: 1px solid var(--base-btn-bg);
+  border: none;
   border-radius: var(--border-radius);
   box-sizing: border-box;
-  padding: 0.5em;
-  margin: 1em 0;
+  padding: 11px;
+  margin: var(--base-margin) 0;
   min-width: 10em;
   cursor: pointer;
   font: inherit;
@@ -68,7 +123,7 @@ WUP-FORM button[type=submit] {
   outline: none;
 }
 WUP-FORM button[type=submit]:focus {
-  border-color: var(--base-btn-focus);
+  box-shadow: inset 0 0 0 2px var(--base-btn-focus);
 }
 @media (hover: hover) and (pointer: fine) {
   WUP-FORM button[type=submit]:hover {
@@ -85,9 +140,10 @@ WUP-FORM button[type=submit][aria-busy] {
   cursor: wait;
 }
         WUP-FORM button[type=submit] {
-          --base-btn-text: var(--btn-submit);
+          --base-btn-text: var(--btn-submit-text);
           --base-btn-bg: var(--btn-submit-bg);
           --base-btn-focus: var(--btn-submit-focus);
+          display: block;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
@@ -97,7 +153,7 @@ WUP-FORM button[type=submit][aria-busy] {
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl: inherit;
+        --ctrl-text: inherit;
         --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
@@ -140,7 +196,7 @@ WUP-FORM button[type=submit][aria-busy] {
         margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl);
+        color: var(--ctrl-text);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -157,7 +213,6 @@ WUP-FORM button[type=submit][aria-busy] {
       }
       WUP-TEXT:focus-within,
       WUP-TEXT:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-TEXT:focus-within strong,
@@ -410,8 +465,6 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-TEXT label&gt;button,
-        WUP-TEXT label&gt;button:after,
         WUP-TEXT label:after,
         WUP-TEXT label:before {
           
@@ -434,66 +487,44 @@ mask-repeat: no-repeat;
 mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
+          cursor: pointer;
           -webkit-mask-image: none;
           mask-image: none;
         }
         WUP-TEXT label:after {
-          cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-TEXT label:before {
-          cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-TEXT label&gt;button {
-          contain: strict;
           z-index: 1;
+          contain: strict;
           font-size: inherit;
+          flex: 0 0 auto;
+          align-self: center;
         }
         WUP-TEXT button[clear] {
+          --icon-size: var(--ctrl-icon-size);
+          --icon-hover-r: 24px;
+          --icon-img: var(--wup-icon-cross);
+          --icon: var(--ctrl-label);
+          --icon-hover: var(--ctrl-clear);
+          --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
-          position: relative;
           margin-right: -0.5em;
-          align-self: center;
-          cursor: pointer;
-          --ctrl-icon-img: var(--wup-icon-cross);
-          background: none;
-          -webkit-mask: none;
-          mask: none;
+        }
+        WUP-TEXT button[clear=back] {
+          --icon-img: var(--wup-icon-back);
         }
         WUP-TEXT:focus-within button[clear] {
           display: inline-block;
           opacity: 1;
         }
-        WUP-TEXT button[clear=back] {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
-        WUP-TEXT button[clear]:after {
-          content: "";
-          padding: 0;
-          -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
-        }
-        WUP-TEXT button[clear]:after,
-        WUP-TEXT button[clear]:before {
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-TEXT:hover button[clear] {
             display: inline-block;
             opacity: 1;
-          }
-          WUP-TEXT button[clear]:hover:before {
-            content: "";
-            box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
-          }
-          WUP-TEXT button[clear]:hover:after {
-            background: var(--ctrl-clear);
           }
         }
         WUP-TEXT[disabled] button[clear],
