@@ -350,6 +350,15 @@ describe("baseElement", () => {
     await h.wait(1);
     expect(document.querySelector("#elid")).toBe(document.body);
     expect(el.$options.target).toBe(document.body);
+    // simulate when element appended after a time
+    const box = document.body.appendChild(document.createElement("div"));
+    const elIsol = box.appendChild(document.createElement(el.tagName));
+    expect(elIsol.previousElementSibling).toBeFalsy();
+    elIsol.setAttribute("w-target", "prev");
+    expect(elIsol.$options.target).toBe("prev");
+    box.prepend(document.createElement("a"));
+    await h.wait(1);
+    expect(elIsol.$options.target).toBe(elIsol.previousElementSibling);
 
     // removing attribute rollbacks to default value
     jest.clearAllMocks();

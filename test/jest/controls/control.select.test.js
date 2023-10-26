@@ -579,6 +579,25 @@ describe("control.select", () => {
   });
 
   describe("options", () => {
+    test("readOnlyInput: 5", async () => {
+      el.$options.readOnlyInput = 5;
+      el.$options.items = [
+        { value: 10, text: "Donny" },
+        { value: 20, text: "Mikky" },
+        { value: 30, text: "Leo" },
+        { value: 40, text: "Splinter" },
+      ];
+      await h.wait();
+      expect(el.$refInput.readOnly).toBe(true);
+
+      el.$options.readOnlyInput = 3;
+      await h.wait();
+      expect(el.$refInput.readOnly).toBe(false);
+
+      el.$options.items = new Promise((res) => setTimeout(() => res(getItems(), 100)));
+      await h.wait(1);
+      expect(() => el.setupInputReadonly()).not.toThrow();
+    });
     test("allowNewValue", async () => {
       el.$options.allowNewValue = true;
       const onChange = jest.fn();
