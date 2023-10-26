@@ -445,7 +445,7 @@ export default class WUPModalElement<
     // remove events
     this.$refClose!.onclick = null;
     this.$refFade!.onclick = null;
-    super.dispose(); // remove only events WARN: don't call this!
+    super.dispose(); // remove only events WARN: don't call this.dispose()!
     // apply animation
     document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
     !document.body.className && document.body.removeAttribute("class");
@@ -479,13 +479,15 @@ export default class WUPModalElement<
     } else {
       el = this._lastFocused;
     }
-    if (!(el as HTMLElement)?.focus) {
+    if (el && (el as HTMLElement).focus && el.isConnected) {
+      (el as HTMLElement).focus();
+    } else {
       this.throwError(
         "Impossible to return focus back: element is missed. Before opening modal set 'id' to focused element"
       );
-      el = document.body;
+      /* istanbul ignore next */
+      (document.activeElement as HTMLElement)?.blur?.();
     }
-    (el as HTMLElement).focus();
   }
 
   // WARN: the focus block work better because not handles keyboard but looks for focus behavior but it's buggy in FF and maybe other browsers since focusOut can be outside the modal
@@ -561,7 +563,7 @@ export default class WUPModalElement<
   }
 
   protected override dispose(): void {
-    document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
+    document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove > everything must returned to prev state
     !document.body.className && document.body.removeAttribute("class");
     this.removeAttribute("open");
     this.$refFade?.remove(); // todo only if last

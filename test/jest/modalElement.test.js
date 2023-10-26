@@ -180,6 +180,8 @@ describe("modalElement", () => {
     expect(document.body.outerHTML).toMatchInlineSnapshot(
       `"<body><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close=""></button><h2 id="sID"></h2></wup-modal></body>"`
     );
+
+    // todo $open & $close several times
   });
 
   test("focus behavior", async () => {
@@ -192,7 +194,7 @@ describe("modalElement", () => {
     btn.focus();
     await h.wait(10);
     expect(el.$isOpened).toBe(true);
-    expect(document.activeElement).toBe(el.$refClose);
+    expect(document.activeElement).toBe(el.$refClose); // when nothing to focus: then focus on btnClose
 
     // no tab-cycling because modal has single focusable item: $refClose
     await h.userPressTab(btn);
@@ -205,7 +207,6 @@ describe("modalElement", () => {
     expect(document.activeElement).toBe(btn); // focus back
 
     // again with extra-focused content
-    WUPModalElement.testMe = true;
     document.body.innerHTML = `
       <wup-modal>
         <h2></h2>
@@ -214,8 +215,8 @@ describe("modalElement", () => {
       </wup-modal>
       <button id="out">...</button>
     `;
+    document.getElementById("out").focus();
     await h.wait();
-    WUPModalElement.testMe = false;
     el = document.body.firstElementChild;
     expect(el.$isOpened).toBe(true);
     expect(el.innerHTML).toMatchInlineSnapshot(`
@@ -225,9 +226,72 @@ describe("modalElement", () => {
               <button id="b2"></button>
             "
     `);
+    el.$refClose.id = "bclose";
+    el.id = "idModal";
+    expect(document.activeElement.id).toBe("b1");
 
-    expect(document.activeElement.outerHTML).toMatchInlineSnapshot(`"<button id="b1"></button>"`);
+    await h.userPressTab(document.getElementById("b2"));
+    expect(document.activeElement.id).toBe("b2");
+    await h.userPressTab(document.getElementById("out"));
+    expect(document.activeElement.id).toBe("bclose"); // focus must retutn to 1st element
+    await h.userPressTab(document.getElementById("b1"));
+    expect(document.activeElement.id).toBe("b1");
+    // back
+    await h.userPressTab(document.getElementById("bclose"), { shiftKey: true });
+    expect(document.activeElement.id).toBe("bclose");
+    await h.userPressTab(document.body, { shiftKey: true });
+    expect(document.activeElement.id).toBe("b2");
 
-    // todo continue with tab-cycling
+    el.$close();
+    await h.wait();
+    expect(document.activeElement.id).toBe("out"); // focus back
+
+    // autofocus: false - focus on itself
+    el.$options.autoFocus = false; // revert logic
+    el.$open();
+    await h.wait();
+    expect(document.activeElement.id).toBe("bclose"); // WARN: it's wrong here actually modal with tabindex="-1" is focusable
+
+    el.$close();
+    await h.wait();
+    expect(document.activeElement.id).toBe("out"); // focus back
+    el.focus(); // no action when modal closed
+    expect(document.activeElement.id).toBe("out"); // focus back
+    el.focusAny(); // no action when modal closed
+    expect(document.activeElement.id).toBe("out"); // focus back
+
+    // focus back when item missed/changed
+    const btnOut = document.activeElement;
+    btnOut.id = "";
+    el.$open();
+    document.getElementById("b2").focus();
+    await h.wait();
+    expect(document.activeElement.id).toBe("b2"); // no re-focus if content is focused already outside built-in logic
+    el.$close();
+    await h.wait();
+    expect(document.activeElement).toBe(btnOut); // ordinary when id missed
+
+    // simulate when model opened, data is refreshed & re-rendered behind modal and need to find such button
+    btnOut.id = "out";
+    el.$open();
+    await h.wait();
+    btnOut.id = "miss";
+    const btnN = document.body.appendChild(document.createElement("button"));
+    btnN.id = "out";
+    expect(document.activeElement.id).not.toBe("out");
+    el.$close();
+    await h.wait();
+    expect(document.activeElement.id).toBe("out");
+    // same case but id not pointed
+    btnN.id = "";
+    el.$open();
+    await h.wait();
+    expect(document.activeElement).not.toBe(btnN);
+    btnN.remove();
+    expect(() => el.$close()).not.toThrow();
+    expect(() => jest.advanceTimersByTime(1)).toThrow(); // because prev-focused item is missed
+    await h.wait();
+    expect(el.$isClosed).toBe(true);
+    expect(document.activeElement).toBe(document.body);
   });
 });
