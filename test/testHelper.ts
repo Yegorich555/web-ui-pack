@@ -540,7 +540,8 @@ export async function userRemove(
 }
 
 /** Simulate user mouse click with 100ms between mouseDown and mouseUp */
-export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutMouseUp = 100) {
+export async function userClick(elOrSelector: HTMLElement | string, opts?: MouseEventInit, timeoutMouseUp = 100) {
+  const el: HTMLElement = typeof elOrSelector === "string" ? document.querySelector(elOrSelector)! : elOrSelector;
   const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
   const mouseEvent = (type = "click") => {
     const args = o();

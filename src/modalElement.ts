@@ -506,33 +506,34 @@ export default class WUPModalElement<
 
   /** Called on keydown event */
   gotKeyDown(e: KeyboardEvent): void {
+    if (e.altKey || e.ctrlKey || e.metaKey) {
+      return;
+    }
     switch (e.key) {
       case "Escape":
-        if (!e.defaultPrevented) {
+        if (!e.shiftKey && !e.defaultPrevented) {
           e.preventDefault();
           // todo it works together on control where Escape clears input
           this.goClose(CloseCases.onPressEsc, e);
         }
         break;
       case "Tab": {
-        if (!e.altKey && !e.ctrlKey && !e.metaKey) {
-          let isFocusLast: boolean | undefined;
-          if (e.shiftKey) {
-            const isFirst = document.activeElement === this.querySelector(focusFirst.$selector);
-            if (isFirst) {
-              isFocusLast = true; // to cycle focus-behavior
-            }
-          } else {
-            const all = this.querySelectorAll(focusFirst.$selector);
-            const isLast = document.activeElement === all.item(all.length - 1);
-            if (isLast) {
-              isFocusLast = false; // to cycle focus-behavior
-            }
+        let isFocusLast: boolean | undefined;
+        if (e.shiftKey) {
+          const isFirst = document.activeElement === this.querySelector(focusFirst.$selector);
+          if (isFirst) {
+            isFocusLast = true; // to cycle focus-behavior
           }
-          if (isFocusLast != null) {
-            e.preventDefault(); // prevent default focus behavior
-            focusFirst(this, { isFocusLast });
+        } else {
+          const all = this.querySelectorAll(focusFirst.$selector);
+          const isLast = document.activeElement === all.item(all.length - 1);
+          if (isLast) {
+            isFocusLast = false; // to cycle focus-behavior
           }
+        }
+        if (isFocusLast != null) {
+          e.preventDefault(); // prevent default focus behavior
+          focusFirst(this, { isFocusLast });
         }
         break;
       }

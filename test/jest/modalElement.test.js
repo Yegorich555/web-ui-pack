@@ -294,4 +294,54 @@ describe("modalElement", () => {
     expect(el.$isClosed).toBe(true);
     expect(document.activeElement).toBe(document.body);
   });
+
+  test("close in diff ways", async () => {
+    const onClose = jest.fn();
+    el.$onClose = onClose;
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+
+    await h.userClick(el);
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+
+    // click outside
+    expect(onClose).toBeCalledTimes(0);
+    await h.userClick(`.${WUPModalElement.$classFade}`);
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    expect(onClose).toBeCalledTimes(1);
+
+    // click on btnClose
+    jest.clearAllMocks();
+    el.$open();
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    await h.userClick(el.$refClose);
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    expect(onClose).toBeCalledTimes(1);
+
+    // close by Esc
+    jest.clearAllMocks();
+    el.$open();
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    await h.userPressKey(el, { key: "Space" }); // for coverage default: in switch
+    expect(el.$isOpened).toBe(true);
+    await h.userPressKey(el, { key: "Escape" });
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    expect(onClose).toBeCalledTimes(1);
+
+    // again with key-modifiers
+    el.$open();
+    await h.wait();
+    await h.userPressKey(el, { key: "Escape", shiftKey: true });
+    await h.userPressKey(el, { key: "Escape", altKey: true });
+    await h.userPressKey(el, { key: "Escape", ctrlKey: true });
+    await h.userPressKey(el, { key: "Escape", metaKey: true });
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+  });
 });
