@@ -181,7 +181,37 @@ describe("modalElement", () => {
       `"<body><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close=""></button><h2 id="sID"></h2></wup-modal></body>"`
     );
 
-    // todo $open & $close several times
+    // open & close in short time
+    jest.clearAllMocks();
+    h.setupCssCompute(el, { transitionDuration: "0.4s" });
+    el.$open();
+    el.$close();
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    el.$close().then(thenClose);
+    await h.wait(1);
+    expect(thenClose).toBeCalledTimes(1);
+    el.$open();
+    el.$close();
+    el.$open();
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    el.$close();
+    await h.wait(10);
+    el.$open();
+    expect(el.$isOpened).toBe(true);
+    await h.wait();
+    jest.clearAllMocks();
+    el.$open().then(thenOpen);
+    await h.wait(10);
+    expect(thenOpen).toBeCalledTimes(1);
+    el.$close();
+    await h.wait(10);
+    expect(el.$isClosing).toBe(true);
+    thenClose.mockClear();
+    el.$close().then(thenClose);
+    await h.wait();
+    expect(thenClose).toBeCalledTimes(1);
   });
 
   test("focus behavior", async () => {

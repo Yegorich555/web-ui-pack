@@ -305,7 +305,7 @@ export default class WUPModalElement<
     return this.goOpen(OpenCases.onManuallCall);
   }
 
-  #whenClose?: Promise<any>;
+  #whenClose?: Promise<boolean>;
   $close(): Promise<boolean> {
     return this.goClose(CloseCases.onManuallCall, null);
   }
@@ -433,6 +433,9 @@ export default class WUPModalElement<
     // todo need confirm window if user has unsaved changes
     if (this.#whenClose) {
       return this.#whenClose;
+    }
+    if (!this.#whenOpen) {
+      return Promise.resolve(true); // possible when on init $close is called
     }
     const e = this.fireEvent("$willClose", { cancelable: true, detail: { closeCase } });
     if (e.defaultPrevented) {
@@ -580,7 +583,8 @@ export default class WUPModalElement<
 
 customElements.define(tagName, WUPModalElement);
 
-// NiceToHave: handle  Ctrl+S, Meta+S for submit & close ???
+// NiceToHave: handle Ctrl+S, Meta+S for submit & close ???
+// NiceToHave: popup & modal has similar show/hide logic: need to unify it to abstract BasePopup
 
 // testcase: add modal with target and remove after 100ms  expected 0 exceptions
 // testcase: close on Escape + when control is in edit mode + when dropdown is opened
