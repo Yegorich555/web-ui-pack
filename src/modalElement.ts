@@ -320,7 +320,7 @@ export default class WUPModalElement<
   }
 
   _prevTarget?: Element | null;
-  _prevTargetClick?: () => void;
+  _prevTargetClick?: (e: MouseEvent) => void;
 
   protected override gotReady(): void {
     super.gotReady();
@@ -334,17 +334,19 @@ export default class WUPModalElement<
     const trg = this._opts.target;
     const isTrgChange = this._prevTarget !== trg;
     if (isTrgChange) {
-      this._prevTarget?.removeEventListener("click", this._prevTargetClick!);
+      (this._prevTarget as HTMLElement)?.removeEventListener("click", this._prevTargetClick!);
       this._prevTarget = trg;
     }
 
     if (!trg) {
       !propsChanged && this.goOpen(OpenCases.onInit); // call here to wait for options before opening
     } else if (isTrgChange) {
-      this._prevTargetClick = (): void => {
-        this.goOpen(OpenCases.onTargetClick);
+      this._prevTargetClick = (e) => {
+        setTimeout(() => {
+          !e.defaultPrevented && this.goOpen(OpenCases.onTargetClick);
+        }); // timeout required to prevent openinig from bubbled-events
       };
-      trg.addEventListener("click", this._prevTargetClick);
+      (trg as HTMLElement).addEventListener("click", this._prevTargetClick, { passive: true });
     }
   }
 
@@ -373,7 +375,7 @@ export default class WUPModalElement<
     this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
     const header = this.querySelector("h1,h2,h3,h4,h5,h6,[role=heading]");
     if (!header) {
-      console.error("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
+      console.warn("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
     } else {
       header.id ||= this.#ctr.$uniqueId;
       this.setAttribute("aria-labelledby", header.id); // issue: NVDA reads content twice if modal has aria-labelledby: https://github.com/nvaccess/nvda/issues/8971
@@ -585,6 +587,3 @@ customElements.define(tagName, WUPModalElement);
 
 // NiceToHave: handle Ctrl+S, Meta+S for submit & close ???
 // NiceToHave: popup & modal has similar show/hide logic: need to unify it to abstract BasePopup
-
-// testcase: add modal with target and remove after 100ms  expected 0 exceptions
-// testcase: close on Escape + when control is in edit mode + when dropdown is opened

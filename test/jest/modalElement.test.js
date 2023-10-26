@@ -212,6 +212,14 @@ describe("modalElement", () => {
     el.$close().then(thenClose);
     await h.wait();
     expect(thenClose).toBeCalledTimes(1);
+
+    // open & remove after without closing
+    el.$open();
+    await h.wait(1);
+    expect(el.$isOpening).toBe(true);
+    el.remove();
+    expect(() => jest.advanceTimersByTime(1000)).not.toThrow();
+    await h.wait();
   });
 
   test("focus behavior", async () => {
@@ -373,5 +381,79 @@ describe("modalElement", () => {
     await h.userPressKey(el, { key: "Escape", metaKey: true });
     await h.wait();
     expect(el.$isOpened).toBe(true);
+  });
+
+  test("options: target", async () => {
+    document.body.innerHTML = `
+      <button id='tar2'>...</button>
+      <button id='tar'>...</button>
+      <wup-modal w-target="prev"><h2></h2></wup-modal>
+    `;
+    await h.wait();
+    el = document.body.querySelector("wup-modal");
+    expect(el.$isOpened).toBe(false);
+
+    const btn = document.getElementById("tar");
+    await h.userClick(btn);
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+
+    await h.userPressKey(el, { key: "Escape" });
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    expect(document.activeElement.id).toBe("tar");
+
+    const btn2 = document.getElementById("tar2");
+    el.$options.target = btn2;
+    await h.wait(1);
+    await h.userClick(btn);
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    await h.userClick(btn2);
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+
+    await h.userPressKey(el, { key: "Escape" });
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    expect(document.activeElement.id).toBe("tar2");
+
+    btn2.onclick = (e) => e.preventDefault();
+    await h.userClick(btn2);
+    await h.wait();
+    expect(el.$isOpened).toBe(false); // close because default action is prevented
+  });
+
+  test("with different content/form", async () => {
+    // without h2
+    const warn = h.mockConsoleWarn();
+    document.body.innerHTML = `<wup-modal>Hello</wup-modal>`;
+    await h.wait();
+    expect(warn).toBeCalledTimes(1);
+
+    // close on Escape + when control is in edit mode + when dropdown is opened
+
+    document.body.innerHTML = `
+      <wup-modal>
+        <wup-form>
+          <wup-date></wup-date>
+        </wup-form>
+      </wup-modal>`;
+    await h.wait();
+    el = document.querySelector("wup-modal");
+    expect(el.$isOpened).toBe(true);
+
+    const dp = document.querySelector("wup-date");
+    dp.focus();
+    await h.wait();
+    expect(dp.$isShown).toBe(true);
+    await h.userPressKey(dp, { key: "Escape" });
+    await h.wait();
+    expect(dp.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(true);
+    await h.userPressKey(dp, { key: "Escape" });
+    await h.wait();
+    expect(dp.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
   });
 });

@@ -29,11 +29,10 @@
 
 **New/Features**:
 
+- [ModalElement](src/modalElement.ts.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
 - **Global**
-
   - Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
   - Added css variable `--base-margin` to unify margins for all elements
-
 - helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector possible to get from `focusFirst.$selector`
 - [FormElement](src/formElement.ts). Increased height of `button[type=submit]`
 - **Text based controls**
