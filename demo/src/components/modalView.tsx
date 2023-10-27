@@ -60,9 +60,10 @@ export default function ModalView() {
         "Built-in styles & animation for different screen sizes",
         "Accessibility: autofocus, tab-cycling, focus-back on closing etc.",
         // todo uncomment when will be implemented
-        // <>
-        //   Integrated with <b>wup-form</b> (pending + close after submit-end + confirm window if unsaved changes)
-        // </>,
+        <>
+          Integrated with <b>wup-form</b> (pending + close after submitEnd {/* "+ confirm window if unsaved changes" */}
+          )
+        </>,
       ]}
     >
       <h3>Different placemenets</h3>
@@ -110,7 +111,18 @@ export default function ModalView() {
       </button>
       <wup-modal w-target="prev" w-placement="center">
         <h2>Ordinary form</h2>
-        <wup-form>
+        <wup-form
+          ref={(el) => {
+            if (el) {
+              el.$onSubmit = ({ detail }) => {
+                console.warn("submit", { detail });
+                // return Promise.reject();
+                // eslint-disable-next-line no-promise-executor-return
+                return new Promise((res) => setTimeout(() => res(true), 1500));
+              };
+            }
+          }}
+        >
           <wup-text w-name="email" w-initValue="yegor.golubchik@mail.com" />
           <wup-pwd w-name="password" w-initValue="123456" />
           <wup-date w-name="dob" w-label="Date of birthday" />

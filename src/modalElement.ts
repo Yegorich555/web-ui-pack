@@ -21,6 +21,7 @@ export const enum CloseCases {
   onCloseClick,
   /** When user pressed Escape button */
   onPressEsc,
+  onSubmitEnd,
 }
 
 const tagName = "wup-modal";
@@ -33,11 +34,14 @@ declare global {
       /** Position on the screen
        * @defaultValue 'center' */
       placement: "center" | "top" | "left" | "right";
-      /** Autofocus first possible content with skipping focus on button[close] if there is another focusable content
+      /** Auto focus first possible content with skipping focus on button[close] if there is another focusable content
        * Point `false` to autofocus on button[close].
        * If you don't need any visual focus by default override method focus() and call `HTMLElement.prototype.focus.call(this)` to focus modal-box itself
        * @defaultValue true */
       autoFocus: boolean;
+      /** Auto close on successful wup-form.$onSubmitEnd: @see {@link WUP.Form.EventMap.$submitEnd}
+       * @defaultValue true */
+      autoClose: boolean;
       // todo modalInModal: replace OR overflow
     }
     interface EventMap extends WUP.Base.EventMap {
@@ -61,6 +65,7 @@ declare global {
       "w-target"?: string;
       "w-placement"?: Options["placement"];
       "w-autoFocus"?: boolean | "";
+      "w-autoClose"?: boolean | "";
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willOpen') instead */
       onWillOpen?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$open') instead */
@@ -245,6 +250,7 @@ export default class WUPModalElement<
     target: null,
     placement: "center",
     autoFocus: true,
+    autoClose: true,
     // todo selfDestroy
   };
 
@@ -407,6 +413,10 @@ export default class WUPModalElement<
     this.$refFade.onclick = (ev) => this.goClose(CloseCases.onOutsideClick, ev);
     // this.appendEvent(this, "focusout", (ev) => this.gotFocusOut(ev), { passive: false });
     this.appendEvent(this, "keydown", (ev) => this.gotKeyDown(ev), { passive: false });
+    // @ts-expect-error - appendEvent isn't good enought for looking for types
+    this.appendEvent(this, "$submitEnd", (sev: WUP.Form.EventMap["$submitEnd"]) => {
+      sev.detail.success && this.goClose(CloseCases.onSubmitEnd, sev);
+    });
 
     this._opts.autoFocus ? this.focusAny() : this.focus(); // bug: FF doesn't adjust suggest-popup according to animation
     this.scroll({ left: 0, top: 0, behavior: "instant" });
@@ -430,8 +440,11 @@ export default class WUPModalElement<
   }
 
   /** Hide modal. @closeCase as reason of close() */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  goClose(closeCase: CloseCases, ev: MouseEvent | KeyboardEvent | SubmitEvent | null): Promise<boolean> {
+  goClose(
+    closeCase: CloseCases,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ev: MouseEvent | KeyboardEvent | WUP.Form.EventMap["$submitEnd"] | null
+  ): Promise<boolean> {
     // todo need confirm window if user has unsaved changes
     if (this.#whenClose) {
       return this.#whenClose;

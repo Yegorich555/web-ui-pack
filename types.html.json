@@ -714,6 +714,21 @@
               "name": "false"
             }
           ]
+        },
+        {
+          "name": "w-autoclose",
+          "description": "Auto close on successful wup-form.$onSubmitEnd: @see {@link WUP.Form.EventMap.$submitEnd} $defaultValue true",
+          "values": [
+            {
+              "name": ""
+            },
+            {
+              "name": "true"
+            },
+            {
+              "name": "false"
+            }
+          ]
         }
       ]
     },

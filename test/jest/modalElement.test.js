@@ -29,6 +29,7 @@ describe("modalElement", () => {
     },
     {
       attrs: {
+        "w-autoclose": { value: true },
         "w-autofocus": { value: true },
         "w-placement": { value: "center" },
         "w-target": { value: "body", parsedValue: document.body },
@@ -455,5 +456,42 @@ describe("modalElement", () => {
     await h.wait();
     expect(dp.$isShown).toBe(false);
     expect(el.$isOpened).toBe(false);
+  });
+
+  test("option: autoclose", async () => {
+    document.body.innerHTML = `
+      <wup-modal>
+        <wup-form>
+          <wup-text w-name='txt' w-initvalue='hello'></wup-text>
+        </wup-form>
+      </wup-modal>`;
+    await h.wait();
+
+    el = document.querySelector("wup-modal");
+    expect(el.$isOpened).toBe(true);
+
+    // when success on submitEnd
+    const form = document.querySelector("wup-form");
+    form.$onWillSubmit = jest.fn();
+    form.$onSubmit = () => new Promise((res) => setTimeout(() => res(true), 300));
+    await h.userPressKey(form, { key: "Enter" });
+    expect(form.$onWillSubmit).toBeCalledTimes(1);
+    await h.wait(100);
+    expect(el.$isOpened).toBe(true);
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+
+    // when rejects on submitEnd
+    jest.clearAllMocks();
+    el.$open();
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    form.$onSubmit = () => Promise.reject();
+    await h.userPressKey(form, { key: "Enter" });
+    expect(form.$onWillSubmit).toBeCalledTimes(1);
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
   });
 });

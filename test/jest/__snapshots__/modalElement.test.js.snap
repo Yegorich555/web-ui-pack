@@ -240,6 +240,7 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
 
 exports[`modalElement common tests snapshot of $defaults 1`] = `
 {
+  "autoClose": true,
   "autoFocus": true,
   "placement": "center",
   "target": null,
@@ -250,6 +251,7 @@ exports[`modalElement common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`modalElement common tests snapshot of $defaults 3`] = `
 [
+  "w-autoclose",
   "w-autofocus",
   "w-placement",
   "w-target",
