@@ -56,7 +56,7 @@ export default function RadioControlView() {
         ref={(el) => {
           if (el) {
             el.setAttribute("autofocus", "");
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

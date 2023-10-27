@@ -33,7 +33,7 @@ export default function NumberControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { pwd: "somePwdHere" };
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

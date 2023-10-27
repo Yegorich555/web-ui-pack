@@ -27,7 +27,7 @@ export default function SwitchControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { reversed: true };
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

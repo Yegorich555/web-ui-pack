@@ -69,7 +69,7 @@ export default function SelectControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
             el.$initModel = { asDropdown: items[3].value };
           }
         }}

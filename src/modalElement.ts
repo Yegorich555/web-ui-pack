@@ -44,13 +44,13 @@ declare global {
       /** Fires before show is happened;
        * @tutorial rules
        * * can be prevented via `e.preventDefault()` */
-      $willOpen: CustomEvent<OpenCases>;
+      $willOpen: CustomEvent<{ openCase: OpenCases }>;
       /** Fires after element is shown (after animation finishes) */
       $open: Event;
       /** Fires before hide is happened;
        * @tutorial rules
        * * can be prevented via `e.preventDefault()` */
-      $willClose: CustomEvent<CloseCases>;
+      $willClose: CustomEvent<{ closeCase: CloseCases }>;
       /** Fires after element is hidden (after animation finishes) */
       $close: Event;
     }
@@ -357,7 +357,7 @@ export default class WUPModalElement<
     if (this.#whenOpen) {
       return this.#whenOpen;
     }
-    const e = this.fireEvent("$willOpen", { cancelable: true, detail: { openCase } });
+    const e = this.fireEvent("$willOpen", { cancelable: true, bubbles: true, detail: { openCase } });
     if (e.defaultPrevented) {
       return Promise.resolve(false);
     }
@@ -423,7 +423,7 @@ export default class WUPModalElement<
 
         this.#isOpening = undefined;
         res(true);
-        setTimeout(() => this.fireEvent("$open"));
+        setTimeout(() => this.fireEvent("$open", { cancelable: false, bubbles: true }));
       }, animTime);
     });
     return this.#whenOpen;
@@ -431,7 +431,7 @@ export default class WUPModalElement<
 
   /** Hide modal. @closeCase as reason of close() */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  goClose(closeCase: CloseCases, ev: MouseEvent | KeyboardEvent | null): Promise<boolean> {
+  goClose(closeCase: CloseCases, ev: MouseEvent | KeyboardEvent | SubmitEvent | null): Promise<boolean> {
     // todo need confirm window if user has unsaved changes
     if (this.#whenClose) {
       return this.#whenClose;
@@ -439,7 +439,7 @@ export default class WUPModalElement<
     if (!this.#whenOpen) {
       return Promise.resolve(true); // possible when on init $close is called
     }
-    const e = this.fireEvent("$willClose", { cancelable: true, detail: { closeCase } });
+    const e = this.fireEvent("$willClose", { cancelable: true, bubbles: true, detail: { closeCase } });
     if (e.defaultPrevented) {
       return Promise.resolve(false);
     }
@@ -468,7 +468,7 @@ export default class WUPModalElement<
         this.dispose();
         // this.remove(); // todo only if self-destroy enabled
         res(true);
-        setTimeout(() => this.fireEvent("$close"));
+        setTimeout(() => this.fireEvent("$close", { cancelable: false, bubbles: true }));
       }, animTime);
     });
 

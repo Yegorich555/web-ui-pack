@@ -299,6 +299,7 @@ describe("formElement", () => {
     const $willSubmitEv = jest.fn();
     const $submitEv = jest.fn();
     const $onSubmit = jest.fn();
+    const $submitEvEnd = jest.fn();
     // native events
     const submitEv = jest.fn();
     const onsubmit = jest.fn();
@@ -306,6 +307,7 @@ describe("formElement", () => {
     test("firing events", async () => {
       el.addEventListener("$willSubmit", $willSubmitEv);
       el.addEventListener("$submit", $submitEv);
+      el.addEventListener("$submitEnd", $submitEvEnd);
       el.$onSubmit = $onSubmit;
       // native events
       el.addEventListener("submit", submitEv);
@@ -314,27 +316,48 @@ describe("formElement", () => {
       btnSubmit.click();
       await h.wait(1);
       expect($willSubmitEv).toBeCalledTimes(1);
-      expect($willSubmitEv.mock.calls[0][0].$relatedForm).toBe(el);
-      expect($willSubmitEv.mock.calls[0][0].$relatedEvent.type).toBe("click");
-      expect($willSubmitEv.mock.calls[0][0].$submitter).toBe(btnSubmit);
+      expect($willSubmitEv.mock.calls[0][0].detail.relatedForm).toBe(el);
+      expect($willSubmitEv.mock.calls[0][0].detail.relatedEvent.type).toBe("click");
+      expect($willSubmitEv.mock.calls[0][0].detail.submitter).toBe(btnSubmit);
 
       expect($submitEv).toBeCalledTimes(1);
-      expect($submitEv.mock.calls[0][0].$model).toEqual({ email: undefined, firstName: undefined });
-      expect($submitEv.mock.calls[0][0].$relatedForm).toBe(el);
-      expect($submitEv.mock.calls[0][0].$relatedEvent.type).toBe("click");
-      expect($submitEv.mock.calls[0][0].$submitter).toBe(btnSubmit);
+      expect($submitEv.mock.calls[0][0].detail.model).toEqual({ email: undefined, firstName: undefined });
+      expect($submitEv.mock.calls[0][0].detail.relatedForm).toBe(el);
+      expect($submitEv.mock.calls[0][0].detail.relatedEvent.type).toBe("click");
+      expect($submitEv.mock.calls[0][0].detail.submitter).toBe(btnSubmit);
 
       expect($onSubmit).toBeCalledTimes(1);
-      expect($onSubmit.mock.calls[0][0].$model).toEqual({ email: undefined, firstName: undefined });
-      expect($onSubmit.mock.calls[0][0].$relatedForm).toBe(el);
-      expect($onSubmit.mock.calls[0][0].$relatedEvent.type).toBe("click");
-      expect($onSubmit.mock.calls[0][0].$submitter).toBe(btnSubmit);
+      expect($onSubmit.mock.calls[0][0].detail.model).toEqual({ email: undefined, firstName: undefined });
+      expect($onSubmit.mock.calls[0][0].detail.relatedForm).toBe(el);
+      expect($onSubmit.mock.calls[0][0].detail.relatedEvent.type).toBe("click");
+      expect($onSubmit.mock.calls[0][0].detail.submitter).toBe(btnSubmit);
 
       expect(onsubmit).toBeCalledTimes(1);
       expect(onsubmit.mock.calls[0][0].submitter).toBe(btnSubmit);
       expect(submitEv).toBeCalledTimes(1);
       expect(submitEv.mock.calls[0][0].submitter).toBe(btnSubmit);
 
+      await h.wait();
+      expect($submitEvEnd).toBeCalledTimes(1);
+      expect($submitEvEnd.mock.lastCall[0].detail).toMatchInlineSnapshot(`
+        {
+          "success": true,
+        }
+      `);
+
+      // when request failed
+      jest.clearAllMocks();
+      $onSubmit.mockImplementationOnce(() => Promise.reject());
+      btnSubmit.click();
+      await h.wait();
+      expect($submitEvEnd).toBeCalledTimes(1);
+      expect($submitEvEnd.mock.lastCall[0].detail).toMatchInlineSnapshot(`
+        {
+          "success": false,
+        }
+      `);
+
+      jest.clearAllMocks();
       // click on btn without type 'submit' - no action
       const btnNoSubmit = el.appendChild(document.createElement("button"));
       btnNoSubmit.type = "button";
@@ -350,21 +373,21 @@ describe("formElement", () => {
       inputs[0].dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }));
       await h.wait(1);
       expect($willSubmitEv).toBeCalledTimes(1);
-      expect($willSubmitEv.mock.calls[0][0].$relatedForm).toBe(el);
-      expect($willSubmitEv.mock.calls[0][0].$relatedEvent.type).toBe("keydown");
-      expect($willSubmitEv.mock.calls[0][0].$submitter).toBe(inputs[0]);
+      expect($willSubmitEv.mock.calls[0][0].detail.relatedForm).toBe(el);
+      expect($willSubmitEv.mock.calls[0][0].detail.relatedEvent.type).toBe("keydown");
+      expect($willSubmitEv.mock.calls[0][0].detail.submitter).toBe(inputs[0]);
 
       expect($submitEv).toBeCalledTimes(1);
-      expect($submitEv.mock.calls[0][0].$model).toEqual({ email: undefined, firstName: undefined });
-      expect($submitEv.mock.calls[0][0].$relatedForm).toBe(el);
-      expect($submitEv.mock.calls[0][0].$relatedEvent.type).toBe("keydown");
-      expect($submitEv.mock.calls[0][0].$submitter).toBe(inputs[0]);
+      expect($submitEv.mock.calls[0][0].detail.model).toEqual({ email: undefined, firstName: undefined });
+      expect($submitEv.mock.calls[0][0].detail.relatedForm).toBe(el);
+      expect($submitEv.mock.calls[0][0].detail.relatedEvent.type).toBe("keydown");
+      expect($submitEv.mock.calls[0][0].detail.submitter).toBe(inputs[0]);
 
       expect($onSubmit).toBeCalledTimes(1);
-      expect($onSubmit.mock.calls[0][0].$model).toEqual({ email: undefined, firstName: undefined });
-      expect($onSubmit.mock.calls[0][0].$relatedForm).toBe(el);
-      expect($onSubmit.mock.calls[0][0].$relatedEvent.type).toBe("keydown");
-      expect($onSubmit.mock.calls[0][0].$submitter).toBe(inputs[0]);
+      expect($onSubmit.mock.calls[0][0].detail.model).toEqual({ email: undefined, firstName: undefined });
+      expect($onSubmit.mock.calls[0][0].detail.relatedForm).toBe(el);
+      expect($onSubmit.mock.calls[0][0].detail.relatedEvent.type).toBe("keydown");
+      expect($onSubmit.mock.calls[0][0].detail.submitter).toBe(inputs[0]);
 
       expect(onsubmit).toBeCalledTimes(1);
       expect(onsubmit.mock.calls[0][0].submitter).toBe(inputs[0]);
@@ -378,7 +401,7 @@ describe("formElement", () => {
       svg.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }));
       await h.wait(1);
       expect($willSubmitEv).toBeCalledTimes(1);
-      expect($willSubmitEv.mock.calls[0][0].$submitter).toBe(el);
+      expect($willSubmitEv.mock.calls[0][0].detail.submitter).toBe(el);
     });
 
     test("prevent submit", async () => {
@@ -432,7 +455,7 @@ describe("formElement", () => {
         await h.wait(1);
         btnSubmit.click();
         await h.wait(1);
-        expect($submitEv.mock.calls[0][0].$model).toEqual(m);
+        expect($submitEv.mock.calls[0][0].detail.model).toEqual(m);
       }
       await expectModel({ email: undefined, firstName: undefined });
 
@@ -484,7 +507,7 @@ describe("formElement", () => {
       );
       el.$isPending = false; // just for coverage
 
-      const submitFn = (e) => (e.$waitFor = new Promise((resolve) => setTimeout(() => resolve("true"), 500)));
+      const submitFn = (e) => (e.detail.waitFor = new Promise((resolve) => setTimeout(() => resolve("true"), 500)));
       el.addEventListener("$submit", submitFn);
       btnSubmit.click();
       await h.wait(1);
@@ -589,7 +612,7 @@ describe("formElement", () => {
 
       test("collectChanged", async () => {
         let m = null;
-        el.addEventListener("$submit", (e) => (m = e.$model));
+        el.addEventListener("$submit", (e) => (m = e.detail.model));
 
         el.$options.submitActions = SubmitActions.collectChanged;
         btnSubmit.click();

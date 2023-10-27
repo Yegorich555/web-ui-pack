@@ -75,7 +75,7 @@ export default function ControlsView() {
             // el.$initModel = { text: "test-me@google.com" };
             el.$isPending = false;
             el.$onSubmit = (e) => {
-              console.warn("submitted model", e.$model);
+              console.warn("submitted model", e.detail.model);
               // eslint-disable-next-line no-promise-executor-return
               return new Promise((resolve) => setTimeout(resolve, 1000));
             };
@@ -146,7 +146,7 @@ const customJS = `js
 const form = document.querySelector("wup-form")!;
 form.$onSubmit = (e) => {
   // post request here
-  console.warn("submitted model", e.$model);
+  console.warn("submitted model", e.detail.model);
   // return promise to block form and show spinner
   return new Promise<boolean>((resolve) => setTimeout(resolve, 1000));
 };

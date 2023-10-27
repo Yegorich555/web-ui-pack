@@ -47,7 +47,7 @@ export default function SelectManyControlView() {
         class={styles.test}
         ref={(el) => {
           if (el) {
-            el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("sumbitted model", e.detail.model);
           }
         }}
         w-autoFocus

@@ -39,7 +39,7 @@ export default function DateControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { readonly: new Date("1990-02-10") };
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

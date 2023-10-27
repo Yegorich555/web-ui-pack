@@ -164,7 +164,7 @@ declare global {
        * @tutorial rules
        * * can be prevented via `e.preventDefault()`
        * * use event.detail.showCase to filter by showCase */
-      $willShow: CustomEvent<{ showCase: HideCases }>;
+      $willShow: CustomEvent<{ showCase: ShowCases }>;
       /** Fires after popup is shown (after animation finishes) */
       $show: Event;
       /** Fires before hide is happened;

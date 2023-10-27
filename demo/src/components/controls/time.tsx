@@ -33,7 +33,7 @@ export default function TimeControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { readonly: new WUPTimeObject("08:30") };
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

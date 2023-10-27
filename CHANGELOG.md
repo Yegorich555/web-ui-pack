@@ -8,6 +8,7 @@
 - [PopupElement](src/popup/popupElement.ts).
   - Removed `$isOpen` in favor of `$isShown`
   - **z-index** is changed from `90000` to `8000`
+- [FormElement](src/formElement.ts). Refactored events: all custom props moved to `e.detail...`
 - Renamed css-vars:
     `--anim-time` >>> `--anim-t`
     `--popup` >>> `popup-text`
@@ -35,7 +36,9 @@
   - Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
   - Added css variable `--base-margin` to unify margins for all elements
 - helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector possible to get from `focusFirst.$selector`
-- [FormElement](src/formElement.ts). Increased height of `button[type=submit]`
+- [FormElement](src/formElement.ts).
+  - Increased height of `button[type=submit]`
+  - Added callback `$onSubmitEnd` & event `$submitEnd`
 - **Text based controls**
   - Added css variable `--ctrl-label-active-pos` to simplify customization of label position
 

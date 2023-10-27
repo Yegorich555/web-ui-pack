@@ -483,12 +483,15 @@ export default abstract class WUPBaseElement<
   }
   /* eslint-enable max-len */
 
-  /** Inits customEvent & calls dispatchEvent and returns created event
+  /** Inits customEvent & calls dispatchEvent and returns created event; by default `cancelable: false, bubbles: true`
    * @tutorial Troubleshooting
    * * Default event bubbling: el.event.click > el.onclick >>> parent.event.click > parent.onclick etc.
    * * Custom event bubbling: el.$onclick > el.event.$click >>> parent.event.$click otherwise impossible to stop propagation from on['event] of target directly */
-  fireEvent<K extends keyof Events>(type: K, eventInit?: CustomEventInit): Event {
-    const ev = new CustomEvent(type as string, eventInit);
+  // @ts-expect-error - somehow TS doesn't allow  Events[K]["detail"] but it works
+  fireEvent<K extends keyof Events, T extends Events[K]["detail"]>(type: K, eventInit: CustomEventInit<T> = {}): Event {
+    eventInit.cancelable ??= false;
+    eventInit.bubbles ??= true;
+    const ev = new CustomEvent<T>(type as string, eventInit);
 
     let sip = false;
     const isCustom = (type as string).startsWith("$");
