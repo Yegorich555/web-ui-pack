@@ -4,11 +4,12 @@
 
 **BREAKING CHANGES**:
 
-- **Global**. Added static `.$use()`. Call it before using element: `WUPTextControl.$use()` (_self-registration by import_ works now and will be removed in the future)
+- **Global**.
+  - Added static `.$use()`. Call it before using element: `WUPTextControl.$use()` (_self-registration by import_ works now and will be removed in the future)
+  - Refactored & unified custom events. Now every event contains detail object: `e.detail = { ... }`
 - [PopupElement](src/popup/popupElement.ts).
   - Removed `$isOpen` in favor of `$isShown`
   - **z-index** is changed from `90000` to `8000`
-- [FormElement](src/formElement.ts). Refactored events: all custom props moved to `e.detail...`
 - Renamed css-vars:
     `--anim-time` >>> `--anim-t`
     `--popup` >>> `popup-text`
@@ -35,7 +36,7 @@
 - **Global**
   - Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
   - Added css variable `--base-margin` to unify margins for all elements
-- helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector possible to get from `focusFirst.$selector`
+- helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector (possible to get from `focusFirst.$selector`)
 - [FormElement](src/formElement.ts).
   - Increased height of `button[type=submit]`
   - Added callback `$onSubmitEnd` & event `$submitEnd`

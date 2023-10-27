@@ -76,7 +76,7 @@ declare global {
     type AutoComplete = AutoFill; // remove after half year with new version TS
     interface EventMap extends WUP.Base.EventMap {
       /** Called on value change */
-      $change: CustomEvent<SetValueReasons>;
+      $change: CustomEvent<{ reason: SetValueReasons }>;
     }
 
     interface ValidityMap {
@@ -1149,7 +1149,7 @@ export default abstract class WUPBaseControl<
     if (reason !== SetValueReasons.initValue) {
       // save to storage
       reason !== SetValueReasons.storage && this._opts.storageKey && this.storageSet(v);
-      setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
+      setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: { reason } }));
     }
 
     return true;

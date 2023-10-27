@@ -159,7 +159,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isChanged).toBe(false);
       jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(0);
-      // expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.initValue);
+      // expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.initValue });
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[1].value);
@@ -175,7 +175,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isChanged).toBe(true);
       jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(1);
-      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.manual);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.manual });
 
       el.$initValue = cfg.initValues[1].value;
       expect(el.$value).toBe(cfg.initValues[2].value);
@@ -405,7 +405,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$initValue).toBe(undefined);
       expect(onThrowErr).not.toBeCalled();
       expect(spyChange).toBeCalledTimes(1);
-      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.storage);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.storage });
 
       // clearing value
       el.clearValue();

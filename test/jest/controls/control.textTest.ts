@@ -103,7 +103,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$value).toBe(undefined);
       expect(el).toMatchSnapshot();
       jest.advanceTimersByTime(1);
-      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.clear);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.clear });
 
       el.$options.clearButton = false;
       jest.advanceTimersByTime(1);
@@ -127,7 +127,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$refInput.value).toBe(initV);
       expect(el.$value).toBe(initV);
       expect(spyChange).toBeCalledTimes(1);
-      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.userInput); // onUserInput
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.userInput }); // onUserInput
       expect(el.$onChange).toBeCalledTimes(1);
       expect((el.$onChange as any).mock.lastCall[0]).toBe(spyChange.mock.lastCall[0]);
 
