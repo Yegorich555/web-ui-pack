@@ -338,6 +338,12 @@ export default abstract class WUPBaseElement<
     return this.#isReady;
   }
 
+  /** Returns if current element or some nested child is active/focused */
+  get $isFocused(): boolean {
+    const a = document.activeElement;
+    return this === a || this.includes(a);
+  }
+
   /** Try to focus self or first possible children; returns true if succesful */
   focus(): boolean {
     delete this._willFocus;
@@ -346,11 +352,11 @@ export default abstract class WUPBaseElement<
 
   /** Remove focus from element on any nested active element */
   blur(): void {
-    const ae = document.activeElement;
-    if (ae === this) {
+    const a = document.activeElement;
+    if (a === this) {
       super.blur();
-    } else if (ae instanceof HTMLElement && this.includes(ae)) {
-      ae.blur();
+    } else if (a instanceof HTMLElement && this.includes(a)) {
+      a.blur();
     }
   }
 

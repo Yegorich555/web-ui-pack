@@ -1,26 +1,26 @@
-import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
+import { AttributeMap, AttributeTypes } from "./baseElement";
+import WUPBaseModal from "./baseModal";
 import focusFirst from "./helpers/focusFirst";
-import { parseMsTime } from "./helpers/styleHelpers";
-import { WUPcssScrollSmall } from "./styles";
 
-export const enum OpenCases {
+export const enum ModalOpenCases {
   /** When $open() is called programmatically */
-  onManuallCall,
+  onManuallCall = 0,
   /** On init (when appended to layout) */
-  onInit,
+  onInit = 1,
   /** When click on target @see {@link WUP.Modal.Options.target} */
   onTargetClick,
 }
 
-export const enum CloseCases {
+export const enum ModalCloseCases {
   /** When $close() is called programmatically */
-  onManuallCall,
+  onManuallCall = 0,
+  /** When was click on button[close] */
+  onCloseClick = 1,
   /** When was click outside modal */
   onOutsideClick,
-  /** When was click on button[close] */
-  onCloseClick,
   /** When user pressed Escape button */
   onPressEsc,
+  /* When on successful wup-form.$onSubmitEnd: @see {@link WUP.Form.EventMap.$submitEnd} */
   onSubmitEnd,
 }
 
@@ -44,21 +44,8 @@ declare global {
       autoClose: boolean;
       // todo modalInModal: replace OR overflow
     }
-    interface EventMap extends WUP.Base.EventMap {
-      /** Fires before show is happened;
-       * @tutorial rules
-       * * can be prevented via `e.preventDefault()` */
-      $willOpen: CustomEvent<{ openCase: OpenCases }>;
-      /** Fires after element is shown (after animation finishes) */
-      $open: Event;
-      /** Fires before hide is happened;
-       * @tutorial rules
-       * * can be prevented via `e.preventDefault()` */
-      $willClose: CustomEvent<{ closeCase: CloseCases }>;
-      /** Fires after element is hidden (after animation finishes) */
-      $close: Event;
-    }
-    interface JSXProps<T = WUPModalElement> extends WUP.Base.JSXProps<T>, WUP.Base.OnlyNames<Options> {
+    interface EventMap extends WUP.BaseModal.EventMap<ModalOpenCases, ModalCloseCases> {}
+    interface JSXProps<T = WUPModalElement> extends WUP.BaseModal.JSXProps<T>, WUP.Base.OnlyNames<Options> {
       /** QuerySelector to find target - element that modal need to listen for click. If `target` missed modal will be opened on init
        * @tutorial rules
        * * point 'prev' to select previousSibling */
@@ -66,14 +53,6 @@ declare global {
       "w-placement"?: Options["placement"];
       "w-autoFocus"?: boolean | "";
       "w-autoClose"?: boolean | "";
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willOpen') instead */
-      onWillOpen?: never;
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$open') instead */
-      onOpen?: never;
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willClose') instead */
-      onWillClose?: never;
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$close') instead */
-      onClose?: never;
     }
   }
   interface HTMLElementTagNameMap {
@@ -110,7 +89,7 @@ declare global {
 export default class WUPModalElement<
   TOptions extends WUP.Modal.Options = WUP.Modal.Options,
   Events extends WUP.Modal.EventMap = WUP.Modal.EventMap
-> extends WUPBaseElement<TOptions, Events> {
+> extends WUPBaseModal<TOptions, Events> {
   #ctr = this.constructor as typeof WUPModalElement;
 
   // static get observedOptions(): Array<keyof WUP.Modal.Options> { return []; }
@@ -142,34 +121,22 @@ export default class WUPModalElement<
       :host {
         --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 9002;
-        display: none;
-        position: fixed;
         width: 100%;
         max-width: 600px;
         min-height: 150px;
-        border-radius: var(--border-radius);
         color: var(--modal-text);
         background: var(--modal-bg);
         border: 1px solid #0002;
-        padding: var(--base-margin);
-        box-sizing: border-box;
-        opacity: 0;
-        white-space: pre-line;
-        overflow: auto;
-        overflow: overlay;
         user-select: none;
         pointer-events: none;
         touch-action: none;
         outline: none;
       }
-      ${WUPcssScrollSmall(":host")}
       :host[open] {
-        display: block;
         user-select: initial;
         pointer-events: initial;
         touch-action: initial;
        }
-      :host[show] { opacity: 1; }
       :host[w-placement="top"] {
         top:0;left:0;right:0;
         margin: var(--modal-margin);
@@ -207,6 +174,7 @@ export default class WUPModalElement<
         }
       }
       .${this.$classFade} {
+         --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 9000;
         display: block;
         position: fixed;
@@ -260,62 +228,6 @@ export default class WUPModalElement<
     return m;
   }
 
-  #isOpened = false;
-  /** Returns if modal is open (before show-animation started)
-   * @tutorial Troubleshooting
-   * * stack: $open() > `$isOpened:true` > opening > opened
-   * * stack: $close() > closing > closed > `$isOpened:false`
-   * * to listen to animation-end use events `$open` & `$close` OR methods `$open().then(...)` & `$close().then(... )` */
-  get $isOpened(): boolean {
-    return this.#isOpened;
-  }
-
-  #isOpening?: true;
-  /** Returns if modal is opening (only if animation enabled) */
-  get $isOpening(): boolean {
-    return this.#isOpening === true;
-  }
-
-  /** Returns if modal is closed (after hide-animation finished)
-   * @tutorial Troubleshooting
-   * * stack: $open() > `$isOpened:true` > opening > opened
-   * * stack: $close() > closing > closed > `$isOpened:false`
-   * * to listen to animation-end use events `$open` & `$close` OR methods `$open().then(...)` & `$close().then(... )` */
-  get $isClosed(): boolean {
-    return !this.#isOpened && !this.#isClosing;
-  }
-
-  #isClosing?: true;
-  /** Returns if modal is opening (only if animation enabled) */
-  get $isClosing(): boolean {
-    return this.#isClosing === true;
-  }
-
-  /** Fires before show is happened;
-   * @tutorial rules
-   * * can be prevented via `e.preventDefault()` */
-  $onWillOpen?: (e: CustomEvent<OpenCases>) => void;
-  /** Fires after element is shown (after animation finishes) */
-  $onOpen?: (e: Event) => void;
-  /** Fires before hide is happened;
-   * @tutorial rules
-   * * can be prevented via `e.preventDefault()` */
-  $onWillClose?: (e: CustomEvent<CloseCases>) => void;
-  /** Fires after element is hidden (after animation finishes) */
-  $onClose?: (e: Event) => void;
-
-  #whenOpen?: Promise<any>;
-  /** Open modal
-   * @returns Promise resolved by animation-end */
-  $open(): Promise<boolean> {
-    return this.goOpen(OpenCases.onManuallCall);
-  }
-
-  #whenClose?: Promise<boolean>;
-  $close(): Promise<boolean> {
-    return this.goClose(CloseCases.onManuallCall, null);
-  }
-
   /** Reference to fade element */
   $refFade?: HTMLElement;
   /** Reference to button[close] */
@@ -345,11 +257,11 @@ export default class WUPModalElement<
     }
 
     if (!trg) {
-      !propsChanged && this.goOpen(OpenCases.onInit); // call here to wait for options before opening
+      !propsChanged && this.goOpen(ModalOpenCases.onInit); // call here to wait for options before opening
     } else if (isTrgChange) {
       this._prevTargetClick = (e) => {
         setTimeout(() => {
-          !e.defaultPrevented && this.goOpen(OpenCases.onTargetClick);
+          !e.defaultPrevented && this.goOpen(ModalOpenCases.onTargetClick);
         }); // timeout required to prevent openinig from bubbled-events
       };
       (trg as HTMLElement).addEventListener("click", this._prevTargetClick, { passive: true });
@@ -358,23 +270,13 @@ export default class WUPModalElement<
 
   /** Id of last focused item on item itself */
   _lastFocused?: Element | string | null;
-  /** Hide modal. @openCase as reason of open() */
-  protected goOpen(openCase: OpenCases): Promise<boolean> {
-    if (this.#whenOpen) {
-      return this.#whenOpen;
-    }
-    const e = this.fireEvent("$willOpen", { cancelable: true, bubbles: true, detail: { openCase } });
-    if (e.defaultPrevented) {
-      return Promise.resolve(false);
-    }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  gotOpen(openCase: ModalOpenCases): void {
     // store id of focused element
     const ael = document.activeElement;
     this._lastFocused = ael?.id || ael;
 
-    // clear state
-    this.#whenClose = undefined;
-    this.#isClosing = undefined;
-    this.#isOpened = true;
     // setup Accesibility attrs
     this.tabIndex = -1; // WA: to allow scroll modal - possible that tabindex: -1 doesn't allow tabbing inside
     this.role = "dialog"; // possible alertdialog for Confirm modal
@@ -386,7 +288,6 @@ export default class WUPModalElement<
       header.id ||= this.#ctr.$uniqueId;
       this.setAttribute("aria-labelledby", header.id); // issue: NVDA reads content twice if modal has aria-labelledby: https://github.com/nvaccess/nvda/issues/8971
     }
-
     // init button[close]
     this.$refClose ??= document.createElement("button");
     this.$refClose.type = "button";
@@ -397,96 +298,35 @@ export default class WUPModalElement<
     // init fade - // todo need to prevent it if prev modal still here
     this.$refFade ??= document.body.appendChild(document.createElement("div"));
     this.$refFade.className = this.#ctr.$classFade;
-    this.$refFade.setAttribute("open", "");
-
+    setTimeout(() => this.$refFade?.setAttribute("show", "")); // timeout to allow animation works
     // apply open styles
     this.setAttribute("w-placement", this._opts.placement);
-    this.setAttribute("open", "");
-    setTimeout(() => {
-      this.setAttribute("show", "");
-      this.$refFade?.setAttribute("show", "");
-    });
     document.body.classList.add(this.#ctr.$classOpened); // to maybe hide scroll-bars
-
     // listen for close-events
-    this.$refClose.onclick = (ev) => this.goClose(CloseCases.onCloseClick, ev);
-    this.$refFade.onclick = (ev) => this.goClose(CloseCases.onOutsideClick, ev);
-    // this.appendEvent(this, "focusout", (ev) => this.gotFocusOut(ev), { passive: false });
+    this.$refClose.onclick = (ev) => this.goClose(ModalCloseCases.onCloseClick, ev);
+    this.$refFade.onclick = (ev) => this.goClose(ModalCloseCases.onOutsideClick, ev);
     this.appendEvent(this, "keydown", (ev) => this.gotKeyDown(ev), { passive: false });
-    // @ts-expect-error - appendEvent isn't good enought for looking for types
+    // @ts-expect-error - TS isn't good enought for looking for types
     this.appendEvent(this, "$submitEnd", (sev: WUP.Form.EventMap["$submitEnd"]) => {
-      sev.detail.success && this.goClose(CloseCases.onSubmitEnd, sev);
+      sev.detail.success && this.goClose(ModalCloseCases.onSubmitEnd, sev);
     });
+    // this.appendEvent(this, "focusout", (ev) => this.gotFocusOut(ev), { passive: false });
 
     this._opts.autoFocus ? this.focusAny() : this.focus(); // bug: FF doesn't adjust suggest-popup according to animation
-    this.scroll({ left: 0, top: 0, behavior: "instant" });
-
-    // wait for animation
-    this.#isOpening = true;
-    this.#whenOpen = new Promise((res) => {
-      const animTime = parseMsTime(getComputedStyle(this).transitionDuration);
-      setTimeout(() => {
-        if (!this.#whenOpen) {
-          res(false); // possible when call $close during the opening
-          return;
-        }
-
-        this.#isOpening = undefined;
-        res(true);
-        setTimeout(() => this.fireEvent("$open", { cancelable: false, bubbles: true }));
-      }, animTime);
-    });
-    return this.#whenOpen;
   }
 
-  /** Hide modal. @closeCase as reason of close() */
-  goClose(
-    closeCase: CloseCases,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ev: MouseEvent | KeyboardEvent | WUP.Form.EventMap["$submitEnd"] | null
-  ): Promise<boolean> {
-    // todo need confirm window if user has unsaved changes
-    if (this.#whenClose) {
-      return this.#whenClose;
-    }
-    if (!this.#whenOpen) {
-      return Promise.resolve(true); // possible when on init $close is called
-    }
-    const e = this.fireEvent("$willClose", { cancelable: true, bubbles: true, detail: { closeCase } });
-    if (e.defaultPrevented) {
-      return Promise.resolve(false);
-    }
-    // clear state
-    this.#whenOpen = undefined;
-    this.#isOpening = undefined;
-    this.#isClosing = true;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  gotClose(closeCase: ModalCloseCases, ev: MouseEvent | KeyboardEvent | WUP.Form.EventMap["$submitEnd"] | null): void {
     // remove events
     this.$refClose!.onclick = null;
     this.$refFade!.onclick = null;
-    super.dispose(); // remove only events WARN: don't call this.dispose()!
+    this.disposeEvents(); // remove only events WARN: don't call this.dispose()!
     // apply animation
+    this.$refFade!.removeAttribute("show"); // todo only if last
     document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
     !document.body.className && document.body.removeAttribute("class");
-    this.removeAttribute("show");
-    this.$refFade!.removeAttribute("show"); // todo only if last
-
-    this.#whenClose = new Promise((res) => {
-      const animTime = parseMsTime(getComputedStyle(this).transitionDuration);
-      setTimeout(() => {
-        if (!this.#whenClose) {
-          res(false); // possible when call $open during the hiding
-          return;
-        }
-
-        this.dispose();
-        // this.remove(); // todo only if self-destroy enabled
-        res(true);
-        setTimeout(() => this.fireEvent("$close", { cancelable: false, bubbles: true }));
-      }, animTime);
-    });
 
     this.focusBack();
-    return this.#whenClose;
   }
 
   /** Called on close to return focus to previously focused item */
@@ -532,7 +372,7 @@ export default class WUPModalElement<
         if (!e.shiftKey && !e.defaultPrevented) {
           e.preventDefault();
           // todo it works together on control where Escape clears input
-          this.goClose(CloseCases.onPressEsc, e);
+          this.goClose(ModalCloseCases.onPressEsc, e);
         }
         break;
       case "Tab": {
@@ -560,7 +400,7 @@ export default class WUPModalElement<
     }
   }
 
-  focus(): boolean {
+  override focus(): boolean {
     if (!this.$isOpened) {
       return false;
     }
@@ -581,17 +421,15 @@ export default class WUPModalElement<
     }
   }
 
+  protected override resetState(): void {
+    this.$refFade?.remove(); // todo only if last
+    this.$refFade = undefined;
+    super.resetState();
+  }
+
   protected override dispose(): void {
     document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove > everything must returned to prev state
     !document.body.className && document.body.removeAttribute("class");
-    this.removeAttribute("open");
-    this.$refFade?.remove(); // todo only if last
-    this.$refFade = undefined;
-    this.#isOpened = false;
-    this.#isClosing = undefined;
-    this.#isOpening = undefined;
-    this.#whenClose = undefined;
-    this.#whenOpen = undefined;
     super.dispose();
   }
 }
