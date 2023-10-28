@@ -532,11 +532,6 @@ export default abstract class WUPBaseControl<
     return this._isValid as boolean;
   }
 
-  /** Returns if current control is active/focused */
-  get $isFocused(): boolean {
-    return this === document.activeElement || this.includes(document.activeElement);
-  }
-
   /** Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled) */
   get $isDisabled(): boolean {
     // @ts-expect-error
