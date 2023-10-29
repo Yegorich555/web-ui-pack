@@ -1,5 +1,5 @@
 import { WUPPopupElement } from "web-ui-pack";
-import { Animations, ShowCases } from "web-ui-pack/popup/popupElement.types";
+import { PopupAnimations, PopupOpenCases } from "web-ui-pack/popup/popupElement.types";
 import * as h from "../testHelper";
 
 /** @type WUPPopupElement */
@@ -351,7 +351,7 @@ describe("popupElement", () => {
     el = document.createElement(el.tagName);
     document.body.appendChild(el);
     document.body.appendChild(trg);
-    el.$options.showCase = ShowCases.alwaysOff;
+    el.$options.showCase = PopupOpenCases.alwaysOff;
     el.$options.target = trg;
     await h.wait();
     expect(el.$isShown).toBe(false);
@@ -362,14 +362,14 @@ describe("popupElement", () => {
     await h.wait();
     expect(el.$isShown).toBe(false);
     // always
-    el.$options.showCase = ShowCases.always;
+    el.$options.showCase = PopupOpenCases.always;
     await h.wait();
     expect(el.$isShown).toBe(true);
     el.$hide();
     await h.wait();
     expect(el.$isShown).toBe(false);
     // alwaysOff & target missed
-    el.$options.showCase = ShowCases.alwaysOff;
+    el.$options.showCase = PopupOpenCases.alwaysOff;
     el.$options.target = null;
     await h.wait();
     expect(el.$isShown).toBe(false);
@@ -604,7 +604,7 @@ describe("popupElement", () => {
     expect(el.$isShown).toBe(true); // because $hide is async
     await h.wait();
     expect(el.$isShown).toBe(false);
-    el.$options.animation = Animations.drawer;
+    el.$options.animation = PopupAnimations.drawer;
     el.$show();
     expect(el.$isShown).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
@@ -795,17 +795,17 @@ describe("popupElement", () => {
     // testing attr
     el.setAttribute("w-animation", "default");
     await h.wait(1);
-    expect(el.$options.animation).toBe(Animations.default);
+    expect(el.$options.animation).toBe(PopupAnimations.default);
     el.setAttribute("w-animation", "drawer");
     await h.wait(1);
-    expect(el.$options.animation).toBe(Animations.drawer);
+    expect(el.$options.animation).toBe(PopupAnimations.drawer);
   });
 
   test("$options.animation: stack", async () => {
     // WARN: there is only code coverage. For full animation tests see helpers/animateStack
     const { nextFrame } = h.useFakeAnimation();
     el.$options.showCase = 0;
-    el.$options.animation = Animations.stack;
+    el.$options.animation = PopupAnimations.stack;
     const orig = window.getComputedStyle;
     jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
       if (elem === el) {
@@ -874,10 +874,10 @@ describe("popupElement", () => {
     // testing attr
     el.setAttribute("w-animation", "");
     await h.wait(1);
-    expect(el.$options.animation).toBe(Animations.default);
+    expect(el.$options.animation).toBe(PopupAnimations.default);
     el.setAttribute("w-animation", "stack");
     await h.wait(1);
-    expect(el.$options.animation).toBe(Animations.stack);
+    expect(el.$options.animation).toBe(PopupAnimations.stack);
   });
 
   test("attr: target", async () => {

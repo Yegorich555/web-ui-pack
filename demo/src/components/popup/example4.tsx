@@ -1,6 +1,6 @@
 //  import { useEffect } from "react";
 import WUPPopupElement from "web-ui-pack/popup/popupElement";
-import { ShowCases } from "web-ui-pack/popup/popupElement.types";
+import { PopupOpenCases } from "web-ui-pack/popup/popupElement.types";
 import styles from "./popupView.scss";
 
 export default function Example4() {
@@ -43,7 +43,7 @@ export default function Example4() {
                 WUPPopupElement.$placements.$top.$middle,
                 WUPPopupElement.$placements.$bottom.$middle,
               ];
-              el.$options.showCase = ShowCases.always;
+              el.$options.showCase = PopupOpenCases.always;
             }
           }}
         >

@@ -1,4 +1,4 @@
-export const enum ShowCases {
+export const enum PopupOpenCases {
   /** No listener - show on init + only manual call `.$hide()` & `.$show()` */
   always = 0,
   /** On `mouseenter` event of target; hide by `mouseleave` */
@@ -11,7 +11,7 @@ export const enum ShowCases {
   alwaysOff = 1 << 3,
 }
 
-export const enum HideCases {
+export const enum PopupCloseCases {
   /** When $hide() is called programmatically */
   onManuallCall,
   /** When mouse left target & popup */
@@ -32,7 +32,7 @@ export const enum HideCases {
   onPressEsc,
 }
 
-export const enum Animations {
+export const enum PopupAnimations {
   /** Via opacity/css-style */
   default = 0,
   /** Dropdown/drawer animation. It's implemented via JS */
@@ -60,20 +60,20 @@ declare global {
        * @defaultValue `document.body` */
       toFitElement: HTMLElement;
       /** Case when popup need to show;
-       * @defaultValue `ShowCases.onClick`
+       * @defaultValue `PopupShowCases.onClick`
        * @example
        * // use `|` to to join cases
-       * showCase=ShowCases.onFocus | ShowCases.onClick;  */
-      showCase: ShowCases;
-      /** Timeout in ms before popup shows on hover of target (for ShowCases.onHover);
+       * showCase=PopupShowCases.onFocus | PopupShowCases.onClick;  */
+      showCase: PopupOpenCases;
+      /** Timeout in ms before popup shows on hover of target (for PopupShowCases.onHover);
        * @defaultValue 200ms */
       hoverShowTimeout: number;
-      /** Timeout in ms before popup hides on mouse-leave of target (for ShowCases.onHover);
+      /** Timeout in ms before popup hides on mouse-leave of target (for PopupShowCases.onHover);
        * @defaultValue 500ms  */
       hoverHideTimeout: number;
       /** Animation applied to popup
-       * @defaultValue `Animations.default (opacity)` */
-      animation: Animations;
+       * @defaultValue `PopupAnimations.default (opacity)` */
+      animation: PopupAnimations;
       /** Anchor that popup uses for placement
        * @defaultValue previousSibling */
       target?: HTMLElement | SVGElement | null;
@@ -164,14 +164,14 @@ declare global {
        * @tutorial rules
        * * can be prevented via `e.preventDefault()`
        * * use event.detail.showCase to filter by showCase */
-      $willShow: CustomEvent<{ showCase: ShowCases }>;
+      $willShow: CustomEvent<{ showCase: PopupOpenCases }>;
       /** Fires after popup is shown (after animation finishes) */
       $show: Event;
       /** Fires before hide is happened;
        * @tutorial rules
        * * can be prevented via `e.preventDefault()`
        * * use event.detail.hideCase to filter by hideCase */
-      $willHide: CustomEvent<{ hideCase: HideCases }>;
+      $willHide: CustomEvent<{ hideCase: PopupCloseCases }>;
       /** Fires after popup is hidden (after animation finishes) */
       $hide: Event;
     }

@@ -1,5 +1,5 @@
 import { WUPPopupElement } from "web-ui-pack";
-import { ShowCases } from "web-ui-pack/popup/popupElement.types";
+import { PopupOpenCases } from "web-ui-pack/popup/popupElement.types";
 import PopupListener from "web-ui-pack/popup/popupListener";
 import * as h from "../testHelper";
 
@@ -42,7 +42,7 @@ afterEach(() => {
 describe("popupListener", () => {
   test("showCase.onClick", async () => {
     const spy = h.spyEventListeners();
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onClick }, onShow, onHide);
 
     await h.userClick(trg);
     await h.wait();
@@ -79,7 +79,7 @@ describe("popupListener", () => {
     document.body.innerHTML = "<div id='trg'><button></button><span id='popup'></span></div>";
     trg = document.getElementById("trg");
     el = document.getElementById("popup");
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onClick }, onShow, onHide);
     jest.clearAllMocks();
     await h.userClick(trg);
     await h.wait();
@@ -100,7 +100,7 @@ describe("popupListener", () => {
 
   test("showCase.onHover", async () => {
     const spy = h.spyEventListeners();
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onHover }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onHover }, onShow, onHide);
 
     trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     expect(isShown).toBe(false);
@@ -161,7 +161,7 @@ describe("popupListener", () => {
     document.body.innerHTML = "<div id='trg'><button></button><span id='popup'></span></div>";
     trg = document.getElementById("trg");
     el = document.getElementById("popup");
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onHover }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onHover }, onShow, onHide);
     trg.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await h.wait();
     expect(isShown).toBe(true);
@@ -204,7 +204,7 @@ describe("popupListener", () => {
 
   test("showCase.focus", async () => {
     const spy = h.spyEventListeners();
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onFocus }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onFocus }, onShow, onHide);
 
     trg.dispatchEvent(new Event("focusin", { bubbles: true }));
     await h.wait(1);
@@ -251,7 +251,7 @@ describe("popupListener", () => {
 
   test("showCase.all", async () => {
     ref = new PopupListener(
-      { target: trg, showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onHover },
+      { target: trg, showCase: PopupOpenCases.onClick | PopupOpenCases.onFocus | PopupOpenCases.onHover },
       onShow,
       onHide
     );
@@ -362,7 +362,7 @@ describe("popupListener", () => {
 
   test("memory leak", async () => {
     const spy = h.spyEventListeners();
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onClick }, onShow, onHide);
 
     trg.dispatchEvent(new MouseEvent("click", { bubbles: true })); // open
     await h.wait();
@@ -374,7 +374,7 @@ describe("popupListener", () => {
     spy.check();
 
     ref = new PopupListener(
-      { target: trg, showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onHover },
+      { target: trg, showCase: PopupOpenCases.onClick | PopupOpenCases.onFocus | PopupOpenCases.onHover },
       onShow,
       onHide
     );
@@ -389,7 +389,7 @@ describe("popupListener", () => {
   });
 
   test("open/show outside listener", async () => {
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onClick }, onShow, onHide);
     // checking self-call show
     const origShow = onShow.getMockImplementation();
 
@@ -445,7 +445,7 @@ describe("popupListener", () => {
   });
 
   test("open/show takes time (for animation)", async () => {
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onClick }, onShow, onHide);
     // WARN it's very important to provide element for onShow without awaiting (to allow hiding as fast as possible)
     const origHide = onHide.getMockImplementation();
     onHide.mockImplementation(() => {
@@ -500,7 +500,7 @@ describe("popupListener", () => {
   });
 
   test("show/hide is prevented", async () => {
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onClick }, onShow, onHide);
 
     onShow.mockImplementationOnce(() => null);
     trg.dispatchEvent(new MouseEvent("click", { bubbles: true })); // show
@@ -523,7 +523,7 @@ describe("popupListener", () => {
   });
 
   test("hide waits for show end", async () => {
-    ref = new PopupListener({ target: trg, showCase: ShowCases }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: 0 }, onShow, onHide);
     const origShow = onShow.getMockImplementation();
     onShow.mockImplementation(() => {
       const r = origShow();
@@ -669,7 +669,7 @@ describe("popupListener", () => {
 
   test("right-click filter", async () => {
     el = document.body.appendChild(document.createElement("wup-popup"));
-    el.$options.showCase = ShowCases.onClick;
+    el.$options.showCase = PopupOpenCases.onClick;
     await h.wait();
 
     await h.userClick(trg);
@@ -686,7 +686,7 @@ describe("popupListener", () => {
   });
 
   test("focus behavior", async () => {
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onClick | ShowCases.onFocus }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onClick | PopupOpenCases.onFocus }, onShow, onHide);
     // focus target by hide
     trg.focus();
     await h.wait();
@@ -722,7 +722,7 @@ describe("popupListener", () => {
     // target already focused when applied listener
     trg = document.body.appendChild(document.createElement(trg.tagName));
     trg.focus();
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onFocus }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onFocus }, onShow, onHide);
     await h.wait();
     expect(isShown).toBe(true);
     // focusout to body (when no relatedTarget)
@@ -735,7 +735,7 @@ describe("popupListener", () => {
     trg = document.body.appendChild(document.createElement("div"));
     const tin1 = trg.appendChild(document.createElement("button"));
     const tin2 = trg.appendChild(document.createElement("input"));
-    ref = new PopupListener({ target: trg, showCase: ShowCases.onClick }, onShow, onHide);
+    ref = new PopupListener({ target: trg, showCase: PopupOpenCases.onClick }, onShow, onHide);
     await h.userClick(tin1);
     await h.wait();
     expect(isShown).toBe(true);
@@ -769,7 +769,7 @@ describe("popupListener", () => {
     // special case when popup can be opened again
     expect(document.activeElement).not.toBe(trg);
     ref = new PopupListener(
-      { target: trg, showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onHover },
+      { target: trg, showCase: PopupOpenCases.onClick | PopupOpenCases.onFocus | PopupOpenCases.onHover },
       onShow,
       onHide
     );

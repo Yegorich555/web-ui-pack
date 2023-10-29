@@ -1,6 +1,6 @@
 import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
-import { ShowCases } from "./popup/popupElement.types";
+import { PopupOpenCases } from "./popup/popupElement.types";
 import animate from "./helpers/animate";
 import { mathScaleValue, rotate } from "./helpers/math";
 import { parseMsTime } from "./helpers/styleHelpers";
@@ -383,7 +383,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   renderTooltip(segment: WUP.Circle.SVGItem): WUPPopupElement {
     const popup = document.createElement("wup-popup");
     popup.setAttribute("tooltip", "");
-    popup.$options.showCase = ShowCases.always;
+    popup.$options.showCase = PopupOpenCases.always;
     popup.$options.target = segment;
     popup.$options.arrowEnable = true;
     // place in the center of drawed path

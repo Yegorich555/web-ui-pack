@@ -147,7 +147,7 @@ More details you can find in [CODESTYLE.md](/CODESTYLE.md) and [FAQ](#faq)
 Typescript
 
 ```typescript
-import WUPPopupElement, { ShowCases } from "web-ui-pack/popup/popupElement";
+import WUPPopupElement, { PopupShowCases } from "web-ui-pack/popup/popupElement";
 
 WUPPopupElement.$use(); // call it to register in the system
 // redefine some defaults; WARN: you can change placement rules here without changing $options per each element!!!
@@ -158,8 +158,8 @@ WUPPopupElement.$defaults.arrowEnable = true;
 // create element
 const el = document.createElement("wup-popup");
 // WARN el.$options is a observable-clone of WUPPopupElement.$defaults
-// WARN: ShowCases is const enum and import ShowCases available only in Typescript
-el.$options.showCase = ShowCases.onClick | ShowCases.onFocus; // show popup by target.click and/or target.focus events
+// WARN: PopupShowCases is const enum and import PopupShowCases available only in Typescript
+el.$options.showCase = PopupShowCases.onClick | PopupShowCases.onFocus; // show popup by target.click and/or target.focus events
 el.$options.target = document.querySelector("button");
 /*
   Placement can be $top, $right, $bottom, $left (top - above at the target etc.)
@@ -200,8 +200,8 @@ WUPPopupElement.prototype.goShow = function customGoShow() {
 
 class Popup extends WUPPopupElement {
   // take a look on definition of WUPPopupElement and you will find internals
-  protected override goShow(showCase: WUPPopup.ShowCases): boolean {
-    if (showCase === WUPPopup.ShowCases.onHover) {
+  protected override goShow(showCase: PopupShowCases): boolean {
+    if (showCase === PopupShowCases.onHover) {
       return false;
     }
     return super.goShow(showCase);

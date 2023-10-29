@@ -7,7 +7,7 @@ import getUsedCssVars from "src/helpers/parseCssVars";
 import { WUPFormElement, WUPPasswordControl, WUPRadioControl, WUPSwitchControl } from "web-ui-pack";
 import linkGit from "src/helpers/linkGit";
 import WUPBaseControl from "web-ui-pack/controls/baseControl";
-import { HideCases } from "web-ui-pack/popup/popupElement.types";
+import { PopupCloseCases } from "web-ui-pack/popup/popupElement.types";
 import WUPBaseElement from "web-ui-pack/baseElement";
 import styles from "./userCode.scss";
 import Code from "./code";
@@ -143,7 +143,8 @@ function RenderCssVars(props: UserCodeProps & { el: WUPBaseElement }): JSX.Eleme
             ref={(p) => {
               if (p) {
                 p.$onWillHide = (e) => {
-                  (e.detail.hideCase === HideCases.onPopupClick || e.detail.hideCase === HideCases.onFocusOut) &&
+                  (e.detail.hideCase === PopupCloseCases.onPopupClick ||
+                    e.detail.hideCase === PopupCloseCases.onFocusOut) &&
                     e.preventDefault();
                 };
               }

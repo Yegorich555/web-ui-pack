@@ -6,7 +6,7 @@ import onFocusLostEv from "../helpers/onFocusLost";
 import onFocusGot from "../helpers/onFocusGot";
 import { stringPrettify } from "../helpers/string";
 import WUPPopupElement from "../popup/popupElement";
-import { ShowCases } from "../popup/popupElement.types";
+import { PopupOpenCases } from "../popup/popupElement.types";
 import { WUPcssIcon } from "../styles";
 import IBaseControl from "./baseControl.i";
 
@@ -943,7 +943,7 @@ export default abstract class WUPBaseControl<
 
   protected renderError(): WUPPopupElement {
     const p = document.createElement("wup-popup");
-    p.$options.showCase = ShowCases.always;
+    p.$options.showCase = PopupOpenCases.always;
     p.$options.target = this;
     p.$options.placement = [
       WUPPopupElement.$placements.$bottom.$start.$resizeWidth,

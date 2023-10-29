@@ -1,6 +1,6 @@
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
-import { ShowCases as PopupShowCases, Animations } from "../popup/popupElement.types";
+import { PopupOpenCases, PopupAnimations } from "../popup/popupElement.types";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 
@@ -212,7 +212,7 @@ export default abstract class WUPBaseComboControl<
     if (!this.$refPopup) {
       const p = document.createElement("wup-popup");
       this.$refPopup = p;
-      p.$options.showCase = PopupShowCases.alwaysOff;
+      p.$options.showCase = PopupOpenCases.alwaysOff;
       p.$options.target = this;
       p.$options.offsetFitElement = [1, 1];
       p.$options.minWidthByTarget = true;
@@ -228,7 +228,7 @@ export default abstract class WUPBaseComboControl<
       ];
 
       p.setAttribute("menu", "");
-      p.$options.animation = Animations.drawer;
+      p.$options.animation = PopupAnimations.drawer;
 
       const menuId = this.#ctr.$uniqueId;
       const i = this.$refInput;

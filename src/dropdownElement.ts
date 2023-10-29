@@ -1,6 +1,6 @@
 import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
-import { Animations, HideCases, ShowCases } from "./popup/popupElement.types";
+import { PopupAnimations, PopupCloseCases, PopupOpenCases } from "./popup/popupElement.types";
 import { WUPcssButton, WUPcssMenu } from "./styles";
 
 const tagName = "wup-dropdown";
@@ -8,17 +8,17 @@ declare global {
   namespace WUP.Dropdown {
     interface Options extends WUP.Popup.Options {
       /** Animation applied to popup;
-       * @defaultValue `Animations.drawer`
+       * @defaultValue `PopupAnimations.drawer`
        * @tutorial Troubleshooting
        * * to change option for specific element change it for `<wup-popup/>` direclty after timeout
-       * @example setTimeout(() => this.$refPopup.$options.animation = Animations.stack) */
-      animation: Animations;
+       * @example setTimeout(() => this.$refPopup.$options.animation = PopupAnimations.stack) */
+      animation: PopupAnimations;
       /** Case when popup need to show;
-       * @defaultValue `ShowCases.onClick | ShowCases.onFocus`
+       * @defaultValue `PopupOpenCases.onClick | PopupOpenCases.onFocus`
        * @tutorial Troubleshooting
        * * to change option for specific element change it for `<wup-popup/>` directly after timeout
-       * @example setTimeout(() => this.$refPopup.$options.showCase = ShowCases.onFocus | ShowCases.onClick) */
-      showCase: ShowCases;
+       * @example setTimeout(() => this.$refPopup.$options.showCase = PopupOpenCases.onFocus | PopupOpenCases.onClick) */
+      showCase: PopupOpenCases;
       /** Hide menu on popup click
        * @defaultValue true */
       hideOnPopupClick: boolean;
@@ -101,8 +101,8 @@ export default class WUPDropdownElement<
    * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty */
   static $defaults: WUP.Dropdown.Options = {
     ...WUPPopupElement.$defaults,
-    animation: Animations.drawer,
-    showCase: ShowCases.onClick | ShowCases.onFocus,
+    animation: PopupAnimations.drawer,
+    showCase: PopupOpenCases.onClick | PopupOpenCases.onFocus,
     hideOnPopupClick: true,
     minHeightByTarget: true,
     minWidthByTarget: true,
@@ -173,7 +173,7 @@ export default class WUPDropdownElement<
   }
 
   /** Custom function to override default `WUPPopupElement.prototype.goHide` */
-  protected goShowPopup(showCase: ShowCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
+  protected goShowPopup(showCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
     const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, showCase, ev);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", true);
     return p;
@@ -181,10 +181,10 @@ export default class WUPDropdownElement<
 
   /** Custom function to override default `WUPPopupElement.prototype.goHide` */
   protected goHidePopup(
-    hideCase: HideCases,
+    hideCase: PopupCloseCases,
     ev: MouseEvent | FocusEvent | KeyboardEvent | null
   ): boolean | Promise<boolean> {
-    if (hideCase === HideCases.onPopupClick && !this._opts.hideOnPopupClick) {
+    if (hideCase === PopupCloseCases.onPopupClick && !this._opts.hideOnPopupClick) {
       return false;
     }
     const p = WUPPopupElement.prototype.goHide.call(this.$refPopup, hideCase, ev);

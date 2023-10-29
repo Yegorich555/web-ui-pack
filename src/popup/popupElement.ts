@@ -1,4 +1,4 @@
-import { ShowCases, HideCases, Animations } from "./popupElement.types";
+import { PopupOpenCases, PopupCloseCases, PopupAnimations } from "./popupElement.types";
 import { WUPcssScrollSmall } from "../styles";
 import WUPBaseElement, { AttributeMap, AttributeTypes } from "../baseElement";
 import { getOffset, PopupPlacements } from "./popupPlacements";
@@ -10,15 +10,6 @@ import animateDropdown from "../helpers/animateDropdown";
 import animateStack from "../helpers/animateStack";
 import isIntoView from "../helpers/isIntoView";
 import viewportSize from "../helpers/viewportSize";
-
-// import {
-//   ShowCases as PopupShowCases,
-//   HideCases as PopupHideCases,
-//   Animations as PopupAnimations,
-// } from "./popupElement.types";
-// export import ShowCases = PopupShowCases;
-// export import HideCases = PopupHideCases;
-// export import Animations = PopupAnimations;
 
 const attachLst = new Map<HTMLElement | SVGElement, () => void>();
 
@@ -43,7 +34,7 @@ declare global {
  * WUPPopupElement.$defaults.arrowEnable = true;
  *
  * const el = document.createElement('wup-popup');
- * el.$options.showCase = ShowCases.onClick | ShowCases.onFocus;
+ * el.$options.showCase = PopupShowCases.onClick | PopupShowCases.onFocus;
  * el.$options.target = document.querySelector('button');
  * // if placement impossible according to rules rest of possible rules will be applied
  * el.$options.placement = [
@@ -57,7 +48,7 @@ declare global {
  * const btn = document.querySelector('button');
  * // this is the most recomended way because $attach appends popup only by onShow and removes byHide
  * const detach = WUPPopupElement.$attach(
-                    { target: btn, text: "Some text content here", showCase: ShowCases.onFocus | ShowCases.onClick },
+                    { target: btn, text: "Some text content here", showCase: PopupShowCases.onFocus | PopupShowCases.onClick },
                     (popup) => { popup.className = "popup-class-here"; }
                   )'
  *```
@@ -106,11 +97,11 @@ export default class WUPPopupElement<
         parse: (attrValue) => {
           switch (attrValue) {
             case "drawer":
-              return Animations.drawer;
+              return PopupAnimations.drawer;
             case "stack":
-              return Animations.stack;
+              return PopupAnimations.stack;
             default:
-              return Animations.default;
+              return PopupAnimations.default;
           }
         },
       },
@@ -225,13 +216,13 @@ export default class WUPPopupElement<
 
   /** Default options. Change it to configure default behavior */
   static $defaults: WUP.Popup.Options = {
-    animation: Animations.default,
+    animation: PopupAnimations.default,
     placement: [
       WUPPopupElement.$placements.$top.$middle.$adjust, //
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
     ],
     toFitElement: document.body,
-    showCase: ShowCases.onClick,
+    showCase: PopupOpenCases.onClick,
     hoverShowTimeout: 200,
     hoverHideTimeout: 500,
   };
@@ -252,7 +243,7 @@ export default class WUPPopupElement<
    *     {
    *       target: document.querySelector("button") as HTMLElement,
    *       text: "Some text here",
-   *       showCase: ShowCases.onClick,
+   *       showCase: PopupShowCases.onClick,
    *     },
    *     // (el) => el.class = "popup-attached"
    *   );
@@ -336,7 +327,7 @@ export default class WUPPopupElement<
 
     function detach(): void {
       if (popup) {
-        popup.$isShown && popup.goHide.call(popup, HideCases.onManuallCall, null);
+        popup.$isShown && popup.goHide.call(popup, PopupCloseCases.onManuallCall, null);
         (popup as T).remove.call(popup);
       }
       r.stopListen();
@@ -353,14 +344,14 @@ export default class WUPPopupElement<
    * @tutorial rules
    * * can be prevented via e.preventDefault()
    * * use event.detail.showCase to filter by showCase */
-  $onWillShow?: (e: CustomEvent<{ showCase: HideCases }>) => void;
+  $onWillShow?: (e: CustomEvent<{ showCase: PopupCloseCases }>) => void;
   /** Fires after popup is shown (after animation finishes) */
   $onShow?: (e: Event) => void;
   /** Fires before hide is happened;
    * @tutorial rules
    * * can be prevented via e.preventDefault()
    * * use event.detail.hideCase to filter by hideCase */
-  $onWillHide?: (e: CustomEvent<{ hideCase: HideCases }>) => void;
+  $onWillHide?: (e: CustomEvent<{ hideCase: PopupCloseCases }>) => void;
   /** Fires after popup is hidden (after animation finishes) */
   $onHide?: (e: Event) => void;
 
@@ -377,10 +368,10 @@ export default class WUPPopupElement<
         let isOk = true;
         if (this.$isReady) {
           if (this.#refListener) {
-            await this.#refListener.hide(HideCases.onManuallCall, null);
+            await this.#refListener.hide(PopupCloseCases.onManuallCall, null);
             isOk = !this.#refListener.openedEl;
           } else {
-            isOk = await this.goHide(HideCases.onManuallCall, null);
+            isOk = await this.goHide(PopupCloseCases.onManuallCall, null);
           }
         }
         resolve(isOk);
@@ -405,10 +396,10 @@ export default class WUPPopupElement<
           try {
             let isOk = true;
             if (this.#refListener) {
-              await this.#refListener.show(ShowCases.always, null);
+              await this.#refListener.show(PopupOpenCases.always, null);
               isOk = !!this.#refListener.openedEl;
             } else {
-              isOk = await this.goShow(ShowCases.always, null);
+              isOk = await this.goShow(PopupOpenCases.always, null);
             }
             res(isOk);
           } catch (err) {
@@ -481,10 +472,10 @@ export default class WUPPopupElement<
       this.#refListener = this.#attach();
     } else {
       if (!this._opts.showCase /* always */) {
-        this.goShow(ShowCases.always, null);
+        this.goShow(PopupOpenCases.always, null);
         return;
       }
-      if (this._opts.showCase !== ShowCases.alwaysOff) {
+      if (this._opts.showCase !== PopupOpenCases.alwaysOff) {
         this._opts.target = this.defineTarget();
         this.#refListener = new PopupListener(
           this._opts as typeof this._opts & { target: HTMLElement },
@@ -499,7 +490,7 @@ export default class WUPPopupElement<
     super.gotChanges(propsChanged);
     if (propsChanged) {
       // re-init
-      this.$isShown && this.goHide(HideCases.onOptionChange, null);
+      this.$isShown && this.goHide(PopupCloseCases.onOptionChange, null);
       this.init(); // only if popup is hidden
     }
   }
@@ -657,19 +648,19 @@ export default class WUPPopupElement<
   _stopAnimation?: () => void;
   protected goAnimate(animTime: number, isHidden: boolean): Promise<boolean> {
     this._isStopChanges = true;
-    if (this._opts.animation === Animations.drawer) {
+    if (this._opts.animation === PopupAnimations.drawer) {
       this.setAttribute("w-animation", "drawer");
       this._isStopChanges = false;
 
       const pa = animateDropdown(this, animTime, isHidden);
       this._stopAnimation = () => {
         delete this._stopAnimation;
-        pa.stop(this._opts.animation !== Animations.drawer); // rst animation state only if animation changed
+        pa.stop(this._opts.animation !== PopupAnimations.drawer); // rst animation state only if animation changed
       };
       return pa;
     }
 
-    if (this._opts.animation === Animations.stack) {
+    if (this._opts.animation === PopupAnimations.stack) {
       this.setAttribute("w-animation", "stack");
       this._isStopChanges = false;
 
@@ -684,7 +675,7 @@ export default class WUPPopupElement<
       const pa = animateStack(this.$options.target!, items as HTMLCollection, animTime, isHidden, isVertical);
       this._stopAnimation = () => {
         delete this._stopAnimation;
-        pa.stop(this._opts.animation !== Animations.stack); // rst animation state only if animation changed
+        pa.stop(this._opts.animation !== PopupAnimations.stack); // rst animation state only if animation changed
       };
       return pa;
     }
@@ -704,7 +695,7 @@ export default class WUPPopupElement<
 
   /** Shows popup if target defined; returns true if successful */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  goShow(showCase: ShowCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
+  goShow(showCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
     if (this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
@@ -760,7 +751,7 @@ export default class WUPPopupElement<
 
   /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  goHide(hideCase: HideCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
+  goHide(hideCase: PopupCloseCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
     if (!this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
@@ -793,7 +784,7 @@ export default class WUPPopupElement<
     };
 
     // waitFor only if was ordinary user-action
-    const skipWait = hideCase === HideCases.onOptionChange || hideCase === HideCases.onTargetRemove;
+    const skipWait = hideCase === PopupCloseCases.onOptionChange || hideCase === PopupCloseCases.onTargetRemove;
     if (!skipWait) {
       this.setAttribute("hide", "");
       const { animationDuration: aD } = getComputedStyle(this);
@@ -827,7 +818,7 @@ export default class WUPPopupElement<
     const trg = this._opts.target!;
     // possible when target removed via set innerHTML (in this case remove-hook doesn't work)
     if (!trg.isConnected) {
-      this.goHide(HideCases.onTargetRemove, null);
+      this.goHide(PopupCloseCases.onTargetRemove, null);
       this.#attach && this.remove(); // self-removing if $attach()
       return undefined;
     }
