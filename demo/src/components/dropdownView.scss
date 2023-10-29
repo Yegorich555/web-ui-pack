@@ -3,7 +3,8 @@
   margin: 6px;
 
   button {
-    z-index: 80001;
+    // todo reduce z-index otherwise menu can't overflow other buttons
+    z-index: 80001; // todo reducing value makes 2 click
     position: relative;
 
     display: flex;
@@ -15,7 +16,6 @@
   }
 
   > wup-popup {
-    z-index: 80000;
     box-shadow: none;
     background: none;
     overflow: visible;
