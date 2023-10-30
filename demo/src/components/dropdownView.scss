@@ -3,8 +3,7 @@
   margin: 6px;
 
   button {
-    // todo reduce z-index otherwise menu can't overflow other buttons
-    z-index: 80001; // todo reducing value makes 2 click
+    // z-index: 8001; // todo reducing value makes 2 click
     position: relative;
 
     display: flex;

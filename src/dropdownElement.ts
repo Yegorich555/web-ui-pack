@@ -173,7 +173,9 @@ export default class WUPDropdownElement<
   /** Custom function to override default `WUPPopupElement.prototype.goHide` */
   protected goShowPopup(showCase: ShowCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
     const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, showCase, ev);
-    this.$refPopup.$options.target!.setAttribute("aria-expanded", true);
+    const t = this.$refPopup.$options.target!;
+    t.setAttribute("aria-expanded", true); // todo: move it to popup side after refactoring
+    t.style.zIndex = `${+getComputedStyle(this.$refPopup).zIndex + 2}`; // inc z-index for btn to allow animation-stack works properly
     return p;
   }
 
@@ -186,7 +188,10 @@ export default class WUPDropdownElement<
       return false;
     }
     const p = WUPPopupElement.prototype.goHide.call(this.$refPopup, hideCase, ev);
-    this.$refPopup.$options.target!.setAttribute("aria-expanded", false);
+    const t = this.$refPopup.$options.target!;
+    t.setAttribute("aria-expanded", false);
+    t.style.zIndex = "";
+    t.getAttribute("style")?.trim() === "" && this.removeAttribute("style");
     return p;
   }
 }

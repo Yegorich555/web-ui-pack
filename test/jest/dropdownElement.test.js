@@ -90,7 +90,7 @@ describe("dropdownElement", () => {
     expect(el.$refPopup.$isShown).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(`
       "<wup-dropdown>
-          <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="true">Click me</button>
+          <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="true" style="z-index: 8002;">Click me</button>
           <wup-popup style="min-width: 100px; min-height: 50px;" menu="">
             <ul id="wup1" tabindex="-1">
               <li><button>A</button></li>
@@ -104,7 +104,7 @@ describe("dropdownElement", () => {
     expect(el.$refPopup.$isShown).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(`
       "<wup-dropdown>
-          <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="false">Click me</button>
+          <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="false" style="">Click me</button>
           <wup-popup style="min-width: 100px; min-height: 50px;" menu="">
             <ul id="wup1" tabindex="-1">
               <li><button>A</button></li>
