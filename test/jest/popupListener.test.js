@@ -333,6 +333,7 @@ describe("popupListener", () => {
     expect(onShow).toBeCalledTimes(1);
     expect(onHide).toBeCalledTimes(0);
     // close by click outside
+    await h.wait();
     await h.userClick(document.body);
     await h.wait();
     expect(isShown).toBe(false);
@@ -504,22 +505,46 @@ describe("popupListener", () => {
 
     onShow.mockImplementationOnce(() => null);
     trg.dispatchEvent(new MouseEvent("click", { bubbles: true })); // show
-    await h.wait(1);
+    await h.wait(50);
     trg.dispatchEvent(new MouseEvent("click", { bubbles: true })); // show
     await h.wait(1);
     expect(onShow).toBeCalledTimes(2);
     expect(onHide).not.toBeCalled();
     expect(isShown).toBe(true);
 
+    await h.wait(200);
     jest.clearAllMocks();
     onHide.mockImplementationOnce(() => false);
     trg.dispatchEvent(new MouseEvent("click", { bubbles: true })); // hide
-    await h.wait(1);
+    await h.wait(50);
     trg.dispatchEvent(new MouseEvent("click", { bubbles: true })); // hide
     await h.wait(1);
     expect(onShow).not.toBeCalled();
     expect(onHide).toBeCalledTimes(2);
     expect(isShown).toBe(false);
+
+    document.activeElement.blur();
+    ref = new PopupListener({ target: trg, showCase: 0b111111111 }, onShow, onHide);
+    let wasShown = false;
+    let isTrapped = false;
+    await h.wait();
+    // simulate: trgMouseDown > focus > open + overflow target (when z-index higher and overflows) > parentMouseUp & Click
+    if (trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }))) {
+      if (trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }))) {
+        HTMLElement.prototype.focus.call(trg);
+        wasShown = isShown;
+        isTrapped = true;
+        const p = trg.parentElement;
+        p.dispatchEvent(new MouseEvent("pointerup", { bubbles: true }));
+        p.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+        p.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+    }
+    await h.wait();
+    expect(document.activeElement).toBe(trg);
+    expect(isTrapped).toBe(true);
+    expect(wasShown).toBe(true);
+    expect(isShown).toBe(true);
   });
 
   test("hide waits for show end", async () => {

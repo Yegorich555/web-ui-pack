@@ -3,7 +3,7 @@
   margin: 6px;
 
   button {
-    // z-index: 8001; // todo reducing value makes 2 click
+    // z-index: 7999 !important; // tescase: uncomment and click on stacked button - previosuly it was open/close immediately
     position: relative;
 
     display: flex;

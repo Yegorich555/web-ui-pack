@@ -174,7 +174,7 @@ export default class WUPDropdownElement<
   protected goShowPopup(showCase: ShowCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
     const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, showCase, ev);
     const t = this.$refPopup.$options.target!;
-    t.setAttribute("aria-expanded", true); // todo: move it to popup side after refactoring
+    t.setAttribute("aria-expanded", true); // NiceToHave: move it to popup side after refactoring ???
     t.style.zIndex = `${+getComputedStyle(this.$refPopup).zIndex + 2}`; // inc z-index for btn to allow animation-stack works properly
     return p;
   }
@@ -197,3 +197,5 @@ export default class WUPDropdownElement<
 }
 
 customElements.define(tagName, WUPDropdownElement);
+
+// todo issue: animation:stack-right. If target is partially hidden in scrollable parent popup changes Y to be full visible but it's not ok; In this case popup must be also partially visible and listen only target

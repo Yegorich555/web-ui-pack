@@ -65,10 +65,11 @@ export default class PopupListener {
       }
     }).finally(() => (this.isShowing = false));
     await this.isShowing;
-    // timeout required to avoid immediate hide by bubbling events to root
     if (this.openedEl) {
+      // timeout required to avoid immediate hide by bubbling events to root
       setTimeout(() => this.openedEl && this.listenOnShow());
     }
+    // fix when targetClick > opening > inputOnFocus
   }
 
   /** Called on hide */
@@ -133,6 +134,7 @@ export default class PopupListener {
   #wasOutsideClick?: boolean; // fix when labelOnClick > inputOnClick
   /** Single event handler */
   handleEventsDocument(e: Event): void {
+    // console.warn(e.type, e.target);
     if (e.defaultPrevented) {
       return;
     }
@@ -145,7 +147,9 @@ export default class PopupListener {
         break;
       case "click":
         {
-          this.#preventClickAfterFocus = false; // mostly it doesn't make sense but maybe it's possible
+          if (this.#preventClickAfterFocus) {
+            return;
+          }
           // filter click from target because we have target event for this
           const isTarget = this.includes.call(this.options.target, e.target);
           if (isTarget) {
@@ -171,9 +175,9 @@ export default class PopupListener {
   #openedByHover?: ReturnType<typeof setTimeout> | false;
   #debounceClick?: ReturnType<typeof setTimeout>;
   #hoverTimeout?: ReturnType<typeof setTimeout>;
-
   /** Single event handler */
   handleEvents(ev: Event): void {
+    // console.warn(ev.type, ev.target);
     if (ev.defaultPrevented) {
       return;
     }
@@ -201,7 +205,7 @@ export default class PopupListener {
             ? this.hide(this.isMe(e.target) ? HideCases.onPopupClick : HideCases.onTargetClick, e)
             : this.show(ShowCases.onClick, e);
           // fix when labelOnClick > inputOnClick > inputOnFocus
-          this.#debounceClick = setTimeout(() => (this.#debounceClick = undefined), 1);
+          this.#debounceClick = setTimeout(() => (this.#debounceClick = undefined), 10);
         }
         break;
       case "mouseenter":
