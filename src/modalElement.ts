@@ -240,12 +240,6 @@ export default class WUPModalElement<
   _prevTarget?: Element | null;
   _prevTargetClick?: (e: MouseEvent) => void;
 
-  protected override gotReady(): void {
-    super.gotReady();
-    this._willFocus && clearTimeout(this._willFocus);
-    delete this._willFocus; // prevent default autofocus behavior since here need to use it only on open
-  }
-
   protected override gotChanges(propsChanged: string[] | null): void {
     super.gotChanges(propsChanged);
 
@@ -398,13 +392,6 @@ export default class WUPModalElement<
       default:
         break;
     }
-  }
-
-  override focus(): boolean {
-    if (!this.$isOpened) {
-      return false;
-    }
-    return super.focus();
   }
 
   /** Focus any content excluding button[close] if possible */
