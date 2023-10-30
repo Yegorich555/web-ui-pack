@@ -152,7 +152,6 @@ export default class WUPTimeControl<
           width: 2em;
           height: 2em;
           border-radius: 50%;
-          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
     `;
     return `${super.$style}
@@ -242,7 +241,7 @@ export default class WUPTimeControl<
         border: none;
         border-radius: 0;
         padding: 0; margin: 0;
-        background: var(--base-btn3-bg);
+        background: var(--popup-bg);
       }
       :host [group] > button:first-child {
         --ctrl-icon-img: var(--wup-icon-check);
@@ -770,5 +769,3 @@ export default class WUPTimeControl<
 }
 
 customElements.define(tagName, WUPTimeControl);
-
-// todo fix animation-dropdown: buttons looks ugly on darkMode because don't have bg
