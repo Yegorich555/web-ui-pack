@@ -106,8 +106,7 @@ export default class WUPPasswordControl<
         }
         :host input[type='password'] {
           font-family: Verdana, sans-serif;
-          letter-spacing: 0.125;
-          ${"margin-bottom: -1px;" /* font Verdana affects on height // todo somehow it's wrong on other apps */}
+          letter-spacing: 0.125em;
         }
         :host button[eye] {
           ${WUPcssIcon}
@@ -183,7 +182,7 @@ export default class WUPPasswordControl<
   $refBtnEye = document.createElement("button");
   protected override renderControl(): void {
     super.renderControl();
-    this.$refInput.type = "password";
+    this.changeInputType(false);
     this.$ariaDetails(this.#ctr.$ariaDescription);
     this.renderBtnEye();
   }
@@ -212,10 +211,21 @@ export default class WUPPasswordControl<
     const end = this.$refInput.selectionEnd;
     const isOff = this.$refBtnEye.getAttribute("eye") !== "off";
     this.$refBtnEye.setAttribute("eye", isOff ? "off" : "");
-    this.$refInput.type = isOff ? "text" : "password";
+    this.changeInputType(isOff);
+
     window.requestAnimationFrame(() => {
       this.$refInput.setSelectionRange(start, end);
     }); // otherwise selection is reset
+  }
+
+  /** Called for toogle input type + fix browser issue when font affects on input height */
+  protected changeInputType(isVisible: boolean): void {
+    const h = this.$refInput.offsetHeight;
+    this.$refInput.type = isVisible ? "text" : "password";
+    const isHchanged = h !== this.$refInput.offsetHeight;
+    if (isHchanged && h) {
+      this.$refInput.style.height = `${h}px`;
+    }
   }
 
   protected override gotChanges(propsChanged: Array<string> | null): void {

@@ -767,8 +767,7 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-PWD input[type='password'] {
           font-family: Verdana, sans-serif;
-          letter-spacing: 0.125;
-          margin-bottom: -1px;
+          letter-spacing: 0.125em;
         }
         WUP-PWD button[eye] {
           

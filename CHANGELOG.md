@@ -28,6 +28,7 @@
 - helper [findScrollParent](src/helpers/findScrollParent.ts). _Returns parent despite on parent.child with position: fixed_
 - [PopupElement](src/popup/popupElement.ts). _Popup hidden if target inside content with position: fixed and target.parent.parent is scrollable_
 - [DropdownElement](src/dropdownElement.ts). _Target button is overflowed by menu in animation-stack_
+- [PasswordControl](src/controls/password.ts). _Input height is changed on button[eye] click_
 - Text based controls
   - _Sometimes weird blink & poor render during the animation on focus_
   - _Button clear changes control size on hover if parent is flexbox_
