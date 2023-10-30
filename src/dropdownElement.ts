@@ -94,8 +94,6 @@ export default class WUPDropdownElement<
       }${WUPcssMenu(":host>[menu]")}`;
   }
 
-  // todo bad style in menu with darkmode
-
   /** Default options applied to every element. Change it to configure default behavior
    * * @tutorial Troubleshooting
    * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty */

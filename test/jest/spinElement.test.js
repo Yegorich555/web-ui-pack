@@ -152,6 +152,8 @@ describe("spinElement", () => {
                 --icon-hover-bg: #0001;
                 --icon-focus-bg: #0000001a;
                 --icon-size: 14px;
+                --menu-hover-text: inherit;
+                --menu-hover-bg: #f1f1f1;
               }
               [wupdark] {
                 --base-btn-focus: #bdbdbd;
@@ -161,6 +163,8 @@ describe("spinElement", () => {
                 --icon-focus-bg: #fff2;
                 --scroll: #fff2;
                 --scroll-hover: #fff3;
+                --menu-hover-text: inherit;
+                --menu-hover-bg: #222a36;
               }:root {
                 --spin-1: #ffa500;
                 --spin-2: #fff;

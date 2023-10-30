@@ -21,6 +21,7 @@
     `--ctrl-clr-width` >>> `--ctrl-clr-w`
     `--ctrl-select-item` >>> `--ctrl-select-item-text`
     `--ctrl-time-off` >>> `--ctrl-time-off-text`
+    `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
 
 **Fixes**:
 

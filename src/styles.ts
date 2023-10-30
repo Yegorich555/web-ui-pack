@@ -155,7 +155,7 @@ ${tag}[aria-busy] {
 }
 
 /** Returns default style for popup menu */
-export function WUPcssMenu(tag: string, hoverColor = "#f1f1f1"): string {
+export function WUPcssMenu(tag: string): string {
   return `
 ${tag} {
   padding: 0;
@@ -175,7 +175,8 @@ ${tag} li {
 }
 @media (hover: hover) and (pointer: fine) {
   ${tag} li:hover {
-    background-color: ${hoverColor};
+    color: var(--menu-hover-text);
+    background: var(--menu-hover-bg);
   }
 }
 ${tag} li[aria-selected="true"] {
