@@ -62,7 +62,7 @@ declare global {
  * * You can set minWidth, minHeight to prevent squizing of popup or don't use rule '.$adjust'
  * * Don't override styles: display, transform (possible to override only for animation)
  * * Don't use inline styles: maxWidth, maxHeight, minWidth, minHeight
- * * If target removed (when popup $isShown) and appended again you need to update $options.target (because $options.target cleared)
+ * * If target removed (when popup $isOpened) and appended again you need to update $options.target (because $options.target cleared)
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
  * * During the closing attr 'hide' is appended only if css-animation-duration is detected
  * * Popup can't be more than 100vw & 100vh (impossible to disable the rule)
@@ -327,7 +327,7 @@ export default class WUPPopupElement<
 
     function detach(): void {
       if (popup) {
-        popup.$isShown && popup.goHide.call(popup, PopupCloseCases.onManuallCall, null);
+        popup.$isOpened && popup.goHide.call(popup, PopupCloseCases.onManuallCall, null);
         (popup as T).remove.call(popup);
       }
       r.stopListen();
@@ -422,7 +422,7 @@ export default class WUPPopupElement<
    * * stack: $show() > `$isShown:true` > showing > shown
    * * stack: $hide() > hiding > hidden > `$isShown:false`
    * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
-  get $isShown(): boolean {
+  get $isOpened(): boolean {
     return this.#isShown;
   }
 
@@ -447,7 +447,7 @@ export default class WUPPopupElement<
     return this.#isShowing === true;
   }
 
-  /** Returns arrowElement if $options.arrowEnable=true and after popup $isShown */
+  /** Returns arrowElement if $options.arrowEnable=true and after popup $isOpened */
   get $refArrow(): WUPPopupArrowElement | null {
     return this.#refArrow || null;
   }
@@ -490,7 +490,7 @@ export default class WUPPopupElement<
     super.gotChanges(propsChanged);
     if (propsChanged) {
       // re-init
-      this.$isShown && this.goHide(PopupCloseCases.onOptionChange, null);
+      this.$isOpened && this.goHide(PopupCloseCases.onOptionChange, null);
       this.init(); // only if popup is hidden
     }
   }
@@ -520,7 +520,7 @@ export default class WUPPopupElement<
     );
   }
 
-  #refArrow?: WUPPopupArrowElement;
+  #refArrow?: WUPPopupArrowElement; // todo change to public
 
   protected setMaxHeight(px: number | null): void {
     this.style.maxHeight = px ? `${px}px` : "";

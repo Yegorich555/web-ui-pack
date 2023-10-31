@@ -31,7 +31,7 @@ export default function FAQView() {
                     </li>
                     <li>
                       All custom events, methods starts with <b>$...</b> (
-                      <b>$options, $defaults, $isChanged, $isShown,</b> event <b>$change</b> etc.)
+                      <b>$options, $defaults, $isChanged, $isOpened,</b> event <b>$change</b> etc.)
                     </li>
                     <li>
                       Every component has <b>$options</b> that inheritted from static <b>$defaults</b>. Use static{" "}

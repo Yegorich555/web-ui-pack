@@ -431,7 +431,7 @@ describe("circleElement", () => {
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await h.wait();
     expect(el.querySelector("wup-popup").$isHiding).toBe(false);
-    expect(el.querySelector("wup-popup").$isShown).toBe(true);
+    expect(el.querySelector("wup-popup").$isOpened).toBe(true);
 
     // new items
     onTooltip.mockClear();

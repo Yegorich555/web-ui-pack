@@ -574,19 +574,19 @@ describe("popupListener", () => {
 
     el.$close(); // showCase opens popup by default
     await h.wait();
-    expect(el.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
     // open
     trg.click();
     await h.wait(); // wait for changes
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
 
     // hide
     document.body.click();
     await h.wait(100); // wait for partially hidden
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(() => document.body.click()).not.toThrow(); // error here because openedEl is null in eventListener on 2nd call
     await h.wait();
-    expect(el.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
   });
 
   test("show 1st time", async () => {
@@ -607,7 +607,7 @@ describe("popupListener", () => {
     // cover case when openedEl hasn't been defined yet
     refs.show(0);
     await h.wait();
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
 
     expect(isShown).toBe(false);
     expect(() => new PopupListener({ target: undefined }, onShow, onHide)).toThrow();
@@ -626,7 +626,7 @@ describe("popupListener", () => {
     await el.$hide();
     el.$options.showCase = 1 << 2; // click
     await h.wait();
-    expect(el.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
     // double-click simulation
     const doubleClick = async (htmlEl) => {
       let e = new MouseEvent("click", { bubbles: true });
@@ -640,7 +640,7 @@ describe("popupListener", () => {
     };
     await doubleClick(trg);
     await h.wait(100);
-    expect(el.$isShown).toBe(true); // because 2nd click is filtered
+    expect(el.$isOpened).toBe(true); // because 2nd click is filtered
   }); */
 
   test("handle errors", async () => {
@@ -674,15 +674,15 @@ describe("popupListener", () => {
 
     await h.userClick(trg);
     await h.wait();
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
 
     await h.userClick(trg, { button: 1 });
     await h.wait();
-    expect(el.$isShown).toBe(true); // because right-button
+    expect(el.$isOpened).toBe(true); // because right-button
 
     await h.userClick(trg, { button: 0 });
     await h.wait();
-    expect(el.$isShown).toBe(false); // because left-button
+    expect(el.$isOpened).toBe(false); // because left-button
   });
 
   test("focus behavior", async () => {

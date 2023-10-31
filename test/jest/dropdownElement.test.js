@@ -83,11 +83,11 @@ afterEach(() => {
 describe("dropdownElement", () => {
   test("basic usage", async () => {
     expect(el.$refPopup).toBeDefined();
-    expect(el.$refPopup.$isShown).toBe(false);
+    expect(el.$refPopup.$isOpened).toBe(false);
     expect(el.$refPopup.$options.animation).toBe(1);
     expect(el.$refPopup.$options.placement).toBe(el.constructor.$defaults.placement);
     await h.userClick(trg);
-    expect(el.$refPopup.$isShown).toBe(true);
+    expect(el.$refPopup.$isOpened).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(`
       "<wup-dropdown>
           <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="true">Click me</button>
@@ -101,7 +101,7 @@ describe("dropdownElement", () => {
     `);
 
     await h.userClick(trg);
-    expect(el.$refPopup.$isShown).toBe(false);
+    expect(el.$refPopup.$isOpened).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(`
       "<wup-dropdown>
           <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="false">Click me</button>
@@ -129,7 +129,7 @@ describe("dropdownElement", () => {
     el = document.body.querySelector("wup-dropdown");
     await h.wait();
     expect(el.$refPopup).toBeDefined();
-    expect(el.$refPopup.$isShown).toBe(false);
+    expect(el.$refPopup.$isOpened).toBe(false);
     expect(el.$refPopup.$options.animation).toBe(2);
     expect(el.$refPopup.$options.placement).toStrictEqual(el.$refPopup.constructor.$placementAttrs("left-middle"));
   });
@@ -162,18 +162,18 @@ describe("dropdownElement", () => {
     el.$options.hideOnPopupClick = true;
     await h.wait(1);
     await h.userClick(trg);
-    expect(el.$refPopup.$isShown).toBe(true);
+    expect(el.$refPopup.$isOpened).toBe(true);
     await h.userClick(item);
-    expect(el.$refPopup.$isShown).toBe(false);
+    expect(el.$refPopup.$isOpened).toBe(false);
 
     el.$options.hideOnPopupClick = false;
     await h.wait(1);
     await h.userClick(trg);
-    expect(el.$refPopup.$isShown).toBe(true);
+    expect(el.$refPopup.$isOpened).toBe(true);
     await h.userClick(item);
-    expect(el.$refPopup.$isShown).toBe(true);
+    expect(el.$refPopup.$isOpened).toBe(true);
     await h.userClick(trg);
-    expect(el.$refPopup.$isShown).toBe(false);
+    expect(el.$refPopup.$isOpened).toBe(false);
   });
 
   test("invalid structure", async () => {
