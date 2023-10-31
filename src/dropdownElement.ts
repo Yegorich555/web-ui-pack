@@ -128,7 +128,7 @@ export default class WUPDropdownElement<
   protected override gotReady(): void {
     this.$refTitle = this.firstElementChild as HTMLElement;
     this.$refPopup = this.lastElementChild as WUPPopupElement;
-    if (this.$refTitle === this.$refPopup || !this.$refPopup.$show) {
+    if (this.$refTitle === this.$refPopup || !this.$refPopup.$open) {
       this.throwError("Invalid structure. Expected 1st element: <any/>, last element: <wup-popup/>");
     } else {
       this.$refPopup.setAttribute("menu", "");

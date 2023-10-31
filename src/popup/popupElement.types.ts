@@ -3,7 +3,7 @@ export const enum PopupOpenCases {
   always = 0,
   /** On `mouseenter` event of target; hide by `mouseleave` */
   onHover = 1,
-  /** On `focusIn` event of target; hide by `focusout` (also on click if PopupShowCases.onClick included) */
+  /** On `focusIn` event of target; hide by `focusout` (also on click if PopupOpenCases.onClick included) */
   onFocus = 1 << 1,
   /** On `click` event of target; hide by click anywhere */
   onClick = 1 << 2,
@@ -60,15 +60,15 @@ declare global {
        * @defaultValue `document.body` */
       toFitElement: HTMLElement;
       /** Case when popup need to show;
-       * @defaultValue `PopupShowCases.onClick`
+       * @defaultValue `PopupOpenCases.onClick`
        * @example
        * // use `|` to to join cases
-       * showCase=PopupShowCases.onFocus | PopupShowCases.onClick;  */
+       * showCase=PopupOpenCases.onFocus | PopupOpenCases.onClick;  */
       showCase: PopupOpenCases;
-      /** Timeout in ms before popup shows on hover of target (for PopupShowCases.onHover);
+      /** Timeout in ms before popup shows on hover of target (for PopupOpenCases.onHover);
        * @defaultValue 200ms */
       hoverShowTimeout: number;
-      /** Timeout in ms before popup hides on mouse-leave of target (for PopupShowCases.onHover);
+      /** Timeout in ms before popup hides on mouse-leave of target (for PopupOpenCases.onHover);
        * @defaultValue 500ms  */
       hoverHideTimeout: number;
       /** Animation applied to popup
@@ -132,15 +132,7 @@ declare global {
        *
        * attr `target` has hire priority than ref.options.target */
       "w-target"?: string;
-      /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
-      onShow?: never;
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$hide') instead */
-      onHide?: never;
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willHide') instead */
-      onWillHide?: never;
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willShow') instead */
-      onWillShow?: never;
+      // todo inherit from basmodal
       /** @readonly Result position; use this to restyle animation etc. */
       readonly position?: "top" | "left" | "bottom" | "right";
       /** @readonly Hide state; use this to hide-animation */
@@ -164,16 +156,16 @@ declare global {
        * @tutorial rules
        * * can be prevented via `e.preventDefault()`
        * * use event.detail.showCase to filter by showCase */
-      $willShow: CustomEvent<{ showCase: PopupOpenCases }>;
+      $willOpen: CustomEvent<{ openCase: PopupOpenCases }>;
       /** Fires after popup is shown (after animation finishes) */
-      $show: Event;
+      $open: Event;
       /** Fires before hide is happened;
        * @tutorial rules
        * * can be prevented via `e.preventDefault()`
        * * use event.detail.hideCase to filter by hideCase */
-      $willHide: CustomEvent<{ hideCase: PopupCloseCases }>;
+      $willClose: CustomEvent<{ closeCase: PopupCloseCases }>;
       /** Fires after popup is hidden (after animation finishes) */
-      $hide: Event;
+      $close: Event;
     }
   }
 }

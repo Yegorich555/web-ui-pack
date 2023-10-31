@@ -1012,7 +1012,7 @@ export default abstract class WUPBaseControl<
     if (this.$refError) {
       const p = this.$refError;
       p.addEventListener("$hide", p.remove, { passive: true, once: true });
-      p.$hide(); // hide with animation
+      p.$close(); // hide with animation
       this.$refError = undefined;
 
       (this.#refErrTarget as HTMLInputElement).setCustomValidity?.call(this.#refErrTarget, "");

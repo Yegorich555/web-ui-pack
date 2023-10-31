@@ -28,8 +28,8 @@ beforeEach(async () => {
 
     const el = document.querySelector("wup-popup");
     window.t = { gotShow: 0, gotHide: 0 };
-    el.addEventListener("$show", () => ++window.t.gotShow);
-    el.addEventListener("$hide", () => ++window.t.gotHide);
+    el.addEventListener("$open", () => ++window.t.gotShow);
+    el.addEventListener("$close", () => ++window.t.gotHide);
     window.testEl = el;
   });
   await page.waitForTimeout(5); // timeout required because of debounceFilters

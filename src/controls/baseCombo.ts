@@ -127,7 +127,7 @@ export default abstract class WUPBaseComboControl<
    * @returns Promise resolved resolved by animation time */
   async $showMenu(): Promise<void> {
     await this.goShowMenu(ShowCases.onManualCall);
-    this.#isShown && (await this.$refPopup!.$show()); // wait for popup show-end
+    this.#isShown && (await this.$refPopup!.$open()); // wait for popup show-end
   }
 
   /** Reference to popupMenu */
@@ -251,7 +251,7 @@ export default abstract class WUPBaseComboControl<
     if (!this.#isShown) {
       return null; // possible when user calls show & hide sync
     }
-    this.$refPopup.$show().then(() => this.fireEvent("$showMenu", { cancelable: false }));
+    this.$refPopup.$open().then(() => this.fireEvent("$showMenu", { cancelable: false }));
     this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", true);
     // await r; // WARN: it's important don't wait for animation to assign onShow events fast
@@ -292,7 +292,7 @@ export default abstract class WUPBaseComboControl<
     }
     this.#isShown = false;
     this._isHiding = true;
-    await this.$refPopup?.$hide();
+    await this.$refPopup?.$close();
     delete this._isHiding;
     if (this.#isShown) {
       return false; // possible when popup opened again during the animation

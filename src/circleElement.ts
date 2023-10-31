@@ -433,7 +433,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         if (t._hasTooltip) {
           t._tid && clearTimeout(t._tid); // remove timer for mouseleave
           t._tid = setTimeout(() => {
-            if (t._tooltip) t._tooltip.$show();
+            if (t._tooltip) t._tooltip.$open();
             else t._tooltip = this.renderTooltip(t);
           }, this._opts.hoverShowTimeout);
 
@@ -443,7 +443,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
             () => {
               t._tid && clearTimeout(t._tid); // remove timer for mouseenter
               t._tid = setTimeout(() => {
-                t._tooltip?.$hide().finally(() => {
+                t._tooltip?.$close().finally(() => {
                   // popup can be opened when user returns mouse back in a short time
                   if (t._tooltip && !t._tooltip!.$isShown) {
                     t._tooltip!.remove();

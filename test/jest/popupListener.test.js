@@ -556,10 +556,10 @@ describe("popupListener", () => {
     ref = new PopupListener(
       { target: trg, showCase: 1 << 2 }, // onClick
       () => {
-        el.$show();
+        el.$open();
         return el;
       },
-      () => el.$hide()
+      () => el.$close()
     );
 
     // simulate defaults
@@ -572,7 +572,7 @@ describe("popupListener", () => {
       return orig(elem);
     });
 
-    el.$hide(); // showCase opens popup by default
+    el.$close(); // showCase opens popup by default
     await h.wait();
     expect(el.$isShown).toBe(false);
     // open
@@ -598,10 +598,10 @@ describe("popupListener", () => {
     const refs = new PopupListener(
       { target: trg, showCase: 1 << 2 }, // onClick
       () => {
-        el.$show();
+        el.$open();
         return el;
       },
-      () => el.$hide()
+      () => el.$close()
     );
 
     // cover case when openedEl hasn't been defined yet

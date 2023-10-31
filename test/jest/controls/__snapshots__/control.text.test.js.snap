@@ -205,6 +205,21 @@ exports[`control.text $show/$hide error 3`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
 </wup-text>
 `;
 
@@ -965,6 +980,120 @@ exports[`control.text validations $options.validationShowAll 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
+    id="txt2"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span
+      class="wup-hidden"
+    >
+      Invalid email address
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li
+        valid=""
+      >
+        Min length is 2 characters
+      </li>
+      <li
+        valid=""
+      >
+        Max length is 3 characters
+      </li>
+      <li>
+        Invalid email address
+      </li>
+    </ul>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span
+      class="wup-hidden"
+    >
+      Invalid email address
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li
+        valid=""
+      >
+        Min length is 2 characters
+      </li>
+      <li
+        valid=""
+      >
+        Max length is 3 characters
+      </li>
+      <li>
+        Invalid email address
+      </li>
+      <li
+        valid=""
+      />
+      <li>
+        Always error
+      </li>
+    </ul>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Name:
+    </span>
+    <span>
+      This field is required
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li
+        valid=""
+      >
+        Min length is 2 characters
+      </li>
+      <li
+        valid=""
+      >
+        Max length is 3 characters
+      </li>
+      <li>
+        Invalid email address
+      </li>
+      <li
+        valid=""
+      />
+      <li>
+        Always error
+      </li>
+    </ul>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
     id="txt5"
     role="alert"
     style="display: none;"
@@ -1088,6 +1217,23 @@ exports[`control.text validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
+    id="txt3"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
     id="txt4"
     style="display: none;"
   >
@@ -1132,6 +1278,39 @@ exports[`control.text validations options.validationCase 4`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"

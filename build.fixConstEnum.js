@@ -13,5 +13,5 @@ function fixReExportConstEnum(from, str) {
 // todo check maybe it's not required anymore
 fixReExportConstEnum(
   "./dist/popup/popupElement.js",
-  'import { PopupShowCases, PopupHideCases, PopupAnimations } from "./popupElement.types";'
+  'import { PopupOpenCases, PopupCloseCases, PopupAnimations } from "./popupElement.types";'
 );

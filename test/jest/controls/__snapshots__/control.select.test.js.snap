@@ -233,6 +233,21 @@ exports[`control.select $show/$hide error 3`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
 </wup-select>
 `;
 
@@ -997,6 +1012,21 @@ exports[`control.select validations $options.validationShowAll 2`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
 </wup-select>
 `;
 
@@ -1033,6 +1063,75 @@ exports[`control.select validations $options.validationShowAll 3`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span
+      class="wup-hidden"
+    >
+      Always error
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li
+        valid=""
+      />
+      <li>
+        Always error
+      </li>
+    </ul>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Name:
+    </span>
+    <span>
+      This field is required
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li
+        valid=""
+      />
+      <li>
+        Always error
+      </li>
+    </ul>
+  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -1242,6 +1341,23 @@ exports[`control.select validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
+    id="txt4"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
     id="txt5"
     style=""
   >
@@ -1292,6 +1408,39 @@ exports[`control.select validations options.validationCase 4`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"

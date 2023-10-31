@@ -34,7 +34,7 @@ declare global {
  * WUPPopupElement.$defaults.arrowEnable = true;
  *
  * const el = document.createElement('wup-popup');
- * el.$options.showCase = PopupShowCases.onClick | PopupShowCases.onFocus;
+ * el.$options.showCase = PopupOpenCases.onClick | PopupOpenCases.onFocus;
  * el.$options.target = document.querySelector('button');
  * // if placement impossible according to rules rest of possible rules will be applied
  * el.$options.placement = [
@@ -48,7 +48,7 @@ declare global {
  * const btn = document.querySelector('button');
  * // this is the most recomended way because $attach appends popup only by onShow and removes byHide
  * const detach = WUPPopupElement.$attach(
-                    { target: btn, text: "Some text content here", showCase: PopupShowCases.onFocus | PopupShowCases.onClick },
+                    { target: btn, text: "Some text content here", showCase: PopupOpenCases.onFocus | PopupOpenCases.onClick },
                     (popup) => { popup.className = "popup-class-here"; }
                   )'
  *```
@@ -243,7 +243,7 @@ export default class WUPPopupElement<
    *     {
    *       target: document.querySelector("button") as HTMLElement,
    *       text: "Some text here",
-   *       showCase: PopupShowCases.onClick,
+   *       showCase: PopupOpenCases.onClick,
    *     },
    *     // (el) => el.class = "popup-attached"
    *   );
@@ -343,22 +343,22 @@ export default class WUPPopupElement<
   /** Fires before show is happened;
    * @tutorial rules
    * * can be prevented via e.preventDefault()
-   * * use event.detail.showCase to filter by showCase */
-  $onWillShow?: (e: CustomEvent<{ showCase: PopupCloseCases }>) => void;
+   * * use event.detail.openCase to filter by openCase */
+  $onWillOpen?: (e: CustomEvent<{ openCase: PopupOpenCases }>) => void;
   /** Fires after popup is shown (after animation finishes) */
-  $onShow?: (e: Event) => void;
+  $onOpen?: (e: Event) => void;
   /** Fires before hide is happened;
    * @tutorial rules
    * * can be prevented via e.preventDefault()
-   * * use event.detail.hideCase to filter by hideCase */
-  $onWillHide?: (e: CustomEvent<{ hideCase: PopupCloseCases }>) => void;
+   * * use event.detail.closeCase to filter by closeCase */
+  $onWillClose?: (e: CustomEvent<{ closeCase: PopupCloseCases }>) => void;
   /** Fires after popup is hidden (after animation finishes) */
-  $onHide?: (e: Event) => void;
+  $onClose?: (e: Event) => void;
 
   #whenHide?: Promise<any>;
   /** Hide popup
    * @returns Promise resolved true if successful by animation-end */
-  $hide(): Promise<boolean> {
+  $close(): Promise<boolean> {
     if (this.#whenHide) {
       return this.#whenHide;
     }
@@ -384,7 +384,7 @@ export default class WUPPopupElement<
   /** Show popup
    * @returns Promise resolved by animation-end
    * @throws (rejects) error if popup not appended on layout */
-  $show(): Promise<boolean> {
+  $open(): Promise<boolean> {
     if (this.#whenShow) {
       return this.#whenShow;
     }
@@ -464,7 +464,7 @@ export default class WUPPopupElement<
   #isShown = false;
   #refListener?: PopupListener;
   #attach?: () => PopupListener; // func to use alternative target
-  /** Called after gotReady() and $show() (to reinit according to options) */
+  /** Called after gotReady() and $open() (to reinit according to options) */
   protected init(): void {
     this.disposeListener(); // remove previously added events
 
@@ -695,7 +695,7 @@ export default class WUPPopupElement<
 
   /** Shows popup if target defined; returns true if successful */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  goShow(showCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
+  goShow(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
     if (this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
@@ -703,7 +703,7 @@ export default class WUPPopupElement<
       return this.#whenShow;
     }
     this._opts.target = this.defineTarget();
-    const e = this.fireEvent("$willShow", { cancelable: true, detail: { showCase } });
+    const e = this.fireEvent("$willOpen", { cancelable: true, detail: { openCase } });
     if (e.defaultPrevented) {
       return false;
     }
@@ -733,7 +733,7 @@ export default class WUPPopupElement<
 
     const { animTime } = this.#state!.userStyles;
     if (!animTime) {
-      wasClosed && setTimeout(() => this.fireEvent("$show", { cancelable: false }));
+      wasClosed && setTimeout(() => this.fireEvent("$open", { cancelable: false }));
       return true;
     }
 
@@ -743,7 +743,7 @@ export default class WUPPopupElement<
       if (!isOk) {
         return false;
       }
-      wasClosed && this.fireEvent("$show", { cancelable: false });
+      wasClosed && this.fireEvent("$open", { cancelable: false });
       return true;
     });
     return this.#whenShow;
@@ -751,7 +751,7 @@ export default class WUPPopupElement<
 
   /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  goHide(hideCase: PopupCloseCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
+  goHide(closeCase: PopupCloseCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
     if (!this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
@@ -759,7 +759,7 @@ export default class WUPPopupElement<
       return this.#whenHide;
     }
 
-    const e = this.fireEvent("$willHide", { cancelable: true, detail: { hideCase } });
+    const e = this.fireEvent("$willClose", { cancelable: true, detail: { closeCase } });
     if (e.defaultPrevented) {
       return false;
     }
@@ -780,11 +780,11 @@ export default class WUPPopupElement<
         this.#refArrow.remove();
         this.#refArrow = undefined;
       }
-      setTimeout(() => this.fireEvent("$hide", { cancelable: false })); // run async to dispose internal resources first: possible dev-side-issues
+      setTimeout(() => this.fireEvent("$close", { cancelable: false })); // run async to dispose internal resources first: possible dev-side-issues
     };
 
     // waitFor only if was ordinary user-action
-    const skipWait = hideCase === PopupCloseCases.onOptionChange || hideCase === PopupCloseCases.onTargetRemove;
+    const skipWait = closeCase === PopupCloseCases.onOptionChange || closeCase === PopupCloseCases.onTargetRemove;
     if (!skipWait) {
       this.setAttribute("hide", "");
       const { animationDuration: aD } = getComputedStyle(this);

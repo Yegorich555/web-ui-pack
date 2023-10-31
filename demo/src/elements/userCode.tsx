@@ -142,7 +142,7 @@ function RenderCssVars(props: UserCodeProps & { el: WUPBaseElement }): JSX.Eleme
             class={styles.cssCommon}
             ref={(p) => {
               if (p) {
-                p.$onWillHide = (e) => {
+                p.$onWillClose = (e) => {
                   (e.detail.hideCase === PopupCloseCases.onPopupClick ||
                     e.detail.hideCase === PopupCloseCases.onFocusOut) &&
                     e.preventDefault();

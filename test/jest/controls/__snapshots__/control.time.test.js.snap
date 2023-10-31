@@ -233,6 +233,21 @@ exports[`control.time $show/$hide error 3`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
 </wup-time>
 `;
 
@@ -1091,6 +1106,34 @@ exports[`control.time validations $options.validationShowAll 2`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      This field is required
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li>
+        Min value is 02:28 AM
+      </li>
+      <li>
+        Max value is 11:15 PM
+      </li>
+      <li>
+        This value is disabled
+      </li>
+    </ul>
+  </wup-popup>
 </wup-time>
 `;
 
@@ -1127,6 +1170,118 @@ exports[`control.time validations $options.validationShowAll 3`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      This field is required
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li>
+        Min value is 02:28 AM
+      </li>
+      <li>
+        Max value is 11:15 PM
+      </li>
+      <li>
+        This value is disabled
+      </li>
+    </ul>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span
+      class="wup-hidden"
+    >
+      Always error
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li
+        valid=""
+      >
+        Min value is 02:28 AM
+      </li>
+      <li
+        valid=""
+      >
+        Max value is 11:15 PM
+      </li>
+      <li
+        valid=""
+      >
+        This value is disabled
+      </li>
+      <li
+        valid=""
+      />
+      <li>
+        Always error
+      </li>
+    </ul>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Name:
+    </span>
+    <span>
+      This field is required
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li
+        valid=""
+      >
+        Min value is 02:28 AM
+      </li>
+      <li
+        valid=""
+      >
+        Max value is 11:15 PM
+      </li>
+      <li
+        valid=""
+      >
+        This value is disabled
+      </li>
+      <li
+        valid=""
+      />
+      <li>
+        Always error
+      </li>
+    </ul>
+  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -1469,6 +1624,23 @@ exports[`control.time validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
+    id="txt4"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
     id="txt5"
     style=""
   >
@@ -1526,6 +1698,39 @@ exports[`control.time validations options.validationCase 4`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    role="alert"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    style=""
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
