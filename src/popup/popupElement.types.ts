@@ -1,14 +1,14 @@
 export const enum PopupOpenCases {
-  /** No listener - show on init + only manual call `.$close()` & `.$open()` */
-  always = 0,
+  /** When $open() is called programmatically */
+  onManuallCall = 0,
+  /** On init (when appended to layout) */
+  onInit = 1,
   /** On `mouseenter` event of target; hide by `mouseleave` */
-  onHover = 1,
+  onHover = 1 << 1,
   /** On `focusIn` event of target; hide by `focusout` (also on click if PopupOpenCases.onClick included) */
-  onFocus = 1 << 1,
+  onFocus = 1 << 2,
   /** On `click` event of target; hide by click anywhere */
-  onClick = 1 << 2,
-  /** No listener - only manual call `.$close()` & `.$open()` */
-  alwaysOff = 1 << 3,
+  onClick = 1 << 3,
 }
 
 export const enum PopupCloseCases {
@@ -132,7 +132,6 @@ declare global {
        *
        * attr `target` has hire priority than ref.options.target */
       "w-target"?: string;
-      // todo inherit from basmodal
       /** @readonly Result position; use this to restyle animation etc. */
       readonly position?: "top" | "left" | "bottom" | "right";
       /** @readonly Hide state; use this to hide-animation */

@@ -18,6 +18,7 @@
     state-prop `$isShown` >>> `$isOpened`
     event `$onShown` >>> `$onOpened`
     etc.
+  - Refactored/normalized enum PopupShowCases
 - **Combobox controls (Select, SelectMany, Date, Time)**
   - Renamed `show/hide` to `open/close`:
     enum `ShowCases` >>> `MenuShowCases`

@@ -263,7 +263,7 @@ exports[`popupElement inheritance common tests snapshot of $defaults 1`] = `
   "animation": 0,
   "hoverCloseTimeout": 500,
   "hoverOpenTimeout": 200,
-  "openCase": 4,
+  "openCase": 8,
   "placement": [
     [Function],
     [Function],
@@ -561,7 +561,7 @@ exports[`popupElement me common tests snapshot of $defaults 1`] = `
   "animation": 0,
   "hoverCloseTimeout": 500,
   "hoverOpenTimeout": 200,
-  "openCase": 4,
+  "openCase": 8,
   "placement": [
     [Function],
     [Function],

@@ -17,7 +17,7 @@ beforeEach(async () => {
       WUPPopupElement.$placements.$top.$start,
       WUPPopupElement.$placements.$bottom.$start,
     ];
-    WUPPopupElement.$defaults.openCase = 4; // onClick;
+    WUPPopupElement.$defaults.openCase = 1 << 3; // onClick;
     renderIt(
       <label key={Date.now()}>
         <span>Label text</span>
@@ -73,7 +73,7 @@ describe("popupElement", () => {
   });
 
   test("openCase: click & focus", async () => {
-    await page.evaluate(() => (testEl.$options.openCase = (1 << 1) | (1 << 2)));
+    await page.evaluate(() => (testEl.$options.openCase = (1 << 2) | (1 << 3)));
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
     expect(t.gotShow).toBe(0);

@@ -943,7 +943,7 @@ export default abstract class WUPBaseControl<
 
   protected renderError(): WUPPopupElement {
     const p = document.createElement("wup-popup");
-    p.$options.openCase = PopupOpenCases.always;
+    p.$options.openCase = PopupOpenCases.onInit;
     p.$options.target = this;
     p.$options.placement = [
       WUPPopupElement.$placements.$bottom.$start.$resizeWidth,

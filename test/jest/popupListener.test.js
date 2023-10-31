@@ -49,7 +49,7 @@ describe("popupListener", () => {
     expect(onOpen).toBeCalledTimes(1);
     expect(onOpen.mock.calls[0]).toMatchInlineSnapshot(`
       [
-        4,
+        8,
         MouseEvent {
           "isTrusted": false,
           "pageX": 1,
@@ -108,7 +108,7 @@ describe("popupListener", () => {
     expect(isOpened).toBe(true);
     expect(onOpen.mock.calls[0]).toMatchInlineSnapshot(`
       [
-        1,
+        2,
         MouseEvent {
           "isTrusted": false,
         },
@@ -211,7 +211,7 @@ describe("popupListener", () => {
     expect(isOpened).toBe(true);
     expect(onOpen.mock.calls[0]).toMatchInlineSnapshot(`
       [
-        2,
+        4,
         Event {
           "isTrusted": false,
         },
@@ -554,7 +554,7 @@ describe("popupListener", () => {
 
     document.body.appendChild(el);
     ref = new PopupListener(
-      { target: trg, openCase: 1 << 2 }, // onClick
+      { target: trg, openCase: PopupOpenCases.onClick }, // onClick
       () => {
         el.$open();
         return el;
@@ -596,7 +596,7 @@ describe("popupListener", () => {
 
     document.body.appendChild(el);
     const refs = new PopupListener(
-      { target: trg, openCase: 1 << 2 }, // onClick
+      { target: trg, openCase: PopupOpenCases.onClick }, // onClick
       () => {
         el.$open();
         return el;
@@ -624,7 +624,7 @@ describe("popupListener", () => {
 
   /* test("double-click filter", async () => {
     await el.$close();
-    el.$options.openCase = 1 << 2; // click
+    el.$options.openCase =PopupOpenCases.onClick; // click
     await h.wait();
     expect(el.$isOpened).toBe(false);
     // double-click simulation
@@ -649,7 +649,7 @@ describe("popupListener", () => {
     el.$options.openCase = 0;
     let cnt = 0;
     ref = new PopupListener(
-      { target: trg, openCase: 1 << 2 }, // onClick
+      { target: trg, openCase: PopupOpenCases.onClick }, // onClick
       () => {
         ++cnt;
         throw new Error("TestCase Impossible to open");

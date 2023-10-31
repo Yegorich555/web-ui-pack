@@ -383,7 +383,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   renderTooltip(segment: WUP.Circle.SVGItem): WUPPopupElement {
     const popup = document.createElement("wup-popup");
     popup.setAttribute("tooltip", "");
-    popup.$options.openCase = PopupOpenCases.always;
+    popup.$options.openCase = PopupOpenCases.onInit;
     popup.$options.target = segment;
     popup.$options.arrowEnable = true;
     // place in the center of drawed path

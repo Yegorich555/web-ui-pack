@@ -396,10 +396,10 @@ export default class WUPPopupElement<
           try {
             let isOk = true;
             if (this.#refListener) {
-              await this.#refListener.open(PopupOpenCases.always, null);
+              await this.#refListener.open(PopupOpenCases.onManuallCall, null);
               isOk = !!this.#refListener.openedEl;
             } else {
-              isOk = await this.goOpen(PopupOpenCases.always, null);
+              isOk = await this.goOpen(PopupOpenCases.onManuallCall, null);
             }
             res(isOk);
           } catch (err) {
@@ -471,11 +471,11 @@ export default class WUPPopupElement<
     if (this.#attach) {
       this.#refListener = this.#attach();
     } else {
-      if (!this._opts.openCase /* always */) {
-        this.goOpen(PopupOpenCases.always, null);
+      if (this._opts.openCase === PopupOpenCases.onInit) {
+        this.goOpen(PopupOpenCases.onInit, null);
         return;
       }
-      if (this._opts.openCase !== PopupOpenCases.alwaysOff) {
+      if (this._opts.openCase !== PopupOpenCases.onManuallCall) {
         this._opts.target = this.defineTarget();
         this.#refListener = new PopupListener(
           this._opts as typeof this._opts & { target: HTMLElement },
