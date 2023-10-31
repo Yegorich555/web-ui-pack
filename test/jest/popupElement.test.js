@@ -235,7 +235,7 @@ describe("popupElement", () => {
     expect(a.$isOpened).toBe(true);
     expect(a.$isShowing).toBe(false);
     a.$close();
-    expect(a.$isHidden).toBe(true);
+    expect(a.$isClosed).toBe(true);
     expect(a.$isHiding).toBe(false);
     onClose.mockClear();
     a.$options.target = null;
@@ -494,17 +494,17 @@ describe("popupElement", () => {
 
   test("$close()/$open()", async () => {
     expect(el.$isOpened).toBe(true);
-    expect(el.$isHidden).toBe(false);
+    expect(el.$isClosed).toBe(false);
 
     el.$close();
     expect(el.$isOpened).toBe(false);
-    expect(el.$isHidden).toBe(true);
+    expect(el.$isClosed).toBe(true);
     expect(el.$isShowing).toBe(false);
     expect(el.$isHiding).toBe(false);
 
     el.$open();
     expect(el.$isOpened).toBe(true);
-    expect(el.$isHidden).toBe(false);
+    expect(el.$isClosed).toBe(false);
     expect(el.$isShowing).toBe(false);
     expect(el.$isHiding).toBe(false);
 
@@ -706,30 +706,30 @@ describe("popupElement", () => {
     // checking states
     document.body.append(el);
     expect(el.$isOpened).toBe(false);
-    expect(el.$isHidden).toBe(true);
+    expect(el.$isClosed).toBe(true);
     el.$open();
     await h.wait(50);
     expect(el.$isOpened).toBe(true);
     expect(el.$isShowing).toBe(true);
-    expect(el.$isHidden).toBe(false);
+    expect(el.$isClosed).toBe(false);
     expect(el.$isHiding).toBe(false);
     await nextFrame(100);
     await h.wait();
     expect(el.$isOpened).toBe(true);
     expect(el.$isShowing).toBe(false);
-    expect(el.$isHidden).toBe(false);
+    expect(el.$isClosed).toBe(false);
     expect(el.$isHiding).toBe(false);
 
     el.$close();
     await h.wait(50);
     expect(el.$isOpened).toBe(true);
     expect(el.$isShowing).toBe(false);
-    expect(el.$isHidden).toBe(false);
+    expect(el.$isClosed).toBe(false);
     expect(el.$isHiding).toBe(true);
     await nextFrame(100);
     expect(el.$isOpened).toBe(false);
     expect(el.$isShowing).toBe(false);
-    expect(el.$isHidden).toBe(true);
+    expect(el.$isClosed).toBe(true);
     expect(el.$isHiding).toBe(false);
 
     // show/hide in a short time
@@ -748,7 +748,7 @@ describe("popupElement", () => {
     await nextFrame(100);
     expect(el.$isOpened).toBe(true);
     expect(el.$isShowing).toBe(false);
-    expect(el.$isHidden).toBe(false);
+    expect(el.$isClosed).toBe(false);
     expect(el.$isHiding).toBe(false);
 
     // no new show-logic
@@ -768,7 +768,7 @@ describe("popupElement", () => {
     el.goHide(0).then(spyThen); // just for coverage
     await nextFrame(100);
     expect(spyThen).toBeCalledTimes(1); // because popup already isHidden
-    expect(el.$isHidden).toBe(true);
+    expect(el.$isClosed).toBe(true);
 
     el.addEventListener("$willClose", spyWill);
     el.$close().then(spyThen);

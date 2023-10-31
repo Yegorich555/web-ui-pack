@@ -431,7 +431,7 @@ export default class WUPPopupElement<
    * * stack: $show() > `$isHidden:false` >  showing > shown
    * * stack: $hide() > hiding > hidden > `$isHidden:true`
    * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
-  get $isHidden(): boolean {
+  get $isClosed(): boolean {
     return !this.#isShown && !this.$isHiding;
   }
 
