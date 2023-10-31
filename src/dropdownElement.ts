@@ -17,8 +17,8 @@ declare global {
        * @defaultValue `PopupOpenCases.onClick | PopupOpenCases.onFocus`
        * @tutorial Troubleshooting
        * * to change option for specific element change it for `<wup-popup/>` directly after timeout
-       * @example setTimeout(() => this.$refPopup.$options.showCase = PopupOpenCases.onFocus | PopupOpenCases.onClick) */
-      showCase: PopupOpenCases;
+       * @example setTimeout(() => this.$refPopup.$options.openCase = PopupOpenCases.onFocus | PopupOpenCases.onClick) */
+      openCase: PopupOpenCases;
       /** Hide menu on popup click
        * @defaultValue true */
       hideOnPopupClick: boolean;
@@ -102,7 +102,7 @@ export default class WUPDropdownElement<
   static $defaults: WUP.Dropdown.Options = {
     ...WUPPopupElement.$defaults,
     animation: PopupAnimations.drawer,
-    showCase: PopupOpenCases.onClick | PopupOpenCases.onFocus,
+    openCase: PopupOpenCases.onClick | PopupOpenCases.onFocus,
     hideOnPopupClick: true,
     minHeightByTarget: true,
     minWidthByTarget: true,

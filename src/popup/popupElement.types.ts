@@ -64,13 +64,13 @@ declare global {
        * @example
        * // use `|` to to join cases
        * showCase=PopupOpenCases.onFocus | PopupOpenCases.onClick;  */
-      showCase: PopupOpenCases;
+      openCase: PopupOpenCases;
       /** Timeout in ms before popup shows on hover of target (for PopupOpenCases.onHover);
        * @defaultValue 200ms */
-      hoverShowTimeout: number;
+      hoverOpenTimeout: number;
       /** Timeout in ms before popup hides on mouse-leave of target (for PopupOpenCases.onHover);
        * @defaultValue 500ms  */
-      hoverHideTimeout: number;
+      hoverCloseTimeout: number;
       /** Animation applied to popup
        * @defaultValue `PopupAnimations.default (opacity)` */
       animation: PopupAnimations;

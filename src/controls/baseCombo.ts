@@ -212,7 +212,7 @@ export default abstract class WUPBaseComboControl<
     if (!this.$refPopup) {
       const p = document.createElement("wup-popup");
       this.$refPopup = p;
-      p.$options.showCase = PopupOpenCases.alwaysOff;
+      p.$options.openCase = PopupOpenCases.alwaysOff;
       p.$options.target = this;
       p.$options.offsetFitElement = [1, 1];
       p.$options.minWidthByTarget = true;

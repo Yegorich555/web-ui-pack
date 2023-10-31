@@ -261,13 +261,13 @@ TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
 exports[`popupElement inheritance common tests snapshot of $defaults 1`] = `
 {
   "animation": 0,
-  "hoverHideTimeout": 500,
-  "hoverShowTimeout": 200,
+  "hoverCloseTimeout": 500,
+  "hoverOpenTimeout": 200,
+  "openCase": 4,
   "placement": [
     [Function],
     [Function],
   ],
-  "showCase": 4,
   "toFitElement": <body>
     <div
       id="targetId"
@@ -284,8 +284,8 @@ exports[`popupElement inheritance common tests snapshot of $defaults 1`] = `
 
 exports[`popupElement inheritance common tests snapshot of $defaults 2`] = `
 [
+  "openCase",
   "placement",
-  "showCase",
   "target",
 ]
 `;
@@ -559,13 +559,13 @@ TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
 exports[`popupElement me common tests snapshot of $defaults 1`] = `
 {
   "animation": 0,
-  "hoverHideTimeout": 500,
-  "hoverShowTimeout": 200,
+  "hoverCloseTimeout": 500,
+  "hoverOpenTimeout": 200,
+  "openCase": 4,
   "placement": [
     [Function],
     [Function],
   ],
-  "showCase": 4,
   "toFitElement": <body>
     <div
       id="targetId"
@@ -582,8 +582,8 @@ exports[`popupElement me common tests snapshot of $defaults 1`] = `
 
 exports[`popupElement me common tests snapshot of $defaults 2`] = `
 [
+  "openCase",
   "placement",
-  "showCase",
   "target",
 ]
 `;

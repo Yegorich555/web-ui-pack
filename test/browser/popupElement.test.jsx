@@ -17,7 +17,7 @@ beforeEach(async () => {
       WUPPopupElement.$placements.$top.$start,
       WUPPopupElement.$placements.$bottom.$start,
     ];
-    WUPPopupElement.$defaults.showCase = 4; // onClick;
+    WUPPopupElement.$defaults.openCase = 4; // onClick;
     renderIt(
       <label key={Date.now()}>
         <span>Label text</span>
@@ -73,7 +73,7 @@ describe("popupElement", () => {
   });
 
   test("showCase: click & focus", async () => {
-    await page.evaluate(() => (testEl.$options.showCase = (1 << 1) | (1 << 2)));
+    await page.evaluate(() => (testEl.$options.openCase = (1 << 1) | (1 << 2)));
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
     expect(t.gotShow).toBe(0);
@@ -88,19 +88,19 @@ describe("popupElement", () => {
   });
 
   test("showCase: hover & click & focus", async () => {
-    await page.evaluate(() => (testEl.$options.showCase = 0b1111111));
+    await page.evaluate(() => (testEl.$options.openCase = 0b1111111));
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     await page.hover("input");
     let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
     expect(t.isOpened).toBe(false); // because of timeout
-    await page.waitForTimeout(300); // hoverShowTimeout is 200 by default
+    await page.waitForTimeout(300); // hoverOpenTimeout is 200 by default
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
     expect(t.isOpened).toBe(true);
 
     await page.hover("span");
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
     expect(t.isOpened).toBe(true); // because of timeout
-    await page.waitForTimeout(500 + 300 + 100); // hoverShowTimeout is 500 by default and hide-animation is 300
+    await page.waitForTimeout(500 + 300 + 100); // hoverOpenTimeout is 500 by default and hide-animation is 300
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
     expect(t.isOpened).toBe(false);
 

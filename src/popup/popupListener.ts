@@ -5,31 +5,31 @@ import { PopupCloseCases, PopupOpenCases } from "./popupElement.types";
 
 export interface PopupListenerOptions {
   target: HTMLElement | SVGElement;
-  showCase?: PopupOpenCases;
-  hoverShowTimeout?: number;
-  hoverHideTimeout?: number;
+  openCase?: PopupOpenCases;
+  hoverOpenTimeout?: number;
+  hoverCloseTimeout?: number;
   focusDebounceMs?: number;
 }
 
-/** Listen for target according to showCase. If target removed call stopListen + don't forget to remove popup yourself;
+/** Listen for target according to openCase. If target removed call stopListen + don't forget to remove popup yourself;
  * @tutorial Troubleshooting/rules:
- * * To allow user hide/show popup before previous action is ended provide for onShow and onHide-
+ * * To allow user close/open popup before previous action is ended provide for onOpen and onClose-
  *   callbacks results as fast as it's possible without waiting for animation */
 export default class PopupListener {
   static $defaults = {
-    showCase: PopupOpenCases.onClick,
-    hoverShowTimeout: 200,
-    hoverHideTimeout: 500,
+    openCase: PopupOpenCases.onClick,
+    hoverOpenTimeout: 200,
+    hoverCloseTimeout: 500,
   };
 
   constructor(
     public options: PopupListenerOptions,
-    public onShow: (
-      showCase: PopupOpenCases,
+    public onOpen: (
+      openCase: PopupOpenCases,
       ev: MouseEvent | FocusEvent | null
     ) => HTMLElement | null | Promise<HTMLElement | null>,
-    public onHide: (
-      hideCase: PopupCloseCases,
+    public onClose: (
+      closeCase: PopupCloseCases,
       ev: MouseEvent | FocusEvent | KeyboardEvent | null
     ) => boolean | Promise<boolean>
   ) {
@@ -45,66 +45,66 @@ export default class PopupListener {
   }
 
   openedEl: Element | null = null;
-  isShowing?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
-  isHiding?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
+  isOpening?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
+  isClosing?: boolean | Promise<unknown>; // required to prevent infinite-calling from parent
 
-  /** Called on show */
-  async show(showCase: PopupOpenCases, e: MouseEvent | FocusEvent | null): Promise<void> {
-    if (this.openedEl || this.isShowing || !this.options.target.isConnected) {
+  /** Called on open */
+  async open(openCase: PopupOpenCases, e: MouseEvent | FocusEvent | null): Promise<void> {
+    if (this.openedEl || this.isOpening || !this.options.target.isConnected) {
       return;
     }
-    this.isShowing = true;
+    this.isOpening = true;
     this.#lastActive = document.activeElement as HTMLElement | SVGElement;
     // eslint-disable-next-line no-async-promise-executor
-    this.isShowing = new Promise<void>(async (res, rej) => {
+    this.isOpening = new Promise<void>(async (res, rej) => {
       try {
-        this.openedEl = await this.onShow(showCase, e);
+        this.openedEl = await this.onOpen(openCase, e);
         res();
       } catch (err) {
         rej(err);
       }
-    }).finally(() => (this.isShowing = false));
-    await this.isShowing;
-    // timeout required to avoid immediate hide by bubbling events to root
+    }).finally(() => (this.isOpening = false));
+    await this.isOpening;
+    // timeout required to avoid immediate close by bubbling events to root
     if (this.openedEl) {
-      setTimeout(() => this.openedEl && this.listenOnShow());
+      setTimeout(() => this.openedEl && this.listenOnOpen());
     }
   }
 
-  /** Called on hide */
-  async hide(hideCase: PopupCloseCases, e: MouseEvent | FocusEvent | KeyboardEvent | null): Promise<void> {
-    this.isShowing && (await this.isShowing);
-    if (!this.openedEl || this.isHiding) {
+  /** Called on close */
+  async close(closeCase: PopupCloseCases, e: MouseEvent | FocusEvent | KeyboardEvent | null): Promise<void> {
+    this.isOpening && (await this.isOpening);
+    if (!this.openedEl || this.isClosing) {
       return;
     }
-    this.disposeOnHide();
-    const was = this.openedEl; // required when user clicks again during the hiding > we need to show in this case
+    this.disposeOnClose();
+    const was = this.openedEl; // required when user clicks again during the hiding > we need to open in this case
     this.openedEl = null;
     try {
-      this.isHiding = true;
+      this.isClosing = true;
       // prevent focusing popupContent during the hiding
       const r = onEvent(was as HTMLElement, "focusin", ({ relatedTarget }) => {
         this.focusBack(relatedTarget); // WARN: it returns focus to target but better move focus forward - but it's impossible
       });
-      const isOk = await this.onHide.call(was, hideCase, e || null);
+      const isOk = await this.onClose.call(was, closeCase, e || null);
       r();
       if (isOk) {
         this.#openedByHover = false;
         // case1: popupClick > focus lastActive or target
-        // case2: hide & focus in popup > focus lastActive or target
+        // case2: close & focus in popup > focus lastActive or target
         const isMeFocused = this.isMe(document.activeElement, was);
-        const needFocusBack = isMeFocused || hideCase === PopupCloseCases.onPopupClick;
+        const needFocusBack = isMeFocused || closeCase === PopupCloseCases.onPopupClick;
         needFocusBack && this.focusBack(null);
         this.#lastActive = undefined;
       }
       if (!isOk && !this.openedEl) {
-        this.openedEl = was; // rollback if onHide was prevented and onShow wasn't called again during the hiding
-        this.listenOnShow();
+        this.openedEl = was; // rollback if onClose was prevented and onOpen wasn't called again during the hiding
+        this.listenOnOpen();
       }
     } catch (error) {
-      Promise.reject(error); // handle error from onHide
+      Promise.reject(error); // handle error from onClose
     }
-    this.isHiding = false;
+    this.isClosing = false;
   }
 
   /** Returns focus back during the hiding */
@@ -152,9 +152,9 @@ export default class PopupListener {
             return;
           }
           if (this.isMe(e.target)) {
-            this.hide(PopupCloseCases.onPopupClick, e as MouseEvent);
+            this.close(PopupCloseCases.onPopupClick, e as MouseEvent);
           } else {
-            this.hide(PopupCloseCases.onOutsideClick, e as MouseEvent);
+            this.close(PopupCloseCases.onOutsideClick, e as MouseEvent);
             this.#wasOutsideClick = true;
             setTimeout(() => (this.#wasOutsideClick = false), 50);
           }
@@ -162,7 +162,7 @@ export default class PopupListener {
         break;
       case "keydown":
         if ((e as unknown as KeyboardEvent).key === "Escape") {
-          this.hide(PopupCloseCases.onPressEsc, e as MouseEvent);
+          this.close(PopupCloseCases.onPressEsc, e as MouseEvent);
         }
         break;
     }
@@ -184,7 +184,7 @@ export default class PopupListener {
           const e = ev as MouseEvent;
           if (!e.pageX) {
             // pageX is null or 0 if it was called programmatically
-            this.#preventClickAfterFocus = false; // test-case: focus without click > show....click programatically on target > it should hide
+            this.#preventClickAfterFocus = false; // test-case: focus without click > open....click programatically on target > it should close
           }
           const skip =
             this.#preventClickAfterFocus ||
@@ -198,8 +198,8 @@ export default class PopupListener {
           }
           // popupClick possible when popup inside target
           this.openedEl
-            ? this.hide(this.isMe(e.target) ? PopupCloseCases.onPopupClick : PopupCloseCases.onTargetClick, e)
-            : this.show(PopupOpenCases.onClick, e);
+            ? this.close(this.isMe(e.target) ? PopupCloseCases.onPopupClick : PopupCloseCases.onTargetClick, e)
+            : this.open(PopupOpenCases.onClick, e);
           // fix when labelOnClick > inputOnClick > inputOnFocus
           this.#debounceClick = setTimeout(() => (this.#debounceClick = undefined), 1);
         }
@@ -209,9 +209,9 @@ export default class PopupListener {
         if (!this.openedEl) {
           this.#hoverTimeout = setTimeout(() => {
             this.#openedByHover && clearTimeout(this.#openedByHover);
-            this.#openedByHover = setTimeout(() => (this.#openedByHover = false), 300); // allow hide by click when shown by hover (300ms to prevent unexpected click & hover colision)
-            this.show(PopupOpenCases.onHover, ev as MouseEvent);
-          }, this.options.hoverShowTimeout);
+            this.#openedByHover = setTimeout(() => (this.#openedByHover = false), 300); // allow close by click when opened by hover (300ms to prevent unexpected click & hover colision)
+            this.open(PopupOpenCases.onHover, ev as MouseEvent);
+          }, this.options.hoverOpenTimeout);
         }
         break;
       case "mouseleave":
@@ -220,14 +220,14 @@ export default class PopupListener {
           this.#hoverTimeout = setTimeout(() => {
             this.#openedByHover && clearTimeout(this.#openedByHover);
             this.#openedByHover = false;
-            this.hide(PopupCloseCases.onMouseLeave, ev as MouseEvent);
-          }, this.options.hoverHideTimeout);
+            this.close(PopupCloseCases.onMouseLeave, ev as MouseEvent);
+          }, this.options.hoverCloseTimeout);
         }
         break;
       case "focusin":
         if (!this.openedEl && !this.#preventFocusEvent && !this.#openedByHover) {
-          this.#preventClickAfterFocus = !!(this.options.showCase! & PopupOpenCases.onClick);
-          this.show(PopupOpenCases.onFocus, ev as FocusEvent).then(() => {
+          this.#preventClickAfterFocus = !!(this.options.openCase! & PopupOpenCases.onClick);
+          this.open(PopupOpenCases.onFocus, ev as FocusEvent).then(() => {
             if (this.#preventClickAfterFocus) {
               // WARN: event is self-destroyed on 1st event so not required to dispose it
               document.addEventListener("pointerdown", () => (this.#preventClickAfterFocus = false), {
@@ -247,7 +247,7 @@ export default class PopupListener {
           const isToMe = this.isMe(next);
           const t = this.options.target;
           const isToTarget = t === next || this.includes.call(t, next);
-          !isToMe && !isToTarget && this.hide(PopupCloseCases.onFocusOut, e);
+          !isToMe && !isToTarget && this.close(PopupCloseCases.onFocusOut, e);
         }
         break;
     }
@@ -264,16 +264,16 @@ export default class PopupListener {
     this.handleEventsDocument = this.handleEventsDocument.bind(this);
     this.handleEvents = this.handleEvents.bind(this);
 
-    const { target: t, showCase } = this.options as Required<PopupListenerOptions>;
+    const { target: t, openCase } = this.options as Required<PopupListenerOptions>;
 
-    if (showCase & PopupOpenCases.onClick) {
+    if (openCase & PopupOpenCases.onClick) {
       t.addEventListener("click", this.handleEvents, this.#defargs);
     }
-    if (showCase & PopupOpenCases.onHover) {
+    if (openCase & PopupOpenCases.onHover) {
       t.addEventListener("mouseenter", this.handleEvents, this.#defargs);
-      t.addEventListener("mouseleave", this.handleEvents, this.#defargs); // use only appendEvent; with onShowEvent it doesn't work properly (because filtered by timeout)
+      t.addEventListener("mouseleave", this.handleEvents, this.#defargs); // use only appendEvent; with onOpenEvent it doesn't work properly (because filtered by timeout)
     }
-    if (showCase & PopupOpenCases.onFocus) {
+    if (openCase & PopupOpenCases.onFocus) {
       this.#disposeFocus = onFocusGot(t as HTMLElement, this.handleEvents, {
         debounceMs: this.options.focusDebounceMs,
       });
@@ -286,21 +286,21 @@ export default class PopupListener {
     }
   }
 
-  /** Called to add extra events when show */
-  listenOnShow(): void {
+  /** Called to add extra events when open */
+  listenOnOpen(): void {
     const el = this.openedEl as HTMLElement;
     document.addEventListener("focusin", this.handleEventsDocument, this.#defargs);
     document.addEventListener("keydown", this.handleEventsDocument, this.#defargs);
 
-    const { target: t, showCase } = this.options as Required<PopupListenerOptions>;
-    if (showCase & PopupOpenCases.onClick) {
+    const { target: t, openCase } = this.options as Required<PopupListenerOptions>;
+    if (openCase & PopupOpenCases.onClick) {
       document.addEventListener("click", this.handleEventsDocument, this.#defargs);
     }
-    if (showCase & PopupOpenCases.onHover) {
+    if (openCase & PopupOpenCases.onHover) {
       el.addEventListener("mouseenter", this.handleEvents, this.#defargs);
       el.addEventListener("mouseleave", this.handleEvents, this.#defargs);
     }
-    // if (showCase & PopupOpenCases.onFocus) {
+    // if (openCase & PopupOpenCases.onFocus) {
     // WARN: use focusLost forever for accessibility purpose
     this.#disposeFocusLost = onFocusLost(t as HTMLElement, this.handleEvents, {
       debounceMs: this.options.focusDebounceMs,
@@ -311,8 +311,8 @@ export default class PopupListener {
     // }
   }
 
-  /** Called to remove extra events when hide */
-  disposeOnHide(): void {
+  /** Called to remove extra events when close */
+  disposeOnClose(): void {
     document.removeEventListener("keydown", this.handleEventsDocument, this.#defargs);
     document.removeEventListener("focusin", this.handleEventsDocument, this.#defargs);
     document.removeEventListener("click", this.handleEventsDocument, this.#defargs);
@@ -324,7 +324,7 @@ export default class PopupListener {
 
   /** Remove all event listeners */
   stopListen(): void {
-    this.disposeOnHide();
+    this.disposeOnClose();
     const t = this.options.target;
     t.removeEventListener("click", this.handleEvents, this.#defargs);
     t.removeEventListener("mouseenter", this.handleEvents, this.#defargs);

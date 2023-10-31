@@ -159,7 +159,7 @@ WUPPopupElement.$defaults.arrowEnable = true;
 const el = document.createElement("wup-popup");
 // WARN el.$options is a observable-clone of WUPPopupElement.$defaults
 // WARN: PopupOpenCases is const enum and import PopupOpenCases available only in Typescript
-el.$options.showCase = PopupOpenCases.onClick | PopupOpenCases.onFocus; // show popup by target.click and/or target.focus events
+el.$options.openCase = PopupOpenCases.onClick | PopupOpenCases.onFocus; // show popup by target.click and/or target.focus events
 el.$options.target = document.querySelector("button");
 /*
   Placement can be $top, $right, $bottom, $left (top - above at the target etc.)

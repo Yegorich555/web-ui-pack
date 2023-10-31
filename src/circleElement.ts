@@ -68,17 +68,17 @@ declare global {
        * @defaultValue 10 */
       minSize: number;
       /** Timeout in ms before popup shows on hover of target;
-       * @defaultValue inherited from WUPPopupElement.$defaults.hoverShowTimeout */
-      hoverShowTimeout: number;
+       * @defaultValue inherited from WUPPopupElement.$defaults.hoverOpenTimeout */
+      hoverOpenTimeout: number;
       /** Timeout in ms before popup hides on mouse-leave of target;
        * @defaultValue 0 */
-      hoverHideTimeout: number;
+      hoverCloseTimeout: number;
       /** Items related to circle-segments */
       items: Item[];
     }
     interface JSXProps<T = WUPCircleElement>
       extends WUP.Base.JSXProps<T>,
-        WUP.Base.OnlyNames<Omit<Options, "hoverShowTimeout" | "hoverHideTimeout" | "items">> {
+        WUP.Base.OnlyNames<Omit<Options, "hoverOpenTimeout" | "hoverCloseTimeout" | "items">> {
       "w-width"?: number;
       "w-corner"?: number;
       "w-back"?: boolean | "";
@@ -197,8 +197,8 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     max: 100,
     space: 2,
     minSize: 10,
-    hoverShowTimeout: WUPPopupElement.$defaults.hoverShowTimeout,
-    hoverHideTimeout: 0,
+    hoverOpenTimeout: WUPPopupElement.$defaults.hoverOpenTimeout,
+    hoverCloseTimeout: 0,
     items: [],
   };
 
@@ -383,7 +383,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   renderTooltip(segment: WUP.Circle.SVGItem): WUPPopupElement {
     const popup = document.createElement("wup-popup");
     popup.setAttribute("tooltip", "");
-    popup.$options.showCase = PopupOpenCases.always;
+    popup.$options.openCase = PopupOpenCases.always;
     popup.$options.target = segment;
     popup.$options.arrowEnable = true;
     // place in the center of drawed path
@@ -435,7 +435,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
           t._tid = setTimeout(() => {
             if (t._tooltip) t._tooltip.$open();
             else t._tooltip = this.renderTooltip(t);
-          }, this._opts.hoverShowTimeout);
+          }, this._opts.hoverOpenTimeout);
 
           onEvent(
             e.target as HTMLElement,
@@ -451,7 +451,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
                   }
                 });
                 t._tid = undefined;
-              }, this._opts.hoverHideTimeout);
+              }, this._opts.hoverCloseTimeout);
             },
             { once: true }
           );

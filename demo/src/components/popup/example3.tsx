@@ -29,7 +29,7 @@ export default function Example3() {
           ref={(el) => {
             if (el) {
               el.$options.toFitElement = document.querySelector("#fit2") as HTMLElement;
-              el.$options.showCase = PopupOpenCases.always;
+              el.$options.openCase = PopupOpenCases.always;
             }
           }}
         >

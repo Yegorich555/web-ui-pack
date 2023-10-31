@@ -43,7 +43,7 @@ export default function Example4() {
                 WUPPopupElement.$placements.$top.$middle,
                 WUPPopupElement.$placements.$bottom.$middle,
               ];
-              el.$options.showCase = PopupOpenCases.always;
+              el.$options.openCase = PopupOpenCases.always;
             }
           }}
         >

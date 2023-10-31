@@ -36,7 +36,7 @@ function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
 
       const isLock = false; // change it to show forever
       if (isLock) {
-        popup.$options.showCase = PopupOpenCases.always;
+        popup.$options.openCase = PopupOpenCases.always;
         popup.$open(); // to override default showCase and leave show forever
       }
     }

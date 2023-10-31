@@ -36,8 +36,8 @@ describe("circleElement", () => {
       "w-space": { value: 2 },
       "w-minsize": { value: 10 },
       "w-back": { value: true },
-      "w-hoverhidetimeout": { value: 100 },
-      "w-hovershowtimeout": { value: 107 },
+      "w-hoverclosetimeout": { value: 100 },
+      "w-hoveropentimeout": { value: 107 },
     },
     onCreateNew: (e) => (e.$options.items = getItems()),
   });
@@ -347,8 +347,8 @@ describe("circleElement", () => {
 
   test("tooltips", async () => {
     el.$options.back = false;
-    el.$options.hoverHideTimeout = 50;
-    el.$options.hoverShowTimeout = 200;
+    el.$options.hoverCloseTimeout = 50;
+    el.$options.hoverOpenTimeout = 200;
     el.$options.items = [
       { value: 5, tooltip: "Item 1; value {#}, percent {#%}" },
       {
@@ -424,9 +424,9 @@ describe("circleElement", () => {
       return orig(elem);
     });
 
-    el._opts.hoverShowTimeout = 0;
+    el._opts.hoverOpenTimeout = 0;
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
-    await h.wait(el.$options.hoverHideTimeout);
+    await h.wait(el.$options.hoverCloseTimeout);
     expect(el.querySelector("wup-popup").$isClosing).toBe(true);
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await h.wait();
@@ -435,7 +435,7 @@ describe("circleElement", () => {
 
     // new items
     onTooltip.mockClear();
-    el.$options.hoverShowTimeout = 200;
+    el.$options.hoverOpenTimeout = 200;
     el.$options.items = [
       { value: 100, tooltip: "Item 1; {#}" },
       { value: 12, tooltip: "Item 2; {#}" },

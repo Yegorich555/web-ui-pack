@@ -34,7 +34,7 @@ declare global {
  * WUPPopupElement.$defaults.arrowEnable = true;
  *
  * const el = document.createElement('wup-popup');
- * el.$options.showCase = PopupOpenCases.onClick | PopupOpenCases.onFocus;
+ * el.$options.openCase = PopupOpenCases.onClick | PopupOpenCases.onFocus;
  * el.$options.target = document.querySelector('button');
  * // if placement impossible according to rules rest of possible rules will be applied
  * el.$options.placement = [
@@ -48,7 +48,7 @@ declare global {
  * const btn = document.querySelector('button');
  * // this is the most recomended way because $attach appends popup only by onShow and removes byHide
  * const detach = WUPPopupElement.$attach(
-                    { target: btn, text: "Some text content here", showCase: PopupOpenCases.onFocus | PopupOpenCases.onClick },
+                    { target: btn, text: "Some text content here", openCase: PopupOpenCases.onFocus | PopupOpenCases.onClick },
                     (popup) => { popup.className = "popup-class-here"; }
                   )'
  *```
@@ -75,7 +75,7 @@ export default class WUPPopupElement<
   // #ctr = this.constructor as typeof WUPPopupElement;
 
   static get observedOptions(): Array<keyof WUP.Popup.Options> {
-    return ["showCase", "target", "placement"];
+    return ["openCase", "target", "placement"];
   }
 
   static get observedAttributes(): Array<string> {
@@ -222,9 +222,9 @@ export default class WUPPopupElement<
       WUPPopupElement.$placements.$bottom.$middle.$adjust,
     ],
     toFitElement: document.body,
-    showCase: PopupOpenCases.onClick,
-    hoverShowTimeout: 200,
-    hoverHideTimeout: 500,
+    openCase: PopupOpenCases.onClick,
+    hoverOpenTimeout: 200,
+    hoverCloseTimeout: 500,
   };
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
@@ -233,7 +233,7 @@ export default class WUPPopupElement<
     return d as unknown as T;
   }
 
-  /** Listen for target according to showCase and create/remove popup when it's required (by show/hide).
+  /** Listen for target according to openCase and create/remove popup when it's required (by open/close).
    *  This helps to avoid tons of hidden popups on HTML;
    *  Firing detach doesn't required if target removed by target.remove() or target.parent.removeChild(target);
    *  If target is removed via changing innerHTML you should fire detach() to avoid memoryLeak
@@ -243,12 +243,12 @@ export default class WUPPopupElement<
    *     {
    *       target: document.querySelector("button") as HTMLElement,
    *       text: "Some text here",
-   *       showCase: PopupOpenCases.onClick,
+   *       openCase: PopupOpenCases.onClick,
    *     },
    *     // (el) => el.class = "popup-attached"
    *   );
    * @tutorial Troubleshooting:
-   * * $attach doesn't work with showCase.always it doesn't make sense
+   * * $attach doesn't work with openCase.always it doesn't make sense
    * * every new attach on the same target > re-init previous (1 attach per target is possible)
    * * Firing detach() doesn't required if target removed by `target.remove()` or `target.parent.removeChild(target)`;
    * * If popup is hidden and target is removed via `target.parent.innerHTML="another content"` you should fire detach() to avoid memoryLeak
@@ -368,7 +368,7 @@ export default class WUPPopupElement<
         let isOk = true;
         if (this.$isReady) {
           if (this.#refListener) {
-            await this.#refListener.hide(PopupCloseCases.onManuallCall, null);
+            await this.#refListener.close(PopupCloseCases.onManuallCall, null);
             isOk = !this.#refListener.openedEl;
           } else {
             isOk = await this.goHide(PopupCloseCases.onManuallCall, null);
@@ -396,7 +396,7 @@ export default class WUPPopupElement<
           try {
             let isOk = true;
             if (this.#refListener) {
-              await this.#refListener.show(PopupOpenCases.always, null);
+              await this.#refListener.open(PopupOpenCases.always, null);
               isOk = !!this.#refListener.openedEl;
             } else {
               isOk = await this.goShow(PopupOpenCases.always, null);
@@ -471,11 +471,11 @@ export default class WUPPopupElement<
     if (this.#attach) {
       this.#refListener = this.#attach();
     } else {
-      if (!this._opts.showCase /* always */) {
+      if (!this._opts.openCase /* always */) {
         this.goShow(PopupOpenCases.always, null);
         return;
       }
-      if (this._opts.showCase !== PopupOpenCases.alwaysOff) {
+      if (this._opts.openCase !== PopupOpenCases.alwaysOff) {
         this._opts.target = this.defineTarget();
         this.#refListener = new PopupListener(
           this._opts as typeof this._opts & { target: HTMLElement },
