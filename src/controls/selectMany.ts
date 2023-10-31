@@ -455,8 +455,8 @@ export default class WUPSelectManyControl<
     });
   }
 
-  override canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
-    return !this._wasSortAfterClick && super.canShowMenu(showCase, e);
+  override canOpenMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
+    return !this._wasSortAfterClick && super.canOpenMenu(showCase, e);
   }
 
   protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
@@ -510,8 +510,8 @@ export default class WUPSelectManyControl<
   }
 
   // @ts-expect-error - because expected v: ValueType[]
-  protected override selectValue(v: ValueType, canHideMenu = true): void {
-    super.selectValue(v as any, canHideMenu);
+  protected override selectValue(v: ValueType, canCloseMenu = true): void {
+    super.selectValue(v as any, canCloseMenu);
     this._opts.hideSelected && this.focusMenuItem(null);
   }
 

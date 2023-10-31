@@ -421,7 +421,7 @@ export default class WUPTimeControl<
         this._selectedMenuItem = undefined; // otherwise selection is cleared after popup-close
         this._focusedMenuItem && this.focusMenuItem(next.items[0]);
       }
-      !this.#isMenuInitPhase && this.$isShown && this.disableItems();
+      !this.#isMenuInitPhase && this.$isOpened && this.disableItems();
     };
 
     const drows = Math.round(rows / 2) - 1;
@@ -589,11 +589,11 @@ export default class WUPTimeControl<
     );
   }
 
-  protected override async goShowMenu(
+  protected override async goOpenMenu(
     showCase: ShowCases,
     e?: MouseEvent | FocusEvent | null
   ): Promise<WUPPopupElement | null> {
-    const r = await super.goShowMenu(showCase, e);
+    const r = await super.goOpenMenu(showCase, e);
 
     this.#valueBeforeMenu = this.$value;
     this.#lastInputChanged = false;
@@ -631,7 +631,7 @@ export default class WUPTimeControl<
     if (isOk) {
       this.selectValue(this.getMenuValue());
     } else {
-      setTimeout(() => this.goHideMenu(HideCases.OnPressEsc, e)); // without timeout it handles click by listener and opens again
+      setTimeout(() => this.goCloseMenu(HideCases.OnPressEsc, e)); // without timeout it handles click by listener and opens again
     }
   }
 
@@ -647,11 +647,14 @@ export default class WUPTimeControl<
     next !== null && this.trySetValue();
   }
 
-  protected override goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null | undefined): Promise<boolean> {
+  protected override goCloseMenu(
+    hideCase: HideCases,
+    e?: MouseEvent | FocusEvent | null | undefined
+  ): Promise<boolean> {
     hideCase === HideCases.OnPressEsc &&
       this._opts.menuButtonsOff &&
       this.setValue(this.#valueBeforeMenu, SetValueReasons.clear);
-    return super.goHideMenu(hideCase, e);
+    return super.goCloseMenu(hideCase, e);
   }
 
   protected override valueToInput(v: ValueType | undefined): string {
@@ -743,14 +746,14 @@ export default class WUPTimeControl<
   }
 
   protected override gotKeyDown(e: KeyboardEvent): void {
-    const wasOpen = this.$isShown;
+    const wasOpen = this.$isOpened;
     const isExtraKey = e.altKey || e.shiftKey || e.ctrlKey;
 
     // handle Enter key when menu is open
     if (!isExtraKey && wasOpen && e.key === "Enter") {
       e.preventDefault();
       if (this.#lastInputChanged || !this.$refButtonOk) {
-        this.goHideMenu(HideCases.OnPressEnter);
+        this.goCloseMenu(HideCases.OnPressEnter);
         this._inputError && this.resetInputValue(); // it will show err message
       } else if (!this.$refButtonOk!.disabled) {
         setTimeout(() =>

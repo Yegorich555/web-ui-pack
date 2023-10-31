@@ -305,7 +305,7 @@ export default class WUPSelectControl<
         Promise.resolve().finally(() => {
           this._cachedItems = data || [];
           act();
-          this.$isFocused && this.goShowMenu(ShowCases.onFocus, null);
+          this.$isFocused && this.goOpenMenu(ShowCases.onFocus, null);
         }); // empty promise required to showMenu after pending changes
         return data;
       });
@@ -541,7 +541,7 @@ export default class WUPSelectControl<
     this.selectValue(o.value, !this._opts.multiple);
   }
 
-  protected override selectValue(v: ValueType, canHideMenu = true): void {
+  protected override selectValue(v: ValueType, canCloseMenu = true): void {
     if (this._opts.multiple) {
       let arr = this.$value as Array<ValueType>;
       if (!arr?.length) {
@@ -562,24 +562,24 @@ export default class WUPSelectControl<
         v = arr as any;
       }
     }
-    super.selectValue(v, canHideMenu);
+    super.selectValue(v, canCloseMenu);
 
     this._opts.multiple && this.clearFilterMenuItems();
   }
 
-  override canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
+  override canOpenMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
     if (this.$isPending) {
       return false;
     }
-    return super.canShowMenu(showCase, e);
+    return super.canOpenMenu(showCase, e);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override async goShowMenu(
+  protected override async goOpenMenu(
     showCase: ShowCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): Promise<WUPPopupElement | null> {
-    if (this.$isShown) {
+    if (this.$isOpened) {
       return this.$refPopup!;
     }
 
@@ -587,7 +587,7 @@ export default class WUPSelectControl<
       this.clearFilterMenuItems();
     }
 
-    const popup = await super.goShowMenu(showCase, e);
+    const popup = await super.goOpenMenu(showCase, e);
     popup && !this.canClearSelection && this.selectMenuItemByValue(this.$value); // set aria-selected only if input not empty
     return popup;
   }
@@ -614,7 +614,7 @@ export default class WUPSelectControl<
 
   /** Select menu item if value !== undefined and menu is opened */
   protected selectMenuItemByValue(v: ValueType | undefined): void {
-    if (this.$isShown) {
+    if (this.$isOpened) {
       const findAndSelect = (vi: ValueType): number => {
         const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, vi, this));
         this.selectMenuItem(this._menuItems!.all[i] || null);
@@ -800,7 +800,7 @@ export default class WUPSelectControl<
 
   /** Called on input change to update menu if possible */
   protected tryUpdateMenu(): void {
-    this.$isShown && this.filterMenuItems();
+    this.$isOpened && this.filterMenuItems();
     this.canClearSelection && this.selectMenuItem(null); // allow user clear value without pressing Enter
   }
 
@@ -810,7 +810,7 @@ export default class WUPSelectControl<
   }
 
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
-    this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
+    this.$isOpened && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
     super.gotInput(e, true); // prevent ordinary value change
 
     // user can append item by ',' at the end or remove immediately

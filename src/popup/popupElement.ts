@@ -419,8 +419,8 @@ export default class WUPPopupElement<
 
   /** Returns if popup is opened (before show-animation started)
    * @tutorial Troubleshooting
-   * * stack: $show() > `$isShown:true` > showing > shown
-   * * stack: $hide() > hiding > hidden > `$isShown:false`
+   * * stack: $show() > `$isOpened:true` > showing > shown
+   * * stack: $hide() > hiding > hidden > `$isOpened:false`
    * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
   get $isOpened(): boolean {
     return this.#isShown;
