@@ -427,10 +427,10 @@ describe("circleElement", () => {
     el._opts.hoverShowTimeout = 0;
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
     await h.wait(el.$options.hoverHideTimeout);
-    expect(el.querySelector("wup-popup").$isHiding).toBe(true);
+    expect(el.querySelector("wup-popup").$isClosing).toBe(true);
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await h.wait();
-    expect(el.querySelector("wup-popup").$isHiding).toBe(false);
+    expect(el.querySelector("wup-popup").$isClosing).toBe(false);
     expect(el.querySelector("wup-popup").$isOpened).toBe(true);
 
     // new items

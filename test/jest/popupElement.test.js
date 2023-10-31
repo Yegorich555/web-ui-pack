@@ -233,10 +233,10 @@ describe("popupElement", () => {
     a.$options.target = trg;
     a.$open();
     expect(a.$isOpened).toBe(true);
-    expect(a.$isShowing).toBe(false);
+    expect(a.$isOpening).toBe(false);
     a.$close();
     expect(a.$isClosed).toBe(true);
-    expect(a.$isHiding).toBe(false);
+    expect(a.$isClosing).toBe(false);
     onClose.mockClear();
     a.$options.target = null;
     const spyShow = jest.spyOn(a, "goShow").mockClear();
@@ -499,14 +499,14 @@ describe("popupElement", () => {
     el.$close();
     expect(el.$isOpened).toBe(false);
     expect(el.$isClosed).toBe(true);
-    expect(el.$isShowing).toBe(false);
-    expect(el.$isHiding).toBe(false);
+    expect(el.$isOpening).toBe(false);
+    expect(el.$isClosing).toBe(false);
 
     el.$open();
     expect(el.$isOpened).toBe(true);
     expect(el.$isClosed).toBe(false);
-    expect(el.$isShowing).toBe(false);
-    expect(el.$isHiding).toBe(false);
+    expect(el.$isOpening).toBe(false);
+    expect(el.$isClosing).toBe(false);
 
     el.remove();
     el.$close();
@@ -710,46 +710,46 @@ describe("popupElement", () => {
     el.$open();
     await h.wait(50);
     expect(el.$isOpened).toBe(true);
-    expect(el.$isShowing).toBe(true);
+    expect(el.$isOpening).toBe(true);
     expect(el.$isClosed).toBe(false);
-    expect(el.$isHiding).toBe(false);
+    expect(el.$isClosing).toBe(false);
     await nextFrame(100);
     await h.wait();
     expect(el.$isOpened).toBe(true);
-    expect(el.$isShowing).toBe(false);
+    expect(el.$isOpening).toBe(false);
     expect(el.$isClosed).toBe(false);
-    expect(el.$isHiding).toBe(false);
+    expect(el.$isClosing).toBe(false);
 
     el.$close();
     await h.wait(50);
     expect(el.$isOpened).toBe(true);
-    expect(el.$isShowing).toBe(false);
+    expect(el.$isOpening).toBe(false);
     expect(el.$isClosed).toBe(false);
-    expect(el.$isHiding).toBe(true);
+    expect(el.$isClosing).toBe(true);
     await nextFrame(100);
     expect(el.$isOpened).toBe(false);
-    expect(el.$isShowing).toBe(false);
+    expect(el.$isOpening).toBe(false);
     expect(el.$isClosed).toBe(true);
-    expect(el.$isHiding).toBe(false);
+    expect(el.$isClosing).toBe(false);
 
     // show/hide in a short time
     el.$open();
     await h.wait(50);
-    expect(el.$isShowing).toBe(true);
-    expect(el.$isHiding).toBe(false);
+    expect(el.$isOpening).toBe(true);
+    expect(el.$isClosing).toBe(false);
     el.$close();
     await h.wait(50);
-    expect(el.$isShowing).toBe(false);
-    expect(el.$isHiding).toBe(true);
+    expect(el.$isOpening).toBe(false);
+    expect(el.$isClosing).toBe(true);
     el.$open();
     await h.wait(50);
-    expect(el.$isShowing).toBe(true);
-    expect(el.$isHiding).toBe(false);
+    expect(el.$isOpening).toBe(true);
+    expect(el.$isClosing).toBe(false);
     await nextFrame(100);
     expect(el.$isOpened).toBe(true);
-    expect(el.$isShowing).toBe(false);
+    expect(el.$isOpening).toBe(false);
     expect(el.$isClosed).toBe(false);
-    expect(el.$isHiding).toBe(false);
+    expect(el.$isClosing).toBe(false);
 
     // no new show-logic
     const spyThen = jest.fn();
