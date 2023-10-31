@@ -188,8 +188,8 @@ How to extend/override
 /// popup.ts
 
 // you can override via prototypes
-const original = WUPPopupElement.prototype.goShow;
-WUPPopupElement.prototype.goShow = function customGoShow() {
+const original = WUPPopupElement.prototype.goOpen;
+WUPPopupElement.prototype.goOpen = function customGoShow() {
   if (window.isBusy) {
     return null;
   }
@@ -200,11 +200,11 @@ WUPPopupElement.prototype.goShow = function customGoShow() {
 
 class Popup extends WUPPopupElement {
   // take a look on definition of WUPPopupElement and you will find internals
-  protected override goShow(openCase: PopupOpenCases): boolean {
+  protected override goOpen(openCase: PopupOpenCases): boolean {
     if (openCase === PopupOpenCases.onHover) {
       return false;
     }
-    return super.goShow(openCase);
+    return super.goOpen(openCase);
   }
 }
 

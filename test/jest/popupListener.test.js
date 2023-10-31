@@ -393,12 +393,12 @@ describe("popupListener", () => {
     // checking self-call open
     const origShow = onOpen.getMockImplementation();
 
-    const goShow = () => {
+    const goOpen = () => {
       const r = origShow();
       ref.open(); // checking if self-call doesn't produce stackOverflow
       return r;
     };
-    onOpen.mockImplementation(goShow);
+    onOpen.mockImplementation(goOpen);
 
     trg.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     await h.wait();

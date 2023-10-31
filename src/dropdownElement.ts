@@ -132,8 +132,8 @@ export default class WUPDropdownElement<
       this.throwError("Invalid structure. Expected 1st element: <any/>, last element: <wup-popup/>");
     } else {
       this.$refPopup.setAttribute("menu", "");
-      this.$refPopup.goShow = this.goOpenPopup.bind(this);
-      this.$refPopup.goHide = this.goClosePopup.bind(this);
+      this.$refPopup.goOpen = this.goOpenPopup.bind(this);
+      this.$refPopup.goClose = this.goClosePopup.bind(this);
 
       // find popup props from attributes
       const excluded = new Set<string>(); // popup props that assigned from attributes
@@ -172,14 +172,14 @@ export default class WUPDropdownElement<
     super.gotReady();
   }
 
-  /** Custom function to override default `WUPPopupElement.prototype.goHide` */
+  /** Custom function to override default `WUPPopupElement.prototype.goClose` */
   protected goOpenPopup(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
-    const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, openCase, ev);
+    const p = WUPPopupElement.prototype.goOpen.call(this.$refPopup, openCase, ev);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", true);
     return p;
   }
 
-  /** Custom function to override default `WUPPopupElement.prototype.goHide` */
+  /** Custom function to override default `WUPPopupElement.prototype.goClose` */
   protected goClosePopup(
     closeCase: PopupCloseCases,
     ev: MouseEvent | FocusEvent | KeyboardEvent | null
@@ -187,7 +187,7 @@ export default class WUPDropdownElement<
     if (closeCase === PopupCloseCases.onPopupClick && !this._opts.closeOnPopupClick) {
       return false;
     }
-    const p = WUPPopupElement.prototype.goHide.call(this.$refPopup, closeCase, ev);
+    const p = WUPPopupElement.prototype.goClose.call(this.$refPopup, closeCase, ev);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", false);
     return p;
   }

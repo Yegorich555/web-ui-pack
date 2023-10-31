@@ -297,7 +297,7 @@ export default class WUPPopupElement<
             callback?.call(this, p);
           }
 
-          if (!popup.goShow.call(popup, v, e)) {
+          if (!popup.goOpen.call(popup, v, e)) {
             /* istanbul ignore else */
             if (isCreate) {
               popup!.#refListener = undefined; // otherwise remove() destroys events
@@ -310,7 +310,7 @@ export default class WUPPopupElement<
         },
         async (v, e) => {
           isHiding = true;
-          const ok = await popup!.goHide.call(popup, v, e);
+          const ok = await popup!.goClose.call(popup, v, e);
           /* istanbul ignore else */
           if (ok && isHiding) {
             popup!.#refListener = undefined; // otherwise remove() destroys events
@@ -327,7 +327,7 @@ export default class WUPPopupElement<
 
     function detach(): void {
       if (popup) {
-        popup.$isOpened && popup.goHide.call(popup, PopupCloseCases.onManuallCall, null);
+        popup.$isOpened && popup.goClose.call(popup, PopupCloseCases.onManuallCall, null);
         (popup as T).remove.call(popup);
       }
       r.stopListen();
@@ -371,7 +371,7 @@ export default class WUPPopupElement<
             await this.#refListener.close(PopupCloseCases.onManuallCall, null);
             isOk = !this.#refListener.openedEl;
           } else {
-            isOk = await this.goHide(PopupCloseCases.onManuallCall, null);
+            isOk = await this.goClose(PopupCloseCases.onManuallCall, null);
           }
         }
         resolve(isOk);
@@ -399,7 +399,7 @@ export default class WUPPopupElement<
               await this.#refListener.open(PopupOpenCases.always, null);
               isOk = !!this.#refListener.openedEl;
             } else {
-              isOk = await this.goShow(PopupOpenCases.always, null);
+              isOk = await this.goOpen(PopupOpenCases.always, null);
             }
             res(isOk);
           } catch (err) {
@@ -472,15 +472,15 @@ export default class WUPPopupElement<
       this.#refListener = this.#attach();
     } else {
       if (!this._opts.openCase /* always */) {
-        this.goShow(PopupOpenCases.always, null);
+        this.goOpen(PopupOpenCases.always, null);
         return;
       }
       if (this._opts.openCase !== PopupOpenCases.alwaysOff) {
         this._opts.target = this.defineTarget();
         this.#refListener = new PopupListener(
           this._opts as typeof this._opts & { target: HTMLElement },
-          (v, e) => (this.goShow(v, e) ? this : null),
-          (v, e) => !!this.goHide(v, e)
+          (v, e) => (this.goOpen(v, e) ? this : null),
+          (v, e) => !!this.goClose(v, e)
         );
       }
     }
@@ -490,7 +490,7 @@ export default class WUPPopupElement<
     super.gotChanges(propsChanged);
     if (propsChanged) {
       // re-init
-      this.$isOpened && this.goHide(PopupCloseCases.onOptionChange, null);
+      this.$isOpened && this.goClose(PopupCloseCases.onOptionChange, null);
       this.init(); // only if popup is hidden
     }
   }
@@ -695,7 +695,7 @@ export default class WUPPopupElement<
 
   /** Shows popup if target defined; returns true if successful */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  goShow(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
+  goOpen(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
     if (this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
@@ -751,7 +751,7 @@ export default class WUPPopupElement<
 
   /** Hide popup. @closeCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  goHide(closeCase: PopupCloseCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
+  goClose(closeCase: PopupCloseCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
     if (!this.#isShown && !this.#isHiding && !this.#isShowing) {
       return true;
     }
@@ -818,7 +818,7 @@ export default class WUPPopupElement<
     const trg = this._opts.target!;
     // possible when target removed via set innerHTML (in this case remove-hook doesn't work)
     if (!trg.isConnected) {
-      this.goHide(PopupCloseCases.onTargetRemove, null);
+      this.goClose(PopupCloseCases.onTargetRemove, null);
       this.#attach && this.remove(); // self-removing if $attach()
       return undefined;
     }

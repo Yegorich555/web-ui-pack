@@ -123,7 +123,7 @@ describe("popupElement", () => {
 
     const gotReady = jest.spyOn(a, "gotReady");
     const init = jest.spyOn(a, "init");
-    const open = jest.spyOn(a, "goShow");
+    const open = jest.spyOn(a, "goOpen");
     const onOpen = jest.fn();
     const onClose = jest.fn();
     const onWillOpen = jest.fn();
@@ -239,7 +239,7 @@ describe("popupElement", () => {
     expect(a.$isClosing).toBe(false);
     onClose.mockClear();
     a.$options.target = null;
-    const spyOpen = jest.spyOn(a, "goShow").mockClear();
+    const spyOpen = jest.spyOn(a, "goOpen").mockClear();
     const onErr = jest.fn();
     a.$open().catch(onErr);
     await h.wait();
@@ -275,8 +275,8 @@ describe("popupElement", () => {
   test("$options.openCase", async () => {
     /** @type typeof el */
     el = document.createElement(el.tagName);
-    const spyOpen = jest.spyOn(el, "goShow");
-    const spyClose = jest.spyOn(el, "goHide");
+    const spyOpen = jest.spyOn(el, "goOpen");
+    const spyClose = jest.spyOn(el, "goClose");
     const trgInput = trg.appendChild(document.createElement("input"));
 
     document.body.appendChild(el);
@@ -560,14 +560,14 @@ describe("popupElement", () => {
 
     /** @type typeof el */
     const b = document.createElement(el.tagName);
-    jest.spyOn(b, "goShow").mockImplementationOnce(() => false);
+    jest.spyOn(b, "goOpen").mockImplementationOnce(() => false);
     b.$options.target = trg;
     document.body.appendChild(b);
     jest.advanceTimersByTime(1);
     trg.click();
     await h.wait();
     expect(b.$isOpened).toBe(false);
-    trg.click(); // click again (goShow is once => it's restored to previous)
+    trg.click(); // click again (goOpen is once => it's restored to previous)
     await h.wait();
     expect(b.$isOpened).toBe(true);
 
@@ -576,7 +576,7 @@ describe("popupElement", () => {
 
     b.$close();
     await h.wait();
-    b.goHide(); // just for coverage
+    b.goClose(); // just for coverage
     expect(b.$isOpened).toBe(false);
     expect(() => b.$refresh()).not.toThrow(); // for coverage
   });
@@ -756,7 +756,7 @@ describe("popupElement", () => {
     const spyWill = jest.fn();
     el.addEventListener("$willOpen", spyWill);
     el.$open().then(spyThen);
-    el.goShow(0); // just for coverage
+    el.goOpen(0); // just for coverage
     await h.wait(10);
     expect(spyThen).toBeCalledTimes(1); // because popup already isOpeneded
     expect(spyWill).toBeCalledTimes(0); // no new event
@@ -765,7 +765,7 @@ describe("popupElement", () => {
     spyThen.mockClear();
     spyWill.mockClear();
     el.$close();
-    el.goHide(0).then(spyThen); // just for coverage
+    el.goClose(0).then(spyThen); // just for coverage
     await nextFrame(100);
     expect(spyThen).toBeCalledTimes(1); // because popup already isHidden
     expect(el.$isClosed).toBe(true);
@@ -1051,7 +1051,7 @@ describe("popupElement", () => {
     trg.click();
     await h.wait();
     expect(a.$isOpened).toBe(false); // because target removed
-    expect(() => a.goShow(0)).toThrow(); // error expected
+    expect(() => a.goOpen(0)).toThrow(); // error expected
     spy.check(); // checking if removed every listener that was added
 
     document.body.appendChild(trg);
@@ -1492,8 +1492,8 @@ describe("popupElement", () => {
     /** @type WUPPopupElement */
     let popup = null;
     let cnt = 0;
-    const spyClose = jest.spyOn(WUPPopupElement.prototype, "goHide");
-    const spyOpen = jest.spyOn(WUPPopupElement.prototype, "goShow");
+    const spyClose = jest.spyOn(WUPPopupElement.prototype, "goClose");
+    const spyOpen = jest.spyOn(WUPPopupElement.prototype, "goOpen");
 
     let detach = WUPPopupElement.$attach({ target: trg, openCase: 0b111111, text: "Me" }, (popupEl) => {
       popup = popupEl;
@@ -1548,7 +1548,7 @@ describe("popupElement", () => {
 
     // checking when canShow = false > popup.removed
     jest.clearAllMocks();
-    jest.spyOn(WUPPopupElement.prototype, "goShow").mockImplementationOnce(() => false);
+    jest.spyOn(WUPPopupElement.prototype, "goOpen").mockImplementationOnce(() => false);
     detach = WUPPopupElement.$attach({ target: trg, openCase: 0b111111, text: "Me" }); // checking without callback
     trg.click();
     jest.advanceTimersByTime(100); // popup has click-timeouts
