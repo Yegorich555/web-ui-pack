@@ -623,7 +623,7 @@ describe("popupListener", () => {
   });
 
   /* test("double-click filter", async () => {
-    await el.$hide();
+    await el.$close();
     el.$options.openCase = 1 << 2; // click
     await h.wait();
     expect(el.$isOpened).toBe(false);
@@ -654,7 +654,7 @@ describe("popupListener", () => {
         ++cnt;
         throw new Error("TestCase Impossible to open");
       },
-      () => el.$hide()
+      () => el.$close()
     );
 
     h.handleRejection();

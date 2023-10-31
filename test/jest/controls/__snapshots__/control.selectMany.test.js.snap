@@ -233,21 +233,6 @@ exports[`control.selectMany $show/$hide error 3`] = `
       wup-icon=""
     />
   </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt2"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span>
-      Some custom message here
-    </span>
-  </wup-popup>
 </wup-selectmany>
 `;
 
@@ -1014,12 +999,12 @@ exports[`control.selectMany common tests snapshot of $defaults 1`] = `
   "maskholder": "",
   "multiple": true,
   "name": null,
+  "openCase": 106,
   "postfix": "",
   "prefix": "",
   "readOnly": false,
   "readOnlyInput": false,
   "selectOnFocus": false,
-  "showCase": 106,
   "sortable": false,
   "storage": "local",
   "storageKey": "",
@@ -1059,12 +1044,12 @@ exports[`control.selectMany common tests snapshot of $defaults 3`] = `
   "w-maskholder",
   "w-multiple",
   "w-name",
+  "w-opencase",
   "w-postfix",
   "w-prefix",
   "w-readonly",
   "w-readonlyinput",
   "w-selectonfocus",
-  "w-showcase",
   "w-sortable",
   "w-storage",
   "w-storagekey",
@@ -1466,105 +1451,6 @@ exports[`control.selectMany validations $options.validationShowAll 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt2"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span
-      class="wup-hidden"
-    >
-      Min count is 2
-    </span>
-    <ul
-      aria-hidden="true"
-    >
-      <li>
-        Min count is 2
-      </li>
-      <li
-        valid=""
-      >
-        Max count is 3
-      </li>
-    </ul>
-  </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt3"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span
-      class="wup-hidden"
-    >
-      Min count is 2
-    </span>
-    <ul
-      aria-hidden="true"
-    >
-      <li>
-        Min count is 2
-      </li>
-      <li
-        valid=""
-      >
-        Max count is 3
-      </li>
-      <li
-        valid=""
-      />
-      <li>
-        Always error
-      </li>
-    </ul>
-  </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt4"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Name:
-    </span>
-    <span>
-      This field is required
-    </span>
-    <ul
-      aria-hidden="true"
-    >
-      <li>
-        Min count is 2
-      </li>
-      <li
-        valid=""
-      >
-        Max count is 3
-      </li>
-      <li
-        valid=""
-      />
-      <li>
-        Always error
-      </li>
-    </ul>
-  </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
     id="txt5"
     role="alert"
     style=""
@@ -1781,23 +1667,6 @@ exports[`control.selectMany validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt4"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
     id="txt5"
     style=""
   >
@@ -1848,39 +1717,6 @@ exports[`control.selectMany validations options.validationCase 4`] = `
       wup-icon=""
     />
   </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt4"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt5"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      custom err here
-    </span>
-  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"

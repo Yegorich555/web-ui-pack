@@ -159,14 +159,14 @@ describe("dropdownElement", () => {
   test("option: hideOnClick", async () => {
     const item = el.$refPopup.querySelector("button");
 
-    el.$options.hideOnPopupClick = true;
+    el.$options.closeOnPopupClick = true;
     await h.wait(1);
     await h.userClick(trg);
     expect(el.$refPopup.$isOpened).toBe(true);
     await h.userClick(item);
     expect(el.$refPopup.$isOpened).toBe(false);
 
-    el.$options.hideOnPopupClick = false;
+    el.$options.closeOnPopupClick = false;
     await h.wait(1);
     await h.userClick(trg);
     expect(el.$refPopup.$isOpened).toBe(true);

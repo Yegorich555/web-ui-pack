@@ -200,11 +200,11 @@ WUPPopupElement.prototype.goShow = function customGoShow() {
 
 class Popup extends WUPPopupElement {
   // take a look on definition of WUPPopupElement and you will find internals
-  protected override goShow(showCase: PopupOpenCases): boolean {
-    if (showCase === PopupOpenCases.onHover) {
+  protected override goShow(openCase: PopupOpenCases): boolean {
+    if (openCase === PopupOpenCases.onHover) {
       return false;
     }
-    return super.goShow(showCase);
+    return super.goShow(openCase);
   }
 }
 

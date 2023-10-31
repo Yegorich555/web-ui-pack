@@ -4,7 +4,7 @@
  */
 import { WUPDateControl } from "web-ui-pack";
 import { PickersEnum } from "web-ui-pack/controls/calendar";
-import { ShowCases } from "web-ui-pack/controls/baseCombo";
+import { MenuOpenCases } from "web-ui-pack/controls/baseCombo";
 // import { localeInfo } from "web-ui-pack/indexHelpers";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
@@ -37,7 +37,7 @@ initTestBaseControl({
   onInit: (e) => {
     jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
     el = e;
-    el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
+    el.$options.openCase |= MenuOpenCases.onFocusAuto; // without this impossible to test with manual triggering focus()
 
     const height = 50;
     const width = 100;
@@ -77,7 +77,7 @@ describe("control.date", () => {
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       "w-readonlyinput": { value: true },
-      "w-showcase": { value: 1 },
+      "w-opencase": { value: 1 },
 
       "w-mask": { value: "#0-#0-0000", nullValue: "0000-00-00" },
       "w-maskholder": { value: "dd-mm-yyyy", nullValue: "YYYY-MM-DD" },

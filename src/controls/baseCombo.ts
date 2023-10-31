@@ -4,7 +4,7 @@ import { PopupOpenCases, PopupAnimations } from "../popup/popupElement.types";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 
-export const enum ShowCases {
+export const enum MenuOpenCases {
   /** When $openMenu() called programmatically; Don't use it for $options (it's for nested cycle) */
   onManualCall = 1,
   /** When control got focus via user interaction; ignores case when user changed value by click on item on clearButton
@@ -22,7 +22,7 @@ export const enum ShowCases {
   onPressArrowKey = 1 << 6,
 }
 
-export const enum HideCases {
+export const enum MenuCloseCases {
   onManualCall,
   onClick,
   onSelect,
@@ -42,15 +42,15 @@ declare global {
     }
     interface ValidityMap extends Omit<WUP.Text.ValidityMap, "min" | "max" | "email"> {}
     interface NewOptions {
-      /** Case when menu-popup to open; WARN ShowCases.inputClick doesn't work without ShowCases.click
+      /** Case when menu-popup to open; WARN MenuOpenCases.inputClick doesn't work without MenuOpenCases.click
        * @defaultValue onPressArrowKey | onClick | onFocus */
-      showCase: ShowCases;
+      openCase: MenuOpenCases;
       /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode) */
       readOnlyInput: boolean | number;
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      "w-showCase"?: ShowCases | number;
+      "w-openCase"?: MenuOpenCases | number;
       "w-readOnlyInput"?: boolean | number;
     }
   }
@@ -102,7 +102,7 @@ export default abstract class WUPBaseComboControl<
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
     },
-    showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey,
+    openCase: MenuOpenCases.onClick | MenuOpenCases.onFocus | MenuOpenCases.onPressArrowKey,
     readOnlyInput: false,
   };
 
@@ -120,13 +120,13 @@ export default abstract class WUPBaseComboControl<
   /** Close popup-menu
    * @returns Promise resolved by animation time */
   async $closeMenu(): Promise<void> {
-    await this.goCloseMenu(HideCases.onManualCall);
+    await this.goCloseMenu(MenuCloseCases.onManualCall);
   }
 
   /** Open popup-menu
    * @returns Promise resolved resolved by animation time */
   async $openMenu(): Promise<void> {
-    await this.goOpenMenu(ShowCases.onManualCall);
+    await this.goOpenMenu(MenuOpenCases.onManualCall);
     this.#isOpened && (await this.$refPopup!.$open()); // wait for popup open-end
   }
 
@@ -172,7 +172,7 @@ export default abstract class WUPBaseComboControl<
   /** Returns whether possible to use input-click as dropdown behavior */
   isLockInputDrodpown(e: Event): boolean {
     return (
-      !(this._opts.showCase & ShowCases.onClickInput) &&
+      !(this._opts.openCase & MenuOpenCases.onClickInput) &&
       e.type === "click" &&
       e!.target instanceof HTMLInputElement &&
       !e!.target.readOnly &&
@@ -181,7 +181,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   /** Override to change open-behavior */
-  canOpenMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
+  canOpenMenu(openCase: MenuOpenCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
     if (this.$isReadOnly || this.$isDisabled) {
       return false;
     }
@@ -190,18 +190,18 @@ export default abstract class WUPBaseComboControl<
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
-    const can = !!(this._opts.showCase & showCase) || showCase === ShowCases.onManualCall;
+    const can = !!(this._opts.openCase & openCase) || openCase === MenuOpenCases.onManualCall;
     return can;
   }
 
   protected async goOpenMenu(
-    showCase: ShowCases,
+    openCase: MenuOpenCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): Promise<WUPPopupElement | null> {
     if (this.#isOpened) {
       return this.$refPopup!;
     }
-    const can = this.canOpenMenu(showCase, e);
+    const can = this.canOpenMenu(openCase, e);
     if (!can) {
       return null;
     }
@@ -254,19 +254,19 @@ export default abstract class WUPBaseComboControl<
     this.$refPopup.$open().then(() => this.fireEvent("$openMenu", { cancelable: false }));
     this.setAttribute("opened", "");
     this.$refInput.setAttribute("aria-expanded", true);
-    // await r; // WARN: it's important don't wait for animation to assign onShow events fast
+    // await r; // WARN: it's important don't wait for animation to assign onOpened events fast
 
     return this.$refPopup;
   }
 
   /** Override to change close-behavior */
-  canCloseMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): boolean {
+  canCloseMenu(closeCase: MenuCloseCases, e?: MouseEvent | FocusEvent | null): boolean {
     if (e && this.isLockInputDrodpown(e!)) {
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
-    if (hideCase === HideCases.onClick) {
-      if (!(this._opts.showCase & ShowCases.onClick)) {
+    if (closeCase === MenuCloseCases.onClick) {
+      if (!(this._opts.openCase & MenuOpenCases.onClick)) {
         return false;
       }
       if (this.$refPopup!.includesTarget(e!)) {
@@ -275,7 +275,7 @@ export default abstract class WUPBaseComboControl<
     }
 
     // always close by focusLost
-    // if (hideCase === HideCases.onFocusLost && !(this._opts.showCase & ShowCases.onFocus)) {
+    // if (closeCase === MenuCloseCases.onFocusLost && !(this._opts.openCase & MenuOpenCases.onFocus)) {
     //   return false;
     // }
 
@@ -283,11 +283,11 @@ export default abstract class WUPBaseComboControl<
   }
 
   protected _isClosing?: true;
-  protected async goCloseMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
+  protected async goCloseMenu(closeCase: MenuCloseCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
     if (!this.#isOpened || this._isClosing) {
       return false;
     }
-    if (!this.canCloseMenu(hideCase, e)) {
+    if (!this.canCloseMenu(closeCase, e)) {
       return false;
     }
     this.#isOpened = false;
@@ -298,7 +298,7 @@ export default abstract class WUPBaseComboControl<
       return false; // possible when popup opened again during the animation
     }
     // remove popup only by focusOut to optimize resources
-    if (hideCase === HideCases.onFocusLost) {
+    if (closeCase === MenuCloseCases.onFocusLost) {
       this.removePopup();
     }
 
@@ -375,10 +375,10 @@ export default abstract class WUPBaseComboControl<
     }
 
     if (!this.#isOpened) {
-      if (this._opts.showCase & ShowCases.onPressArrowKey) {
+      if (this._opts.openCase & MenuOpenCases.onPressArrowKey) {
         if (e.key === "ArrowDown" || e.key === "ArrowUp") {
           e.preventDefault(); // to prevent parent-scroll
-          this.goOpenMenu(ShowCases.onPressArrowKey, e).then(() => this.focusMenuItemByKeydown(e));
+          this.goOpenMenu(MenuOpenCases.onPressArrowKey, e).then(() => this.focusMenuItemByKeydown(e));
           return;
         }
       }
@@ -389,7 +389,7 @@ export default abstract class WUPBaseComboControl<
       case "Escape":
         e.preventDefault();
         this.resetInputValue();
-        this.goCloseMenu(HideCases.OnPressEsc);
+        this.goCloseMenu(MenuCloseCases.OnPressEsc);
         break;
       case "Enter":
         e.preventDefault();
@@ -404,7 +404,7 @@ export default abstract class WUPBaseComboControl<
               this.$refInput.value || this.$isRequired
                 ? this.resetInputValue()
                 : this.setValue(undefined, SetValueReasons.userInput, true); // reset only when input not empty otherwise user cleared this manually
-              this.goCloseMenu(HideCases.OnPressEnter);
+              this.goCloseMenu(MenuCloseCases.OnPressEnter);
             }
           });
         }
@@ -419,7 +419,10 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotInput(e: WUP.Text.GotInputEvent, preventValueChange?: boolean): void {
     // gotInput possible on browser-autofill so we need filter check if isFocused
-    !this.$isOpened && this._opts.showCase & ShowCases.onInput && this.$isFocused && this.goOpenMenu(ShowCases.onInput);
+    !this.$isOpened &&
+      this._opts.openCase & MenuOpenCases.onInput &&
+      this.$isFocused &&
+      this.goOpenMenu(MenuOpenCases.onInput);
     if (preventValueChange) {
       this._refHistory?.handleInput(e);
     } else {
@@ -431,7 +434,7 @@ export default abstract class WUPBaseComboControl<
     const arr = super.gotFocus(ev);
 
     // known issue: _isFocusCall missed when el.focus() + browser-tab not active. Reason: 'focusin' called only when browser-tab gets focus
-    const sc = (this.$refInput as any)._isFocusCall ? ShowCases.onFocusAuto : ShowCases.onFocus;
+    const sc = (this.$refInput as any)._isFocusCall ? MenuOpenCases.onFocusAuto : MenuOpenCases.onFocus;
     delete (this.$refInput as any)._isFocusCall;
 
     let isPreventedFromClick = false; // possible when user clicks on btnClear or on item inside input to remove it
@@ -440,7 +443,7 @@ export default abstract class WUPBaseComboControl<
     let clickAfterFocus = true; // prevent clickAfterFocus
     let onInputStartClick = false; // mouseDown>selectText>mouseUp - without filter it closes/opens popup when user tries to select text
     const dsps0 = onEvent(this.$refInput, "mousedown", () => {
-      const allow = !this.$refInput.readOnly && !(this._opts.showCase & ShowCases.onClickInput);
+      const allow = !this.$refInput.readOnly && !(this._opts.openCase & MenuOpenCases.onClickInput);
       onInputStartClick = allow;
     });
 
@@ -450,8 +453,8 @@ export default abstract class WUPBaseComboControl<
       const skip = e.defaultPrevented || e.button /* only left click */ || isInsideClick || onInputStartClick;
       if (!skip) {
         !this.#isOpened || clickAfterFocus
-          ? this.goOpenMenu(ShowCases.onClick, e)
-          : this.goCloseMenu(HideCases.onClick, e);
+          ? this.goOpenMenu(MenuOpenCases.onClick, e)
+          : this.goCloseMenu(MenuCloseCases.onClick, e);
       }
       isInsideClick = true;
       setTimeout(() => (isInsideClick = false), 1);
@@ -459,7 +462,7 @@ export default abstract class WUPBaseComboControl<
 
     const dsps2 = onEvent(document, "click", (e) => {
       // close by outside click
-      !onInputStartClick && !isInsideClick && this.goCloseMenu(HideCases.onClick, e);
+      !onInputStartClick && !isInsideClick && this.goCloseMenu(MenuCloseCases.onClick, e);
       onInputStartClick = false;
     });
 
@@ -473,7 +476,7 @@ export default abstract class WUPBaseComboControl<
           { once: true, passive: true, capture: true }
         ),
       10
-    ); // fix 10ms => testcase: point autofocus > remove browser focus (click outside browser) > reload page outside browser > click on ctrl with autofocus: menu blinks and hidden after a time but need to open in this case. Also ShowCases.onFocusAuto isn't detected in this case
+    ); // fix 10ms => testcase: point autofocus > remove browser focus (click outside browser) > reload page outside browser > click on ctrl with autofocus: menu blinks and hidden after a time but need to open in this case. Also MenuOpenCases.onFocusAuto isn't detected in this case
 
     arr.push(dsps0, dsps1, dsps2);
     return arr;
@@ -481,14 +484,14 @@ export default abstract class WUPBaseComboControl<
 
   protected override gotFocusLost(): void {
     !this.#isOpened && !this._isClosing && this.removePopup(); // otherwise it's removed by hidingMenu
-    this.goCloseMenu(HideCases.onFocusLost);
+    this.goCloseMenu(MenuCloseCases.onFocusLost);
     super.gotFocusLost();
   }
 
   /** Called when user selected new value from menu and need to close menu */
   protected selectValue(v: ValueType, canCloseMenu = true): void {
     this.setValue(v, SetValueReasons.userSelect);
-    canCloseMenu && setTimeout(() => this.goCloseMenu(HideCases.onSelect)); // without timeout it handles click by listener and opens again
+    canCloseMenu && setTimeout(() => this.goCloseMenu(MenuCloseCases.onSelect)); // without timeout it handles click by listener and opens again
   }
 
   /** Reset input to currentValue; called on pressing Escape or Enter */
@@ -497,7 +500,7 @@ export default abstract class WUPBaseComboControl<
       this.$showError(this._inputError); // case when mask/parse applied and need to open input error without changing
       return;
     }
-    const isClear = !this.$refInput.value && !this._selectedMenuItem; // if user cleared input and $hided menu - need to clearValue
+    const isClear = !this.$refInput.value && !this._selectedMenuItem; // if user cleared input and closed menu - need to clearValue
     isClear
       ? this.setValue(undefined, SetValueReasons.clear)
       : this.setInputValue(this.$value, SetValueReasons.userSelect);

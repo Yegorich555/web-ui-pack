@@ -4,7 +4,7 @@
  */
 import { WUPTimeControl, WUPTimeObject } from "web-ui-pack";
 // import { localeInfo } from "web-ui-pack/indexHelpers";
-import { ShowCases } from "web-ui-pack/controls/baseCombo";
+import { MenuOpenCases } from "web-ui-pack/controls/baseCombo";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -35,7 +35,7 @@ initTestBaseControl({
   onInit: (e) => {
     jest.setSystemTime(new Date("2022-10-18T12:23:00.000Z")); // 18 Oct 2022 12:00 UTC
     el = e;
-    el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
+    el.$options.openCase |= MenuOpenCases.onFocusAuto; // without this impossible to test with manual triggering focus()
 
     const height = 50;
     const width = 100;
@@ -94,7 +94,7 @@ describe("control.time", () => {
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       "w-readonlyinput": { value: true },
-      "w-showcase": { value: 1 },
+      "w-opencase": { value: 1 },
       "w-menubuttonsoff": { value: true },
 
       "w-mask": { value: "00:00 am", nullValue: "00:00 //[AP]//M" },

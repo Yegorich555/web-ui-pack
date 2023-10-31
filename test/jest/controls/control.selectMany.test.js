@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 import { WUPSelectManyControl } from "web-ui-pack";
-import { ShowCases } from "web-ui-pack/controls/baseCombo";
+import { MenuOpenCases } from "web-ui-pack/controls/baseCombo";
 import { isAnimEnabled } from "web-ui-pack/helpers/animate";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
@@ -20,7 +20,7 @@ initTestBaseControl({
   onInit: (e) => {
     el = e;
     el.$options.items = getItems();
-    el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
+    el.$options.openCase |= MenuOpenCases.onFocusAuto; // without this impossible to test with manual triggering focus()
     h.setupLayout(el, { x: 140, y: 100, w: 100, h: 50 });
 
     window.$1Value = [10];
@@ -55,7 +55,7 @@ describe("control.selectMany", () => {
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       "w-allownewvalue": { value: true },
-      "w-showcase": { value: 1 },
+      "w-opencase": { value: 1 },
       "w-readonlyinput": { value: true },
       "w-multiple": { skip: true },
       "w-items": { value: getItems() },

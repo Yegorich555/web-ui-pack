@@ -70,7 +70,7 @@ declare global {
       /** Timeout in ms before popup shows on hover of target;
        * @defaultValue inherited from WUPPopupElement.$defaults.hoverOpenTimeout */
       hoverOpenTimeout: number;
-      /** Timeout in ms before popup hides on mouse-leave of target;
+      /** Timeout in ms before popup closes on mouse-leave of target;
        * @defaultValue 0 */
       hoverCloseTimeout: number;
       /** Items related to circle-segments */

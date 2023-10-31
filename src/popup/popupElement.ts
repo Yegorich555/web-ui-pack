@@ -364,7 +364,7 @@ export default class WUPPopupElement<
     }
     return new Promise<boolean>((resolve) => {
       const f = async (): Promise<void> => {
-        // isReady false when you fire $hide on disposed element
+        // isReady false when you fire $close on disposed element
         let isOk = true;
         if (this.$isReady) {
           if (this.#refListener) {
@@ -419,18 +419,18 @@ export default class WUPPopupElement<
 
   /** Returns if popup is opened (before show-animation started)
    * @tutorial Troubleshooting
-   * * stack: $show() > `$isOpened:true` > showing > shown
-   * * stack: $hide() > hiding > hidden > `$isOpened:false`
-   * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
+   * * stack: $open() > `$isOpened:true` > showing > shown
+   * * stack: $close() > hiding > hidden > `$isOpened:false`
+   * * to listen to animation-end use events `$show` & `$hide` OR methods `$open().then(...)` & `$close().then(... )` */
   get $isOpened(): boolean {
     return this.#isShown;
   }
 
   /** Returns if popup is closed (after hide-animation finished)
    * @tutorial Troubleshooting
-   * * stack: $show() > `$isHidden:false` >  showing > shown
-   * * stack: $hide() > hiding > hidden > `$isHidden:true`
-   * * to listen to animation-end use events `$show` & `$hide` OR methods `$show().then(...)` & `$hide().then(... )` */
+   * * stack: $open() > `$isHidden:false` >  showing > shown
+   * * stack: $close() > hiding > hidden > `$isHidden:true`
+   * * to listen to animation-end use events `$show` & `$hide` OR methods `$open().then(...)` & `$close().then(... )` */
   get $isClosed(): boolean {
     return !this.#isShown && !this.$isClosing;
   }
@@ -749,7 +749,7 @@ export default class WUPPopupElement<
     return this.#whenShow;
   }
 
-  /** Hide popup. @hideCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
+  /** Hide popup. @closeCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   goHide(closeCase: PopupCloseCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): boolean | Promise<boolean> {
     if (!this.#isShown && !this.#isHiding && !this.#isShowing) {

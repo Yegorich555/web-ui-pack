@@ -6,7 +6,7 @@ import localeInfo from "../objects/localeInfo";
 import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
-import WUPBaseComboControl, { HideCases, ShowCases } from "./baseCombo";
+import WUPBaseComboControl, { MenuCloseCases, MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-time";
@@ -590,10 +590,10 @@ export default class WUPTimeControl<
   }
 
   protected override async goOpenMenu(
-    showCase: ShowCases,
+    openCase: MenuOpenCases,
     e?: MouseEvent | FocusEvent | null
   ): Promise<WUPPopupElement | null> {
-    const r = await super.goOpenMenu(showCase, e);
+    const r = await super.goOpenMenu(openCase, e);
 
     this.#valueBeforeMenu = this.$value;
     this.#lastInputChanged = false;
@@ -631,7 +631,7 @@ export default class WUPTimeControl<
     if (isOk) {
       this.selectValue(this.getMenuValue());
     } else {
-      setTimeout(() => this.goCloseMenu(HideCases.OnPressEsc, e)); // without timeout it handles click by listener and opens again
+      setTimeout(() => this.goCloseMenu(MenuCloseCases.OnPressEsc, e)); // without timeout it handles click by listener and opens again
     }
   }
 
@@ -648,13 +648,13 @@ export default class WUPTimeControl<
   }
 
   protected override goCloseMenu(
-    hideCase: HideCases,
+    closeCase: MenuCloseCases,
     e?: MouseEvent | FocusEvent | null | undefined
   ): Promise<boolean> {
-    hideCase === HideCases.OnPressEsc &&
+    closeCase === MenuCloseCases.OnPressEsc &&
       this._opts.menuButtonsOff &&
       this.setValue(this.#valueBeforeMenu, SetValueReasons.clear);
-    return super.goCloseMenu(hideCase, e);
+    return super.goCloseMenu(closeCase, e);
   }
 
   protected override valueToInput(v: ValueType | undefined): string {
@@ -753,7 +753,7 @@ export default class WUPTimeControl<
     if (!isExtraKey && wasOpen && e.key === "Enter") {
       e.preventDefault();
       if (this.#lastInputChanged || !this.$refButtonOk) {
-        this.goCloseMenu(HideCases.OnPressEnter);
+        this.goCloseMenu(MenuCloseCases.OnPressEnter);
         this._inputError && this.resetInputValue(); // it will show err message
       } else if (!this.$refButtonOk!.disabled) {
         setTimeout(() =>

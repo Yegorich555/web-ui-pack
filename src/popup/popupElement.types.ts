@@ -1,5 +1,5 @@
 export const enum PopupOpenCases {
-  /** No listener - show on init + only manual call `.$hide()` & `.$show()` */
+  /** No listener - show on init + only manual call `.$close()` & `.$open()` */
   always = 0,
   /** On `mouseenter` event of target; hide by `mouseleave` */
   onHover = 1,
@@ -7,12 +7,12 @@ export const enum PopupOpenCases {
   onFocus = 1 << 1,
   /** On `click` event of target; hide by click anywhere */
   onClick = 1 << 2,
-  /** No listener - only manual call `.$hide()` & `.$show()` */
+  /** No listener - only manual call `.$close()` & `.$open()` */
   alwaysOff = 1 << 3,
 }
 
 export const enum PopupCloseCases {
-  /** When $hide() is called programmatically */
+  /** When $close() is called programmatically */
   onManuallCall,
   /** When mouse left target & popup */
   onMouseLeave,
@@ -63,7 +63,7 @@ declare global {
        * @defaultValue `PopupOpenCases.onClick`
        * @example
        * // use `|` to to join cases
-       * showCase=PopupOpenCases.onFocus | PopupOpenCases.onClick;  */
+       * openCase=PopupOpenCases.onFocus | PopupOpenCases.onClick;  */
       openCase: PopupOpenCases;
       /** Timeout in ms before popup shows on hover of target (for PopupOpenCases.onHover);
        * @defaultValue 200ms */
@@ -155,7 +155,7 @@ declare global {
       /** Fires before show is happened;
        * @tutorial rules
        * * can be prevented via `e.preventDefault()`
-       * * use event.detail.showCase to filter by showCase */
+       * * use event.detail.openCase to filter by openCase */
       $willOpen: CustomEvent<{ openCase: PopupOpenCases }>;
       /** Fires after popup is shown (after animation finishes) */
       $open: Event;

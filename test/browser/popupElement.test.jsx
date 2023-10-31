@@ -72,7 +72,7 @@ describe("popupElement", () => {
     expect(t.isOpened).toBe(false);
   });
 
-  test("showCase: click & focus", async () => {
+  test("openCase: click & focus", async () => {
     await page.evaluate(() => (testEl.$options.openCase = (1 << 1) | (1 << 2)));
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     let t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
@@ -87,7 +87,7 @@ describe("popupElement", () => {
     expect(t.gotHide).toBe(0);
   });
 
-  test("showCase: hover & click & focus", async () => {
+  test("openCase: hover & click & focus", async () => {
     await page.evaluate(() => (testEl.$options.openCase = 0b1111111));
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     await page.hover("input");

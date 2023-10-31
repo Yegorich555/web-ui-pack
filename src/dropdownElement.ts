@@ -19,9 +19,9 @@ declare global {
        * * to change option for specific element change it for `<wup-popup/>` directly after timeout
        * @example setTimeout(() => this.$refPopup.$options.openCase = PopupOpenCases.onFocus | PopupOpenCases.onClick) */
       openCase: PopupOpenCases;
-      /** Hide menu on popup click
+      /** Close menu on popup click
        * @defaultValue true */
-      hideOnPopupClick: boolean;
+      closeOnPopupClick: boolean;
       /** Placement rules relative to target;
        * @defaultValue `[
             WUPPopupElement.$placements.$bottom.$start,
@@ -42,9 +42,9 @@ declare global {
     }
     // WARN: all options must be applied to wup-popup directly
     interface JSXProps<C = WUPDropdownElement> extends WUP.Base.JSXProps<C> {
-      /** Hide menu on popup click
+      /** Close menu on popup click
        * @defaultValue true */
-      "w-hideOnPopupClick"?: boolean;
+      "w-closeOnPopupClick"?: boolean;
     }
   }
 
@@ -103,7 +103,7 @@ export default class WUPDropdownElement<
     ...WUPPopupElement.$defaults,
     animation: PopupAnimations.drawer,
     openCase: PopupOpenCases.onClick | PopupOpenCases.onFocus,
-    hideOnPopupClick: true,
+    closeOnPopupClick: true,
     minHeightByTarget: true,
     minWidthByTarget: true,
     placement: [
@@ -132,8 +132,8 @@ export default class WUPDropdownElement<
       this.throwError("Invalid structure. Expected 1st element: <any/>, last element: <wup-popup/>");
     } else {
       this.$refPopup.setAttribute("menu", "");
-      this.$refPopup.goShow = this.goShowPopup.bind(this);
-      this.$refPopup.goHide = this.goHidePopup.bind(this);
+      this.$refPopup.goShow = this.goOpenPopup.bind(this);
+      this.$refPopup.goHide = this.goClosePopup.bind(this);
 
       // find popup props from attributes
       const excluded = new Set<string>(); // popup props that assigned from attributes
@@ -146,7 +146,7 @@ export default class WUPDropdownElement<
       });
       Object.keys(this._opts).forEach((k) => {
         if (!excluded.has(k)) {
-          // @ts-expect-error - because hideOnPopupClick doesn't exist on popup
+          // @ts-expect-error - because closeOnPopupClick doesn't exist on popup
           this.$refPopup.$options[k] = this._opts[k];
         }
       });
@@ -173,21 +173,21 @@ export default class WUPDropdownElement<
   }
 
   /** Custom function to override default `WUPPopupElement.prototype.goHide` */
-  protected goShowPopup(showCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
-    const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, showCase, ev);
+  protected goOpenPopup(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
+    const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, openCase, ev);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", true);
     return p;
   }
 
   /** Custom function to override default `WUPPopupElement.prototype.goHide` */
-  protected goHidePopup(
-    hideCase: PopupCloseCases,
+  protected goClosePopup(
+    closeCase: PopupCloseCases,
     ev: MouseEvent | FocusEvent | KeyboardEvent | null
   ): boolean | Promise<boolean> {
-    if (hideCase === PopupCloseCases.onPopupClick && !this._opts.hideOnPopupClick) {
+    if (closeCase === PopupCloseCases.onPopupClick && !this._opts.closeOnPopupClick) {
       return false;
     }
-    const p = WUPPopupElement.prototype.goHide.call(this.$refPopup, hideCase, ev);
+    const p = WUPPopupElement.prototype.goHide.call(this.$refPopup, closeCase, ev);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", false);
     return p;
   }

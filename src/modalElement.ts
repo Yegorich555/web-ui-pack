@@ -437,4 +437,3 @@ export default class WUPModalElement<
 customElements.define(tagName, WUPModalElement);
 
 // NiceToHave: handle Ctrl+S, Meta+S for submit & close ???
-// NiceToHave: popup & modal has similar show/hide logic: need to unify it to abstract BasePopup

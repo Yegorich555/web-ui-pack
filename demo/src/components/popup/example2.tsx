@@ -7,7 +7,7 @@ import styles from "./popupView.scss";
 // example of attach - use this to avoid overhelmed layout by closed popups
 function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
   const detach = WUPPopupElement.$attach(
-    { target: el, text: opts.text, showCase: PopupOpenCases.onFocus | PopupOpenCases.onClick },
+    { target: el, text: opts.text, openCase: PopupOpenCases.onFocus | PopupOpenCases.onClick },
     (popup) => {
       popup.className = styles.dropdownPopup;
 
@@ -37,7 +37,7 @@ function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
       const isLock = false; // change it to show forever
       if (isLock) {
         popup.$options.openCase = PopupOpenCases.always;
-        popup.$open(); // to override default showCase and leave show forever
+        popup.$open(); // to override default openCase and leave show forever
       }
     }
   );

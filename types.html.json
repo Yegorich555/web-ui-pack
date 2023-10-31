@@ -464,7 +464,7 @@
           "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
           "references": [
             {
-              "name": "@see WUP.BaseCombo.ShowCases",
+              "name": "@see WUP.BaseCombo.MenuOpenCases",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseCombo.ts"
             }
           ]
@@ -1227,7 +1227,7 @@
           "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
           "references": [
             {
-              "name": "@see WUP.BaseCombo.ShowCases",
+              "name": "@see WUP.BaseCombo.MenuOpenCases",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseCombo.ts"
             }
           ]
@@ -1402,7 +1402,7 @@
           "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
           "references": [
             {
-              "name": "@see WUP.BaseCombo.ShowCases",
+              "name": "@see WUP.BaseCombo.MenuOpenCases",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseCombo.ts"
             }
           ]

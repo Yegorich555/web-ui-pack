@@ -156,21 +156,6 @@ exports[`control.check $show/$hide error 3`] = `
       icon=""
     />
   </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt2"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span>
-      Some custom message here
-    </span>
-  </wup-popup>
 </wup-check>
 `;
 
@@ -772,22 +757,6 @@ exports[`control.check validations options.validationCase 3`] = `
       icon=""
     />
   </label>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt3"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      custom err here
-    </span>
-  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"

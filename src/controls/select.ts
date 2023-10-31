@@ -4,7 +4,7 @@ import promiseWait from "../helpers/promiseWait";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
 import { WUPcssMenu } from "../styles";
-import WUPBaseComboControl, { ShowCases } from "./baseCombo";
+import WUPBaseComboControl, { MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-select";
@@ -45,7 +45,7 @@ declare global {
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions<T> {
       /** Case when menu-popup to show
        * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
-      showCase: ShowCases;
+      openCase: MenuOpenCases;
       /** Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
        * @tutorial
        * * set number X to enable autoMode where `input.readOnly = items.length < X` */
@@ -186,7 +186,7 @@ export default class WUPSelectControl<
       minCount: (v, setV) => (v == null || v.length < setV) && __wupln(`Min count is ${setV}`, "validation"),
       maxCount: (v, setV) => (v == null || v.length > setV) && __wupln(`Max count is ${setV}`, "validation"),
     },
-    showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
+    openCase: MenuOpenCases.onClick | MenuOpenCases.onFocus | MenuOpenCases.onPressArrowKey | MenuOpenCases.onInput,
     allowNewValue: false,
     multiple: false,
     items: [],
@@ -305,7 +305,7 @@ export default class WUPSelectControl<
         Promise.resolve().finally(() => {
           this._cachedItems = data || [];
           act();
-          this.$isFocused && this.goOpenMenu(ShowCases.onFocus, null);
+          this.$isFocused && this.goOpenMenu(MenuOpenCases.onFocus, null);
         }); // empty promise required to showMenu after pending changes
         return data;
       });
@@ -567,27 +567,27 @@ export default class WUPSelectControl<
     this._opts.multiple && this.clearFilterMenuItems();
   }
 
-  override canOpenMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
+  override canOpenMenu(openCase: MenuOpenCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
     if (this.$isPending) {
       return false;
     }
-    return super.canOpenMenu(showCase, e);
+    return super.canOpenMenu(openCase, e);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override async goOpenMenu(
-    showCase: ShowCases,
+    openCase: MenuOpenCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): Promise<WUPPopupElement | null> {
     if (this.$isOpened) {
       return this.$refPopup!;
     }
 
-    if (this.$refPopup && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
+    if (this.$refPopup && openCase !== MenuOpenCases.onInput && this._menuItems!.filtered) {
       this.clearFilterMenuItems();
     }
 
-    const popup = await super.goOpenMenu(showCase, e);
+    const popup = await super.goOpenMenu(openCase, e);
     popup && !this.canClearSelection && this.selectMenuItemByValue(this.$value); // set aria-selected only if input not empty
     return popup;
   }

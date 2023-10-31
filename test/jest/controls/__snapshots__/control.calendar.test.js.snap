@@ -933,21 +933,6 @@ exports[`control.calendar $show/$hide error 3`] = `
       </div>
     </div>
   </div>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt3"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span>
-      Some custom message here
-    </span>
-  </wup-popup>
 </wup-calendar>
 `;
 
@@ -6192,21 +6177,6 @@ exports[`control.calendar validations $options.validationShowAll 2`] = `
       </div>
     </div>
   </div>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt3"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
 </wup-calendar>
 `;
 
@@ -6343,75 +6313,6 @@ exports[`control.calendar validations $options.validationShowAll 3`] = `
       </div>
     </div>
   </div>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt3"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt4"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    />
-    <span
-      class="wup-hidden"
-    >
-      Always error
-    </span>
-    <ul
-      aria-hidden="true"
-    >
-      <li
-        valid=""
-      />
-      <li>
-        Always error
-      </li>
-    </ul>
-  </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt5"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Name:
-    </span>
-    <span>
-      This field is required
-    </span>
-    <ul
-      aria-hidden="true"
-    >
-      <li
-        valid=""
-      />
-      <li>
-        Always error
-      </li>
-    </ul>
-  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -6853,23 +6754,6 @@ exports[`control.calendar validations options.validationCase 3`] = `
     aria-atomic="true"
     aria-live="off"
     error=""
-    id="txt4"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
     id="txt5"
     style="display: none;"
   >
@@ -7018,39 +6902,6 @@ exports[`control.calendar validations options.validationCase 4`] = `
       </div>
     </div>
   </div>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt4"
-    role="alert"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      This field is required
-    </span>
-  </wup-popup>
-  <wup-popup
-    aria-atomic="true"
-    aria-live="off"
-    error=""
-    id="txt5"
-    style=""
-  >
-    <span
-      class="wup-hidden"
-    >
-      Error for First Input:
-    </span>
-    <span>
-      custom err here
-    </span>
-  </wup-popup>
   <wup-popup
     aria-atomic="true"
     aria-live="off"

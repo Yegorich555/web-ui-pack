@@ -1011,7 +1011,7 @@ export default abstract class WUPBaseControl<
     this._errMsg = undefined;
     if (this.$refError) {
       const p = this.$refError;
-      p.addEventListener("$hide", p.remove, { passive: true, once: true });
+      p.addEventListener("$close", p.remove, { passive: true, once: true });
       p.$close(); // hide with animation
       this.$refError = undefined;
 

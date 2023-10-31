@@ -1,6 +1,6 @@
 /* eslint-disable no-irregular-whitespace */
 import { WUPSelectControl } from "web-ui-pack";
-import WUPBaseComboControl, { ShowCases } from "web-ui-pack/controls/baseCombo";
+import WUPBaseComboControl, { MenuOpenCases } from "web-ui-pack/controls/baseCombo";
 import { initTestBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -19,14 +19,14 @@ initTestBaseControl({
   onInit: (e) => {
     el = e;
     el.$options.items = getItems();
-    el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
+    el.$options.openCase |= MenuOpenCases.onFocusAuto; // without this impossible to test with manual triggering focus()
 
     h.setupLayout(el, { x: 140, y: 100, h: 50, w: 100 });
   },
 });
 
 describe("control.select common", () => {
-  test("$show/$hide menu", async () => {
+  test("$open/$close menu", async () => {
     el.$initValue = 20;
     expect(el.$isOpened).toBe(false);
     const onShow = jest.fn();
@@ -65,7 +65,7 @@ describe("control.select common", () => {
     expect(el.$onCloseMenu).toBeCalledTimes(1);
     expect(onShow).toBeCalledTimes(1);
 
-    // opening by call $show()
+    // opening by call $open()
     jest.clearAllMocks();
     el.$openMenu();
     await h.wait();
@@ -73,7 +73,7 @@ describe("control.select common", () => {
     expect(onHide).toBeCalledTimes(0);
     expect(onShow).toBeCalledTimes(1);
 
-    // closing by call $hide()
+    // closing by call $close()
     el.$closeMenu();
     await h.wait();
     expect(el.$isOpened).toBe(false);
@@ -504,8 +504,8 @@ describe("control.select common", () => {
   });
 
   describe("options", () => {
-    test("showCase", async () => {
-      // showCase: focus
+    test("openCase", async () => {
+      // openCase: focus
       HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       await h.wait();
@@ -515,8 +515,8 @@ describe("control.select common", () => {
       await h.wait();
       expect(el.$isOpened).toBe(false);
 
-      el.$options.showCase &= ~ShowCases.onFocus; // remove option
-      el.$options.showCase &= ~ShowCases.onFocusAuto; // remove option
+      el.$options.openCase &= ~MenuOpenCases.onFocus; // remove option
+      el.$options.openCase &= ~MenuOpenCases.onFocusAuto; // remove option
       HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$isOpened).toBe(false);
@@ -528,18 +528,18 @@ describe("control.select common", () => {
       await h.wait();
       expect(el.$isOpened).toBe(true);
 
-      // showCase: onInput
+      // openCase: onInput
       await h.userTypeText(el.$refInput, "d");
       expect(el.$isOpened).toBe(true);
 
       el.$closeMenu();
-      el.$options.showCase &= ~ShowCases.onInput; // remove option
+      el.$options.openCase &= ~MenuOpenCases.onInput; // remove option
       await h.wait();
       await h.userTypeText(el.$refInput, "a");
       await h.wait();
       expect(el.$isOpened).toBe(false);
 
-      // showCase: Click
+      // openCase: Click
       el.click();
       await h.wait();
       expect(el.$isOpened).toBe(true);
@@ -566,7 +566,7 @@ describe("control.select common", () => {
       await h.wait();
       expect(el.$isOpened).toBe(false);
 
-      el.$options.showCase &= ~ShowCases.onClick; // remove option
+      el.$options.openCase &= ~MenuOpenCases.onClick; // remove option
       el.click();
       await h.wait();
       expect(el.$isOpened).toBe(false);
@@ -580,12 +580,12 @@ describe("control.select common", () => {
 
       el.$closeMenu();
       await h.wait();
-      // showCase: inputClick
-      el.$options.showCase |= ShowCases.onClick; // enable click again
+      // openCase: inputClick
+      el.$options.openCase |= MenuOpenCases.onClick; // enable click again
       await h.userClick(el.$refInput);
       await h.wait();
       expect(el.$isOpened).toBe(false); // because click by input is disabled
-      el.$options.showCase |= ShowCases.onClickInput;
+      el.$options.openCase |= MenuOpenCases.onClickInput;
       await h.userClick(el.$refInput);
       await h.wait();
       expect(el.$isOpened).toBe(true);
@@ -593,26 +593,26 @@ describe("control.select common", () => {
       await h.wait();
       expect(el.$isOpened).toBe(false);
 
-      // showCase: ArrowKeys
+      // openCase: ArrowKeys
       el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
       await h.wait();
       expect(el.$isOpened).toBe(true);
       el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
       await h.wait();
       expect(el.$isOpened).toBe(false);
-      el.$options.showCase &= ~ShowCases.onPressArrowKey; // remove option
+      el.$options.openCase &= ~MenuOpenCases.onPressArrowKey; // remove option
       el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
       await h.wait();
       expect(el.$isOpened).toBe(false);
     });
 
-    test("showCase: focusAuto", async () => {
-      el.$options.showCase |= ShowCases.onFocusAuto;
+    test("openCase: focusAuto", async () => {
+      el.$options.openCase |= MenuOpenCases.onFocusAuto;
       const canShow = jest.spyOn(WUPBaseComboControl.prototype, "canOpenMenu");
       el.focus();
       await h.wait(1);
       expect(canShow).toBeCalledTimes(1);
-      expect(canShow.mock.lastCall[0]).toBe(ShowCases.onFocusAuto);
+      expect(canShow.mock.lastCall[0]).toBe(MenuOpenCases.onFocusAuto);
 
       // WARN: other tests possible only manually: see details directly in the code
     });
