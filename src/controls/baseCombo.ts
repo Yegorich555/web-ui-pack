@@ -6,7 +6,7 @@ import WUPTextControl from "./text";
 
 export const enum MenuOpenCases {
   /** When $openMenu() called programmatically; Don't use it for $options (it's for nested cycle) */
-  onManualCall = 1,
+  onManualCall = 0,
   /** When control got focus via user interaction; ignores case when user changed value by click on item on clearButton
    * to change such behavior update WUPBaseComboControl.prototype.canOpenMenu */
   onFocus = 1 << 1,
