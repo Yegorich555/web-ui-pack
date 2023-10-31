@@ -48,10 +48,16 @@ export default abstract class WUPBaseModal<
   Events extends WUP.BaseModal.EventMap = WUP.BaseModal.EventMap
 > extends WUPBaseElement<TOptions, Events> {
   // #ctr = this.constructor as typeof WUPBaseModal;
+  static get $styleRoot(): string {
+    return `:root {
+        --modal-anim-t: 400ms;
+      }`;
+  }
 
   static get $style(): string {
     return `${super.$style}
       :host {
+        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 8000;
         display: none;
         opacity: 0;
@@ -65,7 +71,12 @@ export default abstract class WUPBaseModal<
       }
       :host[open] { display: block; }
       :host[show] { opacity: 1; }
-      ${WUPcssScrollSmall(":host")}`;
+      ${WUPcssScrollSmall(":host")}
+      @media not all and (prefers-reduced-motion) {
+        :host {
+          transition: opacity var(--modal-anim), transform var(--modal-anim);
+        }
+      }`;
   }
 
   // static $defaults: WUP.BaseModal.Options = {};
@@ -118,7 +129,7 @@ export default abstract class WUPBaseModal<
   /** Open element
    * @returns Promise resolved by animation-end ('true' if it finished & wasn't prevented) */
   $open(): Promise<boolean> {
-    return this.goOpen(OpenCases.onManuallCall);
+    return this.goOpen(OpenCases.onManuallCall, null);
   }
 
   #whenClose?: Promise<boolean>;
@@ -138,13 +149,18 @@ export default abstract class WUPBaseModal<
   //   super.gotChanges(propsChanged);
   // }
 
+  /** Returns animation time  defined according to styles */
+  get animTime(): number {
+    return parseMsTime(getComputedStyle(this).transitionDuration);
+  }
+
   /** Implement extra logic on opening */
-  abstract gotOpen(openCase: OpenCases | number): void;
+  abstract gotOpen(openCase: OpenCases | number, e: Event | null): void;
   /** Implement extra logic on closing */
   abstract gotClose(closeCase: CloseCases | number, e: Event | null): void;
 
   /** Hide modal. @openCase as reason of open() */
-  protected goOpen(openCase: OpenCases | number): Promise<boolean> {
+  goOpen(openCase: OpenCases | number, ev: Event | null): Promise<boolean> {
     if (this.#whenOpen) {
       return this.#whenOpen;
     }
@@ -160,7 +176,7 @@ export default abstract class WUPBaseModal<
     this.#isOpening = true;
     // apply open styles
     this.setAttribute("open", ""); // apply display effect
-    this.gotOpen(openCase);
+    this.gotOpen(openCase, ev);
 
     setTimeout(() => {
       this.scroll({ left: 0, top: 0, behavior: "instant" }); // scroll at the top: to clear prev possible state
@@ -169,7 +185,6 @@ export default abstract class WUPBaseModal<
 
     // wait for animation
     this.#whenOpen = new Promise((res) => {
-      const animTime = parseMsTime(getComputedStyle(this).transitionDuration);
       setTimeout(() => {
         if (!this.#whenOpen) {
           res(false); // possible when call $close during the opening
@@ -179,7 +194,7 @@ export default abstract class WUPBaseModal<
         this.#isOpening = undefined;
         res(true);
         setTimeout(() => this.fireEvent("$open", { cancelable: false, bubbles: true }));
-      }, animTime);
+      }, this.animTime);
     });
     return this.#whenOpen;
   }
@@ -207,7 +222,6 @@ export default abstract class WUPBaseModal<
     this.gotClose(closeCase, ev);
 
     this.#whenClose = new Promise((res) => {
-      const animTime = parseMsTime(getComputedStyle(this).transitionDuration);
       setTimeout(() => {
         if (!this.#whenClose) {
           res(false); // possible when call $open during the hiding
@@ -216,7 +230,7 @@ export default abstract class WUPBaseModal<
         this.resetState();
         res(true);
         setTimeout(() => this.fireEvent("$close", { cancelable: false, bubbles: true }));
-      }, animTime);
+      }, this.animTime);
     });
 
     return this.#whenClose;

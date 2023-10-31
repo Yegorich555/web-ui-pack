@@ -150,22 +150,7 @@ declare global {
       tagName?: string;
     }
 
-    interface EventMap extends WUP.Base.EventMap {
-      /** Fires before show is happened;
-       * @tutorial rules
-       * * can be prevented via `e.preventDefault()`
-       * * use event.detail.openCase to filter by openCase */
-      $willOpen: CustomEvent<{ openCase: PopupOpenCases }>;
-      /** Fires after popup is shown (after animation finishes) */
-      $open: Event;
-      /** Fires before hide is happened;
-       * @tutorial rules
-       * * can be prevented via `e.preventDefault()`
-       * * use event.detail.hideCase to filter by hideCase */
-      $willClose: CustomEvent<{ closeCase: PopupCloseCases }>;
-      /** Fires after popup is hidden (after animation finishes) */
-      $close: Event;
-    }
+    interface EventMap extends WUP.BaseModal.EventMap<PopupOpenCases, PopupCloseCases> {}
   }
 }
 
