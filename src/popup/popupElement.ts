@@ -611,22 +611,19 @@ export default class WUPPopupElement<
       this._refListener.close(null as any, ev); // if listener exists need to call it from listener side to apply events
       return this._whenClose as Promise<boolean>;
     }
-    return super.goClose(closeCase ?? PopupCloseCases.onManuallCall, ev);
+    const skipWait = closeCase === PopupCloseCases.onOptionChange || closeCase === PopupCloseCases.onTargetRemove;
+    return super.goClose(closeCase ?? PopupCloseCases.onManuallCall, ev, skipWait);
   }
 
   /** Hide popup. @closeCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  override gotClose(closeCase: PopupCloseCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): void {
+  override gotClose(
+    closeCase: PopupCloseCases,
+    ev: MouseEvent | FocusEvent | KeyboardEvent | null,
+    immediately?: boolean
+  ): void {
     this._stopAnimation?.call(this);
-
-    // waitFor only if was ordinary user-action
-    // todo skipWait doesn't work here because the main method goShow continue wais for animation
-    const skipWait = closeCase === PopupCloseCases.onOptionChange || closeCase === PopupCloseCases.onTargetRemove;
-    if (skipWait) {
-      // this.style.display = "none"; // todo need to re-check this
-    } else {
-      this.goAnimate(this.animTime, true);
-    }
+    !immediately && this.goAnimate(this.animTime, true);
   }
 
   /** Returns `target.getBoundingClientRect()` Use function to change placement logic based on target-rect

@@ -172,7 +172,7 @@ export default abstract class WUPBaseModal<
   /** Implement extra logic on opening */
   abstract gotOpen(openCase: OpenCases | number, e: Event | null): void;
   /** Implement extra logic on closing */
-  abstract gotClose(closeCase: CloseCases | number, e: Event | null): void;
+  abstract gotClose(closeCase: CloseCases | number, e: Event | null, immediately?: boolean): void;
 
   /** Open element. @openCase as reason of open() */
   goOpen(openCase: OpenCases | number, ev: Event | null): Promise<boolean> {
@@ -216,7 +216,7 @@ export default abstract class WUPBaseModal<
 
   /** Hide element; @closeCase as reason of close() */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  goClose(closeCase: CloseCases | number, ev: Event | null): Promise<boolean> {
+  goClose(closeCase: CloseCases | number, ev: Event | null, immediately?: boolean): Promise<boolean> {
     if (this._whenClose) {
       return this._whenClose;
     }
@@ -234,18 +234,21 @@ export default abstract class WUPBaseModal<
     // apply animation
     this.removeAttribute("show");
 
-    this.gotClose(closeCase, ev);
+    this.gotClose(closeCase, ev, immediately);
 
     this._whenClose = new Promise((res) => {
-      setTimeout(() => {
-        if (!this._whenClose) {
-          res(false); // possible when call $open during the hiding
-          return;
-        }
-        this.resetState();
-        res(true);
-        setTimeout(() => this.fireEvent("$close", { cancelable: false, bubbles: true }));
-      }, this.animTime);
+      setTimeout(
+        () => {
+          if (!this._whenClose) {
+            res(false); // possible when call $open during the hiding
+            return;
+          }
+          this.resetState();
+          res(true);
+          setTimeout(() => this.fireEvent("$close", { cancelable: false, bubbles: true }));
+        },
+        immediately ? 0 : this.animTime
+      );
     });
 
     return this._whenClose;
