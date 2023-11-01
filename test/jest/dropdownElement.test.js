@@ -101,11 +101,12 @@ describe("dropdownElement", () => {
     `);
 
     await h.userClick(trg);
+    await h.wait(1);
     expect(el.$refPopup.$isOpened).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(`
       "<wup-dropdown>
           <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="false">Click me</button>
-          <wup-popup style="min-width: 100px; min-height: 50px;" menu="">
+          <wup-popup menu="" style="min-width: 100px; min-height: 50px;" w-animation="drawer">
             <ul id="wup1" tabindex="-1">
               <li><button>A</button></li>
               <li><button>B</button></li>
@@ -147,8 +148,8 @@ describe("dropdownElement", () => {
     expect(document.body.innerHTML).toMatchInlineSnapshot(`
       "
               <wup-dropdown>
-                <button aria-owns="wup3" aria-controls="wup3" aria-haspopup="listbox" aria-expanded="false">Click me</button>
-                <wup-popup menu="" id="wup3" tabindex="-1">
+                <button aria-owns="wup4" aria-controls="wup4" aria-haspopup="listbox" aria-expanded="false">Click me</button>
+                <wup-popup menu="" id="wup4" tabindex="-1">
                   <button>A</button>
                   <button>B</button>
                 </wup-popup>
@@ -162,8 +163,10 @@ describe("dropdownElement", () => {
     el.$options.closeOnPopupClick = true;
     await h.wait(1);
     await h.userClick(trg);
+    await h.wait(1);
     expect(el.$refPopup.$isOpened).toBe(true);
     await h.userClick(item);
+    await h.wait(1);
     expect(el.$refPopup.$isOpened).toBe(false);
 
     el.$options.closeOnPopupClick = false;
@@ -171,8 +174,10 @@ describe("dropdownElement", () => {
     await h.userClick(trg);
     expect(el.$refPopup.$isOpened).toBe(true);
     await h.userClick(item);
+    await h.wait(1);
     expect(el.$refPopup.$isOpened).toBe(true);
     await h.userClick(trg);
+    await h.wait(1);
     expect(el.$refPopup.$isOpened).toBe(false);
   });
 
