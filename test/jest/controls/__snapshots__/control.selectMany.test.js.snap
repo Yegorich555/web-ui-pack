@@ -195,7 +195,6 @@ exports[`control.selectMany $show/$hide error 2`] = `
     error=""
     id="txt2"
     role="alert"
-    style="opacity: 0;"
   >
     <span
       class="wup-hidden"
@@ -233,6 +232,23 @@ exports[`control.selectMany $show/$hide error 3`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
 </wup-selectmany>
 `;
 
@@ -1321,8 +1337,10 @@ exports[`control.selectMany validations $options.validationShowAll 1`] = `
     aria-live="off"
     error=""
     id="txt2"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1387,8 +1405,10 @@ exports[`control.selectMany validations $options.validationShowAll 2`] = `
     aria-live="off"
     error=""
     id="txt2"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1452,8 +1472,10 @@ exports[`control.selectMany validations $options.validationShowAll 3`] = `
     aria-live="off"
     error=""
     id="txt5"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1535,7 +1557,6 @@ exports[`control.selectMany validations options.validationCase 2`] = `
   </label>
   <wup-popup
     menu=""
-    style="opacity: 0;"
   >
     <ul
       aria-label="Items"
@@ -1571,8 +1592,10 @@ exports[`control.selectMany validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt4"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1631,7 +1654,10 @@ exports[`control.selectMany validations options.validationCase 3`] = `
   </label>
   <wup-popup
     menu=""
-    style="min-width: 100px;"
+    open=""
+    show=""
+    style="min-width: 100px; display: none;"
+    w-animation="drawer"
   >
     <ul
       aria-label="Items"
@@ -1668,7 +1694,9 @@ exports[`control.selectMany validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt5"
-    style=""
+    open=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1722,8 +1750,10 @@ exports[`control.selectMany validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt8"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"

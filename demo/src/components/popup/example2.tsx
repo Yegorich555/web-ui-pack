@@ -9,7 +9,7 @@ function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
   const detach = WUPPopupElement.$attach(
     { target: el, text: opts.text, openCase: PopupOpenCases.onFocus | PopupOpenCases.onClick },
     (popup) => {
-      popup.className = styles.dropdownPopup;
+      // popup.className = styles.dropdownPopup;
 
       popup.$options.placement = [
         // dropdown behavior
@@ -36,7 +36,7 @@ function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
 
       const isLock = false; // change it to show forever
       if (isLock) {
-        popup.$options.openCase = PopupOpenCases.always;
+        popup.$options.openCase = PopupOpenCases.onInit;
         popup.$open(); // to override default openCase and leave show forever
       }
     }

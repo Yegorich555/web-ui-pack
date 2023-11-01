@@ -795,7 +795,6 @@ exports[`control.calendar $show/$hide error 2`] = `
     error=""
     id="txt3"
     role="alert"
-    style="opacity: 0;"
   >
     <span
       class="wup-hidden"
@@ -933,6 +932,23 @@ exports[`control.calendar $show/$hide error 3`] = `
       </div>
     </div>
   </div>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
 </wup-calendar>
 `;
 
@@ -6034,7 +6050,9 @@ exports[`control.calendar validations $options.validationShowAll 1`] = `
     aria-live="off"
     error=""
     id="txt3"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -6318,7 +6336,9 @@ exports[`control.calendar validations $options.validationShowAll 3`] = `
     aria-live="off"
     error=""
     id="txt6"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -6601,7 +6621,9 @@ exports[`control.calendar validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt4"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -6755,6 +6777,8 @@ exports[`control.calendar validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt5"
+    open=""
+    show=""
     style="display: none;"
   >
     <span
@@ -6907,7 +6931,9 @@ exports[`control.calendar validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt6"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span

@@ -776,9 +776,11 @@ export async function userPressTab(next: HTMLElement | null, opts: Partial<Keybo
 }
 
 const origGetComputedStyle = window.getComputedStyle;
-export async function setupCssCompute(el: HTMLElement, cssObj: Partial<CSSStyleDeclaration>) {
-  jest.spyOn(window, "getComputedStyle").mockImplementation((elt) => {
+export function setupCssCompute(el: HTMLElement | ((el: Element) => boolean), cssObj: Partial<CSSStyleDeclaration>) {
+  const spy = jest.spyOn(window, "getComputedStyle").mockImplementation((elt) => {
     const r = origGetComputedStyle(elt);
-    return elt === el ? Object.assign(r, cssObj) : r;
+    const isTarget = typeof el === "function" ? el(elt) : elt === el;
+    return isTarget ? Object.assign(r, cssObj) : r;
   });
+  return spy;
 }

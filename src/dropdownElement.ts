@@ -173,7 +173,7 @@ export default class WUPDropdownElement<
   }
 
   /** Custom function to override default `WUPPopupElement.prototype.goClose` */
-  protected goOpenPopup(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
+  protected goOpenPopup(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): Promise<boolean> {
     const p = WUPPopupElement.prototype.goOpen.call(this.$refPopup, openCase, ev);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", true);
     return p;
@@ -183,9 +183,9 @@ export default class WUPDropdownElement<
   protected goClosePopup(
     closeCase: PopupCloseCases,
     ev: MouseEvent | FocusEvent | KeyboardEvent | null
-  ): boolean | Promise<boolean> {
+  ): Promise<boolean> {
     if (closeCase === PopupCloseCases.onPopupClick && !this._opts.closeOnPopupClick) {
-      return false;
+      return Promise.resolve(false);
     }
     const p = WUPPopupElement.prototype.goClose.call(this.$refPopup, closeCase, ev);
     this.$refPopup.$options.target!.setAttribute("aria-expanded", false);

@@ -89,6 +89,9 @@ padding:0;}
           --scroll: #fff2;
           --scroll-hover: #fff3;
         }
+  :root {
+        --modal-anim-t: 400ms;
+      }
   
       :root {
         --popup-anim-t: 300ms;
@@ -109,49 +112,20 @@ padding:0;}
       }
   
       WUP-POPUP {
+        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 8000;
         display: none;
+        opacity: 0;
         position: fixed!important;
-        top: 0; left: 0;
-        padding: 4px; margin: 0;
-        overflow: auto;
+        border-radius: var(--border-radius);
+        padding: var(--base-margin);
         box-sizing: border-box;
-        border-radius: var(--border-radius, 6px);
-        box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup-text);
-        background: var(--popup-bg);
-        text-overflow: ellipsis;
+        white-space: pre-line;
+        overflow: auto;
+        overflow: overlay;
       }
-      WUP-POPUP[tooltip],
-      WUP-POPUP[tooltip]+WUP-POPUP-arrow {
-        --popup: var(--tooltip-text);
-        --popup-bg: var(--tooltip-bg);
-        --popup-shadow: var(--tooltip-shadow);
-      }
-      @media not all and (prefers-reduced-motion) {
-        WUP-POPUP,
-        WUP-POPUP+WUP-POPUP-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim-t) ease-in-out;
-        }
-        @keyframes WUP-POPUP-a1 {
-          from {opacity: 0;}
-          to {opacity: 1;}
-        }
-        WUP-POPUP[hide],
-        WUP-POPUP[hide]+WUP-POPUP-arrow {
-          animation: WUP-POPUP-a2 var(--popup-anim-t) ease-in-out forwards;
-        }
-        @keyframes WUP-POPUP-a2 {
-          to {opacity: 0;}
-        }
-      }
-      WUP-POPUP[w-animation=drawer] {
-        animation-name: custom;
-      }
-      WUP-POPUP[w-animation=stack] {
-        animation-name: custom;
-        overflow: visible;
-      }
+      WUP-POPUP[open] { display: block; }
+      WUP-POPUP[show] { opacity: 1; }
       
 WUP-POPUP::-webkit-scrollbar {
   width: 10px; height: 10px;
@@ -181,51 +155,60 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
     cursor: pointer;
   }
 }
-  
-      TEST-EL {
-        z-index: 8000;
-        display: none;
-        position: fixed!important;
-        top: 0; left: 0;
+      @media not all and (prefers-reduced-motion) {
+        WUP-POPUP {
+          transition: opacity var(--modal-anim), transform var(--modal-anim);
+        }
+      }
+      WUP-POPUP,
+      WUP-POPUP-arrow {
+        --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        opacity: 0;
+      }
+      WUP-POPUP {
+        top:0;left:0;
         padding: 4px; margin: 0;
-        overflow: auto;
-        box-sizing: border-box;
-        border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 var(--popup-shadow);
         color: var(--popup-text);
         background: var(--popup-bg);
         text-overflow: ellipsis;
       }
-      TEST-EL[tooltip],
-      TEST-EL[tooltip]+TEST-EL-arrow {
+      WUP-POPUP[tooltip],
+      WUP-POPUP[tooltip]+WUP-POPUP-arrow {
         --popup: var(--tooltip-text);
         --popup-bg: var(--tooltip-bg);
         --popup-shadow: var(--tooltip-shadow);
       }
+      WUP-POPUP[show]+WUP-POPUP-arrow { opacity: 1; }
       @media not all and (prefers-reduced-motion) {
-        TEST-EL,
-        TEST-EL+TEST-EL-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim-t) ease-in-out;
-        }
-        @keyframes WUP-POPUP-a1 {
-          from {opacity: 0;}
-          to {opacity: 1;}
-        }
-        TEST-EL[hide],
-        TEST-EL[hide]+TEST-EL-arrow {
-          animation: WUP-POPUP-a2 var(--popup-anim-t) ease-in-out forwards;
-        }
-        @keyframes WUP-POPUP-a2 {
-          to {opacity: 0;}
+        WUP-POPUP,
+        WUP-POPUP+WUP-POPUP-arrow {
+          transition: opacity var(--popup-anim);
         }
       }
-      TEST-EL[w-animation=drawer] {
-        animation-name: custom;
+      WUP-POPUP[w-animation] {
+        transition-property: none;
+        opacity: 1;
       }
-      TEST-EL[w-animation=stack] {
-        animation-name: custom;
+      WUP-POPUP[w-animation=stack] {
         overflow: visible;
       }
+  
+      TEST-EL {
+        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        z-index: 8000;
+        display: none;
+        opacity: 0;
+        position: fixed!important;
+        border-radius: var(--border-radius);
+        padding: var(--base-margin);
+        box-sizing: border-box;
+        white-space: pre-line;
+        overflow: auto;
+        overflow: overlay;
+      }
+      TEST-EL[open] { display: block; }
+      TEST-EL[show] { opacity: 1; }
       
 TEST-EL::-webkit-scrollbar {
   width: 10px; height: 10px;
@@ -255,6 +238,44 @@ TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
     cursor: pointer;
   }
 }
+      @media not all and (prefers-reduced-motion) {
+        TEST-EL {
+          transition: opacity var(--modal-anim), transform var(--modal-anim);
+        }
+      }
+      TEST-EL,
+      TEST-EL-arrow {
+        --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        opacity: 0;
+      }
+      TEST-EL {
+        top:0;left:0;
+        padding: 4px; margin: 0;
+        box-shadow: 0 1px 4px 0 var(--popup-shadow);
+        color: var(--popup-text);
+        background: var(--popup-bg);
+        text-overflow: ellipsis;
+      }
+      TEST-EL[tooltip],
+      TEST-EL[tooltip]+TEST-EL-arrow {
+        --popup: var(--tooltip-text);
+        --popup-bg: var(--tooltip-bg);
+        --popup-shadow: var(--tooltip-shadow);
+      }
+      TEST-EL[show]+TEST-EL-arrow { opacity: 1; }
+      @media not all and (prefers-reduced-motion) {
+        TEST-EL,
+        TEST-EL+TEST-EL-arrow {
+          transition: opacity var(--popup-anim);
+        }
+      }
+      TEST-EL[w-animation] {
+        transition-property: none;
+        opacity: 1;
+      }
+      TEST-EL[w-animation=stack] {
+        overflow: visible;
+      }
 </style>
 `;
 
@@ -275,8 +296,9 @@ exports[`popupElement inheritance common tests snapshot of $defaults 1`] = `
       some text
     </div>
     <wup-popup
+      open=""
       position="top"
-      style="display: block; transform: translate(190px, 100px);"
+      style="transform: translate(190px, 100px);"
     />
   </body>,
 }
@@ -387,6 +409,9 @@ padding:0;}
           --scroll: #fff2;
           --scroll-hover: #fff3;
         }
+  :root {
+        --modal-anim-t: 400ms;
+      }
   
       :root {
         --popup-anim-t: 300ms;
@@ -407,49 +432,20 @@ padding:0;}
       }
   
       WUP-POPUP {
+        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 8000;
         display: none;
+        opacity: 0;
         position: fixed!important;
-        top: 0; left: 0;
-        padding: 4px; margin: 0;
-        overflow: auto;
+        border-radius: var(--border-radius);
+        padding: var(--base-margin);
         box-sizing: border-box;
-        border-radius: var(--border-radius, 6px);
-        box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup-text);
-        background: var(--popup-bg);
-        text-overflow: ellipsis;
+        white-space: pre-line;
+        overflow: auto;
+        overflow: overlay;
       }
-      WUP-POPUP[tooltip],
-      WUP-POPUP[tooltip]+WUP-POPUP-arrow {
-        --popup: var(--tooltip-text);
-        --popup-bg: var(--tooltip-bg);
-        --popup-shadow: var(--tooltip-shadow);
-      }
-      @media not all and (prefers-reduced-motion) {
-        WUP-POPUP,
-        WUP-POPUP+WUP-POPUP-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim-t) ease-in-out;
-        }
-        @keyframes WUP-POPUP-a1 {
-          from {opacity: 0;}
-          to {opacity: 1;}
-        }
-        WUP-POPUP[hide],
-        WUP-POPUP[hide]+WUP-POPUP-arrow {
-          animation: WUP-POPUP-a2 var(--popup-anim-t) ease-in-out forwards;
-        }
-        @keyframes WUP-POPUP-a2 {
-          to {opacity: 0;}
-        }
-      }
-      WUP-POPUP[w-animation=drawer] {
-        animation-name: custom;
-      }
-      WUP-POPUP[w-animation=stack] {
-        animation-name: custom;
-        overflow: visible;
-      }
+      WUP-POPUP[open] { display: block; }
+      WUP-POPUP[show] { opacity: 1; }
       
 WUP-POPUP::-webkit-scrollbar {
   width: 10px; height: 10px;
@@ -479,51 +475,60 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
     cursor: pointer;
   }
 }
-  
-      TEST-EL {
-        z-index: 8000;
-        display: none;
-        position: fixed!important;
-        top: 0; left: 0;
+      @media not all and (prefers-reduced-motion) {
+        WUP-POPUP {
+          transition: opacity var(--modal-anim), transform var(--modal-anim);
+        }
+      }
+      WUP-POPUP,
+      WUP-POPUP-arrow {
+        --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        opacity: 0;
+      }
+      WUP-POPUP {
+        top:0;left:0;
         padding: 4px; margin: 0;
-        overflow: auto;
-        box-sizing: border-box;
-        border-radius: var(--border-radius, 6px);
         box-shadow: 0 1px 4px 0 var(--popup-shadow);
         color: var(--popup-text);
         background: var(--popup-bg);
         text-overflow: ellipsis;
       }
-      TEST-EL[tooltip],
-      TEST-EL[tooltip]+TEST-EL-arrow {
+      WUP-POPUP[tooltip],
+      WUP-POPUP[tooltip]+WUP-POPUP-arrow {
         --popup: var(--tooltip-text);
         --popup-bg: var(--tooltip-bg);
         --popup-shadow: var(--tooltip-shadow);
       }
+      WUP-POPUP[show]+WUP-POPUP-arrow { opacity: 1; }
       @media not all and (prefers-reduced-motion) {
-        TEST-EL,
-        TEST-EL+TEST-EL-arrow {
-          animation: WUP-POPUP-a1 var(--popup-anim-t) ease-in-out;
-        }
-        @keyframes WUP-POPUP-a1 {
-          from {opacity: 0;}
-          to {opacity: 1;}
-        }
-        TEST-EL[hide],
-        TEST-EL[hide]+TEST-EL-arrow {
-          animation: WUP-POPUP-a2 var(--popup-anim-t) ease-in-out forwards;
-        }
-        @keyframes WUP-POPUP-a2 {
-          to {opacity: 0;}
+        WUP-POPUP,
+        WUP-POPUP+WUP-POPUP-arrow {
+          transition: opacity var(--popup-anim);
         }
       }
-      TEST-EL[w-animation=drawer] {
-        animation-name: custom;
+      WUP-POPUP[w-animation] {
+        transition-property: none;
+        opacity: 1;
       }
-      TEST-EL[w-animation=stack] {
-        animation-name: custom;
+      WUP-POPUP[w-animation=stack] {
         overflow: visible;
       }
+  
+      TEST-EL {
+        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        z-index: 8000;
+        display: none;
+        opacity: 0;
+        position: fixed!important;
+        border-radius: var(--border-radius);
+        padding: var(--base-margin);
+        box-sizing: border-box;
+        white-space: pre-line;
+        overflow: auto;
+        overflow: overlay;
+      }
+      TEST-EL[open] { display: block; }
+      TEST-EL[show] { opacity: 1; }
       
 TEST-EL::-webkit-scrollbar {
   width: 10px; height: 10px;
@@ -553,6 +558,44 @@ TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
     cursor: pointer;
   }
 }
+      @media not all and (prefers-reduced-motion) {
+        TEST-EL {
+          transition: opacity var(--modal-anim), transform var(--modal-anim);
+        }
+      }
+      TEST-EL,
+      TEST-EL-arrow {
+        --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        opacity: 0;
+      }
+      TEST-EL {
+        top:0;left:0;
+        padding: 4px; margin: 0;
+        box-shadow: 0 1px 4px 0 var(--popup-shadow);
+        color: var(--popup-text);
+        background: var(--popup-bg);
+        text-overflow: ellipsis;
+      }
+      TEST-EL[tooltip],
+      TEST-EL[tooltip]+TEST-EL-arrow {
+        --popup: var(--tooltip-text);
+        --popup-bg: var(--tooltip-bg);
+        --popup-shadow: var(--tooltip-shadow);
+      }
+      TEST-EL[show]+TEST-EL-arrow { opacity: 1; }
+      @media not all and (prefers-reduced-motion) {
+        TEST-EL,
+        TEST-EL+TEST-EL-arrow {
+          transition: opacity var(--popup-anim);
+        }
+      }
+      TEST-EL[w-animation] {
+        transition-property: none;
+        opacity: 1;
+      }
+      TEST-EL[w-animation=stack] {
+        overflow: visible;
+      }
 </style>
 `;
 
@@ -573,8 +616,9 @@ exports[`popupElement me common tests snapshot of $defaults 1`] = `
       some text
     </div>
     <wup-popup
+      open=""
       position="top"
-      style="display: block; transform: translate(190px, 100px);"
+      style="transform: translate(190px, 100px);"
     />
   </body>,
 }

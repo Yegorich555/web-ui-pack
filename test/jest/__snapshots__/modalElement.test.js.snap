@@ -95,6 +95,9 @@ padding:0;}
         }
   :root {
         --modal-anim-t: 400ms;
+      }
+  :root {
+        --modal-anim-t: 400ms;
         --modal-text: inherit;
         --modal-bg: #fff;
         --modal-fade: #0007;
@@ -105,6 +108,7 @@ padding:0;}
       }
   
       WUP-MODAL {
+        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 8000;
         display: none;
         opacity: 0;
@@ -147,8 +151,12 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
     cursor: pointer;
   }
 }
+      @media not all and (prefers-reduced-motion) {
+        WUP-MODAL {
+          transition: opacity var(--modal-anim), transform var(--modal-anim);
+        }
+      }
       WUP-MODAL {
-        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 9002;
         width: 100%;
         max-width: 600px;
@@ -234,8 +242,7 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
         margin-left: auto;
       }
       @media not all and (prefers-reduced-motion) {
-        WUP-MODAL,
-        .wup-modal-fade {
+       .wup-modal-fade {
           transition: opacity var(--modal-anim), transform var(--modal-anim);
         }
       }

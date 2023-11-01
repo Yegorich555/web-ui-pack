@@ -129,7 +129,6 @@ exports[`control.check $show/$hide error 2`] = `
     error=""
     id="txt2"
     role="alert"
-    style="opacity: 0;"
   >
     <span
       class="wup-hidden"
@@ -156,6 +155,23 @@ exports[`control.check $show/$hide error 3`] = `
       icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
 </wup-check>
 `;
 
@@ -723,6 +739,8 @@ exports[`control.check validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt3"
+    open=""
+    show=""
     style="display: none;"
   >
     <span
@@ -762,7 +780,9 @@ exports[`control.check validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt4"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span

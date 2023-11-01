@@ -1,4 +1,4 @@
-import { WUPPopupElement, WUPCircleElement } from "web-ui-pack";
+import { WUPCircleElement } from "web-ui-pack";
 import * as h from "../testHelper";
 
 let nextFrame = async () => {};
@@ -388,7 +388,7 @@ describe("circleElement", () => {
     await h.wait(300);
     expect(onTooltip).toBeCalledTimes(2);
     expect(el.querySelector("wup-popup").outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup tooltip="" style="background: red;">Me 24 &amp; 82.75862068965517 %</wup-popup>"`
+      `"<wup-popup tooltip="" style="background: red; display: none;" open="" show="">Me 24 &amp; 82.75862068965517 %</wup-popup>"`
     );
 
     // checking debounce timeouts
@@ -415,13 +415,10 @@ describe("circleElement", () => {
     `); // center of target
 
     // show-hide during the animation
-    const orig = window.getComputedStyle;
-    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
-      if (elem instanceof WUPPopupElement) {
-        /** @type CSSStyleDeclaration */
-        return { animationDuration: "0.3s", animationName: "WUP-POPUP-a1", borderRadius: "2px" };
-      }
-      return orig(elem);
+    h.setupCssCompute((elt) => elt.tagName === "WUP-POPUP", {
+      animationDuration: "0.3s",
+      transitionDuration: "0.3s",
+      borderRadius: "2px",
     });
 
     el._opts.hoverOpenTimeout = 0;

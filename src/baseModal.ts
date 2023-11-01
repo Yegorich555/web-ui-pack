@@ -125,14 +125,29 @@ export default abstract class WUPBaseModal<
   /** Fires after element is closed (after animation ends) */
   $onClose?: (e: Events["$close"]) => void;
 
-  #whenOpen?: Promise<any>;
+  _whenOpen?: Promise<any>;
   /** Open element
    * @returns Promise resolved by animation-end ('true' if it finished & wasn't prevented) */
   $open(): Promise<boolean> {
-    return this.goOpen(OpenCases.onManuallCall, null);
+    if (this.$isReady) {
+      try {
+        return this.goOpen(OpenCases.onManuallCall, null);
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    }
+    return new Promise<boolean>((res, rej) => {
+      setTimeout(() => {
+        if (!this.$isReady) {
+          rej(new Error(`${this.tagName}. Impossible to show: not appended to document`));
+        } else {
+          this.goOpen(OpenCases.onManuallCall, null).then(res);
+        }
+      }, 1); // 1ms need to wait forReady
+    });
   }
 
-  #whenClose?: Promise<boolean>;
+  _whenClose?: Promise<boolean>;
   /** Close element
    * @returns Promise resolved by animation-end ('true' if it finished & wasn't prevented) */
   $close(): Promise<boolean> {
@@ -147,9 +162,9 @@ export default abstract class WUPBaseModal<
 
   // protected override gotChanges(propsChanged: string[] | null): void {
   //   super.gotChanges(propsChanged);
-  // }
+  // }#
 
-  /** Returns animation time  defined according to styles */
+  /** Returns animation time defined according to styles */
   get animTime(): number {
     return parseMsTime(getComputedStyle(this).transitionDuration);
   }
@@ -159,10 +174,10 @@ export default abstract class WUPBaseModal<
   /** Implement extra logic on closing */
   abstract gotClose(closeCase: CloseCases | number, e: Event | null): void;
 
-  /** Hide modal. @openCase as reason of open() */
+  /** Open element. @openCase as reason of open() */
   goOpen(openCase: OpenCases | number, ev: Event | null): Promise<boolean> {
-    if (this.#whenOpen) {
-      return this.#whenOpen;
+    if (this._whenOpen) {
+      return this._whenOpen;
     }
     const e = this.fireEvent("$willOpen", { cancelable: true, bubbles: true, detail: { openCase } });
     if (e.defaultPrevented) {
@@ -170,7 +185,7 @@ export default abstract class WUPBaseModal<
     }
 
     // clear state
-    this.#whenClose = undefined;
+    this._whenClose = undefined;
     this.#isClosing = undefined;
     this.#isOpened = true;
     this.#isOpening = true;
@@ -184,9 +199,9 @@ export default abstract class WUPBaseModal<
     }); // timeout to allow animation works
 
     // wait for animation
-    this.#whenOpen = new Promise((res) => {
+    this._whenOpen = new Promise((res) => {
       setTimeout(() => {
-        if (!this.#whenOpen) {
+        if (!this._whenOpen) {
           res(false); // possible when call $close during the opening
           return;
         }
@@ -196,16 +211,16 @@ export default abstract class WUPBaseModal<
         setTimeout(() => this.fireEvent("$open", { cancelable: false, bubbles: true }));
       }, this.animTime);
     });
-    return this.#whenOpen;
+    return this._whenOpen;
   }
 
   /** Hide element; @closeCase as reason of close() */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   goClose(closeCase: CloseCases | number, ev: Event | null): Promise<boolean> {
-    if (this.#whenClose) {
-      return this.#whenClose;
+    if (this._whenClose) {
+      return this._whenClose;
     }
-    if (!this.#whenOpen) {
+    if (!this._whenOpen) {
       return Promise.resolve(true); // possible when on init $close is called
     }
     const e = this.fireEvent("$willClose", { cancelable: true, bubbles: true, detail: { closeCase } });
@@ -213,7 +228,7 @@ export default abstract class WUPBaseModal<
       return Promise.resolve(false);
     }
     // clear state
-    this.#whenOpen = undefined;
+    this._whenOpen = undefined;
     this.#isOpening = undefined;
     this.#isClosing = true;
     // apply animation
@@ -221,9 +236,9 @@ export default abstract class WUPBaseModal<
 
     this.gotClose(closeCase, ev);
 
-    this.#whenClose = new Promise((res) => {
+    this._whenClose = new Promise((res) => {
       setTimeout(() => {
-        if (!this.#whenClose) {
+        if (!this._whenClose) {
           res(false); // possible when call $open during the hiding
           return;
         }
@@ -233,7 +248,7 @@ export default abstract class WUPBaseModal<
       }, this.animTime);
     });
 
-    return this.#whenClose;
+    return this._whenClose;
   }
 
   focus(): boolean {
@@ -249,8 +264,8 @@ export default abstract class WUPBaseModal<
     this.#isOpened = false;
     this.#isClosing = undefined;
     this.#isOpening = undefined;
-    this.#whenClose = undefined;
-    this.#whenOpen = undefined;
+    this._whenClose = undefined;
+    this._whenOpen = undefined;
   }
 
   /* Call it to call baseElement.dispose */

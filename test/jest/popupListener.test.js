@@ -563,14 +563,7 @@ describe("popupListener", () => {
     );
 
     // simulate defaults
-    const orig = window.getComputedStyle;
-    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
-      if (elem === el) {
-        /** @type CSSStyleDeclaration */
-        return { animationDuration: "0.3s", animationName: "WUP-POPUP-a1" };
-      }
-      return orig(elem);
-    });
+    h.setupCssCompute(el, { transitionDuration: "0.3s" });
 
     el.$close(); // openCase opens popup by default
     await h.wait();
@@ -669,6 +662,7 @@ describe("popupListener", () => {
 
   test("right-click filter", async () => {
     el = document.body.appendChild(document.createElement("wup-popup"));
+    el.testMe = true;
     el.$options.openCase = PopupOpenCases.onClick;
     await h.wait();
 
@@ -679,7 +673,6 @@ describe("popupListener", () => {
     await h.userClick(trg, { button: 1 });
     await h.wait();
     expect(el.$isOpened).toBe(true); // because right-button
-
     await h.userClick(trg, { button: 0 });
     await h.wait();
     expect(el.$isOpened).toBe(false); // because left-button

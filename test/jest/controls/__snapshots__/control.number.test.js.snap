@@ -177,7 +177,6 @@ exports[`control.number $show/$hide error 2`] = `
     error=""
     id="txt2"
     role="alert"
-    style="opacity: 0;"
   >
     <span
       class="wup-hidden"
@@ -212,6 +211,23 @@ exports[`control.number $show/$hide error 3`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
 </wup-num>
 `;
 
@@ -794,7 +810,9 @@ exports[`control.number validations $options.validationShowAll 1`] = `
     aria-live="off"
     error=""
     id="txt2"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -881,7 +899,9 @@ exports[`control.number validations $options.validationShowAll 3`] = `
     aria-live="off"
     error=""
     id="txt5"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -959,7 +979,9 @@ exports[`control.number validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt3"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -1011,6 +1033,8 @@ exports[`control.number validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt4"
+    open=""
+    show=""
     style="display: none;"
   >
     <span
@@ -1062,7 +1086,9 @@ exports[`control.number validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt5"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span

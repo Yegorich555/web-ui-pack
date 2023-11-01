@@ -46,7 +46,7 @@ describe("popupElement", () => {
     // bug: toMatchInlineSnapshot doesn't work
     // checking placement
     expect(t.html).toBe(
-      '<wup-popup position="bottom" style="display: block; transform: translate(72px, 29px);">Popup text</wup-popup>'
+      '<wup-popup open="" position="bottom" show="" style="transform: translate(72px, 29px);">Popup text</wup-popup>'
     );
     await page.click("label"); // click again should hide
     t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML, isOpened: testEl.$isOpened }));
@@ -118,7 +118,7 @@ describe("popupElement", () => {
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     const t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML }));
     expect(t.html).toBe(
-      '<wup-popup position="bottom" style="min-width: 177px; min-height: 21px; display: block; transform: translate(72px, 29px);">Popup text</wup-popup>'
+      '<wup-popup open="" position="bottom" show="" style="min-width: 177px; min-height: 21px; transform: translate(72px, 29px);">Popup text</wup-popup>'
     );
   });
 
@@ -130,7 +130,7 @@ describe("popupElement", () => {
     await page.waitForTimeout(1); // timeout required because of debounceFilters
     const t = await page.evaluate(() => ({ ...t, html: document.body.outerHTML }));
     expect(t.html).toMatchInlineSnapshot(
-      `"<body><div id="app"><label><span>Label text</span><input><wup-popup style="display: block; transform: translate(72px, 39px);" position="bottom">Popup text</wup-popup><wup-popup-arrow style="transform: translate(124px, 29px) rotate(180.1deg);"></wup-popup-arrow></label></div></body>"`
+      `"<body><div id="app"><label><span>Label text</span><input><wup-popup open="" position="bottom" show="" style="transform: translate(72px, 39px);">Popup text</wup-popup><wup-popup-arrow style="transform: translate(124px, 29px) rotate(180.1deg);"></wup-popup-arrow></label></div></body>"`
     );
   });
 });

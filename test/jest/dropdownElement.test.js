@@ -91,7 +91,7 @@ describe("dropdownElement", () => {
     expect(el.outerHTML).toMatchInlineSnapshot(`
       "<wup-dropdown>
           <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="true">Click me</button>
-          <wup-popup style="min-width: 100px; min-height: 50px;" menu="">
+          <wup-popup menu="" open="" style="min-width: 100px; min-height: 50px; display: none;" w-animation="drawer" show="">
             <ul id="wup1" tabindex="-1">
               <li><button>A</button></li>
               <li><button>B</button></li>
@@ -147,8 +147,8 @@ describe("dropdownElement", () => {
     expect(document.body.innerHTML).toMatchInlineSnapshot(`
       "
               <wup-dropdown>
-                <button aria-owns="wup4" aria-controls="wup4" aria-haspopup="listbox" aria-expanded="false">Click me</button>
-                <wup-popup style="opacity: 0;" menu="" id="wup4" tabindex="-1">
+                <button aria-owns="wup3" aria-controls="wup3" aria-haspopup="listbox" aria-expanded="false">Click me</button>
+                <wup-popup menu="" id="wup3" tabindex="-1">
                   <button>A</button>
                   <button>B</button>
                 </wup-popup>
