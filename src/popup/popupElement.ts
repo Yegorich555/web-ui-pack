@@ -629,19 +629,6 @@ export default class WUPPopupElement<
     }
   }
 
-  protected override resetState(): void {
-    super.resetState();
-    delete this._stopAnimation;
-    this.style.display = "";
-    this.#state && window.cancelAnimationFrame(this.#state.frameId);
-    this.#state = undefined;
-
-    if (this.$refArrow) {
-      this.$refArrow.remove();
-      this.$refArrow = undefined;
-    }
-  }
-
   /** Returns `target.getBoundingClientRect()` Use function to change placement logic based on target-rect
    * @WARN it's called with screen-frequency (per frame) */
   getTargetRect(target: Element): DOMRect {
@@ -912,6 +899,19 @@ export default class WUPPopupElement<
       layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
       with cnt==2 it's reprodusable */
     return t.el.getBoundingClientRect();
+  }
+
+  protected override resetState(): void {
+    super.resetState();
+    delete this._stopAnimation;
+    this.style.display = "";
+    this.#state && window.cancelAnimationFrame(this.#state.frameId);
+    this.#state = undefined;
+
+    if (this.$refArrow) {
+      this.$refArrow.remove();
+      this.$refArrow = undefined;
+    }
   }
 
   protected override gotRemoved(): void {

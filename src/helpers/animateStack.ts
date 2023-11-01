@@ -46,11 +46,19 @@ export default function animateStack(
     // reset styles
     parent.style.overflow = "";
     parent.style.zIndex = "";
+    !parent.getAttribute("style") && parent.removeAttribute("style");
     arr.forEach((a) => {
       delete a._hideStyle;
       a.style.transition = "";
     });
-    setTimeout(() => arr.forEach((a) => (a.style.transform = "")), 1); // timeout to avoid possible blink effect when need to hide
+    setTimeout(
+      () =>
+        arr.forEach((a) => {
+          a.style.transform = "";
+          !a.getAttribute("style") && a.removeAttribute("style");
+        }),
+      1
+    ); // timeout to avoid possible blink effect when need to hide
   };
 
   let tid: ReturnType<typeof setTimeout>;

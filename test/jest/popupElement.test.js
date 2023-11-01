@@ -638,13 +638,13 @@ describe("popupElement", () => {
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px);" position="top" open="" w-animation="drawer"><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px);" position="top" open="" w-animation="drawer"><div></div><div></div></wup-popup>"`
     );
     await h.wait();
     await nextFrame();
     expect(el.$isOpened).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px);" position="top" w-animation="drawer"><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px);" position="top" w-animation="drawer"><div></div><div></div></wup-popup>"`
     );
 
     // animation to another side
@@ -652,11 +652,11 @@ describe("popupElement", () => {
     await h.wait(); // options is async
     expect(el.$isOpened).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 150px);" position="bottom" w-animation="drawer" open="" show=""><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 150px);" position="bottom" w-animation="drawer" open="" show=""><div></div><div></div></wup-popup>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 150px) scaleY(0); transform-origin: top;" position="bottom" w-animation="drawer" open="" show=""><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 150px) scaleY(0); transform-origin: top;" position="bottom" w-animation="drawer" open="" show=""><div></div><div></div></wup-popup>"`
     );
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
@@ -699,7 +699,7 @@ describe("popupElement", () => {
     await nextFrame();
     // WARN styles haven't been removed because expected that item destroyed
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px);" position="top" w-animation="drawer" show=""><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px);" position="top" w-animation="drawer" show=""><div></div><div></div></wup-popup>"`
     );
 
     // checking states
@@ -787,7 +787,7 @@ describe("popupElement", () => {
     expect(el.$isOpened).toBe(true);
     await nextFrame(); // no-animation expected
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(140px, 100px);" position="top" w-animation="drawer" open="" show=""><div style=""></div><div style=""></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(140px, 100px);" position="top" w-animation="drawer" open="" show=""><div></div><div></div></wup-popup>"`
     );
     h.unMockConsoleWarn();
 
@@ -815,7 +815,7 @@ describe("popupElement", () => {
       `"<wup-popup open="" style="transform: translate(190px, 100px);" position="top" w-animation="stack" show=""><ul style="overflow: visible; z-index: 0;"><li style="transition: transform 300ms ease-out;">Item 1</li><li style="transition: transform 300ms ease-out;">Item 2</li></ul></wup-popup>"`
     );
     await nextFrame(50);
-    expect(el.innerHTML).toMatchInlineSnapshot(`"<ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul>"`);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<ul><li>Item 1</li><li>Item 2</li></ul>"`);
     el.$close();
     await nextFrame(50);
 
@@ -823,7 +823,7 @@ describe("popupElement", () => {
     el.$options.placement = [WUPPopupElement.$placements.$left.$middle];
     el.$open();
     await nextFrame(50);
-    expect(el.innerHTML).toMatchInlineSnapshot(`"<ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul>"`);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<ul><li>Item 1</li><li>Item 2</li></ul>"`);
     el.$close();
     await nextFrame(50);
 
@@ -831,9 +831,7 @@ describe("popupElement", () => {
     el.innerHTML = "<div [items]><button>Item1</button><button>Item2</button></div>";
     el.$open();
     await nextFrame(50);
-    expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<div [items]="" style=""><button style="">Item1</button><button style="">Item2</button></div>"`
-    );
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<div [items]=""><button>Item1</button><button>Item2</button></div>"`);
     el.$close();
     await nextFrame(50);
 
@@ -841,7 +839,7 @@ describe("popupElement", () => {
     el.innerHTML = "<button>Item1</button><button>Item2</button>";
     el.$open();
     await nextFrame(50);
-    expect(el.innerHTML).toMatchInlineSnapshot(`"<button style="">Item1</button><button style="">Item2</button>"`);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<button>Item1</button><button>Item2</button>"`);
     el.$close();
     await nextFrame(50);
 
@@ -849,9 +847,7 @@ describe("popupElement", () => {
     el.innerHTML = "<div><button>Item1</button><button>Item2</button></div>";
     el.$open();
     await nextFrame(50);
-    expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<div style=""><button style="">Item1</button><button style="">Item2</button></div>"`
-    );
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<div><button>Item1</button><button>Item2</button></div>"`);
     el.$close();
     await nextFrame(50);
 
@@ -859,7 +855,7 @@ describe("popupElement", () => {
     el.innerHTML = "<button>Item1</button>";
     el.$open();
     await nextFrame(50);
-    expect(el.innerHTML).toMatchInlineSnapshot(`"<button style="">Item1</button>"`);
+    expect(el.innerHTML).toMatchInlineSnapshot(`"<button>Item1</button>"`);
     el.$close();
     await nextFrame(50);
 
