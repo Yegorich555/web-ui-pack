@@ -76,14 +76,6 @@ $dropdownAnimation: 300ms;
   }
 }
 
-.dropdownPopup {
-  overflow: hidden;
-
-  > div {
-    overflow: auto;
-  }
-}
-
 .inputs {
   border: none;
   display: flex;

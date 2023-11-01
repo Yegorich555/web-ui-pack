@@ -1,6 +1,6 @@
 import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
-import { Animations, HideCases, ShowCases } from "./popup/popupElement.types";
+import { PopupAnimations, PopupCloseCases, PopupOpenCases } from "./popup/popupElement.types";
 import { WUPcssButton, WUPcssMenu } from "./styles";
 
 const tagName = "wup-dropdown";
@@ -8,20 +8,20 @@ declare global {
   namespace WUP.Dropdown {
     interface Options extends WUP.Popup.Options {
       /** Animation applied to popup;
-       * @defaultValue `Animations.drawer`
+       * @defaultValue `PopupAnimations.drawer`
        * @tutorial Troubleshooting
        * * to change option for specific element change it for `<wup-popup/>` direclty after timeout
-       * @example setTimeout(() => this.$refPopup.$options.animation = Animations.stack) */
-      animation: Animations;
+       * @example setTimeout(() => this.$refPopup.$options.animation = PopupAnimations.stack) */
+      animation: PopupAnimations;
       /** Case when popup need to show;
-       * @defaultValue `ShowCases.onClick | ShowCases.onFocus`
+       * @defaultValue `PopupOpenCases.onClick | PopupOpenCases.onFocus`
        * @tutorial Troubleshooting
        * * to change option for specific element change it for `<wup-popup/>` directly after timeout
-       * @example setTimeout(() => this.$refPopup.$options.showCase = ShowCases.onFocus | ShowCases.onClick) */
-      showCase: ShowCases;
-      /** Hide menu on popup click
+       * @example setTimeout(() => this.$refPopup.$options.openCase = PopupOpenCases.onFocus | PopupOpenCases.onClick) */
+      openCase: PopupOpenCases;
+      /** Close menu on popup click
        * @defaultValue true */
-      hideOnPopupClick: boolean;
+      closeOnPopupClick: boolean;
       /** Placement rules relative to target;
        * @defaultValue `[
             WUPPopupElement.$placements.$bottom.$start,
@@ -42,9 +42,9 @@ declare global {
     }
     // WARN: all options must be applied to wup-popup directly
     interface JSXProps<C = WUPDropdownElement> extends WUP.Base.JSXProps<C> {
-      /** Hide menu on popup click
+      /** Close menu on popup click
        * @defaultValue true */
-      "w-hideOnPopupClick"?: boolean;
+      "w-closeOnPopupClick"?: boolean;
     }
   }
 
@@ -99,9 +99,9 @@ export default class WUPDropdownElement<
    * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty */
   static $defaults: WUP.Dropdown.Options = {
     ...WUPPopupElement.$defaults,
-    animation: Animations.drawer,
-    showCase: ShowCases.onClick | ShowCases.onFocus,
-    hideOnPopupClick: true,
+    animation: PopupAnimations.drawer,
+    openCase: PopupOpenCases.onClick | PopupOpenCases.onFocus,
+    closeOnPopupClick: true,
     minHeightByTarget: true,
     minWidthByTarget: true,
     placement: [
@@ -126,12 +126,12 @@ export default class WUPDropdownElement<
   protected override gotReady(): void {
     this.$refTitle = this.firstElementChild as HTMLElement;
     this.$refPopup = this.lastElementChild as WUPPopupElement;
-    if (this.$refTitle === this.$refPopup || !this.$refPopup.$show) {
+    if (this.$refTitle === this.$refPopup || !this.$refPopup.$open) {
       this.throwError("Invalid structure. Expected 1st element: <any/>, last element: <wup-popup/>");
     } else {
       this.$refPopup.setAttribute("menu", "");
-      this.$refPopup.goShow = this.goShowPopup.bind(this);
-      this.$refPopup.goHide = this.goHidePopup.bind(this);
+      this.$refPopup.goOpen = this.goOpenPopup.bind(this);
+      this.$refPopup.goClose = this.goClosePopup.bind(this);
 
       // find popup props from attributes
       const excluded = new Set<string>(); // popup props that assigned from attributes
@@ -144,7 +144,7 @@ export default class WUPDropdownElement<
       });
       Object.keys(this._opts).forEach((k) => {
         if (!excluded.has(k)) {
-          // @ts-expect-error - because hideOnPopupClick doesn't exist on popup
+          // @ts-expect-error - because closeOnPopupClick doesn't exist on popup
           this.$refPopup.$options[k] = this._opts[k];
         }
       });
@@ -170,24 +170,24 @@ export default class WUPDropdownElement<
     super.gotReady();
   }
 
-  /** Custom function to override default `WUPPopupElement.prototype.goHide` */
-  protected goShowPopup(showCase: ShowCases, ev: MouseEvent | FocusEvent | null): boolean | Promise<boolean> {
-    const p = WUPPopupElement.prototype.goShow.call(this.$refPopup, showCase, ev);
+  /** Custom function to override default `WUPPopupElement.prototype.goClose` */
+  protected goOpenPopup(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): Promise<boolean> {
+    const p = WUPPopupElement.prototype.goOpen.call(this.$refPopup, openCase, ev);
     const t = this.$refPopup.$options.target!;
     t.setAttribute("aria-expanded", true); // NiceToHave: move it to popup side after refactoring ???
     t.style.zIndex = `${+getComputedStyle(this.$refPopup).zIndex + 2}`; // inc z-index for btn to allow animation-stack works properly
     return p;
   }
 
-  /** Custom function to override default `WUPPopupElement.prototype.goHide` */
-  protected goHidePopup(
-    hideCase: HideCases,
+  /** Custom function to override default `WUPPopupElement.prototype.goClose` */
+  protected goClosePopup(
+    closeCase: PopupCloseCases,
     ev: MouseEvent | FocusEvent | KeyboardEvent | null
-  ): boolean | Promise<boolean> {
-    if (hideCase === HideCases.onPopupClick && !this._opts.hideOnPopupClick) {
-      return false;
+  ): Promise<boolean> {
+    if (closeCase === PopupCloseCases.onPopupClick && !this._opts.closeOnPopupClick) {
+      return Promise.resolve(false);
     }
-    const p = WUPPopupElement.prototype.goHide.call(this.$refPopup, hideCase, ev);
+    const p = WUPPopupElement.prototype.goClose.call(this.$refPopup, closeCase, ev);
     const t = this.$refPopup.$options.target!;
     t.setAttribute("aria-expanded", false);
     t.style.zIndex = "";

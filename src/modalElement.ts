@@ -6,7 +6,7 @@ export const enum ModalOpenCases {
   /** When $open() is called programmatically */
   onManuallCall = 0,
   /** On init (when appended to layout) */
-  onInit = 1,
+  onInit = 1, // todo unify with popup
   /** When click on target @see {@link WUP.Modal.Options.target} */
   onTargetClick,
 }
@@ -119,7 +119,6 @@ export default class WUPModalElement<
   static get $style(): string {
     return `${super.$style}
       :host {
-        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 9002;
         width: 100%;
         max-width: 600px;
@@ -207,8 +206,7 @@ export default class WUPModalElement<
         margin-left: auto;
       }
       @media not all and (prefers-reduced-motion) {
-        :host,
-        .${this.$classFade} {
+       .${this.$classFade} {
           transition: opacity var(--modal-anim), transform var(--modal-anim);
         }
       }`;
@@ -251,11 +249,11 @@ export default class WUPModalElement<
     }
 
     if (!trg) {
-      !propsChanged && this.goOpen(ModalOpenCases.onInit); // call here to wait for options before opening
+      !propsChanged && this.goOpen(ModalOpenCases.onInit, null); // call here to wait for options before opening
     } else if (isTrgChange) {
       this._prevTargetClick = (e) => {
         setTimeout(() => {
-          !e.defaultPrevented && this.goOpen(ModalOpenCases.onTargetClick);
+          !e.defaultPrevented && this.goOpen(ModalOpenCases.onTargetClick, e);
         }); // timeout required to prevent openinig from bubbled-events
       };
       (trg as HTMLElement).addEventListener("click", this._prevTargetClick, { passive: true });
@@ -266,7 +264,7 @@ export default class WUPModalElement<
   _lastFocused?: Element | string | null;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  gotOpen(openCase: ModalOpenCases): void {
+  gotOpen(openCase: ModalOpenCases, e: MouseEvent | null): void {
     // store id of focused element
     const ael = document.activeElement;
     this._lastFocused = ael?.id || ael;
@@ -424,4 +422,3 @@ export default class WUPModalElement<
 customElements.define(tagName, WUPModalElement);
 
 // NiceToHave: handle Ctrl+S, Meta+S for submit & close ???
-// NiceToHave: popup & modal has similar show/hide logic: need to unify it to abstract BasePopup

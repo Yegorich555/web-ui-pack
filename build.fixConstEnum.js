@@ -10,7 +10,8 @@ function fixReExportConstEnum(from, str) {
   fs.writeFileSync(from, txt, { encoding: "utf8" });
 }
 
+// todo check maybe it's not required anymore
 fixReExportConstEnum(
   "./dist/popup/popupElement.js",
-  'import { ShowCases as PopupShowCases, HideCases as PopupHideCases, Animations as PopupAnimations } from "./popupElement.types";'
+  'import { PopupOpenCases, PopupCloseCases, PopupAnimations } from "./popupElement.types";'
 );

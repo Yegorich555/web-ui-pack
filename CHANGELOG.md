@@ -6,11 +6,28 @@
 
 - **Global**.
   - Added static `.$use()`. Call it before using element: `WUPTextControl.$use()` (_self-registration by import_ works now and will be removed in the future)
-  - Refactored & unified custom events. Now every event contains detail object: `e.detail = { ... }`
-- [PopupElement](src/popup/popupElement.ts).
-  - Removed `$isOpen` in favor of `$isShown`
+  - Refactored & unified custom events. Now every event contains detail as object: `e.detail = { ... }`
+- [PopupElement](src/popup/popupElement.ts)
   - **z-index** is changed from `90000` to `8000`
+  - Renamed `show/hide` to `open/close` (the same for [DropdownElement](src/dropdownElement.ts)):
+    enum `ShowCases` >>> `PopupShowCases`
+    enum `HideCases` >>> `PopupHideCases`
+    option `showCase` >>> `openCase`
+    method `$show()` >>> `$open()`
+    method `$hide()` >>> `$close()`
+    state-prop `$isShown` >>> `$isOpened`
+    event `$onShown` >>> `$onOpened`
+    etc.
+  - Refactored/normalized enum PopupShowCases
+- **Combobox controls (Select, SelectMany, Date, Time)**
+  - Renamed `show/hide` to `open/close`:
+    enum `ShowCases` >>> `MenuShowCases`
+    enum `HideCases` >>> `MenuHideCases`
+    event `$showMenu` >>> `$openMenu`
+    event `$hideMenu` >>> `$closeMenu`
+    etc.
 - Renamed css-vars:
+  `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
     `--anim-time` >>> `--anim-t`
     `--popup` >>> `popup-text`
     `--popup-anim` >>> `popup-anim-t`
@@ -29,7 +46,7 @@
 - [PopupElement](src/popup/popupElement.ts). _Popup hidden if target inside content with position: fixed and target.parent.parent is scrollable_
 - [DropdownElement](src/dropdownElement.ts). _Target button is overflowed by menu in animation-stack_
 - [PasswordControl](src/controls/password.ts). _Input height is changed on button[eye] click_
-- Text based controls
+- **Text based controls**
   - _Sometimes weird blink & poor render during the animation on focus_
   - _Button clear changes control size on hover if parent is flexbox_
 
@@ -40,7 +57,7 @@
   - Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
   - Added css variable `--base-margin` to unify margins for all elements
 - helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector (possible to get from `focusFirst.$selector`)
-- [FormElement](src/formElement.ts).
+- [FormElement](src/formElement.ts)
   - Increased height of `button[type=submit]`
   - Added callback `$onSubmitEnd` & event `$submitEnd`
 - **Text based controls**

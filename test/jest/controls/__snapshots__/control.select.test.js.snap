@@ -195,7 +195,6 @@ exports[`control.select $show/$hide error 2`] = `
     error=""
     id="txt2"
     role="alert"
-    style="opacity: 0;"
   >
     <span
       class="wup-hidden"
@@ -233,6 +232,23 @@ exports[`control.select $show/$hide error 3`] = `
       wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
 </wup-select>
 `;
 
@@ -861,12 +877,12 @@ exports[`control.select common tests snapshot of $defaults 1`] = `
   "maskholder": "",
   "multiple": false,
   "name": null,
+  "openCase": 106,
   "postfix": "",
   "prefix": "",
   "readOnly": false,
   "readOnlyInput": false,
   "selectOnFocus": false,
-  "showCase": 106,
   "storage": "local",
   "storageKey": "",
   "validateDebounceMs": 500,
@@ -904,12 +920,12 @@ exports[`control.select common tests snapshot of $defaults 3`] = `
   "w-maskholder",
   "w-multiple",
   "w-name",
+  "w-opencase",
   "w-postfix",
   "w-prefix",
   "w-readonly",
   "w-readonlyinput",
   "w-selectonfocus",
-  "w-showcase",
   "w-storage",
   "w-storagekey",
   "w-validatedebouncems",
@@ -956,8 +972,10 @@ exports[`control.select validations $options.validationShowAll 1`] = `
     aria-live="off"
     error=""
     id="txt2"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1039,8 +1057,10 @@ exports[`control.select validations $options.validationShowAll 3`] = `
     aria-live="off"
     error=""
     id="txt5"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1120,7 +1140,6 @@ exports[`control.select validations options.validationCase 2`] = `
   </label>
   <wup-popup
     menu=""
-    style="opacity: 0;"
   >
     <ul
       aria-label="Items"
@@ -1155,8 +1174,10 @@ exports[`control.select validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt4"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1208,7 +1229,10 @@ exports[`control.select validations options.validationCase 3`] = `
   </label>
   <wup-popup
     menu=""
-    style="min-width: 100px;"
+    open=""
+    show=""
+    style="min-width: 100px; display: none;"
+    w-animation="drawer"
   >
     <ul
       aria-label="Items"
@@ -1244,7 +1268,9 @@ exports[`control.select validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt5"
-    style=""
+    open=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1298,8 +1324,10 @@ exports[`control.select validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt7"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"

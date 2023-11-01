@@ -30,6 +30,7 @@ export default function movable(refEl: HTMLElement): (x: number, y: number) => v
   el.setAttribute("movable", "");
   el.style.outline = "none";
   el.style.cursor = "grab";
+  el.style.margin = "0";
   el.addEventListener("mousedown", () => {
     isDown = true;
     el.style.cursor = "grabbing";

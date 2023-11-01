@@ -99,7 +99,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
 
 1. **Naming**
    - All components named as `WUP..Element`, `WUP..Control` and has `<wup-...>` html-tags
-   - Public properties/options/events/methods startsWith `$...` (events `$onShow`, `$onHide`, methods `$show`, `$hide`, props like `$isShown` etc.)
+   - Public properties/options/events/methods startsWith `$...` (events `$onOpen`, `$onClose`, methods `$open()`, `$close()`, props like `$isOpened` etc.)
    - Every component/class has static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#example)
    - `$options` are observed. So changing options affects on component immediately after empty timeout (every component has static `observedOptions` as set of watched options)
    - all custom `attributes` updates `$options` automatically. So `document.querySelector('wup-spin').$options.inline` equal to `<wup-spin inline />`
@@ -147,7 +147,7 @@ More details you can find in [CODESTYLE.md](/CODESTYLE.md) and [FAQ](#faq)
 Typescript
 
 ```typescript
-import WUPPopupElement, { ShowCases } from "web-ui-pack/popup/popupElement";
+import WUPPopupElement, { PopupOpenCases } from "web-ui-pack/popup/popupElement";
 
 WUPPopupElement.$use(); // call it to register in the system
 // redefine some defaults; WARN: you can change placement rules here without changing $options per each element!!!
@@ -158,8 +158,8 @@ WUPPopupElement.$defaults.arrowEnable = true;
 // create element
 const el = document.createElement("wup-popup");
 // WARN el.$options is a observable-clone of WUPPopupElement.$defaults
-// WARN: ShowCases is const enum and import ShowCases available only in Typescript
-el.$options.showCase = ShowCases.onClick | ShowCases.onFocus; // show popup by target.click and/or target.focus events
+// WARN: PopupOpenCases is const enum and import PopupOpenCases available only in Typescript
+el.$options.openCase = PopupOpenCases.onClick | PopupOpenCases.onFocus; // show popup by target.click and/or target.focus events
 el.$options.target = document.querySelector("button");
 /*
   Placement can be $top, $right, $bottom, $left (top - above at the target etc.)
@@ -188,8 +188,8 @@ How to extend/override
 /// popup.ts
 
 // you can override via prototypes
-const original = WUPPopupElement.prototype.goShow;
-WUPPopupElement.prototype.goShow = function customGoShow() {
+const original = WUPPopupElement.prototype.goOpen;
+WUPPopupElement.prototype.goOpen = function customGoShow() {
   if (window.isBusy) {
     return null;
   }
@@ -200,11 +200,11 @@ WUPPopupElement.prototype.goShow = function customGoShow() {
 
 class Popup extends WUPPopupElement {
   // take a look on definition of WUPPopupElement and you will find internals
-  protected override goShow(showCase: WUPPopup.ShowCases): boolean {
-    if (showCase === WUPPopup.ShowCases.onHover) {
+  protected override goOpen(openCase: PopupOpenCases): boolean {
+    if (openCase === PopupOpenCases.onHover) {
       return false;
     }
-    return super.goShow(showCase);
+    return super.goOpen(openCase);
   }
 }
 

@@ -48,10 +48,16 @@ export default abstract class WUPBaseModal<
   Events extends WUP.BaseModal.EventMap = WUP.BaseModal.EventMap
 > extends WUPBaseElement<TOptions, Events> {
   // #ctr = this.constructor as typeof WUPBaseModal;
+  static get $styleRoot(): string {
+    return `:root {
+        --modal-anim-t: 400ms;
+      }`;
+  }
 
   static get $style(): string {
     return `${super.$style}
       :host {
+        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 8000;
         display: none;
         opacity: 0;
@@ -65,7 +71,12 @@ export default abstract class WUPBaseModal<
       }
       :host[open] { display: block; }
       :host[show] { opacity: 1; }
-      ${WUPcssScrollSmall(":host")}`;
+      ${WUPcssScrollSmall(":host")}
+      @media not all and (prefers-reduced-motion) {
+        :host {
+          transition: opacity var(--modal-anim), transform var(--modal-anim);
+        }
+      }`;
   }
 
   // static $defaults: WUP.BaseModal.Options = {};
@@ -114,14 +125,29 @@ export default abstract class WUPBaseModal<
   /** Fires after element is closed (after animation ends) */
   $onClose?: (e: Events["$close"]) => void;
 
-  #whenOpen?: Promise<any>;
+  _whenOpen?: Promise<any>;
   /** Open element
    * @returns Promise resolved by animation-end ('true' if it finished & wasn't prevented) */
   $open(): Promise<boolean> {
-    return this.goOpen(OpenCases.onManuallCall);
+    if (this.$isReady) {
+      try {
+        return this.goOpen(OpenCases.onManuallCall, null);
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    }
+    return new Promise<boolean>((res, rej) => {
+      setTimeout(() => {
+        if (!this.$isReady) {
+          rej(new Error(`${this.tagName}. Impossible to show: not appended to document`));
+        } else {
+          this.goOpen(OpenCases.onManuallCall, null).then(res);
+        }
+      }, 1); // 1ms need to wait forReady
+    });
   }
 
-  #whenClose?: Promise<boolean>;
+  _whenClose?: Promise<boolean>;
   /** Close element
    * @returns Promise resolved by animation-end ('true' if it finished & wasn't prevented) */
   $close(): Promise<boolean> {
@@ -136,17 +162,22 @@ export default abstract class WUPBaseModal<
 
   // protected override gotChanges(propsChanged: string[] | null): void {
   //   super.gotChanges(propsChanged);
-  // }
+  // }#
+
+  /** Returns animation time defined according to styles */
+  get animTime(): number {
+    return parseMsTime(getComputedStyle(this).transitionDuration);
+  }
 
   /** Implement extra logic on opening */
-  abstract gotOpen(openCase: OpenCases | number): void;
+  abstract gotOpen(openCase: OpenCases | number, e: Event | null): void;
   /** Implement extra logic on closing */
   abstract gotClose(closeCase: CloseCases | number, e: Event | null): void;
 
-  /** Hide modal. @openCase as reason of open() */
-  protected goOpen(openCase: OpenCases | number): Promise<boolean> {
-    if (this.#whenOpen) {
-      return this.#whenOpen;
+  /** Open element. @openCase as reason of open() */
+  goOpen(openCase: OpenCases | number, ev: Event | null): Promise<boolean> {
+    if (this._whenOpen) {
+      return this._whenOpen;
     }
     const e = this.fireEvent("$willOpen", { cancelable: true, bubbles: true, detail: { openCase } });
     if (e.defaultPrevented) {
@@ -154,13 +185,13 @@ export default abstract class WUPBaseModal<
     }
 
     // clear state
-    this.#whenClose = undefined;
+    this._whenClose = undefined;
     this.#isClosing = undefined;
     this.#isOpened = true;
     this.#isOpening = true;
     // apply open styles
     this.setAttribute("open", ""); // apply display effect
-    this.gotOpen(openCase);
+    this.gotOpen(openCase, ev);
 
     setTimeout(() => {
       this.scroll({ left: 0, top: 0, behavior: "instant" }); // scroll at the top: to clear prev possible state
@@ -168,10 +199,9 @@ export default abstract class WUPBaseModal<
     }); // timeout to allow animation works
 
     // wait for animation
-    this.#whenOpen = new Promise((res) => {
-      const animTime = parseMsTime(getComputedStyle(this).transitionDuration);
+    this._whenOpen = new Promise((res) => {
       setTimeout(() => {
-        if (!this.#whenOpen) {
+        if (!this._whenOpen) {
           res(false); // possible when call $close during the opening
           return;
         }
@@ -179,18 +209,18 @@ export default abstract class WUPBaseModal<
         this.#isOpening = undefined;
         res(true);
         setTimeout(() => this.fireEvent("$open", { cancelable: false, bubbles: true }));
-      }, animTime);
+      }, this.animTime);
     });
-    return this.#whenOpen;
+    return this._whenOpen;
   }
 
   /** Hide element; @closeCase as reason of close() */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   goClose(closeCase: CloseCases | number, ev: Event | null): Promise<boolean> {
-    if (this.#whenClose) {
-      return this.#whenClose;
+    if (this._whenClose) {
+      return this._whenClose;
     }
-    if (!this.#whenOpen) {
+    if (!this._whenOpen) {
       return Promise.resolve(true); // possible when on init $close is called
     }
     const e = this.fireEvent("$willClose", { cancelable: true, bubbles: true, detail: { closeCase } });
@@ -198,7 +228,7 @@ export default abstract class WUPBaseModal<
       return Promise.resolve(false);
     }
     // clear state
-    this.#whenOpen = undefined;
+    this._whenOpen = undefined;
     this.#isOpening = undefined;
     this.#isClosing = true;
     // apply animation
@@ -206,20 +236,19 @@ export default abstract class WUPBaseModal<
 
     this.gotClose(closeCase, ev);
 
-    this.#whenClose = new Promise((res) => {
-      const animTime = parseMsTime(getComputedStyle(this).transitionDuration);
+    this._whenClose = new Promise((res) => {
       setTimeout(() => {
-        if (!this.#whenClose) {
+        if (!this._whenClose) {
           res(false); // possible when call $open during the hiding
           return;
         }
         this.resetState();
         res(true);
         setTimeout(() => this.fireEvent("$close", { cancelable: false, bubbles: true }));
-      }, animTime);
+      }, this.animTime);
     });
 
-    return this.#whenClose;
+    return this._whenClose;
   }
 
   focus(): boolean {
@@ -235,8 +264,8 @@ export default abstract class WUPBaseModal<
     this.#isOpened = false;
     this.#isClosing = undefined;
     this.#isOpening = undefined;
-    this.#whenClose = undefined;
-    this.#whenOpen = undefined;
+    this._whenClose = undefined;
+    this._whenOpen = undefined;
   }
 
   /* Call it to call baseElement.dispose */

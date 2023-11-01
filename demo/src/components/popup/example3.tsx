@@ -1,5 +1,5 @@
 import movable from "src/helpers/movable";
-import { ShowCases } from "web-ui-pack/popup/popupElement.types";
+import { PopupOpenCases } from "web-ui-pack/popup/popupElement.types";
 import styles from "./popupView.scss";
 
 export default function Example3() {
@@ -29,7 +29,7 @@ export default function Example3() {
           ref={(el) => {
             if (el) {
               el.$options.toFitElement = document.querySelector("#fit2") as HTMLElement;
-              el.$options.showCase = ShowCases.always;
+              el.$options.openCase = PopupOpenCases.always;
             }
           }}
         >

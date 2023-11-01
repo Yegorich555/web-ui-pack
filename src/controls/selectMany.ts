@@ -4,7 +4,7 @@ import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
-import { ShowCases } from "./baseCombo";
+import { MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 import WUPSelectControl from "./select";
 
@@ -455,8 +455,8 @@ export default class WUPSelectManyControl<
     });
   }
 
-  override canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
-    return !this._wasSortAfterClick && super.canShowMenu(showCase, e);
+  override canOpenMenu(openCase: MenuOpenCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
+    return !this._wasSortAfterClick && super.canOpenMenu(openCase, e);
   }
 
   protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
@@ -510,8 +510,8 @@ export default class WUPSelectManyControl<
   }
 
   // @ts-expect-error - because expected v: ValueType[]
-  protected override selectValue(v: ValueType, canHideMenu = true): void {
-    super.selectValue(v as any, canHideMenu);
+  protected override selectValue(v: ValueType, canCloseMenu = true): void {
+    super.selectValue(v as any, canCloseMenu);
     this._opts.hideSelected && this.focusMenuItem(null);
   }
 

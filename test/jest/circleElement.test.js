@@ -1,4 +1,4 @@
-import { WUPPopupElement, WUPCircleElement } from "web-ui-pack";
+import { WUPCircleElement } from "web-ui-pack";
 import * as h from "../testHelper";
 
 let nextFrame = async () => {};
@@ -36,8 +36,8 @@ describe("circleElement", () => {
       "w-space": { value: 2 },
       "w-minsize": { value: 10 },
       "w-back": { value: true },
-      "w-hoverhidetimeout": { value: 100 },
-      "w-hovershowtimeout": { value: 107 },
+      "w-hoverclosetimeout": { value: 100 },
+      "w-hoveropentimeout": { value: 107 },
     },
     onCreateNew: (e) => (e.$options.items = getItems()),
   });
@@ -347,8 +347,8 @@ describe("circleElement", () => {
 
   test("tooltips", async () => {
     el.$options.back = false;
-    el.$options.hoverHideTimeout = 50;
-    el.$options.hoverShowTimeout = 200;
+    el.$options.hoverCloseTimeout = 50;
+    el.$options.hoverOpenTimeout = 200;
     el.$options.items = [
       { value: 5, tooltip: "Item 1; value {#}, percent {#%}" },
       {
@@ -388,7 +388,7 @@ describe("circleElement", () => {
     await h.wait(300);
     expect(onTooltip).toBeCalledTimes(2);
     expect(el.querySelector("wup-popup").outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup tooltip="" style="background: red;">Me 24 &amp; 82.75862068965517 %</wup-popup>"`
+      `"<wup-popup tooltip="" style="background: red; display: none;" open="" show="">Me 24 &amp; 82.75862068965517 %</wup-popup>"`
     );
 
     // checking debounce timeouts
@@ -415,27 +415,24 @@ describe("circleElement", () => {
     `); // center of target
 
     // show-hide during the animation
-    const orig = window.getComputedStyle;
-    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
-      if (elem instanceof WUPPopupElement) {
-        /** @type CSSStyleDeclaration */
-        return { animationDuration: "0.3s", animationName: "WUP-POPUP-a1", borderRadius: "2px" };
-      }
-      return orig(elem);
+    h.setupCssCompute((elt) => elt.tagName === "WUP-POPUP", {
+      animationDuration: "0.3s",
+      transitionDuration: "0.3s",
+      borderRadius: "2px",
     });
 
-    el._opts.hoverShowTimeout = 0;
+    el._opts.hoverOpenTimeout = 0;
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
-    await h.wait(el.$options.hoverHideTimeout);
-    expect(el.querySelector("wup-popup").$isHiding).toBe(true);
+    await h.wait(el.$options.hoverCloseTimeout);
+    expect(el.querySelector("wup-popup").$isClosing).toBe(true);
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await h.wait();
-    expect(el.querySelector("wup-popup").$isHiding).toBe(false);
-    expect(el.querySelector("wup-popup").$isShown).toBe(true);
+    expect(el.querySelector("wup-popup").$isClosing).toBe(false);
+    expect(el.querySelector("wup-popup").$isOpened).toBe(true);
 
     // new items
     onTooltip.mockClear();
-    el.$options.hoverShowTimeout = 200;
+    el.$options.hoverOpenTimeout = 200;
     el.$options.items = [
       { value: 100, tooltip: "Item 1; {#}" },
       { value: 12, tooltip: "Item 2; {#}" },

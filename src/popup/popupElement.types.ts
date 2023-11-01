@@ -1,18 +1,18 @@
-export const enum ShowCases {
-  /** No listener - show on init + only manual call `.$hide()` & `.$show()` */
-  always = 0,
+export const enum PopupOpenCases {
+  /** When $open() is called programmatically */
+  onManuallCall = 0,
+  /** On init (when appended to layout) */
+  onInit = 1,
   /** On `mouseenter` event of target; hide by `mouseleave` */
-  onHover = 1,
-  /** On `focusIn` event of target; hide by `focusout` (also on click if PopupShowCases.onClick included) */
-  onFocus = 1 << 1,
+  onHover = 1 << 1,
+  /** On `focusIn` event of target; hide by `focusout` (also on click if PopupOpenCases.onClick included) */
+  onFocus = 1 << 2,
   /** On `click` event of target; hide by click anywhere */
-  onClick = 1 << 2,
-  /** No listener - only manual call `.$hide()` & `.$show()` */
-  alwaysOff = 1 << 3,
+  onClick = 1 << 3,
 }
 
-export const enum HideCases {
-  /** When $hide() is called programmatically */
+export const enum PopupCloseCases {
+  /** When $close() is called programmatically */
   onManuallCall,
   /** When mouse left target & popup */
   onMouseLeave,
@@ -32,7 +32,7 @@ export const enum HideCases {
   onPressEsc,
 }
 
-export const enum Animations {
+export const enum PopupAnimations {
   /** Via opacity/css-style */
   default = 0,
   /** Dropdown/drawer animation. It's implemented via JS */
@@ -60,20 +60,20 @@ declare global {
        * @defaultValue `document.body` */
       toFitElement: HTMLElement;
       /** Case when popup need to show;
-       * @defaultValue `ShowCases.onClick`
+       * @defaultValue `PopupOpenCases.onClick`
        * @example
        * // use `|` to to join cases
-       * showCase=ShowCases.onFocus | ShowCases.onClick;  */
-      showCase: ShowCases;
-      /** Timeout in ms before popup shows on hover of target (for ShowCases.onHover);
+       * openCase=PopupOpenCases.onFocus | PopupOpenCases.onClick;  */
+      openCase: PopupOpenCases;
+      /** Timeout in ms before popup shows on hover of target (for PopupOpenCases.onHover);
        * @defaultValue 200ms */
-      hoverShowTimeout: number;
-      /** Timeout in ms before popup hides on mouse-leave of target (for ShowCases.onHover);
+      hoverOpenTimeout: number;
+      /** Timeout in ms before popup hides on mouse-leave of target (for PopupOpenCases.onHover);
        * @defaultValue 500ms  */
-      hoverHideTimeout: number;
+      hoverCloseTimeout: number;
       /** Animation applied to popup
-       * @defaultValue `Animations.default (opacity)` */
-      animation: Animations;
+       * @defaultValue `PopupAnimations.default (opacity)` */
+      animation: PopupAnimations;
       /** Anchor that popup uses for placement
        * @defaultValue previousSibling */
       target?: HTMLElement | SVGElement | null;
@@ -132,15 +132,6 @@ declare global {
        *
        * attr `target` has hire priority than ref.options.target */
       "w-target"?: string;
-      /** Placement rule (relative to target); applied on show(). Call show() again to apply changed options */
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$show') instead */
-      onShow?: never;
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$hide') instead */
-      onHide?: never;
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willHide') instead */
-      onWillHide?: never;
-      /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willShow') instead */
-      onWillShow?: never;
       /** @readonly Result position; use this to restyle animation etc. */
       readonly position?: "top" | "left" | "bottom" | "right";
       /** @readonly Hide state; use this to hide-animation */
@@ -159,22 +150,7 @@ declare global {
       tagName?: string;
     }
 
-    interface EventMap extends WUP.Base.EventMap {
-      /** Fires before show is happened;
-       * @tutorial rules
-       * * can be prevented via `e.preventDefault()`
-       * * use event.detail.showCase to filter by showCase */
-      $willShow: CustomEvent<{ showCase: ShowCases }>;
-      /** Fires after popup is shown (after animation finishes) */
-      $show: Event;
-      /** Fires before hide is happened;
-       * @tutorial rules
-       * * can be prevented via `e.preventDefault()`
-       * * use event.detail.hideCase to filter by hideCase */
-      $willHide: CustomEvent<{ hideCase: HideCases }>;
-      /** Fires after popup is hidden (after animation finishes) */
-      $hide: Event;
-    }
+    interface EventMap extends WUP.BaseModal.EventMap<PopupOpenCases, PopupCloseCases> {}
   }
 }
 

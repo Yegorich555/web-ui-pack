@@ -447,14 +447,14 @@ describe("modalElement", () => {
     const dp = document.querySelector("wup-date");
     dp.focus();
     await h.wait();
-    expect(dp.$isShown).toBe(true);
+    expect(dp.$isOpened).toBe(true);
     await h.userPressKey(dp, { key: "Escape" });
     await h.wait();
-    expect(dp.$isShown).toBe(false);
+    expect(dp.$isOpened).toBe(false);
     expect(el.$isOpened).toBe(true);
     await h.userPressKey(dp, { key: "Escape" });
     await h.wait();
-    expect(dp.$isShown).toBe(false);
+    expect(dp.$isOpened).toBe(false);
     expect(el.$isOpened).toBe(false);
   });
 

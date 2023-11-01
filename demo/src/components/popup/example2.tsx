@@ -1,15 +1,15 @@
 import { useCallback, useEffect } from "react";
 import movable from "src/helpers/movable";
 import WUPPopupElement from "web-ui-pack/popup/popupElement";
-import { ShowCases, Animations } from "web-ui-pack/popup/popupElement.types";
+import { PopupOpenCases, PopupAnimations } from "web-ui-pack/popup/popupElement.types";
 import styles from "./popupView.scss";
 
 // example of attach - use this to avoid overhelmed layout by closed popups
 function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
   const detach = WUPPopupElement.$attach(
-    { target: el, text: opts.text, showCase: ShowCases.onFocus | ShowCases.onClick },
+    { target: el, text: opts.text, openCase: PopupOpenCases.onFocus | PopupOpenCases.onClick },
     (popup) => {
-      popup.className = styles.dropdownPopup;
+      // popup.className = styles.dropdownPopup;
 
       popup.$options.placement = [
         // dropdown behavior
@@ -24,7 +24,7 @@ function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
       ];
       popup.$options.toFitElement = document.querySelector("#fit") as HTMLElement;
       popup.$options.arrowEnable = false;
-      popup.$options.animation = Animations.drawer;
+      popup.$options.animation = PopupAnimations.drawer;
       setTimeout(() => {
         if (popup.$refArrow) {
           popup.$refArrow.style.background = popup.style.background;
@@ -36,8 +36,8 @@ function attach(el: HTMLElement, opts: { text?: string; innerHTML?: string }) {
 
       const isLock = false; // change it to show forever
       if (isLock) {
-        popup.$options.showCase = ShowCases.always;
-        popup.$show(); // to override default showCase and leave show forever
+        popup.$options.openCase = PopupOpenCases.onInit;
+        popup.$open(); // to override default openCase and leave show forever
       }
     }
   );

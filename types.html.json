@@ -460,11 +460,11 @@
           ]
         },
         {
-          "name": "w-showcase",
+          "name": "w-opencase",
           "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
           "references": [
             {
-              "name": "@see WUP.BaseCombo.ShowCases",
+              "name": "@see WUP.BaseCombo.MenuOpenCases",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseCombo.ts"
             }
           ]
@@ -613,8 +613,8 @@
       ],
       "attributes": [
         {
-          "name": "w-hideonpopupclick",
-          "description": "Hide menu on popup click \n\r @defaultValue true"
+          "name": "w-closeonpopupclick",
+          "description": "Close menu on popup click \n\r @defaultValue true"
         }
       ]
     },
@@ -1223,11 +1223,11 @@
           "description": "Allow to select multiple values; in this case `$value` & `$initValue` must contain `Array<ValueType>` @defaultValue fals"
         },
         {
-          "name": "w-showcase",
+          "name": "w-opencase",
           "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
           "references": [
             {
-              "name": "@see WUP.BaseCombo.ShowCases",
+              "name": "@see WUP.BaseCombo.MenuOpenCases",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseCombo.ts"
             }
           ]
@@ -1398,11 +1398,11 @@
           "description": "Allow user to create new value if value not found in items @defaultValue false"
         },
         {
-          "name": "w-showcase",
+          "name": "w-opencase",
           "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
           "references": [
             {
-              "name": "@see WUP.BaseCombo.ShowCases",
+              "name": "@see WUP.BaseCombo.MenuOpenCases",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseCombo.ts"
             }
           ]
