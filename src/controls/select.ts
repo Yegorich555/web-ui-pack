@@ -298,11 +298,9 @@ export default class WUPSelectControl<
     };
     if (d instanceof Promise) {
       return promiseWait(d, 300, (v) => this.changePending(v)).then((data) => {
-        Promise.resolve().finally(() => {
-          this._cachedItems = data || [];
-          act();
-          this.$isFocused && this.goOpenMenu(MenuOpenCases.onFocus, null);
-        }); // empty promise required to showMenu after pending changes
+        this._cachedItems = data || [];
+        act();
+        this.$isFocused && this.goOpenMenu(MenuOpenCases.onFocus, null);
         return data;
       });
     }

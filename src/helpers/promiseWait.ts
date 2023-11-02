@@ -7,11 +7,10 @@
  * @param [smartOrCallback=true] Allow not to wait if pointed promise is resolved immediately default-`true`
  * @example
  * let isPending = false
- * promiseWait(Promise.resolve(), 300, (isWait)=> sPending=isWait;)
+ * promiseWait(Promise.resolve(), 300, (isWait) => (isPending=isWait))
  * // OR
  * isPending = true;
- * promiseWait(Promise.resolve(), 300, true).finally(()=> isPending=false;)
- */
+ * promiseWait(Promise.resolve(), 300, true).finally(() => (isPending=false)) */
 export default function promiseWait<T>(
   promise: Promise<T>,
   ms: number,
@@ -23,8 +22,12 @@ export default function promiseWait<T>(
     .catch((err) => (catchErr = err)) //
     .finally(() => (isResolved = true));
 
-  const p = new Promise((resolve, reject) => {
-    const end = (): void => (catchErr ? reject(catchErr) : resolve(promise));
+  const p = new Promise((res, rej) => {
+    let back: boolean;
+    const end = (): void => {
+      back && (smartOrCallback as Func)(false);
+      catchErr ? rej(catchErr) : res(promise);
+    };
     const a = setTimeout(end, ms);
 
     smartOrCallback &&
@@ -34,7 +37,8 @@ export default function promiseWait<T>(
           end();
         } else if (typeof smartOrCallback === "function") {
           smartOrCallback(true);
-          p.finally(() => smartOrCallback(false));
+          back = true;
+          // p.finally(() => smartOrCallback(false)); // .catch(() => null);
         }
       });
   });

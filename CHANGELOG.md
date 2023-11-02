@@ -43,6 +43,7 @@
 **Fixes**:
 
 - helper [findScrollParent](src/helpers/findScrollParent.ts). _Returns parent despite on parent.child with position: fixed_
+- helper [promiseWait](src/helpers/promiseWait.ts). _Throws error twice instead of 1 time_
 - [PopupElement](src/popup/popupElement.ts). _Popup hidden if target inside content with position: fixed and target.parent.parent is scrollable_
 - [DropdownElement](src/dropdownElement.ts). _Target button is overflowed by menu in animation-stack_
 - [PasswordControl](src/controls/password.ts). _Input height is changed on button[eye] click_
