@@ -438,7 +438,7 @@ describe("modalElement", () => {
     document.body.innerHTML = `
       <wup-modal>
         <wup-form>
-          <wup-date></wup-date>
+          <wup-date w-initvalue="2023-10-16"></wup-date>
         </wup-form>
       </wup-modal>`;
     await h.wait();
@@ -449,14 +449,17 @@ describe("modalElement", () => {
     dp.focus();
     await h.wait();
     expect(dp.$isOpened).toBe(true);
+    expect(dp.$isEmpty).toBe(false);
     await h.userPressKey(dp, { key: "Escape" });
     await h.wait();
     expect(dp.$isOpened).toBe(false);
+    expect(dp.$isEmpty).toBe(false);
     expect(el.$isOpened).toBe(true);
     await h.userPressKey(dp, { key: "Escape" });
     await h.wait();
     expect(dp.$isOpened).toBe(false);
     expect(el.$isOpened).toBe(false);
+    expect(dp.$isEmpty).toBe(false);
   });
 
   test("option: autoclose", async () => {

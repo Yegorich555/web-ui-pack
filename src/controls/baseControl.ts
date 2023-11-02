@@ -1222,7 +1222,9 @@ export default abstract class WUPBaseControl<
 
   /** Called when user pressed key */
   protected gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
-    e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it enables NVDA-focus-mode
+    const canClear = !e.defaultPrevented && e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey;
+    // WARN: Escape works wrong with NVDA because it enables NVDA-focus-mode
+    canClear && setTimeout(() => !e.defaultPrevented && this.clearValue()); // timeout to wait for modal to handle it
   }
 }
 

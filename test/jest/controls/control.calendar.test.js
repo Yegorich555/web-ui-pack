@@ -577,10 +577,12 @@ describe("control.calendar", () => {
     el.focus();
 
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", cancelable: true, bubbles: true }));
+    jest.advanceTimersByTime(1);
     expect(el.$value).toBe(undefined);
     expect(el.querySelector("[aria-selected]")).toBeFalsy();
 
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", cancelable: true, bubbles: true }));
+    jest.advanceTimersByTime(1);
     expect(el.querySelector("[aria-selected]")).toBeTruthy();
     expect(el.$value).toStrictEqual(el.$initValue);
   });

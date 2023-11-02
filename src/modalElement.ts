@@ -367,7 +367,6 @@ export default class WUPModalElement<
       case "Escape":
         if (!e.shiftKey && !e.defaultPrevented) {
           e.preventDefault();
-          // todo it works together on control where Escape clears input
           this.goClose(ModalCloseCases.onPressEsc, e);
         }
         break;
@@ -418,8 +417,9 @@ export default class WUPModalElement<
   }
 
   protected override dispose(): void {
-    document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove > everything must returned to prev state
-    !document.body.className && document.body.removeAttribute("class");
+    const bd = document.body;
+    bd.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove > everything must returned to prev state
+    !bd.className && bd.removeAttribute("class");
     (this._prevTarget as HTMLElement)?.removeEventListener("click", this._prevTargetClick!);
     super.dispose();
   }

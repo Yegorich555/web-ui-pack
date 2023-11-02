@@ -152,8 +152,11 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$refInput.selectionEnd).toBe(0);
 
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      jest.advanceTimersByTime(1);
       expect(el.$value).toBe(undefined);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      jest.advanceTimersByTime(1);
+
       expect(el.$value).toBe(initV);
 
       expect(el.$refInput.selectionStart).toBe(0);
@@ -172,6 +175,8 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$value).toBe(initV);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      jest.advanceTimersByTime(1);
+
       expect(el.$value).toBe(initV);
       expect(el.$refInput.selectionEnd).toBe(initV.length);
     });
