@@ -843,8 +843,8 @@ export default class WUPPopupElement<
           if (me.arrow.w > maxArrowSize) {
             me.arrow.w = maxArrowSize;
             me.arrow.h = maxArrowSize / 2;
-            (this.$refArrow as WUPPopupArrowElement).style.width = `${me.arrow.w}px`;
-            (this.$refArrow as WUPPopupArrowElement).style.height = `${me.arrow.h}px`;
+            this.$refArrow!.style.width = `${me.arrow.w}px`;
+            this.$refArrow!.style.height = `${me.arrow.h}px`;
             pos = lastRule(t, me, fit); // recalc position because size of arrow is changed
           }
         };
