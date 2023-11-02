@@ -121,7 +121,7 @@ export default function ModalView() {
           ref={(el) => {
             if (el) {
               el.$onSubmit = ({ detail }) => {
-                console.warn("submit", { detail });
+                console.warn("submit detail:", detail);
                 // return Promise.reject();
                 // eslint-disable-next-line no-promise-executor-return
                 return new Promise((res) => setTimeout(() => res(true), 1500));

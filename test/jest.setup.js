@@ -7,7 +7,7 @@ process.on("unhandledRejection", (err) => {
   if (un) {
     un(err);
   } else {
-    console.error("UnhandledRejection\r\n", err);
+    err?.message !== "test reject" && console.error("UnhandledRejection\r\n", err);
   }
 });
 

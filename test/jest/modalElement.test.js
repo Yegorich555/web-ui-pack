@@ -226,7 +226,7 @@ describe("modalElement", () => {
 
   test("focus behavior", async () => {
     document.body.innerHTML = `
-      <wup-modal><h2></h2></wup-modal>
+      <wup-modal><h2>...</h2></wup-modal>
       <button id='out'>...</button>
     `;
     el = document.body.firstElementChild;
@@ -389,7 +389,7 @@ describe("modalElement", () => {
     document.body.innerHTML = `
       <button id='tar2'>...</button>
       <button id='tar'>...</button>
-      <wup-modal w-target="prev"><h2></h2></wup-modal>
+      <wup-modal w-target="prev"><h2>...</h2></wup-modal>
     `;
     await h.wait();
     el = document.body.querySelector("wup-modal");
@@ -432,12 +432,13 @@ describe("modalElement", () => {
     document.body.innerHTML = `<wup-modal>Hello</wup-modal>`;
     await h.wait();
     expect(warn).toBeCalledTimes(1);
-
+    h.unMockConsoleWarn();
     // close on Escape + when control is in edit mode + when dropdown is opened
 
     document.body.innerHTML = `
       <wup-modal>
         <wup-form>
+          <h2>...</h2>
           <wup-date w-initvalue="2023-10-16"></wup-date>
         </wup-form>
       </wup-modal>`;
@@ -466,6 +467,7 @@ describe("modalElement", () => {
     document.body.innerHTML = `
       <wup-modal>
         <wup-form>
+          <h2>...</h2>
           <wup-text w-name='txt' w-initvalue='hello'></wup-text>
         </wup-form>
       </wup-modal>`;
@@ -473,7 +475,6 @@ describe("modalElement", () => {
 
     el = document.querySelector("wup-modal");
     expect(el.$isOpened).toBe(true);
-
     // when success on submitEnd
     const form = document.querySelector("wup-form");
     form.$onWillSubmit = jest.fn();
@@ -490,7 +491,7 @@ describe("modalElement", () => {
     el.$open();
     await h.wait();
     expect(el.$isOpened).toBe(true);
-    form.$onSubmit = () => Promise.reject();
+    form.$onSubmit = () => Promise.reject(new Error("test reject"));
     await h.userPressKey(form, { key: "Enter" });
     expect(form.$onWillSubmit).toBeCalledTimes(1);
     await h.wait();

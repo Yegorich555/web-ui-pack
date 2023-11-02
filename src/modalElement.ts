@@ -319,8 +319,9 @@ export default class WUPModalElement<
     this.disposeEvents(); // remove only events WARN: don't call this.dispose()!
     // apply animation
     this.$refFade!.removeAttribute("show"); // todo only if last
-    document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
-    !document.body.className && document.body.removeAttribute("class");
+    const bd = document.body;
+    bd.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
+    !bd.className && bd.removeAttribute("class");
 
     this.focusBack();
   }
