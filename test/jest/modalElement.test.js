@@ -29,6 +29,7 @@ describe("modalElement", () => {
     },
     {
       attrs: {
+        "w-selfremove": { value: true },
         "w-autoclose": { value: true },
         "w-autofocus": { value: true },
         "w-placement": { value: "center" },
@@ -493,5 +494,21 @@ describe("modalElement", () => {
     expect(el.$isOpened).toBe(true);
     await h.wait();
     expect(el.$isOpened).toBe(true);
+  });
+
+  test("option: selfRemove", async () => {
+    expect(el.$isOpened).toBe(true);
+    el.$close();
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    expect(el.isConnected).toBe(true);
+
+    el.$options.selfRemove = true;
+    el.$open();
+    await h.wait();
+    el.$close();
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    expect(el.isConnected).toBe(false);
   });
 });

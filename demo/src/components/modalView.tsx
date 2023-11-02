@@ -50,7 +50,13 @@ export default function ModalView() {
         linkDemo: "demo/src/components/modalView.tsx",
         customHTML: [
           `html
-<wup-modal w-target w-placement="center">
+<wup-modal
+  w-target
+  w-placement="center"
+  w-autofocus
+  w-autoclose
+  w-selfremove="false"
+>
   Some content here...
 </wup-modal>`,
         ],

@@ -729,6 +729,21 @@
               "name": "false"
             }
           ]
+        },
+        {
+          "name": "w-selfremove",
+          "description": "Remove itself after closing $defaultValue false",
+          "values": [
+            {
+              "name": ""
+            },
+            {
+              "name": "true"
+            },
+            {
+              "name": "false"
+            }
+          ]
         }
       ]
     },

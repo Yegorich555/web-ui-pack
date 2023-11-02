@@ -6,7 +6,7 @@ export const enum ModalOpenCases {
   /** When $open() is called programmatically */
   onManuallCall = 0,
   /** On init (when appended to layout) */
-  onInit = 1, // todo unify with popup
+  onInit = 1,
   /** When click on target @see {@link WUP.Modal.Options.target} */
   onTargetClick,
 }
@@ -42,6 +42,9 @@ declare global {
       /** Auto close on successful wup-form.$onSubmitEnd: @see {@link WUP.Form.EventMap.$submitEnd}
        * @defaultValue true */
       autoClose: boolean;
+      /** Remove itself after closing
+       * @defaultValue false */
+      selfRemove: boolean;
       // todo modalInModal: replace OR overflow
     }
     interface EventMap extends WUP.BaseModal.EventMap<ModalOpenCases, ModalCloseCases> {}
@@ -53,6 +56,7 @@ declare global {
       "w-placement"?: Options["placement"];
       "w-autoFocus"?: boolean | "";
       "w-autoClose"?: boolean | "";
+      "w-selfRemove"?: boolean | "";
     }
   }
   interface HTMLElementTagNameMap {
@@ -217,7 +221,7 @@ export default class WUPModalElement<
     placement: "center",
     autoFocus: true,
     autoClose: true,
-    // todo selfDestroy
+    selfRemove: false,
   };
 
   static get mappedAttributes(): Record<string, AttributeMap> {
@@ -407,14 +411,16 @@ export default class WUPModalElement<
   }
 
   protected override resetState(): void {
+    super.resetState();
     this.$refFade?.remove(); // todo only if last
     this.$refFade = undefined;
-    super.resetState();
+    this.isConnected && this._opts.selfRemove && this.remove();
   }
 
   protected override dispose(): void {
     document.body.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove > everything must returned to prev state
     !document.body.className && document.body.removeAttribute("class");
+    (this._prevTarget as HTMLElement)?.removeEventListener("click", this._prevTargetClick!);
     super.dispose();
   }
 }

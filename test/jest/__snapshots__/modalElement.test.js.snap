@@ -258,6 +258,7 @@ exports[`modalElement common tests snapshot of $defaults 1`] = `
   "autoClose": true,
   "autoFocus": true,
   "placement": "center",
+  "selfRemove": false,
   "target": null,
 }
 `;
@@ -269,6 +270,7 @@ exports[`modalElement common tests snapshot of $defaults 3`] = `
   "w-autoclose",
   "w-autofocus",
   "w-placement",
+  "w-selfremove",
   "w-target",
 ]
 `;
