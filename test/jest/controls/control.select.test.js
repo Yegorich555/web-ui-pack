@@ -91,9 +91,10 @@ describe("control.select", () => {
     // when need to parse but items must be fetched before
     document.body.innerHTML = "";
     el = document.body.appendChild(document.createElement(el.tagName));
-    el.$options.items = new Promise((res) => setTimeout(() => res(getItems(), 100)));
+    el.$options.items = new Promise((res) => setTimeout(() => res(getItems()), 100));
     el.setAttribute("w-initvalue", "10");
     await h.wait();
+    expect(el._cachedItems).toBeTruthy();
     expect(el.$isPending).toBe(false);
     expect(el.$initValue).toBe(10);
     expect(el.$value).toBe(10);

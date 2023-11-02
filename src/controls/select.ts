@@ -293,7 +293,7 @@ export default class WUPSelectControl<
     const act = (): void => {
       this._onPendingInitValue?.call(this);
       delete this._onPendingInitValue;
-      this.setInputValue(this.$value, SetValueReasons.clear); // NiceToHave: .clear is wrong need new reason
+      this.setInputValue(this.$value, SetValueReasons.initValue);
       this.setupInputReadonly(); // call it because opt readonlyInput can depends on items.length
     };
     if (d instanceof Promise) {
