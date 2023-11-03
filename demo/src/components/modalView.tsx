@@ -73,6 +73,7 @@ export default function ModalView() {
         "Close by: outside click, button[close] click, key Escape",
         "Built-in styles & animation for different screen sizes",
         "Accessibility: autofocus, tab-cycling, focus-back on closing etc.",
+        "Built-in modal-in-modal behavior",
         // todo uncomment when will be implemented
         <>
           Integrated with <b>wup-form</b> (pending + close after submitEnd {/* "+ confirm window if unsaved changes" */}
@@ -142,6 +143,17 @@ export default function ModalView() {
           <wup-date w-name="dob" w-label="Date of birthday" />
           {/* <wup-selectmany w-name="selectMany" w-items="inputSelectMany.items" /> */}
           <footer>
+            <button type="button">TestMe</button>
+            {/*  todo remove after tests */}
+            <wup-modal w-target="prev">
+              <h2>Do you want to close me?</h2>
+              <footer>
+                <button type="button" data-close="modal">
+                  No
+                </button>
+                <button type="button">Yes </button>
+              </footer>
+            </wup-modal>
             <button type="button" data-close="modal">
               Close
             </button>

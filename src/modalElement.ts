@@ -72,6 +72,9 @@ declare global {
   }
 }
 
+/** List of opened modals */
+const openedModals: Array<WUPModalElement> = [];
+
 /** Modal element
  * @example
  * JS/TS
@@ -282,7 +285,8 @@ export default class WUPModalElement<
 
   /** Id of last focused item on item itself */
   _lastFocused?: Element | string | null;
-
+  /** Number of opened modal */
+  _mid?: number;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotOpen(openCase: ModalOpenCases, e: MouseEvent | null): void {
     // store id of focused element
@@ -308,10 +312,22 @@ export default class WUPModalElement<
     this.$refClose.setAttribute("close", "");
     this.$refClose.setAttribute("data-close", "modal");
     this.prepend(this.$refClose);
-    // init fade - // todo need to prevent it if prev modal still here
-    this.$refFade ??= document.body.appendChild(document.createElement("div"));
+    // init fade
+    openedModals.push(this as WUPModalElement<any, any>);
+    this._mid = openedModals.length;
+    if (this._mid === 1) {
+      this.$refFade ??= document.body.appendChild(document.createElement("div"));
+      setTimeout(() => this.$refFade?.setAttribute("show", "")); // timeout to allow animation works
+    } else {
+      const p = openedModals[this._mid - 2];
+      // todo fix when need to replace prev modal
+      this.$refFade ??= p.appendChild(document.createElement("div")); // append to parent to hide modal parent
+      this.$refFade!.setAttribute("show", "");
+      p.$refFade!.style.display = "none";
+    }
+
     this.$refFade.className = this.#ctr.$classFade;
-    setTimeout(() => this.$refFade?.setAttribute("show", "")); // timeout to allow animation works
+
     // apply open styles
     this.setAttribute("w-placement", this._opts.placement);
     document.body.classList.add(this.#ctr.$classOpened); // to maybe hide scroll-bars
@@ -331,14 +347,22 @@ export default class WUPModalElement<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotClose(closeCase: ModalCloseCases, ev: MouseEvent | KeyboardEvent | WUP.Form.EventMap["$submitEnd"] | null): void {
     // remove events
-    this.$refClose!.onclick = null;
     this.$refFade!.onclick = null;
     this.disposeEvents(); // remove only events WARN: don't call this.dispose()!
     // apply animation
-    this.$refFade!.removeAttribute("show"); // todo only if last
-    const bd = document.body;
-    bd.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
-    !bd.className && bd.removeAttribute("class");
+    if (this._mid === 1) {
+      this.$refFade!.removeAttribute("show"); // animation if opened single modal
+      const b = document.body;
+      b.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
+      !b.className && b.removeAttribute("class");
+    } else {
+      this.$refFade!.remove(); // immediately hide if opened 2+ modals
+      this.$refFade = undefined;
+      const p = openedModals[this._mid! - 2].$refFade!;
+      p.style.display = "";
+      !p.getAttribute("style") && p.removeAttribute("style");
+    }
+    openedModals.splice(this._mid! - 1, 1); // self remove from array
 
     this.focusBack();
   }
@@ -349,15 +373,11 @@ export default class WUPModalElement<
     if (e.defaultPrevented || t === this) {
       return;
     }
-    // if (this.itsMe.call(this.$refClose, t)) {
-    //   this.goClose(ModalCloseCases.onCloseClick, e);
-    //   return;
-    // }
-    // todo will be issue with modal in modal
     const all = this.querySelectorAll("[data-close=modal]").values(); // allow to use any button with attr to close modal
     // eslint-disable-next-line no-restricted-syntax
     for (const el of all) {
       if (this.itsMe.call(el, t)) {
+        this._mid !== 1 && e.stopPropagation(); // prevent closing other modals
         this.goClose(ModalCloseCases.onCloseClick, e);
         break;
       }
@@ -450,7 +470,7 @@ export default class WUPModalElement<
 
   protected override resetState(): void {
     super.resetState();
-    this.$refFade?.remove(); // todo only if last
+    this.$refFade?.remove();
     this.$refFade = undefined;
     this.isConnected && this._opts.selfRemove && this.remove();
   }
