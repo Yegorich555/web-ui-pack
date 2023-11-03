@@ -49,3 +49,9 @@
 .mform {
   max-width: 540px;
 }
+
+wup-modal footer {
+  & > button[type] {
+    // margin: 0;
+  }
+}

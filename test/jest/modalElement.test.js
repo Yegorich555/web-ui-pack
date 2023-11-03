@@ -70,7 +70,7 @@ describe("modalElement", () => {
     expect(el.$isClosing).toBe(false);
     expect(el.$isOpening).toBe(true);
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body class="wup-modal-open"><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close=""></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade"></div></body>"`
+      `"<body class="wup-modal-open"><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade"></div></body>"`
     );
     el.$open().then(thenOpen); // despite on opening it shouldn't trigger open again but must return prev-saved promise
     await h.wait(1);
@@ -82,7 +82,7 @@ describe("modalElement", () => {
     // end opening: opened
     await h.wait();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body class="wup-modal-open"><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close=""></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade" show=""></div></body>"`
+      `"<body class="wup-modal-open"><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade" show=""></div></body>"`
     );
     expect(el.$isOpened).toBe(true);
     expect(el.$isOpening).toBe(false);
@@ -102,7 +102,7 @@ describe("modalElement", () => {
     expect(el.$isClosed).toBe(false);
     expect(el.$isOpened).toBe(true);
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close=""></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade"></div></body>"`
+      `"<body><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade"></div></body>"`
     );
     await h.wait(1);
     expect(onWillOpen).toBeCalledTimes(0);
@@ -111,11 +111,11 @@ describe("modalElement", () => {
     expect(onClose).toBeCalledTimes(0);
     expect(thenClose).toBeCalledTimes(0);
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close=""></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade"></div></body>"`
+      `"<body><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade"></div></body>"`
     );
     await h.wait();
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close=""></button><h2 id="sID"></h2></wup-modal></body>"`
+      `"<body><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2></wup-modal></body>"`
     );
     expect(el.$isOpened).toBe(false);
     expect(el.$isOpening).toBe(false);
@@ -160,13 +160,13 @@ describe("modalElement", () => {
     await h.wait();
     expect(el.$isOpened).toBe(false);
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close=""></button><h2 id="sID"></h2></wup-modal></body>"`
+      `"<body><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2></wup-modal></body>"`
     );
     el.$open();
     await h.wait();
     expect(el.$isOpened).toBe(true);
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body class="wup-modal-open"><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" open="" show=""><button type="button" aria-label="close" wup-icon="" close=""></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade" show=""></div></body>"`
+      `"<body class="wup-modal-open"><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" open="" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade" show=""></div></body>"`
     );
 
     el.$onWillClose = jest.fn().mockImplementationOnce((e) => e.preventDefault());
@@ -174,13 +174,13 @@ describe("modalElement", () => {
     await h.wait();
     expect(el.$isClosed).toBe(false);
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body class="wup-modal-open"><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" open="" show=""><button type="button" aria-label="close" wup-icon="" close=""></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade" show=""></div></body>"`
+      `"<body class="wup-modal-open"><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" open="" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2></wup-modal><div class="wup-modal-fade" show=""></div></body>"`
     );
     el.$close();
     await h.wait();
     expect(el.$isClosed).toBe(true);
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close=""></button><h2 id="sID"></h2></wup-modal></body>"`
+      `"<body><wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2></wup-modal></body>"`
     );
 
     // open & close in short time
@@ -260,7 +260,7 @@ describe("modalElement", () => {
     el = document.body.firstElementChild;
     expect(el.$isOpened).toBe(true);
     expect(el.innerHTML).toMatchInlineSnapshot(`
-      "<button type="button" aria-label="close" wup-icon="" close=""></button>
+      "<button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button>
               <h2 id="sID"></h2>
               <button id="b1"></button>
               <button id="b2"></button>
@@ -440,6 +440,10 @@ describe("modalElement", () => {
         <wup-form>
           <h2>...</h2>
           <wup-date w-initvalue="2023-10-16"></wup-date>
+          <footer>
+            <button type="button" data-close="modal" id='testme'><span>Close</span></button>
+            <button type="submit">Submit</button>
+          </footer>
         </wup-form>
       </wup-modal>`;
     await h.wait();
@@ -461,6 +465,14 @@ describe("modalElement", () => {
     expect(dp.$isOpened).toBe(false);
     expect(el.$isOpened).toBe(false);
     expect(dp.$isEmpty).toBe(false);
+
+    // close by external close click
+    el.$open();
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    await h.userClick(document.getElementById("testme").firstElementChild);
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
   });
 
   test("option: autoclose", async () => {

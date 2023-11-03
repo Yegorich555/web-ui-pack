@@ -1,6 +1,7 @@
 import { AttributeMap, AttributeTypes } from "./baseElement";
 import WUPBaseModal from "./baseModal";
 import focusFirst from "./helpers/focusFirst";
+import { WUPcssButton } from "./styles";
 
 export const enum ModalOpenCases {
   /** When $open() is called programmatically */
@@ -70,6 +71,9 @@ declare global {
     }
   }
 }
+
+/** List of opened modals */
+const openedModals: Array<WUPModalElement> = [];
 
 /** Modal element
  * @example
@@ -192,6 +196,11 @@ export default class WUPModalElement<
          touch-action: initial;
          opacity: 1;
       }
+      @media not all and (prefers-reduced-motion) {
+       .${this.$classFade} {
+          transition: opacity var(--modal-anim), transform var(--modal-anim);
+        }
+      }
       :host > button[close] {
         --icon-img: var(--wup-icon-cross);
         position: absolute;
@@ -209,10 +218,20 @@ export default class WUPModalElement<
         margin-bottom: 0;
         margin-left: auto;
       }
-      @media not all and (prefers-reduced-motion) {
-       .${this.$classFade} {
-          transition: opacity var(--modal-anim), transform var(--modal-anim);
-        }
+      :host footer {
+        display: flex;
+        gap: calc(var(--base-margin) / 2);
+        margin-top: var(--base-margin);
+        justify-content: flex-end;
+      }
+      ${WUPcssButton(":host footer>button")}
+      :host footer>button[type] {
+         margin: 0;
+         min-width: 7em;
+      }
+      :host footer>button[data-close=modal] {
+         background: var(--base-btn2-bg);
+         color: var(--base-btn2-text);
       }`;
   }
 
@@ -266,7 +285,8 @@ export default class WUPModalElement<
 
   /** Id of last focused item on item itself */
   _lastFocused?: Element | string | null;
-
+  /** Number of opened modal */
+  _mid?: number;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotOpen(openCase: ModalOpenCases, e: MouseEvent | null): void {
     // store id of focused element
@@ -290,17 +310,30 @@ export default class WUPModalElement<
     this.$refClose.setAttribute("aria-label", __wupln("close", "aria"));
     this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
     this.$refClose.setAttribute("close", "");
+    this.$refClose.setAttribute("data-close", "modal");
     this.prepend(this.$refClose);
-    // init fade - // todo need to prevent it if prev modal still here
-    this.$refFade ??= document.body.appendChild(document.createElement("div"));
+    // init fade
+    openedModals.push(this as WUPModalElement<any, any>);
+    this._mid = openedModals.length;
+    if (this._mid === 1) {
+      this.$refFade ??= document.body.appendChild(document.createElement("div"));
+      setTimeout(() => this.$refFade?.setAttribute("show", "")); // timeout to allow animation works
+    } else {
+      const p = openedModals[this._mid - 2];
+      // todo fix when need to replace prev modal
+      this.$refFade ??= p.appendChild(document.createElement("div")); // append to parent to hide modal parent
+      this.$refFade!.setAttribute("show", "");
+      p.$refFade!.style.display = "none";
+    }
+
     this.$refFade.className = this.#ctr.$classFade;
-    setTimeout(() => this.$refFade?.setAttribute("show", "")); // timeout to allow animation works
+
     // apply open styles
     this.setAttribute("w-placement", this._opts.placement);
     document.body.classList.add(this.#ctr.$classOpened); // to maybe hide scroll-bars
     // listen for close-events
-    this.$refClose.onclick = (ev) => this.goClose(ModalCloseCases.onCloseClick, ev);
     this.$refFade.onclick = (ev) => this.goClose(ModalCloseCases.onOutsideClick, ev);
+    this.appendEvent(this, "click", (ev) => this.gotClick(ev));
     this.appendEvent(this, "keydown", (ev) => this.gotKeyDown(ev), { passive: false });
     // @ts-expect-error - TS isn't good enought for looking for types
     this.appendEvent(this, "$submitEnd", (sev: WUP.Form.EventMap["$submitEnd"]) => {
@@ -314,34 +347,40 @@ export default class WUPModalElement<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotClose(closeCase: ModalCloseCases, ev: MouseEvent | KeyboardEvent | WUP.Form.EventMap["$submitEnd"] | null): void {
     // remove events
-    this.$refClose!.onclick = null;
     this.$refFade!.onclick = null;
     this.disposeEvents(); // remove only events WARN: don't call this.dispose()!
     // apply animation
-    this.$refFade!.removeAttribute("show"); // todo only if last
-    const bd = document.body;
-    bd.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
-    !bd.className && bd.removeAttribute("class");
+    if (this._mid === 1) {
+      this.$refFade!.removeAttribute("show"); // animation if opened single modal
+      const b = document.body;
+      b.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
+      !b.className && b.removeAttribute("class");
+    } else {
+      this.$refFade!.remove(); // immediately hide if opened 2+ modals
+      this.$refFade = undefined;
+      const p = openedModals[this._mid! - 2].$refFade!;
+      p.style.display = "";
+      !p.getAttribute("style") && p.removeAttribute("style");
+    }
+    openedModals.splice(this._mid! - 1, 1); // self remove from array
 
     this.focusBack();
   }
 
-  /** Called on close to return focus to previously focused item */
-  focusBack(): void {
-    let el: Element | null | undefined;
-    if (typeof this._lastFocused === "string") {
-      el = document.getElementById(this._lastFocused);
-    } else {
-      el = this._lastFocused;
+  /** Called when modal handles click to check if was close-click */
+  gotClick(e: MouseEvent): void {
+    const t = e.target;
+    if (e.defaultPrevented || t === this) {
+      return;
     }
-    if (el && (el as HTMLElement).focus && el.isConnected) {
-      (el as HTMLElement).focus();
-    } else {
-      this.throwError(
-        "Impossible to return focus back: element is missed. Before opening modal set 'id' to focused element"
-      );
-      /* istanbul ignore next */
-      (document.activeElement as HTMLElement)?.blur?.();
+    const all = this.querySelectorAll("[data-close=modal]").values(); // allow to use any button with attr to close modal
+    // eslint-disable-next-line no-restricted-syntax
+    for (const el of all) {
+      if (this.itsMe.call(el, t)) {
+        this._mid !== 1 && e.stopPropagation(); // prevent closing other modals
+        this.goClose(ModalCloseCases.onCloseClick, e);
+        break;
+      }
     }
   }
 
@@ -351,7 +390,7 @@ export default class WUPModalElement<
   // /** Called on focusout event */
   // gotFocusOut(e: FocusEvent): void {
   //   const t = e.relatedTarget;
-  //   const isOut = !t || !this.includes(t); // a-todo includes can be wrong for absolute items ???
+  //   const isOut = !t || !this.includes(t); // WARN: ncludes can be wrong for absolute items ???
   //   const isFocusLast = this._willFocusPrev;
   //   isOut && isFocusLast != null && focusFirst(this, { isFocusLast }); // bug: FF doesn't remove focus-style on btn[close] when focus goes outside
   //   delete this._willFocusPrev;
@@ -396,6 +435,25 @@ export default class WUPModalElement<
     }
   }
 
+  /** Called on close to return focus to previously focused item */
+  focusBack(): void {
+    let el: Element | null | undefined;
+    if (typeof this._lastFocused === "string") {
+      el = document.getElementById(this._lastFocused);
+    } else {
+      el = this._lastFocused;
+    }
+    if (el && (el as HTMLElement).focus && el.isConnected) {
+      (el as HTMLElement).focus();
+    } else {
+      this.throwError(
+        "Impossible to return focus back: element is missed. Before opening modal set 'id' to focused element"
+      );
+      /* istanbul ignore next */
+      (document.activeElement as HTMLElement)?.blur?.();
+    }
+  }
+
   /** Focus any content excluding button[close] if possible */
   focusAny(): void {
     if (this.$isOpened) {
@@ -412,7 +470,7 @@ export default class WUPModalElement<
 
   protected override resetState(): void {
     super.resetState();
-    this.$refFade?.remove(); // todo only if last
+    this.$refFade?.remove();
     this.$refFade = undefined;
     this.isConnected && this._opts.selfRemove && this.remove();
   }
