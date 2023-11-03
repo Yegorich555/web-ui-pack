@@ -228,6 +228,11 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
          touch-action: initial;
          opacity: 1;
       }
+      @media not all and (prefers-reduced-motion) {
+       .wup-modal-fade {
+          transition: opacity var(--modal-anim), transform var(--modal-anim);
+        }
+      }
       WUP-MODAL &gt; button[close] {
         --icon-img: var(--wup-icon-cross);
         position: absolute;
@@ -245,10 +250,52 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
         margin-bottom: 0;
         margin-left: auto;
       }
-      @media not all and (prefers-reduced-motion) {
-       .wup-modal-fade {
-          transition: opacity var(--modal-anim), transform var(--modal-anim);
-        }
+      WUP-MODAL footer {
+        display: flex;
+        gap: calc(var(--base-margin) / 2);
+        margin-top: var(--base-margin);
+        justify-content: flex-end;
+      }
+      
+WUP-MODAL footer&gt;button {
+  box-shadow: none;
+  border: none;
+  border-radius: var(--border-radius);
+  box-sizing: border-box;
+  padding: 11px;
+  margin: var(--base-margin) 0;
+  min-width: 10em;
+  cursor: pointer;
+  font: inherit;
+  font-weight: bold;
+  background: var(--base-btn-bg);
+  color: var(--base-btn-text);
+  outline: none;
+}
+WUP-MODAL footer&gt;button:focus {
+  box-shadow: inset 0 0 0 2px var(--base-btn-focus);
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-MODAL footer&gt;button:hover {
+    box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
+  }
+}
+WUP-MODAL footer&gt;button[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+  -webkit-user-select: none;
+  user-select: none;
+}
+WUP-MODAL footer&gt;button[aria-busy] {
+  cursor: wait;
+}
+      WUP-MODAL footer&gt;button[type] {
+         margin: 0;
+         min-width: 7em;
+      }
+      WUP-MODAL footer&gt;button[data-close=modal] {
+         background: var(--base-btn2-bg);
+         color: var(--base-btn2-text);
       }
 </style>
 `;

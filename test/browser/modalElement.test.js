@@ -51,7 +51,7 @@ describe("modalElement", () => {
     expect(t.isOpened).toBe(true);
     expect(t.html).toMatchInlineSnapshot(`
       "<body class="wup-modal-open"><div id="app"><button id="clickBtn">Login</button>
-            <wup-modal w-target="#clickBtn" open="" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="wup1" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close=""></button>
+            <wup-modal w-target="#clickBtn" open="" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="wup1" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button>
               <h2 id="wup1">Some text</h2>
               <input type="text">
             </wup-modal></div><div class="wup-modal-fade" show=""></div></body>"
@@ -65,7 +65,7 @@ describe("modalElement", () => {
     expect(t.isOpened).toBe(false);
     expect(t.html).toMatchInlineSnapshot(`
       "<body><div id="app"><button id="clickBtn">Login</button>
-            <wup-modal w-target="#clickBtn" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="wup1" w-placement="center"><button type="button" aria-label="close" wup-icon="" close=""></button>
+            <wup-modal w-target="#clickBtn" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="wup1" w-placement="center"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button>
               <h2 id="wup1">Some text</h2>
               <input type="text">
             </wup-modal></div></body>"

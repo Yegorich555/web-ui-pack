@@ -117,6 +117,7 @@ ${tag}::-webkit-scrollbar-track-piece:horizontal:end {
 }
 
 /** Returns default style for primary/submit button */
+/* istanbul ignore next */
 export function WUPcssButton(tag: string, type: 1 | 2 | 3 = 1): string {
   if (type === 1) {
     // @ts-ignore

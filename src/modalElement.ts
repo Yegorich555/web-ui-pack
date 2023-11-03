@@ -306,7 +306,7 @@ export default class WUPModalElement<
     this.$refClose.setAttribute("aria-label", __wupln("close", "aria"));
     this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
     this.$refClose.setAttribute("close", "");
-    this.$refClose.setAttribute("data-close", "modal"); // todo use w-close instead
+    this.$refClose.setAttribute("data-close", "modal");
     this.prepend(this.$refClose);
     // init fade - // todo need to prevent it if prev modal still here
     this.$refFade ??= document.body.appendChild(document.createElement("div"));
@@ -370,7 +370,7 @@ export default class WUPModalElement<
   // /** Called on focusout event */
   // gotFocusOut(e: FocusEvent): void {
   //   const t = e.relatedTarget;
-  //   const isOut = !t || !this.includes(t); // a-todo includes can be wrong for absolute items ???
+  //   const isOut = !t || !this.includes(t); // WARN: ncludes can be wrong for absolute items ???
   //   const isFocusLast = this._willFocusPrev;
   //   isOut && isFocusLast != null && focusFirst(this, { isFocusLast }); // bug: FF doesn't remove focus-style on btn[close] when focus goes outside
   //   delete this._willFocusPrev;
