@@ -566,8 +566,14 @@ export default abstract class WUPBaseElement<
    * @tutorial Troubleshooting
    * * if element has position `fixed` or `absolute` then returns false */
   includesTarget(e: Event): boolean {
-    const t = e.target;
-    return this === t || this.includes(t);
+    return this.itsMe(e.target);
+  }
+
+  /** Returns true if contains pointed element or has iself
+   * @tutorial Troubleshooting
+   * * if element has position `fixed` or `absolute` then returns false */
+  itsMe(el: Element | EventTarget | null): boolean {
+    return this === el || (el instanceof Node && this.contains(el));
   }
 
   /** Returns parsed value according to pointed type OR current value if something wrong;

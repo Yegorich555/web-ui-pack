@@ -301,6 +301,7 @@ export default class WUPModalElement<
     this.$refClose.setAttribute("aria-label", __wupln("close", "aria"));
     this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
     this.$refClose.setAttribute("close", "");
+    this.$refClose.setAttribute("data-close", "modal"); // todo use w-close instead
     this.prepend(this.$refClose);
     // init fade - // todo need to prevent it if prev modal still here
     this.$refFade ??= document.body.appendChild(document.createElement("div"));
@@ -310,8 +311,8 @@ export default class WUPModalElement<
     this.setAttribute("w-placement", this._opts.placement);
     document.body.classList.add(this.#ctr.$classOpened); // to maybe hide scroll-bars
     // listen for close-events
-    this.$refClose.onclick = (ev) => this.goClose(ModalCloseCases.onCloseClick, ev);
     this.$refFade.onclick = (ev) => this.goClose(ModalCloseCases.onOutsideClick, ev);
+    this.appendEvent(this, "click", (ev) => this.gotClick(ev));
     this.appendEvent(this, "keydown", (ev) => this.gotKeyDown(ev), { passive: false });
     // @ts-expect-error - TS isn't good enought for looking for types
     this.appendEvent(this, "$submitEnd", (sev: WUP.Form.EventMap["$submitEnd"]) => {
@@ -337,22 +338,24 @@ export default class WUPModalElement<
     this.focusBack();
   }
 
-  /** Called on close to return focus to previously focused item */
-  focusBack(): void {
-    let el: Element | null | undefined;
-    if (typeof this._lastFocused === "string") {
-      el = document.getElementById(this._lastFocused);
-    } else {
-      el = this._lastFocused;
+  /** Called when modal handles click to check if was close-click */
+  gotClick(e: MouseEvent): void {
+    const t = e.target;
+    if (e.defaultPrevented || t === this) {
+      return;
     }
-    if (el && (el as HTMLElement).focus && el.isConnected) {
-      (el as HTMLElement).focus();
-    } else {
-      this.throwError(
-        "Impossible to return focus back: element is missed. Before opening modal set 'id' to focused element"
-      );
-      /* istanbul ignore next */
-      (document.activeElement as HTMLElement)?.blur?.();
+    // if (this.itsMe.call(this.$refClose, t)) {
+    //   this.goClose(ModalCloseCases.onCloseClick, e);
+    //   return;
+    // }
+    // todo will issue with modal in modal
+    const all = this.querySelectorAll("[data-close=modal]").values(); // allow to use any button with attr to close modal
+    // eslint-disable-next-line no-restricted-syntax
+    for (const el of all) {
+      if (this.itsMe.call(el, t)) {
+        this.goClose(ModalCloseCases.onCloseClick, e);
+        break;
+      }
     }
   }
 
@@ -404,6 +407,25 @@ export default class WUPModalElement<
       }
       default:
         break;
+    }
+  }
+
+  /** Called on close to return focus to previously focused item */
+  focusBack(): void {
+    let el: Element | null | undefined;
+    if (typeof this._lastFocused === "string") {
+      el = document.getElementById(this._lastFocused);
+    } else {
+      el = this._lastFocused;
+    }
+    if (el && (el as HTMLElement).focus && el.isConnected) {
+      (el as HTMLElement).focus();
+    } else {
+      this.throwError(
+        "Impossible to return focus back: element is missed. Before opening modal set 'id' to focused element"
+      );
+      /* istanbul ignore next */
+      (document.activeElement as HTMLElement)?.blur?.();
     }
   }
 
