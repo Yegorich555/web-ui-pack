@@ -52,12 +52,20 @@ export default function ModalView() {
           `html
 <wup-modal
   w-target
-  w-placement="center"
   w-autofocus
   w-autoclose
+  w-placement="center"
   w-selfremove="false"
 >
-  Some content here...
+  <h2>Login form</h2>
+   <wup-form>
+      <wup-text w-name="email"></wup-text>
+      <wup-pwd w-name="password"></wup-pwd>
+      <footer>
+        <button type="button" data-close="modal">Close</button>
+        <button type="submit">Submit</button>
+      </footer>
+   </wup-form>
 </wup-modal>`,
         ],
       }}
@@ -133,7 +141,12 @@ export default function ModalView() {
           <wup-pwd w-name="password" w-initValue="123456" />
           <wup-date w-name="dob" w-label="Date of birthday" />
           {/* <wup-selectmany w-name="selectMany" w-items="inputSelectMany.items" /> */}
-          <button type="submit">Submit </button>
+          <footer>
+            <button type="button" data-close="modal">
+              Close
+            </button>
+            <button type="submit">Submit </button>
+          </footer>
         </wup-form>
       </wup-modal>
     </Page>

@@ -531,6 +531,7 @@ export default class WUPFormElement<
 
   protected override connectedCallback(): void {
     super.connectedCallback();
+    // todo set aria-labelledby="t1" where t1 id of related header (can be outside/inside form)
     this.setAttribute("role", "form");
     formStore.push(this);
   }

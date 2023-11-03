@@ -1,6 +1,7 @@
 import { AttributeMap, AttributeTypes } from "./baseElement";
 import WUPBaseModal from "./baseModal";
 import focusFirst from "./helpers/focusFirst";
+import { WUPcssButton } from "./styles";
 
 export const enum ModalOpenCases {
   /** When $open() is called programmatically */
@@ -192,6 +193,11 @@ export default class WUPModalElement<
          touch-action: initial;
          opacity: 1;
       }
+      @media not all and (prefers-reduced-motion) {
+       .${this.$classFade} {
+          transition: opacity var(--modal-anim), transform var(--modal-anim);
+        }
+      }
       :host > button[close] {
         --icon-img: var(--wup-icon-cross);
         position: absolute;
@@ -209,10 +215,15 @@ export default class WUPModalElement<
         margin-bottom: 0;
         margin-left: auto;
       }
-      @media not all and (prefers-reduced-motion) {
-       .${this.$classFade} {
-          transition: opacity var(--modal-anim), transform var(--modal-anim);
-        }
+      :host footer {
+        display: flex;
+        gap: calc(var(--base-margin) / 2);
+        margin-top: var(--base-margin);
+        justify-content: flex-end;
+      }
+      ${WUPcssButton(":host footer>button")}
+      :host footer>button[type] {
+         margin: 0;
       }`;
   }
 
