@@ -117,7 +117,11 @@ ${tag}::-webkit-scrollbar-track-piece:horizontal:end {
 }
 
 /** Returns default style for primary/submit button */
-export function WUPcssButton(tag: string): string {
+export function WUPcssButton(tag: string, type: 1 | 2 | 3 = 1): string {
+  if (type === 1) {
+    // @ts-ignore
+    type = "";
+  }
   return `
 ${tag} {
   box-shadow: none;
@@ -130,8 +134,8 @@ ${tag} {
   cursor: pointer;
   font: inherit;
   font-weight: bold;
-  background: var(--base-btn-bg);
-  color: var(--base-btn-text);
+  background: var(--base-btn${type}-bg);
+  color: var(--base-btn${type}-text);
   outline: none;
 }
 ${tag}:focus {

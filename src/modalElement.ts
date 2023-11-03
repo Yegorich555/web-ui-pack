@@ -224,6 +224,11 @@ export default class WUPModalElement<
       ${WUPcssButton(":host footer>button")}
       :host footer>button[type] {
          margin: 0;
+         min-width: 7em;
+      }
+      :host footer>button[data-close=modal] {
+         background: var(--base-btn2-bg);
+         color: var(--base-btn2-text);
       }`;
   }
 
@@ -348,7 +353,7 @@ export default class WUPModalElement<
     //   this.goClose(ModalCloseCases.onCloseClick, e);
     //   return;
     // }
-    // todo will issue with modal in modal
+    // todo will be issue with modal in modal
     const all = this.querySelectorAll("[data-close=modal]").values(); // allow to use any button with attr to close modal
     // eslint-disable-next-line no-restricted-syntax
     for (const el of all) {
