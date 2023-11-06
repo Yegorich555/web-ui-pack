@@ -49,7 +49,7 @@
         },
         {
           "name": "w-utc",
-          "description": "Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this @defaultValue true"
+          "description": "Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this"
         },
         {
           "name": "w-startwith",
@@ -104,7 +104,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -118,11 +118,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -130,7 +130,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -159,7 +159,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
@@ -208,7 +208,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -222,11 +222,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -234,7 +234,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -263,7 +263,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
@@ -315,11 +315,11 @@
         },
         {
           "name": "w-back",
-          "description": "Enable background circle \n\r @defaultValue true"
+          "description": "Enable background circle \n\r"
         },
         {
           "name": "w-corner",
-          "description": "Border/corner radius of each segment; expected 0..0.5 where 0.5 == 50% of `$options.width` \n\r @defaultValue 0.25"
+          "description": "Border/corner radius of each segment; expected 0..0.5 where 0.5 == 50% of `$options.width` \n\r.25"
         },
         {
           "name": "w-from",
@@ -410,7 +410,7 @@
         },
         {
           "name": "w-utc",
-          "description": "Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this @defaultValue true"
+          "description": "Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this"
         },
         {
           "name": "w-startwith",
@@ -475,7 +475,7 @@
         },
         {
           "name": "w-debouncems",
-          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
         {
           "name": "w-clearbutton",
@@ -526,7 +526,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -540,11 +540,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -552,7 +552,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -581,7 +581,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
@@ -614,7 +614,7 @@
       "attributes": [
         {
           "name": "w-closeonpopupclick",
-          "description": "Close menu on popup click \n\r @defaultValue true"
+          "description": "Close menu on popup click \n\r"
         }
       ]
     },
@@ -640,23 +640,23 @@
         },
         {
           "name": "w-autostore",
-          "description": "Enable to store data in localStorage to prevent losing till submitted @defaultValue false"
+          "description": "Enable to store data in localStorage to prevent losing till submitted "
         },
         {
           "name": "w-autofocus",
-          "description": "Focus first possible element when it's appended to layout @defaultValue false"
+          "description": "Focus first possible element when it's appended to layout "
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling @defaultValue false"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling "
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for stylin @defaultValue falseg"
+          "description": "Disallow copy value; use attr [readonly] for stylin g"
         },
         {
           "name": "w-autocomplete",
-          "description": "Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherited from form @defaultValue false"
+          "description": "Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherited from form "
         }
       ]
     },
@@ -716,7 +716,7 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Autofocus first possible content with skipping focus on button[close] if there is another focusable content @defaultValue true",
+          "description": "Autofocus first possible content with skipping focus on button[close] if there is another focusable content",
           "values": [
             {
               "name": ""
@@ -731,7 +731,7 @@
         },
         {
           "name": "w-autoclose",
-          "description": "Auto close on successful wup-form.$onSubmitEnd: @see {@link WUP.Form.EventMap.$submitEnd} $defaultValue true",
+          "description": "Auto close on successful wup-form.$onSubmitEnd: @see {@link WUP.Form.EventMap.$submitEnd}",
           "values": [
             {
               "name": ""
@@ -746,7 +746,7 @@
         },
         {
           "name": "w-selfremove",
-          "description": "Remove itself after closing $defaultValue false",
+          "description": "Remove itself after closing",
           "values": [
             {
               "name": ""
@@ -792,7 +792,7 @@
         },
         {
           "name": "w-debouncems",
-          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
         {
           "name": "w-clearbutton",
@@ -843,7 +843,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -857,11 +857,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -869,7 +869,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -898,7 +898,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
@@ -1020,7 +1020,7 @@
       "attributes": [
         {
           "name": "w-debouncems",
-          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
         {
           "name": "w-clearbutton",
@@ -1032,7 +1032,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -1046,11 +1046,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r `null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -1058,7 +1058,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -1077,7 +1077,7 @@
         },
         {
           "name": "w-validationsshowall",
-          "description": "Show all validation-rules with checkpoints as list instead of single error @defaultValue false"
+          "description": "Show all validation-rules with checkpoints as list instead of single error "
         },
         {
           "name": "w-storagekey",
@@ -1091,7 +1091,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
@@ -1147,7 +1147,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -1161,11 +1161,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -1173,7 +1173,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -1202,7 +1202,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
@@ -1245,11 +1245,11 @@
         },
         {
           "name": "w-allownewvalue",
-          "description": "Allow user to create new value if value not found in items @defaultValue false"
+          "description": "Allow user to create new value if value not found in items"
         },
         {
           "name": "w-multiple",
-          "description": "Allow to select multiple values; in this case `$value` & `$initValue` must contain `Array<ValueType>` @defaultValue fals"
+          "description": "Allow to select multiple values; in this case `$value` & `$initValue` must contain `Array<ValueType>`"
         },
         {
           "name": "w-opencase",
@@ -1267,7 +1267,7 @@
         },
         {
           "name": "w-debouncems",
-          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
         {
           "name": "w-clearbutton",
@@ -1318,7 +1318,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -1332,11 +1332,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -1344,7 +1344,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -1373,7 +1373,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
@@ -1406,11 +1406,11 @@
       "attributes": [
         {
           "name": "w-hideselected",
-          "description": " Hide items in menu that selected @defaultValue false"
+          "description": " Hide items in menu that selected "
         },
         {
           "name": "w-sortable",
-          "description": "Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position @defaultValue false"
+          "description": "Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position "
         },
         {
           "name": "w-items",
@@ -1424,7 +1424,7 @@
         },
         {
           "name": "w-allownewvalue",
-          "description": "Allow user to create new value if value not found in items @defaultValue false"
+          "description": "Allow user to create new value if value not found in items"
         },
         {
           "name": "w-opencase",
@@ -1442,7 +1442,7 @@
         },
         {
           "name": "w-debouncems",
-          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
         {
           "name": "w-clearbutton",
@@ -1493,7 +1493,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -1507,11 +1507,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -1519,7 +1519,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -1548,7 +1548,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
@@ -1581,15 +1581,15 @@
       "attributes": [
         {
           "name": "w-inline",
-          "description": "Place inside parent as inline-block otherwise overflow target in the center (`position: relative` is not required); \n\r @defaultValue false"
+          "description": "Place inside parent as inline-block otherwise overflow target in the center (`position: relative` is not required); \n\r "
         },
         {
           "name": "w-fit",
-          "description": "Allow to reduce size to fit parent (for max-size change css-var --spin-size) \n\r @defaultValue `auto` => `false` when inline:true, `true` when inline:false"
+          "description": "Allow to reduce size to fit parent (for max-size change css-var --spin-size) \n\r value `auto` => `false` when inline:true, `true` when inline:false"
         },
         {
           "name": "w-overflowoffset",
-          "description": "Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px; \n\r Point Global reference to object with array \n\r @defaultValue [4,4]",
+          "description": "Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px; \n\r Point Global reference to object with array",
           "values": [
             {
               "name": "window.overflowOffset"
@@ -1604,11 +1604,11 @@
         },
         {
           "name": "w-overflowfade",
-          "description": "Allow to create shadowBox to partially hide target (only for `inline: false`) @defaultValue false"
+          "description": "Allow to create shadowBox to partially hide target (only for `inline: false`) "
         },
         {
           "name": "w-overflowtarget",
-          "description": "Anchor element that need to oveflow by spinner \n\r Point querySelector to related element \n\r Ignored if option `inline='true'` \n\r @defaultValue 'auto' (parentElement)",
+          "description": "Anchor element that need to oveflow by spinner \n\r Point querySelector to related element \n\r Ignored if option `inline='true'` \n\r value 'auto' => parentElement",
           "values": [
             {
               "name": "auto"
@@ -1660,7 +1660,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -1674,11 +1674,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -1686,7 +1686,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -1715,7 +1715,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
@@ -1748,7 +1748,7 @@
       "attributes": [
         {
           "name": "w-debouncems",
-          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
         {
           "name": "w-clearbutton",
@@ -1799,7 +1799,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -1813,11 +1813,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -1825,7 +1825,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -1854,7 +1854,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
@@ -1887,7 +1887,7 @@
       "attributes": [
         {
           "name": "w-debouncems",
-          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
         {
           "name": "w-clearbutton",
@@ -1899,7 +1899,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -1913,11 +1913,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -1925,7 +1925,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -1954,7 +1954,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
@@ -1987,7 +1987,7 @@
       "attributes": [
         {
           "name": "w-format",
-          "description": "String representation of displayed time (enables mask, - to disable mask set mask='' @defaultValue localeInfo.time",
+          "description": "String representation of displayed time (enables mask, - to disable mask set mask=''",
           "references": [
             {
               "name": "@see localeInfo",
@@ -2011,7 +2011,7 @@
         },
         {
           "name": "w-step",
-          "description": "Increment value in minutes @defaultValue 1",
+          "description": "Increment value in minutes",
           "values": [
             {
               "name": "1"
@@ -2034,7 +2034,7 @@
         },
         {
           "name": "w-menubuttonsoff",
-          "description": "Set `false` to hide menu buttons 'Ok' & 'Cancel' @defaultValue `true`"
+          "description": "Set `false` to hide menu buttons 'Ok' & 'Cancel'"
         },
         {
           "name": "w-exclude",
@@ -2053,7 +2053,7 @@
         },
         {
           "name": "w-debouncems",
-          "description": "Time to wait for user finishes typing to start validate and provide $change event @defaultValue 0"
+          "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
         {
           "name": "w-clearbutton",
@@ -2077,7 +2077,7 @@
         },
         {
           "name": "w-label",
-          "description": "Title/label of control \n\r @defaultValue null that means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
         },
         {
           "name": "w-name",
@@ -2091,11 +2091,11 @@
         },
         {
           "name": "w-autofocus",
-          "description": "Focus element when it's appended to layout @defaultValue false"
+          "description": "Focus element when it's appended to layout "
         },
         {
           "name": "w-autocomplete",
-          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r @defaultValue null - means false if form.$options.autoComplete false also"
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
         },
         {
           "name": "disabled",
@@ -2103,7 +2103,7 @@
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling @defaultValue false"
+          "description": "Disallow copy value; use attr [readonly] for styling "
         },
         {
           "name": "w-validations",
@@ -2132,7 +2132,7 @@
         },
         {
           "name": "w-storage",
-          "description": "Type of storage for saving value \n\r @defaultValue `local`",
+          "description": "Type of storage for saving value",
           "values": [
             {
               "name": "local"
