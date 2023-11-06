@@ -294,7 +294,7 @@ export default class WUPSelectControl<
       this._onPendingInitValue?.call(this);
       delete this._onPendingInitValue;
       this.setInputValue(this.$value, SetValueReasons.initValue);
-      this.setupInputReadonly(); // call it because opt readonlyInput can depends on items.length
+      this.setupInputReadonly(); // call it because opt readonlyInput can depend on items.length
     };
     if (d instanceof Promise) {
       return promiseWait(d, 300, (v) => this.changePending(v)).then((data) => {
