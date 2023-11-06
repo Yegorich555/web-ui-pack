@@ -48,7 +48,8 @@ declare global {
        * @defaultValue false */
       selfRemove: boolean;
       // todo modalInModal: replace OR overflow
-      // todo confirmUnsaved: boolean; // show confirm modal if user tries to close form with unsaved changes
+      /** Show confirm modal if user tries to close form with unsaved changes */
+      // todo confirmUnsaved: boolean; // NiceToHave: confirmKey to show CheckBox "Don't show anymore" + some option to rollback it
     }
     interface EventMap extends WUP.BaseModal.EventMap<ModalOpenCases, ModalCloseCases> {}
     interface JSXProps<T = WUPModalElement> extends WUP.BaseModal.JSXProps<T>, WUP.Base.OnlyNames<Options> {
@@ -113,14 +114,19 @@ export default class WUPModalElement<
 
   /** Call it to enable attribute [w-confirm] for buttons
    * @tutorial Rules
-   * * to override default render: redefine `WUPModalElement.prototype.gotRenderConfirm` method
+   * * to override default render: redefine `WUPModalElement.prototype.gotRenderConfirm` method OR use `onReander` callback
    * @example
    * ```html
    * <button w-confirm="Do you want to do it?">
    *   I will fire click event only when confirmButton will be pressed in the confirm-modal
    * </button>
    * ``` */
-  static $useConfirmHook(defaults?: Partial<WUP.Modal.Options>): void {
+  static $useConfirmHook(options?: {
+    /** Options to override defaults of modal */
+    defaults?: Partial<WUP.Modal.Options>;
+    /** Called when element is already rendered; so possible to change innerHTML */
+    onRender?: (el: WUPModalElement) => void;
+  }): void {
     document.addEventListener(
       "click",
       (e) => {
@@ -138,8 +144,11 @@ export default class WUPModalElement<
         e.stopPropagation();
         const me = document.createElement("wup-modal");
         me.gotRenderConfirm(txt);
-        Object.assign(me.$options, defaults); // todo add default position center ???
+        Object.assign(me.$options, options?.defaults); // todo recheck different positions
         document.body.appendChild(me);
+        // call callback to allow user re-define it
+        options?.onRender?.call(this, me);
+
         const btnConfirm = me.querySelector("[data-close=confirm]");
         if (btnConfirm) {
           (btnConfirm as HTMLElement).onclick = (ev) => {

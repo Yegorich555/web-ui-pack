@@ -84,7 +84,7 @@ export default function ModalView() {
     >
       <h3>Different placemenets</h3>
       <small>Use $options.placement or attribute [w-placement]</small>
-      {DEV ? dbgSmall : null}
+      {DEV && false ? dbgSmall : null}
       <div className={styles.block}>
         <button className={`btn ${styles.left}`} type="button">
           Left
