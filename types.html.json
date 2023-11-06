@@ -661,6 +661,20 @@
       ]
     },
     {
+      "name": "button",
+      "attributes": [
+        {
+          "name": "w-confirm",
+          "description": "Point message for confirm-modal then`click`event will be fired only after btn-confirm click",
+          "values": [
+            {
+              "name": "Do you want to do it?"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "wup-modal",
       "description": "Modal element",
       "references": [

@@ -3,6 +3,7 @@ import { WUPModalElement } from "web-ui-pack";
 import styles from "./modalView.scss";
 
 WUPModalElement.$use();
+WUPModalElement.$useConfirmHook();
 
 const dbgSmall = (
   <>
@@ -143,21 +144,10 @@ export default function ModalView() {
           <wup-date w-name="dob" w-label="Date of birthday" />
           {/* <wup-selectmany w-name="selectMany" w-items="inputSelectMany.items" /> */}
           <footer>
-            <button type="button">TestMe</button>
-            {/*  todo remove after tests */}
-            <wup-modal w-target="prev">
-              <h2>Do you want to close me?</h2>
-              <footer>
-                <button type="button" data-close="modal">
-                  No
-                </button>
-                <button type="button">Yes </button>
-              </footer>
-            </wup-modal>
-            <button type="button" data-close="modal">
+            <button type="button" data-close="modal" w-confirm="Do you want to close me?">
               Close
             </button>
-            <button type="submit">Submit </button>
+            <button type="submit">Submit</button>
           </footer>
         </wup-form>
       </wup-modal>

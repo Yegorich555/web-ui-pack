@@ -569,6 +569,25 @@ export default abstract class WUPBaseElement<
     return this.itsMe(e.target);
   }
 
+  /** Find parent according with callback */
+  findParent(callback: (el: HTMLElement) => boolean, options = { bubbleCount: 10 }): HTMLElement | null {
+    let i = options?.bubbleCount || 10; // expected no more 10 parents
+    let el: HTMLElement | null = this;
+    while (--i) {
+      if (callback(el)) {
+        return el;
+      }
+      if (el === document.body) {
+        return null;
+      }
+      el = el.parentElement;
+      if (!el) {
+        return null;
+      }
+    }
+    return null;
+  }
+
   /** Returns true if contains pointed element or has iself
    * @tutorial Troubleshooting
    * * if element has position `fixed` or `absolute` then returns false */

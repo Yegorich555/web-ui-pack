@@ -26,10 +26,11 @@ export const enum ModalCloseCases {
 }
 
 const tagName = "wup-modal";
+const attrConfirm = "w-confirm";
 declare global {
   namespace WUP.Modal {
     interface Options {
-      /** Element that modal need to listen for click. If `target` missed modal will be opened on init
+      /** Element that modal need to listen for click. If `target` missed then modal will be opened on init
        * @defaultValue null */
       target?: Element | null;
       /** Position on the screen
@@ -47,6 +48,7 @@ declare global {
        * @defaultValue false */
       selfRemove: boolean;
       // todo modalInModal: replace OR overflow
+      // todo confirmUnsaved: boolean; // show confirm modal if user tries to close form with unsaved changes
     }
     interface EventMap extends WUP.BaseModal.EventMap<ModalOpenCases, ModalCloseCases> {}
     interface JSXProps<T = WUPModalElement> extends WUP.BaseModal.JSXProps<T>, WUP.Base.OnlyNames<Options> {
@@ -68,6 +70,15 @@ declare global {
       /**  Modal element
        *  @see {@link WUPModalElement} */
       [tagName]: WUP.Modal.JSXProps; // add element to tsx/jsx intellisense
+    }
+  }
+
+  namespace React {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface ButtonHTMLAttributes<T> {
+      /** Point message for confirm-modal then`click` event will be fired only after btn-confirm click
+       * @see {@link WUPModalElement.$useConfirmHook} */
+      [attrConfirm]?: string;
     }
   }
 }
@@ -100,10 +111,55 @@ export default class WUPModalElement<
 > extends WUPBaseModal<TOptions, Events> {
   #ctr = this.constructor as typeof WUPModalElement;
 
+  /** Call it to enable attribute [w-confirm] for buttons
+   * @tutorial Rules
+   * * to override default render: redefine `WUPModalElement.prototype.gotRenderConfirm` method
+   * @example
+   * ```html
+   * <button w-confirm="Do you want to do it?">
+   *   I will fire click event only when confirmButton will be pressed in the confirm-modal
+   * </button>
+   * ``` */
+  static $useConfirmHook(defaults?: Partial<WUP.Modal.Options>): void {
+    document.addEventListener(
+      "click",
+      (e) => {
+        if (e.button || (window as any).__wupfixCycleClick) {
+          return;
+        }
+
+        const btn = WUPModalElement.prototype.findParent.call(e.target, (el) => el.hasAttribute(attrConfirm), {
+          bubbleCount: 5, // no more 5 parent iterations
+        });
+        const txt = btn?.getAttribute(attrConfirm);
+        if (!txt) {
+          return;
+        }
+        e.stopPropagation();
+        const me = document.createElement("wup-modal");
+        me.gotRenderConfirm(txt);
+        Object.assign(me.$options, defaults); // todo add default position center ???
+        document.body.appendChild(me);
+        const btnConfirm = me.querySelector("[data-close=confirm]");
+        if (btnConfirm) {
+          (btnConfirm as HTMLElement).onclick = (ev) => {
+            (window as any).__wupfixCycleClick = true;
+            setTimeout(() => delete (window as any).__wupfixCycleClick);
+            me.goClose(ModalCloseCases.onCloseClick, ev);
+            btn!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+          };
+        } else {
+          console.error("WUP-MODAL. button[data-close=confirm] missed");
+        }
+      },
+      { capture: true }
+    );
+  }
+
   // static get observedOptions(): Array<keyof WUP.Modal.Options> { return []; }
   // static get observedAttributes(): Array<string> { return []; }
 
-  /** Default class used for fade -blur background for main content
+  /** Default class used for fade - bluring background for main content
    * @defaultValue "wup-modal-fade" */
   static $classFade = "wup-modal-fade";
   /** Default class that appended to body when modal opend (required to hide body scroll)
@@ -256,6 +312,15 @@ export default class WUPModalElement<
 
   protected override gotRender(): void {
     /** empty because component is hidden by default and need to focus on speed of init-phase */
+  }
+
+  /** Override it to change default render for modalConfirm */
+  gotRenderConfirm(headerContent: string): void {
+    this.innerHTML = `<h2>${headerContent}</h2>
+<footer>
+  <button type='button' data-close='modal'>${__wupln("Cancel", "content")}</button>
+  <button type='button' data-close='confirm'>${__wupln("Confirm", "content")}</button>
+</footer>`;
   }
 
   _prevTarget?: Element | null;
