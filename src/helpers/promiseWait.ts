@@ -18,14 +18,19 @@ export default function promiseWait<T>(
 ): Promise<T> {
   let catchErr: Error;
   let isResolved = false;
+  let resCnt = 0;
+  let back: boolean;
+
   promise
     .catch((err) => (catchErr = err)) //
-    .finally(() => (isResolved = true));
+    .finally(() => {
+      isResolved = true;
+      ++resCnt === 2 && back && (smartOrCallback as Func)(false);
+    });
 
   const p = new Promise((res, rej) => {
-    let back: boolean;
     const end = (): void => {
-      back && (smartOrCallback as Func)(false);
+      ++resCnt === 2 && back && (smartOrCallback as Func)(false);
       catchErr ? rej(catchErr) : res(promise);
     };
     const a = setTimeout(end, ms);
