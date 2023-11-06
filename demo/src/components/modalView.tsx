@@ -1,5 +1,6 @@
 import Page from "src/elements/page";
 import { WUPModalElement } from "web-ui-pack";
+import Code from "src/elements/code";
 import styles from "./modalView.scss";
 
 WUPModalElement.$use();
@@ -75,85 +76,112 @@ export default function ModalView() {
         "Built-in styles & animation for different screen sizes",
         "Accessibility: autofocus, tab-cycling, focus-back on closing etc.",
         "Built-in modal-in-modal behavior",
-        // todo uncomment when will be implemented
+        "Confirm modal (use .$useConfirmHook() + attr [w-confirm='Confirm message'] on buttons)",
         <>
-          Integrated with <b>wup-form</b> (pending + close after submitEnd {/* "+ confirm window if unsaved changes" */}
-          )
+          Integrated with <b>wup-form</b> (pending + close after submitEnd + confirm modal if unsaved changes)
         </>,
       ]}
     >
-      <h3>Different placemenets</h3>
-      <small>Use $options.placement or attribute [w-placement]</small>
-      {DEV && false ? dbgSmall : null}
-      <div className={styles.block}>
-        <button className={`btn ${styles.left}`} type="button">
-          Left
-        </button>
-        <wup-modal w-target="prev" w-placement="left">
-          <h2>Modal with placement: left</h2>
-          <div>{bigContent}</div>
-        </wup-modal>
-        {/*  */}
-        <button className={`btn ${styles.top}`} type="button">
-          Top
-        </button>
-        <wup-modal w-target="prev" w-placement="top">
-          <h2>Modal with placement: top</h2>
-          <div>{bigContent}</div>
-        </wup-modal>
-        {/*  */}
-        <button className={`btn ${styles.center}`} type="button">
-          Center
+      <section>
+        <h3>Different placemenets</h3>
+        <small>Use $options.placement or attribute [w-placement]</small>
+        {DEV && false ? dbgSmall : null}
+        <div className={styles.block}>
+          <button className={`btn ${styles.left}`} type="button">
+            Left
+          </button>
+          <wup-modal w-target="prev" w-placement="left">
+            <h2>Modal with placement: left</h2>
+            <div>{bigContent}</div>
+          </wup-modal>
+          {/*  */}
+          <button className={`btn ${styles.top}`} type="button">
+            Top
+          </button>
+          <wup-modal w-target="prev" w-placement="top">
+            <h2>Modal with placement: top</h2>
+            <div>{bigContent}</div>
+          </wup-modal>
+          {/*  */}
+          <button className={`btn ${styles.center}`} type="button">
+            Center
+          </button>
+          <wup-modal w-target="prev" w-placement="center">
+            <h2>Modal with placement: center</h2>
+            <div>{bigContent}</div>
+          </wup-modal>
+          {/*  */}
+          <button className={`btn ${styles.right}`} type="button">
+            Right
+          </button>
+          <wup-modal w-target="prev" w-placement="right">
+            <h2>Modal with placement: right</h2>
+            <div>{bigContent}</div>
+          </wup-modal>
+        </div>
+      </section>
+      <section>
+        <h3>Built-in form support</h3>
+        <small>Just place wup-form with controls inside</small>
+        <br />
+        <button className="btn" type="button">
+          Sign Up
         </button>
         <wup-modal w-target="prev" w-placement="center">
-          <h2>Modal with placement: center</h2>
-          <div>{bigContent}</div>
+          <h2>Ordinary form</h2>
+          <wup-form
+            ref={(el) => {
+              if (el) {
+                el.$onSubmit = ({ detail }) => {
+                  console.warn("submit detail:", detail);
+                  // return Promise.reject();
+                  // eslint-disable-next-line no-promise-executor-return
+                  return new Promise((res) => setTimeout(() => res(true), 1500));
+                };
+              }
+            }}
+          >
+            <wup-text w-name="email" w-initValue="yegor.golubchik@mail.com" />
+            <wup-pwd w-name="password" w-initValue="123456" />
+            <wup-date w-name="dob" w-label="Date of birthday" />
+            {/* <wup-selectmany w-name="selectMany" w-items="inputSelectMany.items" /> */}
+            <footer>
+              <button type="button" data-close="modal">
+                Close
+              </button>
+              <button type="submit">Submit</button>
+            </footer>
+          </wup-form>
         </wup-modal>
-        {/*  */}
-        <button className={`btn ${styles.right}`} type="button">
-          Right
-        </button>
-        <wup-modal w-target="prev" w-placement="right">
-          <h2>Modal with placement: right</h2>
-          <div>{bigContent}</div>
-        </wup-modal>
-      </div>
-
-      <h3>Built-in form support</h3>
-      <small>Just place wup-form with controls inside</small>
-      <br />
-      <button className="btn" type="button">
-        Sign Up
-      </button>
-      <wup-modal w-target="prev" w-placement="center">
-        <h2>Ordinary form</h2>
-        <wup-form
-          ref={(el) => {
-            if (el) {
-              el.$onSubmit = ({ detail }) => {
-                console.warn("submit detail:", detail);
-                // return Promise.reject();
-                // eslint-disable-next-line no-promise-executor-return
-                return new Promise((res) => setTimeout(() => res(true), 1500));
-              };
-            }
-          }}
+      </section>
+      <section>
+        <h3>Confirm Modal with hook</h3>
+        <small>Click event on buttons with attribute [w-confirm]</small>
+        <Code code={confirmHookJS} />
+        <Code code={confirmHookHTML} />
+        <button
+          className="btn"
+          type="button"
+          w-confirm="Do you want to click me?"
+          onClick={() => console.warn("Click is fired")}
         >
-          <wup-text w-name="email" w-initValue="yegor.golubchik@mail.com" />
-          <wup-pwd w-name="password" w-initValue="123456" />
-          <wup-date w-name="dob" w-label="Date of birthday" />
-          {/* <wup-selectmany w-name="selectMany" w-items="inputSelectMany.items" /> */}
-          <footer>
-            <button type="button" data-close="modal" w-confirm="Do you want to close me?">
-              Close
-            </button>
-            <button type="submit">Submit</button>
-          </footer>
-        </wup-form>
-      </wup-modal>
+          Button with confirm modal
+        </button>
+      </section>
     </Page>
   );
 }
+
+const confirmHookJS = `js
+import { WUPModalElement } from "web-ui-pack";
+WUPModalElement.$use();
+WUPModalElement.$useConfirmHook();`;
+
+const confirmHookHTML = `html
+<button type="button" w-confirm="Do you want to click me?">
+  Click event will be called only after buttonConfirm click
+</button>
+`;
 
 const bigContent = `I LOOKED AT MY NOTES AND I DIDN’T LIKE THEM. I’d spent three days at U. S. Robots and might as
 well have spent them at home with the Encyclopedia Tellurica.

@@ -5,14 +5,15 @@
 
   ul {
     font-size: small;
+    line-height: 17px;
     padding-left: 20px;
     margin: 0;
     list-style-type: disc;
     color: $basicTextColor2;
-  }
 
-  & > li {
-    padding: 0;
+    & > li {
+      padding: 0;
+    }
   }
 }
 
