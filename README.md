@@ -36,9 +36,10 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
 ## Installing & usage
 
 1. Install with npm `npm install web-ui-pack`
-2. Add `import WUPPopupElement from "web-ui-pack";` into main.js file
-3. For usage with React see [CODESTYLE.md](CODESTYLE.md)
-4. For usage with HTML + VSCode extend VSCode settings
+2. Add `import WUPPopupElement from "web-ui-pack";` into any file (`main.js` for example)
+3. Call `WUPPopupElement.$use()` to register HTML tag into web-browser
+4. For usage with React see [CODESTYLE.md](CODESTYLE.md) (for other frameworks it's very similar)
+5. For usage with HTML + VSCode extend VSCode settings
 
    ```json
    // .vscode/settings.json
@@ -48,7 +49,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
    }
    ```
 
-5. Type `<wup w-` to see suggestions (if it doesn't work reload VSCode). More details below
+6. Type `<wup w-` to see suggestions (if it doesn't work reload VSCode). More details below
 
 ## TODO
 
