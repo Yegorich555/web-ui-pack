@@ -758,6 +758,21 @@
               "name": "false"
             }
           ]
+        },
+        {
+          "name": "w-confirmUnsaved",
+          "description": "Show confirm modal if user closes modal with `wup-form` with unsaved changes",
+          "values": [
+            {
+              "name": ""
+            },
+            {
+              "name": "true"
+            },
+            {
+              "name": "false"
+            }
+          ]
         }
       ]
     },

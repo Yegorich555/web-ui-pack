@@ -29,6 +29,14 @@ const tagName = "wup-modal";
 const attrConfirm = "w-confirm";
 declare global {
   namespace WUP.Modal {
+    interface ConfirmOptions {
+      /** Message appended to confrim modal as question  */
+      question?: string;
+      /** Options to override defaults of modal */
+      defaults?: Partial<WUP.Modal.Options>;
+      /** Called when element is already rendered; so possible to change innerHTML */
+      onRender?: (el: WUPModalElement) => void;
+    }
     interface Options {
       /** Element that modal need to listen for click. If `target` missed then modal will be opened on init
        * @defaultValue null */
@@ -48,8 +56,9 @@ declare global {
        * @defaultValue false */
       selfRemove: boolean;
       // todo modalInModal: replace OR overflow
-      /** Show confirm modal if user tries to close form with unsaved changes */
-      // todo confirmUnsaved: boolean; // NiceToHave: confirmKey to show CheckBox "Don't show anymore" + some option to rollback it
+      /** Show confirm modal if user closes modal with `wup-form` with unsaved changes
+       * @defaultValue true */
+      confirmUnsaved: boolean; // NiceToHave: confirmKey to show CheckBox "Don't show anymore" + some option to rollback it
     }
     interface EventMap extends WUP.BaseModal.EventMap<ModalOpenCases, ModalCloseCases> {}
     interface JSXProps<T = WUPModalElement> extends WUP.BaseModal.JSXProps<T>, WUP.Base.OnlyNames<Options> {
@@ -121,48 +130,49 @@ export default class WUPModalElement<
    *   I will fire click event only when confirmButton will be pressed in the confirm-modal
    * </button>
    * ``` */
-  static $useConfirmHook(options?: {
-    /** Options to override defaults of modal */
-    defaults?: Partial<WUP.Modal.Options>;
-    /** Called when element is already rendered; so possible to change innerHTML */
-    onRender?: (el: WUPModalElement) => void;
-  }): void {
+  static $useConfirmHook(opts?: WUP.Modal.ConfirmOptions): void {
     document.addEventListener(
       "click",
       (e) => {
         if (e.button || (window as any).__wupfixCycleClick) {
           return;
         }
-
         const btn = WUPModalElement.prototype.findParent.call(e.target, (el) => el.hasAttribute(attrConfirm), {
           bubbleCount: 5, // no more 5 parent iterations
         });
         const txt = btn?.getAttribute(attrConfirm);
-        if (!txt) {
-          return;
-        }
-        e.stopPropagation();
-        const me = document.createElement("wup-modal");
-        me.gotRenderConfirm(txt);
-        Object.assign(me.$options, options?.defaults); // todo recheck different positions
-        document.body.appendChild(me);
-        // call callback to allow user re-define it
-        options?.onRender?.call(this, me);
-
-        const btnConfirm = me.querySelector("[data-close=confirm]");
-        if (btnConfirm) {
-          (btnConfirm as HTMLElement).onclick = (ev) => {
-            (window as any).__wupfixCycleClick = true;
-            setTimeout(() => delete (window as any).__wupfixCycleClick);
-            me.goClose(ModalCloseCases.onCloseClick, ev);
-            btn!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-          };
-        } else {
-          console.error("WUP-MODAL. button[data-close=confirm] missed");
+        if (txt) {
+          e.stopPropagation();
+          this.$showConfirm({ question: txt, ...opts }).then((isOk) => {
+            isOk && btn!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+          });
         }
       },
       { capture: true }
     );
+  }
+
+  /** Show confirm modal and retun Promise(true) if user pressed button[data-close=confirm] and before modal is closed itself */
+  static async $showConfirm(opts?: WUP.Modal.ConfirmOptions): Promise<boolean> {
+    const me = document.createElement("wup-modal");
+    me.gotRenderConfirm(opts?.question || "");
+    Object.assign(me.$options, opts?.defaults); // todo recheck different positions
+    document.body.appendChild(me);
+    // call callback to allow user re-define it
+    opts?.onRender?.call(this, me);
+    const btnConfirm = me.querySelector("[data-close=confirm]");
+    if (btnConfirm) {
+      return new Promise((res) => {
+        (btnConfirm as HTMLElement).onclick = (ev) => {
+          (window as any).__wupfixCycleClick = true;
+          setTimeout(() => delete (window as any).__wupfixCycleClick);
+          me.goClose(ModalCloseCases.onCloseClick, ev);
+          res(true);
+        };
+      });
+    }
+    me.throwError("button[data-close=confirm] missed");
+    return Promise.resolve(false);
   }
 
   // static get observedOptions(): Array<keyof WUP.Modal.Options> { return []; }
@@ -306,6 +316,7 @@ export default class WUPModalElement<
     autoFocus: true,
     autoClose: true,
     selfRemove: false,
+    confirmUnsaved: true,
   };
 
   static get mappedAttributes(): Record<string, AttributeMap> {
@@ -320,7 +331,7 @@ export default class WUPModalElement<
   $refClose?: HTMLButtonElement;
 
   protected override gotRender(): void {
-    /** empty because component is hidden by default and need to focus on speed of init-phase */
+    /** empty because component is hidden by default and need to focus on open-phase */
   }
 
   /** Override it to change default render for modalConfirm */
@@ -416,6 +427,24 @@ export default class WUPModalElement<
     // this.appendEvent(this, "focusout", (ev) => this.gotFocusOut(ev), { passive: false });
 
     this._opts.autoFocus ? this.focusAny() : this.focus(); // bug: FF doesn't adjust suggest-popup according to animation
+  }
+
+  goClose(closeCase: ModalCloseCases, ev: Event | null, immediately?: boolean): Promise<boolean> {
+    if (this._whenClose) {
+      return this._whenClose;
+    }
+    if (!this._whenOpen) {
+      return Promise.resolve(true); // possible when on init $close is called
+    }
+    if (this._opts.confirmUnsaved && closeCase !== ModalCloseCases.onSubmitEnd) {
+      const f = this.querySelector("wup-form");
+      if (f?.$isChanged) {
+        return this.#ctr
+          .$showConfirm({ question: "You have unsaved changes. Would you like to skip it?" })
+          .then((isOk) => (isOk ? super.goClose(closeCase, ev, immediately) : false));
+      }
+    }
+    return super.goClose(closeCase, ev, immediately);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
