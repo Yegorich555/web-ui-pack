@@ -12,6 +12,8 @@ Web package with high scalable [WebComponents](#components) and [helpers](#helpe
 
 You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone repo and run `npm i & npm start`
 
+Template repo with React: **comming soon...**
+
 ## Features
 
 - Possible to use **with any frameworks** like Angular, React, Vue etc. **or even directly with HTML & JS** (because it's js-native logic that doesn't required anything extrernal)

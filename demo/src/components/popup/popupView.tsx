@@ -51,6 +51,7 @@ export default function PopupView() {
         "Flexible way to change position-priorities",
       ]}
     >
+      {/* todo replace with wup-number */}
       <h3>Options</h3>
       <fieldset className={styles.inputs}>
         <legend>Offset</legend>
