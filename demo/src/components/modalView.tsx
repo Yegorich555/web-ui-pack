@@ -42,6 +42,29 @@ const dbgSmall = (
   </>
 );
 
+function SameFooter() {
+  return (
+    <footer>
+      <button
+        type="submit"
+        w-confirm="Close me?"
+        ref={(el) => {
+          if (el) {
+            el.$onRenderModal = (m) => {
+              m.$options.replace = true;
+            };
+          }
+        }}
+      >
+        Close with confirm-replace
+      </button>
+      <button type="submit" w-confirm="Close me?">
+        Close with confirm
+      </button>
+    </footer>
+  );
+}
+
 export default function ModalView() {
   return (
     <Page //
@@ -78,7 +101,7 @@ export default function ModalView() {
         "Built-in modal-in-modal behavior",
         "Confirm modal (use .$useConfirmHook() + attr [w-confirm='Confirm message'] on buttons)",
         <>
-          Integrated with <b>wup-form</b> (pending + close after submitEnd + confirm modal if unsaved changes)
+          Integrated with <b>{"<wup-form/>"}</b> (pending + close after submitEnd + confirm modal if unsaved changes)
         </>,
       ]}
     >
@@ -93,21 +116,7 @@ export default function ModalView() {
           <wup-modal w-target="prev" w-placement="left">
             <h2>Modal with placement: left</h2>
             <div>{bigContent}</div>
-            <footer>
-              <button
-                type="submit"
-                w-confirm="Close me?"
-                ref={(el) => {
-                  if (el) {
-                    el.$onRenderModal = (m) => {
-                      console.warn("willRender", m);
-                    };
-                  }
-                }}
-              >
-                Close with confirm
-              </button>
-            </footer>
+            <SameFooter />
           </wup-modal>
           {/*  */}
           <button className={`btn ${styles.top}`} type="button">
@@ -116,11 +125,7 @@ export default function ModalView() {
           <wup-modal w-target="prev" w-placement="top">
             <h2>Modal with placement: top</h2>
             <div>{bigContent}</div>
-            <footer>
-              <button type="submit" w-confirm="Close me?">
-                Close with confirm
-              </button>
-            </footer>
+            <SameFooter />
           </wup-modal>
           {/*  */}
           <button className={`btn ${styles.center}`} type="button">
@@ -129,11 +134,7 @@ export default function ModalView() {
           <wup-modal w-target="prev" w-placement="center">
             <h2>Modal with placement: center</h2>
             <div>{bigContent}</div>
-            <footer>
-              <button type="submit" w-confirm="Close me?">
-                Close with confirm
-              </button>
-            </footer>
+            <SameFooter />
           </wup-modal>
           {/*  */}
           <button className={`btn ${styles.right}`} type="button">
@@ -142,17 +143,13 @@ export default function ModalView() {
           <wup-modal w-target="prev" w-placement="right">
             <h2>Modal with placement: right</h2>
             <div>{bigContent}</div>
-            <footer>
-              <button type="submit" w-confirm="Close me?">
-                Close with confirm
-              </button>
-            </footer>
+            <SameFooter />
           </wup-modal>
         </div>
       </section>
       <section>
         <h3>Built-in form support</h3>
-        <small>Just place wup-form with controls inside</small>
+        <small>Just place {"<wup-form/>"} with controls inside</small>
         <br />
         <button className="btn" type="button">
           Sign Up

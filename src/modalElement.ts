@@ -57,7 +57,9 @@ declare global {
       /** Remove itself after closing
        * @defaultValue false */
       selfRemove: boolean;
-      // todo modalInModal: replace OR overflow
+      /** Modal-in-modal behavior; by default new modal overflows previously opened modal
+       * @defaultValue false */
+      replace: boolean;
       /** Show confirm modal if user closes modal with `wup-form` with unsaved changes
        * @defaultValue true */
       confirmUnsaved: boolean; // NiceToHave: confirmKey to show CheckBox "Don't show anymore" + some option to rollback it
@@ -186,6 +188,17 @@ export default class WUPModalElement<
         const p = openedModals[me._mid - 2];
         if (!p.$isOpened || p.$isClosing) {
           return; // it should work only if prev modal is opened
+        }
+        if (me._opts.replace) {
+          switch (me._opts.placement) {
+            case "left":
+            case "right":
+              me.setAttribute("w-placement", "center");
+              break;
+            default:
+              break;
+          }
+          return;
         }
         // position in center of parent modal
         me.setAttribute("w-placement", "center");
@@ -365,6 +378,7 @@ export default class WUPModalElement<
     autoFocus: true,
     autoClose: true,
     selfRemove: false,
+    replace: false,
     confirmUnsaved: true,
   };
 
@@ -460,10 +474,13 @@ export default class WUPModalElement<
       setTimeout(() => this.$refFade?.setAttribute("show", "")); // timeout to allow animation works
     } else {
       const p = openedModals[this._mid - 2];
-      // todo fix when need to replace prev modal
-      this.$refFade ??= p.appendChild(document.createElement("div")); // append to parent to hide modal parent
-      this.$refFade!.setAttribute("show", "");
+      const isReplace = this._opts.replace;
+      this.$refFade ??= (isReplace ? document.body : p).appendChild(document.createElement("div")); // append to parent to hide modal parent
+      this.$refFade.setAttribute("show", ""); // WARN without timeout to show immediately
       p.$refFade!.style.display = "none";
+      if (isReplace) {
+        p.style.opacity = "0"; // hide such modal
+      }
     }
 
     this.$refFade.className = this.#ctr.$classFade;
@@ -516,8 +533,10 @@ export default class WUPModalElement<
     } else {
       this.$refFade!.remove(); // immediately hide if opened 2+ modals
       this.$refFade = undefined;
-      const p = openedModals[this._mid! - 2].$refFade!;
-      p.style.display = "";
+      const p = openedModals[this._mid! - 2];
+      p.$refFade!.style.display = "";
+      !p.$refFade!.getAttribute("style") && p.$refFade!.removeAttribute("style");
+      p.style.opacity = "";
       !p.getAttribute("style") && p.removeAttribute("style");
     }
     openedModals.splice(this._mid! - 1, 1); // self remove from array

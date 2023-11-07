@@ -760,6 +760,21 @@
           ]
         },
         {
+          "name": "w-replace",
+          "description": "Modal-in-modal behavior; by default new modal overflows previously opened modal",
+          "values": [
+            {
+              "name": ""
+            },
+            {
+              "name": "true"
+            },
+            {
+              "name": "false"
+            }
+          ]
+        },
+        {
           "name": "w-confirmUnsaved",
           "description": "Show confirm modal if user closes modal with `wup-form` with unsaved changes",
           "values": [
