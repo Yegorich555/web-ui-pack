@@ -157,6 +157,7 @@ export default class WUPModalElement<
     const me = document.createElement("wup-modal");
     me.gotRenderConfirm(opts?.question || "");
     Object.assign(me.$options, opts?.defaults); // todo recheck different positions
+    me.$options.selfRemove = true;
     document.body.appendChild(me);
     // call callback to allow user re-define it
     opts?.onRender?.call(this, me);
