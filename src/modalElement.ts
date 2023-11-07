@@ -342,7 +342,7 @@ export default class WUPModalElement<
         --icon-img: var(--wup-icon-cross);
         position: absolute;
         right: 0;
-        margin: 0 1em;
+        margin: -0.2em 1em 0;
       }
       :host h2 {
         margin: 0 0 1em;
