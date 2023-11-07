@@ -29,6 +29,8 @@ describe("modalElement", () => {
     },
     {
       attrs: {
+        "w-confirmunsaved": { value: true },
+        "w-replace": { value: true },
         "w-selfremove": { value: true },
         "w-autoclose": { value: true },
         "w-autofocus": { value: true },
@@ -528,3 +530,4 @@ describe("modalElement", () => {
     expect(el.isConnected).toBe(false);
   });
 });
+// todo testcase: modalInModal: when parent is removed immediately

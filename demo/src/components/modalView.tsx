@@ -81,6 +81,8 @@ export default function ModalView() {
   w-autoclose
   w-placement="center"
   w-selfremove="false"
+  w-replace="false"
+  w-confirmunsaved
 >
   <h2>Login form</h2>
    <wup-form>

@@ -100,10 +100,6 @@ declare global {
     }
   }
 }
-
-/** List of opened modals */
-const openedModals: Array<WUPModalElement> = [];
-
 /** Modal element
  * @example
  * JS/TS
@@ -185,7 +181,7 @@ export default class WUPModalElement<
 
     setTimeout(() => {
       if (me._mid && me._mid > 1) {
-        const p = openedModals[me._mid - 2];
+        const p = me._openedModals[me._mid - 2];
         if (!p.$isOpened || p.$isClosing) {
           return; // it should work only if prev modal is opened
         }
@@ -220,7 +216,7 @@ export default class WUPModalElement<
         };
         goCenter();
       }
-    }); // timeout to wait when openedModals[] changed
+    }); // timeout to wait when this.openedModals[] changed
 
     const btnConfirm = me.querySelector("[data-close=confirm]");
     if (btnConfirm) {
@@ -467,13 +463,13 @@ export default class WUPModalElement<
     this.prepend(this.$refClose);
 
     // init fade
-    openedModals.push(this as WUPModalElement<any, any>);
-    this._mid = openedModals.length;
+    this._openedModals.push(this as WUPModalElement<any, any>);
+    this._mid = this._openedModals.length;
     if (this._mid === 1) {
       this.$refFade ??= document.body.appendChild(document.createElement("div"));
       setTimeout(() => this.$refFade?.setAttribute("show", "")); // timeout to allow animation works
     } else {
-      const p = openedModals[this._mid - 2];
+      const p = this._openedModals[this._mid - 2];
       const isReplace = this._opts.replace;
       this.$refFade ??= (isReplace ? document.body : p).appendChild(document.createElement("div")); // append to parent to hide modal parent
       this.$refFade.setAttribute("show", ""); // WARN without timeout to show immediately
@@ -510,7 +506,7 @@ export default class WUPModalElement<
     }
     if (this._opts.confirmUnsaved && closeCase !== ModalCloseCases.onSubmitEnd) {
       const f = this.querySelector("wup-form");
-      if (f?.$isChanged) {
+      if (f?.$isChanged && !f.$options.autoStore) {
         return this.#ctr
           .$showConfirm({ question: __wupln("You have unsaved changes.\nWould you like to skip it?", "content") })
           .then((isOk) => (isOk ? super.goClose(closeCase, ev, immediately) : false));
@@ -533,13 +529,13 @@ export default class WUPModalElement<
     } else {
       this.$refFade!.remove(); // immediately hide if opened 2+ modals
       this.$refFade = undefined;
-      const p = openedModals[this._mid! - 2];
+      const p = this._openedModals[this._mid! - 2];
       p.$refFade!.style.display = "";
       !p.$refFade!.getAttribute("style") && p.$refFade!.removeAttribute("style");
       p.style.opacity = "";
       !p.getAttribute("style") && p.removeAttribute("style");
     }
-    openedModals.splice(this._mid! - 1, 1); // self remove from array
+    this._openedModals.splice(this._mid! - 1, 1); // self remove from array
 
     this.focusBack();
   }
@@ -657,11 +653,22 @@ export default class WUPModalElement<
     bd.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove > everything must returned to prev state
     !bd.className && bd.removeAttribute("class");
     (this._target as HTMLElement)?.removeEventListener("click", this._targetClick!);
+
+    const i = this._openedModals.findIndex((m) => (this as WUPModalElement<any, any>) === m);
+    if (i > -1) {
+      this._openedModals.splice(i, 1);
+    }
     super.dispose();
   }
+
+  /** Singleton array with opened modals */
+  get _openedModals(): Array<WUPModalElement> {
+    return __openedModals;
+  }
 }
+
+const __openedModals: Array<WUPModalElement> = [];
 
 customElements.define(tagName, WUPModalElement);
 
 // NiceToHave: handle Ctrl+S, Meta+S for submit & close ???
-// testcase: modalInModal: when parent is removed immediately

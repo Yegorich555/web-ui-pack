@@ -237,7 +237,7 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
         --icon-img: var(--wup-icon-cross);
         position: absolute;
         right: 0;
-        margin: 0 1em;
+        margin: -0.2em 1em 0;
       }
       WUP-MODAL h2 {
         margin: 0 0 1em;
@@ -304,7 +304,9 @@ exports[`modalElement common tests snapshot of $defaults 1`] = `
 {
   "autoClose": true,
   "autoFocus": true,
+  "confirmUnsaved": true,
   "placement": "center",
+  "replace": false,
   "selfRemove": false,
   "target": null,
 }
@@ -316,7 +318,9 @@ exports[`modalElement common tests snapshot of $defaults 3`] = `
 [
   "w-autoclose",
   "w-autofocus",
+  "w-confirmunsaved",
   "w-placement",
+  "w-replace",
   "w-selfremove",
   "w-target",
 ]
