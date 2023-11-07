@@ -187,8 +187,8 @@ export default class WUPModalElement<
         if (!p.$isOpened || p.$isClosing) {
           return; // it should work only if prev modal is opened
         }
+        // position in center of parent modal
         me.setAttribute("w-placement", "center");
-        //  position in center of prevModal but it won't be reponsible on screen size changes
         const prev = { x: -1, y: -1 };
         const goCenter = (): void => {
           if (!me.$isOpened || me.$isClosing || !p.isConnected) {
@@ -207,7 +207,7 @@ export default class WUPModalElement<
         };
         goCenter();
       }
-    }); // timeout to wait when openedModals array changed
+    }); // timeout to wait when openedModals[] changed
 
     const btnConfirm = me.querySelector("[data-close=confirm]");
     if (btnConfirm) {
