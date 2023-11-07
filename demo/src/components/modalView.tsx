@@ -93,6 +93,21 @@ export default function ModalView() {
           <wup-modal w-target="prev" w-placement="left">
             <h2>Modal with placement: left</h2>
             <div>{bigContent}</div>
+            <footer>
+              <button
+                type="submit"
+                w-confirm="Close me?"
+                ref={(el) => {
+                  if (el) {
+                    el.$onRenderModal = (m) => {
+                      console.warn("willRender", m);
+                    };
+                  }
+                }}
+              >
+                Close with confirm
+              </button>
+            </footer>
           </wup-modal>
           {/*  */}
           <button className={`btn ${styles.top}`} type="button">
@@ -101,6 +116,11 @@ export default function ModalView() {
           <wup-modal w-target="prev" w-placement="top">
             <h2>Modal with placement: top</h2>
             <div>{bigContent}</div>
+            <footer>
+              <button type="submit" w-confirm="Close me?">
+                Close with confirm
+              </button>
+            </footer>
           </wup-modal>
           {/*  */}
           <button className={`btn ${styles.center}`} type="button">
@@ -109,6 +129,11 @@ export default function ModalView() {
           <wup-modal w-target="prev" w-placement="center">
             <h2>Modal with placement: center</h2>
             <div>{bigContent}</div>
+            <footer>
+              <button type="submit" w-confirm="Close me?">
+                Close with confirm
+              </button>
+            </footer>
           </wup-modal>
           {/*  */}
           <button className={`btn ${styles.right}`} type="button">
@@ -117,6 +142,11 @@ export default function ModalView() {
           <wup-modal w-target="prev" w-placement="right">
             <h2>Modal with placement: right</h2>
             <div>{bigContent}</div>
+            <footer>
+              <button type="submit" w-confirm="Close me?">
+                Close with confirm
+              </button>
+            </footer>
           </wup-modal>
         </div>
       </section>
@@ -155,8 +185,8 @@ export default function ModalView() {
         </wup-modal>
       </section>
       <section>
-        <h3>Confirm Modal with hook</h3>
-        <small>Click event on buttons with attribute [w-confirm]</small>
+        <h3>Confirm modal with hook</h3>
+        <small>It wraps click event on buttons with attribute [w-confirm]</small>
         <Code code={confirmHookJS} />
         <Code code={confirmHookHTML} />
         <button

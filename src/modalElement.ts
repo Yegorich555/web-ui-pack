@@ -36,6 +36,8 @@ declare global {
       defaults?: Partial<WUP.Modal.Options>;
       /** Called when element is already rendered; so possible to change innerHTML */
       onRender?: (el: WUPModalElement) => void;
+      /** Default class that appended to confirm modal */
+      className?: string;
     }
     interface Options {
       /** Element that modal need to listen for click. If `target` missed then modal will be opened on init
@@ -71,6 +73,10 @@ declare global {
       "w-autoClose"?: boolean | "";
       "w-selfRemove"?: boolean | "";
     }
+  }
+  interface HTMLElement {
+    /** Called when related modalElement is already rendered before opening; so possible to change innerHTML */
+    $onRenderModal?: (modal: WUPModalElement) => void;
   }
   interface HTMLElementTagNameMap {
     [tagName]: WUPModalElement; // add element to document.createElement
@@ -123,7 +129,7 @@ export default class WUPModalElement<
 
   /** Call it to enable attribute [w-confirm] for buttons
    * @tutorial Rules
-   * * to override default render: redefine `WUPModalElement.prototype.gotRenderConfirm` method OR use `onReander` callback
+   * * to override default render: redefine `WUPModalElement.prototype.gotRenderConfirm` method OR use `onReander` callback; @see {@link WUPModalElement.$showConfirm}
    * @example
    * ```html
    * <button w-confirm="Do you want to do it?">
@@ -143,7 +149,14 @@ export default class WUPModalElement<
         const txt = btn?.getAttribute(attrConfirm);
         if (txt) {
           e.stopPropagation();
-          this.$showConfirm({ question: txt, ...opts }).then((isOk) => {
+          this.$showConfirm({
+            question: txt,
+            ...opts,
+            onRender: (m) => {
+              btn!.$onRenderModal?.call(btn, m);
+              opts?.onRender?.call(this, m);
+            },
+          }).then((isOk) => {
             isOk && btn!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
           });
         }
@@ -152,15 +165,50 @@ export default class WUPModalElement<
     );
   }
 
-  /** Show confirm modal and retun Promise(true) if user pressed button[data-close=confirm] and before modal is closed itself */
+  /** Show confirm modal and retun Promise(true) if user pressed button[data-close=confirm] and before modal is closed itself
+   * @tutorial Troubleshooting
+   * * ConfirmModal ignores option `placement` if it overflow existed modal
+   * * There is static class */
   static async $showConfirm(opts?: WUP.Modal.ConfirmOptions): Promise<boolean> {
+    // init
     const me = document.createElement("wup-modal");
-    me.gotRenderConfirm(opts?.question || "");
-    Object.assign(me.$options, opts?.defaults); // todo recheck different positions
+    opts?.className && me.classList.add(opts.className);
+    Object.assign(me.$options, opts?.defaults);
     me.$options.selfRemove = true;
+    me.gotRenderConfirm(opts?.question || "");
+    // append to root
     document.body.appendChild(me);
     // call callback to allow user re-define it
     opts?.onRender?.call(this, me);
+
+    setTimeout(() => {
+      if (me._mid && me._mid > 1) {
+        const p = openedModals[me._mid - 2];
+        if (!p.$isOpened || p.$isClosing) {
+          return; // it should work only if prev modal is opened
+        }
+        me.setAttribute("w-placement", "center");
+        //  position in center of prevModal but it won't be reponsible on screen size changes
+        const prev = { x: -1, y: -1 };
+        const goCenter = (): void => {
+          if (!me.$isOpened || me.$isClosing || !p.isConnected) {
+            return;
+          }
+          const r = p.getBoundingClientRect();
+          const rme = me.getBoundingClientRect();
+          const x = Math.max(0, Math.round(r.x + (r.width - rme.width) / 2)); // WARN: expected that modal never bigger than viewport
+          const y = Math.max(0, Math.round(r.y + (r.height - rme.height) / 2));
+          if (prev.x !== x || prev.y !== y) {
+            prev.x = x;
+            prev.y = y;
+            me.style.margin = `${y}px 0 0 ${x}px`; // center of parent modal
+          }
+          window.requestAnimationFrame(goCenter);
+        };
+        goCenter();
+      }
+    }); // timeout to wait when openedModals array changed
+
     const btnConfirm = me.querySelector("[data-close=confirm]");
     if (btnConfirm) {
       return new Promise((res) => {
@@ -182,7 +230,7 @@ export default class WUPModalElement<
   /** Default class used for fade - bluring background for main content
    * @defaultValue "wup-modal-fade" */
   static $classFade = "wup-modal-fade";
-  /** Default class that appended to body when modal opend (required to hide body scroll)
+  /** Default class that appended to body when modal opened (required to hide body scroll)
    * @defaultValue "wup-modal-open" */
   static $classOpened = "wup-modal-open";
 
@@ -344,28 +392,29 @@ export default class WUPModalElement<
 </footer>`;
   }
 
-  _prevTarget?: Element | null;
-  _prevTargetClick?: (e: MouseEvent) => void;
+  /** Related button that need to listen for click event to open modal */
+  _target?: Element | null;
+  /** Click event related to _target */
+  _targetClick?: (e: MouseEvent) => void;
 
   protected override gotChanges(propsChanged: string[] | null): void {
     super.gotChanges(propsChanged);
 
     const trg = this._opts.target;
-    const isTrgChange = this._prevTarget !== trg;
+    const isTrgChange = this._target !== trg;
     if (isTrgChange) {
-      (this._prevTarget as HTMLElement)?.removeEventListener("click", this._prevTargetClick!);
-      this._prevTarget = trg;
+      (this._target as HTMLElement)?.removeEventListener("click", this._targetClick!);
+      this._target = trg;
     }
 
     if (!trg) {
       !propsChanged && this.goOpen(ModalOpenCases.onInit, null); // call here to wait for options before opening
     } else if (isTrgChange) {
-      this._prevTargetClick = (e) => {
-        setTimeout(() => {
-          !e.defaultPrevented && this.goOpen(ModalOpenCases.onTargetClick, e);
-        }); // timeout required to prevent openinig from bubbled-events
+      this._targetClick = (e) => {
+        // timeout required to prevent openinig from bubbled-events
+        setTimeout(() => !e.defaultPrevented && this.goOpen(ModalOpenCases.onTargetClick, e));
       };
-      (trg as HTMLElement).addEventListener("click", this._prevTargetClick, { passive: true });
+      (trg as HTMLElement).addEventListener("click", this._targetClick, { passive: true });
     }
   }
 
@@ -383,6 +432,9 @@ export default class WUPModalElement<
     this.tabIndex = -1; // WA: to allow scroll modal - possible that tabindex: -1 doesn't allow tabbing inside
     this.role = "dialog"; // possible alertdialog for Confirm modal
     this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
+
+    (this._target as HTMLElement | null)?.$onRenderModal?.call(this._target, this as WUPModalElement<any, any>);
+
     const header = this.querySelector("h1,h2,h3,h4,h5,h6,[role=heading]");
     if (!header) {
       console.warn("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
@@ -397,7 +449,9 @@ export default class WUPModalElement<
     this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
     this.$refClose.setAttribute("close", "");
     this.$refClose.setAttribute("data-close", "modal");
+
     this.prepend(this.$refClose);
+
     // init fade
     openedModals.push(this as WUPModalElement<any, any>);
     this._mid = openedModals.length;
@@ -441,7 +495,7 @@ export default class WUPModalElement<
       const f = this.querySelector("wup-form");
       if (f?.$isChanged) {
         return this.#ctr
-          .$showConfirm({ question: "You have unsaved changes. Would you like to skip it?" })
+          .$showConfirm({ question: __wupln("You have unsaved changes.\nWould you like to skip it?", "content") })
           .then((isOk) => (isOk ? super.goClose(closeCase, ev, immediately) : false));
       }
     }
@@ -583,7 +637,7 @@ export default class WUPModalElement<
     const bd = document.body;
     bd.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove > everything must returned to prev state
     !bd.className && bd.removeAttribute("class");
-    (this._prevTarget as HTMLElement)?.removeEventListener("click", this._prevTargetClick!);
+    (this._target as HTMLElement)?.removeEventListener("click", this._targetClick!);
     super.dispose();
   }
 }
@@ -591,3 +645,4 @@ export default class WUPModalElement<
 customElements.define(tagName, WUPModalElement);
 
 // NiceToHave: handle Ctrl+S, Meta+S for submit & close ???
+// testcase: modalInModal: when parent is removed immediately
