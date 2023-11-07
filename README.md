@@ -1,6 +1,6 @@
 # ![logo](/demo/src/assets/logo-small.png) web-ui-pack
 
-Web package with high scalable [WebComponents](#components) and [helpers](#helpers)
+Web package with high scalable [WebComponents](#components) and [helpers](#helpers) with focus on DX (developer experience)
 
 [![npm version](https://img.shields.io/npm/v/web-ui-pack.svg?style=flat-square)](https://www.npmjs.com/package/web-ui-pack)
 [![code coverage](https://coveralls.io/repos/github/Yegorich555/web-ui-pack/badge.svg?style=flat-square)](https://coveralls.io/github/Yegorich555/web-ui-pack)
@@ -16,14 +16,14 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 
 - Possible to use **with any frameworks** like Angular, React, Vue etc. **or even directly with HTML & JS** (because it's js-native logic that doesn't required anything extrernal)
 - Form/controls are ready to use and has built-in completed validation logic for any case that you can imagine (see [demo/controls](https://yegorich555.github.io/web-ui-pack/controls))
-- Focus on accessibility best practices, most of popular packages has low-accessibility support
+- Focus on accessibility best practices (most of popular packages has lower accessibility)
 - High scalable and easy customizable (every component is developed to easy inherit and redefine/extend default logic)
 - Built-in css-variables to use custom color-themes with native ordinary styling (css, scss etc.)
-- Built-in dark color scheme. To use need to add attr `wupdark` (`<body wupdark>`) and define general background & text colors
+- Built-in dark color scheme. Add attribute `wupdark` (`<body wupdark>`) and define main background & text colors
 - Built-in Typescript (coverage types 100%)
 - Built-in `.jsx/.tsx` support (for React/Vue)
-- Supports different locales (based on [localeInfo](src/objects/localeInfo.ts) helper). For changing built-in messages override global function `window.__wupln` (detials you can see in your editor via built-in entellisense)
-- Well documented via JSDoc (use intellisense power of your editor to get details about each property/option/usage)
+- Supports different locales (based on [localeInfo](src/objects/localeInfo.ts) helper). For changing built-in messages override global function `window.__wupln` (details you can find in your editor during the coding via built-in entellisense)
+- Well documented with JSDoc (use intellisense power of your editor to get details about each property/option/usage)
 - Optimized for webpack (build includes only used components and helpers via **side-effects** option)
 - Zero dependancy (don't need to wait for bug-fixing of other packages)
 - Always 100% test coverage via e2e and unit tests (it's must-have and always will be so)
@@ -31,12 +31,12 @@ You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone
 
 ## Why the package is so big
 
-It's developed with [Typescript](https://www.typescriptlang.org/) and has huge built-in documentation (JSDoc). Every method,property,event is documented well so you don't need extra resource to take an example to implement or configure elements. In build-result without comments you will see that it's small-enough
+It's developed with [Typescript](https://www.typescriptlang.org/) and has huge built-in documentation (JSDoc). Every method,property,event and even local variables are documented well so you don't need extra resource to take an example to implement or configure elements. In build-result without comments you will see that it's small-enough
 
 ## Installing & usage
 
 1. Install with npm `npm install web-ui-pack`
-2. Add `import WUPPopupElement from "web-ui-pack";` into any file (`main.js` for example)
+2. Add `import { WUPPopupElement } from "web-ui-pack";` into any file (`main.js` for example)
 3. Call `WUPPopupElement.$use()` to register HTML tag into web-browser
 4. For usage with React see [CODESTYLE.md](CODESTYLE.md) (for other frameworks it's very similar)
 5. For usage with HTML + VSCode extend VSCode settings
@@ -54,45 +54,57 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
 ## TODO
 
 - [x] [Helpers](#helpers)
-- [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
-  - [ ] Tooltip
-- [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
-- [x] [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
-- [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
-  - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-    - [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-  - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
-  - [x] [SwitchControl (Toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
-  - [x] [CheckControl (Checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
-    - [ ] CheckTreeControl
-  - [x] [RadioControl (RadioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
-    - [ ] Full customized items
-  - [x] [SelectControl (ComboBox)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-    - [ ] Full customized menu
-  - [x] [SelectManyControl (MultiSelect)](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
-  - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
-  - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
-    - [ ] option `multiSelect`
-    - [ ] DateRangeControl
-  - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
-  - [ ] DateTimeControl
-  - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
-    - [ ] TextRichControl
-  - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
-  - [ ] SliderControl (progress bar)
-  - [ ] FileControl
-  - [ ] SearchControl
-  - [ ] ImageControl (AvatarEditor)
-  - [ ] ColorControl (ColorPicker) ?
-- [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
-- [ ] MediaPlayer (Video player)
-- [x] [ModalElement](src/modalElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
-  - [ ] Built-in form support
-  - [ ] ConfirmModalElement
-- [ ] InfiniteScroll
-- [ ] VirtualScroll
-- [ ] CarouselElement (Slide show)
-- [ ] TableElement
+- _HTMLElement_
+
+  - _BaseElement_
+
+    - [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
+    - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
+    - [x] [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
+    - _BaseModal_
+
+      - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
+        - [ ] Tooltip
+      - [x] [ModalElement](src/modalElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
+        - [x] Modal in modal
+        - [x] Confirm modal
+        - [x] Modal form
+
+    - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
+
+    - _BaseControl_
+      - [x] [SwitchControl (toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
+        - [x] [CheckControl (checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
+          - [ ] CheckTreeControl
+      - [x] [RadioControl (radioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
+        - [ ] Full customized items
+      - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+        - [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+        - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
+          - [ ] TextRichControl
+        - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
+        - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
+        - [x] [_BaseComboControl_](src/controls/baseCombo.ts)
+          - [x] [SelectControl (combobox)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
+            - [ ] Full customized menu
+            - [x] [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
+          - [ ] SearchControl
+          - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
+          - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
+            - [ ] DateTimeControl
+            - [ ] DateRangeControl
+            - [ ] option `multiSelect`
+      - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
+      - [ ] SliderControl (progress bar)
+      - [ ] FileControl
+      - [ ] ImageControl (AvatarEditor)
+      - [ ] ColorControl (ColorPicker)
+
+  - [ ] MediaPlayer (Video player)
+  - [ ] InfiniteScroll
+  - [ ] VirtualScroll
+  - [ ] CarouselElement (Slide show)
+  - [ ] TableElement
 
 ## Components
 
@@ -104,7 +116,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
    - Every component/class has static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#example)
    - `$options` are observed. So changing options affects on component immediately after empty timeout (every component has static `observedOptions` as set of watched options)
    - all custom `attributes` updates `$options` automatically. So `document.querySelector('wup-spin').$options.inline` equal to `<wup-spin inline />`
-2. **Usage**
+2. **Recommendations**
    - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched on (for optimization). But **if you don't use webpack** don't import from `web-ui-pack` directly (due to tree-shaking can be not smart enough). Instead use `web-ui-pack/path-to-element`
    - Every component has a good JSDoc so go ahead and read details directly during the coding
    - Library compiled into ESNext. To avoid unexpected issues include this package into babel (use `exclude: /node_modules\/(?!(web-ui-pack)\/).*/` for babel-loader)
@@ -116,28 +128,6 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
    - All Components inherited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
    - To redefine component just extend it and register with new html tag OR redefine default behavior via prototype functions (if $defaults are not included something). See details in [example](#example)
-   - **Inheritance Tree**
-     - [_HTMLElement_](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement)
-       - [_BaseElement_](src/baseElement.ts)
-         - [PopupElement](src/popupElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
-         - [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
-         - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
-         - [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
-         - [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
-         - [_BaseControl_](src/controls/baseControl.ts)
-           - [SwitchControl](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
-             - [CheckControl](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
-           - [RadioControl](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
-           - [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-             - [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
-             - [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
-             - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
-             - [_BaseComboControl_](src/controls/baseCombo.ts)
-               - [SelectControl](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-                 - [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
-               - [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
-               - [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
-           - [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
 
 ---
 
@@ -295,16 +285,13 @@ Be sure that you familiar with [common rules](#components)
 
 #### UI doesn't recognize html tags like `<wup-popup />` etc
 
-> It's possible if you missed import or it was removed by optimizer of wepback etc. To fix this you need to force import at least once and don't forget to call `.$use()`
+> It's possible if you missed import or it was removed by optimizer of wepback etc. To fix this need to force import at least once and don't forget to call `.$use()`
 >
 > ```js
 > import { WUPSelectControl, WUPTextControl } from "web-ui-pack";
 >
 > WUPTextControl.$use(); // register element
 > WUPSelectControl.$use(); // register element
-> // or
-> WUPTextControl.$defaults.validateDebounceMs = 500;
-> WUPSelectControl.$defaults.validateDebounceMs = 500;
 > // etc.
 > ```
 
