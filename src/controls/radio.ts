@@ -11,7 +11,7 @@ declare global {
        * @tutorial Troubleshooting
        * * array items is converted to Proxy (observer) so
        * ```js
-       * const items = [text: "1", value: {name: "Janny"}]
+       * const items = [text: "1", value: {name: "Jenny"}]
        * el.$options.items = items;
        * setTimeout(()=> console.warn(el.$options.items === items)},1) // returns 'false'
        * setTimeout(()=> console.warn(el.$options.items[0].value === items[0].value)},1) // returns 'true'

@@ -23,7 +23,7 @@ export default function TextControlView() {
         "Smart clear (reset/revert) by Esc key and button-clear (use $defaults.clearActions)",
         "Built-in validations (required,min,max,email). To extend use $defaults.validations",
         "Smart validations on the fly (use $defaults.validationCases)",
-        "Powerful accessibility support (keyboard, announcenement)",
+        "Powerful accessibility support (keyboard, announcement)",
         "Easy to append icons",
         "Mask/maskholder support (options mask & maskholder)",
         "Prefix/postfix support (options prefix & postfix)",

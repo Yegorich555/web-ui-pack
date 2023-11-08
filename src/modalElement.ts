@@ -5,7 +5,7 @@ import { WUPcssButton } from "./styles";
 
 export const enum ModalOpenCases {
   /** When $open() is called programmatically */
-  onManuallCall = 0,
+  onManualCall = 0,
   /** On init (when appended to layout) */
   onInit = 1,
   /** When click on target @see {@link WUP.Modal.Options.target} */
@@ -14,7 +14,7 @@ export const enum ModalOpenCases {
 
 export const enum ModalCloseCases {
   /** When $close() is called programmatically */
-  onManuallCall = 0,
+  onManualCall = 0,
   /** When was click on button[close] */
   onCloseClick = 1,
   /** When was click outside modal */
@@ -30,7 +30,7 @@ const attrConfirm = "w-confirm";
 declare global {
   namespace WUP.Modal {
     interface ConfirmOptions {
-      /** Message appended to confrim modal as question  */
+      /** Message appended to confirm modal as question  */
       question?: string;
       /** Options to override defaults of modal */
       defaults?: Partial<WUP.Modal.Options>;
@@ -118,7 +118,7 @@ declare global {
  * @tutorial Troubleshooting known issues:
  * * for very long content with 1st focusable item at the bottom it won't be visible because user must see top of the modal at first
  * To fix the issue set `<h2 tabindex="-1">...</h2>` and hide focus frame via styles OR disable `$options.autoFocus`
- * * accessibility: NVDA reads modal content twice. To fix follow the recomendations: https://github.com/nvaccess/nvda/issues/8971 */
+ * * accessibility: NVDA reads modal content twice. To fix follow the recommendations: https://github.com/nvaccess/nvda/issues/8971 */
 export default class WUPModalElement<
   TOptions extends WUP.Modal.Options = WUP.Modal.Options,
   Events extends WUP.Modal.EventMap = WUP.Modal.EventMap
@@ -127,7 +127,7 @@ export default class WUPModalElement<
 
   /** Call it to enable attribute [w-confirm] for buttons
    * @tutorial Rules
-   * * to override default render: redefine `WUPModalElement.prototype.gotRenderConfirm` method OR use `onReander` callback; @see {@link WUPModalElement.$showConfirm}
+   * * to override default render: redefine `WUPModalElement.prototype.gotRenderConfirm` method OR use `onRender` callback; @see {@link WUPModalElement.$showConfirm}
    * @example
    * ```html
    * <button w-confirm="Do you want to do it?">
@@ -138,7 +138,7 @@ export default class WUPModalElement<
     document.addEventListener(
       "click",
       (e) => {
-        if (e.button || (window as any).__wupfixCycleClick) {
+        if (e.button || (window as any).__wupFixCycleClick) {
           return;
         }
         const btn = WUPModalElement.prototype.findParent.call(e.target, (el) => el.hasAttribute(attrConfirm), {
@@ -163,7 +163,7 @@ export default class WUPModalElement<
     );
   }
 
-  /** Show confirm modal and retun Promise(true) if user pressed button[data-close=confirm] and before modal is closed itself
+  /** Show confirm modal and return Promise(true) if user pressed button[data-close=confirm] and before modal is closed itself
    * @tutorial Troubleshooting
    * * ConfirmModal ignores option `placement` if it overflow existed modal
    * * There is static class */
@@ -222,8 +222,8 @@ export default class WUPModalElement<
     if (btnConfirm) {
       return new Promise((res) => {
         (btnConfirm as HTMLElement).onclick = (ev) => {
-          (window as any).__wupfixCycleClick = true;
-          setTimeout(() => delete (window as any).__wupfixCycleClick);
+          (window as any).__wupFixCycleClick = true;
+          setTimeout(() => delete (window as any).__wupFixCycleClick);
           me.goClose(ModalCloseCases.onCloseClick, ev);
           res(true);
         };
@@ -236,7 +236,7 @@ export default class WUPModalElement<
   // static get observedOptions(): Array<keyof WUP.Modal.Options> { return []; }
   // static get observedAttributes(): Array<string> { return []; }
 
-  /** Default class used for fade - bluring background for main content
+  /** Default class used for fade - blurring background for main content
    * @defaultValue "wup-modal-fade" */
   static $classFade = "wup-modal-fade";
   /** Default class that appended to body when modal opened (required to hide body scroll)
@@ -421,7 +421,7 @@ export default class WUPModalElement<
       !propsChanged && this.goOpen(ModalOpenCases.onInit, null); // call here to wait for options before opening
     } else if (isTrgChange) {
       this._targetClick = (e) => {
-        // timeout required to prevent openinig from bubbled-events
+        // timeout required to prevent opening from bubbled-events
         setTimeout(() => !e.defaultPrevented && this.goOpen(ModalOpenCases.onTargetClick, e));
       };
       (trg as HTMLElement).addEventListener("click", this._targetClick, { passive: true });
@@ -438,9 +438,9 @@ export default class WUPModalElement<
     const ael = document.activeElement;
     this._lastFocused = ael?.id || ael;
 
-    // setup Accesibility attrs
+    // setup Accessibility attrs
     this.tabIndex = -1; // WA: to allow scroll modal - possible that tabindex: -1 doesn't allow tabbing inside
-    this.role = "dialog"; // possible alertdialog for Confirm modal
+    this.role = "dialog"; // possible alert-dialog for Confirm modal
     this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
 
     (this._target as HTMLElement | null)?.$onRenderModal?.call(this._target, this as WUPModalElement<any, any>);
@@ -488,7 +488,7 @@ export default class WUPModalElement<
     this.$refFade.onclick = (ev) => this.goClose(ModalCloseCases.onOutsideClick, ev);
     this.appendEvent(this, "click", (ev) => this.gotClick(ev));
     this.appendEvent(this, "keydown", (ev) => this.gotKeyDown(ev), { passive: false });
-    // @ts-expect-error - TS isn't good enought for looking for types
+    // @ts-expect-error - TS isn't good enough for looking for types
     this.appendEvent(this, "$submitEnd", (sev: WUP.Form.EventMap["$submitEnd"]) => {
       sev.detail.success && this.goClose(ModalCloseCases.onSubmitEnd, sev);
     });
@@ -524,7 +524,7 @@ export default class WUPModalElement<
     if (this._mid === 1) {
       this.$refFade!.removeAttribute("show"); // animation if opened single modal
       const b = document.body;
-      b.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everythin must returned to prev state
+      b.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everything must returned to prev state
       !b.className && b.removeAttribute("class");
     } else {
       this.$refFade!.remove(); // immediately hide if opened 2+ modals
@@ -563,7 +563,7 @@ export default class WUPModalElement<
   // /** Called on focusout event */
   // gotFocusOut(e: FocusEvent): void {
   //   const t = e.relatedTarget;
-  //   const isOut = !t || !this.includes(t); // WARN: ncludes can be wrong for absolute items ???
+  //   const isOut = !t || !this.includes(t); // WARN: includes can be wrong for absolute items ???
   //   const isFocusLast = this._willFocusPrev;
   //   isOut && isFocusLast != null && focusFirst(this, { isFocusLast }); // bug: FF doesn't remove focus-style on btn[close] when focus goes outside
   //   delete this._willFocusPrev;

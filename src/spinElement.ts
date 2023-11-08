@@ -18,7 +18,7 @@ declare global {
       /** Allow to create shadowBox to partially hide target (only for `inline: false`)
        * @defaultValue true */
       overflowFade: boolean;
-      /** Anchor element that need to oveflow by spinner; ignored if option `inline='true'`
+      /** Anchor element that need to overflow by spinner; ignored if option `inline='true'`
        * @defaultValue `auto`: parentElement */
       overflowTarget: HTMLElement | "auto";
     }
@@ -35,7 +35,7 @@ declare global {
        * @defaultValue [4,4] */
       "w-overflowOffset"?: string;
       "w-overflowFade"?: boolean | "";
-      /** Anchor element that need to oveflow by spinner
+      /** Anchor element that need to overflow by spinner
        * * Point querySelector to related element
        * @example
        * ```html

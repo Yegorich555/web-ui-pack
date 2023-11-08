@@ -150,10 +150,10 @@ export default function calendarTZtest() {
             await h.wait();
 
             expect(el.querySelector("[calendar='day']")).toBeTruthy();
-            expect(el.$refCalenarTitle.textContent).toBe("December 2022");
-            expect(el.$refCalenarItems.children.length).toBe(42);
-            expect(el.$refCalenarItems.firstElementChild!.textContent).toBe(`${ds.days[curMonth].prev?.from ?? 1}`);
-            expect(el.$refCalenarItems.lastElementChild!.textContent).toBe(`${ds.days[curMonth].nextTo}`);
+            expect(el.$refCalendarTitle.textContent).toBe("December 2022");
+            expect(el.$refCalendarItems.children.length).toBe(42);
+            expect(el.$refCalendarItems.firstElementChild!.textContent).toBe(`${ds.days[curMonth].prev?.from ?? 1}`);
+            expect(el.$refCalendarItems.lastElementChild!.textContent).toBe(`${ds.days[curMonth].nextTo}`);
             expect(el.querySelector("[aria-current]")?.textContent).toBe("16");
             expect(el.querySelector("[aria-selected]")?.textContent).toBe("5");
             expect(el.$refInput.value).toBe("5 December 2022");
@@ -169,7 +169,7 @@ export default function calendarTZtest() {
             // test click
             const onChange = jest.fn();
             el.addEventListener("$change", onChange);
-            let item = el.$refCalenarItems.children.item(15) as HTMLElement;
+            let item = el.$refCalendarItems.children.item(15) as HTMLElement;
             expect(onChange).toBeCalledTimes(0);
             jest.useFakeTimers();
             await h.userClick(item);
@@ -189,7 +189,7 @@ export default function calendarTZtest() {
 
             // click on the first
             onChange.mockClear();
-            item = el.$refCalenarItems.firstElementChild as HTMLElement;
+            item = el.$refCalendarItems.firstElementChild as HTMLElement;
             await h.userClick(item);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
@@ -201,7 +201,7 @@ export default function calendarTZtest() {
 
             // click on the last
             onChange.mockClear();
-            item = el.$refCalenarItems.lastElementChild as HTMLElement;
+            item = el.$refCalendarItems.lastElementChild as HTMLElement;
             await h.userClick(item);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
@@ -216,9 +216,9 @@ export default function calendarTZtest() {
             el.remove();
             document.body.appendChild(el);
             await h.wait();
-            expect(el.$refCalenarItems.children.length).toBe(42);
+            expect(el.$refCalendarItems.children.length).toBe(42);
             expect(el.querySelector("[aria-selected]")?.textContent).toBe("1");
-            item = el.$refCalenarItems.lastElementChild as HTMLElement;
+            item = el.$refCalendarItems.lastElementChild as HTMLElement;
             await h.userClick(item);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.$value).toEqual(initDate(2022, 11, item.textContent!, 23, 50));
@@ -228,7 +228,7 @@ export default function calendarTZtest() {
             document.body.appendChild(el);
             await h.wait();
             expect(el.querySelector("[aria-selected]")?.textContent).toBe("2");
-            item = el.$refCalenarItems.lastElementChild as HTMLElement;
+            item = el.$refCalendarItems.lastElementChild as HTMLElement;
             await h.userClick(item);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.$value).toEqual(initDate(2022, 5, item.textContent!, 23, 50));
@@ -240,31 +240,31 @@ export default function calendarTZtest() {
             el.$options.startWith = "1990-02-01";
             document.body.appendChild(el);
             await h.wait();
-            expect(el.$refCalenarTitle.textContent).toBe("February 1990");
+            expect(el.$refCalendarTitle.textContent).toBe("February 1990");
             // option startWith: is whole date
             el.remove();
             el.$options.startWith = "1990-01-01 10:55";
             document.body.appendChild(el);
             await h.wait();
-            expect(el.$refCalenarTitle.textContent).toBe("January 1990");
+            expect(el.$refCalendarTitle.textContent).toBe("January 1990");
             // option startWith: is wrong
             el.remove();
             el.$options.startWith = "a-b-c";
             document.body.appendChild(el);
             await h.wait();
-            expect(el.$refCalenarTitle.textContent).toBe("January 2023");
+            expect(el.$refCalendarTitle.textContent).toBe("January 2023");
             // option startWith: is wrong
             el.remove();
             el.$options.startWith = "1990-01-01-06";
             document.body.appendChild(el);
             await h.wait();
-            expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+            expect(el.$refCalendarTitle.textContent).toBe("2018 ... 2033");
             // option startWith: is empty
             el.remove();
             el.$options.startWith = "";
             document.body.appendChild(el);
             await h.wait();
-            expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+            expect(el.$refCalendarTitle.textContent).toBe("2018 ... 2033");
           });
         });
       });
@@ -278,24 +278,24 @@ export default function calendarTZtest() {
         await h.wait();
 
         expect(el.querySelector("[calendar='month']")).toBeTruthy();
-        expect(el.$refCalenarItems.children.length).toBe(12 + 4);
-        expect(el.$refCalenarTitle?.textContent).toBe("2022");
+        expect(el.$refCalendarItems.children.length).toBe(12 + 4);
+        expect(el.$refCalendarTitle?.textContent).toBe("2022");
         expect(el.querySelector("[aria-current]")?.textContent).toBe("Dec");
         expect(el.querySelector("[aria-selected]")?.textContent).toBe("Dec");
-        expect(el.$refCalenar).toMatchSnapshot();
+        expect(el.$refCalendar).toMatchSnapshot();
 
         el.remove();
         el.$initValue = undefined;
         document.body.appendChild(el);
         await h.wait();
         expect(el.querySelector("[calendar='month']")).toBeTruthy();
-        expect(el.$refCalenarTitle?.textContent).toBe("2022");
+        expect(el.$refCalendarTitle?.textContent).toBe("2022");
         expect(el.querySelector("[aria-selected]")).toBeFalsy();
 
-        await h.userClick(el.$refCalenarItems.firstElementChild as HTMLElement);
+        await h.userClick(el.$refCalendarItems.firstElementChild as HTMLElement);
         await h.wait();
         expect(el.querySelector("[calendar='day']")).toBeTruthy();
-        expect(el.$refCalenarTitle.textContent).toBe("January 2022");
+        expect(el.$refCalendarTitle.textContent).toBe("January 2022");
         // other click tests see in 'navigation between pickers'
 
         // option startWith: string
@@ -306,7 +306,7 @@ export default function calendarTZtest() {
         el.$options.startWith = "1990-01";
         document.body.appendChild(el);
         await h.wait();
-        expect(el.$refCalenarTitle.textContent).toBe("1990");
+        expect(el.$refCalendarTitle.textContent).toBe("1990");
       });
 
       test("year picker", async () => {
@@ -319,24 +319,24 @@ export default function calendarTZtest() {
         await h.wait();
 
         expect(el.querySelector("[calendar='year']")).toBeTruthy();
-        expect(el.$refCalenarItems.children.length).toBe(16);
-        expect(el.$refCalenarTitle?.textContent).toBe("2018 ... 2033");
+        expect(el.$refCalendarItems.children.length).toBe(16);
+        expect(el.$refCalendarTitle?.textContent).toBe("2018 ... 2033");
         expect(el.querySelector("[aria-current]")?.textContent).toBe("2018");
         expect(el.querySelector("[aria-selected]")?.textContent).toBe("2018");
-        expect(el.$refCalenar).toMatchSnapshot();
+        expect(el.$refCalendar).toMatchSnapshot();
 
         el.remove();
         el.$initValue = undefined;
         document.body.appendChild(el);
         await h.wait();
         expect(el.querySelector("[calendar='year']")).toBeTruthy();
-        expect(el.$refCalenarTitle?.textContent).toBe("2018 ... 2033");
+        expect(el.$refCalendarTitle?.textContent).toBe("2018 ... 2033");
         expect(el.querySelector("[aria-selected]")).toBeFalsy();
 
-        await h.userClick(el.$refCalenarItems.firstElementChild as HTMLElement);
+        await h.userClick(el.$refCalendarItems.firstElementChild as HTMLElement);
         await h.wait();
         expect(el.querySelector("[calendar='month']")).toBeTruthy();
-        expect(el.$refCalenarTitle.textContent).toBe("2018");
+        expect(el.$refCalendarTitle.textContent).toBe("2018");
         // other click tests see in 'navigation between pickers'
 
         // option startWith: string
@@ -347,7 +347,7 @@ export default function calendarTZtest() {
         el.setAttribute("w-startwith", "1990");
         document.body.appendChild(el);
         await h.wait();
-        expect(el.$refCalenarTitle.textContent).toBe("1986 ... 2001");
+        expect(el.$refCalendarTitle.textContent).toBe("1986 ... 2001");
       });
 
       test("navigation between pickers", async () => {
@@ -360,50 +360,50 @@ export default function calendarTZtest() {
         document.body.appendChild(el);
         await h.wait();
         expect(el.querySelector("[calendar='year']")).toBeTruthy();
-        expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+        expect(el.$refCalendarTitle.textContent).toBe("2018 ... 2033");
 
         el.$initValue = initDate(2022, 3, 1, 1, 40);
         el.remove();
         document.body.appendChild(el);
         await h.wait();
         expect(el.querySelector("[calendar='day']")).toBeTruthy();
-        expect(el.$refCalenarTitle.textContent).toBe("April 2022");
+        expect(el.$refCalendarTitle.textContent).toBe("April 2022");
         onChange.mockClear();
 
-        await h.userClick(el.$refCalenarTitle);
+        await h.userClick(el.$refCalendarTitle);
         await h.wait();
         expect(el.querySelector("[calendar='month']")).toBeTruthy();
-        expect(el.$refCalenarTitle.textContent).toBe("2022");
+        expect(el.$refCalendarTitle.textContent).toBe("2022");
         expect(el.querySelector("[aria-selected]")!.textContent).toBe("Apr");
 
-        await h.userClick(el.$refCalenarTitle);
+        await h.userClick(el.$refCalendarTitle);
         await h.wait();
         expect(el.querySelector("[calendar='year']")).toBeTruthy();
-        expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+        expect(el.$refCalendarTitle.textContent).toBe("2018 ... 2033");
         expect(el.querySelector("[aria-selected]")!.textContent).toBe("2022");
 
         const wasHtml = el.outerHTML;
-        await h.userClick(el.$refCalenarTitle); // click again on title does nothing
+        await h.userClick(el.$refCalendarTitle); // click again on title does nothing
         await h.wait();
         expect(el.querySelector("[calendar='year']")).toBeTruthy();
         expect(wasHtml).toBe(el.outerHTML);
 
         // go back from year to day
-        await h.userClick(el.$refCalenarItems.children.item(2) as HTMLElement); // click on 2020
+        await h.userClick(el.$refCalendarItems.children.item(2) as HTMLElement); // click on 2020
         await h.wait();
         expect(el.querySelector("[calendar='month']")).toBeTruthy();
-        expect(el.$refCalenarTitle.textContent).toBe("2020");
+        expect(el.$refCalendarTitle.textContent).toBe("2020");
         expect(el.querySelector("[aria-selected]")?.textContent).toBeFalsy(); // because selected Apr 2022
         expect(el.querySelector("[aria-current]")?.textContent).toBeFalsy();
 
-        await h.userClick(el.$refCalenarItems.children.item(5) as HTMLElement); // click on June
+        await h.userClick(el.$refCalendarItems.children.item(5) as HTMLElement); // click on June
         await h.wait();
         expect(el.querySelector("[calendar='day']")).toBeTruthy();
-        expect(el.$refCalenarTitle.textContent).toBe("June 2020");
+        expect(el.$refCalendarTitle.textContent).toBe("June 2020");
         expect(el.querySelector("[aria-selected]")?.textContent).toBeFalsy(); // because selected Apr 2022
         expect(el.querySelector("[aria-current]")?.textContent).toBeFalsy();
 
-        const item = el.$refCalenarItems.children.item(7) as HTMLElement;
+        const item = el.$refCalendarItems.children.item(7) as HTMLElement;
         expect(item.textContent).toBe("8");
         await h.userClick(item); // 8 June 2020
         await h.wait();
@@ -422,18 +422,18 @@ export default function calendarTZtest() {
           expect(str).toBe("2020-6-8 1:40:0.0");
         }
 
-        await h.userClick(el.$refCalenarTitle);
+        await h.userClick(el.$refCalendarTitle);
         await h.wait();
         expect(el.querySelector("[aria-selected]")?.textContent).toBe("Jun");
 
-        await h.userClick(el.$refCalenarTitle);
+        await h.userClick(el.$refCalendarTitle);
         await h.wait();
         expect(el.querySelector("[aria-selected]")?.textContent).toBe("2020");
 
         // checking if value change affects on calendarSelection
         el.$value = initDate(2022, 11, 15); // 15 Dec 2022
         expect(el.querySelector("[aria-selected]")?.textContent).toBe("2022");
-        await h.userClick(el.$refCalenarItems.children.item(0) as HTMLElement);
+        await h.userClick(el.$refCalendarItems.children.item(0) as HTMLElement);
         await h.wait();
         el.$value = initDate(2018, 1, 15); // 15 Feb 2018
         expect(el.querySelector("[aria-selected]")?.textContent).toBe("Feb");
@@ -447,9 +447,9 @@ export default function calendarTZtest() {
       test("$options.min & .max", async () => {
         const showNext = mockShowNext();
         const mapContent = () => {
-          const arr = new Array(el.$refCalenarItems.children.length);
+          const arr = new Array(el.$refCalendarItems.children.length);
           for (let i = 0; i < arr.length; ++i) {
-            const item = el.$refCalenarItems.children.item(i)!;
+            const item = el.$refCalendarItems.children.item(i)!;
             arr[i] = `${item.textContent}${item.hasAttribute("disabled") ? " disabled" : ""}`;
           }
           return arr;
@@ -464,59 +464,59 @@ export default function calendarTZtest() {
         el.$options.max = initDate(2022, 10, 1); // 1 Nov
         await h.wait();
 
-        expect(el.$refCalenarTitle.textContent).toBe("October 2022");
+        expect(el.$refCalendarTitle.textContent).toBe("October 2022");
         expect(mapContent()).toMatchSnapshot();
         await showNext(true);
-        expect(el.$refCalenarTitle.textContent).toBe("November 2022");
-        expect(el.$refCalenarItems.children.length).toBe(42);
+        expect(el.$refCalendarTitle.textContent).toBe("November 2022");
+        expect(el.$refCalendarItems.children.length).toBe(42);
         expect(mapContent()).toMatchSnapshot();
         await showNext(true);
-        expect(el.$refCalenarTitle.textContent).toBe("November 2022");
-        expect(el.$refCalenarItems.children.length).toBe(42);
+        expect(el.$refCalendarTitle.textContent).toBe("November 2022");
+        expect(el.$refCalendarItems.children.length).toBe(42);
 
         await showNext(false);
-        expect(el.$refCalenarTitle.textContent).toBe("October 2022");
+        expect(el.$refCalendarTitle.textContent).toBe("October 2022");
         await showNext(false);
-        expect(el.$refCalenarTitle.textContent).toBe("September 2022");
-        expect(el.$refCalenarItems.children.length).toBe(42);
+        expect(el.$refCalendarTitle.textContent).toBe("September 2022");
+        expect(el.$refCalendarItems.children.length).toBe(42);
         expect(mapContent()).toMatchSnapshot();
         await showNext(false);
-        expect(el.$refCalenarTitle.textContent).toBe("September 2022");
-        expect(el.$refCalenarItems.children.length).toBe(42);
+        expect(el.$refCalendarTitle.textContent).toBe("September 2022");
+        expect(el.$refCalendarItems.children.length).toBe(42);
 
         // with monthPicker
         el.$options.min = initDateStr("2021-08-02");
         el.$options.max = initDateStr("2023-01-31");
         await h.wait();
-        await h.userClick(el.$refCalenarTitle);
+        await h.userClick(el.$refCalendarTitle);
         await h.wait();
-        expect(el.$refCalenarTitle.textContent).toBe("2022");
+        expect(el.$refCalendarTitle.textContent).toBe("2022");
         await showNext(false);
         await showNext(false);
-        expect(el.$refCalenarTitle.textContent).toBe("2021");
+        expect(el.$refCalendarTitle.textContent).toBe("2021");
         expect(el).toMatchSnapshot();
         await showNext(true);
         await showNext(true);
         await showNext(true);
-        expect(el.$refCalenarTitle.textContent).toBe("2023");
+        expect(el.$refCalendarTitle.textContent).toBe("2023");
         expect(el).toMatchSnapshot();
 
         // checking with yearPicker
         el.$options.min = initDateStr("2016-01-02");
         el.$options.max = initDateStr("2034-05-01");
         await h.wait();
-        await h.userClick(el.$refCalenarTitle);
+        await h.userClick(el.$refCalendarTitle);
         await h.wait();
-        expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+        expect(el.$refCalendarTitle.textContent).toBe("2018 ... 2033");
         await showNext(false);
         await showNext(false);
-        expect(el.$refCalenarTitle.textContent).toBe("2002 ... 2017");
-        expect(el.$refCalenarItems).toMatchSnapshot();
+        expect(el.$refCalendarTitle.textContent).toBe("2002 ... 2017");
+        expect(el.$refCalendarItems).toMatchSnapshot();
         await showNext(true);
         await showNext(true);
         await showNext(true);
-        expect(el.$refCalenarTitle.textContent).toBe("2034 ... 2049");
-        expect(el.$refCalenarItems).toMatchSnapshot();
+        expect(el.$refCalendarTitle.textContent).toBe("2034 ... 2049");
+        expect(el.$refCalendarItems).toMatchSnapshot();
 
         // start with $options.max
         jest.setSystemTime(new Date(2022, 9, 15));
@@ -528,7 +528,7 @@ export default function calendarTZtest() {
         el.$value = initDate(2022, 9, 15);
         document.body.appendChild(el);
         await h.wait();
-        expect(el.$refCalenarTitle.textContent).toBe("1986 ... 2001");
+        expect(el.$refCalendarTitle.textContent).toBe("1986 ... 2001");
         // start with $options.min
         el.remove();
         el.$options.min = initDate(2003, 5, 1);
@@ -536,15 +536,15 @@ export default function calendarTZtest() {
         el.$value = initDate(1990, 0, 1);
         document.body.appendChild(el);
         await h.wait();
-        expect(el.$refCalenarTitle.textContent).toBe("2002 ... 2017");
+        expect(el.$refCalendarTitle.textContent).toBe("2002 ... 2017");
       });
 
       test("$options.exclude (attr [disabled])", async () => {
         const showNext = mockShowNext();
         const mapContent = () => {
-          const arr = new Array(el.$refCalenarItems.children.length);
+          const arr = new Array(el.$refCalendarItems.children.length);
           for (let i = 0; i < arr.length; ++i) {
-            const item = el.$refCalenarItems.children.item(i)!;
+            const item = el.$refCalendarItems.children.item(i)!;
             arr[i] = `${item.textContent}${item.hasAttribute("disabled") ? " disabled" : ""}`;
           }
           return arr;
@@ -560,7 +560,7 @@ export default function calendarTZtest() {
         const max = initDate(2022, 10, 1); // 1 Nov
         el.$options.exclude = [new Date(min), new Date(max)];
         await h.wait();
-        expect(el.$refCalenarTitle.textContent).toBe("October 2022");
+        expect(el.$refCalendarTitle.textContent).toBe("October 2022");
         expect(mapContent()).toMatchSnapshot();
         el.$options.min = min;
         el.$options.max = max;
@@ -571,18 +571,18 @@ export default function calendarTZtest() {
           new Date(el.$options.max),
         ];
         await h.wait();
-        expect(el.$refCalenarTitle.textContent).toBe("October 2022");
+        expect(el.$refCalendarTitle.textContent).toBe("October 2022");
         expect(mapContent()).toMatchSnapshot();
         await showNext(true);
-        expect(el.$refCalenarTitle.textContent).toBe("November 2022");
-        expect(el.$refCalenarItems.children.length).toBe(42);
+        expect(el.$refCalendarTitle.textContent).toBe("November 2022");
+        expect(el.$refCalendarItems.children.length).toBe(42);
         expect(mapContent()).toMatchSnapshot();
 
-        await h.userClick(el.$refCalenarTitle);
+        await h.userClick(el.$refCalendarTitle);
         await h.wait();
         expect(mapContent()).toMatchSnapshot();
 
-        await h.userClick(el.$refCalenarTitle);
+        await h.userClick(el.$refCalendarTitle);
         await h.wait();
         expect(mapContent()).toMatchSnapshot();
 

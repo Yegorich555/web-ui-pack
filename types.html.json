@@ -108,7 +108,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",
@@ -212,7 +212,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",
@@ -518,7 +518,7 @@
         },
         {
           "name": "w-postfix",
-          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+          "description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
         },
         {
           "name": "w-initvalue",
@@ -530,7 +530,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",
@@ -630,7 +630,7 @@
       "attributes": [
         {
           "name": "w-submitactions",
-          "description": "Actions that enabled on submit event; You can point several like: `goToError | collectChanged` \n\r  @defaultValue goToError | validateUntiFirst | reset | lockOnPending",
+          "description": "Actions that enabled on submit event; You can point several like: `goToError | collectChanged` \n\r  @defaultValue goToError | validateUntilFirst | reset | lockOnPending",
           "references": [
             {
               "name": "demo",
@@ -806,7 +806,7 @@
           "description": "String representation of displayed value by default inherits from localeInfo \n\r Point Global reference to object",
           "values": [
             {
-              "name": "window.myformat"
+              "name": "window.myFormat"
             }
           ],
           "references": [
@@ -865,7 +865,7 @@
         },
         {
           "name": "w-postfix",
-          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+          "description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
         },
         {
           "name": "w-initvalue",
@@ -877,7 +877,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",
@@ -1066,7 +1066,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",
@@ -1181,7 +1181,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",
@@ -1340,7 +1340,7 @@
         },
         {
           "name": "w-postfix",
-          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+          "description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
         },
         {
           "name": "w-initvalue",
@@ -1352,7 +1352,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",
@@ -1515,7 +1515,7 @@
         },
         {
           "name": "w-postfix",
-          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+          "description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
         },
         {
           "name": "w-initvalue",
@@ -1527,7 +1527,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",
@@ -1638,7 +1638,7 @@
         },
         {
           "name": "w-overflowtarget",
-          "description": "Anchor element that need to oveflow by spinner \n\r Point querySelector to related element \n\r Ignored if option `inline='true'` \n\r value 'auto' => parentElement",
+          "description": "Anchor element that need to overflow by spinner \n\r Point querySelector to related element \n\r Ignored if option `inline='true'` \n\r value 'auto' => parentElement",
           "values": [
             {
               "name": "auto"
@@ -1694,7 +1694,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",
@@ -1821,7 +1821,7 @@
         },
         {
           "name": "w-postfix",
-          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+          "description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
         },
         {
           "name": "w-initvalue",
@@ -1833,7 +1833,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",
@@ -1933,7 +1933,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",
@@ -2099,7 +2099,7 @@
         },
         {
           "name": "w-postfix",
-          "description": "Part after input; for example for value `$ 123 USD` postifx is ` USD`"
+          "description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
         },
         {
           "name": "w-initvalue",
@@ -2111,7 +2111,7 @@
         },
         {
           "name": "w-name",
-          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exlcude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
           "references": [
             {
               "name": "@see WUP.BaseControl.Options",

@@ -10,7 +10,7 @@ declare global {
       /** Animation applied to popup;
        * @defaultValue `PopupAnimations.drawer`
        * @tutorial Troubleshooting
-       * * to change option for specific element change it for `<wup-popup/>` direclty after timeout
+       * * to change option for specific element change it for `<wup-popup/>` directly after timeout
        * @example setTimeout(() => this.$refPopup.$options.animation = PopupAnimations.stack) */
       animation: PopupAnimations;
       /** Case when popup need to show;
@@ -96,7 +96,7 @@ export default class WUPDropdownElement<
 
   /** Default options applied to every element. Change it to configure default behavior
    * * @tutorial Troubleshooting
-   * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` direclty */
+   * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` directly */
   static $defaults: WUP.Dropdown.Options = {
     ...WUPPopupElement.$defaults,
     animation: PopupAnimations.drawer,

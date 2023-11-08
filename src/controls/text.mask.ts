@@ -286,7 +286,7 @@ export default class MaskTextInput {
     return caret;
   }
 
-  /** Update state based on chunks; call it when chunks are changed to recalc value etc. */
+  /** Update state based on chunks; call it when chunks are changed to re-calc value etc. */
   updateState(): void {
     // find last processed chunk
     let l = this.chunks.findIndex((c) => !c.isTouched) - 1;
@@ -335,9 +335,9 @@ export default class MaskTextInput {
     switch (e!.inputType) {
       case "insertText":
       case "insertFromPaste": {
-        const npos = this.adjustCaret(pos);
-        npos !== pos && el.setSelectionRange(npos, npos);
-        pos = npos;
+        const nPos = this.adjustCaret(pos);
+        nPos !== pos && el.setSelectionRange(nPos, nPos);
+        pos = nPos;
       }
     }
     el._maskPrev = {
@@ -435,8 +435,8 @@ export default class MaskTextInput {
   private deleteChar(pos: number, isBefore: boolean): number {
     /**
      * +1(234) 343|-4: remove char, shiftDigits. If lastDigit isEmpty: remove isTouched
-     * +1(234) 343|-: remove char, shiftDigits. if lastDigit incompleted: remove separator chunk
-     * +1(234) 343-4|: remove char, shiftDigits. if lastDigit incompleted: remove next separator chunk
+     * +1(234) 343|-: remove char, shiftDigits. if lastDigit inCompleted: remove separator chunk
+     * +1(234) 343-4|: remove char, shiftDigits. if lastDigit inCompleted: remove next separator chunk
      */
     let { chunk, posChunk } = this.findChunkByCaret(pos);
     if (!isBefore && chunk.isVar && chunk.value.length === posChunk && this.chunks[chunk.index + 1]) {
@@ -504,7 +504,7 @@ export default class MaskTextInput {
       chunk.value = chunk.value.substring(0, posChunk) + chunk.value.substring(posChunk + 1);
       chunk.isCompleted = chunk.value.length >= chunk.min;
       if (!chunk.isCompleted) {
-        // shift/recalc chunks
+        // shift/re-calc chunks
         let prev = chunk;
         for (let i = chunk.index + 2; i < this.chunks.length; i += 2) {
           const next = this.chunks[i] as WUP.Text.Mask.VarChunk;
@@ -518,7 +518,7 @@ export default class MaskTextInput {
         }
         if (prev !== chunk) {
           chunk.isCompleted = true;
-          prev.isCompleted = prev.value.length >= prev.min; // recalc last chunk
+          prev.isCompleted = prev.value.length >= prev.min; // re-calc last chunk
           !prev.isCompleted && this.resetChunk(this.chunks[prev.index + 1]); // reset next separator if prev not completed
         } else {
           // if no digit chunks at the right need to remove separator

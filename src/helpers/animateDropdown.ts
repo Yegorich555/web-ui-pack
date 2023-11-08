@@ -58,7 +58,7 @@ export default function animateDropdown(el: HTMLElement, ms: number, isHide = fa
   // define from-to ranges
   const to = isHide ? 0 : 1;
   const { from } = parseScale(el);
-  ms *= Math.abs(to - from); // recalc left-animTime (if element is partially opened and need to hide it)
+  ms *= Math.abs(to - from); // re-calc left-animTime (if element is partially opened and need to hide it)
 
   const p = animate(from, to, ms, (v, _t, isLast) => {
     if (!el.isConnected) {

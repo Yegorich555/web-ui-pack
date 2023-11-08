@@ -386,7 +386,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     popup.$options.openCase = PopupOpenCases.onInit;
     popup.$options.target = segment;
     popup.$options.arrowEnable = true;
-    // place in the center of drawed path
+    // place in the center of drawn path
     popup.getTargetRect = () => {
       const r = this.$refSVG.getBoundingClientRect();
       const scale = Math.min(r.width, r.height) / 100;
@@ -484,7 +484,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
 
 customElements.define(tagName, WUPCircleElement);
 
-/** Returns svg-path for Cirle according to options */
+/** Returns svg-path for Circle according to options */
 export function drawCircle(center: [number, number], r: number, width: number): string {
   const inR = r - width;
   const [x, y] = center;

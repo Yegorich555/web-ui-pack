@@ -27,10 +27,10 @@ export default function DateControlView() {
       }}
       features={[
         "Inheritted features from TextControl & CalendarControl",
-        "Powerful accessibility support (keyboard, announcenement)",
+        "Powerful accessibility support (keyboard, announcement)",
         "Scrollable & well animated pickers (with swipe for touchscreens)",
         "Wide ability to disable particular dates (options min/max/exclude)",
-        "No dependancy for working with dates (usage momentjs doesn't make sense)",
+        "No dependency for working with dates (usage momentJS doesn't make sense)",
         "Saves hours. So $value='2022-11-06 23:50' & click on '20 Dec' => '2022-12-20 23:50'",
         "Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
       ]}

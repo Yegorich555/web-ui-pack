@@ -14,7 +14,7 @@ export default function SwitchControlView() {
       features={[
         "Easy to change size of items via css-variables (ctrl-switch-h...)", //
         "Easy to reverse label",
-        "Powerful accessibility support (keyboard, announcenement)",
+        "Powerful accessibility support (keyboard, announcement)",
         "Ability to save value to localStorage, sessionStorage, URL (options storageKey & storage)",
       ]}
       details={{

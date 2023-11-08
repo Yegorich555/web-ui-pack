@@ -23,7 +23,7 @@ export default function TimeControlView() {
       }}
       features={[
         "Inheritted features from TextControl",
-        "Powerful accessibility support (keyboard, announcenement)",
+        "Powerful accessibility support (keyboard, announcement)",
         "Scrollable & well animated pickers (with swipe for touchscreens)",
         "Wide ability to disable particular values (options min/max/exclude)",
         "Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",

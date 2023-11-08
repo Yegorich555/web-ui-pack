@@ -249,7 +249,7 @@ export default class WUPSelectManyControl<
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override canParseInput(_text: string): boolean {
-    return false; // disable behavior from select[mulitple]
+    return false; // disable behavior from select[multiple]
   }
 
   override parseInput(text: string): ValueType[] | undefined {
@@ -280,7 +280,7 @@ export default class WUPSelectManyControl<
 
   /** It prevents menu opening if user tries sorting and focus got after mouseUp */
   _wasSortAfterClick?: boolean;
-  /** Call it to remove dragdrop loggic */
+  /** Call it to remove dragdrop logic */
   _disposeDragdrop?: () => void;
   /** Called to apply dragdrop logic */
   protected applyDragdrop(): void {
@@ -378,7 +378,7 @@ export default class WUPSelectManyControl<
         });
         // find nearest item in the nearest line
         dist = Number.MAX_SAFE_INTEGER;
-        // console.warn(nearest, nearestEnd, linei);
+        // console.warn(nearest, nearestEnd, lineY);
         for (let i = nearest; i <= nearestEnd; ++i) {
           const r = rects[i];
           const dx = ev.clientX - (r.x + r.width / 2);

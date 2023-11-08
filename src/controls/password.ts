@@ -218,7 +218,7 @@ export default class WUPPasswordControl<
     }); // otherwise selection is reset
   }
 
-  /** Called for toogle input type + fix browser issue when font affects on input height */
+  /** Called for toggling input type + fix browser issue when font affects on input height */
   protected changeInputType(isVisible: boolean): void {
     const h = this.$refInput.offsetHeight;
     this.$refInput.type = isVisible ? "text" : "password";

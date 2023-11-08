@@ -45,7 +45,7 @@ declare global {
        * '#' // optional digit
        * '*' // any char
        * '*{1,5}' // - any 1..5 chars
-       * '//[a-zA-Z]//' // regex: 1 letter (WARN: regex must be pointed for checkin only 1 char at once)
+       * '//[a-zA-Z]//' // regex: 1 letter (WARN: regex must be pointed for check-in only 1 char at once)
        * '//[a-zA-Z]//{1,5}' // regex: 1..5 letters
        * '|0' // or '\x00' - static char '0'
        * '|#' // or '\x01' - static char '#'
@@ -750,5 +750,5 @@ export default class WUPTextControl<
 }
 
 customElements.define(tagName, WUPTextControl);
-// todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
+// todo example how to create built-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask

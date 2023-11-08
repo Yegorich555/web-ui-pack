@@ -126,7 +126,7 @@ export default class WUPSelectControl<
       }`;
   }
 
-  // WARN: scroll sets for ul otherwise animation brokes scroll to selectItem because animation affects on scrollSize
+  // WARN: scroll sets for ul otherwise animation broken scroll to selectItem because animation affects on scrollSize
   static get $style(): string {
     return `${super.$style}
       :host {
@@ -282,7 +282,7 @@ export default class WUPSelectControl<
   /** Called to get/fetch items based on $options.items */
   fetchItems(): Promise<WUP.Select.MenuItems<ValueType>> | WUP.Select.MenuItems<ValueType> {
     this._cachedItems = undefined;
-    this.#findValT && clearTimeout(this.#findValT); // prevent setIinputValue if fetchItems is started
+    this.#findValT && clearTimeout(this.#findValT); // prevent setInputValue if fetchItems is started
     this.#findValT = undefined;
     const { items } = this._opts;
 

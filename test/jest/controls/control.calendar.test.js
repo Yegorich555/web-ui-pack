@@ -68,15 +68,15 @@ describe("control.calendar", () => {
 
     await set("day");
     expect(el.$options.startWith).toBe(PickersEnum.Day);
-    expect(el.$refCalenarTitle.textContent).toBe("October 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("October 2022");
 
     await set("month");
     expect(el.$options.startWith).toBe(PickersEnum.Month);
-    expect(el.$refCalenarTitle.textContent).toBe("2022");
+    expect(el.$refCalendarTitle.textContent).toBe("2022");
 
     await set("year");
     expect(el.$options.startWith).toBe(PickersEnum.Year);
-    expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+    expect(el.$refCalendarTitle.textContent).toBe("2018 ... 2033");
 
     await set("");
     expect(el.$options.startWith).toBeFalsy();
@@ -118,34 +118,34 @@ describe("control.calendar", () => {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     el.focus();
 
-    el.$refCalenarItems.firstElementChild.appendChild(span);
-    el.$refCalenarTitle.appendChild(svg);
+    el.$refCalendarItems.firstElementChild.appendChild(span);
+    el.$refCalendarTitle.appendChild(svg);
     let ev = new MouseEvent("click", { bubbles: true, cancelable: true });
-    expect(() => el.$refCalenarItems.dispatchEvent(ev)).not.toThrow(); // click outside li-item, but directly on parent
+    expect(() => el.$refCalendarItems.dispatchEvent(ev)).not.toThrow(); // click outside li-item, but directly on parent
     await h.wait();
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
     expect(ev.defaultPrevented).toBe(false);
 
-    el.$refCalenarItems.firstElementChild.appendChild(span);
-    el.$refCalenarTitle.appendChild(svg);
+    el.$refCalendarItems.firstElementChild.appendChild(span);
+    el.$refCalendarTitle.appendChild(svg);
     ev = new MouseEvent("click", { bubbles: true, cancelable: true });
     expect(() => span.dispatchEvent(ev)).not.toThrow();
     await h.wait(); // click on span inside first li-item
     expect(el.querySelector("[calendar='month']")).toBeTruthy();
     expect(ev.defaultPrevented).toBe(true);
 
-    el.$refCalenarItems.firstElementChild.appendChild(span);
-    el.$refCalenarTitle.appendChild(svg);
+    el.$refCalendarItems.firstElementChild.appendChild(span);
+    el.$refCalendarTitle.appendChild(svg);
     ev = new MouseEvent("click", { bubbles: true, cancelable: true });
     expect(() => svg.dispatchEvent(ev)).not.toThrow();
     await h.wait(); // click on svg inside button-title
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
     expect(ev.defaultPrevented).toBe(true);
 
-    el.$refCalenarItems.firstElementChild.appendChild(span);
-    el.$refCalenarTitle.appendChild(svg);
+    el.$refCalendarItems.firstElementChild.appendChild(span);
+    el.$refCalendarTitle.appendChild(svg);
     ev = new MouseEvent("click", { bubbles: true, cancelable: true });
-    el.$refCalenarItems.firstElementChild.dispatchEvent(ev);
+    el.$refCalendarItems.firstElementChild.dispatchEvent(ev);
     await h.wait(); // click on first li-item
     expect(el.querySelector("[calendar='month']")).toBeTruthy();
     expect(ev.defaultPrevented).toBe(true);
@@ -153,33 +153,33 @@ describe("control.calendar", () => {
     // click with right-button must be ignored
     const was = el.outerHTML;
     ev = new MouseEvent("click", { bubbles: true, cancelable: true, button: 1 });
-    el.$refCalenarItems.firstElementChild.dispatchEvent(ev);
+    el.$refCalendarItems.firstElementChild.dispatchEvent(ev);
     await h.wait();
     expect(ev.defaultPrevented).toBe(false);
     expect(el.outerHTML).toBe(was);
     // again on title
     ev = new MouseEvent("click", { bubbles: true, cancelable: true, button: 1 });
-    el.$refCalenarTitle.dispatchEvent(ev);
+    el.$refCalendarTitle.dispatchEvent(ev);
     await h.wait();
     expect(ev.defaultPrevented).toBe(false);
     expect(el.outerHTML).toBe(was);
 
     // click between items
-    await expect(h.userClick(el.$refCalenarItems.parentElement)).resolves.not.toThrow();
+    await expect(h.userClick(el.$refCalendarItems.parentElement)).resolves.not.toThrow();
   });
 
   test("scrolling", async () => {
     const mapContent = () => {
-      const arr = new Array(el.$refCalenarItems.children.length);
+      const arr = new Array(el.$refCalendarItems.children.length);
       for (let i = 0; i < arr.length; ++i) {
-        arr[i] = el.$refCalenarItems.children.item(i).textContent;
+        arr[i] = el.$refCalendarItems.children.item(i).textContent;
       }
       return arr;
     };
 
     const scrollNext = async (isNext) => {
       await nextFrame();
-      el.$refCalenarItems.dispatchEvent(
+      el.$refCalendarItems.dispatchEvent(
         new WheelEvent("wheel", { cancelable: true, bubbles: true, deltaY: isNext ? 100 : -100 })
       );
       await nextFrame();
@@ -212,58 +212,58 @@ describe("control.calendar", () => {
     ];
     // day picker
     for (let i = 0; i < arr.length; ++i) {
-      expect(el.$refCalenarTitle.textContent).toBe(`${months[i]} 2022`);
-      expect(el.$refCalenarItems.children.length).toBe(42);
-      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+      expect(el.$refCalendarTitle.textContent).toBe(`${months[i]} 2022`);
+      expect(el.$refCalendarItems.children.length).toBe(42);
+      expect(`${el.$refCalendarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
       await scrollNext(true);
     }
     for (let i = arr.length - 1; i !== 0; --i) {
       await scrollNext(false);
-      expect(el.$refCalenarTitle.textContent).toBe(`${months[i]} 2022`);
-      expect(el.$refCalenarItems.children.length).toBe(42);
-      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+      expect(el.$refCalendarTitle.textContent).toBe(`${months[i]} 2022`);
+      expect(el.$refCalendarItems.children.length).toBe(42);
+      expect(`${el.$refCalendarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
     }
 
     // check if selectBy clicks works after scrolling
-    let item = el.$refCalenarItems.children.item(2);
+    let item = el.$refCalendarItems.children.item(2);
     expect(item?.textContent).toBe("2");
     await h.userClick(item);
     expect(el.$value).toEqual(new Date("2022-02-02"));
 
     // month picker
-    await h.userClick(el.$refCalenarTitle);
+    await h.userClick(el.$refCalendarTitle);
     await h.wait();
     for (let i = 0; i < 4; ++i) {
-      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+      expect(`${el.$refCalendarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
       await scrollNext(true);
     }
     for (let i = 4; i !== 0; --i) {
       await scrollNext(false);
-      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+      expect(`${el.$refCalendarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
     }
 
     // year picker
-    await h.userClick(el.$refCalenarTitle);
+    await h.userClick(el.$refCalendarTitle);
     await h.wait();
     for (let i = 0; i < 4; ++i) {
-      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+      expect(`${el.$refCalendarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
       await scrollNext(true);
     }
     for (let i = 4; i !== 0; --i) {
       await scrollNext(false);
-      expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+      expect(`${el.$refCalendarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
     }
 
     // test if after scrolling selection works fine
-    item = el.$refCalenarItems.children.item(2);
+    item = el.$refCalendarItems.children.item(2);
     expect(item.textContent).toBe("2020");
     await h.userClick(item);
     await h.wait();
-    item = el.$refCalenarItems.children.item(2);
+    item = el.$refCalendarItems.children.item(2);
     expect(item.textContent).toBe("Mar");
     await h.userClick(item);
     await h.wait();
-    item = el.$refCalenarItems.children.item(7);
+    item = el.$refCalendarItems.children.item(7);
     expect(item.textContent).toBe("2");
     await h.userClick(item);
     await h.wait();
@@ -272,10 +272,10 @@ describe("control.calendar", () => {
     // test manual showNext
     el.showNext(true);
     await h.wait();
-    expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+    expect(`${el.$refCalendarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
     el.showNext(false);
     await h.wait();
-    expect(`${el.$refCalenarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
+    expect(`${el.$refCalendarTitle.textContent}: ${mapContent().join(",")}`).toMatchSnapshot();
     // cover case when #showNext not ready
     el = document.createElement("wup-calendar");
     expect(() => el.showNext()).not.toThrow();
@@ -295,20 +295,20 @@ describe("control.calendar", () => {
     document.body.addEventListener("keydown", (e) => (isPrevented = e.defaultPrevented));
 
     expect(el.querySelector("[calendar='day']")).toBeTruthy();
-    expect(el.$refCalenarTitle.textContent).toBe("March 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("March 2022");
 
     // checking logic of focusItem() before
     el.$options.min = new Date("2022-03-01");
     await h.wait();
-    let item = el.$refCalenarItems.children[0];
+    let item = el.$refCalendarItems.children[0];
     expect(item.hasAttribute("disabled")).toBe(true);
-    el.focusItem(el.$refCalenarItems.children[0]);
+    el.focusItem(el.$refCalendarItems.children[0]);
     expect(el.$refInput).toMatchSnapshot();
     expect(item).toMatchSnapshot();
     await h.wait();
     expect(item).toMatchSnapshot();
     const prevItem = item;
-    item = el.$refCalenarItems.children[el.$refCalenarItems.children.length - 1];
+    item = el.$refCalendarItems.children[el.$refCalendarItems.children.length - 1];
     el.focusItem(item);
     await h.wait();
     expect(el.$refInput).toMatchSnapshot();
@@ -364,18 +364,18 @@ describe("control.calendar", () => {
     expect(el.querySelector("[focused]")?.textContent).toBe("7");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("28");
-    expect(el.$refCalenarTitle.textContent).toBe("February 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("February 2022");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("27");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("1");
-    expect(el.$refCalenarTitle.textContent).toBe("March 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("March 2022");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("2");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
-    expect(el.$refCalenarTitle.textContent).toBe("February 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("February 2022");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("27");
 
@@ -393,35 +393,35 @@ describe("control.calendar", () => {
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageUp", cancelable: true, bubbles: true }));
     expect(isPrevented).toBe(true);
     expect(el.querySelector("[focused]")?.textContent).toBe("1");
-    expect(el.$refCalenarTitle.textContent).toBe("January 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("January 2022");
 
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageUp", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("1");
-    expect(el.$refCalenarTitle.textContent).toBe("January 2022"); // stay the same because nextPage not allowed due to min/max
+    expect(el.$refCalendarTitle.textContent).toBe("January 2022"); // stay the same because nextPage not allowed due to min/max
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("2");
 
     isPrevented = null;
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", cancelable: true, bubbles: true }));
     expect(isPrevented).toBe(true);
-    expect(el.$refCalenarTitle.textContent).toBe("February 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("February 2022");
     expect(el.querySelector("[focused]")?.textContent).toBe("1");
 
     // PageDown + Shift => change year
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", cancelable: true, bubbles: true }));
-    expect(el.$refCalenarTitle.textContent).toBe("March 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("March 2022");
     el.$refInput.dispatchEvent(
       new KeyboardEvent("keydown", { key: "PageDown", shiftKey: true, cancelable: true, bubbles: true })
     );
-    expect(el.$refCalenarTitle.textContent).toBe("March 2023");
+    expect(el.$refCalendarTitle.textContent).toBe("March 2023");
     expect(el.querySelector("[focused]")?.textContent).toBe("1");
 
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", cancelable: true, bubbles: true }));
-    expect(el.$refCalenarTitle.textContent).toBe("March 2023"); // stay the same because nextPage not allowed due to min/max
+    expect(el.$refCalendarTitle.textContent).toBe("March 2023"); // stay the same because nextPage not allowed due to min/max
     expect(el.querySelector("[focused]")?.textContent).toBe("1");
 
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "End", cancelable: true, bubbles: true }));
-    expect(el.$refCalenarTitle.textContent).toBe("March 2023");
+    expect(el.$refCalendarTitle.textContent).toBe("March 2023");
     expect(el.querySelector("[focused]")?.textContent).toBe("31"); // allowed to go to 31 despite on March 29 is max
 
     isPrevented = null;
@@ -439,7 +439,7 @@ describe("control.calendar", () => {
     el.$refInput.dispatchEvent(
       new KeyboardEvent("keydown", { key: "PageUp", shiftKey: true, cancelable: true, bubbles: true })
     );
-    expect(el.$refCalenarTitle.textContent).toBe("March 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("March 2022");
     expect(el.querySelector("[focused]")?.textContent).toBe("1");
 
     isPrevented = null;
@@ -451,9 +451,9 @@ describe("control.calendar", () => {
     // monthPicker
     el.$options.min = new Date("2021-02-15");
     await h.wait();
-    await h.userClick(el.$refCalenarTitle);
+    await h.userClick(el.$refCalendarTitle);
     await h.wait();
-    expect(el.$refCalenarTitle.textContent).toBe("2022");
+    expect(el.$refCalendarTitle.textContent).toBe("2022");
     expect(el.querySelector("[focused]")?.textContent).toBe("Jan");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
@@ -465,10 +465,10 @@ describe("control.calendar", () => {
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("Feb");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageUp", cancelable: true, bubbles: true }));
-    expect(el.$refCalenarTitle.textContent).toBe("2021");
+    expect(el.$refCalendarTitle.textContent).toBe("2021");
     expect(el.querySelector("[focused]")?.textContent).toBe("Jan");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", cancelable: true, bubbles: true }));
-    expect(el.$refCalenarTitle.textContent).toBe("2022");
+    expect(el.$refCalendarTitle.textContent).toBe("2022");
     expect(el.querySelector("[focused]")?.textContent).toBe("Jan");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "End", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("Dec");
@@ -478,9 +478,9 @@ describe("control.calendar", () => {
     // yearPicker
     el.$options.min = new Date("2002-02-15");
     await h.wait();
-    await h.userClick(el.$refCalenarTitle);
+    await h.userClick(el.$refCalendarTitle);
     await h.wait();
-    expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+    expect(el.$refCalendarTitle.textContent).toBe("2018 ... 2033");
     expect(el.querySelector("[focused]")?.textContent).toBe("2018");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
@@ -492,10 +492,10 @@ describe("control.calendar", () => {
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("2019");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageUp", cancelable: true, bubbles: true }));
-    expect(el.$refCalenarTitle.textContent).toBe("2002 ... 2017");
+    expect(el.$refCalendarTitle.textContent).toBe("2002 ... 2017");
     expect(el.querySelector("[focused]")?.textContent).toBe("2002");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", cancelable: true, bubbles: true }));
-    expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+    expect(el.$refCalendarTitle.textContent).toBe("2018 ... 2033");
     expect(el.querySelector("[focused]")?.textContent).toBe("2018");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "End", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("2033");
@@ -530,7 +530,7 @@ describe("control.calendar", () => {
     el.focusItem(null);
     el.showNext(false);
     await h.wait();
-    expect(el.$refCalenarTitle.textContent).toBe("February 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("February 2022");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("1"); // it takes first of month if no aria-selected and aria-current
 
@@ -539,12 +539,12 @@ describe("control.calendar", () => {
     el.$initValue = new Date("2022-08-01");
     document.body.appendChild(el);
     await h.wait();
-    expect(el.$refCalenarItems.firstElementChild.textContent).toBe("1");
+    expect(el.$refCalendarItems.firstElementChild.textContent).toBe("1");
     el.focus();
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")?.textContent).toBe("1");
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
-    expect(el.$refCalenarTitle.textContent).toBe("July 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("July 2022");
     expect(el.querySelector("[focused]")?.textContent).toBe("31");
 
     el.$options.disabled = true;
@@ -552,9 +552,9 @@ describe("control.calendar", () => {
     expect(el.querySelector("[focused]")).toBeFalsy();
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")).toBeFalsy();
-    await h.userClick(el.$refCalenarTitle);
+    await h.userClick(el.$refCalendarTitle);
     await h.wait();
-    expect(el.$refCalenarTitle.textContent).toBe("July 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("July 2022");
 
     el.$options.disabled = false;
     el.$options.readOnly = true;
@@ -562,9 +562,9 @@ describe("control.calendar", () => {
     expect(el.querySelector("[focused]")).toBeFalsy();
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", cancelable: true, bubbles: true }));
     expect(el.querySelector("[focused]")).toBeFalsy();
-    await h.userClick(el.$refCalenarTitle);
+    await h.userClick(el.$refCalendarTitle);
     await h.wait();
-    expect(el.$refCalenarTitle.textContent).toBe("July 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("July 2022");
   });
 
   test("clear by Esc", async () => {
@@ -593,7 +593,7 @@ describe("control.calendar", () => {
     document.body.appendChild(el);
     await h.wait();
 
-    const animEl = el.$refCalenar.children[1].children[0];
+    const animEl = el.$refCalendar.children[1].children[0];
     const orig = window.getComputedStyle;
     jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
       if (animEl === elem) {
@@ -602,8 +602,8 @@ describe("control.calendar", () => {
       return orig(elem);
     });
 
-    expect(el.$refCalenarTitle.textContent).toBe("October 2022");
-    await h.userClick(el.$refCalenarTitle);
+    expect(el.$refCalendarTitle.textContent).toBe("October 2022");
+    await h.userClick(el.$refCalendarTitle);
     expect(animEl.getAttribute("zoom")).toBe("out");
     await h.wait(300); // cases when events not fired
     expect(animEl.getAttribute("zoom")).toBe("out2");
@@ -613,8 +613,8 @@ describe("control.calendar", () => {
     expect(animEl.getAttribute("zoom")).toBe(null);
     await h.wait();
 
-    expect(el.$refCalenarTitle.textContent).toBe("2022");
-    await h.userClick(el.$refCalenarTitle);
+    expect(el.$refCalendarTitle.textContent).toBe("2022");
+    await h.userClick(el.$refCalendarTitle);
     expect(animEl.getAttribute("zoom")).toBe("out");
     await h.wait(300); // cases when events not fired
     expect(animEl.getAttribute("zoom")).toBe("out2");
@@ -624,8 +624,8 @@ describe("control.calendar", () => {
     expect(animEl.getAttribute("zoom")).toBe(null);
     await h.wait();
 
-    expect(el.$refCalenarTitle.textContent).toBe("2018 ... 2033");
-    await h.userClick(el.$refCalenarItems.firstElementChild);
+    expect(el.$refCalendarTitle.textContent).toBe("2018 ... 2033");
+    await h.userClick(el.$refCalendarItems.firstElementChild);
     expect(animEl.getAttribute("zoom")).toBe("in");
     await h.wait(300);
     expect(animEl.getAttribute("zoom")).toBe("in2");
@@ -633,15 +633,15 @@ describe("control.calendar", () => {
     expect(animEl.getAttribute("zoom")).toBe(null);
     await h.wait();
 
-    expect(el.$refCalenarTitle.textContent).toBe("2018");
-    await h.userClick(el.$refCalenarItems.firstElementChild);
+    expect(el.$refCalendarTitle.textContent).toBe("2018");
+    await h.userClick(el.$refCalendarItems.firstElementChild);
     expect(animEl.getAttribute("zoom")).toBe("in");
     await h.wait(300);
     expect(animEl.getAttribute("zoom")).toBe("in2");
     await h.wait(300);
     expect(animEl.getAttribute("zoom")).toBe(null);
     await h.wait();
-    expect(el.$refCalenarTitle.textContent).toBe("January 2018");
+    expect(el.$refCalendarTitle.textContent).toBe("January 2018");
   });
 
   test("save hh even when no $value but has $initValue", async () => {
@@ -650,9 +650,9 @@ describe("control.calendar", () => {
     el.$initValue = new Date("2022-12-13T23:46:57.987Z");
     document.body.appendChild(el);
     await h.wait();
-    expect(el.$refCalenarTitle.textContent).toBe("December 2022");
+    expect(el.$refCalendarTitle.textContent).toBe("December 2022");
     el.$value = undefined;
-    await h.userClick(el.$refCalenarItems.children[6]);
+    await h.userClick(el.$refCalendarItems.children[6]);
     await h.wait();
     expect(el.$value?.toISOString()).toBe("2022-12-04T23:46:57.987Z");
   });

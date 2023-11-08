@@ -170,7 +170,7 @@ export default abstract class WUPBaseComboControl<
   protected abstract focusMenuItemByKeydown(e: KeyboardEvent): void;
 
   /** Returns whether possible to use input-click as dropdown behavior */
-  isLockInputDrodpown(e: Event): boolean {
+  isLockInputDropdown(e: Event): boolean {
     return (
       !(this._opts.openCase & MenuOpenCases.onClickInput) &&
       e.type === "click" &&
@@ -186,7 +186,7 @@ export default abstract class WUPBaseComboControl<
       return false;
     }
 
-    if (e && this.isLockInputDrodpown(e!)) {
+    if (e && this.isLockInputDropdown(e!)) {
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 
@@ -212,7 +212,7 @@ export default abstract class WUPBaseComboControl<
     if (!this.$refPopup) {
       const p = document.createElement("wup-popup");
       this.$refPopup = p;
-      p.$options.openCase = PopupOpenCases.onManuallCall;
+      p.$options.openCase = PopupOpenCases.onManualCall;
       p.$options.target = this;
       p.$options.offsetFitElement = [1, 1];
       p.$options.minWidthByTarget = true;
@@ -261,7 +261,7 @@ export default abstract class WUPBaseComboControl<
 
   /** Override to change close-behavior */
   canCloseMenu(closeCase: MenuCloseCases, e?: MouseEvent | FocusEvent | null): boolean {
-    if (e && this.isLockInputDrodpown(e!)) {
+    if (e && this.isLockInputDropdown(e!)) {
       return false; // if input readonly > dropdown behavior otherwise allow to work with input instead of opening window
     }
 

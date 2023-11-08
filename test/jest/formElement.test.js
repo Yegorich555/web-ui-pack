@@ -595,11 +595,11 @@ describe("formElement", () => {
         expect(document.activeElement).not.toBe(inputs[1].$refInput);
       });
 
-      test("validateUntiFirst", async () => {
+      test("validateUntilFirst", async () => {
         inputs.forEach((inp) => (inp.$options.validations = { required: true }));
         inputs[0].$value = "kaly@mail.com";
 
-        el.$options.submitActions = SubmitActions.validateUntiFirst;
+        el.$options.submitActions = SubmitActions.validateUntilFirst;
         btnSubmit.click();
         await h.wait();
         expect(inputs.map((c) => !!c.$refError)).toEqual([false, true, false]);

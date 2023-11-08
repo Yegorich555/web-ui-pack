@@ -60,7 +60,7 @@ export default class WUPCheckControl<
       }`;
   }
 
-  /** NiceToHave: split to wup-icheck to resut with wup-table etc. */
+  /** NiceToHave: split to wup-icheck to result with wup-table etc. */
   static get $style(): string {
     return `${super.$style}
        :host [icon] {

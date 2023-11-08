@@ -379,7 +379,7 @@ describe("control.date", () => {
     await h.wait();
     expect(h.getInputCursor(el.$refInput)).toBe("|2022-10-12|");
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
-    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+    expect(el.$refPopup.firstChild.$refCalendarTitle.textContent).toBe("2018 ... 2033");
 
     const isPressKeyPrevented = (key = "Arrow", opts = { shiftKey: false, ctrlKey: false }) => {
       const isPrevented = !el.$refInput.dispatchEvent(
@@ -413,13 +413,13 @@ describe("control.date", () => {
     expect(isPressKeyPrevented("Enter")).toBe(true);
     await h.wait();
     expect(el.querySelector("[calendar='month']")).toBeTruthy();
-    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("2033");
+    expect(el.$refPopup.firstChild.$refCalendarTitle.textContent).toBe("2033");
     expect(el.querySelector("[focused]")?.textContent).toBe("Jan");
 
     expect(isPressKeyPrevented("Enter")).toBe(true);
     await h.wait();
     expect(el.querySelector("[calendar='day']")).toBeTruthy();
-    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("January 2033");
+    expect(el.$refPopup.firstChild.$refCalendarTitle.textContent).toBe("January 2033");
     expect(el.querySelector("[focused]")?.textContent).toBe("1");
 
     expect(isPressKeyPrevented("Enter")).toBe(true);
@@ -448,14 +448,14 @@ describe("control.date", () => {
     await h.wait();
 
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
-    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.firstElementChild); // click on 2018
+    await h.userClick(el.$refPopup.firstChild.$refCalendarItems.firstElementChild); // click on 2018
     await h.wait();
     expect(el.querySelector("[calendar='month']")).toBeTruthy();
-    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.children[1]); // click on Feb
+    await h.userClick(el.$refPopup.firstChild.$refCalendarItems.children[1]); // click on Feb
     await h.wait();
     expect(el.querySelector("[calendar='day']")).toBeTruthy();
-    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("February 2018");
-    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.children[6]); // click on 4 February 2018
+    expect(el.$refPopup.firstChild.$refCalendarTitle.textContent).toBe("February 2018");
+    await h.userClick(el.$refPopup.firstChild.$refCalendarItems.children[6]); // click on 4 February 2018
     await h.wait();
     expect(el.$isOpened).toBe(false);
     expect(el.$value?.toISOString()).toBe("2018-02-04T13:45:59.000Z"); // it's must store hours

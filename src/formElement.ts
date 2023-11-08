@@ -10,7 +10,7 @@ export const enum SubmitActions {
   /** Scroll to first error (if exists) and focus control */
   goToError = 1,
   /** Validate until first error is found (otherwise validate all) */
-  validateUntiFirst = 1 << 1,
+  validateUntilFirst = 1 << 1,
   /** Collect to model only changed values */
   collectChanged = 1 << 2,
   /** Reset isDirty and assign $value to $initValue for controls (on success only) */
@@ -40,7 +40,7 @@ declare global {
     interface EventMap extends WUP.Base.EventMap {
       /** Fires before $submit is happened; can be prevented via `e.preventDefault()` */
       $willSubmit: CustomEvent<Pick<SubmitDetails, "relatedEvent" | "relatedForm" | "submitter">>;
-      /** Fires by user-submit when validation succesfull and model is collected */
+      /** Fires by user-submit when validation successful and model is collected */
       $submit: CustomEvent<SubmitDetails>;
       /** Fires when submit is end (after http-response) */
       $submitEnd: CustomEvent<{ success: boolean }>;
@@ -48,7 +48,7 @@ declare global {
 
     interface Options {
       /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
-       * @defaultValue goToError | validateUntiFirst | reset | lockOnPending */
+       * @defaultValue goToError | validateUntilFirst | reset | lockOnPending */
       submitActions: SubmitActions;
       /** Enable to tore data in localStorage to prevent losing till submitted;
        * @defaultValue false
@@ -253,7 +253,7 @@ export default class WUPFormElement<
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Form.Options = {
     submitActions:
-      SubmitActions.goToError | SubmitActions.validateUntiFirst | SubmitActions.reset | SubmitActions.lockOnPending,
+      SubmitActions.goToError | SubmitActions.validateUntilFirst | SubmitActions.reset | SubmitActions.lockOnPending,
     autoComplete: false,
     autoFocus: false,
     autoStore: false,
@@ -390,7 +390,7 @@ export default class WUPFormElement<
     // validate
     let errCtrl: IBaseControl | undefined;
     let arrCtrl = this.$controlsAttached;
-    if (this._opts.submitActions & SubmitActions.validateUntiFirst) {
+    if (this._opts.submitActions & SubmitActions.validateUntilFirst) {
       errCtrl = arrCtrl.find((c) => c.validateBySubmit() && c.canShowError);
     } else {
       arrCtrl.forEach((c) => {

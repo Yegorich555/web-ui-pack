@@ -95,7 +95,7 @@
 
 **BREAKING CHANGES**:
 
-- **Internals** (**Note:** Skip this if you haven't created custon Elements inherrited from WUP...)
+- **Internals** (**Note:** Skip this if you haven't created custom Elements inherited from WUP...)
   - Added auto-mapping between attributes <=> options based on key-values in `$defaults`
   - TypeScript. Removed interface `Defaults`. Merged with interface `Options` and now contains all fields as required
   - Now removing attributes/options always rollbacks to value defined in `$defaults`
@@ -142,7 +142,7 @@
 - **Controls**
   - `button[clear]` not hidden anymore for required controls (user must have ability to clear all at once & put new text). To rollback it use css-rule `wup-text[required] button[clear] { display: none; }`
   - `button[clear]` visible only on focus & hover. To rollback it use css `wup-text button[clear] { display: block!important; }`
-  - updated hover & focus tyles
+  - updated hover & focus styles
 - **Combobox controls (Select, Date, Time)**
   - Now menu is hidden by default when `autoFocus` enabled. To revert to previous behavior use `WUPSelectControl.$defaults.showCase |= ShowCases.onFocusAuto`
 - [SelectControl](src/controls/select.ts).[SelectManyControl](src/controls/selectMany.ts).
@@ -153,10 +153,10 @@
 
 **BREAKING CHANGES**:
 
-- **Internals** (**Note:** If you haven't created custom Elements inherrited from WUP... - don't pay attention on it).
-  - Refactored `$options` initialization. So all inherrited Elemenents must override only `$defaults` and use `TOptions` as generic instead of overriding $options like it was before.
+- **Internals** (**Note:** If you haven't created custom Elements inherited from WUP... - don't pay attention on it).
+  - Refactored `$options` initialization. So all inherited Elements must override only `$defaults` and use `TOptions` as generic instead of overriding $options like it was before.
   - Deprecated static property **nameUnique**
-  - **Controls**. Dsiable `maxWidthByTarget` for error-popup
+  - **Controls**. Disable `maxWidthByTarget` for error-popup
   - **Global**. Improved styles performance via refactoring selectors
 
 **Fixes**:
@@ -179,7 +179,7 @@
 - [CircleElement](src/circleElement.ts).
   - _wrong tooltip position when segment is half of circle_
   - _wrong console.error when `items=[{value:2}]`_
-  - \*wrong label-value when item value < opion **minsize\***
+  - \*wrong label-value when item value < option **minsize\***
   - _edges of small segment are not rounded according to corner_
 - [TimeControl](src/controls/time.ts).
   - _menu items with wrong sizes and text not aligned_
@@ -265,7 +265,7 @@
   - Added `$defaults.storage` and `$options.skey` to store/get value in different storages `local/session/url`
   - Extended custom validation to `(value, control, reason) => false | string`. Was `(value) => false | string`
   - Hide `button[clear]` by default for disabled/readonly/required
-- **Glolbal**. Added JSDoc comments for `jsx/tsx` files (previously hovering on `<wup-text>` showed nothing)
+- **Global**. Added JSDoc comments for `jsx/tsx` files (previously hovering on `<wup-text>` showed nothing)
 
 ## 0.6.0 (May 19, 2023)
 
@@ -298,9 +298,9 @@
   - Reduced memory consumption via significant refactoring listeners & callback
   - Popup **always closed by keydown Escape** if wasn't prevented (if was opened via default listener)
   - Popup **always closed by focusLost of target & popup** for accessibility purpose (if was opened via default listener)
-  - Ability to call **\$show()** and **\$hide()** with working listeners (previously manuall **$show()** removed all listeners)
+  - Ability to call **\$show()** and **\$hide()** with working listeners (previously manual call of **$show()** removed all listeners)
   - **Controls**. Able to setup `$defaults.validations` (like `WUPNumberControl.$validations = {min: 0}` etc.)
-- **Global**. Added custom callbacks for events. So event `popup.addEventListner("$show",e=>...)` equal to `popup.$onShow = (e)=>...`
+- **Global**. Added custom callbacks for events. So event `popup.addEventListener("$show",e=>...)` equal to `popup.$onShow = (e)=>...`
 
 ## 0.5.2 (Mar 29, 2023)
 
@@ -340,7 +340,7 @@
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _Attribute `initvalue=''` sets value to `true` (expected `false`)_
 - [TextareaControl](src/controls/textarea.ts). _`Ctrl + B` makes text bold but it's unexpected for plain textarea_
 - **Controls**. _Hover effect on Android devices (expected: no-hover on touch-screens)_
-- **Controls**. _Focus frame isn't rouned on Safari_
+- **Controls**. _Focus frame isn't rounded on Safari_
 - **Controls**. _Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)_
 - **Controls**. _Controls are not rendered if parsing initvalue is wrong_
 - **Controls**. _Unexpected autofocus on mask-inputs on Safari_
@@ -372,7 +372,7 @@
 
 - [CalendarControl](src/controls/calendar.ts). Different pickers height after scrolling
 - helper [WUPScrolled](src/helpers/scrolled.ts). maxHeight left after scrolling finished
-- helper [WUPScrolled](src/helpers/scrolled.ts). goto previous sometimes scrolles through the whole range
+- helper [WUPScrolled](src/helpers/scrolled.ts). goto previous sometimes scrolls through the whole range
 
 ## 0.4.0 (Jan 26, 2023)
 
@@ -399,8 +399,8 @@
 
 - helper [localeInfo](src/objects/localeInfo.ts). `AM/PM parsed to 'a' but expected 'A'`
 - helper [dateFromString](src/helpers/dateFromString.ts). `12:00 PM throws Error but expected 12:00`
-- Icon **check**. Reduced thikness to fit other texts & icons
-- [PopupElement](src/popup/popupElement.ts). Changing content size doesn't recalc popup position
+- Icon **check**. Reduced thickness to fit other texts & icons
+- [PopupElement](src/popup/popupElement.ts). Changing content size doesn't re-calc popup position
 - [PopupElement](src/popup/popupElement.ts). Wrong position if parent has style transform.translate
 - [PopupElement](src/popup/popupElement.ts). Content is blured if transform.translate with float values
 - [DateControl](src/controls/date.ts). Clearing input doesn't reset $value
@@ -427,7 +427,7 @@
 
 - Helpers [dateToString](src/helpers/dateToString.ts), [dateFromString](src/helpers/dateFromString.ts). Added support **MMM** format
 - **Text based controls**. Added `$options` `prefix` & `postfix`
-- Controls **Number, Date, Calendar** are locale based and depeneds on [localeInfo](src/objects/localeInfo.ts) helper
+- Controls **Number, Date, Calendar** are locale based and depends on [localeInfo](src/objects/localeInfo.ts) helper
 - Added elements
   - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
   - [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
@@ -507,7 +507,7 @@
 
 - [PopupElement](src/popup/popupElement.ts)
   - Renamed $arrowElement to $refArrow
-  - Added $refresh() - to force update/recalc position when nested content is changed
+  - Added $refresh() - to force update/re-calc position when nested content is changed
   - Added option **animation** with animation-drawer
   - Added option **maxWidthByTarget**
   - Added option **offsetFitElement**

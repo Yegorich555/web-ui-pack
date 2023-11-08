@@ -13,7 +13,7 @@ declare global {
       /** Decimal separator; for number 123.4 it's dot
        *  @see {@link localeInfo.sepDecimal} */
       sepDecimal?: string;
-      /** Thouthands separator; for number 1,234.5 it's comma
+      /** Thousands separator; for number 1,234.5 it's comma
        *  @see {@link localeInfo.sep1000} */
       sep1000?: string;
       /** Maximum displayed fraction digits; for 123.45 it's 2

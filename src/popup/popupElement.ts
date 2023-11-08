@@ -46,7 +46,7 @@ declare global {
  * document.body.append(el);
  * // or
  * const btn = document.querySelector('button');
- * // this is the most recomended way because $attach appends popup only by onShow and removes byHide
+ * // this is the most recommended way because $attach appends popup only by onShow and removes byHide
  * const detach = WUPPopupElement.$attach(
                     { target: btn, text: "Some text content here", openCase: PopupOpenCases.onFocus | PopupOpenCases.onClick },
                     (popup) => { popup.className = "popup-class-here"; }
@@ -59,7 +59,7 @@ declare global {
  * <wup-popup w-target="#btn1" w-placement="top-start">Some content here</wup-popup>
  * ```
  * @tutorial Troubleshooting:
- * * You can set minWidth, minHeight to prevent squizing of popup or don't use rule '.$adjust'
+ * * You can set minWidth, minHeight to prevent squeezing of popup or don't use rule '.$adjust'
  * * Don't override styles: display, transform (possible to override only for animation)
  * * Don't use inline styles: maxWidth, maxHeight, minWidth, minHeight
  * * If target removed (when popup $isOpened) and appended again you need to update $options.target (because $options.target cleared)
@@ -331,7 +331,7 @@ export default class WUPPopupElement<
   /** Returns arrowElement if $options.arrowEnable=true and after popup $isOpened */
   $refArrow?: WUPPopupArrowElement;
 
-  /** Force to update position. Call this if related styles are changed & need to recalc position */
+  /** Force to update position. Call this if related styles are changed & need to re-calc position */
   $refresh(): void {
     this.#state && this.buildState();
   }
@@ -347,7 +347,7 @@ export default class WUPPopupElement<
 
   _refListener?: PopupListener;
   #attach?: () => PopupListener; // func to use alternative target
-  /** Called after gotReady() and $open() (to reinit according to options) */
+  /** Called after gotReady() and $open() (to re-init according to options) */
   protected init(): void {
     this.disposeListener(); // remove previously added events
 
@@ -358,7 +358,7 @@ export default class WUPPopupElement<
         this.goOpen(PopupOpenCases.onInit, null);
         return;
       }
-      if (this._opts.openCase !== PopupOpenCases.onManuallCall) {
+      if (this._opts.openCase !== PopupOpenCases.onManualCall) {
         this._opts.target = this.defineTarget();
         this._refListener = new PopupListener(
           this._opts as typeof this._opts & { target: HTMLElement },
@@ -577,11 +577,11 @@ export default class WUPPopupElement<
 
   override goOpen(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): Promise<boolean> {
     this._opts.target = this.defineTarget(); // WARN: it can throw error if target isn't defined
-    if (openCase === PopupOpenCases.onManuallCall && this._refListener) {
+    if (openCase === PopupOpenCases.onManualCall && this._refListener) {
       this._refListener.open(null as any, ev); // if listener exists need to call it from listener side to apply events
       return this._whenOpen as Promise<boolean>;
     }
-    return super.goOpen(openCase ?? PopupOpenCases.onManuallCall, ev);
+    return super.goOpen(openCase ?? PopupOpenCases.onManualCall, ev);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -607,12 +607,12 @@ export default class WUPPopupElement<
   }
 
   override goClose(closeCase: PopupCloseCases, ev: MouseEvent | FocusEvent | KeyboardEvent | null): Promise<boolean> {
-    if (closeCase === PopupCloseCases.onManuallCall && this._refListener) {
+    if (closeCase === PopupCloseCases.onManualCall && this._refListener) {
       this._refListener.close(null as any, ev); // if listener exists need to call it from listener side to apply events
       return this._whenClose as Promise<boolean>;
     }
     const skipWait = closeCase === PopupCloseCases.onOptionChange || closeCase === PopupCloseCases.onTargetRemove;
-    return super.goClose(closeCase ?? PopupCloseCases.onManuallCall, ev, skipWait);
+    return super.goClose(closeCase ?? PopupCloseCases.onManualCall, ev, skipWait);
   }
 
   /** Hide popup. @closeCase as reason of hide(). Calling 2nd time at once will stop previous hide-animation */
@@ -797,7 +797,7 @@ export default class WUPPopupElement<
     let lastRule: WUP.Popup.Place.PlaceFunc;
 
     const process = (): WUP.Popup.Place.Result => {
-      const hasOveflow = (p: WUP.Popup.Place.Result, meSize: { w: number; h: number }): boolean =>
+      const hasOverflow = (p: WUP.Popup.Place.Result, meSize: { w: number; h: number }): boolean =>
         p.left < fit.left ||
         p.top < fit.top ||
         p.freeW < this.#state!.userStyles!.minW ||
@@ -809,7 +809,7 @@ export default class WUPPopupElement<
       const isOk = this.#state!.placements!.some((pfn) => {
         lastRule = pfn;
         pos = pfn(t, me, fit);
-        let ok = !hasOveflow(pos, me);
+        let ok = !hasOverflow(pos, me);
         if (ok) {
           // maxW/H can be null if resize is not required
           if (pos.maxW != null && !_defMaxW /* || _defMaxW > pos.maxW */) {
@@ -822,7 +822,7 @@ export default class WUPPopupElement<
           if (this.offsetHeight !== me.h || this.offsetWidth !== me.w) {
             const meUpdated = { ...me, w: this.offsetWidth, h: this.offsetHeight };
             pos = pfn(t, meUpdated, fit);
-            ok = !hasOveflow(pos, meUpdated);
+            ok = !hasOverflow(pos, meUpdated);
             /* istanbul ignore else */
             if (!ok) {
               // reset styles if need to look for another position
@@ -893,7 +893,7 @@ export default class WUPPopupElement<
       this.style.transform += ` ${was}`; // rollback scale transformation
     }
     /* re-calc is required to avoid case when popup unexpectedly affects on layout:
-      layout bug: Yscroll appears/disappears when display:flex; heigth:100vh > position:absolute; right:-10px
+      layout bug: Y-scroll appears/disappears when display:flex; height:100vh > position:absolute; right:-10px
       with cnt==2 it's reprodusable */
     return t.el.getBoundingClientRect();
   }
@@ -919,9 +919,9 @@ export default class WUPPopupElement<
     super.gotRemoved();
   }
 
-  /** Call when need to reinit */
+  /** Call when need to re-init */
   protected disposeListener(): void {
-    // possible on reinit when need to rebound events
+    // possible on re-init when need to rebound events
     this._refListener?.stopListen();
     this._refListener = undefined;
   }

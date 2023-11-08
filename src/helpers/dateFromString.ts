@@ -19,7 +19,7 @@ export default function dateFromString(
   v: string,
   format = "YYYY-MM-DD",
   options: {
-    /** Enables rule: if detected out of range value: day > 31 etc. then throws exeption "Out of range";
+    /** Enables rule: if detected out of range value: day > 31 etc. then throws exception "Out of range";
      *  Disable it to return `null` instead
      * @defaultValue true */
     throwOutOfRange?: boolean;

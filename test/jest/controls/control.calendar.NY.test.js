@@ -19,10 +19,10 @@ describe(`control.calendar >> timezone: ${window.TZ}, offset: ${new Date(2022, 9
     document.body.appendChild(el);
     await h.wait();
 
-    const item = el.$refCalenarItems.children.item(6);
+    const item = el.$refCalendarItems.children.item(6);
     expect(item.textContent).toBe("6"); // 6 Nov
     await h.userClick(item);
-    // for NewYourk DST shift on 6Nov and 14Mar
+    // for NewYork DST shift on 6Nov and 14Mar
     expect(el.$value.toLocaleString()).toBe(new Date("2022-11-06 23:50").toLocaleString());
   });
 });

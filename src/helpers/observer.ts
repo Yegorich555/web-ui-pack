@@ -23,7 +23,7 @@ const pathThrough = <R>(fn: () => R): Promise<R> =>
     resolve(fn());
   });
 
-/** Returs true if object is valid Record<string, any> and need to iterate props */
+/** Returns true if object is valid Record<string, any> and need to iterate props */
 const isRecord = (obj: any): boolean =>
   obj !== null && typeof obj === "object" && !(obj instanceof HTMLElement) && !(obj instanceof Promise);
 const isDate = (obj: any): boolean => Object.prototype.toString.call(obj) === "[object Date]";

@@ -55,18 +55,18 @@ declare global {
     }
     /** Ordinary placement rule with nested $resize rule */
     interface AdjustFunc extends PlaceFunc {
-      /** Allow changing maxHeight to fit layout; setup style minHeight to avoid extra-squizing */
+      /** Allow changing maxHeight to fit layout; setup style minHeight to avoid extra-squeezing */
       $resizeHeight: PlaceFunc;
-      /** Allow changing maxWidth; setup style minWidth to avoid extra-squizing */
+      /** Allow changing maxWidth; setup style minWidth to avoid extra-squeezing */
       $resizeWidth: PlaceFunc;
     }
     /** Ordinary placement rule with nested $adjust rule */
     interface AlignFunc extends PlaceFunc {
       /** Allow to break align-rules (start,middle,end) and adjust position to fit layout */
       $adjust: AdjustFunc;
-      /** Allow changing maxHeight to fit layout; setup style minHeight to avoid extra-squizing */
+      /** Allow changing maxHeight to fit layout; setup style minHeight to avoid extra-squeezing */
       $resizeHeight: PlaceFunc;
-      /** Allow changing maxWidth to fit layout; setup style minWidth to avoid extra-squizing */
+      /** Allow changing maxWidth to fit layout; setup style minWidth to avoid extra-squeezing */
       $resizeWidth: PlaceFunc;
     }
 
@@ -96,7 +96,7 @@ export const xAdjust = <WUP.Popup.Place.AdjustFunc>function xAdjust(this: WUP.Po
 };
 
 const resizeHeight = <WUP.Popup.Place.PlaceFunc>function resizeHeight(this: WUP.Popup.Place.Result, t, me, fit) {
-  // reject calc since minSize > availableSize; in this case we must select opossite or something that fit better
+  // reject calc since minSize > availableSize; in this case we must select opposite or something that fit better
   if (me.minH > this.freeH) {
     return this;
   }
@@ -111,7 +111,7 @@ const resizeHeight = <WUP.Popup.Place.PlaceFunc>function resizeHeight(this: WUP.
 };
 
 const resizeWidth = <WUP.Popup.Place.PlaceFunc>function resizeWidth(this: WUP.Popup.Place.Result, t, me, fit) {
-  // reject calc since minSize > availableSize; in this case we must select opossite or something that fit better
+  // reject calc since minSize > availableSize; in this case we must select opposite or something that fit better
   if (me.minW > this.freeW) {
     return this;
   }

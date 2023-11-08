@@ -41,7 +41,7 @@ export default function PopupView() {
       link="src/popup/popupElement.ts"
       details={{ tag: "wup-popup", linkDemo: "demo/src/components/popup/popupView.tsx" }}
       features={[
-        "The main goal: place inside visible area without oveflow of target",
+        "The main goal: place inside visible area without overflow of target",
         <>
           Works without <b>position: relative</b>
         </>,

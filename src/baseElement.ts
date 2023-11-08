@@ -7,7 +7,7 @@ import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
 import { WUPcssHidden, WUPcssBtnIcon } from "./styles";
 
-// theoritcally such single appending is faster than using :host inside shadowComponent
+// theoretically such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
 const appendedRootStyles = new Set<typeof WUPBaseElement>();
 let lastUniqueNum = 0;
@@ -251,7 +251,7 @@ export default abstract class WUPBaseElement<
     return this._opts;
   }
 
-  /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
+  /** Options inherited from `static.$defaults` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
   set $options(v: Partial<TOptions>) {
     if (this._opts === v) {
       return;
@@ -437,7 +437,7 @@ export default abstract class WUPBaseElement<
     if (name.startsWith("w-")) {
       name = name.substring(2);
     }
-    // WARN: observedAttribute must return same colelction as mappedAttributes
+    // WARN: observedAttribute must return same collection as mappedAttributes
     let map = allMappedAttrs.get(this.#ctr); // try to get from cache first
     if (!map) {
       map = this.#ctr.mappedAttributes;
@@ -588,7 +588,7 @@ export default abstract class WUPBaseElement<
     return null;
   }
 
-  /** Returns true if contains pointed element or has iself
+  /** Returns true if contains pointed element or has itself
    * @tutorial Troubleshooting
    * * if element has position `fixed` or `absolute` then returns false */
   itsMe(el: Element | EventTarget | null): boolean {
@@ -681,7 +681,7 @@ export default abstract class WUPBaseElement<
     }
   }
 
-  /** Throws unhanled error via empty setTimeout */
+  /** Throws unhandled error via empty setTimeout */
   throwError(err: string | Error | unknown): void {
     const e = new Error(`${this.tagName}. ${err}`, { cause: err });
     setTimeout(() => {

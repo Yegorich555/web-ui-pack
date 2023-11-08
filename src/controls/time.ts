@@ -72,7 +72,7 @@ declare global {
       _scrolled: WUPScrolled;
       _value: number;
       goToNext(isNext: boolean): void;
-      reinit(): void;
+      reInit(): void;
     }
   }
 
@@ -462,7 +462,7 @@ export default class WUPTimeControl<
       },
     });
     lh.goToNext = (v) => lh._scrolled.goTo(v);
-    lh.reinit = () => {
+    lh.reInit = () => {
       lh._scrolled.options.pages!.current = getCurHours();
       lh._scrolled.init();
     };
@@ -498,7 +498,7 @@ export default class WUPTimeControl<
       },
     });
     lm.goToNext = (v) => lm._scrolled.goTo(v);
-    lm.reinit = () => {
+    lm.reInit = () => {
       lm._scrolled.options.pages!.current = getCurMinutes();
       lm._scrolled.init();
     };
@@ -600,8 +600,8 @@ export default class WUPTimeControl<
     if (this.$refMenuLists && v) {
       this.#isMenuInitPhase = true; // to avoid calling trySetaValue on reRender
       const menuV = this.getMenuValue();
-      menuV.hours !== v.hours && this.$refMenuLists[0].reinit();
-      menuV.minutes !== v.minutes && this.$refMenuLists[1].reinit();
+      menuV.hours !== v.hours && this.$refMenuLists[0].reInit();
+      menuV.minutes !== v.minutes && this.$refMenuLists[1].reInit();
       this.$refMenuLists[2]?._scrolled.goTo(v.isPM ? 2 : 1, false);
       this.#isMenuInitPhase = false;
     }

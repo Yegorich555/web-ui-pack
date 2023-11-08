@@ -101,7 +101,7 @@ export default function Example2() {
           type="button"
           ref={setTitle(`<div>I must feet div with border <br/>(changed option <b>toFitElement</b>)
                 <br/>I scrollable
-                <br/>(you can setup minHeight to avoid squizing)
+                <br/>(you can setup minHeight to avoid squeezing)
                 <br/>I have a good animation
                 <br/>
                 </div>`)}

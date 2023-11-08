@@ -144,7 +144,7 @@ export default class WUPTextareaControl<
   //   // issue: when insertText: and endswith "\nAbc " need to remove last empty space
   //   // issue: when delete an empty space: chrome adds <br>
   //   if (text === "\n" && this.$refInput.selectionEnd === this.$refInput.textContent!.length) {
-  //     fr.appendChild(document.createTextNode(" ")); // WARN: othwerise Chrome doesn't go to next line
+  //     fr.appendChild(document.createTextNode(" ")); // WARN: otherwise Chrome doesn't go to next line
   //   }
   //   range.insertNode(fr);
 

@@ -1,6 +1,6 @@
 # Code style
 
-Logic below contains best practice for re-using web-ui-pack elements. The main idea is create Component native to your framework and use web-ui-pack elements inside. Using web-ui-pack elements everywhere directly isn't recommended because in this case you need to import components to `main.ts` and if you somehow don't use these anymore it won't be removed by optimizator.
+Logic below contains best practice for re-using web-ui-pack elements. The main idea is create Component native to your framework and use web-ui-pack elements inside. Using web-ui-pack elements everywhere directly isn't recommended because in this case you need to import components to `main.ts` and if you somehow don't use these anymore it won't be removed by optimizer.
 
 ## Bad practice
 
@@ -12,7 +12,7 @@ import { WUPTextControl } from "web-ui-pack";
 WUPTextControl.$use(); // register control in the browser
 // other files.tsx
 <wup-text w-name="email" />;
-// If remove <wup-text/> everywhere it's still imported in the build because inlcuded in `main.ts`
+// If remove <wup-text/> everywhere it's still imported in the build because included in `main.ts`
 ```
 
 ---

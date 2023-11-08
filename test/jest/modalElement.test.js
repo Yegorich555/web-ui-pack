@@ -275,7 +275,7 @@ describe("modalElement", () => {
     await h.userPressTab(document.getElementById("b2"));
     expect(document.activeElement.id).toBe("b2");
     await h.userPressTab(document.getElementById("out"));
-    expect(document.activeElement.id).toBe("bclose"); // focus must retutn to 1st element
+    expect(document.activeElement.id).toBe("bclose"); // focus must return to 1st element
     await h.userPressTab(document.getElementById("b1"));
     expect(document.activeElement.id).toBe("b1");
     // back
@@ -443,7 +443,7 @@ describe("modalElement", () => {
           <h2>...</h2>
           <wup-date w-initvalue="2023-10-16"></wup-date>
           <footer>
-            <button type="button" data-close="modal" id='testme'><span>Close</span></button>
+            <button type="button" data-close="modal" id='testMe'><span>Close</span></button>
             <button type="submit">Submit</button>
           </footer>
         </wup-form>
@@ -472,7 +472,7 @@ describe("modalElement", () => {
     el.$open();
     await h.wait();
     expect(el.$isOpened).toBe(true);
-    await h.userClick(document.getElementById("testme").firstElementChild);
+    await h.userClick(document.getElementById("testMe").firstElementChild);
     await h.wait();
     expect(el.$isOpened).toBe(false);
   });
@@ -529,5 +529,45 @@ describe("modalElement", () => {
     expect(el.$isOpened).toBe(false);
     expect(el.isConnected).toBe(false);
   });
+
+  test("modal in modal: overflow", async () => {
+    // todo testcase: modalInModal: when parent is removed immediately
+    // todo
+    document.body.innerHTML = `
+      <wup-modal>
+          <h2>...</h2>
+      </wup-modal>`;
+    await h.wait();
+    el = document.querySelector("wup-modal");
+    expect(el.$isOpened).toBe(true);
+    expect(document.body.outerHTML).toMatchInlineSnapshot(`
+      "<body class="wup-modal-open">
+            <wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button>
+                <h2 id="sID">...</h2>
+            </wup-modal><div class="wup-modal-fade" show=""></div></body>"
+    `);
+    const m2 = el.appendChild(document.createElement("wup-modal"));
+    m2.innerHTML = "<h3>...</h3>";
+    m2.$open();
+    await h.wait();
+    // todo prev fade must be hidden & new fade must override parent modal
+    expect(document.body.outerHTML).toMatchInlineSnapshot(`
+      "<body class="wup-modal-open">
+            <wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button>
+                <h2 id="sID">...</h2>
+            <wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h3 id="sID">...</h3></wup-modal><div show="" class="wup-modal-fade"></div></wup-modal><div class="wup-modal-fade" show="" style="display: none;"></div></body>"
+    `);
+  });
+
+  test("modal in modal: replace", () => {
+    // todo
+  });
+
+  test("confirm modal + hook", () => {
+    // todo
+  });
+
+  test("option: confirmUnsaved", () => {
+    // todo
+  });
 });
-// todo testcase: modalInModal: when parent is removed immediately

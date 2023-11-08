@@ -1,6 +1,6 @@
 export const enum PopupOpenCases {
   /** When $open() is called programmatically */
-  onManuallCall = 0,
+  onManualCall = 0,
   /** On init (when appended to layout) */
   onInit = 1,
   /** On `mouseenter` event of target; hide by `mouseleave` */
@@ -13,7 +13,7 @@ export const enum PopupOpenCases {
 
 export const enum PopupCloseCases {
   /** When $close() is called programmatically */
-  onManuallCall,
+  onManualCall,
   /** When mouse left target & popup */
   onMouseLeave,
   /** When focus left target & popup */

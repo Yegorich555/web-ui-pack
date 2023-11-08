@@ -354,7 +354,7 @@ describe("popupElement", () => {
     el = document.createElement(el.tagName);
     document.body.appendChild(el);
     document.body.appendChild(trg);
-    el.$options.openCase = PopupOpenCases.onManuallCall;
+    el.$options.openCase = PopupOpenCases.onManualCall;
     el.$options.target = trg;
     await h.wait();
     expect(el.$isOpened).toBe(false);
@@ -372,7 +372,7 @@ describe("popupElement", () => {
     await h.wait();
     expect(el.$isOpened).toBe(false);
     // alwaysOff & target missed
-    el.$options.openCase = PopupOpenCases.onManuallCall;
+    el.$options.openCase = PopupOpenCases.onManualCall;
     el.$options.target = null;
     await h.wait();
     expect(el.$isOpened).toBe(false);

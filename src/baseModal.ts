@@ -4,12 +4,12 @@ import { WUPcssScrollSmall } from "./styles";
 
 const enum OpenCases {
   /** When $open() is called programmatically */
-  onManuallCall = 0,
+  onManualCall = 0,
 }
 
 const enum CloseCases {
   /** When $close() is called programmatically */
-  onManuallCall = 0,
+  onManualCall = 0,
 }
 
 declare global {
@@ -131,7 +131,7 @@ export default abstract class WUPBaseModal<
   $open(): Promise<boolean> {
     if (this.$isReady) {
       try {
-        return this.goOpen(OpenCases.onManuallCall, null);
+        return this.goOpen(OpenCases.onManualCall, null);
       } catch (err) {
         return Promise.reject(err);
       }
@@ -141,7 +141,7 @@ export default abstract class WUPBaseModal<
         if (!this.$isReady) {
           rej(new Error(`${this.tagName}. Impossible to show: not appended to document`));
         } else {
-          this.goOpen(OpenCases.onManuallCall, null).then(res);
+          this.goOpen(OpenCases.onManualCall, null).then(res);
         }
       }, 1); // 1ms need to wait forReady
     });
@@ -151,7 +151,7 @@ export default abstract class WUPBaseModal<
   /** Close element
    * @returns Promise resolved by animation-end ('true' if it finished & wasn't prevented) */
   $close(): Promise<boolean> {
-    return this.goClose(CloseCases.onManuallCall, null);
+    return this.goClose(CloseCases.onManualCall, null);
   }
 
   protected override gotReady(): void {

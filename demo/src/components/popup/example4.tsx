@@ -43,11 +43,11 @@ export default function Example4() {
                 WUPPopupElement.$placements.$top.$middle,
                 WUPPopupElement.$placements.$bottom.$middle,
               ];
-              el.$options.openCase = PopupOpenCases.always;
+              el.$options.openCase = PopupOpenCases.onInit;
             }
           }}
         >
-          I can overflow scrollbable content, modals etc.
+          I can overflow scrollable content, modals etc.
           <br /> But to be consistent I hide myself <br />
           if target is invisible in scrollable parent
         </wup-popup>
