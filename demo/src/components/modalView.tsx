@@ -108,7 +108,7 @@ export default function ModalView() {
       ]}
     >
       <section>
-        <h3>Different placemenets</h3>
+        <h3>Different placements</h3>
         <small>Use $options.placement or attribute [w-placement]</small>
         {DEV && false ? dbgSmall : null}
         <div className={styles.block}>
@@ -212,44 +212,48 @@ const confirmHookHTML = `html
 </button>
 `;
 
-const bigContent = `I LOOKED AT MY NOTES AND I DIDN’T LIKE THEM. I’d spent three days at U. S. Robots and might as
-well have spent them at home with the Encyclopedia Tellurica.
+const bigContent = [
+  `I've been in development since 2010. And nowadays, I'm really impressed that web browsers don't suggest good
+elements with rich functionality, perfect styles and easy customizable at the same time.
+Browsers provide ugly elements that need wrapping and spend a lot of time to make something presentative.
+For example, think about <input/>. It's a perfect tag that has different types and behaviors,
+but the built-in functionality is poor and the native style is ugly. That is why we know such popular libraries as Material-ui, Bootstrap etc.`,
 
-Susan Calvin had been born in the year 1982, they said, which made her seventy-five now.
-Everyone knew that. Appropriately enough, U. S. Robot and Mechanical Men, Inc. was seventyfive also, since it had been in the year of Dr. Calvin’s birth that Lawrence Robertson had first taken
-out incorporation papers for what eventually became the strangest industrial giant in man’s history.
-Well, everyone knew that, too.
+  `But these libraries are not universal (depend on framework OR difficult to customize), have poor functionality,
+and are mostly focused on styling. For example, with Bootstrap you need to learn classes, practice them, and use quite a lot of divs & classes together.
+As a result, you have a large bundle size. At the same time, Material-ui possible to use only with React and very difficult
+to customize if you need something out of the box. Moreover, any element doesn't contain enough functionality to fit our modern requirements.
+Also, web-accessibility exists but is poor in the libraries...`,
 
-At the age of twenty, Susan Calvin had been part of the particular Psycho-Math seminar at which
-Dr. Alfred Lanning of U. S. Robots had demonstrated the first mobile robot to be equipped with a
-voice. It was a large, clumsy unbeautiful robot, smelling of machine-oil and destined for the
-projected mines on Mercury. But it could speak and make sense.
+  `Ok. We want something universal that blows our mind. What library do we need? What are the requirements?`,
+  `1. It must be independent of any other library/framework, so it can be used anywhere with & without any framework (so need to use some JS native logic).`,
+  `2. It must contain rich built-in functionality that covers all possible requirements (so need good internal structure + bunch of options per element).`,
+  `3. Developers must use it superfast and easily. It must be intuitive, like native HTML tags (so need to use custom Web components and a very good naming convention).`,
+  `4. It must be well documented and understandable during the coding. Developers shouldn't spend time on searching for solutions on websites
+(so need to use the full power of JSDoc and describe every option/method/variable & cover everything with examples that can be shown by intellisense).`,
+  `5. Developers must easily distinguish properties/attributes between native & custom
+(so need to name every method/property/option to start with '$...' and attributes to start with 'w-...')`,
+  `6. Every element must be highly customizable, so developers can rewrite anything if something is missed in the options, or even fix it yourself.`,
+  `7. Every element must look pretty, contain built-in styles, and at the same time be easily modifiable.
+Developers shouldn't spend much time on digging into HTML structure
+(so need to use css-variables that cover most possible cases and try not to use css-class till possible;
+then developers can change styles completely with a single custom class without difficult nested selectors).`,
+  `8. The whole library must be developed with a focus on browser performance, small bundle size, low-memory consumption, and very fast initialization
+(so it must contain the full power OOP: inheritance, prototypes + adopted for tree shaking + as little as possible arrow functions).`,
+  `9. Every element must be easily accessible. Every input/control must fit the highest accessibility requirements (full support keyboard/focus/history etc.).`,
+  `10. The library must be extra reliable and ideally contain 0 bugs and 0 dependencies on other libraries (so it needs 1000s unit & e2e tests)`,
+  `11. Every element must be well tested in production before it goes to publicity`,
 
-Susan said nothing at that seminar; took no part in the hectic discussion period that followed. She
-was a frosty girl, plain and colorless, who protected herself against a world she disliked by a masklike expression and a hypertrophy of intellect. But as she watched and listened, she felt the stirrings
-of a cold enthusiasm.
+  `THE LIBRARY WEB-UI-PACK FITS ALL REQUIREMENTS ABOVE!`,
 
-She obtained her bachelor’s degree at Columbia in 2003 and began graduate work in cybernetics.
-All that had been done in the mid-twentieth century on “calculating machines” had been upset by
-Robertson and his positronic brain-paths. The miles of relays and photocells had given way to the
-spongy globe of plantinumiridium about the size of a human brain.
+  `Let's explain the popup element. During the 10+ years, I've worked with 10s libraries included popup. Every library has huge amount of issues!`,
+  `* almost with every library impossible to place popup inside parent with position relative. In web-ui-pack it's possible.`,
+  `* almost in every library popup time to time is wrongly positioned when there is not enough space (sometimes outside the viewport). In web-ui-pack it works like a charm.`,
+  `* most of popups are extremely difficult to position/resize on the fly, or even impossible to set position priorities
+when there is not enough space for the popup at the first pointed position. In web-ui-pack it's very flexible`,
 
-She learned to calculate the parameters necessary to fix the possible variables within the “positronic
-brain”; to construct “brains” on paper such that the responses to given stimuli could be accurately
-predicted.
-
-In 2008, she obtained her Ph.D. and joined United States Robots as a “Robopsychologist,”
-becoming the first great practitioner of a new science. Lawrence Robertson was still president of
-the corporation; Alfred Lanning had become director of research.
-
-For fifty years, she watched the direction of human progress change and leap ahead.
-Now she was retiring — as much as she ever could. At least, she was allowing someone else’s
-name to be inset upon the door of her office.
-
-That, essentially, was what I had. I had a long list of her published papers, of the patents in her
-name; I had the chronological details of her promotions. In short I had her professional “vita” in
-full detail.
-
-But that wasn’t what I wanted.
-
-I needed more than that for my feature articles for Interplanetary Press. M`;
+  `So every element/helper is the result of many years of experience collected in one place to help the web community develop faster, easier and better overall.
+This library is a wonderful solution that must fit the requirements of every developer, every user, and the highest standards nowadays!`,
+]
+  .map((s) => s.replace(/\n/g, " "))
+  .join("\r\n\r\n");
