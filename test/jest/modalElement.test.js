@@ -531,8 +531,6 @@ describe("modalElement", () => {
   });
 
   test("modal in modal: overflow", async () => {
-    // todo testcase: modalInModal: when parent is removed immediately
-    // todo
     document.body.innerHTML = `
       <wup-modal>
           <h2>...</h2>
@@ -548,25 +546,75 @@ describe("modalElement", () => {
     `);
     const m2 = el.appendChild(document.createElement("wup-modal"));
     m2.innerHTML = "<h3>...</h3>";
-    m2.$open();
     await h.wait();
-    // todo prev fade must be hidden & new fade must override parent modal
+
+    expect(el.$refFade.outerHTML).toMatchInlineSnapshot(
+      `"<div class="wup-modal-fade" show="" style="display: none;"></div>"`
+    );
+    expect(m2.$refFade.outerHTML).toMatchInlineSnapshot(`"<div show="" class="wup-modal-fade"></div>"`);
     expect(document.body.outerHTML).toMatchInlineSnapshot(`
       "<body class="wup-modal-open">
             <wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button>
                 <h2 id="sID">...</h2>
             <wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h3 id="sID">...</h3></wup-modal><div show="" class="wup-modal-fade"></div></wup-modal><div class="wup-modal-fade" show="" style="display: none;"></div></body>"
     `);
+    // on close parent modal must be restored
+    m2.$close();
+    await h.wait();
+    expect(m2.$isOpened).toBe(false);
+    expect(el.$isOpened).toBe(true);
+    expect(m2.$refFade?.outerHTML).toMatchInlineSnapshot(`undefined`);
+    expect(el.$refFade?.outerHTML).toMatchInlineSnapshot(`"<div class="wup-modal-fade" show=""></div>"`);
+    expect(document.body.outerHTML).toMatchInlineSnapshot(`
+      "<body class="wup-modal-open">
+            <wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button>
+                <h2 id="sID">...</h2>
+            <wup-modal tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h3 id="sID">...</h3></wup-modal></wup-modal><div class="wup-modal-fade" show=""></div></body>"
+    `);
+
+    // modalInModal: when parent is removed immediately
+    m2.$open();
+    await h.wait();
+    expect(el.$refFade.outerHTML).toMatchInlineSnapshot(
+      `"<div class="wup-modal-fade" show="" style="display: none;"></div>"`
+    );
+    expect(m2.$refFade.outerHTML).toMatchInlineSnapshot(`"<div show="" class="wup-modal-fade"></div>"`);
+    el.remove();
+    await h.wait();
+    expect(el.$isClosed).toBe(true);
+    expect(m2.$isClosed).toBe(true);
+    expect(el._openedModals.length).toBe(0);
   });
 
-  test("modal in modal: replace", () => {
+  test("modal in modal: replace", async () => {
+    document.body.innerHTML = `<wup-modal><h2>..</h2></wup-modal>`;
+    await h.wait();
+    el = document.querySelector("wup-modal");
+    const m2 = document.body.appendChild(document.createElement("wup-modal"));
+    m2.innerHTML = "<h3>...</h3>";
+    m2.$options.replace = true;
+    await h.wait();
+    expect(el.$refFade.outerHTML).toMatchInlineSnapshot(
+      `"<div class="wup-modal-fade" show="" style="display: none;"></div>"`
+    );
+    expect(m2.$refFade.outerHTML).toMatchInlineSnapshot(`"<div show="" class="wup-modal-fade"></div>"`);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show="" style="opacity: 0;"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID">..</h2></wup-modal>"`
+    );
+    expect(m2.outerHTML).toMatchInlineSnapshot(
+      `"<wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h3 id="sID">...</h3></wup-modal>"`
+    );
+    expect(document.body.outerHTML).toMatchInlineSnapshot(
+      `"<body class="wup-modal-open"><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show="" style="opacity: 0;"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID">..</h2></wup-modal><div class="wup-modal-fade" show="" style="display: none;"></div><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h3 id="sID">...</h3></wup-modal><div show="" class="wup-modal-fade"></div></body>"`
+    );
+  });
+
+  test("confirm modal", () => {
+    // todo m2 must be in center of parent
+  });
+  test("confirm modal: hook", () => {
     // todo
   });
-
-  test("confirm modal + hook", () => {
-    // todo
-  });
-
   test("option: confirmUnsaved", () => {
     // todo
   });
