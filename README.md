@@ -1,5 +1,4 @@
-<!-- markdownlint-disable-next-line MD033 -->
-# <div style='align-items: center; display: flex'>![logo](/demo/src/assets/logo-small.png) web-ui-pack</div>
+# ![logo](/demo/src/assets/logo-small.png) web-ui-pack
 
 Universal web package with high scalable [WebComponents](#components) and [helpers](#helpers) with focus on DX (developer experience)
 
