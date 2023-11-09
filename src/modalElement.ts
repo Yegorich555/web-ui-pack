@@ -11,7 +11,7 @@ export const enum ModalOpenCases {
   /** When click on target @see {@link WUP.Modal.Options.target} */
   onTargetClick,
 }
-
+// todo re-check it in dist
 export const enum ModalCloseCases {
   /** When $close() is called programmatically */
   onManualCall = 0,
@@ -60,7 +60,7 @@ declare global {
       /** Modal-in-modal behavior; by default new modal overflows previously opened modal
        * @defaultValue false */
       replace: boolean;
-      /** Show confirm modal if user closes modal with `wup-form` with unsaved changes
+      /** Show confirm modal if user closes modal with `wup-form` with unsaved changes (isChanged & option autoStore is off)
        * @defaultValue true */
       confirmUnsaved: boolean; // NiceToHave: confirmKey to show CheckBox "Don't show anymore" + some option to rollback it
     }

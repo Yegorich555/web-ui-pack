@@ -584,8 +584,6 @@ describe("modalElement", () => {
     expect(el.$isClosed).toBe(true);
     expect(m2.$isClosed).toBe(true);
     expect(el._openedModals.length).toBe(0);
-
-    // todo test Escape must close only last window
   });
 
   test("modal in modal: replace", async () => {
@@ -767,11 +765,88 @@ describe("modalElement", () => {
     await h.wait();
   });
 
-  test("confirm modal: hook", () => {
-    // todo test with modal-in-modal also
+  test("option: confirmUnsaved", async () => {
+    document.body.innerHTML = `
+      <wup-modal>
+        <wup-form>
+          <h2>...</h2>
+          <wup-text w-name="firstName"></wup-text>
+        </wup-form>
+      </wup-modal>`;
+    await h.wait();
+    el = document.querySelector("wup-modal");
+    expect(el.$isOpened).toBe(true);
+    const ctrl = document.querySelector("wup-text");
+    ctrl.$value = "hi";
+    const form = document.querySelector("wup-form");
+    expect(form.$isChanged).toBe(true);
+
+    await h.userClick("[data-close]");
+    await h.wait();
+    let all = Array.prototype.slice.call(document.querySelectorAll("wup-modal"));
+    expect(all.length).toBe(2);
+    let m2 = all[1];
+    expect(el.$isOpened).toBe(true); // because 2nd window must me opened
+    expect(m2.$isOpened).toBe(true);
+    expect(all.map((m) => m.outerHTML)).toMatchInlineSnapshot(`
+      [
+        "<wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button>
+              <wup-form role="form">
+                <h2 id="sID">...</h2>
+                <wup-text w-name="firstName"><label for="wup4"><span><input placeholder=" " type="text" id="wup4" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text>
+              </wup-form>
+            <div show="" class="wup-modal-fade"></div></wup-modal>",
+        "<wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" style="margin: 0px 0px 0px 0px;" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID">You have unsaved changes.
+      Would you like to skip it?</h2>
+      <footer>
+        <button type="button" data-close="modal">Cancel</button>
+        <button type="button" data-close="confirm">Confirm</button>
+      </footer></wup-modal>",
+      ]
+    `);
+    await h.userPressKey(m2, { key: "Escape" }); // close by Escape
+    await h.wait();
+    expect(m2.$isOpened).toBe(false);
+    expect(m2.isConnected).toBe(false); // self-removing
+    expect(el.$isOpened).toBe(true);
+
+    // when confirm click => close both
+    await h.userPressKey(el, { key: "Escape" }); // close by Escape
+    await h.wait();
+    all = Array.prototype.slice.call(document.querySelectorAll("wup-modal"));
+    expect(all.length).toBe(2);
+    [, m2] = all;
+    expect(el.$isOpened).toBe(true);
+    expect(m2.$isOpened).toBe(true);
+    await h.userClick(m2.querySelector("[data-close=confirm]"));
+    await h.wait();
+    expect(m2.$isOpened).toBe(false);
+    expect(m2.isConnected).toBe(false); // self-removing
+    expect(el.$isOpened).toBe(false);
+
+    // when $options.autoStore is ON => close without confirmWindow
+    el.$open();
+    await h.wait();
+    expect(form.$isChanged).toBe(true);
+    form.$options.autoStore = true;
+    await h.userPressKey(el, { key: "Escape" }); // close by Escape
+    await h.wait();
+    expect(document.querySelectorAll("wup-modal").length).toBe(1); // no confirm window
+    expect(el.$isOpened).toBe(false);
+
+    // when form is unchanged
+    el.$open();
+    form.$options.autoStore = false;
+    ctrl.$value = undefined;
+    await h.wait();
+    expect(form.$isChanged).toBe(false);
+    await h.userPressKey(el, { key: "Escape" }); // close by Escape
+    await h.wait();
+    expect(document.querySelectorAll("wup-modal").length).toBe(1); // no confirm window
+    expect(el.$isOpened).toBe(false);
   });
 
-  test("option: confirmUnsaved", () => {
-    // todo
+  test("confirm modal: hook", () => {
+    // todo test with modal-in-modal also
   });
 });
