@@ -566,7 +566,7 @@ describe("baseElement", () => {
     input.blur();
     expect(document.activeElement).not.toBe(input);
     el.remove();
-    el.$options.autofocs = true;
+    el.$options.autofocus = true;
     document.body.appendChild(el);
     await h.wait();
     expect(document.activeElement).toBe(input);
@@ -608,6 +608,23 @@ describe("baseElement", () => {
     el.textContent = "Hello";
     el.removeChildren();
     expect(el.textContent).toBe("");
+  });
+
+  test("findParent", () => {
+    document.body.innerHTML = "<main><div><button><span>..</span></button></div></main>";
+    el = document.querySelector("span");
+    expect(WUPBaseElement.prototype.findParent.call(el, () => false)).toBe(null);
+    expect(WUPBaseElement.prototype.findParent.call(el, () => true)).toBe(el);
+    expect(WUPBaseElement.prototype.findParent.call(el, (t) => t.tagName === "BUTTON")?.tagName).toBe("BUTTON");
+    expect(WUPBaseElement.prototype.findParent.call(el, (t) => t.tagName === "MAIN")?.tagName).toBe("MAIN");
+    expect(WUPBaseElement.prototype.findParent.call(el, (t) => t.tagName === "MAIN", { bubbleCount: 2 })).toBe(null);
+    expect(WUPBaseElement.prototype.findParent.call(el, (t) => t.tagName === "MAIN", { bubbleCount: 0 })?.tagName).toBe(
+      "MAIN"
+    );
+
+    const dispEl = document.createElement("a");
+    expect(dispEl.parentElement).toBeFalsy();
+    expect(WUPBaseElement.prototype.findParent.call(dispEl, (t) => t.tagName === "MAIN")).toBe(null);
   });
 
   test("dispose", () => {

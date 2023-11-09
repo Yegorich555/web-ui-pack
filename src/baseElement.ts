@@ -569,7 +569,7 @@ export default abstract class WUPBaseElement<
     return this.itsMe(e.target);
   }
 
-  /** Find parent according with callback */
+  /** Find parent/self according with callback */
   findParent(callback: (el: HTMLElement) => boolean, options = { bubbleCount: 10 }): HTMLElement | null {
     let i = options?.bubbleCount || 10; // expected no more 10 parents
     let el: HTMLElement | null = this;
