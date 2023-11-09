@@ -166,13 +166,13 @@ export default class WUPModalElement<
   /** Show confirm modal and return Promise(true) if user pressed button[data-close=confirm] and before modal is closed itself
    * @tutorial Troubleshooting
    * * ConfirmModal ignores option `placement` if it overflow existed modal
-   * * There is static class */
+   * * On close modal self-removed */
   static async $showConfirm(opts?: WUP.Modal.ConfirmOptions): Promise<boolean> {
     // init
     const me = document.createElement("wup-modal");
     opts?.className && me.classList.add(opts.className);
-    Object.assign(me.$options, opts?.defaults);
     me.$options.selfRemove = true;
+    Object.assign(me.$options, opts?.defaults);
     me.gotRenderConfirm(opts?.question || "");
     // append to root
     document.body.appendChild(me);
@@ -182,9 +182,11 @@ export default class WUPModalElement<
     setTimeout(() => {
       if (me._mid && me._mid > 1) {
         const p = me._openedModals[me._mid - 2];
-        if (!p.$isOpened || p.$isClosing) {
-          return; // it should work only if prev modal is opened
-        }
+        // case impossible because _openedModal must contain only opened modals
+        // if (!p.$isOpened || p.$isClosing) {
+        //   return; // it should work only if prev modal is opened
+        // }
+        // setup position according to options: center in modal if `overflow` OR in center of screen if `replace` +  default left/right
         if (me._opts.replace) {
           switch (me._opts.placement) {
             case "left":
@@ -219,18 +221,23 @@ export default class WUPModalElement<
     }); // timeout to wait when this.openedModals[] changed
 
     const btnConfirm = me.querySelector("[data-close=confirm]");
+    let isConfirmed = false;
     if (btnConfirm) {
-      return new Promise((res) => {
-        (btnConfirm as HTMLElement).onclick = (ev) => {
-          (window as any).__wupFixCycleClick = true;
-          setTimeout(() => delete (window as any).__wupFixCycleClick);
-          me.goClose(ModalCloseCases.onCloseClick, ev);
-          res(true);
-        };
-      });
+      (btnConfirm as HTMLElement).onclick = (ev) => {
+        isConfirmed = true;
+        setTimeout(() => (isConfirmed = false), 1);
+        (window as any).__wupFixCycleClick = true;
+        setTimeout(() => delete (window as any).__wupFixCycleClick); // to prevent false opening next confirm window
+        me.goClose(ModalCloseCases.onCloseClick, ev);
+      };
+    } else {
+      me.throwError("button[data-close=confirm] missed");
     }
-    me.throwError("button[data-close=confirm] missed");
-    return Promise.resolve(false);
+
+    return new Promise((res) => {
+      // WARN: expected that $willClose isn't prevented otherwise need to add logic for checking this
+      me.addEventListener("$willClose", () => res(isConfirmed), { once: true, passive: true });
+    });
   }
 
   // static get observedOptions(): Array<keyof WUP.Modal.Options> { return []; }

@@ -584,6 +584,8 @@ describe("modalElement", () => {
     expect(el.$isClosed).toBe(true);
     expect(m2.$isClosed).toBe(true);
     expect(el._openedModals.length).toBe(0);
+
+    // todo test Escape must close only last window
   });
 
   test("modal in modal: replace", async () => {
@@ -609,12 +611,166 @@ describe("modalElement", () => {
     );
   });
 
-  test("confirm modal", () => {
-    // todo m2 must be in center of parent
+  test("confirm modal", async () => {
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    h.setupLayout(el, { x: 20, y: 30, w: 600, h: 900 });
+    const { nextFrame } = h.useFakeAnimation();
+
+    // without parent modal
+    const spyThen = jest.fn();
+    WUPModalElement.$showConfirm().then(spyThen);
+    await h.wait();
+    expect(Array.prototype.slice.call(document.querySelectorAll("wup-modal")).map((m) => m.outerHTML))
+      .toMatchInlineSnapshot(`
+      [
+        "<wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2><div show="" class="wup-modal-fade"></div></wup-modal>",
+        "<wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" style="margin: 480px 0px 0px 320px;" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2>
+      <footer>
+        <button type="button" data-close="modal">Cancel</button>
+        <button type="button" data-close="confirm">Confirm</button>
+      </footer></wup-modal>",
+      ]
+    `);
+    expect(document.body.outerHTML).toMatchInlineSnapshot(`
+      "<body class="wup-modal-open"><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2><div show="" class="wup-modal-fade"></div></wup-modal><div class="wup-modal-fade" show="" style="display: none;"></div><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" style="margin: 480px 0px 0px 320px;" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2>
+      <footer>
+        <button type="button" data-close="modal">Cancel</button>
+        <button type="button" data-close="confirm">Confirm</button>
+      </footer></wup-modal></body>"
+    `);
+    expect(spyThen).toBeCalledTimes(0);
+
+    // m2 must be in center of parent
+    let m2 = document.querySelectorAll("wup-modal").item(1);
+    h.setupLayout(m2, { x: 20, y: 30, w: 500, h: 200 });
+    await nextFrame();
+    expect(m2.getAttribute("style")).toMatchInlineSnapshot(`"margin: 380px 0px 0px 70px;"`);
+    h.setupLayout(m2, { x: 20, y: 30, w: 500, h: 300 }); // height is changed
+    await nextFrame();
+    expect(m2.getAttribute("style")).toMatchInlineSnapshot(`"margin: 330px 0px 0px 70px;"`);
+    await nextFrame();
+    expect(m2.getAttribute("style")).toMatchInlineSnapshot(`"margin: 330px 0px 0px 70px;"`);
+    // close on click Cancel must close only confirm modal
+    await h.userClick(m2.querySelector("[data-close=modal]"));
+    await h.wait();
+    expect(m2.$isClosed).toBe(true);
+    expect(el.$isOpened).toBe(true);
+    expect(spyThen).toBeCalledTimes(1);
+    expect(spyThen).lastCalledWith(false);
+    expect(m2.isConnected).toBe(false); // because it has option self-remove by default
+    await expect(nextFrame()).resolves.not.toThrow();
+    await expect(nextFrame()).resolves.not.toThrow(); // positioning in center must be skipped
+
+    // open again & press Confirm button
+    jest.clearAllMocks();
+    WUPModalElement.$showConfirm().then(spyThen);
+    m2 = document.querySelectorAll("wup-modal").item(1);
+    await h.wait();
+    expect(m2.$isOpened).toBe(true);
+    await h.userClick(m2.querySelector("[data-close=confirm]"));
+    await h.wait();
+    expect(m2.$isClosed).toBe(true);
+    expect(el.$isOpened).toBe(true); // because it's ordinary static method
+    expect(spyThen).toBeCalledTimes(1);
+    expect(spyThen).lastCalledWith(true);
+    expect(m2.isConnected).toBe(false); // because it has option self-remove by default
+
+    // test with different placement & options
+    WUPModalElement.$showConfirm({ onRender: (me) => (m2 = me), className: "mcf", defaults: { placement: "left" } });
+    await h.wait();
+    expect(m2?.$isOpened).toBe(true);
+    expect(m2.$options.placement).toBe("center"); // because centered relative to parent modal (event if placed outside)
+    expect(m2.outerHTML).toMatchInlineSnapshot(`
+      "<wup-modal class="mcf" open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" style="margin: 480px 0px 0px 320px;" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2>
+      <footer>
+        <button type="button" data-close="modal">Cancel</button>
+        <button type="button" data-close="confirm">Confirm</button>
+      </footer></wup-modal>"
+    `);
+    m2.$close();
+    await h.wait();
+
+    WUPModalElement.$showConfirm({ onRender: (me) => (m2 = me), defaults: { placement: "right" } });
+    await h.wait();
+    expect(m2.$options.placement).toBe("center");
+    m2.$close();
+    await h.wait();
+
+    WUPModalElement.$showConfirm({ onRender: (me) => (m2 = me), defaults: { placement: "top" } });
+    await h.wait();
+    expect(m2.$options.placement).toBe("center");
+    m2.$close();
+    await h.wait();
+
+    WUPModalElement.$showConfirm({ onRender: (me) => (m2 = me), defaults: { placement: "center" } });
+    await h.wait();
+    expect(m2.$options.placement).toBe("center");
+    m2.$close();
+    await h.wait();
+
+    // with w-replace
+    WUPModalElement.$showConfirm({ onRender: (me) => (m2 = me), defaults: { placement: "left", replace: true } });
+    await h.wait();
+    expect(m2?.$isOpened).toBe(true);
+    expect(m2.$options.placement).toBe("center"); // because confirm is ugly for 100vh
+    m2.$close();
+    await h.wait();
+
+    WUPModalElement.$showConfirm({ onRender: (me) => (m2 = me), defaults: { placement: "right", replace: true } });
+    await h.wait();
+    expect(m2?.$isOpened).toBe(true);
+    expect(m2.$options.placement).toBe("center"); // because confirm is ugly for 100vh
+    m2.$close();
+    await h.wait();
+
+    WUPModalElement.$showConfirm({ onRender: (me) => (m2 = me), defaults: { placement: "top", replace: true } });
+    await h.wait();
+    expect(m2?.$isOpened).toBe(true);
+    expect(m2.$options.placement).toBe("top");
+    m2.$close();
+    await h.wait();
+
+    WUPModalElement.$showConfirm({ onRender: (me) => (m2 = me), defaults: { placement: "center", replace: true } });
+    await h.wait();
+    expect(m2?.$isOpened).toBe(true);
+    expect(m2.$options.placement).toBe("center");
+    m2.$close();
+    await h.wait();
+
+    // when btnConfirm is missed
+    WUPModalElement.$showConfirm({
+      onRender: (me) => {
+        m2 = me;
+        m2.innerHTML = `<h2>..</h2><footer>..</footer>`;
+      },
+    });
+    await expect(h.wait()).rejects.toThrow(); // buttonConfirm is missed
+    expect(m2?.$isOpened).toBe(true);
+    m2.$close();
+    await h.wait();
+
+    // when parent modal don't exists
+    el.remove();
+    WUPModalElement.$showConfirm({ onRender: (me) => (m2 = me) });
+    await h.wait();
+    expect(m2?.$isOpened).toBe(true);
+    expect(m2.$options.placement).toBe("center");
+    expect(m2.outerHTML).toMatchInlineSnapshot(`
+      "<wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID"></h2>
+      <footer>
+        <button type="button" data-close="modal">Cancel</button>
+        <button type="button" data-close="confirm">Confirm</button>
+      </footer></wup-modal>"
+    `);
+    m2.$close();
+    await h.wait();
   });
+
   test("confirm modal: hook", () => {
-    // todo
+    // todo test with modal-in-modal also
   });
+
   test("option: confirmUnsaved", () => {
     // todo
   });

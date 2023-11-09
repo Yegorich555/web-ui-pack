@@ -681,6 +681,7 @@ export default abstract class WUPBaseElement<
     }
   }
 
+  // NiceToHave: throwError in 90% must be excluded from prod-build
   /** Throws unhandled error via empty setTimeout */
   throwError(err: string | Error | unknown): void {
     const e = new Error(`${this.tagName}. ${err}`, { cause: err });
@@ -689,7 +690,7 @@ export default abstract class WUPBaseElement<
     });
   }
 
-  // /** Forces to recalc render-logic of browser */
+  // /** Forces to re-calc render-logic of browser */
   // refreshRender(): void {
   //   const was = this.style.display;
   //   this.style.display = was === "none" ? "block" : "none";
