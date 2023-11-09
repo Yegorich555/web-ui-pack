@@ -2,10 +2,55 @@
 
 ## 1.0.0 (\_\_\_)
 
-**BREAKING CHANGES**:
+### New Features
+
+---
+
+- [ModalElement](src/modalElement.ts.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
+- **Global**
+  - Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
+  - Added css variable `--base-margin` to unify margins for all elements
+- helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector (possible to get from `focusFirst.$selector`)
+- [FormElement](src/formElement.ts)
+  - Increased height of `button[type=submit]`
+  - Added callback `$onSubmitEnd` & event `$submitEnd`
+- **Text based controls**
+  - Added css variable `--ctrl-label-active-pos` to simplify customization of label position
+- [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). Improved handling promise rejection in `$options.items`
+
+### Fixes
+
+---
+
+- helper [findScrollParent](src/helpers/findScrollParent.ts). _Returns parent despite on parent.child with position-fixed_
+- helper [promiseWait](src/helpers/promiseWait.ts). _Throws error twice instead of 1 time_
+- [PopupElement](src/popup/popupElement.ts). _Popup hidden if target inside content with position: fixed and target.parent.parent is scrollable_
+- [DropdownElement](src/dropdownElement.ts). _Target button is overflowed by menu in animation-stack_
+- [PasswordControl](src/controls/password.ts). _Input height is changed on button[eye] click_
+- **Text based controls**
+  - _Sometimes weird blink & poor render during the animation on focus_
+  - _Button clear changes control size on hover if parent is flexbox_
+
+### BREAKING CHANGES
+
+---
 
 - **Global**.
   - Added static `.$use()`. Call it before using element: `WUPTextControl.$use()` (_self-registration by import_ works now and will be removed in the future)
+  - Renamed css-vars:
+  `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
+  `--anim-time` >>> `--anim-t`
+  `--popup` >>> `popup-text`
+  `--popup-anim` >>> `popup-anim-t`
+  `--tooltip` >>> `tooltip-text`
+  `--spin-speed` >>> `spin-t`
+  `--btn-submit` >>> `--btn-submit-text`
+  `--ctrl` >>> `--ctrl-text`
+  `--ctrl-clr-width` >>> `--ctrl-clr-w`
+  `--ctrl-select-item` >>> `--ctrl-select-item-text`
+  `--ctrl-time-off` >>> `--ctrl-time-off-text`
+  `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
+
   - Refactored & unified custom events. Now every event contains detail as object: `e.detail = { ... }`
 - [PopupElement](src/popup/popupElement.ts)
   - **z-index** is changed from `90000` to `8000`
@@ -26,44 +71,10 @@
     event `$showMenu` >>> `$openMenu`
     event `$hideMenu` >>> `$closeMenu`
     etc.
-- Renamed css-vars:
-  `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
-    `--anim-time` >>> `--anim-t`
-    `--popup` >>> `popup-text`
-    `--popup-anim` >>> `popup-anim-t`
-    `--tooltip` >>> `tooltip-text`
-    `--spin-speed` >>> `spin-t`
-    `--btn-submit` >>> `--btn-submit-text`
-    `--ctrl` >>> `--ctrl-text`
-    `--ctrl-clr-width` >>> `--ctrl-clr-w`
-    `--ctrl-select-item` >>> `--ctrl-select-item-text`
-    `--ctrl-time-off` >>> `--ctrl-time-off-text`
-    `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
 
-**Fixes**:
-
-- helper [findScrollParent](src/helpers/findScrollParent.ts). _Returns parent despite on parent.child with position: fixed_
-- helper [promiseWait](src/helpers/promiseWait.ts). _Throws error twice instead of 1 time_
-- [PopupElement](src/popup/popupElement.ts). _Popup hidden if target inside content with position: fixed and target.parent.parent is scrollable_
-- [DropdownElement](src/dropdownElement.ts). _Target button is overflowed by menu in animation-stack_
-- [PasswordControl](src/controls/password.ts). _Input height is changed on button[eye] click_
-- **Text based controls**
-  - _Sometimes weird blink & poor render during the animation on focus_
-  - _Button clear changes control size on hover if parent is flexbox_
-
-**New/Features**:
-
-- [ModalElement](src/modalElement.ts.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
-- **Global**
-  - Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
-  - Added css variable `--base-margin` to unify margins for all elements
-- helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector (possible to get from `focusFirst.$selector`)
-- [FormElement](src/formElement.ts)
-  - Increased height of `button[type=submit]`
-  - Added callback `$onSubmitEnd` & event `$submitEnd`
-- **Text based controls**
-  - Added css variable `--ctrl-label-active-pos` to simplify customization of label position
-- [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). Improved handling promise rejection in `$options.items``
+---
+---
+---
 
 ## 0.10.2 (Oct 11, 2023)
 
