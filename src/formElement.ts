@@ -629,4 +629,4 @@ export default class WUPFormElement<
 customElements.define(tagName, WUPFormElement);
 
 // todo show success/error result in <wup-alert> at the left/right angle + add autoSubmit option
-// todo method $submit() to call it manually
+// NiceToHave: method $submit() to call it manually

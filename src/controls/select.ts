@@ -876,7 +876,7 @@ customElements.define(tagName, WUPSelectControl);
 // NiceToHave: add support custom items rendering when it's already appended to DOM like it works with dropdown
 
 // NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
-// NiceToHave: color differently text part that matches in menu
+// NiceToHave: color differently text-chunk that matches in menu
 // NiceToHave: for allowNewValue add at the end of menu `[text] (New option)` like it works in JIRA. `label` dropdown on ticket
 
 // todo check fetch + storageKey

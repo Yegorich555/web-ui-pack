@@ -856,7 +856,6 @@ describe("modalElement", () => {
     el = document.querySelector("wup-modal");
     expect(el.$isOpened).toBe(true);
 
-    // todo somehow rightClick doesn't work
     await h.userClick("#testBtn", { button: 1 }); // btnRight mouse click
     await h.wait();
     expect(document.body.querySelectorAll("wup-modal").length).toBe(1);
