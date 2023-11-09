@@ -63,6 +63,7 @@
   - Added callback `$onSubmitEnd` & event `$submitEnd`
 - **Text based controls**
   - Added css variable `--ctrl-label-active-pos` to simplify customization of label position
+- [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). Improved handling promise rejection in `$options.items``
 
 ## 0.10.2 (Oct 11, 2023)
 

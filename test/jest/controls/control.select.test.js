@@ -245,10 +245,19 @@ describe("control.select", () => {
     await h.wait();
     expect(el._cachedItems).toStrictEqual([]); // empty array to avoid future bugs if somehow fetch returns nothing
 
-    // cover case when somehow items not fetched before
+    // when somehow items not fetched before
     el = document.body.appendChild(document.createElement(el.tagName));
     expect(el.getItems()).toStrictEqual([]);
     expect(() => jest.advanceTimersByTime(1)).toThrow(); // because items not fetched yet but gotItems is called
+
+    // when fetching items is rejected
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.items = Promise.reject(new Error("test reject"));
+    h.mockConsoleError();
+    el.$initValue = 123;
+    await h.wait();
+    expect(el.$refInput.value).toMatchInlineSnapshot(`"Error: not found for 123"`);
+    h.unMockConsoleError();
   });
 
   test("menu navigation", async () => {

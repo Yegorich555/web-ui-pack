@@ -110,11 +110,12 @@ export default function SelectControlView() {
         <wup-select
           ref={(el) => {
             if (el) {
-              // el.$options.storageKey = "tme"; // todo it doesn't work with storageKey
+              // el.$options.storageKey = "tme"; // todo it doesn't work with fetch
               el.$options.name = "withPending";
               el.$options.label = "With pending (set Promise to $options.items)";
               setTimeout(() => {
                 el.$options.items = () => new Promise((res) => setTimeout(() => res(items), 3000));
+                // manual testcase: el.$options.items = () => new Promise((_, rej) => setTimeout(() => rej("TestErr"), 3000));
                 el.$initValue = 13; // was issue here - items not fetched yet
               }, 100);
             }

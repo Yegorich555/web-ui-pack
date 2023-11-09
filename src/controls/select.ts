@@ -297,12 +297,16 @@ export default class WUPSelectControl<
       this.setupInputReadonly(); // call it because opt readonlyInput can depend on items.length
     };
     if (d instanceof Promise) {
-      return promiseWait(d, 300, (v) => this.changePending(v)).then((data) => {
-        this._cachedItems = data || [];
-        act();
-        this.$isFocused && this.goOpenMenu(MenuOpenCases.onFocus, null);
-        return data;
-      });
+      return promiseWait(d, 300, (v) => this.changePending(v))
+        .then((data) => {
+          this._cachedItems = data || [];
+          return data;
+        })
+        .finally(() => {
+          this._cachedItems ??= [];
+          act();
+          this.$isFocused && this.goOpenMenu(MenuOpenCases.onFocus, null);
+        });
     }
     this._cachedItems = d;
     act();
@@ -878,6 +882,3 @@ customElements.define(tagName, WUPSelectControl);
 // NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
 // NiceToHave: color differently text-chunk that matches in menu
 // NiceToHave: for allowNewValue add at the end of menu `[text] (New option)` like it works in JIRA. `label` dropdown on ticket
-
-// todo check fetch + storageKey
-// todo check fetch with exception
