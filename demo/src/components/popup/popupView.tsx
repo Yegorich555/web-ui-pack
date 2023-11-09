@@ -18,6 +18,7 @@ export default function PopupView() {
     document.querySelectorAll("wup-popup").forEach((t) => {
       Object.assign(t.$options, opts);
       !t.$options.openCase && t.$open(); // required because some options are not watched
+      t.$refresh();
     });
   }
 
@@ -51,19 +52,21 @@ export default function PopupView() {
         "Flexible way to change position-priorities",
       ]}
     >
-      {/* todo replace with wup-number */}
       <h3>Options</h3>
-      <fieldset className={styles.inputs}>
+      <fieldset className={styles.groupCtrl}>
         <legend>Offset</legend>
         {["Top", "Right", "Bottom", "Left"].map((l, i) => (
-          <label key={l}>
-            <span>{l}</span>
-            <input
-              type="number"
-              onChange={(e) => changeOffset(+e.target.value, i)}
-              defaultValue={opts.offset && (opts.offset as Array<number>)[i]}
-            />
-          </label>
+          <wup-num
+            key={l}
+            w-label={l}
+            ref={(el) => {
+              if (el) {
+                el.$initValue = opts.offset && (opts.offset as Array<number>)[i];
+                el.$onChange = () => changeOffset(el.$value ?? 0, i);
+                el.$options.clearButton = false;
+              }
+            }}
+          />
         ))}
       </fieldset>
       <wup-radio
@@ -79,17 +82,20 @@ export default function PopupView() {
           }
         }}
       />
-      <fieldset className={styles.inputs}>
+      <fieldset className={styles.groupCtrl}>
         <legend>ArrowOffset (only if arrow enabled)</legend>
         {["Top", "Right", "Bottom", "Left"].map((l, i) => (
-          <label key={l}>
-            <span>{l}</span>
-            <input
-              type="number"
-              onChange={(e) => changeArrowOffset(+e.target.value, i)}
-              defaultValue={opts.arrowOffset && opts.arrowOffset[i]}
-            />
-          </label>
+          <wup-num
+            key={l}
+            w-label={l}
+            ref={(el) => {
+              if (el) {
+                el.$initValue = opts.arrowOffset && opts.arrowOffset[i];
+                el.$onChange = () => changeArrowOffset(el.$value ?? 0, i);
+                el.$options.clearButton = false;
+              }
+            }}
+          />
         ))}
       </fieldset>
       <Example1 />

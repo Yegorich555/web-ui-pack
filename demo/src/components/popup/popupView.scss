@@ -76,14 +76,14 @@ $dropdownAnimation: 300ms;
   }
 }
 
-.inputs {
+.groupCtrl {
   border: none;
   display: flex;
   flex-wrap: wrap;
   background: var(--basicBgColor, #fff);
   border-radius: var(--border-radius);
   margin: 0;
-  padding: 2em 1em 0.5em 1em;
+  padding: 2em 1em 1em;
   position: relative;
   gap: 8px;
 
@@ -99,36 +99,7 @@ $dropdownAnimation: 300ms;
     padding: 0;
   }
 
-  > label {
-    flex: 1 1 calc(50% - 8px);
-    position: relative;
-
-    > span {
-      display: block;
-      position: absolute;
-      padding: 0 0.2em;
-      left: 0.3em;
-      top: -0.5em;
-      transform-origin: top left;
-      transform: scale(0.9);
-      background: var(--basicBgColor, #fff);
-    }
-
-    > input {
-      padding: 0.5em;
-      border-radius: 4px;
-      border: 1px solid #5e5e5e;
-      box-shadow: none;
-      background: none;
-      color: var(--basicTextColor, black);
-    }
+  > wup-num {
+    margin: 0;
   }
-}
-
-.inputs + .inputs,
-.inputs + wup-radio,
-wup-radio + .inputs {
-  margin-top: 10px;
-  margin-bottom: 0;
-  background: var(--basicBgColor, #fff);
 }
