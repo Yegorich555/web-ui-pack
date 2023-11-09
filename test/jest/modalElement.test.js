@@ -846,7 +846,55 @@ describe("modalElement", () => {
     expect(el.$isOpened).toBe(false);
   });
 
-  test("confirm modal: hook", () => {
-    // todo test with modal-in-modal also
+  test("confirm modal: hook", async () => {
+    WUPModalElement.$useConfirmHook();
+    document.body.innerHTML = `<wup-modal>
+      <h2>..</h2>
+      <button w-confirm="Really close?" data-close='modal' id='testBtn'>try</button>
+    </wup-modal>`;
+    await h.wait();
+    el = document.querySelector("wup-modal");
+    expect(el.$isOpened).toBe(true);
+
+    // todo somehow rightClick doesn't work
+    await h.userClick("#testBtn", { button: 1 }); // btnRight mouse click
+    await h.wait();
+    expect(document.body.querySelectorAll("wup-modal").length).toBe(1);
+    expect(el.$isOpened).toBe(true);
+
+    await h.userClick("#testBtn");
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    let m2 = document.body.querySelectorAll("wup-modal").item(1);
+    expect(m2.$isOpened).toBe(true);
+    expect(m2.querySelector("h2").textContent).toBe("Really close?");
+    expect(document.body.outerHTML).toMatchInlineSnapshot(`
+      "<body class="wup-modal-open"><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button>
+            <h2 id="sID">..</h2>
+            <button w-confirm="Really close?" data-close="modal" id="testBtn">try</button>
+          <div show="" class="wup-modal-fade"></div></wup-modal><div class="wup-modal-fade" show="" style="display: none;"></div><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" style="margin: 0px 0px 0px 0px;" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID">Really close?</h2>
+      <footer>
+        <button type="button" data-close="modal">Cancel</button>
+        <button type="button" data-close="confirm">Confirm</button>
+      </footer></wup-modal></body>"
+    `);
+    // close on confirmModal btnClose
+    await h.userClick(m2.querySelector("[data-close=modal]"));
+    await h.wait();
+    expect(m2.$isClosed).toBe(true);
+    expect(el.$isOpened).toBe(true);
+    expect(document.body.querySelectorAll("wup-modal").length).toBe(1);
+
+    await h.userClick("#testBtn");
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    m2 = document.body.querySelectorAll("wup-modal").item(1);
+    expect(m2.$isOpened).toBe(true);
+    // close on confirmModal btnConfirm
+    await h.userClick(m2.querySelector("[data-close=confirm]"));
+    await h.wait();
+    expect(m2.$isClosed).toBe(true);
+    expect(el.$isClosed).toBe(true);
+    expect(document.body.querySelectorAll("wup-modal").length).toBe(1);
   });
 });

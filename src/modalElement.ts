@@ -11,7 +11,7 @@ export const enum ModalOpenCases {
   /** When click on target @see {@link WUP.Modal.Options.target} */
   onTargetClick,
 }
-// todo re-check it in dist
+
 export const enum ModalCloseCases {
   /** When $close() is called programmatically */
   onManualCall = 0,
@@ -550,7 +550,7 @@ export default class WUPModalElement<
   /** Called when modal handles click to check if was close-click */
   gotClick(e: MouseEvent): void {
     const t = e.target;
-    if (e.defaultPrevented || t === this) {
+    if (e.defaultPrevented || t === this || e.button) {
       return;
     }
     const all = this.querySelectorAll("[data-close=modal]").values(); // allow to use any button with attr to close modal

@@ -15,7 +15,7 @@ const enum CloseCases {
 declare global {
   namespace WUP.BaseModal {
     interface Options {}
-    interface EventMap<OpenCases = number, CloseCases = number> extends WUP.Base.EventMap {
+    interface EventMap<OpenCases = any, CloseCases = any> extends WUP.Base.EventMap {
       /** Fires before opening
        * @tutorial rules
        * * can be prevented via `e.preventDefault()` */
