@@ -1,0 +1,1279 @@
+{
+	"$schema": "https://raw.githubusercontent.com/JetBrains/web-types/master/schema/web-types.json",
+	"name": "web-ui-pack",
+	"version": "0.10.2",
+	"description-markup": "markdown",
+	"contributions": {
+		"html": {
+			"elements": [
+				{
+					"name": "button",
+					"attributes": [
+						{
+							"name": "w-confirm",
+							"description": "Point message for confirm-modal then`click`event will be fired only after btn-confirm click",
+							"value": {
+								"kind": "plain",
+								"type": "'Do you want to do it?'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-calendar",
+					"description": "Form-control represented by date picker",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/calendar",
+					"attributes": [
+						{
+							"name": "w-firstweekday",
+							"description": "First day of week in calendar where 1-Monday, 7-Sunday @defaultValue gathered from localeInfo.firstWeekDay",
+							"value": {
+								"kind": "plain",
+								"type": "'1' | '2' | '3' | '4' | '5' | '6' | '7'"
+							}
+						},
+						{
+							"name": "w-utc",
+							"description": "Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this"
+						},
+						{
+							"name": "w-startwith",
+							"description": "Picker that must be rendered at first; if undefined & isEmpty - `year`, otherwise - `day`",
+							"value": {
+								"kind": "plain",
+								"type": "'year' | 'month' | 'day' | '2012' | '2012-05' | '2012-05-24'"
+							}
+						},
+						{
+							"name": "w-min",
+							"description": "User can't select date less than min; format `yyyy-MM-dd`"
+						},
+						{
+							"name": "w-max",
+							"description": "User can't select date more than max; format `yyyy-MM-dd`"
+						},
+						{
+							"name": "w-exclude",
+							"description": "Dates that user can't choose\n\r Global reference to object with array of dates",
+							"value": {
+								"kind": "plain",
+								"type": "'window.excludedDays'"
+							}
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`"
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-check",
+					"description": "Form-control with toggle button",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/check",
+					"attributes": [
+						{
+							"name": "w-reverse",
+							"description": "Reversed-style (checkmark+label for true vs label+checkmark)"
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value in boolean representation",
+							"value": {
+								"kind": "plain",
+								"type": "'true' | 'false'"
+							}
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-circle",
+					"description": "Arc/circle chart based on SVG",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/circle",
+					"attributes": [
+						{
+							"name": "w-items",
+							"description": "Global reference to object with array where `item: {value:any, color?:string, tooltip?:string}`",
+							"value": {
+								"kind": "plain",
+								"type": "'window.circleItems'"
+							}
+						},
+						{
+							"name": "w-width",
+							"description": "Width of each segment; expected 1..100 (perecentage) \n\r @defaultValue 10"
+						},
+						{
+							"name": "w-back",
+							"description": "Enable background circle \n\r @defaultValue true"
+						},
+						{
+							"name": "w-corner",
+							"description": "Border/corner radius of each segment; expected 0..0.5 where 0.5 == 50% of `$options.width` \n\r @defaultValue 0.25"
+						},
+						{
+							"name": "w-from",
+							"description": "Angle from that rendering is started -360..360 (degrees) \n\r @defaultValue 0"
+						},
+						{
+							"name": "w-to",
+							"description": "Angle to that rendering is finished -360..360 (degrees) \n\r @defaultValue 360"
+						},
+						{
+							"name": "w-min",
+							"description": "Min possible value that fits `from` \n\r @defaultValue 0"
+						},
+						{
+							"name": "w-max",
+							"description": "Max possible value that fits `to` \n\r @defaultValue 100"
+						},
+						{
+							"name": "w-space",
+							"description": "Space between segments; expected 0..20 (degrees), \n\r @defaultValue 2"
+						},
+						{
+							"name": "w-minsize",
+							"description": "Min segment size - to avoid rendering extra-small segments; expected 0..20 (degrees) \n\r @defaultValue 10"
+						}
+					]
+				},
+				{
+					"name": "wup-date",
+					"description": "Form-control with datepicker",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/date",
+					"attributes": [
+						{
+							"name": "w-format",
+							"description": "String representation of displayed date (enables mask, - to disable mask set $options.mask='') @defaultValue localeInfo",
+							"value": {
+								"kind": "plain",
+								"type": "'yyyy-mm-dd' | 'dd/mm/yyyy'"
+							}
+						},
+						{
+							"name": "w-firstweekday",
+							"description": "First day of week in calendar where 1-Monday, 7-Sunday @defaultValue gathered from localeInfo.firstWeekDay",
+							"value": {
+								"kind": "plain",
+								"type": "'1' | '2' | '3' | '4' | '5' | '6' | '7'"
+							}
+						},
+						{
+							"name": "w-utc",
+							"description": "Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this"
+						},
+						{
+							"name": "w-startwith",
+							"description": "Picker that must be rendered at first; if undefined & isEmpty - `year`, otherwise - `day`",
+							"value": {
+								"kind": "plain",
+								"type": "'year' | 'month' | 'day' | '2012' | '2012-05' | '2012-05-24'"
+							}
+						},
+						{
+							"name": "w-min",
+							"description": "User can't select date less than min; format `yyyy-MM-dd`"
+						},
+						{
+							"name": "w-max",
+							"description": "User can't select date more than max; format `yyyy-MM-dd`"
+						},
+						{
+							"name": "w-exclude",
+							"description": "Dates that user can't choose\n\r Global reference to object with array of dates",
+							"value": {
+								"kind": "plain",
+								"type": "'window.excludedDays'"
+							}
+						},
+						{
+							"name": "w-opencase",
+							"description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`"
+						},
+						{
+							"name": "w-readonlyinput",
+							"description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+						},
+						{
+							"name": "w-debouncems",
+							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-clearbutton",
+							"description": "Show/hide clear button"
+						},
+						{
+							"name": "w-mask",
+							"description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+							"value": {
+								"kind": "plain",
+								"type": "'+1(000) 000-0000' | '0000-00-00' | '##0.##0.##0.##0' | '00:00 /[AP]/M' | '//[a-zA-Z]//{1,5}'"
+							}
+						},
+						{
+							"name": "w-maskholder",
+							"description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+						},
+						{
+							"name": "w-prefix",
+							"description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+						},
+						{
+							"name": "w-postfix",
+							"description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`"
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-dropdown",
+					"description": "Dropdown element",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/dropdown",
+					"attributes": [
+						{
+							"name": "w-closeonpopupclick",
+							"description": "Close menu on popup click"
+						}
+					]
+				},
+				{
+					"name": "wup-form",
+					"description": "Wrapper of FormHTMLElement that collect values from controls",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/controls",
+					"attributes": [
+						{
+							"name": "w-submitactions",
+							"description": "Actions that enabled on submit event; You can point several like: `goToError | collectChanged` \n\r  @defaultValue goToError | validateUntilFirst | reset | lockOnPending"
+						},
+						{
+							"name": "w-autostore",
+							"description": "Enable to store data in localStorage to prevent losing till submitted"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus first possible element when it's appended to layout"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherited from form"
+						}
+					]
+				},
+				{
+					"name": "wup-modal",
+					"description": "Modal element",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/modal",
+					"attributes": [
+						{
+							"name": "w-target",
+							"description": "Element that modal need to listen for click. If `target` missed modal will be opened on init",
+							"value": {
+								"kind": "plain",
+								"type": "'prev' | '#someId'"
+							}
+						},
+						{
+							"name": "w-placement",
+							"description": "Position on the screen @defaultValue `center`",
+							"value": {
+								"kind": "plain",
+								"type": "'left' | 'right' | 'top' | 'center'"
+							}
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Autofocus first possible content with skipping focus on button[close] if there is another focusable content"
+						},
+						{
+							"name": "w-autoclose",
+							"description": "Auto close on successful wup-form.$onSubmitEnd: @see {@link WUP.Form.EventMap.$submitEnd}"
+						},
+						{
+							"name": "w-selfremove",
+							"description": "Remove itself after closing"
+						},
+						{
+							"name": "w-replace",
+							"description": "Modal-in-modal behavior; by default new modal overflows previously opened modal"
+						},
+						{
+							"name": "w-confirmunsaved",
+							"description": "Show confirm modal if user closes modal with `wup-form` with unsaved changes"
+						}
+					]
+				},
+				{
+					"name": "wup-num",
+					"description": "Form-control with number-input",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/control/number",
+					"attributes": [
+						{
+							"name": "w-format",
+							"description": "String representation of displayed value by default inherits from localeInfo \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myFormat'"
+							}
+						},
+						{
+							"name": "w-debouncems",
+							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-clearbutton",
+							"description": "Show/hide clear button"
+						},
+						{
+							"name": "w-mask",
+							"description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+							"value": {
+								"kind": "plain",
+								"type": "'+1(000) 000-0000' | '0000-00-00' | '##0.##0.##0.##0' | '00:00 /[AP]/M' | '//[a-zA-Z]//{1,5}'"
+							}
+						},
+						{
+							"name": "w-maskholder",
+							"description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+						},
+						{
+							"name": "w-prefix",
+							"description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+						},
+						{
+							"name": "w-postfix",
+							"description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value"
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-popup",
+					"description": "Popup element",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/popup",
+					"attributes": [
+						{
+							"name": "w-target",
+							"description": "Anchor that popup uses for placement @defaultValue `previousSibling` Point querySelector, for example `#some-id`",
+							"value": {
+								"kind": "plain",
+								"type": "'#someId'"
+							}
+						},
+						{
+							"name": "w-placement",
+							"description": "Placement rules relative to target @defaultValue `top-middle`",
+							"value": {
+								"kind": "plain",
+								"type": "'top-start' | 'top-middle' | 'top-end' | 'bottom-start' | 'bottom-middle' | 'bottom-end' | 'left-start' | 'left-middle' | 'left-end' | 'right-start' | 'right-middle' | 'right-end'"
+							}
+						},
+						{
+							"name": "w-animation",
+							"description": "Animation applied to popup @defaultValue `default`",
+							"value": {
+								"kind": "plain",
+								"type": "'' | 'default' | 'drawer' | 'stack'"
+							}
+						},
+						{
+							"name": "menu",
+							"description": "Custom attribute used for internal behavior"
+						},
+						{
+							"name": "tooltip",
+							"description": "Custom attribute used for styling"
+						}
+					]
+				},
+				{
+					"name": "wup-pwd",
+					"description": "Form-control with password input",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/control/password",
+					"attributes": [
+						{
+							"name": "w-debouncems",
+							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-clearbutton",
+							"description": "Show/hide clear button"
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value"
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r `null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-validationsshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-radio",
+					"description": "Form-control with radio buttons",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/radio",
+					"attributes": [
+						{
+							"name": "w-reverse",
+							"description": "Reversed-style (radio+label for true vs label+radio)"
+						},
+						{
+							"name": "w-items",
+							"description": "Global reference to object with array where `item: {value: any, text: string}`",
+							"value": {
+								"kind": "plain",
+								"type": "'window.radioItems'"
+							}
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value in string/boolean/number representation (depends on `control.prototype.parse()`)"
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-select",
+					"description": "Form-control with dropdown/combobox behavior",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/control/select",
+					"attributes": [
+						{
+							"name": "w-items",
+							"description": "Items showed in dropdown-menu. Provide Array OR promise/api-call to show pending status when control retrieves data! \n\r Point key to Global reference"
+						},
+						{
+							"name": "w-allownewvalue",
+							"description": "Allow user to create new value if value not found in items"
+						},
+						{
+							"name": "w-multiple",
+							"description": "Allow to select multiple values; in this case `$value` & `$initValue` must contain `Array<ValueType>`"
+						},
+						{
+							"name": "w-opencase",
+							"description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`"
+						},
+						{
+							"name": "w-readonlyinput",
+							"description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+						},
+						{
+							"name": "w-debouncems",
+							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-clearbutton",
+							"description": "Show/hide clear button"
+						},
+						{
+							"name": "w-mask",
+							"description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+							"value": {
+								"kind": "plain",
+								"type": "'+1(000) 000-0000' | '0000-00-00' | '##0.##0.##0.##0' | '00:00 /[AP]/M' | '//[a-zA-Z]//{1,5}'"
+							}
+						},
+						{
+							"name": "w-maskholder",
+							"description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+						},
+						{
+							"name": "w-prefix",
+							"description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+						},
+						{
+							"name": "w-postfix",
+							"description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value"
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-selectmany",
+					"description": "Form-control with dropdown/combobox behavior",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/control/selectMany",
+					"attributes": [
+						{
+							"name": "w-hideselected",
+							"description": "Hide items in menu that selected"
+						},
+						{
+							"name": "w-sortable",
+							"description": "Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position"
+						},
+						{
+							"name": "w-items",
+							"description": "Items showed in dropdown-menu. Provide Array OR promise/api-call to show pending status when control retrieves data! \n\r Point key to Global reference"
+						},
+						{
+							"name": "w-allownewvalue",
+							"description": "Allow user to create new value if value not found in items"
+						},
+						{
+							"name": "w-opencase",
+							"description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`"
+						},
+						{
+							"name": "w-readonlyinput",
+							"description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+						},
+						{
+							"name": "w-debouncems",
+							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-clearbutton",
+							"description": "Show/hide clear button"
+						},
+						{
+							"name": "w-mask",
+							"description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+							"value": {
+								"kind": "plain",
+								"type": "'+1(000) 000-0000' | '0000-00-00' | '##0.##0.##0.##0' | '00:00 /[AP]/M' | '//[a-zA-Z]//{1,5}'"
+							}
+						},
+						{
+							"name": "w-maskholder",
+							"description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+						},
+						{
+							"name": "w-prefix",
+							"description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+						},
+						{
+							"name": "w-postfix",
+							"description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value"
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-spin",
+					"description": "Flexible animated element with ability to place over target element without position relative",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/spin",
+					"attributes": [
+						{
+							"name": "w-inline",
+							"description": "Place inside parent as inline-block otherwise overflow target in the center (`position: relative` is not required);"
+						},
+						{
+							"name": "w-fit",
+							"description": "Allow to reduce size to fit parent (for max-size change css-var --spin-size) \n\r value `auto` => `false` when inline:true, `true` when inline:false"
+						},
+						{
+							"name": "w-overflowoffset",
+							"description": "Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px; \n\r Point Global reference to object with array",
+							"value": {
+								"kind": "plain",
+								"type": "'window.overflowOffset'"
+							}
+						},
+						{
+							"name": "w-overflowfade",
+							"description": "Allow to create shadowBox to partially hide target (only for `inline: false`)"
+						},
+						{
+							"name": "w-overflowtarget",
+							"description": "Anchor element that need to overflow by spinner \n\r Point querySelector to related element \n\r Ignored if option `inline='true'` \n\r value 'auto' => parentElement",
+							"value": {
+								"kind": "plain",
+								"type": "'auto' | '#someId' | '.someClass' | 'prev'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-switch",
+					"description": "Form-control with toggle button",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/switch",
+					"attributes": [
+						{
+							"name": "w-reverse",
+							"description": "Reversed-style (switch+label for true vs label+switch)"
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value in boolean representation",
+							"value": {
+								"kind": "plain",
+								"type": "'true' | 'false'"
+							}
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-text",
+					"description": "Form-control with text-input",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/control/text",
+					"attributes": [
+						{
+							"name": "w-debouncems",
+							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-clearbutton",
+							"description": "Show/hide clear button"
+						},
+						{
+							"name": "w-mask",
+							"description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+							"value": {
+								"kind": "plain",
+								"type": "'+1(000) 000-0000' | '0000-00-00' | '##0.##0.##0.##0' | '00:00 /[AP]/M' | '//[a-zA-Z]//{1,5}'"
+							}
+						},
+						{
+							"name": "w-maskholder",
+							"description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+						},
+						{
+							"name": "w-prefix",
+							"description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+						},
+						{
+							"name": "w-postfix",
+							"description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value"
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-textarea",
+					"description": "Form-control with multiline text-input",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/control/textarea",
+					"attributes": [
+						{
+							"name": "w-debouncems",
+							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-clearbutton",
+							"description": "Show/hide clear button"
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value"
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-time",
+					"description": "Form-control with timepicker",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/control/time",
+					"attributes": [
+						{
+							"name": "w-format",
+							"description": "String representation of displayed time (enables mask, - to disable mask set mask=''",
+							"value": {
+								"kind": "plain",
+								"type": "'hh:mm A' | 'hh:mm' | 'h:mm' | 'h:m'"
+							}
+						},
+						{
+							"name": "w-step",
+							"description": "Increment value in minutes",
+							"value": {
+								"kind": "plain",
+								"type": "'1' | '5' | '10'"
+							}
+						},
+						{
+							"name": "w-min",
+							"description": "User can't select date less than min; format `hh:mm`"
+						},
+						{
+							"name": "w-max",
+							"description": "User can't select date more than max; format `hh:mm`"
+						},
+						{
+							"name": "w-menubuttonsoff",
+							"description": "Set `false` to hide menu buttons 'Ok' & 'Cancel'"
+						},
+						{
+							"name": "w-exclude",
+							"description": "Points that user can't choose. Global reference to object with array: `window.exclude = [new WUPTimeObject(`02:30`), ...]`",
+							"value": {
+								"kind": "plain",
+								"type": "'window.exclude'"
+							}
+						},
+						{
+							"name": "w-debouncems",
+							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-clearbutton",
+							"description": "Show/hide clear button"
+						},
+						{
+							"name": "w-maskholder",
+							"description": "Placeholder for mask. By default it inherits from mask. To disabled it set `false`; for date maskholder can be 'yyyy-mm-dd'"
+						},
+						{
+							"name": "w-prefix",
+							"description": "Part before input; for example for value `$ 123 USD` prefix is `$ `"
+						},
+						{
+							"name": "w-postfix",
+							"description": "Part after input; for example for value `$ 123 USD` postfix is ` USD`"
+						},
+						{
+							"name": "w-initvalue",
+							"description": "Default value"
+						},
+						{
+							"name": "w-label",
+							"description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+						},
+						{
+							"name": "w-name",
+							"description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+						},
+						{
+							"name": "w-autofocus",
+							"description": "Focus element when it's appended to layout"
+						},
+						{
+							"name": "w-autocomplete",
+							"description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+						},
+						{
+							"name": "disabled",
+							"description": "Disallow edit/copy value; use attr [disabled] for styling"
+						},
+						{
+							"name": "readonly",
+							"description": "Disallow copy value; use attr [readonly] for styling"
+						},
+						{
+							"name": "w-validations",
+							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+							"value": {
+								"kind": "plain",
+								"type": "'window.myValidations'"
+							}
+						},
+						{
+							"name": "w-storagekey",
+							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+						},
+						{
+							"name": "w-storage",
+							"description": "Type of storage for saving value",
+							"value": {
+								"kind": "plain",
+								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				}
+			]
+		}
+	}
+}

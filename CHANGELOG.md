@@ -10,6 +10,7 @@
 - **Global**
   - Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
   - Added css variable `--base-margin` to unify margins for all elements
+  - Added support HTML intellisense for WebStorm (no action required from developer/user side)
 - helper [focusFirst](src/helpers/focusFirst.ts). Added option `isFocusLast` & static querySelector (possible to get from `focusFirst.$selector`)
 - [FormElement](src/formElement.ts)
   - Increased height of `button[type=submit]`
@@ -40,22 +41,24 @@
 ---
 
 - **Global**.
+
   - Added static `.$use()`. Call it before using element: `WUPTextControl.$use()` (_self-registration by import_ works now and will be removed in the future)
   - Renamed css-vars:
-  `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
-  `--anim-time` >>> `--anim-t`
-  `--popup` >>> `popup-text`
-  `--popup-anim` >>> `popup-anim-t`
-  `--tooltip` >>> `tooltip-text`
-  `--spin-speed` >>> `spin-t`
-  `--btn-submit` >>> `--btn-submit-text`
-  `--ctrl` >>> `--ctrl-text`
-  `--ctrl-clr-width` >>> `--ctrl-clr-w`
-  `--ctrl-select-item` >>> `--ctrl-select-item-text`
-  `--ctrl-time-off` >>> `--ctrl-time-off-text`
-  `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
+    `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
+    `--anim-time` >>> `--anim-t`
+    `--popup` >>> `popup-text`
+    `--popup-anim` >>> `popup-anim-t`
+    `--tooltip` >>> `tooltip-text`
+    `--spin-speed` >>> `spin-t`
+    `--btn-submit` >>> `--btn-submit-text`
+    `--ctrl` >>> `--ctrl-text`
+    `--ctrl-clr-width` >>> `--ctrl-clr-w`
+    `--ctrl-select-item` >>> `--ctrl-select-item-text`
+    `--ctrl-time-off` >>> `--ctrl-time-off-text`
+    `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
 
   - Refactored & unified custom events. Now every event contains detail as object: `e.detail = { ... }`
+
 - [PopupElement](src/popup/popupElement.ts)
   - **z-index** is changed from `90000` to `8000`
   - Renamed `show/hide` to `open/close` (the same for [DropdownElement](src/dropdownElement.ts)):
@@ -77,7 +80,9 @@
     etc.
 
 ---
+
 ---
+
 ---
 
 ## 0.10.2 (Oct 11, 2023)

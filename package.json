@@ -165,5 +165,6 @@
         "html.custom-elements.json"
       ]
     }
-  }
+  },
+  "web-types": "./types.html.webstorm.json"
 }

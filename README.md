@@ -41,7 +41,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
 2. Add `import { WUPPopupElement } from "web-ui-pack";` into any file (`main.js` for example)
 3. Call `WUPPopupElement.$use()` to register HTML tag into web-browser
 4. For usage with React see [CODESTYLE.md](CODESTYLE.md) (for other frameworks it's very similar)
-5. For usage with HTML + VSCode extend VSCode settings
+5. For usage with HTML + VSCode extend VSCode settings (For WebStorm it works out of box - without extra config)
 
    ```json
    // .vscode/settings.json
