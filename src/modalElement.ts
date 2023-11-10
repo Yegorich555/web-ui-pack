@@ -62,7 +62,7 @@ declare global {
       replace: boolean;
       /** Show confirm modal if user closes modal with `wup-form` with unsaved changes (isChanged & option autoStore is off)
        * @defaultValue true */
-      confirmUnsaved: boolean; // NiceToHave: confirmKey to show CheckBox "Don't show anymore" + some option to rollback it
+      confirmUnsaved: boolean; // NiceToHave: confirmKey to show CheckBox "Don't show again" + some option to rollback it
     }
     interface EventMap extends WUP.BaseModal.EventMap<ModalOpenCases, ModalCloseCases> {}
     interface JSXProps<T = WUPModalElement> extends WUP.BaseModal.JSXProps<T>, WUP.Base.OnlyNames<Options> {
