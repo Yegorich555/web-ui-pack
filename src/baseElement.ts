@@ -60,9 +60,9 @@ export default abstract class WUPBaseElement<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
 
-  /** Register control in the web to allow use */
+  /** Register control in the web to allow to use */
   static $use(): void {
-    // todo customElements.define(...) and protected from calling several times
+    // WARN: this is method required but must be empty for webpack optimization (see sideEffects)
   }
 
   /** Reference to global style element used by web-ui-pack */

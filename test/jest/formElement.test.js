@@ -402,6 +402,14 @@ describe("formElement", () => {
       await h.wait(1);
       expect($willSubmitEv).toBeCalledTimes(1);
       expect($willSubmitEv.mock.calls[0][0].detail.submitter).toBe(el);
+
+      // try again when submit called manually
+      jest.clearAllMocks();
+      expect(() => el.$submit()).not.toThrow();
+      await h.wait(10);
+      expect($willSubmitEv).toBeCalledTimes(1);
+      expect(submitEv).toBeCalledTimes(1);
+      expect(onsubmit).toBeCalledTimes(1);
     });
 
     test("prevent submit", async () => {

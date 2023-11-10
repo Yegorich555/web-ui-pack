@@ -29,8 +29,8 @@ declare global {
       model: Record<string | number, any>;
       /** Form related to submit event; equal to event.target */
       relatedForm: WUPFormElement;
-      /** Event that produced submit event */
-      relatedEvent: MouseEvent | KeyboardEvent;
+      /** Event that produced submit event; null if `form.$submit()` is called */
+      relatedEvent: MouseEvent | KeyboardEvent | null;
       /** Element that that produced submit event */
       submitter: HTMLElement | null;
       /** Point a promise as callback to allow form show pending state during the promise */
@@ -328,6 +328,11 @@ export default class WUPFormElement<
     return this.$controls.some((c) => c.$options.name && c.$isChanged);
   }
 
+  /** Call it to manually trigger submit or better to use `gotSubmit` for handling events properly */
+  $submit(): void {
+    this.gotSubmit(null, this);
+  }
+
   /** Called on every spin-render */
   renderSpin(target: HTMLElement): WUPSpinElement {
     WUPSpinElement.$use();
@@ -370,9 +375,9 @@ export default class WUPFormElement<
     }
   }
 
-  /** Called on submit before validation */
-  protected gotSubmit(e: KeyboardEvent | MouseEvent, submitter: HTMLElement): void {
-    e.preventDefault(); // prevent default keyboard or mouse event because it's handled in custom event
+  /** Called on submit before validation (to fire validation & $onSubmit if successful) */
+  gotSubmit(e: KeyboardEvent | MouseEvent | null, submitter: HTMLElement): void {
+    e?.preventDefault(); // prevent default keyboard or mouse event because it's handled in custom event
 
     const willEv = this.fireEvent("$willSubmit", {
       bubbles: true,
@@ -542,7 +547,6 @@ export default class WUPFormElement<
 
   protected override connectedCallback(): void {
     super.connectedCallback();
-    // todo set aria-labelledby="t1" where t1 id of related header (can be outside/inside form)
     this.setAttribute("role", "form");
     formStore.push(this);
   }
@@ -640,4 +644,3 @@ export default class WUPFormElement<
 customElements.define(tagName, WUPFormElement);
 
 // todo show success/error result in <wup-alert> at the left/right angle + add autoSubmit option
-// NiceToHave: method $submit() to call it manually

@@ -14,6 +14,7 @@
 - [FormElement](src/formElement.ts)
   - Increased height of `button[type=submit]`
   - Added callback `$onSubmitEnd` & event `$submitEnd`
+  - Added public method `$submit()` for manual calling
   - Web Accessibility: auto-tie with closest heading via aria-labelledby
 - **Text based controls**
   - Added css variable `--ctrl-label-active-pos` to simplify customization of label position
