@@ -66,12 +66,13 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
     - _BaseModal_
 
       - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
-        - [ ] Tooltip
+        - [ ] Tooltip Hook
       - [x] [ModalElement](src/modalElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
         - [x] Modal in modal
         - [x] Confirm modal
+        - [x] Confirm hook (use WUPModal.$useConfirmHook)
         - [x] Modal form
-
+      - [ ] Notice (alt of react-tostify)
     - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
 
     - _BaseControl_
@@ -95,7 +96,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
           - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
             - [ ] DateTimeControl
             - [ ] DateRangeControl
-            - [ ] option `multiSelect`
+            - [ ] option `multiple`
       - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
       - [ ] SliderControl (progress bar)
       - [ ] FileControl
