@@ -657,10 +657,7 @@ export default abstract class WUPBaseControl<
     this.setAttr.call(this.$refInput, "aria-required", isReq);
 
     this.setupInitValue(propsChanged);
-    // retrieve value from store
-    if (!propsChanged && this._opts.storageKey) {
-      this.setValue(this.storageGet(), SetValueReasons.storage);
-    }
+
     propsChanged?.includes("clearActions") && this.setClearState();
     this.gotFormChanges(propsChanged);
   }
@@ -686,7 +683,7 @@ export default abstract class WUPBaseControl<
     this.$refInput.readOnly = this.$isReadOnly;
   }
 
-  /** Called on Init and options/attributes changes to update $initValue */
+  /** Called on Init and options/attributes changes to update $initValue or $value (if pointed storageKey) */
   setupInitValue(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     // lowercase for attribute-changes otherwise it's wrong
     if (!propsChanged || propsChanged.includes("initvalue")) {
@@ -709,6 +706,11 @@ export default abstract class WUPBaseControl<
       if (!propsChanged || propsChanged.includes("name")) {
         this.$initValue = nestedProperty.get(this.$form._initModel as any, this._opts.name);
       }
+    }
+
+    // retrieve value from store
+    if (!propsChanged && this._opts.storageKey) {
+      this.setValue(this.storageGet(), SetValueReasons.storage);
     }
   }
 
@@ -1022,7 +1024,7 @@ export default abstract class WUPBaseControl<
     }
   }
 
-  /** Called to serialize value from URL/storage; override it if you have unexpected object */
+  /** Called to serialize value from URL/storage; override it if you have object */
   valueFromUrl(str: string): ValueType | undefined {
     return str === "null" ? (null as ValueType) : this.parse(str);
   }

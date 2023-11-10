@@ -173,6 +173,40 @@ describe("control.select", () => {
     expect(onErr).toBeCalledTimes(0);
 
     h.unMockConsoleError();
+
+    // save to localStorage
+    el.$options.storageKey = "s1";
+    el.$value = 20;
+    await h.wait();
+    expect(el.$refInput.value).toBe("D");
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.storageKey = "s1";
+    el.$options.items = [
+      { text: "C", value: 10 },
+      { text: "D", value: 20 },
+      { text: "f", value: 30 },
+    ];
+    await h.wait();
+    expect(el.$value).toBe(20);
+    expect(el.$refInput.value).toBe("D");
+    // check the same when items are fetched
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.storageKey = "s1";
+    el.$options.items = () =>
+      new Promise((res) => {
+        setTimeout(
+          () =>
+            res([
+              { text: "C", value: 10 },
+              { text: "D", value: 20 },
+              { text: "f", value: 30 },
+            ]),
+          100
+        );
+      });
+    await h.wait();
+    expect(el.$value).toBe(20);
+    expect(el.$refInput.value).toBe("D");
   });
 
   test("pending state", async () => {
