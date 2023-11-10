@@ -876,9 +876,9 @@ export default class WUPSelectControl<
 customElements.define(tagName, WUPSelectControl);
 
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
-// todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???
-// NiceToHave: add support custom items rendering when it's already appended to DOM like it works with dropdown
+// WARN label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check
 
+// NiceToHave: add support custom items rendering when it's already appended to DOM like it works with dropdown
 // NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
 // NiceToHave: color differently text-chunk that matches in menu
 // NiceToHave: for allowNewValue add at the end of menu `[text] (New option)` like it works in JIRA. `label` dropdown on ticket

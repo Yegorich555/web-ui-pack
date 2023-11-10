@@ -34,7 +34,7 @@ export const enum ValidationCases {
   onChangeSmart = 1,
   /** Validate when user changed value (via type,select etc.); Also you can check $options.validateDebounceMs */
   onChange = 1 << 1,
-  /** Validate when control losts focus */
+  /** Validate when control lost focus */
   onFocusLost = 1 << 2,
   /** Validate if control has value and gets focus (recommended option for password with $options.validationShowAll) */
   onFocusWithValue = 1 << 3,
@@ -96,7 +96,7 @@ declare global {
       /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
        * * @tutorial
        * * point `undefined` to completely detach from FormElement
-       * * point `''`(empty string) to partially detach (exlcude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
+       * * point `''`(empty string) to partially detach (exclude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
       name: string | undefined | null;
       /** Focus element when it's appended to layout @defaultValue false */
       autoFocus: boolean;
@@ -109,14 +109,14 @@ declare global {
       disabled: boolean;
       /** Disallow copy value; adds attr [readonly] for styling @defaultValue false */
       readOnly: boolean;
-      /** Debounce option for onFocustLost event (for validationCases.onFocusLost);
+      /** Debounce option for onFocusLost event (for validationCases.onFocusLost);
        * @see {@link onFocusLostOptions.debounceMs} in helpers/onFocusLost;
        * @defaultValue 100ms */
       focusDebounceMs: number;
       /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
        * @defaultValue ClearActions.initClearBack */
       clearActions: ClearActions;
-      /** Rules defined for control. Impossible to override via `$options`. Use static `$dfaults` instead
+      /** Rules defined for control. Impossible to override via `$options`. Use static `$defaults` instead
        * * all functions must return error-message when value === undefined
        * * all functions must return error-message if setValue is `true/enabled` or value doesn't fit a rule
        * * value can be undefined only when a rule named as 'required' or need to collect error-messages @see {@link Options.validationShowAll}
@@ -156,7 +156,7 @@ declare global {
       /** When to validate control and show error. Validation by onSubmit impossible to disable
        *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit */
       validationCase: ValidationCases;
-      /** Wait for pointed time after valueChange before showError (it's sumarized with $options.debounce); WARN: hide error without debounce
+      /** Wait for pointed time after valueChange before showError (it's summarized with $options.debounce); WARN: hide error without debounce
        *  @defaultValue 500 */
       validateDebounceMs: number;
       /** Show all validation-rules with checkpoints as list instead of single error @defaultValue false */
@@ -580,7 +580,7 @@ export default abstract class WUPBaseControl<
   }
 
   #refDetails?: HTMLElement;
-  /** Add (replace) description of control to be anounced by screen-readers */
+  /** Add (replace) description of control to be announced by screen-readers */
   $ariaDetails(text: string | null): void {
     // this.setAttr.call(this.$refInput, "aria-description", text); // watchfix: Safari VoiceOver doesn't support aria-description: https://a11ysupport.io/tests/tech__aria__aria-description
     let el = this.#refDetails;
