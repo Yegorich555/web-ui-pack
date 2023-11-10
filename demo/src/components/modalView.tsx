@@ -173,7 +173,6 @@ export default function ModalView() {
             <wup-text w-name="email" w-initValue="yegor.golubchik@mail.com" />
             <wup-pwd w-name="password" w-initValue="123456" />
             <wup-date w-name="dob" w-label="Date of birthday" />
-            {/* <wup-selectmany w-name="selectMany" w-items="inputSelectMany.items" /> */}
             <footer>
               <button type="button" data-close="modal">
                 Close

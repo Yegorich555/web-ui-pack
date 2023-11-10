@@ -398,7 +398,7 @@ padding:0;}
         --ctrl-select-item-del: var(--ctrl-icon);
         --ctrl-select-item-del-img: var(--wup-icon-cross);
         --ctrl-select-item-del-size: 0.8em;
-        --ctrl-select-gap: 6px;
+        --ctrl-select-gap: 0.5em;
       }
       [wupdark] {
         --ctrl-select-item-bg: #fff2;
@@ -873,18 +873,16 @@ WUP-SELECTMANY [menu] li[focused] {
 }
       WUP-SELECTMANY strong {
         top: 1.6em;
-        margin: calc(var(--ctrl-select-gap) / 2);
       }
       WUP-SELECTMANY label &gt; span {
+        gap: var(--ctrl-select-gap);
         flex-wrap: wrap;
         flex-direction: row;
         padding: var(--ctrl-padding);
         padding-left: 0; padding-right: 0;
-        margin: calc(var(--ctrl-select-gap) / -2);
       }
       WUP-SELECTMANY [item],
       WUP-SELECTMANY input {
-        margin: calc(var(--ctrl-select-gap) / 2);
         padding: var(--ctrl-select-gap);
       }
       WUP-SELECTMANY input {
@@ -911,6 +909,7 @@ WUP-SELECTMANY [menu] li[focused] {
         box-sizing: border-box;
         white-space: nowrap;
         overflow: hidden;
+        flex: 0 0 auto;
       }
       WUP-SELECTMANY [item]:after {
         

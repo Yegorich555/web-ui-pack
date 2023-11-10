@@ -98,7 +98,7 @@ export default class WUPSelectManyControl<
         --ctrl-select-item-del: var(--ctrl-icon);
         --ctrl-select-item-del-img: var(--wup-icon-cross);
         --ctrl-select-item-del-size: 0.8em;
-        --ctrl-select-gap: 6px;
+        --ctrl-select-gap: 0.5em;
       }
       [wupdark] {
         --ctrl-select-item-bg: #fff2;
@@ -110,18 +110,16 @@ export default class WUPSelectManyControl<
     return `${super.$style}
       :host strong {
         top: 1.6em;
-        margin: calc(var(--ctrl-select-gap) / 2);
       }
       :host label > span {
+        gap: var(--ctrl-select-gap);
         flex-wrap: wrap;
         flex-direction: row;
         padding: var(--ctrl-padding);
         padding-left: 0; padding-right: 0;
-        margin: calc(var(--ctrl-select-gap) / -2);
       }
       :host [item],
       :host input {
-        margin: calc(var(--ctrl-select-gap) / 2);
         padding: var(--ctrl-select-gap);
       }
       :host input {
@@ -148,6 +146,7 @@ export default class WUPSelectManyControl<
         box-sizing: border-box;
         white-space: nowrap;
         overflow: hidden;
+        flex: 0 0 auto;
       }
       :host [item]:after {
         ${WUPcssIcon}
@@ -745,5 +744,6 @@ when popup is opened => don't change bottom...top if menu or control height chan
 
 // NiceToHave: Ctrl+Z must should work for the whole control. Not only for `input`
 
-// todo don't allow items affects on width - sometimes flex: wrap doesn't work
-// todo add option autoheight & use vert-scroll if it's disabled (now it works with autoheight: true)
+/* NiceToHave: Allow nested content to be scrollable(singleLine, fixedHeight).
+  But for this need to add place <strong/> outside label>span[scrollable] & somehow apply style-transform >>> :host..input:not(:placeholder-shown) + strong
+*/

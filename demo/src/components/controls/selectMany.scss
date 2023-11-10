@@ -27,3 +27,19 @@
   height: 100%;
   align-items: baseline;
 }
+
+// uncomment to test with scrollable part
+// wup-selectmany {
+//   > label > span {
+//     overflow: auto;
+//     overflow: overlay;
+//     max-height: 4em;
+//     flex-wrap: nowrap;
+
+//     &::-webkit-scrollbar {
+//       display: none;
+//       // -ms-overflow-style: none; /* IE and Edge */
+//       scrollbar-width: none; /* Firefox */
+//     }
+//   }
+// }
