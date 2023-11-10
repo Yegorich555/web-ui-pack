@@ -23,6 +23,6 @@ try {
 
 /** Run this script to update types.html.json. cmd> node ./types.html.update.js */
 
-// todo add types.css.json: prop [wupdark] + css-variables:
+// NiceToHave add types.css.json: prop [wupdark] + css-variables: but it's not supported now
 // https://github.com/microsoft/vscode-extension-samples/blob/main/custom-data-sample/css.css-data.json
 // https://github.com/microsoft/vscode-css-languageservice/blob/main/docs/customData.md
