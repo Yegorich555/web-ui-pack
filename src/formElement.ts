@@ -498,6 +498,17 @@ export default class WUPFormElement<
   protected override gotReady(): void {
     super.gotReady();
 
+    // tie with heading if possible
+    if (["title", "aria-label", "aria-labelledby"].every((a) => !this.hasAttribute(a))) {
+      const meHeading = (el: Element | null): Element | null =>
+        el && (/H[\d]/.test(el.tagName) || el.getAttribute("role") === "heading") ? el : null;
+      const h = meHeading(this.firstElementChild) ?? meHeading(this.previousElementSibling);
+      if (h) {
+        h.id ||= this.#ctr.$uniqueId;
+        this.setAttribute("aria-labelledby", h.id);
+      }
+    }
+
     this.appendEvent(
       this,
       "keydown",

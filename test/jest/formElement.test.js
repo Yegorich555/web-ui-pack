@@ -837,4 +837,54 @@ describe("formElement", () => {
       expect(el.storageGet()).toBe(null);
     });
   });
+
+  test("WA: tie with heading", async () => {
+    document.body.innerHTML = `<h3>..</h3> <wup-form></wup-form>`;
+    await h.wait(10);
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<h3 id="wup1">..</h3> <wup-form role="form" aria-labelledby="wup1"></wup-form>"`
+    );
+
+    document.body.innerHTML = `<wup-form><h3>..</h3></wup-form>`;
+    await h.wait(10);
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<wup-form role="form" aria-labelledby="wup2"><h3 id="wup2">..</h3></wup-form>"`
+    );
+
+    document.body.innerHTML = `<div role='heading'>..</div> <wup-form></wup-form>`;
+    await h.wait(10);
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<div role="heading" id="wup3">..</div> <wup-form role="form" aria-labelledby="wup3"></wup-form>"`
+    );
+
+    document.body.innerHTML = `<h2 id='hrm'>..</h2> <wup-form></wup-form>`;
+    await h.wait(10);
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<h2 id="hrm">..</h2> <wup-form role="form" aria-labelledby="hrm"></wup-form>"`
+    );
+
+    document.body.innerHTML = `<h2>..</h2> <wup-form><h3>.</h3></wup-form>`;
+    await h.wait(10);
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<h2>..</h2> <wup-form role="form" aria-labelledby="wup4"><h3 id="wup4">.</h3></wup-form>"`
+    );
+
+    document.body.innerHTML = `<h2>..</h2><wup-form aria-label="Login"></wup-form>`;
+    await h.wait(10);
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<h2>..</h2><wup-form aria-label="Login" role="form"></wup-form>"`
+    );
+
+    document.body.innerHTML = `<h2>..</h2><wup-form title="Login"></wup-form>`;
+    await h.wait(10);
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<h2>..</h2><wup-form title="Login" role="form"></wup-form>"`
+    );
+
+    document.body.innerHTML = `<h2>..</h2><h3>..<h3><wup-form aria-labelledby="sid"><div id='sid'>.</div></wup-form>`;
+    await h.wait(10);
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<h2>..</h2><h3>..</h3><h3><wup-form aria-labelledby="sid" role="form"><div id="sid">.</div></wup-form></h3>"`
+    );
+  });
 });

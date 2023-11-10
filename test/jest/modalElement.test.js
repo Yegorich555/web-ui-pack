@@ -791,7 +791,7 @@ describe("modalElement", () => {
     expect(all.map((m) => m.outerHTML)).toMatchInlineSnapshot(`
       [
         "<wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button>
-              <wup-form role="form">
+              <wup-form role="form" aria-labelledby="sID">
                 <h2 id="sID">...</h2>
                 <wup-text w-name="firstName"><label for="wup4"><span><input placeholder=" " type="text" id="wup4" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text>
               </wup-form>
