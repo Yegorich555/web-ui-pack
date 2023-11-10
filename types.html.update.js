@@ -7,7 +7,7 @@ try {
   const tags = htmlTypes.tags.sort((a, b) => a.name.localeCompare(b.name));
   tags.forEach((tag) => {
     console.warn(`Proccessed <${tag.name}>`);
-    const exclude = new Set(["disabled", "readonly"]);
+    const exclude = new Set(["disabled", "readonly", "menu", "tooltip"]);
     tag.attributes.forEach((a) => {
       a.name = a.name.toLowerCase();
       if (!exclude.has(a.name) && !a.name.startsWith("w-")) {
@@ -22,7 +22,11 @@ try {
 }
 
 /** Run this script to update types.html.json. cmd> node ./types.html.update.js */
+// watchfix: VSCode built-in support: https://github.com/WICG/webcomponents/issues/776
+// watchfix: VSCode css support: https://github.com/microsoft/vscode-custom-data/issues/82
 
 // NiceToHave add types.css.json: prop [wupdark] + css-variables: but it's not supported now
 // https://github.com/microsoft/vscode-extension-samples/blob/main/custom-data-sample/css.css-data.json
 // https://github.com/microsoft/vscode-css-languageservice/blob/main/docs/customData.md
+
+// todo add WebStorm support: https://plugins.jetbrains.com/docs/intellij/websymbols-web-types.html#including-web-types

@@ -5,6 +5,20 @@
   "_buildAuto": "https://github.com/runem/web-component-analyzer => run: wca analyze src --format json --outFile custom-elements.json/",
   "tags": [
     {
+      "name": "button",
+      "attributes": [
+        {
+          "name": "w-confirm",
+          "description": "Point message for confirm-modal then`click`event will be fired only after btn-confirm click",
+          "values": [
+            {
+              "name": "Do you want to do it?"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "wup-calendar",
       "description": "Form-control represented by date picker",
       "references": [
@@ -661,20 +675,6 @@
       ]
     },
     {
-      "name": "button",
-      "attributes": [
-        {
-          "name": "w-confirm",
-          "description": "Point message for confirm-modal then`click`event will be fired only after btn-confirm click",
-          "values": [
-            {
-              "name": "Do you want to do it?"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "wup-modal",
       "description": "Modal element",
       "references": [
@@ -775,7 +775,7 @@
           ]
         },
         {
-          "name": "w-confirmUnsaved",
+          "name": "w-confirmunsaved",
           "description": "Show confirm modal if user closes modal with `wup-form` with unsaved changes",
           "values": [
             {
