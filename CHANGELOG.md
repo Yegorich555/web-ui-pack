@@ -19,6 +19,7 @@
 - **Text based controls**
   - Added css variable `--ctrl-label-active-pos` to simplify customization of label position
 - [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). Improved handling promise rejection in `$options.items`
+- [SelectManyControl](src/controls/selectMany.ts). Added scrolling style & restricted max-height by default
 
 ### Fixes
 

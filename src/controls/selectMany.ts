@@ -3,7 +3,7 @@ import isOverlap from "../helpers/isOverlap";
 import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
-import { WUPcssIcon } from "../styles";
+import { WUPcssIcon, WUPcssScrollSmall } from "../styles";
 import { MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 import WUPSelectControl from "./select";
@@ -108,15 +108,30 @@ export default class WUPSelectManyControl<
 
   static get $style(): string {
     return `${super.$style}
-      :host strong {
-        top: 1.6em;
+      :host label {
+        position: relative;
       }
+      ${WUPcssScrollSmall(":host label>span")}
       :host label > span {
+        position: initial;
+        overflow: auto;
         gap: var(--ctrl-select-gap);
         flex-wrap: wrap;
         flex-direction: row;
-        padding: var(--ctrl-padding);
-        padding-left: 0; padding-right: 0;
+        margin: var(--ctrl-padding);
+        padding: 0;
+        margin-left: 0;
+        margin-right: 0;
+        max-height: 5em;
+      }
+      :host strong {
+        top: 1.6em;
+        margin: var(--ctrl-padding);
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      :host[filled] strong {
+        transform: var(--ctrl-label-active-pos);
       }
       :host [item],
       :host input {
@@ -241,6 +256,12 @@ export default class WUPSelectManyControl<
 
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
+
+  protected override renderControl(): void {
+    super.renderControl();
+    // Move ctrl-label outside scrollable part
+    this.$refLabel.prepend(this.$refTitle); // WARN: expected browser won't autofill this type of control - otherwise it doesn't work
+  }
 
   protected override canHandleUndo(): boolean {
     return false; // custom history not required for this control
@@ -743,7 +764,3 @@ when popup is opened => don't change bottom...top if menu or control height chan
  */
 
 // NiceToHave: Ctrl+Z must should work for the whole control. Not only for `input`
-
-/* NiceToHave: Allow nested content to be scrollable(singleLine, fixedHeight).
-  But for this need to add place <strong/> outside label>span[scrollable] & somehow apply style-transform >>> :host..input:not(:placeholder-shown) + strong
-*/

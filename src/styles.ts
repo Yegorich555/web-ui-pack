@@ -81,6 +81,7 @@ ${tag}:focus:after {
 }`;
 }
 
+// todo need someHook to apply this rule as singleton once
 /** Style for small-scroll; vars --scroll, --scroll-hover to customize styling
  * @tutorial Troubleshooting
  * * cursor:pointer; doesn't work - this Chromium issue https://stackoverflow.com/questions/64402424/why-does-the-css-cursor-property-not-work-for-the-styled-scrollbar */
