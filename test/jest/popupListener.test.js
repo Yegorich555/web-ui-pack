@@ -666,7 +666,6 @@ describe("popupListener", () => {
 
   test("right-click filter", async () => {
     el = document.body.appendChild(document.createElement("wup-popup"));
-    el.testMe = true;
     el.$options.openCase = PopupOpenCases.onClick;
     await h.wait();
 
