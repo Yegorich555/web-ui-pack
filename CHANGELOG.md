@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 (\_\_\_)
+## 1.0.0 (Nov 13, 2023)
 
 ### New Features
 
