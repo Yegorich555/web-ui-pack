@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 (\_\_\_)
+## 1.0.0 (Nov 13, 2023)
 
 ### New Features
 
@@ -45,39 +45,39 @@
 
   - Added static `.$use()`. Call it before using element: `WUPTextControl.$use()` (_self-registration by import_ works now and will be removed in the future)
   - Renamed css-vars:
-    `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
-    `--anim-time` >>> `--anim-t`
-    `--popup` >>> `popup-text`
-    `--popup-anim` >>> `popup-anim-t`
-    `--tooltip` >>> `tooltip-text`
-    `--spin-speed` >>> `spin-t`
-    `--btn-submit` >>> `--btn-submit-text`
-    `--ctrl` >>> `--ctrl-text`
-    `--ctrl-clr-width` >>> `--ctrl-clr-w`
-    `--ctrl-select-item` >>> `--ctrl-select-item-text`
-    `--ctrl-time-off` >>> `--ctrl-time-off-text`
-    `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
+    - `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
+    - `--anim-time` >>> `--anim-t`
+    - `--popup` >>> `popup-text`
+    - `--popup-anim` >>> `popup-anim-t`
+    - `--tooltip` >>> `tooltip-text`
+    - `--spin-speed` >>> `spin-t`
+    - `--btn-submit` >>> `--btn-submit-text`
+    - `--ctrl` >>> `--ctrl-text`
+    - `--ctrl-clr-width` >>> `--ctrl-clr-w`
+    - `--ctrl-select-item` >>> `--ctrl-select-item-text`
+    - `--ctrl-time-off` >>> `--ctrl-time-off-text`
+    - `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
 
   - Refactored & unified custom events. Now every event contains detail as object: `e.detail = { ... }`
 
 - [PopupElement](src/popup/popupElement.ts)
   - **z-index** is changed from `90000` to `8000`
   - Renamed `show/hide` to `open/close` (the same for [DropdownElement](src/dropdownElement.ts)):
-    enum `ShowCases` >>> `PopupShowCases`
-    enum `HideCases` >>> `PopupHideCases`
-    option `showCase` >>> `openCase`
-    method `$show()` >>> `$open()`
-    method `$hide()` >>> `$close()`
-    state-prop `$isShown` >>> `$isOpened`
-    event `$onShown` >>> `$onOpened`
-    etc.
+    - enum `ShowCases` >>> `PopupShowCases`
+    - enum `HideCases` >>> `PopupHideCases`
+    - option `showCase` >>> `openCase`
+    - method `$show()` >>> `$open()`
+    - method `$hide()` >>> `$close()`
+    - state-prop `$isShown` >>> `$isOpened`
+    - event `$onShown` >>> `$onOpened`
+    - etc.
   - Refactored/normalized enum PopupShowCases
 - **Combobox controls (Select, SelectMany, Date, Time)**
   - Renamed `show/hide` to `open/close`:
-    enum `ShowCases` >>> `MenuShowCases`
-    enum `HideCases` >>> `MenuHideCases`
-    event `$showMenu` >>> `$openMenu`
-    event `$hideMenu` >>> `$closeMenu`
+    - enum `ShowCases` >>> `MenuShowCases`
+    - enum `HideCases` >>> `MenuHideCases`
+    - event `$showMenu` >>> `$openMenu`
+    - event `$hideMenu` >>> `$closeMenu`
     etc.
 
 ---
