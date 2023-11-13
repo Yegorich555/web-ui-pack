@@ -99,15 +99,12 @@ export default function AppContainer() {
 
   useEffect(() => {
     const prevPath = window.localStorage.getItem("path");
-    console.error({ prevPath, routes: routes.map((r) => r.path) });
     if (prevPath) {
       window.localStorage.removeItem("path");
       const p = prevPath.split("?")[0];
       const r = routes.find((v) => v.path === p);
-      console.warn("navigate", r?.path);
-      r && navigate(prevPath); // window.location.replace(r.url as string);
+      r && navigate(process.env.BASE_URL + prevPath); // window.location.replace(r.url as string);
     }
-    window.tryNavigate = (s: string) => navigate(s);
   }, []);
 
   return (
