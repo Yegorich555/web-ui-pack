@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 import { WUPSelectManyControl } from "web-ui-pack";
-import { ShowCases } from "web-ui-pack/controls/baseCombo";
+import { MenuOpenCases } from "web-ui-pack/controls/baseCombo";
 import { isAnimEnabled } from "web-ui-pack/helpers/animate";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
@@ -20,7 +20,7 @@ initTestBaseControl({
   onInit: (e) => {
     el = e;
     el.$options.items = getItems();
-    el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
+    el.$options.openCase |= MenuOpenCases.onFocusAuto; // without this impossible to test with manual triggering focus()
     h.setupLayout(el, { x: 140, y: 100, w: 100, h: 50 });
 
     window.$1Value = [10];
@@ -55,7 +55,7 @@ describe("control.selectMany", () => {
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       "w-allownewvalue": { value: true },
-      "w-showcase": { value: 1 },
+      "w-opencase": { value: 1 },
       "w-readonlyinput": { value: true },
       "w-multiple": { skip: true },
       "w-items": { value: getItems() },
@@ -70,18 +70,18 @@ describe("control.selectMany", () => {
     el.$initValue = [10, 30];
     await h.wait(10);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
+      `"<label for="txt1"><strong></strong><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label>"`
     );
 
     HTMLInputElement.prototype.focus.call(el.$refInput); // opening menu by focus
     await h.wait(2);
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2" aria-owns="txt3" aria-controls="txt3"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><section aria-live="off" aria-atomic="true" class="wup-hidden" id="txt2">Donny,Leo</section><wup-popup menu="" style="min-width: 100px;"><ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
+      `"<label for="txt1"><strong></strong><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2" aria-owns="txt3" aria-controls="txt3"></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><section aria-live="off" aria-atomic="true" class="wup-hidden" id="txt2">Donny,Leo</section><wup-popup menu="" open="" style="min-width: 100px; display: none;" w-animation="drawer"><ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
     );
     await h.wait();
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<label for="txt1"><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt3" aria-controls="txt3"><strong></strong></span><button clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" style="min-width: 100px;"><ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
+      `"<label for="txt1"><strong></strong><span><span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt3" aria-controls="txt3"></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" open="" style="min-width: 100px; display: none;" w-animation="drawer" show=""><ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
     );
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option">Splinter</li></ul>"`
@@ -93,7 +93,7 @@ describe("control.selectMany", () => {
     );
     await h.userClick(el.$refPopup.querySelectorAll("li")[1]); // select first visible
     await h.wait();
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(el.$value).toStrictEqual([10, 30, 20]);
     expect(el.$refInput.value).toBe(""); // input is cleared after selection
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
@@ -115,7 +115,7 @@ describe("control.selectMany", () => {
     await h.wait();
     expect(el.$value).toStrictEqual([10, 30, 20, 40]); // because selected Splinter
     expect(el.$refInput.value).toBe("");
-    // deprecated feature: expect(el.$isShown).toBe(false); // because no-items anymore
+    // deprecated feature: expect(el.$isOpened).toBe(false); // because no-items anymore
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option" aria-selected="false" id="txt4" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;" aria-selected="false" id="txt8">Splinter</li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
     );
@@ -123,7 +123,7 @@ describe("control.selectMany", () => {
     // expected no-items
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
     await h.wait();
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(el.$refInput.outerHTML).toMatchInlineSnapshot(
       `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt3" aria-controls="txt3">"`
     );
@@ -133,7 +133,7 @@ describe("control.selectMany", () => {
 
     await h.userClick(el.$refItems[0]); // remove item by click
     await h.wait();
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(el.$value).toStrictEqual([30, 20, 40]); // because selected Splinter
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="">Donny</li><li role="option" aria-selected="false" id="txt4" style="display: none;">Mikky</li><li role="option" style="display: none;">Leo</li><li role="option" style="display: none;" aria-selected="false" id="txt8">Splinter</li><li role="option" aria-disabled="true" aria-selected="false" style="display: none;">No Items</li></ul>"`
@@ -159,23 +159,23 @@ describe("control.selectMany", () => {
       .spyOn(window, "matchMedia")
       .mockImplementationOnce((s) => ({ matches: s !== "(hover: hover) and (pointer: fine)" })); // simulate touchscreen
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt12" aria-controls="txt12"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt12" aria-controls="txt12">"`
     );
     const item = el.$refItems[0];
     await h.userTap(item);
     await h.wait();
     expect(el.$isFocused).toBe(true);
-    expect(el.$isShown).toBe(true); // 1st tap only to focus control
+    expect(el.$isOpened).toBe(true); // 1st tap only to focus control
     // item must be not-removed
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt14" aria-controls="txt14"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Leo</span><span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt14" aria-controls="txt14">"`
     );
 
     await h.userTap(item);
     await h.wait();
     // 2nd tap removes item
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt14" aria-controls="txt14"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Mikky</span><span item="" aria-hidden="true">Splinter</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt14" aria-controls="txt14">"`
     );
 
     // input hidden if readOnlyInput and values exist
@@ -225,27 +225,27 @@ describe("control.selectMany", () => {
     el.$initValue = [10, 30];
     await h.wait(10);
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">"`
     );
 
     // remove item by click
     jest.spyOn(el.$refItems[0], "offsetWidth", "get").mockReturnValue("33px");
-    expect(el.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
     await h.wait();
     await h.userClick(el.$refItems[0], undefined);
     expect(el.$value).toStrictEqual([30]);
     expect(el.$initValue).toStrictEqual([10, 30]);
     // animation for [removed]
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true" removed="">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2"><strong></strong>"`
+      `"<span item="" aria-hidden="true" removed="">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2">"`
     );
-    expect(el.$isShown).toBe(false); // because not-open by value-change
+    expect(el.$isOpened).toBe(false); // because not-open by value-change
     await h.wait();
-    expect(el.$isShown).toBe(false); // because not-open by value-change
+    expect(el.$isOpened).toBe(false); // because not-open by value-change
 
     await h.wait();
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
+      `"<span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">"`
     );
     expect(handledKeydown("Backspace")).toBe(true); // 1st time - focus, 2nd - delete
     expect(handledKeydown("Backspace")).toBe(true); // 1st time - focus, 2nd - delete
@@ -264,13 +264,13 @@ describe("control.selectMany", () => {
     await h.wait();
     // without animation for [removed]
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">"`
     );
     await h.wait();
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list"><strong></strong>"`
+      `"<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">"`
     );
-    expect(el.$isShown).toBe(false); // because not-open by value-change
+    expect(el.$isOpened).toBe(false); // because not-open by value-change
 
     el.$value = [10, 30];
     await h.wait();
@@ -286,7 +286,7 @@ describe("control.selectMany", () => {
     el.$value = [getItems()[0].value];
     HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
 
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" style="display: none;">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
@@ -298,7 +298,7 @@ describe("control.selectMany", () => {
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
     expect(el.$value).toStrictEqual([10, 20]);
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(el.querySelector("[focused]")).toBeFalsy();
 
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
@@ -314,7 +314,7 @@ describe("control.selectMany", () => {
     el.$value = [getItems()[0].value];
     HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
       `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1" aria-multiselectable="true"><li role="option" aria-selected="true">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
     );
@@ -576,7 +576,7 @@ describe("control.selectMany", () => {
       ]
     `);
     expect(el.$refInput.value).toBe("");
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(onChange).toBeCalledTimes(1);
 
     expect(handledKeydown("Enter")).toBe(true);
@@ -614,7 +614,7 @@ describe("control.selectMany", () => {
     el.addEventListener("$change", onChanged);
     HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
-    el.$hideMenu();
+    el.$closeMenu();
     await h.wait();
     expect(handledKeydown("ArrowLeft", { shiftKey: true })).toBe(false); // because not item focused
 
@@ -754,7 +754,6 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
-        "<strong></strong>",
       ]
     `);
     expect(el).toMatchSnapshot();
@@ -788,7 +787,6 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
-        "<strong></strong>",
       ]
     `);
 
@@ -804,7 +802,6 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
-        "<strong></strong>",
       ]
     `); // no -effect because throttling
     await h.wait(5);
@@ -822,7 +819,6 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
-        "<strong></strong>",
       ]
     `);
     await h.wait(5);
@@ -840,7 +836,6 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
-        "<strong></strong>",
       ]
     `);
     // move to the 1st - left side
@@ -855,7 +850,6 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
-        "<strong></strong>",
       ]
     `);
 
@@ -871,7 +865,6 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
-        "<strong></strong>",
       ]
     `);
     await h.wait(5);
@@ -888,7 +881,6 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true">Splinter</span>",
         "<span item="" aria-hidden="true" drop="">Donny</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
-        "<strong></strong>",
       ]
     `);
     await h.wait(5);
@@ -917,7 +909,6 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true">Splinter</span>",
         "<span item="" aria-hidden="true">Donny</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
-        "<strong></strong>",
       ]
     `);
 
@@ -939,7 +930,6 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true">Splinter</span>",
         "<span item="" aria-hidden="true">Donny</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
-        "<strong></strong>",
       ]
     `);
     trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
@@ -1057,11 +1047,14 @@ describe("control.selectMany", () => {
     await nextFrame(50);
     await expect(h.userTypeText(el.$refInput, "l")).resolves.not.toThrow();
     await h.wait();
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(el.$refPopup).toMatchInlineSnapshot(`
       <wup-popup
         menu=""
-        style="min-width: 180px;"
+        open=""
+        show=""
+        style="min-width: 180px; display: none;"
+        w-animation="drawer"
       >
         <ul
           aria-label="Items"

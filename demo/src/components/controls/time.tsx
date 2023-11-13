@@ -2,8 +2,8 @@ import Page from "src/elements/page";
 import { WUPTimeControl, WUPTimeObject } from "web-ui-pack";
 import stylesCom from "./controls.scss";
 
-const sideEffect = WUPTimeControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPTimeControl.$use();
+
 (window as any).myTimeValidations = { required: true } as WUP.Time.Options["validations"];
 (window as any).myTimeValidations2 = { required: false } as WUP.Time.Options["validations"];
 (window as any).myTimeExclude = { test: (v: WUPTimeObject) => v.hours === 12 && v.minutes === 48 };
@@ -23,7 +23,7 @@ export default function TimeControlView() {
       }}
       features={[
         "Inheritted features from TextControl",
-        "Powerful accessibility support (keyboard, announcenement)",
+        "Powerful accessibility support (keyboard, announcement)",
         "Scrollable & well animated pickers (with swipe for touchscreens)",
         "Wide ability to disable particular values (options min/max/exclude)",
         "Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
@@ -33,7 +33,7 @@ export default function TimeControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { readonly: new WUPTimeObject("08:30") };
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

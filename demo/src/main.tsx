@@ -11,6 +11,7 @@ import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
 import CircleView from "./components/circleView";
 import DropdownView from "./components/dropdownView";
+import ModalView from "./components/modalView";
 
 import TextControlView from "./components/controls/text";
 import TextareaControlView from "./components/controls/textarea";
@@ -43,10 +44,13 @@ interface IRoute {
 const baseURL = process.env.BASE_URL || "/";
 
 const routes: IRoute[] = [
-  { path: "popup", el: PopupView },
-  { path: "spin", el: SpinView },
-  { path: "circle", el: CircleView },
-  { path: "dropdown", el: DropdownView },
+  ...[
+    { path: "popup", el: PopupView },
+    { path: "spin", el: SpinView },
+    { path: "circle", el: CircleView },
+    { path: "dropdown", el: DropdownView },
+    { path: "modal", el: ModalView },
+  ].sort((a, b) => a.path.localeCompare(b.path)),
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
   { path: "control/textarea", el: TextareaControlView, isNested: true },
@@ -69,7 +73,7 @@ function last(arr: string[]) {
   return arr[arr.length - 1];
 }
 
-!WUPSwitchControl && console.error("!");
+WUPSwitchControl.$use();
 
 declare global {
   interface Window {
@@ -97,8 +101,9 @@ export default function AppContainer() {
     const prevPath = window.localStorage.getItem("path");
     if (prevPath) {
       window.localStorage.removeItem("path");
-      const r = routes.find((v) => v.path === prevPath);
-      r && navigate(r.url as string); // window.location.replace(r.url as string);
+      const p = prevPath.split("?")[0];
+      const r = routes.find((v) => v.path === p);
+      r && navigate(prevPath); // window.location.replace(r.url as string);
     }
   }, []);
 

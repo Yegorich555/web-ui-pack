@@ -122,7 +122,7 @@ const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) 
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-calendar w-name="dateOfBirhday" w-utc w-initvalue="1990-10-24" w-min="1930-01-01" w-max="2010-01-01"/>
+    <wup-calendar w-name="dateOfBirthday" w-utc w-initvalue="1990-10-24" w-min="1930-01-01" w-max="2010-01-01"/>
   </wup-form>;
  */
 export default class WUPCalendarControl<
@@ -137,7 +137,7 @@ export default class WUPCalendarControl<
     return `:root {
       --ctrl-clr-selected: #fff;
       --ctrl-clr-selected-bg: #009fbc;
-      --ctrl-clr-width: 17em;
+      --ctrl-clr-w: 17em;
       --ctrl-clr-cell-gap: 0px;
       --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
       --ctrl-clr-off: var(--ctrl-err);
@@ -160,7 +160,7 @@ export default class WUPCalendarControl<
         text-transform: capitalize;
       }
       :host label {
-        max-width: var(--ctrl-clr-width);
+        max-width: var(--ctrl-clr-w);
         display: block;
         padding-right: 0;
       }
@@ -174,9 +174,9 @@ export default class WUPCalendarControl<
       }
       :host input {${WUPcssHidden}}
       :host [calendar] {
-        --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-width) / 7 - var(--ctrl-clr-cell-gap));
+        --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-w) / 7 - var(--ctrl-clr-cell-gap));
         --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
-        width: var(--ctrl-clr-width);
+        width: var(--ctrl-clr-w);
         padding: var(--ctrl-clr-padding);
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
@@ -188,7 +188,7 @@ export default class WUPCalendarControl<
       }
       :host [calendar="month"],
       :host [calendar="year"] {
-        --ctrl-clr-cell-w: calc(var(--ctrl-clr-width) / 4 - var(--ctrl-clr-cell-gap));
+        --ctrl-clr-cell-w: calc(var(--ctrl-clr-w) / 4 - var(--ctrl-clr-cell-gap));
         --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
       }
       :host [calendar="month"] ul,
@@ -300,7 +300,7 @@ export default class WUPCalendarControl<
         :host [calendar]>div {
           overflow: hidden;
         }
-        :host [zoom] { animation: none var(--anim-time) linear forwards; }
+        :host [zoom] { animation: none var(--anim-t) linear forwards; }
         :host [zoom="out"] { animation-name: WUP-ZOOM-OUT-1; }
         :host [zoom="out2"] { animation-name: WUP-ZOOM-OUT-2; }
         :host [zoom="in"] { animation-name: WUP-ZOOM-IN-1; }
@@ -401,11 +401,11 @@ export default class WUPCalendarControl<
   }
 
   /** Reference to calendar-container */
-  $refCalenar = document.createElement("div");
+  $refCalendar = document.createElement("div");
   /** Reference to header-button */
-  $refCalenarTitle = document.createElement("button");
+  $refCalendarTitle = document.createElement("button");
   /** Reference to container with items */
-  $refCalenarItems: HTMLOListElement & { _items?: WUP.Calendar.IItemElement[] } = document.createElement("ol");
+  $refCalendarItems: HTMLOListElement & { _items?: WUP.Calendar.IItemElement[] } = document.createElement("ol");
 
   /** Called once when need to render label + input */
   renderInput(): { menuId: string } {
@@ -429,17 +429,17 @@ export default class WUPCalendarControl<
     const { menuId } = this.renderInput();
 
     // render calendar
-    this.$refCalenar.id = menuId;
-    const h = add(this.$refCalenar, "header");
-    /* */ h.appendChild(this.$refCalenarTitle);
-    this.$refCalenarTitle.setAttribute("tabindex", "-1");
-    this.$refCalenarTitle.setAttribute("aria-hidden", true);
-    this.$refCalenarTitle.setAttribute("type", "button");
-    const box = add(this.$refCalenar, "div");
+    this.$refCalendar.id = menuId;
+    const h = add(this.$refCalendar, "header");
+    /* */ h.appendChild(this.$refCalendarTitle);
+    this.$refCalendarTitle.setAttribute("tabindex", "-1");
+    this.$refCalendarTitle.setAttribute("aria-hidden", true);
+    this.$refCalendarTitle.setAttribute("type", "button");
+    const box = add(this.$refCalendar, "div");
     const animBox = add(box, "div");
-    /* */ animBox.appendChild(this.$refCalenarItems);
-    this.$refCalenarItems.setAttribute("role", "grid");
-    this.appendChild(this.$refCalenar);
+    /* */ animBox.appendChild(this.$refCalendarItems);
+    this.$refCalendarItems.setAttribute("role", "grid");
+    this.appendChild(this.$refCalendar);
     // WARN: for render picker see gotReady
   }
 
@@ -460,7 +460,7 @@ export default class WUPCalendarControl<
         el.removeAttributeNode(el.attributes[0]);
       }
     } else {
-      el = add(this.$refCalenarItems, "li") as unknown as WUP.Calendar.IItemElement;
+      el = add(this.$refCalendarItems, "li") as unknown as WUP.Calendar.IItemElement;
     }
     el.setAttribute("role", "gridcell");
     el.textContent = text;
@@ -491,26 +491,26 @@ export default class WUPCalendarControl<
       case PickersEnum.Year:
         type = "year";
         r = this.getYearPicker(utcVal);
-        this.$refCalenarTitle.disabled = true;
+        this.$refCalendarTitle.disabled = true;
         break;
       case PickersEnum.Month:
         type = "month";
         r = this.getMonthPicker(utcVal);
-        this.$refCalenarTitle.disabled = false;
+        this.$refCalendarTitle.disabled = false;
         break;
       default:
         type = "day";
         r = this.getDayPicker();
-        this.$refCalenarTitle.disabled = false;
+        this.$refCalendarTitle.disabled = false;
     }
 
-    this.$refCalenar.setAttribute("calendar", type);
+    this.$refCalendar.setAttribute("calendar", type);
     this.#handleClickItem = r.onItemClick;
 
     const renderPicker = (next: Date): WUP.Calendar.IItemElement[] => {
       this._pickerValue = next;
-      const a = r.renderItems(this.$refCalenarItems, next);
-      this.$refCalenarItems._items = a;
+      const a = r.renderItems(this.$refCalendarItems, next);
+      this.$refCalendarItems._items = a;
 
       const first = a[0]._value;
       const now = this.#ctr.$dateToUTC(new Date());
@@ -530,14 +530,14 @@ export default class WUPCalendarControl<
       this.#refreshSelected();
 
       this.disableItems(a, r.getIndex);
-      this.$isFocused && this.$ariaSpeak(this.$refCalenarTitle.textContent!);
+      this.$isFocused && this.$ariaSpeak(this.$refCalendarTitle.textContent!);
       this.#focused && this.focusItem(a.find((e) => !e.hasAttribute("prev"))!);
       return a;
     };
 
     renderPicker(utcVal);
 
-    const scrollObj = new WUPScrolled(this.$refCalenarItems, {
+    const scrollObj = new WUPScrolled(this.$refCalendarItems, {
       onRender: (n) => {
         const nextDate = r.next(utcVal, n);
         const { scrollFrom, scrollTo } = this.#disabled!;
@@ -556,7 +556,7 @@ export default class WUPCalendarControl<
     this.#scrollObj = scrollObj;
 
     this.#clearPicker = async (isOut: boolean) => {
-      const box = this.$refCalenar.children[1].children[0] as HTMLElement;
+      const box = this.$refCalendar.children[1].children[0] as HTMLElement;
       const animate = (attrVal: string): Promise<any> =>
         new Promise<any>((resolve) => {
           box.setAttribute("zoom", attrVal);
@@ -576,7 +576,7 @@ export default class WUPCalendarControl<
 
       await animate(isOut ? "out" : "in");
       scrollObj.dispose();
-      this.removeChildren.call(this.$refCalenarItems);
+      this.removeChildren.call(this.$refCalendarItems);
       this.#refreshSelected = undefined;
 
       animate(isOut ? "out2" : "in2").then(() => box.removeAttribute("zoom")); // WARN: it's important not to wait
@@ -588,7 +588,7 @@ export default class WUPCalendarControl<
   protected getDayPicker(): WUP.Calendar.IPickerResult {
     // render daysOfWeek
     if (!this.#isDayWeeksAdded) {
-      const box = this.$refCalenarItems.parentElement!;
+      const box = this.$refCalendarItems.parentElement!;
       const days = document.createElement("ul");
       days.setAttribute("aria-hidden", true);
       box.prepend(days);
@@ -611,7 +611,7 @@ export default class WUPCalendarControl<
     const renderItems = (ol: HTMLElement, v: Date): WUP.Calendar.IItemElement[] => {
       const valMonth = v.getUTCMonth();
       const valYear = v.getUTCFullYear();
-      this.$refCalenarTitle.textContent = `${namesMonth[valMonth]} ${valYear}`;
+      this.$refCalendarTitle.textContent = `${namesMonth[valMonth]} ${valYear}`;
 
       const items: WUP.Calendar.IItemElement[] = [];
       const r = this.#ctr.$daysOfMonth(valYear, valMonth, this._opts.firstWeekDay!);
@@ -681,7 +681,7 @@ export default class WUPCalendarControl<
 
     const renderItems = (ol: HTMLElement, v: Date): WUP.Calendar.IItemElement[] => {
       const year = v.getUTCFullYear();
-      this.$refCalenarTitle.textContent = `${year}`;
+      this.$refCalendarTitle.textContent = `${year}`;
 
       const namesShort = localeInfo.namesMonthShort;
       const items: WUP.Calendar.IItemElement[] = [];
@@ -736,7 +736,7 @@ export default class WUPCalendarControl<
     const renderItems = (_ol: HTMLElement, v: Date): WUP.Calendar.IItemElement[] => {
       let year = getFirst(v);
 
-      this.$refCalenarTitle.textContent = `${year} ... ${year + pageSize - 1}`;
+      this.$refCalendarTitle.textContent = `${year} ... ${year + pageSize - 1}`;
       const items: WUP.Calendar.IItemElement[] = [];
       let i = 0;
       for (i = 0; i < pageSize; ++i) {
@@ -901,7 +901,7 @@ export default class WUPCalendarControl<
       this.$refInput.setAttribute("aria-activedescendant", el.id);
       el.hasAttribute("aria-selected") && el.setAttribute("aria-selected", "false");
       setTimeout(() => {
-        el.setAttribute("aria-label", `${el.textContent} ${this.$refCalenarTitle.textContent}`);
+        el.setAttribute("aria-label", `${el.textContent} ${this.$refCalendarTitle.textContent}`);
         el.hasAttribute("disabled") && el.setAttribute("aria-disabled", true);
         el.hasAttribute("aria-selected") && el.setAttribute("aria-selected", "true"); // otherwise NVDA doesn't announce it again
       }, 100); // without timeout text isn't announced when switch pickers
@@ -917,7 +917,7 @@ export default class WUPCalendarControl<
 
     const isSkip = (el: Element): boolean => el.hasAttribute("prev") || el.hasAttribute("next");
     if (!was) {
-      const items = this.$refCalenarItems._items!;
+      const items = this.$refCalendarItems._items!;
       will =
         items.find((el) => el.hasAttribute("aria-selected") && !isSkip(el)) ||
         items.find((el) => el.hasAttribute("aria-current") && !isSkip(el)) ||
@@ -1090,11 +1090,11 @@ export default class WUPCalendarControl<
       return; // only left button
     }
     let t = e.target as Node | HTMLElement;
-    if (this.$refCalenarTitle === t || this.$refCalenarTitle.contains(t)) {
+    if (this.$refCalendarTitle === t || this.$refCalendarTitle.contains(t)) {
       e.preventDefault();
       this._picker !== PickersEnum.Year && this.changePicker(this._pickerValue, this._picker + 1);
-    } else if (this.$refCalenarItems.contains(t)) {
-      while (t !== this.$refCalenarItems) {
+    } else if (this.$refCalendarItems.contains(t)) {
+      while (t !== this.$refCalendarItems) {
         const v = (t as any)._value;
         if (v !== undefined) {
           e.preventDefault();
@@ -1121,7 +1121,7 @@ export default class WUPCalendarControl<
 
     let isHandled = true;
     const isDayPicker = this._picker === PickersEnum.Day;
-    const items = this.$refCalenarItems._items!;
+    const items = this.$refCalendarItems._items!;
     switch (e.key) {
       case "Enter":
         isHandled = this.#focused != null; // WARN: submit by enter impossible if user focused item
@@ -1163,7 +1163,7 @@ export default class WUPCalendarControl<
             this.showNext(true); // shift the whole year
           }
         }
-        this.focusItem(this.$refCalenarItems._items!.find((el) => !el.hasAttribute("prev"))!);
+        this.focusItem(this.$refCalendarItems._items!.find((el) => !el.hasAttribute("prev"))!);
         break;
       case "PageUp":
         this.showNext(false);
@@ -1172,7 +1172,7 @@ export default class WUPCalendarControl<
             this.showNext(false); // shift the whole year
           }
         }
-        this.focusItem(this.$refCalenarItems._items!.find((el) => !el.hasAttribute("prev"))!);
+        this.focusItem(this.$refCalendarItems._items!.find((el) => !el.hasAttribute("prev"))!);
         break;
       default:
         isHandled = false;
@@ -1189,5 +1189,3 @@ customElements.define(tagName, WUPCalendarControl);
  *  Mar 13...14 >>>  + 1h
  *  Nov 6...7 >>> -1h
  */
-
-// todo add ability to select range

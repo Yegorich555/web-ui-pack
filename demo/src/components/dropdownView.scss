@@ -3,7 +3,7 @@
   margin: 6px;
 
   button {
-    z-index: 80001;
+    // z-index: 7999 !important; // tescase: uncomment and click on stacked button - previosuly it was open/close immediately
     position: relative;
 
     display: flex;
@@ -15,7 +15,6 @@
   }
 
   > wup-popup {
-    z-index: 80000;
     box-shadow: none;
     background: none;
     overflow: visible;

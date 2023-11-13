@@ -103,7 +103,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$value).toBe(undefined);
       expect(el).toMatchSnapshot();
       jest.advanceTimersByTime(1);
-      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.clear);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.clear });
 
       el.$options.clearButton = false;
       jest.advanceTimersByTime(1);
@@ -127,7 +127,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$refInput.value).toBe(initV);
       expect(el.$value).toBe(initV);
       expect(spyChange).toBeCalledTimes(1);
-      expect(spyChange.mock.lastCall[0].detail).toBe(SetValueReasons.userInput); // onUserInput
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.userInput }); // onUserInput
       expect(el.$onChange).toBeCalledTimes(1);
       expect((el.$onChange as any).mock.lastCall[0]).toBe(spyChange.mock.lastCall[0]);
 
@@ -152,8 +152,11 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$refInput.selectionEnd).toBe(0);
 
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      jest.advanceTimersByTime(1);
       expect(el.$value).toBe(undefined);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      jest.advanceTimersByTime(1);
+
       expect(el.$value).toBe(initV);
 
       expect(el.$refInput.selectionStart).toBe(0);
@@ -172,6 +175,8 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$value).toBe(initV);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      jest.advanceTimersByTime(1);
+
       expect(el.$value).toBe(initV);
       expect(el.$refInput.selectionEnd).toBe(initV.length);
     });

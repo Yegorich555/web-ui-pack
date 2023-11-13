@@ -6,7 +6,7 @@ export class WUPlocaleInfo {
   localeUser = new Intl.DateTimeFormat().resolvedOptions().locale;
   /** Decimal separator for number 123.4 it's dot */
   sepDecimal = ".";
-  /** Thouthands separator for number 1,234.5 it's comma */
+  /** Thousands separator for number 1,234.5 it's comma */
   sep1000 = ",";
   /** Date format, example YYYY-MM-DD */
   date = "YYYY-MM-DD";
@@ -16,7 +16,7 @@ export class WUPlocaleInfo {
   dateTime = "YYYY-MM-DD hh:mm:ss A";
   /** First day of week where 1-Monday, 7-Sunday;
    * @tutorial Troubleshooting
-   * * detection depeneds on `Intl.Locale.prototype.weekInfo` https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/weekInfo
+   * * detection depends on `Intl.Locale.prototype.weekInfo` https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/weekInfo
    * and works from Chrome99 & Safari 15.4 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/weekInfo#browser_compatibility
    */
   firstWeekDay = 1;

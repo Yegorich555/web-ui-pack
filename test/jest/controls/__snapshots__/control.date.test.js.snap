@@ -28,6 +28,7 @@ exports[`control.date $ariaDetails 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-date>
@@ -56,6 +57,7 @@ exports[`control.date $ariaDetails 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-date>
@@ -85,6 +87,7 @@ exports[`control.date $ariaSpeak 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <section
@@ -122,6 +125,7 @@ exports[`control.date $ariaSpeak 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-date>
@@ -150,6 +154,7 @@ exports[`control.date $show/$hide error 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-date>
@@ -181,6 +186,7 @@ exports[`control.date $show/$hide error 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -189,7 +195,6 @@ exports[`control.date $show/$hide error 2`] = `
     error=""
     id="txt2"
     role="alert"
-    style="opacity: 0;"
   >
     <span
       class="wup-hidden"
@@ -224,8 +229,26 @@ exports[`control.date $show/$hide error 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
 </wup-date>
 `;
 
@@ -240,28 +263,87 @@ overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
+
+  
+[wup-icon] {
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+}
+[wup-icon]:after {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: var(--icon, #000);
+  -webkit-mask-size: var(--icon-size, 1em);
+  mask-size: var(--icon-size, 1em);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-image: var(--icon-img);
+  mask-image: var(--icon-img);
+}
+[wup-icon]:focus {
+   box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+[wup-icon]:focus:after {
+   background: var(--icon-hover, var(--icon, #000));
+}
+@media (hover: hover) and (pointer: fine) {
+  [wup-icon]:hover {
+   box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  [wup-icon]:hover:after {
+    background: var(--icon-hover, var(--icon, #000));
+  }
+  [wup-icon]:focus:hover {
+   opacity: 0.9;
+  }
+}
+
   :root {
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
           --base-btn-text: #fff;
           --base-btn-focus: #005766;
-          --base-btn2-bg: var(--base-btn-text);
-          --base-btn2-text: var(--base-btn-bg);
+          --base-btn2-bg: #6c757d;
+          --base-btn2-text: #fff;
           --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
+          --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
-          --icon-hover: #0001;
+          --icon-hover-bg: #0001;
+          --icon-focus-bg: #0000001a;
+          --icon-size: 14px;
+          --menu-hover-text: inherit;
+          --menu-hover-bg: #f1f1f1;
         }
         [wupdark] {
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
-          --icon-hover: #fff3;
+          --icon: #fff;
+          --icon-hover-bg: #fff1;
+          --icon-focus-bg: #fff2;
           --scroll: #fff2;
           --scroll-hover: #fff3;
+          --menu-hover-text: inherit;
+          --menu-hover-bg: #222a36;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
@@ -271,7 +353,7 @@ padding:0;}
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl: inherit;
+        --ctrl-text: inherit;
         --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
@@ -299,6 +381,7 @@ padding:0;}
       --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
      }
      [wupdark] {
         --ctrl-clear-hover: rgba(255,0,0,0.2);
@@ -316,7 +399,7 @@ padding:0;}
         margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl);
+        color: var(--ctrl-text);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -333,7 +416,6 @@ padding:0;}
       }
       WUP-DATE:focus-within,
       WUP-DATE:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-DATE:focus-within strong,
@@ -455,6 +537,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE {
           contain: style;
           cursor: text;
+          flex: 1;
         }
         WUP-DATE label &gt; span {
           width: 100%;
@@ -546,6 +629,8 @@ mask-image: var(--ctrl-icon-img);
           transform: translateY(-50%);
           font-weight: normal;
           text-decoration: none;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden; 
         }
         @media not all and (prefers-reduced-motion) {
           WUP-DATE strong {
@@ -561,20 +646,17 @@ mask-image: var(--ctrl-icon-img);
         WUP-DATE textarea:not(:placeholder-shown) + strong,
         WUP-DATE [contenteditable=true]:not(:empty) + strong,
         WUP-DATE legend {
-          top: 0.2em;
-          transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-DATE input:-webkit-autofill + strong
         WUP-DATE textarea:-webkit-autofill + strong
         WUP-DATE [contenteditable=true]:-webkit-autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-DATE input:autofill + strong,
         WUP-DATE textarea:autofill + strong,
         WUP-DATE [contenteditable=true]:autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-DATE:focus-within [maskholder],
         WUP-DATE:focus-within [prefix],
@@ -586,8 +668,6 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-DATE label&gt;button,
-        WUP-DATE label&gt;button:after,
         WUP-DATE label:after,
         WUP-DATE label:before {
           
@@ -610,66 +690,44 @@ mask-repeat: no-repeat;
 mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
+          cursor: pointer;
           -webkit-mask-image: none;
           mask-image: none;
         }
         WUP-DATE label:after {
-          cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-DATE label:before {
-          cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-DATE label&gt;button {
-          contain: strict;
           z-index: 1;
+          contain: strict;
           font-size: inherit;
+          flex: 0 0 auto;
+          align-self: center;
         }
         WUP-DATE button[clear] {
+          --icon-size: var(--ctrl-icon-size);
+          --icon-hover-r: 24px;
+          --icon-img: var(--wup-icon-cross);
+          --icon: var(--ctrl-label);
+          --icon-hover: var(--ctrl-clear);
+          --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
-          position: relative;
           margin-right: -0.5em;
-          align-self: center;
-          cursor: pointer;
-          --ctrl-icon-img: var(--wup-icon-cross);
-          background: none;
-          -webkit-mask: none;
-          mask: none;
+        }
+        WUP-DATE button[clear=back] {
+          --icon-img: var(--wup-icon-back);
         }
         WUP-DATE:focus-within button[clear] {
           display: inline-block;
           opacity: 1;
         }
-        WUP-DATE button[clear=back] {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
-        WUP-DATE button[clear]:after {
-          content: "";
-          padding: 0;
-          -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
-        }
-        WUP-DATE button[clear]:after,
-        WUP-DATE button[clear]:before {
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-DATE:hover button[clear] {
             display: inline-block;
             opacity: 1;
-          }
-          WUP-DATE button[clear]:hover:before {
-            content: "";
-            box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
-          }
-          WUP-DATE button[clear]:hover:after {
-            background: var(--ctrl-clear);
           }
         }
         WUP-DATE[disabled] button[clear],
@@ -703,7 +761,7 @@ mask-image: var(--ctrl-icon-img);
       WUP-DATE &gt; [menu] {
         padding: 0;
         max-height: 300px;
-        z-index: 90010;
+        z-index: 8010;
       }
       WUP-DATE {
         --ctrl-icon-img: var(--ctrl-date-icon-img);
@@ -735,12 +793,12 @@ exports[`control.date common tests snapshot of $defaults 1`] = `
   "max": null,
   "min": null,
   "name": null,
+  "openCase": 74,
   "postfix": "",
   "prefix": "",
   "readOnly": false,
   "readOnlyInput": false,
   "selectOnFocus": false,
-  "showCase": 74,
   "startWith": null,
   "storage": "local",
   "storageKey": "",
@@ -783,12 +841,12 @@ exports[`control.date common tests snapshot of $defaults 3`] = `
   "w-max",
   "w-min",
   "w-name",
+  "w-opencase",
   "w-postfix",
   "w-prefix",
   "w-readonly",
   "w-readonlyinput",
   "w-selectonfocus",
-  "w-showcase",
   "w-startwith",
   "w-storage",
   "w-storagekey",
@@ -829,6 +887,7 @@ exports[`control.date validations $options.validationShowAll 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -836,8 +895,10 @@ exports[`control.date validations $options.validationShowAll 1`] = `
     aria-live="off"
     error=""
     id="txt2"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -890,6 +951,7 @@ exports[`control.date validations $options.validationShowAll 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -897,8 +959,10 @@ exports[`control.date validations $options.validationShowAll 2`] = `
     aria-live="off"
     error=""
     id="txt2"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -959,6 +1023,7 @@ exports[`control.date validations $options.validationShowAll 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -966,8 +1031,10 @@ exports[`control.date validations $options.validationShowAll 3`] = `
     aria-live="off"
     error=""
     id="txt5"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1004,6 +1071,7 @@ exports[`control.date validations options.validationCase 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
 </wup-date>
@@ -1049,11 +1117,11 @@ exports[`control.date validations options.validationCase 2`] = `
       clear="back"
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
     menu=""
-    style="opacity: 0;"
   >
     <wup-calendar
       required=""
@@ -1170,8 +1238,10 @@ exports[`control.date validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt4"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1228,11 +1298,15 @@ exports[`control.date validations options.validationCase 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
     menu=""
-    style=""
+    open=""
+    show=""
+    style="display: none;"
+    w-animation="drawer"
   >
     <wup-calendar
       required=""
@@ -1350,7 +1424,9 @@ exports[`control.date validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt5"
-    style=""
+    open=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1404,6 +1480,7 @@ exports[`control.date validations options.validationCase 4`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
   </label>
   <wup-popup
@@ -1411,8 +1488,10 @@ exports[`control.date validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt7"
+    open=""
     role="alert"
-    style=""
+    show=""
+    style="display: none;"
   >
     <span
       class="wup-hidden"
@@ -1454,6 +1533,7 @@ exports[`control.date with form 1`] = `
         clear=""
         tabindex="-1"
         type="button"
+        wup-icon=""
       />
     </label>
   </wup-date>

@@ -4,8 +4,7 @@ import MyLink from "src/elements/myLink";
 import stylesCom from "./controls.scss";
 import styles from "./switch.scss";
 
-const sideEffect = WUPSwitchControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPSwitchControl.$use();
 
 export default function SwitchControlView() {
   return (
@@ -15,7 +14,7 @@ export default function SwitchControlView() {
       features={[
         "Easy to change size of items via css-variables (ctrl-switch-h...)", //
         "Easy to reverse label",
-        "Powerful accessibility support (keyboard, announcenement)",
+        "Powerful accessibility support (keyboard, announcement)",
         "Ability to save value to localStorage, sessionStorage, URL (options storageKey & storage)",
       ]}
       details={{
@@ -28,7 +27,7 @@ export default function SwitchControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { reversed: true };
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

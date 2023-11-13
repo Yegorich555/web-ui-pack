@@ -540,7 +540,8 @@ export async function userRemove(
 }
 
 /** Simulate user mouse click with 100ms between mouseDown and mouseUp */
-export async function userClick(el: HTMLElement, opts?: MouseEventInit, timeoutMouseUp = 100) {
+export async function userClick(elOrSelector: HTMLElement | string, opts?: MouseEventInit, timeoutMouseUp = 100) {
+  const el: HTMLElement = typeof elOrSelector === "string" ? document.querySelector(elOrSelector)! : elOrSelector;
   const o = () => ({ bubbles: true, cancelable: true, pageX: 1, pageY: 1, ...opts });
   const mouseEvent = (type = "click") => {
     const args = o();
@@ -761,9 +762,9 @@ export async function userPressKey(el: Element, opts: Partial<KeyboardEvent>, be
 }
 
 /** Simulate pressing key Tab + focus event */
-export async function userPressTab(next: HTMLElement | null) {
+export async function userPressTab(next: HTMLElement | null, opts: Partial<KeyboardEvent>) {
   const el = document.activeElement || document.body;
-  userPressKey(el, { key: "Tab" }, () => {
+  userPressKey(el, { key: "Tab", ...opts }, () => {
     // el.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: next }));
     if (!next) {
       (document.activeElement as HTMLElement)?.blur?.call(document.activeElement);
@@ -772,4 +773,14 @@ export async function userPressTab(next: HTMLElement | null) {
       next.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
     }
   });
+}
+
+const origGetComputedStyle = window.getComputedStyle;
+export function setupCssCompute(el: HTMLElement | ((el: Element) => boolean), cssObj: Partial<CSSStyleDeclaration>) {
+  const spy = jest.spyOn(window, "getComputedStyle").mockImplementation((elt) => {
+    const r = origGetComputedStyle(elt);
+    const isTarget = typeof el === "function" ? el(elt) : elt === el;
+    return isTarget ? Object.assign(r, cssObj) : r;
+  });
+  return spy;
 }

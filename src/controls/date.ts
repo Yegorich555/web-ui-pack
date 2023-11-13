@@ -9,9 +9,7 @@ import WUPBaseComboControl from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 import WUPCalendarControl from "./calendar";
 
-/* c8 ignore next */
-/* istanbul ignore next */
-!WUPCalendarControl && console.error("!"); // It's required otherwise import is ignored by webpack
+WUPCalendarControl.$use();
 
 const tagName = "wup-date";
 declare global {
@@ -70,7 +68,7 @@ declare global {
   form.appendChild(el);
   // or HTML
   <wup-form>
-    <wup-date w-name="dateOfBirhday" w-utc w-initvalue="1990-10-24" w-min="1930-01-01" w-max="2010-01-01"/>
+    <wup-date w-name="dateOfBirthday" w-utc w-initvalue="1990-10-24" w-min="1930-01-01" w-max="2010-01-01"/>
   </wup-form>; */
 export default class WUPDateControl<
   ValueType extends Date = Date,
@@ -116,13 +114,13 @@ export default class WUPDateControl<
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
         (v === undefined || dateCompareWithoutTime(v, setV, (c as WUPDateControl)._opts.utc) === -1) &&
-        `Min value is ${(c as WUPDateControl).valueToInput(setV)}`,
+        __wupln(`Min value is ${(c as WUPDateControl).valueToInput(setV)}`, "validation"),
       max: (v, setV, c) =>
         (v === undefined || dateCompareWithoutTime(v, setV, (c as WUPDateControl)._opts.utc) === 1) &&
-        `Max value is ${(c as WUPDateControl).valueToInput(setV)}`,
+        __wupln(`Max value is ${(c as WUPDateControl).valueToInput(setV)}`, "validation"),
       exclude: (v, setV, c) =>
         (v === undefined || setV.some((d) => dateCompareWithoutTime(v, d, (c as WUPDateControl)._opts.utc) === 0)) &&
-        `This value is disabled`,
+        __wupln(`This value is disabled`, "validation"),
     },
     format: "",
     // firstWeekDay: 1,
@@ -202,7 +200,7 @@ export default class WUPDateControl<
       return { menuId };
     };
     el.focusItem = (a) => this.focusMenuItem(a);
-    el.focus = () => true; // to not allow to focus calendar itselft
+    el.focus = () => true; // to not allow to focus calendar itself
     el.gotFocus.call(el, new FocusEvent("focusin"));
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     el.setInputValue = () => {};

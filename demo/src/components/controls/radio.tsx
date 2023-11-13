@@ -6,8 +6,7 @@ import MyLink from "src/elements/myLink";
 import stylesCom from "./controls.scss";
 import styles from "./radio.scss";
 
-const sideEffect = WUPRadioControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPRadioControl.$use();
 
 let ir = 10;
 const items = [
@@ -57,7 +56,7 @@ export default function RadioControlView() {
         ref={(el) => {
           if (el) {
             el.setAttribute("autofocus", "");
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus
@@ -152,8 +151,8 @@ export default function RadioControlView() {
 
 const codeTypes = `js
 import WUPRadioControl from "web-ui-pack";
-// otherwise import is ignored by webpack
-!WUPRadioControl && console.error("!");
+
+WUPRadioControl.$use(); // register control
 
 const el = document.createElement("wup-radio");
 el.$options.name = "customized";

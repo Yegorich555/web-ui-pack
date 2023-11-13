@@ -1,10 +1,10 @@
 import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
-import { ShowCases } from "./popup/popupElement.types";
+import { PopupOpenCases } from "./popup/popupElement.types";
 import animate from "./helpers/animate";
 import { mathScaleValue, rotate } from "./helpers/math";
 import { parseMsTime } from "./helpers/styleHelpers";
-import { onEvent } from "./indexHelpers";
+import onEvent from "./helpers/onEvent";
 
 // example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
 // similar https://github.com/w8r/svg-arc-corners
@@ -68,17 +68,17 @@ declare global {
        * @defaultValue 10 */
       minSize: number;
       /** Timeout in ms before popup shows on hover of target;
-       * @defaultValue inherited from WUPPopupElement.$defaults.hoverShowTimeout */
-      hoverShowTimeout: number;
-      /** Timeout in ms before popup hides on mouse-leave of target;
+       * @defaultValue inherited from WUPPopupElement.$defaults.hoverOpenTimeout */
+      hoverOpenTimeout: number;
+      /** Timeout in ms before popup closes on mouse-leave of target;
        * @defaultValue 0 */
-      hoverHideTimeout: number;
+      hoverCloseTimeout: number;
       /** Items related to circle-segments */
       items: Item[];
     }
     interface JSXProps<T = WUPCircleElement>
       extends WUP.Base.JSXProps<T>,
-        WUP.Base.OnlyNames<Omit<Options, "hoverShowTimeout" | "hoverHideTimeout" | "items">> {
+        WUP.Base.OnlyNames<Omit<Options, "hoverOpenTimeout" | "hoverCloseTimeout" | "items">> {
       "w-width"?: number;
       "w-corner"?: number;
       "w-back"?: boolean | "";
@@ -154,7 +154,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         position: relative;
         overflow: visible;
         margin: auto;
-        --anim-time: 400ms;
+        --anim-t: 400ms;
       }
       :host>strong {
         display: block;
@@ -197,8 +197,8 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     max: 100,
     space: 2,
     minSize: 10,
-    hoverShowTimeout: WUPPopupElement.$defaults.hoverShowTimeout,
-    hoverHideTimeout: 0,
+    hoverOpenTimeout: WUPPopupElement.$defaults.hoverOpenTimeout,
+    hoverCloseTimeout: 0,
     items: [],
   };
 
@@ -221,11 +221,13 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     this._opts.items ??= [];
     super.gotChanges(propsChanged);
 
+    let skipAnim = false;
     if (propsChanged) {
-      this.removeChildren.call(this.$refItems); // NiceToHave: instead of re-init update/remove required children + possible to deprecate custom observed attrs here
+      this.removeChildren.call(this.$refItems);
       this.removeChildren.call(this.$refSVG); // clean before new render
+      skipAnim = true; // renderNew without animation
     }
-    this.gotRenderItems();
+    this.renderItems(skipAnim);
   }
 
   /** Returns array of render-angles according to pointed arguments */
@@ -303,7 +305,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   }
 
   _animation?: WUP.PromiseCancel<boolean>;
-  protected gotRenderItems(): void {
+  protected renderItems(skipAnim?: boolean): void {
     this._animation?.stop(false);
 
     const angleMin = this._opts.from;
@@ -313,7 +315,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     const { items, minSize: minsize, corner, width } = this._opts;
 
     const style = getComputedStyle(this);
-    const animTime = parseMsTime(style.getPropertyValue("--anim-time"));
+    const animTime = skipAnim ? 0 : parseMsTime(style.getPropertyValue("--anim-t"));
 
     // calc min possible segment size so cornerR can fit
     const inR = radius - width + corner * width;
@@ -358,7 +360,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         this._animation = animate(c.angleFrom, c.angleTo, c.ms, (animV) => {
           path.setAttribute("d", this.drawArc(c.angleFrom, animV));
         });
-        await this._animation.catch().finally(() => delete this._animation);
+        !skipAnim && (await this._animation.catch().finally(() => delete this._animation));
       }
       this.useTooltip(hasTooltip);
     })();
@@ -383,10 +385,10 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   renderTooltip(segment: WUP.Circle.SVGItem): WUPPopupElement {
     const popup = document.createElement("wup-popup");
     popup.setAttribute("tooltip", "");
-    popup.$options.showCase = ShowCases.always;
+    popup.$options.openCase = PopupOpenCases.onInit;
     popup.$options.target = segment;
     popup.$options.arrowEnable = true;
-    // place in the center of drawed path
+    // place in the center of drawn path
     popup.getTargetRect = () => {
       const r = this.$refSVG.getBoundingClientRect();
       const scale = Math.min(r.width, r.height) / 100;
@@ -433,9 +435,9 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         if (t._hasTooltip) {
           t._tid && clearTimeout(t._tid); // remove timer for mouseleave
           t._tid = setTimeout(() => {
-            if (t._tooltip) t._tooltip.$show();
+            if (t._tooltip) t._tooltip.$open();
             else t._tooltip = this.renderTooltip(t);
-          }, this._opts.hoverShowTimeout);
+          }, this._opts.hoverOpenTimeout);
 
           onEvent(
             e.target as HTMLElement,
@@ -443,15 +445,15 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
             () => {
               t._tid && clearTimeout(t._tid); // remove timer for mouseenter
               t._tid = setTimeout(() => {
-                t._tooltip?.$hide().finally(() => {
+                t._tooltip?.$close().finally(() => {
                   // popup can be opened when user returns mouse back in a short time
-                  if (t._tooltip && !t._tooltip!.$isOpen) {
+                  if (t._tooltip && !t._tooltip!.$isOpened) {
                     t._tooltip!.remove();
                     t._tooltip = undefined;
                   }
                 });
                 t._tid = undefined;
-              }, this._opts.hoverHideTimeout);
+              }, this._opts.hoverCloseTimeout);
             },
             { once: true }
           );
@@ -463,7 +465,6 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
 
   /** Called on every changeEvent */
   protected override gotRender(): void {
-    super.gotRender();
     this.$refSVG.setAttribute("viewBox", `0 0 100 100`);
     this.$refSVG.setAttribute("role", "img");
     this.appendChild(this.$refSVG);
@@ -485,7 +486,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
 
 customElements.define(tagName, WUPCircleElement);
 
-/** Returns svg-path for Cirle according to options */
+/** Returns svg-path for Circle according to options */
 export function drawCircle(center: [number, number], r: number, width: number): string {
   const inR = r - width;
   const [x, y] = center;

@@ -3,8 +3,7 @@ import Page from "src/elements/page";
 import { WUPCircleElement } from "web-ui-pack";
 import styles from "./circleView.scss";
 
-const sideEffect = WUPCircleElement;
-!sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
+WUPCircleElement.$use();
 
 (window as any).circleItems = [{ value: 60 }];
 

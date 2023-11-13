@@ -31,7 +31,7 @@ export default function FAQView() {
                     </li>
                     <li>
                       All custom events, methods starts with <b>$...</b> (
-                      <b>$options, $defaults, $isChanged, $isShown,</b> event <b>$change</b> etc.)
+                      <b>$options, $defaults, $isChanged, $isOpened,</b> event <b>$change</b> etc.)
                     </li>
                     <li>
                       Every component has <b>$options</b> that inheritted from static <b>$defaults</b>. Use static{" "}
@@ -40,7 +40,7 @@ export default function FAQView() {
                     </li>
                     <li>All custom attributes are provided on each demo-page (see HTML-section)</li>
                     <li>
-                      All custom attibutes affects <b>$options</b> with same name
+                      All custom attributes affects <b>$options</b> with same name
                     </li>
                     <li>Use css-variables to change default style (see CSS-section on demo pages)</li>
                   </ol>
@@ -253,7 +253,7 @@ const form = document.body.appendChild(document.createElement("wup-form"));
 const el = form.appendChild(document.createElement("wup-text"));
 el.$options.name = undefined; // To completely detach from FormElement skip option name
 // OR
-el.$options.name = ""; // To partially detach (exlcude from model, isChanged, but included in validations, submit)
+el.$options.name = ""; // To partially detach (exclude from model, isChanged, but included in validations, submit)
 /* WARNING: event $change bubbles from control.
  * To subscribe for only attached controls changes you need filter it yourself */
 form.addEventListener("$change", (e) => {

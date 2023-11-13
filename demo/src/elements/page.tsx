@@ -22,7 +22,7 @@ export default function Page(props: React.PropsWithChildren<Props>) {
         }
       }}
     >
-      <h2>
+      <h2 className={styles.h2}>
         <MyLink href={props.link} gitIcon>
           {props.header}
         </MyLink>

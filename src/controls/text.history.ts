@@ -1,5 +1,5 @@
 const enum InputTypes {
-  /** Same as insert but possible with update last snasphot to merge several append to single */
+  /** Same as insert but possible with update last snapshot to merge several append to single */
   append,
   insert,
   deleteAfter,
@@ -83,7 +83,7 @@ export default class TextHistory {
       | HTMLInputElement
       | (HTMLElement & Pick<HTMLInputElement, "value" | "selectionStart" | "selectionEnd" | "setSelectionRange">)
   ) {
-    // call manualy handlers instead to reduce event-listeners
+    // call manually handlers instead to reduce event-listeners
     // this.refInput.addEventListener("keydown", (e) => this.handleKeyDown(e as KeyboardEvent));
     // this.refInput.addEventListener("beforeinput", (e) => this.handleBeforeInput(e as InputEvent));
     // this.refInput.addEventListener("input", (e) => this.handleInput(e as InputEvent));
@@ -133,7 +133,7 @@ export default class TextHistory {
             inputType: isUndo ? "historyUndo" : "historyRedo", //  synthetic event otherwise default can be ignored by browser itself if browser-history is empty
           })
         );
-      }); // fire it after empty timeout so keyDown can buble to top at first
+      }); // fire it after empty timeout so keyDown can bubble to top at first
       return true;
     }
     return false;
@@ -276,7 +276,7 @@ export default class TextHistory {
     this._stateBeforeInput = stateBefore;
     const { pos1, pos2, action, value: prev } = stateBefore;
 
-    // init new snapshot or get/udate previous
+    // init new snapshot or get/update previous
     let snap: Snapshot;
     let isUpdate = false; // update last snapshot
     if (this._histTimeout) {

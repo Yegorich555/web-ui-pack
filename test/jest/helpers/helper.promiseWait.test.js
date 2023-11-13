@@ -52,18 +52,38 @@ describe("helper.promiseWait", () => {
     await new Promise((resolve) => setTimeout(resolve, 1));
     expect(fn).toBeCalledTimes(1);
     expect(fn).toBeCalledWith("error");
+
+    const waitTime = 20;
+    const onPending = jest.fn();
+    await promiseWait(
+      new Promise((_, rej) => {
+        setTimeout(() => rej("my err"), waitTime);
+      }),
+      waitTime / 2,
+      onPending
+    ).catch(fn);
+    await new Promise((resolve) => setTimeout(resolve, waitTime + 2));
+    expect(onPending).toBeCalledTimes(2);
   });
 
   test("no-wait if resolved before (enable smart-option)", async () => {
     const fn = jest.fn();
     promiseWait(Promise.resolve(), 2, true).then(fn);
-    await new Promise((resolve) => setTimeout(resolve, 1));
+    await new Promise((res) => setTimeout(res, 1));
     expect(fn).toBeCalledTimes(1); // because Promise is already resolved
 
     fn.mockClear();
     promiseWait(Promise.resolve(), 2, fn);
     await new Promise((resolve) => setTimeout(resolve, 1));
     expect(fn).not.toBeCalled(); // because Promise is already resolved
+
+    // chaining
+    const waitTime = 6;
+    const arrChain = [];
+    await promiseWait(new Promise((res) => setTimeout(() => res("mok"), waitTime)), waitTime, (v) =>
+      arrChain.push(`Pending:${v}`)
+    ).then(() => arrChain.push("Then"));
+    expect(arrChain).toStrictEqual(["Pending:true", "Pending:false", "Then"]);
   });
 
   test("wait if not resolved before (enable smart-option)", async () => {
@@ -83,6 +103,13 @@ describe("helper.promiseWait", () => {
     expect(fnFinally).toBeCalledTimes(1);
     expect(fn).toBeCalledTimes(2);
     expect(fn).lastCalledWith(false);
+
+    fn.mockClear();
+    promiseWait(new Promise((r) => setTimeout(r, 10)), 2, fn);
+    await new Promise((r) => setTimeout(r, 5));
+    expect(fn).toBeCalledTimes(1);
+    await new Promise((r) => setTimeout(r, 6));
+    expect(fn).toBeCalledTimes(2);
   });
 
   test("wait if resolved before (disable smart-option)", async () => {

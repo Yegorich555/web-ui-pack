@@ -4,17 +4,13 @@ import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
 import WUPSpinElement from "./spinElement";
 import { WUPcssButton } from "./styles";
 
-/* c8 ignore next */
-/* istanbul ignore next */
-!WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
-
 export const enum SubmitActions {
   /** Disable any action */
   none = 0,
   /** Scroll to first error (if exists) and focus control */
   goToError = 1,
   /** Validate until first error is found (otherwise validate all) */
-  validateUntiFirst = 1 << 1,
+  validateUntilFirst = 1 << 1,
   /** Collect to model only changed values */
   collectChanged = 1 << 2,
   /** Reset isDirty and assign $value to $initValue for controls (on success only) */
@@ -28,29 +24,31 @@ export const enum SubmitActions {
 const tagName = "wup-form";
 declare global {
   namespace WUP.Form {
-    interface SubmitEvent<T extends Record<string, any>> extends Event {
+    interface SubmitDetails {
       /** Model collected from controls */
-      $model: Partial<T>;
-      /** Form related to submit event */
-      $relatedForm: WUPFormElement<T>;
-      /** Event that produced submit event */
-      $relatedEvent: MouseEvent | KeyboardEvent;
+      model: Record<string | number, any>;
+      /** Form related to submit event; equal to event.target */
+      relatedForm: WUPFormElement;
+      /** Event that produced submit event; null if `form.$submit()` is called */
+      relatedEvent: MouseEvent | KeyboardEvent | null;
       /** Element that that produced submit event */
-      $submitter: HTMLElement | null;
+      submitter: HTMLElement | null;
       /** Point a promise as callback to allow form show pending state during the promise */
-      $waitFor?: Promise<unknown>;
+      waitFor?: Promise<unknown>;
     }
 
     interface EventMap extends WUP.Base.EventMap {
-      /** Fires before $submit is happened; can be prevented via e.preventDefault() */
-      $willSubmit: Omit<SubmitEvent<any>, "$model">;
-      /** Fires by user-submit when validation succesfull and model is collected */
-      $submit: SubmitEvent<any>;
+      /** Fires before $submit is happened; can be prevented via `e.preventDefault()` */
+      $willSubmit: CustomEvent<Pick<SubmitDetails, "relatedEvent" | "relatedForm" | "submitter">>;
+      /** Fires by user-submit when validation successful and model is collected */
+      $submit: CustomEvent<SubmitDetails>;
+      /** Fires when submit is end (after http-response) */
+      $submitEnd: CustomEvent<{ success: boolean }>;
     }
 
     interface Options {
       /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
-       * @defaultValue goToError | validateUntiFirst | reset | lockOnPending */
+       * @defaultValue goToError | validateUntilFirst | reset | lockOnPending */
       submitActions: SubmitActions;
       /** Enable to tore data in localStorage to prevent losing till submitted;
        * @defaultValue false
@@ -89,7 +87,7 @@ declare global {
       readonly?: boolean | "";
 
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      onChange?: never;
+      onChange?: never; // NiceToHave: controls doesn't fire form.$onChange method - need to implement chaining
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */
       onWillSubmit?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead */
@@ -117,8 +115,8 @@ const formStore: WUPFormElement[] = [];
  *  const form = document.createElement("wup-form");
  *  form.$options.autoComplete = false;
  *  form.$initModel = { email: "test-me@google.com" };
- *  form.addEventListener("$submit", (e) => console.warn(e.$model) );
- *  form.$onSubmit = async (e)=>{ await postHere(e.$model); } // equal to form.addEventListener
+ *  form.addEventListener("$submit", (e) => console.warn(e.detail.model) );
+ *  form.$onSubmit = async (e)=>{ await postHere(e.detail.model); } // equal to form.addEventListener
  *  // init control
  *  const el = document.createElement("wup-text");
  *  el.$options.name = "email";
@@ -170,12 +168,12 @@ export default class WUPFormElement<
 
   static get $styleRoot(): string {
     return `:root {
-      --btn-submit: var(--base-btn-text);
+      --btn-submit-text: var(--base-btn-text);
       --btn-submit-bg: var(--base-btn-bg);
       --btn-submit-focus: var(--base-btn-focus);
     }
     [wupdark] {
-      --btn-submit: var(--base-btn-text);
+      --btn-submit-text: var(--base-btn-text);
       --btn-submit-bg: var(--base-btn-bg);
       --btn-submit-focus: var(--base-btn-focus);
     }`;
@@ -191,9 +189,10 @@ export default class WUPFormElement<
         }
         ${WUPcssButton(":host button[type=submit]")}
         :host button[type=submit] {
-          --base-btn-text: var(--btn-submit);
+          --base-btn-text: var(--btn-submit-text);
           --base-btn-bg: var(--btn-submit-bg);
           --base-btn-focus: var(--btn-submit-focus);
+          display: block;
         }`;
   }
 
@@ -254,7 +253,7 @@ export default class WUPFormElement<
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Form.Options = {
     submitActions:
-      SubmitActions.goToError | SubmitActions.validateUntiFirst | SubmitActions.reset | SubmitActions.lockOnPending,
+      SubmitActions.goToError | SubmitActions.validateUntilFirst | SubmitActions.reset | SubmitActions.lockOnPending,
     autoComplete: false,
     autoFocus: false,
     autoStore: false,
@@ -262,8 +261,12 @@ export default class WUPFormElement<
     readOnly: false,
   };
 
-  /** Dispatched on submit. Return promise to lock form and show spinner */
-  $onSubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void | Promise<unknown>;
+  /** Fires before $submit is happened; can be prevented via `e.preventDefault()` */
+  $onWillSubmit?: (ev: WUP.Form.EventMap["$willSubmit"]) => void;
+  /** Dispatched on submit. Return promise to lock form and show spinner on http-request */
+  $onSubmit?: (ev: WUP.Form.EventMap["$submit"]) => void | Promise<unknown>;
+  /** Fires when submit is end (after http-response) */
+  $onSubmitEnd?: (ev: WUP.Form.EventMap["$submitEnd"]) => void;
   /** Dispatched on submit */
   // It's not required but called: $onsubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void;
 
@@ -325,8 +328,14 @@ export default class WUPFormElement<
     return this.$controls.some((c) => c.$options.name && c.$isChanged);
   }
 
+  /** Call it to manually trigger submit or better to use `gotSubmit` for handling events properly */
+  $submit(): void {
+    this.gotSubmit(null, this);
+  }
+
   /** Called on every spin-render */
   renderSpin(target: HTMLElement): WUPSpinElement {
+    WUPSpinElement.$use();
     const spin = document.createElement("wup-spin");
     spin.$options.fit = true;
     spin.$options.overflowFade = false;
@@ -366,17 +375,19 @@ export default class WUPFormElement<
     }
   }
 
-  /** Called on submit before validation */
-  protected gotSubmit(e: KeyboardEvent | MouseEvent, submitter: HTMLElement): void {
-    e.preventDefault();
+  /** Called on submit before validation (to fire validation & $onSubmit if successful) */
+  gotSubmit(e: KeyboardEvent | MouseEvent | null, submitter: HTMLElement): void {
+    e?.preventDefault(); // prevent default keyboard or mouse event because it's handled in custom event
 
-    const willEv = new Event("$willSubmit", { bubbles: true, cancelable: true }) as Events["$willSubmit"];
-    // willEv.$model = null;
-    willEv.$relatedEvent = e;
-    willEv.$relatedForm = this as WUPFormElement<any>;
-    willEv.$submitter = submitter;
-
-    this.dispatchEvent(willEv);
+    const willEv = this.fireEvent("$willSubmit", {
+      bubbles: true,
+      cancelable: true,
+      detail: {
+        relatedEvent: e,
+        relatedForm: this,
+        submitter,
+      },
+    });
     if (willEv.defaultPrevented) {
       return;
     }
@@ -384,7 +395,7 @@ export default class WUPFormElement<
     // validate
     let errCtrl: IBaseControl | undefined;
     let arrCtrl = this.$controlsAttached;
-    if (this._opts.submitActions & SubmitActions.validateUntiFirst) {
+    if (this._opts.submitActions & SubmitActions.validateUntilFirst) {
       errCtrl = arrCtrl.find((c) => c.validateBySubmit() && c.canShowError);
     } else {
       arrCtrl.forEach((c) => {
@@ -411,16 +422,21 @@ export default class WUPFormElement<
     const onlyChanged = this._opts.submitActions & SubmitActions.collectChanged;
     const m = this.#ctr.$modelFromControls({}, arrCtrl, "$value", !!onlyChanged);
     // fire events
-    const ev = new Event("$submit", { cancelable: false, bubbles: true }) as WUP.Form.SubmitEvent<Model>;
-    ev.$model = m;
-    ev.$relatedForm = this;
-    ev.$relatedEvent = e;
-    ev.$submitter = submitter;
+    const ev: WUP.Form.EventMap["$submit"] = new CustomEvent("$submit", {
+      cancelable: false,
+      bubbles: true,
+      detail: {
+        model: m,
+        relatedEvent: e,
+        relatedForm: this,
+        submitter,
+      },
+    });
 
     const needReset = this._opts.submitActions & SubmitActions.reset;
     setTimeout(() => {
-      this.dispatchEvent(ev);
       const p1 = this.$onSubmit?.call(this, ev);
+      this.dispatchEvent(ev);
       // SubmitEvent constructor doesn't exist on some browsers: https://developer.mozilla.org/en-US/docs/Web/API/SubmitEvent/SubmitEvent
       const ev2 = new (window.SubmitEvent || Event)("submit", { submitter, cancelable: false, bubbles: true });
       /* istanbul ignore else */
@@ -429,13 +445,19 @@ export default class WUPFormElement<
       }
       this.dispatchEvent(ev2);
 
-      promiseWait(Promise.all([p1, ev.$waitFor]), 300, (v: boolean) => this.changePending(v)).then(() => {
-        this._opts.autoStore && this.storageSave(null); // clear storage after submit
-        if (needReset) {
-          arrCtrl.forEach((v) => (v.$isDirty = false));
-          this.$initModel = this.$model;
-        }
-      });
+      let success = false;
+      promiseWait(Promise.all([p1, ev.detail.waitFor]), 300, (v: boolean) => this.changePending(v))
+        .then(() => {
+          this._opts.autoStore && this.storageSave(null); // clear storage after submit
+          if (needReset) {
+            arrCtrl.forEach((v) => (v.$isDirty = false));
+            this.$initModel = this.$model;
+          }
+          success = true;
+        })
+        .finally(() => {
+          this.fireEvent("$submitEnd", { detail: { success }, cancelable: false, bubbles: true });
+        });
     });
   }
 
@@ -480,6 +502,17 @@ export default class WUPFormElement<
 
   protected override gotReady(): void {
     super.gotReady();
+
+    // tie with heading if possible
+    if (["title", "aria-label", "aria-labelledby"].every((a) => !this.hasAttribute(a))) {
+      const meHeading = (el: Element | null): Element | null =>
+        el && (/H[\d]/.test(el.tagName) || el.getAttribute("role") === "heading") ? el : null;
+      const h = meHeading(this.firstElementChild) ?? meHeading(this.previousElementSibling);
+      if (h) {
+        h.id ||= this.#ctr.$uniqueId;
+        this.setAttribute("aria-labelledby", h.id);
+      }
+    }
 
     this.appendEvent(
       this,
@@ -610,4 +643,4 @@ export default class WUPFormElement<
 
 customElements.define(tagName, WUPFormElement);
 
-// todo show success result in <wup-alert> at the right angle + add autoSubmit option
+// todo show success/error result in <wup-alert> at the left/right angle + add autoSubmit option

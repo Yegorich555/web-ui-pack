@@ -2,8 +2,7 @@ import Page from "src/elements/page";
 import { WUPPasswordControl } from "web-ui-pack";
 import stylesCom from "./controls.scss";
 
-const sideEffect = WUPPasswordControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPPasswordControl.$use();
 
 (window as any)._somePasswordValidations = {
   min: 8,
@@ -34,7 +33,7 @@ export default function PasswordControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { pwd: "somePwdHere" };
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus={false}

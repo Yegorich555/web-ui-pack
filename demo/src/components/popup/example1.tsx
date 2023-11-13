@@ -12,6 +12,11 @@ export default function Example1() {
           ref={(el) =>
             setTimeout(() => {
               el?.click();
+              if (el) {
+                el.parentElement?.querySelectorAll("wup-popup").forEach((popup) => {
+                  popup.$onWillClose = (e) => e.preventDefault();
+                });
+              }
             }, 200)
           }
         >

@@ -7,7 +7,7 @@ import getUsedCssVars from "src/helpers/parseCssVars";
 import { WUPFormElement, WUPPasswordControl, WUPRadioControl, WUPSwitchControl } from "web-ui-pack";
 import linkGit from "src/helpers/linkGit";
 import WUPBaseControl from "web-ui-pack/controls/baseControl";
-import { HideCases } from "web-ui-pack/popup/popupElement.types";
+import { PopupCloseCases } from "web-ui-pack/popup/popupElement.types";
 import WUPBaseElement from "web-ui-pack/baseElement";
 import styles from "./userCode.scss";
 import Code from "./code";
@@ -35,7 +35,7 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
     !isColor &&
     v &&
     !v.startsWith("url") &&
-    !v.startsWith("var(--anim-time)") &&
+    !v.startsWith("var(--anim-t)") &&
     !v.startsWith("calc") &&
     !v.includes("size")
   ) {
@@ -48,7 +48,7 @@ function renderCssValue(v: string, alt: string | undefined): string | JSX.Elemen
     document.body.appendChild(el);
     const gotColor = window.getComputedStyle(el).color;
     if (def !== gotColor && gotColor !== "rgb(0, 0, 0)") {
-      isColor = true; // WARN it's wrong for 'var(--anim-time)'
+      isColor = true; // WARN it's wrong for 'var(--anim-t)'
     }
     el.remove();
   }
@@ -142,8 +142,9 @@ function RenderCssVars(props: UserCodeProps & { el: WUPBaseElement }): JSX.Eleme
             class={styles.cssCommon}
             ref={(p) => {
               if (p) {
-                p.$onWillHide = (e) => {
-                  (e.detail.hideCase === HideCases.onPopupClick || e.detail.hideCase === HideCases.onFocusOut) &&
+                p.$onWillClose = (e) => {
+                  (e.detail.closeCase === PopupCloseCases.onPopupClick ||
+                    e.detail.closeCase === PopupCloseCases.onFocusOut) &&
                     e.preventDefault();
                 };
               }

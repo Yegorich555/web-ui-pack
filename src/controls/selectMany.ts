@@ -3,8 +3,8 @@ import isOverlap from "../helpers/isOverlap";
 import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
-import { WUPcssIcon } from "../styles";
-import { ShowCases } from "./baseCombo";
+import { WUPcssIcon, WUPcssScrollSmall } from "../styles";
+import { MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 import WUPSelectControl from "./select";
 
@@ -92,13 +92,13 @@ export default class WUPSelectManyControl<
 
   static get $styleRoot(): string {
     return `:root {
-        --ctrl-select-item: inherit;
+        --ctrl-select-item-text: inherit;
         --ctrl-select-item-bg: rgba(0,0,0,0.04);
         --ctrl-select-item-del-display: none;
         --ctrl-select-item-del: var(--ctrl-icon);
         --ctrl-select-item-del-img: var(--wup-icon-cross);
         --ctrl-select-item-del-size: 0.8em;
-        --ctrl-select-gap: 6px;
+        --ctrl-select-gap: 0.5em;
       }
       [wupdark] {
         --ctrl-select-item-bg: #fff2;
@@ -108,20 +108,33 @@ export default class WUPSelectManyControl<
 
   static get $style(): string {
     return `${super.$style}
-      :host strong {
-        top: 1.6em;
-        margin: calc(var(--ctrl-select-gap) / 2);
+      :host label {
+        position: relative;
       }
+      ${WUPcssScrollSmall(":host label>span")}
       :host label > span {
+        position: initial;
+        overflow: auto;
+        gap: var(--ctrl-select-gap);
         flex-wrap: wrap;
         flex-direction: row;
-        padding: var(--ctrl-padding);
-        padding-left: 0; padding-right: 0;
-        margin: calc(var(--ctrl-select-gap) / -2);
+        margin: var(--ctrl-padding);
+        padding: 0;
+        margin-left: 0;
+        margin-right: 0;
+        max-height: 5em;
+      }
+      :host strong {
+        top: 1.6em;
+        margin: var(--ctrl-padding);
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      :host[filled] strong {
+        transform: var(--ctrl-label-active-pos);
       }
       :host [item],
       :host input {
-        margin: calc(var(--ctrl-select-gap) / 2);
         padding: var(--ctrl-select-gap);
       }
       :host input {
@@ -141,13 +154,14 @@ export default class WUPSelectManyControl<
         --ctrl-icon: var(--ctrl-select-item-del);
         --ctrl-icon-size: var(--ctrl-select-item-del-size);
         --ctrl-icon-img: var(--ctrl-select-item-del-img);
-        color: var(--ctrl-select-item);
+        color: var(--ctrl-select-item-text);
         background-color: var(--ctrl-select-item-bg);
         border-radius: var(--ctrl-border-radius);
         cursor: pointer;
         box-sizing: border-box;
         white-space: nowrap;
         overflow: hidden;
+        flex: 0 0 auto;
       }
       :host [item]:after {
         ${WUPcssIcon}
@@ -193,7 +207,7 @@ export default class WUPSelectManyControl<
       }
       @media not all and (prefers-reduced-motion) {
         :host [item][removed] {
-          transition: all var(--anim-time) ease-in-out;
+          transition: all var(--anim-t) ease-in-out;
           transition-property: margin, padding, width, opacity;
           padding-left: 0; padding-right: 0;
           margin-left: 0; margin-right: 0;
@@ -202,13 +216,13 @@ export default class WUPSelectManyControl<
         }
       }
       :host [item][drag] {
-        z-index: 99999;
+        z-index: 9999;
         position: fixed;
         left:0; top:0;
         cursor: grabbing;
         text-decoration: none;
         --ctrl-icon: var(--ctrl-select-item-del);
-        color: var(--ctrl-select-item);
+        color: var(--ctrl-select-item-text);
         background-color: var(--ctrl-select-item-bg);
       }
       :host [item][drop] {
@@ -243,13 +257,19 @@ export default class WUPSelectManyControl<
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
 
+  protected override renderControl(): void {
+    super.renderControl();
+    // Move ctrl-label outside scrollable part
+    this.$refLabel.prepend(this.$refTitle); // WARN: expected browser won't autofill this type of control - otherwise it doesn't work
+  }
+
   protected override canHandleUndo(): boolean {
     return false; // custom history not required for this control
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override canParseInput(_text: string): boolean {
-    return false; // disable behavior from select[mulitple]
+    return false; // disable behavior from select[multiple]
   }
 
   override parseInput(text: string): ValueType[] | undefined {
@@ -280,7 +300,7 @@ export default class WUPSelectManyControl<
 
   /** It prevents menu opening if user tries sorting and focus got after mouseUp */
   _wasSortAfterClick?: boolean;
-  /** Call it to remove dragdrop loggic */
+  /** Call it to remove dragdrop logic */
   _disposeDragdrop?: () => void;
   /** Called to apply dragdrop logic */
   protected applyDragdrop(): void {
@@ -378,7 +398,7 @@ export default class WUPSelectManyControl<
         });
         // find nearest item in the nearest line
         dist = Number.MAX_SAFE_INTEGER;
-        // console.warn(nearest, nearestEnd, linei);
+        // console.warn(nearest, nearestEnd, lineY);
         for (let i = nearest; i <= nearestEnd; ++i) {
           const r = rects[i];
           const dx = ev.clientX - (r.x + r.width / 2);
@@ -426,7 +446,7 @@ export default class WUPSelectManyControl<
             dr.remove();
             this.removeValue(eli);
           } else {
-            const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-time"));
+            const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-t"));
             const from = dr.getBoundingClientRect();
             const to = el.getBoundingClientRect();
             const diff = { x: to.x - from.x, y: to.y - from.y };
@@ -455,8 +475,8 @@ export default class WUPSelectManyControl<
     });
   }
 
-  override canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
-    return !this._wasSortAfterClick && super.canShowMenu(showCase, e);
+  override canOpenMenu(openCase: MenuOpenCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
+    return !this._wasSortAfterClick && super.canOpenMenu(openCase, e);
   }
 
   protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
@@ -510,8 +530,8 @@ export default class WUPSelectManyControl<
   }
 
   // @ts-expect-error - because expected v: ValueType[]
-  protected override selectValue(v: ValueType, canHideMenu = true): void {
-    super.selectValue(v as any, canHideMenu);
+  protected override selectValue(v: ValueType, canCloseMenu = true): void {
+    super.selectValue(v as any, canCloseMenu);
     this._opts.hideSelected && this.focusMenuItem(null);
   }
 
@@ -564,7 +584,7 @@ export default class WUPSelectManyControl<
       item.style.width = `${item.offsetWidth}px`;
       item.setAttribute("removed", "");
       setTimeout(() => (item.style.width = ""));
-      ms = parseMsTime(window.getComputedStyle(item).getPropertyValue("--anim-time"));
+      ms = parseMsTime(window.getComputedStyle(item).getPropertyValue("--anim-t"));
     }
     setTimeout(() => item.remove(), ms);
 
@@ -744,6 +764,3 @@ when popup is opened => don't change bottom...top if menu or control height chan
  */
 
 // NiceToHave: Ctrl+Z must should work for the whole control. Not only for `input`
-
-// todo don't allow items affects on width - sometimes flex: wrap doesn't work
-// todo add option autoheight & use vert-scroll if it's disabled (now it works with autoheight: true)

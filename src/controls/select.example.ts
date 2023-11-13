@@ -25,18 +25,18 @@ el.$options.validations = {
 console.warn("try custom validation", { validateResult: el.$validate() });
 
 /* change spinner */
-class WUPSpin2Element extends WUPSpinElement {}
-spinUseDualRing(WUPSpin2Element);
-const tagName = "wup-spin2";
-customElements.define(tagName, WUPSpin2Element);
+class MySpinElement extends WUPSpinElement {}
+spinUseDualRing(MySpinElement);
+const tagName = "my-spin";
+customElements.define(tagName, MySpinElement);
 declare global {
   interface HTMLElementTagNameMap {
-    [tagName]: WUPSpin2Element;
+    [tagName]: MySpinElement;
   }
 }
 
 WUPSelectControl.prototype.renderSpin = function renderSpinCustom(): WUPSpinElement {
-  const spin = document.createElement("wup-spin2");
+  const spin = document.createElement(tagName);
   spin.$options.fit = true;
   spin.$options.overflowFade = true;
   spin.$options.overflowTarget = this;

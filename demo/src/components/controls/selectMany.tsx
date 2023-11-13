@@ -4,8 +4,7 @@ import { WUPSelectManyControl } from "web-ui-pack";
 import stylesCom from "./controls.scss";
 import styles from "./selectMany.scss";
 
-const sideEffect = WUPSelectManyControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPSelectManyControl.$use();
 
 let ir = 10;
 const items = [
@@ -48,7 +47,7 @@ export default function SelectManyControlView() {
         class={styles.test}
         ref={(el) => {
           if (el) {
-            el.$onSubmit = (e) => console.warn("sumbitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("sumbitted model", e.detail.model);
           }
         }}
         w-autoFocus

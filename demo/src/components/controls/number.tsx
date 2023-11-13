@@ -2,8 +2,7 @@ import Page from "src/elements/page";
 import { WUPNumberControl } from "web-ui-pack";
 import stylesCom from "./controls.scss";
 
-const sideEffect = WUPNumberControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPNumberControl.$use();
 
 (window as any).myNumberValidations = {
   min: 8,
@@ -34,7 +33,7 @@ export default function NumberControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { pwd: "somePwdHere" };
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

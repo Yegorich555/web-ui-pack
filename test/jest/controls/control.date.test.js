@@ -4,7 +4,7 @@
  */
 import { WUPDateControl } from "web-ui-pack";
 import { PickersEnum } from "web-ui-pack/controls/calendar";
-import { ShowCases } from "web-ui-pack/controls/baseCombo";
+import { MenuOpenCases } from "web-ui-pack/controls/baseCombo";
 // import { localeInfo } from "web-ui-pack/indexHelpers";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
@@ -37,7 +37,7 @@ initTestBaseControl({
   onInit: (e) => {
     jest.setSystemTime(new Date("2022-10-18T12:00:00.000Z")); // 18 Oct 2022 12:00 UTC
     el = e;
-    el.$options.showCase |= ShowCases.onFocusAuto; // without this impossible to test with manual triggering focus()
+    el.$options.openCase |= MenuOpenCases.onFocusAuto; // without this impossible to test with manual triggering focus()
 
     const height = 50;
     const width = 100;
@@ -77,7 +77,7 @@ describe("control.date", () => {
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       "w-readonlyinput": { value: true },
-      "w-showcase": { value: 1 },
+      "w-opencase": { value: 1 },
 
       "w-mask": { value: "#0-#0-0000", nullValue: "0000-00-00" },
       "w-maskholder": { value: "dd-mm-yyyy", nullValue: "YYYY-MM-DD" },
@@ -253,7 +253,7 @@ describe("control.date", () => {
     el.addEventListener("$change", onChange);
     await h.userTypeText(el.$refInput, "20221030");
     await h.wait(150);
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(el.$refInput.value).toBe("2022-10-30"); // becahuse mask is applied
     expect(el.$isValid).toBe(true);
     expect(el.$refError).toBe(undefined);
@@ -261,10 +261,10 @@ describe("control.date", () => {
     expect(onChange).toBeCalledTimes(1);
     expect(onParse).toBeCalled();
     expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z"); // value changed without key "Enter" because user completed input
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
-    expect(el.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
     expect(onSubmit).toBeCalledTimes(0); // 1st Enter only hides popup
 
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
@@ -277,7 +277,7 @@ describe("control.date", () => {
     expect(el.$refError.innerHTML).toMatchInlineSnapshot(
       `"<span class="wup-hidden">Error for Test Date:</span><span>Incomplete value</span>"`
     );
-    expect(el.$isShown).toBe(false); // menu must stay closed
+    expect(el.$isOpened).toBe(false); // menu must stay closed
 
     h.mockConsoleWarn();
     await h.userTypeText(el.$refInput, "9", { clearPrevious: false });
@@ -288,13 +288,13 @@ describe("control.date", () => {
       `"<span class="wup-hidden">Error for Test Date:</span><span>Invalid value</span>"`
     );
     expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z"); // value the same
-    expect(el.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
     expect(onSubmit).toBeCalledTimes(0);
 
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
     expect(el.$value?.toISOString()).toBe("2022-10-30T00:00:00.000Z"); // value the same
-    expect(el.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
     expect(el.$refError.innerHTML).toMatchInlineSnapshot(
       `"<span class="wup-hidden">Error for Test Date:</span><span>Invalid value</span>"`
     ); // value lefts the same
@@ -336,11 +336,11 @@ describe("control.date", () => {
     el = document.body.appendChild(document.createElement(el.tagName));
     await h.wait(1);
     expect(await h.userTypeText(el.$refInput, "99999999")).toBe("9999-99-99|");
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
 
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     await h.wait();
-    expect(el.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
     expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
       `"<span class="wup-hidden"></span><span>Invalid value</span>"`
     );
@@ -350,12 +350,12 @@ describe("control.date", () => {
     el = document.body.appendChild(document.createElement(el.tagName));
     await h.wait(1);
     expect(await h.userTypeText(el.$refInput, "99")).toBe("99|");
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(el.$refError?.innerHTML).toBeFalsy();
 
     el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     await h.wait();
-    expect(el.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
     expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
       `"<span class="wup-hidden"></span><span>Incomplete value</span>"`
     );
@@ -379,7 +379,7 @@ describe("control.date", () => {
     await h.wait();
     expect(h.getInputCursor(el.$refInput)).toBe("|2022-10-12|");
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
-    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("2018 ... 2033");
+    expect(el.$refPopup.firstChild.$refCalendarTitle.textContent).toBe("2018 ... 2033");
 
     const isPressKeyPrevented = (key = "Arrow", opts = { shiftKey: false, ctrlKey: false }) => {
       const isPrevented = !el.$refInput.dispatchEvent(
@@ -413,13 +413,13 @@ describe("control.date", () => {
     expect(isPressKeyPrevented("Enter")).toBe(true);
     await h.wait();
     expect(el.querySelector("[calendar='month']")).toBeTruthy();
-    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("2033");
+    expect(el.$refPopup.firstChild.$refCalendarTitle.textContent).toBe("2033");
     expect(el.querySelector("[focused]")?.textContent).toBe("Jan");
 
     expect(isPressKeyPrevented("Enter")).toBe(true);
     await h.wait();
     expect(el.querySelector("[calendar='day']")).toBeTruthy();
-    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("January 2033");
+    expect(el.$refPopup.firstChild.$refCalendarTitle.textContent).toBe("January 2033");
     expect(el.querySelector("[focused]")?.textContent).toBe("1");
 
     expect(isPressKeyPrevented("Enter")).toBe(true);
@@ -435,10 +435,10 @@ describe("control.date", () => {
 
     // checking if user can use mouse properly
     onChanged.mockClear();
-    expect(el.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
     expect(isPressKeyPrevented("ArrowDown")).toBe(true); // open menu by arrow key
     await h.wait();
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
     expect(el.querySelector("[calendar='day']")).toBeTruthy(); // dayPicker because it was stored previously by calendar
 
     // force to remove calendar (to startWith year again)
@@ -448,16 +448,16 @@ describe("control.date", () => {
     await h.wait();
 
     expect(el.querySelector("[calendar='year']")).toBeTruthy();
-    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.firstElementChild); // click on 2018
+    await h.userClick(el.$refPopup.firstChild.$refCalendarItems.firstElementChild); // click on 2018
     await h.wait();
     expect(el.querySelector("[calendar='month']")).toBeTruthy();
-    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.children[1]); // click on Feb
+    await h.userClick(el.$refPopup.firstChild.$refCalendarItems.children[1]); // click on Feb
     await h.wait();
     expect(el.querySelector("[calendar='day']")).toBeTruthy();
-    expect(el.$refPopup.firstChild.$refCalenarTitle.textContent).toBe("February 2018");
-    await h.userClick(el.$refPopup.firstChild.$refCalenarItems.children[6]); // click on 4 February 2018
+    expect(el.$refPopup.firstChild.$refCalendarTitle.textContent).toBe("February 2018");
+    await h.userClick(el.$refPopup.firstChild.$refCalendarItems.children[6]); // click on 4 February 2018
     await h.wait();
-    expect(el.$isShown).toBe(false);
+    expect(el.$isOpened).toBe(false);
     expect(el.$value?.toISOString()).toBe("2018-02-04T13:45:59.000Z"); // it's must store hours
     expect(onChanged).toBeCalledTimes(1);
 
@@ -467,11 +467,11 @@ describe("control.date", () => {
   test("value change not affects on popup", async () => {
     HTMLInputElement.prototype.focus.call(el.$refInput);
     await h.wait();
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
 
     el.$value = new Date("2015-09-26");
     await h.wait();
-    expect(el.$isShown).toBe(true);
+    expect(el.$isOpened).toBe(true);
 
     el.blur();
     await h.wait();
@@ -481,6 +481,6 @@ describe("control.date", () => {
     expect(cur).toBeDefined();
     await h.userClick(cur);
     await h.wait();
-    expect(el.$isShown).toBe(false); // click on the same date must hide popup
+    expect(el.$isOpened).toBe(false); // click on the same date must hide popup
   });
 });

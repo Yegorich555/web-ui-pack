@@ -3,8 +3,7 @@ import Page from "src/elements/page";
 import { WUPTextareaControl } from "web-ui-pack";
 import styles from "./textarea.scss";
 
-const sideEffect = WUPTextareaControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPTextareaControl.$use();
 
 (window as any).myTextareaValidations = { min: 4 } as WUP.Textarea.Options["validations"];
 
@@ -27,7 +26,7 @@ export default function TextControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { email: "test@google.com", required: "yes" };
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

@@ -4,8 +4,7 @@ import MyLink from "src/elements/myLink";
 import stylesCom from "./controls.scss";
 import styles from "./check.scss";
 
-const sideEffect = WUPCheckControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPCheckControl.$use();
 
 export default function CheckControlView() {
   return (
@@ -22,7 +21,7 @@ export default function CheckControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

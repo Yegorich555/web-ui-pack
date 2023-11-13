@@ -795,7 +795,6 @@ exports[`control.calendar $show/$hide error 2`] = `
     error=""
     id="txt3"
     role="alert"
-    style="opacity: 0;"
   >
     <span
       class="wup-hidden"
@@ -933,6 +932,23 @@ exports[`control.calendar $show/$hide error 3`] = `
       </div>
     </div>
   </div>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
 </wup-calendar>
 `;
 
@@ -947,28 +963,87 @@ overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
+
+  
+[wup-icon] {
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+}
+[wup-icon]:after {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: var(--icon, #000);
+  -webkit-mask-size: var(--icon-size, 1em);
+  mask-size: var(--icon-size, 1em);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-image: var(--icon-img);
+  mask-image: var(--icon-img);
+}
+[wup-icon]:focus {
+   box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+[wup-icon]:focus:after {
+   background: var(--icon-hover, var(--icon, #000));
+}
+@media (hover: hover) and (pointer: fine) {
+  [wup-icon]:hover {
+   box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  [wup-icon]:hover:after {
+    background: var(--icon-hover, var(--icon, #000));
+  }
+  [wup-icon]:focus:hover {
+   opacity: 0.9;
+  }
+}
+
   :root {
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
           --base-btn-text: #fff;
           --base-btn-focus: #005766;
-          --base-btn2-bg: var(--base-btn-text);
-          --base-btn2-text: var(--base-btn-bg);
+          --base-btn2-bg: #6c757d;
+          --base-btn2-text: #fff;
           --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
+          --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
-          --icon-hover: #0001;
+          --icon-hover-bg: #0001;
+          --icon-focus-bg: #0000001a;
+          --icon-size: 14px;
+          --menu-hover-text: inherit;
+          --menu-hover-bg: #f1f1f1;
         }
         [wupdark] {
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
-          --icon-hover: #fff3;
+          --icon: #fff;
+          --icon-hover-bg: #fff1;
+          --icon-focus-bg: #fff2;
           --scroll: #fff2;
           --scroll-hover: #fff3;
+          --menu-hover-text: inherit;
+          --menu-hover-bg: #222a36;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
@@ -978,7 +1053,7 @@ padding:0;}
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl: inherit;
+        --ctrl-text: inherit;
         --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
@@ -1005,7 +1080,7 @@ padding:0;}
   :root {
       --ctrl-clr-selected: #fff;
       --ctrl-clr-selected-bg: #009fbc;
-      --ctrl-clr-width: 17em;
+      --ctrl-clr-w: 17em;
       --ctrl-clr-cell-gap: 0px;
       --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
       --ctrl-clr-off: var(--ctrl-err);
@@ -1023,7 +1098,7 @@ padding:0;}
         margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl);
+        color: var(--ctrl-text);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -1040,7 +1115,6 @@ padding:0;}
       }
       WUP-CALENDAR:focus-within,
       WUP-CALENDAR:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-CALENDAR:focus-within strong,
@@ -1168,7 +1242,7 @@ mask-image: var(--ctrl-icon-img);
         text-transform: capitalize;
       }
       WUP-CALENDAR label {
-        max-width: var(--ctrl-clr-width);
+        max-width: var(--ctrl-clr-w);
         display: block;
         padding-right: 0;
       }
@@ -1188,9 +1262,9 @@ clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
       WUP-CALENDAR [calendar] {
-        --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-width) / 7 - var(--ctrl-clr-cell-gap));
+        --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-w) / 7 - var(--ctrl-clr-cell-gap));
         --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
-        width: var(--ctrl-clr-width);
+        width: var(--ctrl-clr-w);
         padding: var(--ctrl-clr-padding);
         border-radius: var(--ctrl-border-radius);
         background: var(--ctrl-bg);
@@ -1202,7 +1276,7 @@ padding:0;}
       }
       WUP-CALENDAR [calendar="month"],
       WUP-CALENDAR [calendar="year"] {
-        --ctrl-clr-cell-w: calc(var(--ctrl-clr-width) / 4 - var(--ctrl-clr-cell-gap));
+        --ctrl-clr-cell-w: calc(var(--ctrl-clr-w) / 4 - var(--ctrl-clr-cell-gap));
         --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
       }
       WUP-CALENDAR [calendar="month"] ul,
@@ -1314,7 +1388,7 @@ padding:0;}
         WUP-CALENDAR [calendar]&gt;div {
           overflow: hidden;
         }
-        WUP-CALENDAR [zoom] { animation: none var(--anim-time) linear forwards; }
+        WUP-CALENDAR [zoom] { animation: none var(--anim-t) linear forwards; }
         WUP-CALENDAR [zoom="out"] { animation-name: WUP-ZOOM-OUT-1; }
         WUP-CALENDAR [zoom="out2"] { animation-name: WUP-ZOOM-OUT-2; }
         WUP-CALENDAR [zoom="in"] { animation-name: WUP-ZOOM-IN-1; }
@@ -5980,7 +6054,9 @@ exports[`control.calendar validations $options.validationShowAll 1`] = `
     aria-live="off"
     error=""
     id="txt3"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -6264,7 +6340,9 @@ exports[`control.calendar validations $options.validationShowAll 3`] = `
     aria-live="off"
     error=""
     id="txt6"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -6547,7 +6625,9 @@ exports[`control.calendar validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt4"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -6701,6 +6781,8 @@ exports[`control.calendar validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt5"
+    open=""
+    show=""
     style="display: none;"
   >
     <span
@@ -6853,7 +6935,9 @@ exports[`control.calendar validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt6"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span

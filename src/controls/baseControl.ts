@@ -6,7 +6,7 @@ import onFocusLostEv from "../helpers/onFocusLost";
 import onFocusGot from "../helpers/onFocusGot";
 import { stringPrettify } from "../helpers/string";
 import WUPPopupElement from "../popup/popupElement";
-import { ShowCases } from "../popup/popupElement.types";
+import { PopupOpenCases } from "../popup/popupElement.types";
 import { WUPcssIcon } from "../styles";
 import IBaseControl from "./baseControl.i";
 
@@ -34,7 +34,7 @@ export const enum ValidationCases {
   onChangeSmart = 1,
   /** Validate when user changed value (via type,select etc.); Also you can check $options.validateDebounceMs */
   onChange = 1 << 1,
-  /** Validate when control losts focus */
+  /** Validate when control lost focus */
   onFocusLost = 1 << 2,
   /** Validate if control has value and gets focus (recommended option for password with $options.validationShowAll) */
   onFocusWithValue = 1 << 3,
@@ -76,7 +76,7 @@ declare global {
     type AutoComplete = AutoFill; // remove after half year with new version TS
     interface EventMap extends WUP.Base.EventMap {
       /** Called on value change */
-      $change: CustomEvent<SetValueReasons>;
+      $change: CustomEvent<{ reason: SetValueReasons }>;
     }
 
     interface ValidityMap {
@@ -96,7 +96,7 @@ declare global {
       /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
        * * @tutorial
        * * point `undefined` to completely detach from FormElement
-       * * point `''`(empty string) to partially detach (exlcude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
+       * * point `''`(empty string) to partially detach (exclude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
       name: string | undefined | null;
       /** Focus element when it's appended to layout @defaultValue false */
       autoFocus: boolean;
@@ -109,14 +109,14 @@ declare global {
       disabled: boolean;
       /** Disallow copy value; adds attr [readonly] for styling @defaultValue false */
       readOnly: boolean;
-      /** Debounce option for onFocustLost event (for validationCases.onFocusLost);
+      /** Debounce option for onFocusLost event (for validationCases.onFocusLost);
        * @see {@link onFocusLostOptions.debounceMs} in helpers/onFocusLost;
        * @defaultValue 100ms */
       focusDebounceMs: number;
       /** Behavior that expected for clearing value inside control (via pressEsc or btnClear)
        * @defaultValue ClearActions.initClearBack */
       clearActions: ClearActions;
-      /** Rules defined for control. Impossible to override via `$options`. Use static `$dfaults` instead
+      /** Rules defined for control. Impossible to override via `$options`. Use static `$defaults` instead
        * * all functions must return error-message when value === undefined
        * * all functions must return error-message if setValue is `true/enabled` or value doesn't fit a rule
        * * value can be undefined only when a rule named as 'required' or need to collect error-messages @see {@link Options.validationShowAll}
@@ -156,7 +156,7 @@ declare global {
       /** When to validate control and show error. Validation by onSubmit impossible to disable
        *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit */
       validationCase: ValidationCases;
-      /** Wait for pointed time after valueChange before showError (it's sumarized with $options.debounce); WARN: hide error without debounce
+      /** Wait for pointed time after valueChange before showError (it's summarized with $options.debounce); WARN: hide error without debounce
        *  @defaultValue 500 */
       validateDebounceMs: number;
       /** Show all validation-rules with checkpoints as list instead of single error @defaultValue false */
@@ -217,7 +217,7 @@ declare global {
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      "w-onChange"?: never;
+      onChange?: never;
     }
   }
 }
@@ -235,9 +235,9 @@ export default abstract class WUPBaseControl<
   #ctr = this.constructor as typeof WUPBaseControl;
 
   /** Text announced by screen-readers when control cleared; @defaultValue `cleared` */
-  static $ariaCleared = "cleared";
+  static $ariaCleared = __wupln("cleared", "aria");
   /** Text announced by screen-readers; @defaultValue `Error for` */
-  static $ariaError = "Error for";
+  static $ariaError = __wupln("Error for", "aria");
 
   /** Css-variables related to component */
   static get $styleRoot(): string {
@@ -249,7 +249,7 @@ export default abstract class WUPBaseControl<
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl: inherit;
+        --ctrl-text: inherit;
         --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
@@ -287,7 +287,7 @@ export default abstract class WUPBaseControl<
         margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl);
+        color: var(--ctrl-text);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;${
@@ -306,7 +306,6 @@ export default abstract class WUPBaseControl<
       }
       :host:focus-within,
       :host:focus-within > [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       :host:focus-within strong,
@@ -447,7 +446,7 @@ export default abstract class WUPBaseControl<
     validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
     validationRules: {
-      required: (v, setV) => setV === true && this.$isEmpty(v) && "This field is required",
+      required: (v, setV) => setV === true && this.$isEmpty(v) && __wupln("This field is required", "validation"),
     },
     validations: null,
     validationShowAll: false,
@@ -533,11 +532,6 @@ export default abstract class WUPBaseControl<
     return this._isValid as boolean;
   }
 
-  /** Returns if current control is active/focused */
-  get $isFocused(): boolean {
-    return this === document.activeElement || this.includes(document.activeElement);
-  }
-
   /** Returns if related form or control disabled (true even if form.$options.disabled && !control.$options.disabled) */
   get $isDisabled(): boolean {
     // @ts-expect-error
@@ -586,7 +580,7 @@ export default abstract class WUPBaseControl<
   }
 
   #refDetails?: HTMLElement;
-  /** Add (replace) description of control to be anounced by screen-readers */
+  /** Add (replace) description of control to be announced by screen-readers */
   $ariaDetails(text: string | null): void {
     // this.setAttr.call(this.$refInput, "aria-description", text); // watchfix: Safari VoiceOver doesn't support aria-description: https://a11ysupport.io/tests/tech__aria__aria-description
     let el = this.#refDetails;
@@ -649,9 +643,10 @@ export default abstract class WUPBaseControl<
 
     const i = this.$refInput;
     // set label
-    const label = (this._opts.label ?? (this._opts.name && stringPrettify(this._opts.name))) || null;
+    const label =
+      (this._opts.label ?? (this._opts.name && __wupln(stringPrettify(this._opts.name), "content"))) || null;
     this.$refTitle.textContent = label;
-    const n = !label && this._opts.name ? stringPrettify(this._opts.name) : null;
+    const n = !label && this._opts.name ? __wupln(stringPrettify(this._opts.name), "aria") : null;
     this.setAttr.call(i, "aria-label", n);
 
     // set other props
@@ -662,10 +657,7 @@ export default abstract class WUPBaseControl<
     this.setAttr.call(this.$refInput, "aria-required", isReq);
 
     this.setupInitValue(propsChanged);
-    // retrieve value from store
-    if (!propsChanged && this._opts.storageKey) {
-      this.setValue(this.storageGet(), SetValueReasons.storage);
-    }
+
     propsChanged?.includes("clearActions") && this.setClearState();
     this.gotFormChanges(propsChanged);
   }
@@ -691,7 +683,7 @@ export default abstract class WUPBaseControl<
     this.$refInput.readOnly = this.$isReadOnly;
   }
 
-  /** Called on Init and options/attributes changes to update $initValue */
+  /** Called on Init and options/attributes changes to update $initValue or $value (if pointed storageKey) */
   setupInitValue(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     // lowercase for attribute-changes otherwise it's wrong
     if (!propsChanged || propsChanged.includes("initvalue")) {
@@ -714,6 +706,11 @@ export default abstract class WUPBaseControl<
       if (!propsChanged || propsChanged.includes("name")) {
         this.$initValue = nestedProperty.get(this.$form._initModel as any, this._opts.name);
       }
+    }
+
+    // retrieve value from store
+    if (!propsChanged && this._opts.storageKey) {
+      this.setValue(this.storageGet(), SetValueReasons.storage);
     }
   }
 
@@ -774,7 +771,6 @@ export default abstract class WUPBaseControl<
   }
 
   protected override gotRender(): void {
-    super.gotRender();
     this.renderControl();
   }
 
@@ -949,7 +945,7 @@ export default abstract class WUPBaseControl<
 
   protected renderError(): WUPPopupElement {
     const p = document.createElement("wup-popup");
-    p.$options.showCase = ShowCases.always;
+    p.$options.openCase = PopupOpenCases.onInit;
     p.$options.target = this;
     p.$options.placement = [
       WUPPopupElement.$placements.$bottom.$start.$resizeWidth,
@@ -1017,8 +1013,8 @@ export default abstract class WUPBaseControl<
     this._errMsg = undefined;
     if (this.$refError) {
       const p = this.$refError;
-      p.addEventListener("$hide", p.remove, { passive: true, once: true });
-      p.$hide(); // hide with animation
+      p.addEventListener("$close", p.remove, { passive: true, once: true });
+      p.$close(); // hide with animation
       this.$refError = undefined;
 
       (this.#refErrTarget as HTMLInputElement).setCustomValidity?.call(this.#refErrTarget, "");
@@ -1028,7 +1024,7 @@ export default abstract class WUPBaseControl<
     }
   }
 
-  /** Called to serialize value from URL/storage; override it if you have unexpected object */
+  /** Called to serialize value from URL/storage; override it if you have object */
   valueFromUrl(str: string): ValueType | undefined {
     return str === "null" ? (null as ValueType) : this.parse(str);
   }
@@ -1150,7 +1146,7 @@ export default abstract class WUPBaseControl<
     if (reason !== SetValueReasons.initValue) {
       // save to storage
       reason !== SetValueReasons.storage && this._opts.storageKey && this.storageSet(v);
-      setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: reason }));
+      setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: { reason } }));
     }
 
     return true;
@@ -1228,7 +1224,9 @@ export default abstract class WUPBaseControl<
 
   /** Called when user pressed key */
   protected gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
-    e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey && this.clearValue(); // WARN: Escape works wrong with NVDA because it enables NVDA-focus-mode
+    const canClear = !e.defaultPrevented && e.key === "Escape" && !e.shiftKey && !e.altKey && !e.ctrlKey;
+    // WARN: Escape works wrong with NVDA because it enables NVDA-focus-mode
+    canClear && setTimeout(() => !e.defaultPrevented && this.clearValue()); // timeout to wait for modal to handle it
   }
 }
 

@@ -46,6 +46,7 @@
     "vanilla js",
     "accessibility",
     "popup",
+    "modal",
     "spin",
     "spinner",
     "checkbox",
@@ -164,5 +165,6 @@
         "html.custom-elements.json"
       ]
     }
-  }
+  },
+  "web-types": "./types.html.webstorm.json"
 }

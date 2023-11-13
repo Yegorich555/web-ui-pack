@@ -6,6 +6,7 @@ let el;
 export function initTestTextControl({ htmlTag, type, onBeforeEach }) {
   beforeEach(async () => {
     await onBeforeEach?.call();
+    await page.addStyleTag({ content: "body { font-size: 14px}" });
     await page.evaluate(
       (opts) => {
         const tagName = opts.htmlTag;
@@ -40,7 +41,7 @@ export function initTestTextControl({ htmlTag, type, onBeforeEach }) {
 
 export function testTextControl({ isComboCtrl } = {}) {
   test("control height", async () => {
-    await page.addStyleTag({ content: "body { font-size: 14px}" });
+    // await page.addStyleTag({ content: "body { font-size: 14px}" });
     const h = await page.evaluate(() => document.getElementById("trueEl").offsetHeight);
     expect(h).toBe(44);
   });

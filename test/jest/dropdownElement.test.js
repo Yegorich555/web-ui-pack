@@ -5,7 +5,7 @@ let el;
 /** @type HTMLButtonElement */
 let trg;
 
-!WUPDropdownElement && console.error("missed");
+WUPDropdownElement.$use();
 beforeEach(async () => {
   jest.useFakeTimers();
   // fix case when popup rect must be changed according to transform
@@ -83,15 +83,15 @@ afterEach(() => {
 describe("dropdownElement", () => {
   test("basic usage", async () => {
     expect(el.$refPopup).toBeDefined();
-    expect(el.$refPopup.$isShown).toBe(false);
+    expect(el.$refPopup.$isOpened).toBe(false);
     expect(el.$refPopup.$options.animation).toBe(1);
     expect(el.$refPopup.$options.placement).toBe(el.constructor.$defaults.placement);
     await h.userClick(trg);
-    expect(el.$refPopup.$isShown).toBe(true);
+    expect(el.$refPopup.$isOpened).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(`
       "<wup-dropdown>
-          <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="true">Click me</button>
-          <wup-popup style="min-width: 100px; min-height: 50px;" menu="">
+          <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="true" style="z-index: 8002;">Click me</button>
+          <wup-popup menu="" open="" style="min-width: 100px; min-height: 50px; display: none;" w-animation="drawer" show="">
             <ul id="wup1" tabindex="-1">
               <li><button>A</button></li>
               <li><button>B</button></li>
@@ -101,11 +101,12 @@ describe("dropdownElement", () => {
     `);
 
     await h.userClick(trg);
-    expect(el.$refPopup.$isShown).toBe(false);
+    await h.wait(1);
+    expect(el.$refPopup.$isOpened).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(`
       "<wup-dropdown>
           <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="false">Click me</button>
-          <wup-popup style="min-width: 100px; min-height: 50px;" menu="">
+          <wup-popup menu="" style="min-width: 100px; min-height: 50px;" w-animation="drawer">
             <ul id="wup1" tabindex="-1">
               <li><button>A</button></li>
               <li><button>B</button></li>
@@ -129,7 +130,7 @@ describe("dropdownElement", () => {
     el = document.body.querySelector("wup-dropdown");
     await h.wait();
     expect(el.$refPopup).toBeDefined();
-    expect(el.$refPopup.$isShown).toBe(false);
+    expect(el.$refPopup.$isOpened).toBe(false);
     expect(el.$refPopup.$options.animation).toBe(2);
     expect(el.$refPopup.$options.placement).toStrictEqual(el.$refPopup.constructor.$placementAttrs("left-middle"));
   });
@@ -148,7 +149,7 @@ describe("dropdownElement", () => {
       "
               <wup-dropdown>
                 <button aria-owns="wup4" aria-controls="wup4" aria-haspopup="listbox" aria-expanded="false">Click me</button>
-                <wup-popup style="opacity: 0;" menu="" id="wup4" tabindex="-1">
+                <wup-popup menu="" id="wup4" tabindex="-1">
                   <button>A</button>
                   <button>B</button>
                 </wup-popup>
@@ -159,21 +160,25 @@ describe("dropdownElement", () => {
   test("option: hideOnClick", async () => {
     const item = el.$refPopup.querySelector("button");
 
-    el.$options.hideOnPopupClick = true;
+    el.$options.closeOnPopupClick = true;
     await h.wait(1);
     await h.userClick(trg);
-    expect(el.$refPopup.$isShown).toBe(true);
+    await h.wait(1);
+    expect(el.$refPopup.$isOpened).toBe(true);
     await h.userClick(item);
-    expect(el.$refPopup.$isShown).toBe(false);
+    await h.wait(1);
+    expect(el.$refPopup.$isOpened).toBe(false);
 
-    el.$options.hideOnPopupClick = false;
+    el.$options.closeOnPopupClick = false;
     await h.wait(1);
     await h.userClick(trg);
-    expect(el.$refPopup.$isShown).toBe(true);
+    expect(el.$refPopup.$isOpened).toBe(true);
     await h.userClick(item);
-    expect(el.$refPopup.$isShown).toBe(true);
+    await h.wait(1);
+    expect(el.$refPopup.$isOpened).toBe(true);
     await h.userClick(trg);
-    expect(el.$refPopup.$isShown).toBe(false);
+    await h.wait(1);
+    expect(el.$refPopup.$isOpened).toBe(false);
   });
 
   test("invalid structure", async () => {

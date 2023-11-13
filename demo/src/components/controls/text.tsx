@@ -4,8 +4,7 @@ import { WUPTextControl } from "web-ui-pack";
 import stylesCom from "./controls.scss";
 import styles from "./text.scss";
 
-const sideEffect = WUPTextControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPTextControl.$use();
 
 (window as any).myTextValidations = { min: 4 } as WUP.Text.Options["validations"];
 (window as any).myTextValidations2 = { required: true } as WUP.Text.Options["validations"];
@@ -24,7 +23,7 @@ export default function TextControlView() {
         "Smart clear (reset/revert) by Esc key and button-clear (use $defaults.clearActions)",
         "Built-in validations (required,min,max,email). To extend use $defaults.validations",
         "Smart validations on the fly (use $defaults.validationCases)",
-        "Powerful accessibility support (keyboard, announcenement)",
+        "Powerful accessibility support (keyboard, announcement)",
         "Easy to append icons",
         "Mask/maskholder support (options mask & maskholder)",
         "Prefix/postfix support (options prefix & postfix)",
@@ -35,7 +34,7 @@ export default function TextControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { email: "test@google.com" };
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

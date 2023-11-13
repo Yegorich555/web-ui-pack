@@ -31,6 +31,7 @@ module.exports = {
     "react/prop-types": "off",
     "react/jsx-props-no-spreading": "off",
     "react/no-access-state-in-setstate": "off",
+    "react/no-unknown-property": ["error", { ignore: ["w-confirm"] }],
     "@typescript-eslint/no-this-alias": "off",
     "@typescript-eslint/no-shadow": "error",
     "@typescript-eslint/ban-ts-comment": "off",

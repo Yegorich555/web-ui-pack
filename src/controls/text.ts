@@ -45,7 +45,7 @@ declare global {
        * '#' // optional digit
        * '*' // any char
        * '*{1,5}' // - any 1..5 chars
-       * '//[a-zA-Z]//' // regex: 1 letter (WARN: regex must be pointed for checkin only 1 char at once)
+       * '//[a-zA-Z]//' // regex: 1 letter (WARN: regex must be pointed for check-in only 1 char at once)
        * '//[a-zA-Z]//{1,5}' // regex: 1..5 letters
        * '|0' // or '\x00' - static char '0'
        * '|#' // or '\x01' - static char '#'
@@ -125,6 +125,7 @@ export default class WUPTextControl<
       --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
      }
      [wupdark] {
         --ctrl-clear-hover: rgba(255,0,0,0.2);
@@ -138,12 +139,13 @@ export default class WUPTextControl<
         :host {
           contain: style;
           cursor: text;
+          flex: 1;
         }
         :host label > span {
           width: 100%;
           position: relative;${/* to position <strong /> relative to input */ ""}
           display: flex;
-          flex-direction: row-reverse;${/* required for reading <strong /> 1st */ ""}
+          flex-direction: row-reverse;${/* WA: required for reading <strong /> 1st */ ""}
         }
         :host input,
         :host textarea,
@@ -229,6 +231,8 @@ export default class WUPTextControl<
           transform: translateY(-50%);
           font-weight: normal;
           text-decoration: none;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden; ${/* to fix sometimes blink during the animation */ ""}
         }
         @media not all and (prefers-reduced-motion) {
           :host strong {
@@ -244,20 +248,17 @@ export default class WUPTextControl<
         :host textarea:not(:placeholder-shown) + strong,
         :host [contenteditable=true]:not(:empty) + strong,
         :host legend {
-          top: 0.2em;
-          transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         :host input:-webkit-autofill + strong
         :host textarea:-webkit-autofill + strong
         :host [contenteditable=true]:-webkit-autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         :host input:autofill + strong,
         :host textarea:autofill + strong,
         :host [contenteditable=true]:autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         :host:focus-within [maskholder],
         :host:focus-within [prefix],
@@ -269,71 +270,47 @@ export default class WUPTextControl<
           display: inline-block;
         }
         /* style for icons */
-        :host label>button,
-        :host label>button:after,
         :host label:after,
         :host label:before {
           ${WUPcssIcon}
+          cursor: pointer;
           -webkit-mask-image: none;
           mask-image: none;
         }
         :host label:after {
-          cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
         :host label:before {
-          cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         :host label>button {
-          contain: strict;
           z-index: 1;
+          contain: strict;
           font-size: inherit;
+          flex: 0 0 auto;
+          align-self: center;
         }
         :host button[clear] {
+          --icon-size: var(--ctrl-icon-size);
+          --icon-hover-r: 24px;
+          --icon-img: var(--wup-icon-cross);
+          --icon: var(--ctrl-label);
+          --icon-hover: var(--ctrl-clear);
+          --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
-          position: relative;
           margin-right: -0.5em;
-          align-self: center;
-          cursor: pointer;
-          --ctrl-icon-img: var(--wup-icon-cross);
-          background: none;
-          -webkit-mask: none;
-          mask: none;
+        }
+        :host button[clear=back] {
+          --icon-img: var(--wup-icon-back);
         }
         :host:focus-within button[clear] {
           display: inline-block;
           opacity: 1;
         }
-        :host button[clear=back] {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
-        :host button[clear]:after {
-          content: "";
-          padding: 0;
-          -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
-        }
-        :host button[clear]:after,
-        :host button[clear]:before {
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-        }
         @media (hover: hover) and (pointer: fine) {
           :host:hover button[clear] {
             display: inline-block;
             opacity: 1;
-          }
-          :host button[clear]:hover:before {
-            content: "";
-            box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
-          }
-          :host button[clear]:hover:after {
-            background: var(--ctrl-clear);
           }
         }
         :host[disabled] button[clear],
@@ -343,8 +320,8 @@ export default class WUPTextControl<
         }`;
   }
 
-  static $errorParse = "Invalid value";
-  static $errorMask = "Incomplete value";
+  static $errorParse = __wupln("Invalid value", "validation");
+  static $errorMask = __wupln("Incomplete value", "validation");
 
   static $defaults: WUP.Text.Options = {
     ...WUPBaseControl.$defaults,
@@ -352,9 +329,11 @@ export default class WUPTextControl<
     clearButton: true,
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
-      min: (v, setV) => (v === undefined || v.length < setV) && `Min length is ${setV} characters`,
-      max: (v, setV) => (v === undefined || v.length > setV) && `Max length is ${setV} characters`,
-      email: (v, setV) => setV && (!v || !emailReg.test(v)) && "Invalid email address",
+      min: (v, setV) =>
+        (v === undefined || v.length < setV) && __wupln(`Min length is ${setV} characters`, "validation"),
+      max: (v, setV) =>
+        (v === undefined || v.length > setV) && __wupln(`Max length is ${setV} characters`, "validation"),
+      email: (v, setV) => setV && (!v || !emailReg.test(v)) && __wupln("Invalid email address", "validation"),
     },
     debounceMs: 0,
     mask: "",
@@ -424,6 +403,7 @@ export default class WUPTextControl<
     } else {
       this.$refLabel.appendChild(bc);
     }
+    bc.setAttribute(this.#ctr.classNameBtnIcon, "");
     bc.setAttribute("clear", "");
     bc.setAttribute("tabindex", -1);
     bc.setAttribute("aria-hidden", true);
@@ -770,7 +750,5 @@ export default class WUPTextControl<
 }
 
 customElements.define(tagName, WUPTextControl);
-// todo example how to create bult-in dropdown before the main input (like phone-number with ability to select countryCode)
+// todo example how to create built-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
-
-// todo fix when hover changes control size because btnClear appears

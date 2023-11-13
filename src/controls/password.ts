@@ -1,5 +1,6 @@
 import onEvent from "../helpers/onEvent";
 import { stringLowerCount, stringUpperCount } from "../helpers/string";
+import { WUPcssIcon } from "../styles";
 import WUPTextControl from "./text";
 
 const tagName = "wup-pwd";
@@ -86,7 +87,7 @@ export default class WUPPasswordControl<
   #ctr = this.constructor as typeof WUPPasswordControl;
 
   /** Text announced by screen-readers when input cleared; @defaultValue `input cleared` */
-  static $ariaDescription = "press Alt + V to show/hide password";
+  static $ariaDescription = __wupln("press Alt + V to show/hide password", "aria");
 
   static get $styleRoot(): string {
     return `:root {
@@ -105,14 +106,12 @@ export default class WUPPasswordControl<
         }
         :host input[type='password'] {
           font-family: Verdana, sans-serif;
-          letter-spacing: 0.125;
-          ${"margin-bottom: -1px;" /* font Verdana affects on height // todo somehow it's wrong on other apps */}
+          letter-spacing: 0.125em;
         }
         :host button[eye] {
+          ${WUPcssIcon}
           cursor: pointer;
           margin-right: -0.5em;
-          -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
           -webkit-mask-size: calc(var(--ctrl-icon-size) * 1.3);
           mask-size: calc(var(--ctrl-icon-size) * 1.3);
         }
@@ -140,12 +139,17 @@ export default class WUPPasswordControl<
       ...WUPTextControl.$defaults.validationRules,
       minNumber: (v, setV) =>
         (!v || (v.match(/[0-9]/g)?.length ?? 0) < setV) &&
-        `Must contain at least ${setV} number${setV === 1 ? "" : "s"}`,
-      minUpper: (v, setV) => (!v || stringUpperCount(v, setV) < setV) && `Must contain at least ${setV} upper case`,
-      minLower: (v, setV) => (!v || stringLowerCount(v, setV) < setV) && `Must contain at least ${setV} lower case`,
+        __wupln(`Must contain at least ${setV} number${setV === 1 ? "" : "s"}`, "validation"),
+      minUpper: (v, setV) =>
+        (!v || stringUpperCount(v, setV) < setV) && __wupln(`Must contain at least ${setV} upper case`, "validation"),
+      minLower: (v, setV) =>
+        (!v || stringLowerCount(v, setV) < setV) && __wupln(`Must contain at least ${setV} lower case`, "validation"),
       special: (v, setV) =>
         (!v || ![...setV.chars].reduce((prev, c) => (v.includes(c) ? ++prev : prev), 0)) &&
-        `Must contain at least ${setV.min} special character${setV.min === 1 ? "" : "s"}: ${setV.chars}`,
+        __wupln(
+          `Must contain at least ${setV.min} special character${setV.min === 1 ? "" : "s"}: ${setV.chars}`,
+          "validation"
+        ),
       confirm: (v, setV, c) => {
         if (!setV) {
           return false;
@@ -169,7 +173,7 @@ export default class WUPPasswordControl<
         if (i === -2) {
           return `Previous "${selector}" not found`;
         }
-        return "Passwords must be equal";
+        return __wupln("Passwords must be equal", "validation");
       },
     },
     reverse: false,
@@ -178,7 +182,7 @@ export default class WUPPasswordControl<
   $refBtnEye = document.createElement("button");
   protected override renderControl(): void {
     super.renderControl();
-    this.$refInput.type = "password";
+    this.changeInputType(false);
     this.$ariaDetails(this.#ctr.$ariaDescription);
     this.renderBtnEye();
   }
@@ -207,10 +211,21 @@ export default class WUPPasswordControl<
     const end = this.$refInput.selectionEnd;
     const isOff = this.$refBtnEye.getAttribute("eye") !== "off";
     this.$refBtnEye.setAttribute("eye", isOff ? "off" : "");
-    this.$refInput.type = isOff ? "text" : "password";
+    this.changeInputType(isOff);
+
     window.requestAnimationFrame(() => {
       this.$refInput.setSelectionRange(start, end);
     }); // otherwise selection is reset
+  }
+
+  /** Called for toggling input type + fix browser issue when font affects on input height */
+  protected changeInputType(isVisible: boolean): void {
+    const h = this.$refInput.offsetHeight;
+    this.$refInput.type = isVisible ? "text" : "password";
+    const isHchanged = h !== this.$refInput.offsetHeight;
+    if (isHchanged && h) {
+      this.$refInput.style.height = `${h}px`;
+    }
   }
 
   protected override gotChanges(propsChanged: Array<string> | null): void {

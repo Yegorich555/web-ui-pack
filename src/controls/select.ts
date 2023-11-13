@@ -4,12 +4,8 @@ import promiseWait from "../helpers/promiseWait";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
 import { WUPcssMenu } from "../styles";
-import WUPBaseComboControl, { ShowCases } from "./baseCombo";
+import WUPBaseComboControl, { MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
-
-/* c8 ignore next */
-/* istanbul ignore next */
-!WUPSpinElement && console.error("!"); // It's required otherwise import is ignored by webpack
 
 const tagName = "wup-select";
 declare global {
@@ -49,7 +45,7 @@ declare global {
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions<T> {
       /** Case when menu-popup to show
        * @defaultValue onPressArrowKey | onClick | onFocus | onInput */
-      showCase: ShowCases;
+      openCase: MenuOpenCases;
       /** Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
        * @tutorial
        * * set number X to enable autoMode where `input.readOnly = items.length < X` */
@@ -127,14 +123,10 @@ export default class WUPSelectControl<
   static get $styleRoot(): string {
     return `:root {
         --ctrl-select-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
-        --ctrl-select-menu-hover: #f1f1f1;
-      }
-      [wupdark] {
-        --ctrl-select-menu-hover: #222a36;
       }`;
   }
 
-  // WARN: scroll sets for ul otherwise animation brokes scroll to selectItem because animation affects on scrollSize
+  // WARN: scroll sets for ul otherwise animation broken scroll to selectItem because animation affects on scrollSize
   static get $style(): string {
     return `${super.$style}
       :host {
@@ -147,13 +139,13 @@ export default class WUPSelectControl<
       :host[opened] label:after {
         transform: rotate(180deg);
       }
-      ${WUPcssMenu(":host [menu]", "var(--ctrl-select-menu-hover)")}`;
+      ${WUPcssMenu(":host [menu]")}`;
   }
 
   /** Text for listbox when no items are displayed */
-  static $textNoItems: string | undefined = "No Items";
+  static $textNoItems: string | undefined = __wupln("No Items", "content");
   /** Text for aria-label of <ul> element */
-  static $ariaLabelItems = "Items";
+  static $ariaLabelItems = __wupln("Items", "aria");
 
   static $isEqual(v1: unknown, v2: unknown, c: WUPSelectControl): boolean {
     let isEq = super.$isEqual(v1, v2, c);
@@ -187,10 +179,10 @@ export default class WUPSelectControl<
     ...WUPBaseComboControl.$defaults,
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
-      minCount: (v, setV) => (v == null || v.length < setV) && `Min count is ${setV}`,
-      maxCount: (v, setV) => (v == null || v.length > setV) && `Max count is ${setV}`,
+      minCount: (v, setV) => (v == null || v.length < setV) && __wupln(`Min count is ${setV}`, "validation"),
+      maxCount: (v, setV) => (v == null || v.length > setV) && __wupln(`Max count is ${setV}`, "validation"),
     },
-    showCase: ShowCases.onClick | ShowCases.onFocus | ShowCases.onPressArrowKey | ShowCases.onInput,
+    openCase: MenuOpenCases.onClick | MenuOpenCases.onFocus | MenuOpenCases.onPressArrowKey | MenuOpenCases.onInput,
     allowNewValue: false,
     multiple: false,
     items: [],
@@ -276,6 +268,7 @@ export default class WUPSelectControl<
 
   /** Called on every spin-render */
   renderSpin(): WUPSpinElement {
+    WUPSpinElement.$use();
     const spin = document.createElement("wup-spin");
     spin.$options.fit = true;
     spin.$options.overflowFade = true;
@@ -289,7 +282,7 @@ export default class WUPSelectControl<
   /** Called to get/fetch items based on $options.items */
   fetchItems(): Promise<WUP.Select.MenuItems<ValueType>> | WUP.Select.MenuItems<ValueType> {
     this._cachedItems = undefined;
-    this.#findValT && clearTimeout(this.#findValT); // prevent setIinputValue if fetchItems is started
+    this.#findValT && clearTimeout(this.#findValT); // prevent setInputValue if fetchItems is started
     this.#findValT = undefined;
     const { items } = this._opts;
 
@@ -300,18 +293,20 @@ export default class WUPSelectControl<
     const act = (): void => {
       this._onPendingInitValue?.call(this);
       delete this._onPendingInitValue;
-      this.setInputValue(this.$value, SetValueReasons.clear); // NiceToHave: .clear is wrong need new reason
-      this.setupInputReadonly(); // call it because opt readonlyInput can depends on items.length
+      this.setInputValue(this.$value, SetValueReasons.initValue);
+      this.setupInputReadonly(); // call it because opt readonlyInput can depend on items.length
     };
     if (d instanceof Promise) {
-      return promiseWait(d, 300, (v) => this.changePending(v)).then((data) => {
-        Promise.resolve().finally(() => {
+      return promiseWait(d, 300, (v) => this.changePending(v))
+        .then((data) => {
           this._cachedItems = data || [];
+          return data;
+        })
+        .finally(() => {
+          this._cachedItems ??= [];
           act();
-          this.$isFocused && this.goShowMenu(ShowCases.onFocus, null);
-        }); // empty promise required to showMenu after pending changes
-        return data;
-      });
+          this.$isFocused && this.goOpenMenu(MenuOpenCases.onFocus, null);
+        });
     }
     this._cachedItems = d;
     act();
@@ -544,7 +539,7 @@ export default class WUPSelectControl<
     this.selectValue(o.value, !this._opts.multiple);
   }
 
-  protected override selectValue(v: ValueType, canHideMenu = true): void {
+  protected override selectValue(v: ValueType, canCloseMenu = true): void {
     if (this._opts.multiple) {
       let arr = this.$value as Array<ValueType>;
       if (!arr?.length) {
@@ -565,32 +560,32 @@ export default class WUPSelectControl<
         v = arr as any;
       }
     }
-    super.selectValue(v, canHideMenu);
+    super.selectValue(v, canCloseMenu);
 
     this._opts.multiple && this.clearFilterMenuItems();
   }
 
-  override canShowMenu(showCase: ShowCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
+  override canOpenMenu(openCase: MenuOpenCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
     if (this.$isPending) {
       return false;
     }
-    return super.canShowMenu(showCase, e);
+    return super.canOpenMenu(openCase, e);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override async goShowMenu(
-    showCase: ShowCases,
+  protected override async goOpenMenu(
+    openCase: MenuOpenCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
   ): Promise<WUPPopupElement | null> {
-    if (this.$isShown) {
+    if (this.$isOpened) {
       return this.$refPopup!;
     }
 
-    if (this.$refPopup && showCase !== ShowCases.onInput && this._menuItems!.filtered) {
+    if (this.$refPopup && openCase !== MenuOpenCases.onInput && this._menuItems!.filtered) {
       this.clearFilterMenuItems();
     }
 
-    const popup = await super.goShowMenu(showCase, e);
+    const popup = await super.goOpenMenu(openCase, e);
     popup && !this.canClearSelection && this.selectMenuItemByValue(this.$value); // set aria-selected only if input not empty
     return popup;
   }
@@ -617,7 +612,7 @@ export default class WUPSelectControl<
 
   /** Select menu item if value !== undefined and menu is opened */
   protected selectMenuItemByValue(v: ValueType | undefined): void {
-    if (this.$isShown) {
+    if (this.$isOpened) {
       const findAndSelect = (vi: ValueType): number => {
         const i = this._cachedItems!.findIndex((item) => this.#ctr.$isEqual(item.value, vi, this));
         this.selectMenuItem(this._menuItems!.all[i] || null);
@@ -803,7 +798,7 @@ export default class WUPSelectControl<
 
   /** Called on input change to update menu if possible */
   protected tryUpdateMenu(): void {
-    this.$isShown && this.filterMenuItems();
+    this.$isOpened && this.filterMenuItems();
     this.canClearSelection && this.selectMenuItem(null); // allow user clear value without pressing Enter
   }
 
@@ -813,7 +808,7 @@ export default class WUPSelectControl<
   }
 
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
-    this.$isShown && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
+    this.$isOpened && this.focusMenuItem(null); // reset virtual focus: // WARN it's not good enough when this._opts.multiple
     super.gotInput(e, true); // prevent ordinary value change
 
     // user can append item by ',' at the end or remove immediately
@@ -881,7 +876,9 @@ export default class WUPSelectControl<
 customElements.define(tagName, WUPSelectControl);
 
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
-// todo label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check ???
-// NiceToHave: add support custom items rendering when it's already appended to DOM like it works with dropdown
+// WARN label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check
 
+// NiceToHave: add support custom items rendering when it's already appended to DOM like it works with dropdown
 // NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
+// NiceToHave: color differently text-chunk that matches in menu
+// NiceToHave: for allowNewValue add at the end of menu `[text] (New option)` like it works in JIRA. `label` dropdown on ticket

@@ -24,6 +24,7 @@ exports[`control.pwd $ariaDetails 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -54,6 +55,7 @@ exports[`control.pwd $ariaDetails 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -90,6 +92,7 @@ exports[`control.pwd $ariaSpeak 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -134,6 +137,7 @@ exports[`control.pwd $ariaSpeak 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -169,6 +173,7 @@ exports[`control.pwd $show/$hide error 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -207,6 +212,7 @@ exports[`control.pwd $show/$hide error 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -221,7 +227,6 @@ exports[`control.pwd $show/$hide error 2`] = `
     error=""
     id="txt2"
     role="alert"
-    style="opacity: 0;"
   >
     <span
       class="wup-hidden"
@@ -257,6 +262,7 @@ exports[`control.pwd $show/$hide error 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -265,6 +271,23 @@ exports[`control.pwd $show/$hide error 3`] = `
       type="button"
     />
   </label>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt2"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
 </wup-pwd>
 `;
 
@@ -279,28 +302,87 @@ overflow:hidden;
 clip:rect(1px,1px,1px,1px);
 min-width:initial;
 padding:0;}
+
+  
+[wup-icon] {
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+}
+[wup-icon]:after {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: var(--icon, #000);
+  -webkit-mask-size: var(--icon-size, 1em);
+  mask-size: var(--icon-size, 1em);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+
+  -webkit-mask-image: var(--icon-img);
+  mask-image: var(--icon-img);
+}
+[wup-icon]:focus {
+   box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+[wup-icon]:focus:after {
+   background: var(--icon-hover, var(--icon, #000));
+}
+@media (hover: hover) and (pointer: fine) {
+  [wup-icon]:hover {
+   box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  [wup-icon]:hover:after {
+    background: var(--icon-hover, var(--icon, #000));
+  }
+  [wup-icon]:focus:hover {
+   opacity: 0.9;
+  }
+}
+
   :root {
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;
           --base-btn-text: #fff;
           --base-btn-focus: #005766;
-          --base-btn2-bg: var(--base-btn-text);
-          --base-btn2-text: var(--base-btn-bg);
+          --base-btn2-bg: #6c757d;
+          --base-btn2-text: #fff;
           --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
+          --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
-          --icon-hover: #0001;
+          --icon-hover-bg: #0001;
+          --icon-focus-bg: #0000001a;
+          --icon-size: 14px;
+          --menu-hover-text: inherit;
+          --menu-hover-bg: #f1f1f1;
         }
         [wupdark] {
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
-          --icon-hover: #fff3;
+          --icon: #fff;
+          --icon-hover-bg: #fff1;
+          --icon-focus-bg: #fff2;
           --scroll: #fff2;
           --scroll-hover: #fff3;
+          --menu-hover-text: inherit;
+          --menu-hover-bg: #222a36;
         }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
@@ -310,7 +392,7 @@ padding:0;}
         --ctrl-label: #5e5e5e;
         --ctrl-icon: var(--ctrl-label);
         --ctrl-icon-size: 1em;
-        --ctrl: inherit;
+        --ctrl-text: inherit;
         --ctrl-bg: #fff;
         --ctrl-border: #e6e6e6;
         --ctrl-border-radius: var(--border-radius);
@@ -338,6 +420,7 @@ padding:0;}
       --ctrl-autofill: #00869e;
       --ctrl-clear: red;
       --ctrl-clear-hover: rgba(255,0,0,0.1);
+      --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
      }
      [wupdark] {
         --ctrl-clear-hover: rgba(255,0,0,0.2);
@@ -356,7 +439,7 @@ padding:0;}
         margin: 20px 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl);
+        color: var(--ctrl-text);
         background: var(--ctrl-bg);
         cursor: pointer;
         -webkit-tap-highlight-color: transparent;
@@ -373,7 +456,6 @@ padding:0;}
       }
       WUP-PWD:focus-within,
       WUP-PWD:focus-within &gt; [menu] {
-        z-index: 90010;
         box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
       }
       WUP-PWD:focus-within strong,
@@ -495,6 +577,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD {
           contain: style;
           cursor: text;
+          flex: 1;
         }
         WUP-PWD label &gt; span {
           width: 100%;
@@ -586,6 +669,8 @@ mask-image: var(--ctrl-icon-img);
           transform: translateY(-50%);
           font-weight: normal;
           text-decoration: none;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden; 
         }
         @media not all and (prefers-reduced-motion) {
           WUP-PWD strong {
@@ -601,20 +686,17 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD textarea:not(:placeholder-shown) + strong,
         WUP-PWD [contenteditable=true]:not(:empty) + strong,
         WUP-PWD legend {
-          top: 0.2em;
-          transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-PWD input:-webkit-autofill + strong
         WUP-PWD textarea:-webkit-autofill + strong
         WUP-PWD [contenteditable=true]:-webkit-autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-PWD input:autofill + strong,
         WUP-PWD textarea:autofill + strong,
         WUP-PWD [contenteditable=true]:autofill + strong {
-           top: 0.2em;
-           transform: scale(0.9);
+          transform: var(--ctrl-label-active-pos);
         }
         WUP-PWD:focus-within [maskholder],
         WUP-PWD:focus-within [prefix],
@@ -626,8 +708,6 @@ mask-image: var(--ctrl-icon-img);
           display: inline-block;
         }
         /* style for icons */
-        WUP-PWD label&gt;button,
-        WUP-PWD label&gt;button:after,
         WUP-PWD label:after,
         WUP-PWD label:before {
           
@@ -650,66 +730,44 @@ mask-repeat: no-repeat;
 mask-position: center;
 -webkit-mask-image: var(--ctrl-icon-img);
 mask-image: var(--ctrl-icon-img);
+          cursor: pointer;
           -webkit-mask-image: none;
           mask-image: none;
         }
         WUP-PWD label:after {
-          cursor: pointer;
           margin-right: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-PWD label:before {
-          cursor: pointer;
           margin-left: calc(var(--ctrl-icon-size) / -2);
         }
         WUP-PWD label&gt;button {
-          contain: strict;
           z-index: 1;
+          contain: strict;
           font-size: inherit;
+          flex: 0 0 auto;
+          align-self: center;
         }
         WUP-PWD button[clear] {
+          --icon-size: var(--ctrl-icon-size);
+          --icon-hover-r: 24px;
+          --icon-img: var(--wup-icon-cross);
+          --icon: var(--ctrl-label);
+          --icon-hover: var(--ctrl-clear);
+          --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
-          position: relative;
           margin-right: -0.5em;
-          align-self: center;
-          cursor: pointer;
-          --ctrl-icon-img: var(--wup-icon-cross);
-          background: none;
-          -webkit-mask: none;
-          mask: none;
+        }
+        WUP-PWD button[clear=back] {
+          --icon-img: var(--wup-icon-back);
         }
         WUP-PWD:focus-within button[clear] {
           display: inline-block;
           opacity: 1;
         }
-        WUP-PWD button[clear=back] {
-          --ctrl-icon-img: var(--wup-icon-back);
-        }
-        WUP-PWD button[clear]:after {
-          content: "";
-          padding: 0;
-          -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
-        }
-        WUP-PWD button[clear]:after,
-        WUP-PWD button[clear]:before {
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 100%;
-          height: 100%;
-          border-radius: 50%;
-        }
         @media (hover: hover) and (pointer: fine) {
           WUP-PWD:hover button[clear] {
             display: inline-block;
             opacity: 1;
-          }
-          WUP-PWD button[clear]:hover:before {
-            content: "";
-            box-shadow: inset 0 0 0 99999px var(--ctrl-clear-hover);
-          }
-          WUP-PWD button[clear]:hover:after {
-            background: var(--ctrl-clear);
           }
         }
         WUP-PWD[disabled] button[clear],
@@ -725,14 +783,31 @@ mask-image: var(--ctrl-icon-img);
         }
         WUP-PWD input[type='password'] {
           font-family: Verdana, sans-serif;
-          letter-spacing: 0.125;
-          margin-bottom: -1px;
+          letter-spacing: 0.125em;
         }
         WUP-PWD button[eye] {
+          
+display: inline-block;
+width: var(--ctrl-icon-size);
+min-height: var(--ctrl-icon-size);
+box-sizing: content-box;
+margin: 0;
+padding: 5px;
+flex: 0 0 auto;
+align-self: stretch;
+border: none;
+box-shadow: none;
+background: var(--ctrl-icon);
+-webkit-mask-size: var(--ctrl-icon-size);
+mask-size: var(--ctrl-icon-size);
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+-webkit-mask-image: var(--ctrl-icon-img);
+mask-image: var(--ctrl-icon-img);
           cursor: pointer;
           margin-right: -0.5em;
-          -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
           -webkit-mask-size: calc(var(--ctrl-icon-size) * 1.3);
           mask-size: calc(var(--ctrl-icon-size) * 1.3);
         }
@@ -844,6 +919,7 @@ exports[`control.pwd options clearButton 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -926,6 +1002,7 @@ exports[`control.pwd validations $options.validationShowAll 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -939,7 +1016,9 @@ exports[`control.pwd validations $options.validationShowAll 1`] = `
     aria-live="off"
     error=""
     id="txt2"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -1006,6 +1085,7 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -1019,7 +1099,9 @@ exports[`control.pwd validations $options.validationShowAll 2`] = `
     aria-live="off"
     error=""
     id="txt2"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -1096,6 +1178,7 @@ exports[`control.pwd validations $options.validationShowAll 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -1109,7 +1192,9 @@ exports[`control.pwd validations $options.validationShowAll 3`] = `
     aria-live="off"
     error=""
     id="txt5"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -1148,6 +1233,7 @@ exports[`control.pwd validations options.validationCase 1`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -1190,6 +1276,7 @@ exports[`control.pwd validations options.validationCase 2`] = `
       clear="back"
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -1203,7 +1290,9 @@ exports[`control.pwd validations options.validationCase 2`] = `
     aria-live="off"
     error=""
     id="txt3"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -1249,6 +1338,7 @@ exports[`control.pwd validations options.validationCase 3`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -1262,6 +1352,8 @@ exports[`control.pwd validations options.validationCase 3`] = `
     aria-live="off"
     error=""
     id="txt4"
+    open=""
+    show=""
     style="display: none;"
   >
     <span
@@ -1307,6 +1399,7 @@ exports[`control.pwd validations options.validationCase 4`] = `
       clear=""
       tabindex="-1"
       type="button"
+      wup-icon=""
     />
     <button
       aria-hidden="true"
@@ -1320,7 +1413,9 @@ exports[`control.pwd validations options.validationCase 4`] = `
     aria-live="off"
     error=""
     id="txt5"
+    open=""
     role="alert"
+    show=""
     style="display: none;"
   >
     <span
@@ -1364,6 +1459,7 @@ exports[`control.pwd with form 1`] = `
         clear=""
         tabindex="-1"
         type="button"
+        wup-icon=""
       />
       <button
         aria-hidden="true"

@@ -46,7 +46,7 @@ function targetAppend(targetW = 100, targetH = 20) {
 }
 
 beforeEach(() => {
-  !WUPSpinElement && console.error("missed");
+  WUPSpinElement.$use();
   const a = h.useFakeAnimation();
   nextFrame = a.nextFrame;
 
@@ -85,32 +85,90 @@ describe("spinElement", () => {
       overflow:hidden;
       clip:rect(1px,1px,1px,1px);
       min-width:initial;
-      padding:0;}:root {
+      padding:0;}
+
+      [wup-icon] {
+        display: inline-block;
+        cursor: pointer;
+        box-shadow: none;
+        border: none;
+        margin: 0;
+        padding: 0;
+        width: var(--icon-hover-r, 2em);
+        height: var(--icon-hover-r, 2em);
+        background: none;
+        outline: none;
+        border-radius: 50%;
+      }
+      [wup-icon]:after {
+        content: "";
+        display: inline-block;
+        border-radius: 50%;
+        width: 100%;
+        height: 100%;
+        background: var(--icon, #000);
+        -webkit-mask-size: var(--icon-size, 1em);
+        mask-size: var(--icon-size, 1em);
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+
+        -webkit-mask-image: var(--icon-img);
+        mask-image: var(--icon-img);
+      }
+      [wup-icon]:focus {
+         box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+      }
+      [wup-icon]:focus:after {
+         background: var(--icon-hover, var(--icon, #000));
+      }
+      @media (hover: hover) and (pointer: fine) {
+        [wup-icon]:hover {
+         box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+        }
+        [wup-icon]:hover:after {
+          background: var(--icon-hover, var(--icon, #000));
+        }
+        [wup-icon]:focus:hover {
+         opacity: 0.9;
+        }
+      }
+      :root {
                 --base-focus: #00778d;
                 --base-btn-bg: #009fbc;
                 --base-btn-text: #fff;
                 --base-btn-focus: #005766;
-                --base-btn2-bg: var(--base-btn-text);
-                --base-btn2-text: var(--base-btn-bg);
+                --base-btn2-bg: #6c757d;
+                --base-btn2-text: #fff;
                 --base-btn3-bg: none;
                 --base-btn3-text: inherit;
                 --base-sep: #e4e4e4;
+                --base-margin: 20px;
                 --border-radius: 6px;
-                --anim-time: 200ms;
-                --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+                --anim-t: 200ms;
+                --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
                 --icon-hover-r: 30px;
-                --icon-hover: #0001;
+                --icon-hover-bg: #0001;
+                --icon-focus-bg: #0000001a;
+                --icon-size: 14px;
+                --menu-hover-text: inherit;
+                --menu-hover-bg: #f1f1f1;
               }
               [wupdark] {
                 --base-btn-focus: #bdbdbd;
                 --base-sep: #141414;
-                --icon-hover: #fff3;
+                --icon: #fff;
+                --icon-hover-bg: #fff1;
+                --icon-focus-bg: #fff2;
                 --scroll: #fff2;
                 --scroll-hover: #fff3;
+                --menu-hover-text: inherit;
+                --menu-hover-bg: #222a36;
               }:root {
                 --spin-1: #ffa500;
                 --spin-2: #fff;
-                --spin-speed: 1.2s;
+                --spin-t: 1.2s;
                 --spin-size: 3em;
                 --spin-item-size: calc(var(--spin-size) / 8);
                 --spin-fade: rgba(255,255,255,0.43);
@@ -133,7 +191,7 @@ describe("spinElement", () => {
               border-radius: 50%;
             }
             WUP-SPIN>div {
-              animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
               width: 100%; height: 100%;
               left:0; top:0;
             }
@@ -321,7 +379,7 @@ describe("spinElement", () => {
               border-radius: 50%;
             }
             SPIN-A>div {
-              animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
               width: 100%; height: 100%;
               left:0; top:0;
             }
@@ -377,7 +435,7 @@ describe("spinElement", () => {
               border-radius: 50%;
             }
             SPIN-B>div {
-              animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
               width: 100%; height: 100%;
               left:0; top:0;
             }
@@ -414,7 +472,7 @@ describe("spinElement", () => {
                 height: calc(100% - var(--spin-item-size) * 3);
                 left: 50%; top: 50%;
                 transform: translate(-50%,-50%);
-                animation: WUP-SPIN-2-2 var(--spin-speed) linear infinite;
+                animation: WUP-SPIN-2-2 var(--spin-t) linear infinite;
              }</style>"
     `);
   });
@@ -451,7 +509,7 @@ describe("spinElement", () => {
               border-radius: 50%;
             }
             SPIN-C>div {
-              animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
               width: 100%; height: 100%;
               left:0; top:0;
             }
@@ -513,7 +571,7 @@ describe("spinElement", () => {
               border-radius: 50%;
             }
             SPIN-D>div {
-              animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
               width: 100%; height: 100%;
               left:0; top:0;
             }
@@ -597,7 +655,7 @@ describe("spinElement", () => {
               border-radius: 50%;
             }
             SPIN-E>div {
-              animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
               width: 100%; height: 100%;
               left:0; top:0;
             }
@@ -627,7 +685,7 @@ describe("spinElement", () => {
                     top:50%; left:50%;
                   }
                   SPIN-E>div:after {
-                    animation: WUP-SPIN-2 var(--spin-speed) linear infinite;
+                    animation: WUP-SPIN-2 var(--spin-t) linear infinite;
                     content: " ";
                     display: block;
                     width: var(--spin-item-size);
@@ -691,7 +749,7 @@ describe("spinElement", () => {
               border-radius: 50%;
             }
             SPIN-F>div {
-              animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
               width: 100%; height: 100%;
               left:0; top:0;
             }
@@ -713,7 +771,7 @@ describe("spinElement", () => {
                   :root { --spin-item-size: calc(var(--spin-size) / 10); }
                   SPIN-F { position: relative; }
                   SPIN-F>div {
-                    animation: WUP-SPIN-3 var(--spin-speed) linear infinite;
+                    animation: WUP-SPIN-3 var(--spin-t) linear infinite;
                     position: absolute;
                     width: calc(var(--spin-size) / 4);
                     height: var(--spin-item-size);
@@ -807,7 +865,7 @@ describe("spinElement", () => {
               border-radius: 50%;
             }
             SPIN-G>div {
-              animation: WUP-SPIN-1 var(--spin-speed) linear infinite;
+              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
               width: 100%; height: 100%;
               left:0; top:0;
             }
@@ -874,10 +932,10 @@ describe("spinElement", () => {
                   border-radius: calc(var(--spin-item-size) / 2);
                 }
                 SPIN-G>div:nth-child(1) {
-                  animation: var(--spin-speed) ease 0s infinite normal none running WUP-SPIN-4-1;
+                  animation: var(--spin-t) ease 0s infinite normal none running WUP-SPIN-4-1;
                 }
                 SPIN-G>div:nth-child(2) {
-                  animation: var(--spin-speed) ease 0s infinite normal none running WUP-SPIN-4-2;
+                  animation: var(--spin-t) ease 0s infinite normal none running WUP-SPIN-4-2;
                 }</style>"
     `);
   });

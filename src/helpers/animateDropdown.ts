@@ -45,18 +45,20 @@ export default function animateDropdown(el: HTMLElement, ms: number, isHide = fa
     nested.forEach((e) => {
       e.el.style.transform = e.prev.trimEnd();
       e.el.style.transformOrigin = "";
+      !e.el.getAttribute("style") && e.el.removeAttribute("style");
     });
     // refresh layout otherwise blur effect possible if scroll during the animation
     const was = el.style.display;
     el.style.display = "none";
     (reset as any)._cached = el.offsetHeight;
     el.style.display = was;
+    !el.getAttribute("style") && el.removeAttribute("style");
   };
 
   // define from-to ranges
   const to = isHide ? 0 : 1;
   const { from } = parseScale(el);
-  ms *= Math.abs(to - from); // recalc left-animTime (if element is partially opened and need to hide it)
+  ms *= Math.abs(to - from); // re-calc left-animTime (if element is partially opened and need to hide it)
 
   const p = animate(from, to, ms, (v, _t, isLast) => {
     if (!el.isConnected) {

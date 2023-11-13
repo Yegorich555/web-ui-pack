@@ -2,8 +2,8 @@ import Page from "src/elements/page";
 import { WUPDateControl } from "web-ui-pack";
 import stylesCom from "./controls.scss";
 
-const sideEffect = WUPDateControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPDateControl.$use();
+
 (window as any).myDateValidations = { required: true } as WUP.Date.Options["validations"];
 (window as any).myDateValidations2 = { required: false } as WUP.Date.Options["validations"];
 
@@ -27,10 +27,10 @@ export default function DateControlView() {
       }}
       features={[
         "Inheritted features from TextControl & CalendarControl",
-        "Powerful accessibility support (keyboard, announcenement)",
+        "Powerful accessibility support (keyboard, announcement)",
         "Scrollable & well animated pickers (with swipe for touchscreens)",
         "Wide ability to disable particular dates (options min/max/exclude)",
-        "No dependancy for working with dates (usage momentjs doesn't make sense)",
+        "No dependency for working with dates (usage momentJS doesn't make sense)",
         "Saves hours. So $value='2022-11-06 23:50' & click on '20 Dec' => '2022-12-20 23:50'",
         "Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
       ]}
@@ -39,7 +39,7 @@ export default function DateControlView() {
         ref={(el) => {
           if (el) {
             el.$initModel = { readonly: new Date("1990-02-10") };
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
         w-autoFocus

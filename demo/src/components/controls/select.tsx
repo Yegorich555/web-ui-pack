@@ -5,8 +5,7 @@ import { ClearActions } from "web-ui-pack/controls/baseControl";
 import { spinUseDualRing } from "web-ui-pack/spinElement";
 import stylesCom from "./controls.scss";
 
-const sideEffect = WUPSelectControl;
-!sideEffect && console.error("!"); // required otherwise import is ignored by webpack
+WUPSelectControl.$use();
 
 let ir = 10;
 const items = [
@@ -70,7 +69,7 @@ export default function SelectControlView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$onSubmit = (e) => console.warn("submitted model", e.$model);
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
             el.$initModel = { asDropdown: items[3].value };
           }
         }}
@@ -115,6 +114,7 @@ export default function SelectControlView() {
               el.$options.label = "With pending (set Promise to $options.items)";
               setTimeout(() => {
                 el.$options.items = () => new Promise((res) => setTimeout(() => res(items), 3000));
+                // manual testcase: el.$options.items = () => new Promise((_, rej) => setTimeout(() => rej("TestErr"), 3000));
                 el.$initValue = 13; // was issue here - items not fetched yet
               }, 100);
             }

@@ -17,7 +17,7 @@ describe("control.select", () => {
         activeElementId: document.activeElement.id,
         trueId: el.$refInput.id,
         html: el.outerHTML,
-        isShown: el.$isShown,
+        isShown: el.$isOpened,
         isMenuExists: !!el.$refPopup,
       };
     });

@@ -5,9 +5,9 @@ import focusFirst from "./helpers/focusFirst";
 import nestedProperty from "./helpers/nestedProperty";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
-import { WUPcssHidden } from "./styles";
+import { WUPcssHidden, WUPcssBtnIcon } from "./styles";
 
-// theoritcally such single appending is faster than using :host inside shadowComponent
+// theoretically such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
 const appendedRootStyles = new Set<typeof WUPBaseElement>();
 let lastUniqueNum = 0;
@@ -36,6 +36,22 @@ export const enum AttributeTypes {
   selector,
 }
 
+declare global {
+  /** Translate function that need to replace to translate content according to requirements
+   * @param text Text that must be translated
+   * @param type Type of related text
+   * @returns the same string by default */
+  const __wupln: Window["__wupln"]; // NiceToHave: interpolation `Max length ${setV} is chars` where (-s) can depend on value
+  interface Window {
+    /** Translate function that need to replace to translate content according to requirements
+     * @param text Text that must be translated
+     * @param type Type of related text
+     * @returns the same string by default */
+    __wupln: (text: string, type: "aria" | "content" | "validation") => string;
+  }
+}
+window.__wupln = (s) => s;
+
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement<
   TOptions extends Record<string, any> = Record<string, any>,
@@ -43,6 +59,11 @@ export default abstract class WUPBaseElement<
 > extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPBaseElement;
+
+  /** Register control in the web to allow to use */
+  static $use(): void {
+    // WARN: this is method required but must be empty for webpack optimization (see sideEffects)
+  }
 
   /** Reference to global style element used by web-ui-pack */
   static get $refStyle(): HTMLStyleElement | null {
@@ -65,23 +86,32 @@ export default abstract class WUPBaseElement<
           --base-btn-bg: #009fbc;
           --base-btn-text: #fff;
           --base-btn-focus: #005766;
-          --base-btn2-bg: var(--base-btn-text);
-          --base-btn2-text: var(--base-btn-bg);
+          --base-btn2-bg: #6c757d;
+          --base-btn2-text: #fff;
           --base-btn3-bg: none;
           --base-btn3-text: inherit;
           --base-sep: #e4e4e4;
+          --base-margin: 20px;
           --border-radius: 6px;
-          --anim-time: 200ms;
-          --anim: var(--anim-time) cubic-bezier(0, 0, 0.2, 1) 0ms;
+          --anim-t: 200ms;
+          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
           --icon-hover-r: 30px;
-          --icon-hover: #0001;
+          --icon-hover-bg: #0001;
+          --icon-focus-bg: #0000001a;
+          --icon-size: 14px;
+          --menu-hover-text: inherit;
+          --menu-hover-bg: #f1f1f1;
         }
         [wupdark] {
           --base-btn-focus: #bdbdbd;
           --base-sep: #141414;
-          --icon-hover: #fff3;
+          --icon: #fff;
+          --icon-hover-bg: #fff1;
+          --icon-focus-bg: #fff2;
           --scroll: #fff2;
           --scroll-hover: #fff3;
+          --menu-hover-text: inherit;
+          --menu-hover-bg: #222a36;
         }`;
   }
 
@@ -90,8 +120,14 @@ export default abstract class WUPBaseElement<
     return `wup${++lastUniqueNum}`;
   }
 
+  /** Returns default class name for visually hidden element */
   static get classNameHidden(): string {
     return "wup-hidden";
+  }
+
+  /** Returns default class name for buttons with icons */
+  static get classNameBtnIcon(): string {
+    return "wup-icon";
   }
 
   /** Returns map-type based on value */
@@ -215,7 +251,7 @@ export default abstract class WUPBaseElement<
     return this._opts;
   }
 
-  /** Options inherited from `static.$defauls` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
+  /** Options inherited from `static.$defaults` and applied to element. Use this to change behavior per item OR use `$defaults` to change globally */
   set $options(v: Partial<TOptions>) {
     if (this._opts === v) {
       return;
@@ -273,7 +309,9 @@ export default abstract class WUPBaseElement<
     if (!this.#ctr.$refStyle) {
       this.#ctr.$refStyle = document.createElement("style");
       /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
-      this.#ctr.$refStyle.append(`.${this.#ctr.classNameHidden}, [${this.#ctr.classNameHidden}] {${WUPcssHidden}}`);
+      this.#ctr.$refStyle.append(`.${this.#ctr.classNameHidden}, [${this.#ctr.classNameHidden}] {${WUPcssHidden}}\r\n`);
+      this.#ctr.$refStyle.append(`${WUPcssBtnIcon(`[${this.#ctr.classNameBtnIcon}]`)}\r\n`);
+
       document.head.prepend(this.#ctr.$refStyle);
     }
     const refStyle = this.#ctr.$refStyle;
@@ -304,18 +342,25 @@ export default abstract class WUPBaseElement<
     return this.#isReady;
   }
 
+  /** Returns if current element or some nested child is active/focused */
+  get $isFocused(): boolean {
+    const a = document.activeElement;
+    return this === a || this.includes(a);
+  }
+
   /** Try to focus self or first possible children; returns true if succesful */
   focus(): boolean {
+    delete this._willFocus;
     return focusFirst(this);
   }
 
   /** Remove focus from element on any nested active element */
   blur(): void {
-    const ae = document.activeElement;
-    if (ae === this) {
+    const a = document.activeElement;
+    if (a === this) {
       super.blur();
-    } else if (ae instanceof HTMLElement && this.includes(ae)) {
-      ae.blur();
+    } else if (a instanceof HTMLElement && this.includes(a)) {
+      a.blur();
     }
   }
 
@@ -324,6 +369,8 @@ export default abstract class WUPBaseElement<
     return text;
   }
 
+  /** Clear this to prevent autofocus */
+  _willFocus?: ReturnType<typeof setTimeout>;
   #isReady = false;
   /** Called when element is added to document (after empty timeout - at the end of call stack) */
   protected gotReady(): void {
@@ -332,10 +379,9 @@ export default abstract class WUPBaseElement<
     this._isStopChanges = true;
     this.gotChanges(null);
     this._isStopChanges = false;
-    this.#readyTimeout = setTimeout(() => {
-      (this.autofocus || this._opts.autoFocus) && this.focus();
-      this.#readyTimeout = undefined;
-    }); // timeout to wait for options
+    if (this.autofocus || this._opts.autoFocus) {
+      this._willFocus = setTimeout(() => this.focus(), 2);
+    }
   }
 
   /** Called when element is removed from document */
@@ -391,7 +437,7 @@ export default abstract class WUPBaseElement<
     if (name.startsWith("w-")) {
       name = name.substring(2);
     }
-    // WARN: observedAttribute must return same colelction as mappedAttributes
+    // WARN: observedAttribute must return same collection as mappedAttributes
     let map = allMappedAttrs.get(this.#ctr); // try to get from cache first
     if (!map) {
       map = this.#ctr.mappedAttributes;
@@ -447,12 +493,15 @@ export default abstract class WUPBaseElement<
   }
   /* eslint-enable max-len */
 
-  /** Inits customEvent & calls dispatchEvent and returns created event
+  /** Inits customEvent & calls dispatchEvent and returns created event; by default `cancelable: false, bubbles: true`
    * @tutorial Troubleshooting
    * * Default event bubbling: el.event.click > el.onclick >>> parent.event.click > parent.onclick etc.
    * * Custom event bubbling: el.$onclick > el.event.$click >>> parent.event.$click otherwise impossible to stop propagation from on['event] of target directly */
-  fireEvent<K extends keyof Events>(type: K, eventInit?: CustomEventInit): Event {
-    const ev = new CustomEvent(type as string, eventInit);
+  // @ts-expect-error - somehow TS doesn't allow  Events[K]["detail"] but it works
+  fireEvent<K extends keyof Events, T extends Events[K]["detail"]>(type: K, eventInit: CustomEventInit<T> = {}): Event {
+    eventInit.cancelable ??= false;
+    eventInit.bubbles ??= true;
+    const ev = new CustomEvent<T>(type as string, eventInit);
 
     let sip = false;
     const isCustom = (type as string).startsWith("$");
@@ -517,8 +566,33 @@ export default abstract class WUPBaseElement<
    * @tutorial Troubleshooting
    * * if element has position `fixed` or `absolute` then returns false */
   includesTarget(e: Event): boolean {
-    const t = e.target;
-    return this === t || this.includes(t);
+    return this.itsMe(e.target);
+  }
+
+  /** Find parent/self according with callback */
+  findParent(callback: (el: HTMLElement) => boolean, options = { bubbleCount: 10 }): HTMLElement | null {
+    let i = options?.bubbleCount || 10; // expected no more 10 parents
+    let el: HTMLElement | null = this;
+    while (--i) {
+      if (callback(el)) {
+        return el;
+      }
+      if (el === document.body) {
+        return null;
+      }
+      el = el.parentElement;
+      if (!el) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /** Returns true if contains pointed element or has itself
+   * @tutorial Troubleshooting
+   * * if element has position `fixed` or `absolute` then returns false */
+  itsMe(el: Element | EventTarget | null): boolean {
+    return this === el || (el instanceof Node && this.contains(el));
   }
 
   /** Returns parsed value according to pointed type OR current value if something wrong;
@@ -573,10 +647,11 @@ export default abstract class WUPBaseElement<
         if (!attrValue) {
           return undefined;
         }
-        let el = document.querySelector(attrValue);
+        const isPrev = attrValue === "prev";
+        let el = isPrev ? this.previousElementSibling : document.querySelector(attrValue);
         if (!el) {
           setTimeout(() => {
-            el = document.querySelector(attrValue);
+            el = isPrev ? this.previousElementSibling : document.querySelector(attrValue);
             if (el) {
               this._opts[propName as keyof TOptions] = el as any;
             } else {
@@ -606,7 +681,8 @@ export default abstract class WUPBaseElement<
     }
   }
 
-  /** Throws unhanled error via empty setTimeout */
+  // NiceToHave: throwError in 90% must be excluded from prod-build
+  /** Throws unhandled error via empty setTimeout */
   throwError(err: string | Error | unknown): void {
     const e = new Error(`${this.tagName}. ${err}`, { cause: err });
     setTimeout(() => {
@@ -614,7 +690,7 @@ export default abstract class WUPBaseElement<
     });
   }
 
-  // /** Forces to recalc render-logic of browser */
+  // /** Forces to re-calc render-logic of browser */
   // refreshRender(): void {
   //   const was = this.style.display;
   //   this.style.display = was === "none" ? "block" : "none";

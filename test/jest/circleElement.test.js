@@ -1,4 +1,4 @@
-import { WUPPopupElement, WUPCircleElement } from "web-ui-pack";
+import { WUPCircleElement } from "web-ui-pack";
 import * as h from "../testHelper";
 
 let nextFrame = async () => {};
@@ -8,7 +8,7 @@ let el;
 const getItems = () => [{ value: 50 }];
 
 beforeEach(() => {
-  !WUPCircleElement && console.error("missed");
+  WUPCircleElement.$use();
   jest.useFakeTimers();
   const a = h.useFakeAnimation();
   nextFrame = a.nextFrame;
@@ -36,8 +36,8 @@ describe("circleElement", () => {
       "w-space": { value: 2 },
       "w-minsize": { value: 10 },
       "w-back": { value: true },
-      "w-hoverhidetimeout": { value: 100 },
-      "w-hovershowtimeout": { value: 107 },
+      "w-hoverclosetimeout": { value: 100 },
+      "w-hoveropentimeout": { value: 107 },
     },
     onCreateNew: (e) => (e.$options.items = getItems()),
   });
@@ -216,7 +216,7 @@ describe("circleElement", () => {
         /** @type CSSStyleDeclaration */
         return {
           getPropertyValue: (s) => {
-            if (s === "--anim-time") {
+            if (s === "--anim-t") {
               return `32ms`; // 3steps
             }
             return orig(elem).getPropertyValue(s);
@@ -228,6 +228,7 @@ describe("circleElement", () => {
     jest.spyOn(window, "matchMedia").mockReturnValue({ matches: false }); // simulate 'no prefers-reduced-motion'
 
     // for single item
+    el = document.body.appendChild(document.createElement("wup-circle"));
     el.$options.items = [{ value: 100 }];
     await nextFrame();
     expect(Array.prototype.slice.call(el.$refItems.children).map((v) => v.outerHTML)).toMatchInlineSnapshot(`
@@ -249,6 +250,7 @@ describe("circleElement", () => {
     `);
 
     // for severals items
+    el = document.body.appendChild(document.createElement("wup-circle"));
     el.$options.items = [{ value: 10 }, { value: 20 }];
     await nextFrame();
     expect(Array.prototype.slice.call(el.$refItems.children).map((v) => v.outerHTML)).toMatchInlineSnapshot(`
@@ -290,6 +292,15 @@ describe("circleElement", () => {
         "<path d="M 89.99693537713449 73.7169804241039 A 3.5 3.5 0 0 1 91.11844059292036 78.44773880656385 A 50 50 0 1 1 44.76428660556784 0.2748825516584219 A 3.5 3.5 0 0 1 48.37717340333367 3.528326543612053 L 48.62146988025118 10.524062332745721 A 3.5 3.5 0 0 1 45.257191107932286 14.313787482932241 A 36 36 0 1 0 79.03680160011521 71.28060508621752 A 3.5 3.5 0 0 1 83.97589134186694 70.14668229574417 Z"></path>",
       ]
     `);
+
+    // no-animation on 2nd render
+    await nextFrame(10);
+    const exp = Array.prototype.slice.call(el.$refItems.children).map((v) => v.outerHTML);
+    el.$options.items = [...el.$options.items];
+    await nextFrame();
+    expect(Array.prototype.slice.call(el.$refItems.children).map((v) => v.outerHTML)).toStrictEqual(exp);
+    await nextFrame();
+    expect(Array.prototype.slice.call(el.$refItems.children).map((v) => v.outerHTML)).toStrictEqual(exp);
   });
 
   test("option minsize", async () => {
@@ -347,8 +358,8 @@ describe("circleElement", () => {
 
   test("tooltips", async () => {
     el.$options.back = false;
-    el.$options.hoverHideTimeout = 50;
-    el.$options.hoverShowTimeout = 200;
+    el.$options.hoverCloseTimeout = 50;
+    el.$options.hoverOpenTimeout = 200;
     el.$options.items = [
       { value: 5, tooltip: "Item 1; value {#}, percent {#%}" },
       {
@@ -388,7 +399,7 @@ describe("circleElement", () => {
     await h.wait(300);
     expect(onTooltip).toBeCalledTimes(2);
     expect(el.querySelector("wup-popup").outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup tooltip="" style="background: red;">Me 24 &amp; 82.75862068965517 %</wup-popup>"`
+      `"<wup-popup tooltip="" style="background: red; display: none;" open="" show="">Me 24 &amp; 82.75862068965517 %</wup-popup>"`
     );
 
     // checking debounce timeouts
@@ -415,27 +426,24 @@ describe("circleElement", () => {
     `); // center of target
 
     // show-hide during the animation
-    const orig = window.getComputedStyle;
-    jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
-      if (elem instanceof WUPPopupElement) {
-        /** @type CSSStyleDeclaration */
-        return { animationDuration: "0.3s", animationName: "WUP-POPUP-a1", borderRadius: "2px" };
-      }
-      return orig(elem);
+    h.setupCssCompute((elt) => elt.tagName === "WUP-POPUP", {
+      animationDuration: "0.3s",
+      transitionDuration: "0.3s",
+      borderRadius: "2px",
     });
 
-    el._opts.hoverShowTimeout = 0;
+    el._opts.hoverOpenTimeout = 0;
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
-    await h.wait(el.$options.hoverHideTimeout);
-    expect(el.querySelector("wup-popup").$isHiding).toBe(true);
+    await h.wait(el.$options.hoverCloseTimeout);
+    expect(el.querySelector("wup-popup").$isClosing).toBe(true);
     el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     await h.wait();
-    expect(el.querySelector("wup-popup").$isHiding).toBe(false);
-    expect(el.querySelector("wup-popup").$isShown).toBe(true);
+    expect(el.querySelector("wup-popup").$isClosing).toBe(false);
+    expect(el.querySelector("wup-popup").$isOpened).toBe(true);
 
     // new items
     onTooltip.mockClear();
-    el.$options.hoverShowTimeout = 200;
+    el.$options.hoverOpenTimeout = 200;
     el.$options.items = [
       { value: 100, tooltip: "Item 1; {#}" },
       { value: 12, tooltip: "Item 2; {#}" },

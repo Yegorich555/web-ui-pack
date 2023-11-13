@@ -11,16 +11,14 @@ import WUPSpin7Element from "./spin7";
 import WUPSpin8Element from "./spin8";
 import styles from "./spinView.scss";
 
-const sideEffect =
-  WUPSpinElement &&
-  WUPSpin2Element &&
-  WUPSpin3Element &&
-  WUPSpin4Element &&
-  WUPSpin5Element &&
-  WUPSpin6Element &&
-  WUPSpin7Element &&
-  WUPSpin8Element;
-!sideEffect && console.error("Missed"); // It's required otherwise import is ignored by webpack
+WUPSpinElement.$use();
+WUPSpin2Element.$use();
+WUPSpin3Element.$use();
+WUPSpin4Element.$use();
+WUPSpin5Element.$use();
+WUPSpin6Element.$use();
+WUPSpin7Element.$use();
+WUPSpin8Element.$use();
 
 export default function SpinView() {
   return (

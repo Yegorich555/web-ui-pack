@@ -6,7 +6,7 @@ import localeInfo from "../objects/localeInfo";
 import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
-import WUPBaseComboControl, { HideCases, ShowCases } from "./baseCombo";
+import WUPBaseComboControl, { MenuCloseCases, MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-time";
@@ -72,7 +72,7 @@ declare global {
       _scrolled: WUPScrolled;
       _value: number;
       goToNext(isNext: boolean): void;
-      reinit(): void;
+      reInit(): void;
     }
   }
 
@@ -113,15 +113,15 @@ export default class WUPTimeControl<
   #ctr = this.constructor as typeof WUPTimeControl;
 
   /** Text announced by screen-readers when button Ok pressed in menu; @defaultValue `Ok` */
-  static $ariaOk = "Ok";
+  static $ariaOk = __wupln("Ok", "aria");
   /** Text announced by screen-readers when button Cancel pressed in menu; @defaultValue `Cancel` */
-  static $ariaCancel = "Cancel";
+  static $ariaCancel = __wupln("Cancel", "aria");
   /** Aria-label for list in menu; @defaultValue `Hours` */
-  static $ariaHours = "Hours";
+  static $ariaHours = __wupln("Hours", "aria");
   /** Aria-label for list in menu; @defaultValue `Minutes` */
-  static $ariaMinutes = "Minutes";
+  static $ariaMinutes = __wupln("Minutes", "aria");
   /** Aria-label for list in menu; @defaultValue `AM PM` */
-  static $ariaHours12 = "AM PM";
+  static $ariaHours12 = __wupln("AM PM", "aria");
 
   // --ctrl-time-icon-img-png-20: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAABiAAAAYgH4krHQAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAYJJREFUOI2l1L9qVUEQBvCf5+JFUBBbJQi2SSW+gLFV88ck2tmaBJE8gen8h/gCWklInzZ5h4BKIkkUtFD7BDGF91jsHLJe7tl70Q+GPTvzzcfOnJ1lMLq4h3V8xFHYLtawEJyRMI/PqIfYAWZKQh28zBLe4RHGcTZsPHzvM95zVIMEG7FfWGwjBSos4ThynvUT5jKx66Uy+jCZiU43zi4+hfNBS2KN1ZbYcsT3Q8tdJz1rK7Mk2MGH4MxX2VFfo9eSVMJvvInvqQpXY7P1D2INNmO9VuFibL7+h+CXWC9VUu1wakjSTUwM4dQVvsdmrEC8hQvYxiuc74tfjvUbaTZraQJKOIPH+IkfuJ/FVkLjLWnQa2mcOkNE4Qo24iD8fW3mSJfxIBxLIwg2aF6bh5G7h9NNcDacx9I4jYobkdPD7f7gi0x0Wbn8TpysmeMng0hVJlpLfVmRrsq5sInwNT3r4anyy2TWSU9LtoepklCOrvT316Rn/wiH2JGuxh3ZD8jxB6xmcQf6l8SZAAAAAElFTkSuQmCC');
   static get $styleRoot(): string {
@@ -130,13 +130,13 @@ export default class WUPTimeControl<
         --ctrl-time-icon-img: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==');
         --ctrl-time-current: #000;
         --ctrl-time-current-bg: #d9f7fd;
-        --ctrl-time-off: var(--ctrl-err);
+        --ctrl-time-off-text: var(--ctrl-err);
         --ctrl-time-off-bg: none;
       }
       [wupdark] {
         --ctrl-time-current: #25a1b6;
         --ctrl-time-current-bg: #fff1;
-        --ctrl-time-off: var(--ctrl-err);
+        --ctrl-time-off-text: var(--ctrl-err);
         --ctrl-time-off-bg: none;
       }`;
   }
@@ -152,7 +152,6 @@ export default class WUPTimeControl<
           width: 2em;
           height: 2em;
           border-radius: 50%;
-          //box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
           box-shadow: 0 0 3px 1px var(--ctrl-focus);
     `;
     return `${super.$style}
@@ -224,8 +223,8 @@ export default class WUPTimeControl<
       }
       :host > [menu] li[disabled] {
         border-radius: 999px;
-        color: var(--ctrl-time-off);
-        --ctrl-focus: var(--ctrl-time-off);
+        color: var(--ctrl-time-off-text);
+        --ctrl-focus: var(--ctrl-time-off-text);
         background-color: var(--ctrl-time-off-bg);
       }
       :host [group] {
@@ -242,7 +241,7 @@ export default class WUPTimeControl<
         border: none;
         border-radius: 0;
         padding: 0; margin: 0;
-        background: var(--base-btn3-bg);
+        background: var(--popup-bg);
       }
       :host [group] > button:first-child {
         --ctrl-icon-img: var(--wup-icon-check);
@@ -290,10 +289,12 @@ export default class WUPTimeControl<
     validationRules: {
       ...WUPBaseComboControl.$defaults.validationRules,
       min: (v, setV, c) =>
-        (v === undefined || v < setV) && `Min value is ${setV.format((c as WUPTimeControl)._opts.format)}`,
+        (v === undefined || v < setV) &&
+        __wupln(`Min value is ${setV.format((c as WUPTimeControl)._opts.format)}`, "validation"),
       max: (v, setV, c) =>
-        (v === undefined || v > setV) && `Max value is ${setV.format((c as WUPTimeControl)._opts.format)}`,
-      exclude: (v, fn) => (v === undefined || fn.test(v)) && "This value is disabled",
+        (v === undefined || v > setV) &&
+        __wupln(`Max value is ${setV.format((c as WUPTimeControl)._opts.format)}`, "validation"),
+      exclude: (v, fn) => (v === undefined || fn.test(v)) && __wupln("This value is disabled", "validation"),
     },
     step: 1,
     format: "",
@@ -419,7 +420,7 @@ export default class WUPTimeControl<
         this._selectedMenuItem = undefined; // otherwise selection is cleared after popup-close
         this._focusedMenuItem && this.focusMenuItem(next.items[0]);
       }
-      !this.#isMenuInitPhase && this.$isShown && this.disableItems();
+      !this.#isMenuInitPhase && this.$isOpened && this.disableItems();
     };
 
     const drows = Math.round(rows / 2) - 1;
@@ -461,7 +462,7 @@ export default class WUPTimeControl<
       },
     });
     lh.goToNext = (v) => lh._scrolled.goTo(v);
-    lh.reinit = () => {
+    lh.reInit = () => {
       lh._scrolled.options.pages!.current = getCurHours();
       lh._scrolled.init();
     };
@@ -497,7 +498,7 @@ export default class WUPTimeControl<
       },
     });
     lm.goToNext = (v) => lm._scrolled.goTo(v);
-    lm.reinit = () => {
+    lm.reInit = () => {
       lm._scrolled.options.pages!.current = getCurMinutes();
       lm._scrolled.init();
     };
@@ -523,6 +524,7 @@ export default class WUPTimeControl<
             return null;
           }
           lh12._value = next.index;
+          // AM/PM in other cultures and do we need to use __wupln ???
           const txt = (lower ? ["pm", "am", "pm", "am"] : ["PM", "AM", "PM", "AM"])[v];
           const item = append(lh12, txt, false, v);
           if (v === 0 || v === 3) {
@@ -586,11 +588,11 @@ export default class WUPTimeControl<
     );
   }
 
-  protected override async goShowMenu(
-    showCase: ShowCases,
+  protected override async goOpenMenu(
+    openCase: MenuOpenCases,
     e?: MouseEvent | FocusEvent | null
   ): Promise<WUPPopupElement | null> {
-    const r = await super.goShowMenu(showCase, e);
+    const r = await super.goOpenMenu(openCase, e);
 
     this.#valueBeforeMenu = this.$value;
     this.#lastInputChanged = false;
@@ -598,8 +600,8 @@ export default class WUPTimeControl<
     if (this.$refMenuLists && v) {
       this.#isMenuInitPhase = true; // to avoid calling trySetaValue on reRender
       const menuV = this.getMenuValue();
-      menuV.hours !== v.hours && this.$refMenuLists[0].reinit();
-      menuV.minutes !== v.minutes && this.$refMenuLists[1].reinit();
+      menuV.hours !== v.hours && this.$refMenuLists[0].reInit();
+      menuV.minutes !== v.minutes && this.$refMenuLists[1].reInit();
       this.$refMenuLists[2]?._scrolled.goTo(v.isPM ? 2 : 1, false);
       this.#isMenuInitPhase = false;
     }
@@ -628,7 +630,7 @@ export default class WUPTimeControl<
     if (isOk) {
       this.selectValue(this.getMenuValue());
     } else {
-      setTimeout(() => this.goHideMenu(HideCases.OnPressEsc, e)); // without timeout it handles click by listener and opens again
+      setTimeout(() => this.goCloseMenu(MenuCloseCases.OnPressEsc, e)); // without timeout it handles click by listener and opens again
     }
   }
 
@@ -644,11 +646,14 @@ export default class WUPTimeControl<
     next !== null && this.trySetValue();
   }
 
-  protected override goHideMenu(hideCase: HideCases, e?: MouseEvent | FocusEvent | null | undefined): Promise<boolean> {
-    hideCase === HideCases.OnPressEsc &&
+  protected override goCloseMenu(
+    closeCase: MenuCloseCases,
+    e?: MouseEvent | FocusEvent | null | undefined
+  ): Promise<boolean> {
+    closeCase === MenuCloseCases.OnPressEsc &&
       this._opts.menuButtonsOff &&
       this.setValue(this.#valueBeforeMenu, SetValueReasons.clear);
-    return super.goHideMenu(hideCase, e);
+    return super.goCloseMenu(closeCase, e);
   }
 
   protected override valueToInput(v: ValueType | undefined): string {
@@ -740,14 +745,14 @@ export default class WUPTimeControl<
   }
 
   protected override gotKeyDown(e: KeyboardEvent): void {
-    const wasOpen = this.$isShown;
+    const wasOpen = this.$isOpened;
     const isExtraKey = e.altKey || e.shiftKey || e.ctrlKey;
 
     // handle Enter key when menu is open
     if (!isExtraKey && wasOpen && e.key === "Enter") {
       e.preventDefault();
       if (this.#lastInputChanged || !this.$refButtonOk) {
-        this.goHideMenu(HideCases.OnPressEnter);
+        this.goCloseMenu(MenuCloseCases.OnPressEnter);
         this._inputError && this.resetInputValue(); // it will show err message
       } else if (!this.$refButtonOk!.disabled) {
         setTimeout(() =>

@@ -58,7 +58,7 @@ describe("helper.animateDropdown", () => {
     await nextFrame(5);
     expect(isResolved).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<div><button style="z-index: 5;"></button><ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul></div>"`
+      `"<div><button style="z-index: 5;"></button><ul><li>Item 1</li><li>Item 2</li></ul></div>"`
     );
 
     // close
@@ -74,7 +74,7 @@ describe("helper.animateDropdown", () => {
     await nextFrame(5);
     expect(isResolved).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<div><button style="z-index: 5;"></button><ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul></div>"`
+      `"<div><button style="z-index: 5;"></button><ul><li>Item 1</li><li>Item 2</li></ul></div>"`
     );
 
     // open again
@@ -90,7 +90,7 @@ describe("helper.animateDropdown", () => {
     await nextFrame(5);
     expect(isResolved).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<div><button style="z-index: 5;"></button><ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul></div>"`
+      `"<div><button style="z-index: 5;"></button><ul><li>Item 1</li><li>Item 2</li></ul></div>"`
     );
 
     // close again
@@ -106,7 +106,7 @@ describe("helper.animateDropdown", () => {
     await nextFrame(5);
     expect(isResolved).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<div><button style="z-index: 5;"></button><ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul></div>"`
+      `"<div><button style="z-index: 5;"></button><ul><li>Item 1</li><li>Item 2</li></ul></div>"`
     );
   });
 
@@ -151,7 +151,7 @@ describe("helper.animateDropdown", () => {
     expect(isResolvedOpen2).toBe(true);
     expect(isResolvedClose).toBe(false);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<div><button style="z-index: 5;"></button><ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul></div>"`
+      `"<div><button style="z-index: 5;"></button><ul><li>Item 1</li><li>Item 2</li></ul></div>"`
     );
   });
 
@@ -163,7 +163,7 @@ describe("helper.animateDropdown", () => {
     );
     await nextFrame(5);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<div><button style="z-index: 5;"></button><ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul></div>"`
+      `"<div><button style="z-index: 5;"></button><ul><li>Item 1</li><li>Item 2</li></ul></div>"`
     );
 
     anim({ isHide: true, isVertical: true });
@@ -173,7 +173,7 @@ describe("helper.animateDropdown", () => {
     );
     await nextFrame(5);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<div><button style="z-index: 5;"></button><ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul></div>"`
+      `"<div><button style="z-index: 5;"></button><ul><li>Item 1</li><li>Item 2</li></ul></div>"`
     );
   });
 
@@ -190,7 +190,7 @@ describe("helper.animateDropdown", () => {
     );
     await nextFrame(5);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<div><button style="z-index: 5;"></button><ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul></div>"`
+      `"<div><button style="z-index: 5;"></button><ul><li>Item 1</li><li>Item 2</li></ul></div>"`
     );
 
     anim({ isHide: true, isVertical: false });
@@ -200,7 +200,7 @@ describe("helper.animateDropdown", () => {
     );
     await nextFrame(5);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<div><button style="z-index: 5;"></button><ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul></div>"`
+      `"<div><button style="z-index: 5;"></button><ul><li>Item 1</li><li>Item 2</li></ul></div>"`
     );
   });
 
@@ -239,7 +239,7 @@ describe("helper.animateDropdown", () => {
     p.stop();
     await nextFrame();
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<button style="z-index: 5;"></button><ul style=""><li style="">Item 1</li><li style="">Item 2</li></ul>"`
+      `"<button style="z-index: 5;"></button><ul><li>Item 1</li><li>Item 2</li></ul>"`
     );
   });
 });
