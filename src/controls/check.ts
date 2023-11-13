@@ -109,5 +109,3 @@ export default class WUPCheckControl<
 }
 
 customElements.define(tagName, WUPCheckControl);
-
-// todo add logic for checkbox-tree:
