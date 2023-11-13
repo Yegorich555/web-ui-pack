@@ -206,6 +206,12 @@ WUP-MODAL::-webkit-scrollbar-track-piece:horizontal:end {
       WUP-MODAL[show] {
         transform: none;
       }
+      WUP-MODAL[hide] {
+        opacity: 0!important;
+        pointer-events: none!important;
+        user-select: none!important;
+        touch-action: none!important;
+      }
       @media (max-width: 600px) {
         WUP-MODAL {
           --modal-margin: 0px;

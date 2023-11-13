@@ -599,13 +599,13 @@ describe("modalElement", () => {
     );
     expect(m2.$refFade.outerHTML).toMatchInlineSnapshot(`"<div show="" class="wup-modal-fade"></div>"`);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show="" style="opacity: 0;"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID">..</h2></wup-modal>"`
+      `"<wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show="" hide=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID">..</h2></wup-modal>"`
     );
     expect(m2.outerHTML).toMatchInlineSnapshot(
       `"<wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h3 id="sID">...</h3></wup-modal>"`
     );
     expect(document.body.outerHTML).toMatchInlineSnapshot(
-      `"<body class="wup-modal-open"><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show="" style="opacity: 0;"><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID">..</h2></wup-modal><div class="wup-modal-fade" show="" style="display: none;"></div><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h3 id="sID">...</h3></wup-modal><div show="" class="wup-modal-fade"></div></body>"`
+      `"<body class="wup-modal-open"><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show="" hide=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h2 id="sID">..</h2></wup-modal><div class="wup-modal-fade" show="" style="display: none;"></div><wup-modal open="" tabindex="-1" aria-modal="true" aria-labelledby="sID" w-placement="center" show=""><button type="button" aria-label="close" wup-icon="" close="" data-close="modal"></button><h3 id="sID">...</h3></wup-modal><div show="" class="wup-modal-fade"></div></body>"`
     );
   });
 
