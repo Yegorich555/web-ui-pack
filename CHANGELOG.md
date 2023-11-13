@@ -8,6 +8,10 @@
 
 - [ModalElement](src/modalElement.ts.ts). _Wrong behavior on confirmModal + replace: true + click outside on previous/hidden modal_
 
+---
+
+---
+
 ## 1.0.0 (Nov 13, 2023)
 
 ### New Features
