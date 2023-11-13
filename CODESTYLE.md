@@ -49,10 +49,13 @@ useBuiltinStyle(
 // textControl.tsx
 import { WUPTextControl } from "web-ui-pack";
 
-// #1 change defaults
+// #1 register control
+WUPTextControl.$use();
+
+// #2 change defaults
 WUPTextControl.$defaults.clearButton = true;
 
-// #2.0 override messages according to required language
+// #3.0 override messages according to required language
 const defVld = { ...WUPTextControl.$defaults.validationRules };
 const vld = WUPTextControl.$defaults.validationRules;
 // rule "min"
@@ -60,11 +63,11 @@ vld.min = (v, setV, c) => defVld.min.call(c, v, setV, c) && __wupln(`Min length 
 // rule "email"
 vld.email = (v, setV) => setV && (!v || !v.includes("@")) && __wupln("Invalid email address", "validation");
 
-// #2.1 override ariaMessages according to required language
+// #3.1 override ariaMessages according to required language
 WUPTextControl.$ariaError = __wupln("Error for", "aria");
 // check also other props started with `$aria...`: `WUPTextControl.$aria...`
 
-// #3 extend default validations
+// #4 extend default validations
 declare global {
   namespace WUP.Text {
     interface ValidityMap {
@@ -110,32 +113,32 @@ interface Props extends Partial<WUP.Text.Options> {
 export class TextControl extends React.Component<Props> {
   domEl = {} as WUPTextControl;
 
-  /* Apply React props to $options */
-  updateOptions(nextProps: Props | null): void {
-    Object.assign(this.domEl.$options, this.props);
-    this.domEl.$onChange = this.props.onChange;
-    if (!nextProps || nextProps.initValue !== this.props.initValue) {
-      this.domEl.$initValue = this.props.initValue; // update only if value changed
-    }
-    if (!nextProps || nextProps.value !== this.props.value) {
-      this.domEl.$value = this.props.value; // update only if value changed
-    }
-  }
-
   /* Called every time when DOM element is appended to document */
   componentDidMount(): void {
-    this.updateOptions(null);
+    this.updateOptions(this.props, true);
   }
 
   /* Called every time when properties are changed */
-  shouldComponentUpdate(nextProps: Readonly<Props>): boolean {
+  shouldComponentUpdate(nextProps: Readonly<P>): boolean {
     const isChanged = this.props !== nextProps;
-    isChanged && this.updateOptions(nextProps);
-    // update render only if className is changed otherwise apply props directly to options
+    isChanged && this.updateOptions(nextProps, false);
+    // update render only if className is changed otherwise apply props directly for options
     return this.props.className !== nextProps.className;
   }
 
-  /* Called init and every time when shouldComponentUpdate returns `true`*/
+  /* Apply React props for $options */
+  updateOptions(nextProps: P, isInit: boolean): void {
+    Object.assign(this.domEl.$options, nextProps, { children: null });
+    this.domEl.$onChange = nextProps.onChange;
+    if (isInit || nextProps.value !== this.props.value) {
+      this.domEl.$value = nextProps.value; // update only if value changed
+    }
+    if (isInit || nextProps.initValue !== this.props.initValue) {
+      this.domEl.$initValue = nextProps.initValue; // update only if value changed
+    }
+  }
+
+  /* Called on init & every time when shouldComponentUpdate returns `true`*/
   render(): React.ReactNode {
     return (
       <wup-text
