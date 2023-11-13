@@ -35,6 +35,7 @@
   - _Sometimes weird blink & poor render during the animation on focus_
   - _Button clear changes control size on hover if parent is flexbox_
 - [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). _storageKey + items as Promise don't work together_
+- [CircleElement](src/circleElement.ts). _Update options/items colors triggers animated re-render with blink_
 
 ### BREAKING CHANGES
 

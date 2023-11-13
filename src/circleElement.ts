@@ -4,7 +4,7 @@ import { PopupOpenCases } from "./popup/popupElement.types";
 import animate from "./helpers/animate";
 import { mathScaleValue, rotate } from "./helpers/math";
 import { parseMsTime } from "./helpers/styleHelpers";
-import { onEvent } from "./indexHelpers";
+import onEvent from "./helpers/onEvent";
 
 // example: https://medium.com/@pppped/how-to-code-a-responsive-circular-percentage-chart-with-svg-and-css-3632f8cd7705
 // similar https://github.com/w8r/svg-arc-corners
@@ -221,11 +221,13 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     this._opts.items ??= [];
     super.gotChanges(propsChanged);
 
+    let skipAnim = false;
     if (propsChanged) {
-      this.removeChildren.call(this.$refItems); // NiceToHave: instead of re-init update/remove required children + possible to deprecate custom observed attrs here
+      this.removeChildren.call(this.$refItems);
       this.removeChildren.call(this.$refSVG); // clean before new render
+      skipAnim = true; // renderNew without animation
     }
-    this.gotRenderItems();
+    this.renderItems(skipAnim);
   }
 
   /** Returns array of render-angles according to pointed arguments */
@@ -303,7 +305,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   }
 
   _animation?: WUP.PromiseCancel<boolean>;
-  protected gotRenderItems(): void {
+  protected renderItems(skipAnim?: boolean): void {
     this._animation?.stop(false);
 
     const angleMin = this._opts.from;
@@ -313,7 +315,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     const { items, minSize: minsize, corner, width } = this._opts;
 
     const style = getComputedStyle(this);
-    const animTime = parseMsTime(style.getPropertyValue("--anim-t"));
+    const animTime = skipAnim ? 0 : parseMsTime(style.getPropertyValue("--anim-t"));
 
     // calc min possible segment size so cornerR can fit
     const inR = radius - width + corner * width;
@@ -358,7 +360,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         this._animation = animate(c.angleFrom, c.angleTo, c.ms, (animV) => {
           path.setAttribute("d", this.drawArc(c.angleFrom, animV));
         });
-        await this._animation.catch().finally(() => delete this._animation);
+        !skipAnim && (await this._animation.catch().finally(() => delete this._animation));
       }
       this.useTooltip(hasTooltip);
     })();

@@ -228,6 +228,7 @@ describe("circleElement", () => {
     jest.spyOn(window, "matchMedia").mockReturnValue({ matches: false }); // simulate 'no prefers-reduced-motion'
 
     // for single item
+    el = document.body.appendChild(document.createElement("wup-circle"));
     el.$options.items = [{ value: 100 }];
     await nextFrame();
     expect(Array.prototype.slice.call(el.$refItems.children).map((v) => v.outerHTML)).toMatchInlineSnapshot(`
@@ -249,6 +250,7 @@ describe("circleElement", () => {
     `);
 
     // for severals items
+    el = document.body.appendChild(document.createElement("wup-circle"));
     el.$options.items = [{ value: 10 }, { value: 20 }];
     await nextFrame();
     expect(Array.prototype.slice.call(el.$refItems.children).map((v) => v.outerHTML)).toMatchInlineSnapshot(`
@@ -290,6 +292,15 @@ describe("circleElement", () => {
         "<path d="M 89.99693537713449 73.7169804241039 A 3.5 3.5 0 0 1 91.11844059292036 78.44773880656385 A 50 50 0 1 1 44.76428660556784 0.2748825516584219 A 3.5 3.5 0 0 1 48.37717340333367 3.528326543612053 L 48.62146988025118 10.524062332745721 A 3.5 3.5 0 0 1 45.257191107932286 14.313787482932241 A 36 36 0 1 0 79.03680160011521 71.28060508621752 A 3.5 3.5 0 0 1 83.97589134186694 70.14668229574417 Z"></path>",
       ]
     `);
+
+    // no-animation on 2nd render
+    await nextFrame(10);
+    const exp = Array.prototype.slice.call(el.$refItems.children).map((v) => v.outerHTML);
+    el.$options.items = [...el.$options.items];
+    await nextFrame();
+    expect(Array.prototype.slice.call(el.$refItems.children).map((v) => v.outerHTML)).toStrictEqual(exp);
+    await nextFrame();
+    expect(Array.prototype.slice.call(el.$refItems.children).map((v) => v.outerHTML)).toStrictEqual(exp);
   });
 
   test("option minsize", async () => {
