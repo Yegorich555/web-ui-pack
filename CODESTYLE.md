@@ -49,10 +49,13 @@ useBuiltinStyle(
 // textControl.tsx
 import { WUPTextControl } from "web-ui-pack";
 
-// #1 change defaults
+// #1 register control
+WUPTextControl.$use();
+
+// #2 change defaults
 WUPTextControl.$defaults.clearButton = true;
 
-// #2.0 override messages according to required language
+// #3.0 override messages according to required language
 const defVld = { ...WUPTextControl.$defaults.validationRules };
 const vld = WUPTextControl.$defaults.validationRules;
 // rule "min"
@@ -60,11 +63,11 @@ vld.min = (v, setV, c) => defVld.min.call(c, v, setV, c) && __wupln(`Min length 
 // rule "email"
 vld.email = (v, setV) => setV && (!v || !v.includes("@")) && __wupln("Invalid email address", "validation");
 
-// #2.1 override ariaMessages according to required language
+// #3.1 override ariaMessages according to required language
 WUPTextControl.$ariaError = __wupln("Error for", "aria");
 // check also other props started with `$aria...`: `WUPTextControl.$aria...`
 
-// #3 extend default validations
+// #4 extend default validations
 declare global {
   namespace WUP.Text {
     interface ValidityMap {
