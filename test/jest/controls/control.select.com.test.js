@@ -648,7 +648,6 @@ describe("control.select common", () => {
   });
 
   test("tryScroll", async () => {
-    const { nextFrame } = h.useFakeAnimation();
     const ul = document.body.appendChild(document.createElement("ul"));
     const li = ul.appendChild(document.createElement("li"));
     const li2 = ul.appendChild(document.createElement("li2"));
@@ -662,51 +661,8 @@ describe("control.select common", () => {
     // all at once - filtered
     el.tryScrollTo(li);
     el.tryScrollTo(li2);
-    await nextFrame();
-    expect(li._scrolled).toBeCalledTimes(1);
-    expect(li2._scrolled).toBeCalledTimes(0);
-
-    // after debounce 1ms
-    jest.clearAllMocks();
-    el.tryScrollTo(li);
-    await h.wait(1);
-    el.tryScrollTo(li2);
-    await nextFrame();
-    await nextFrame();
     expect(li._scrolled).toBeCalledTimes(1);
     expect(li2._scrolled).toBeCalledTimes(1);
-
-    // simulate when parentScrollTop is different
-    let scrollTop = 0;
-    jest.spyOn(ul, "scrollTop", "get").mockImplementation(() => {
-      scrollTop += 5;
-      return scrollTop;
-    });
-
-    jest.clearAllMocks();
-    el.tryScrollTo(li);
-    await h.wait(1);
-    expect(li._scrolled).toBeCalledTimes(1);
-    await nextFrame();
-    expect(li._scrolled).toBeCalledTimes(2);
-    await nextFrame();
-    expect(li._scrolled).toBeCalledTimes(3);
-
-    jest.clearAllMocks();
-    el.tryScrollTo(li2);
-    await h.wait(1);
-    expect(li2._scrolled).toBeCalledTimes(1);
-    await nextFrame();
-    expect(li2._scrolled).toBeCalledTimes(2);
-    expect(li._scrolled).toBeCalledTimes(0);
-
-    jest.spyOn(ul, "scrollTop", "get").mockImplementation(() => scrollTop);
-    await nextFrame();
-    await nextFrame();
-    await nextFrame();
-    await nextFrame();
-    expect(li2._scrolled).toBeCalledTimes(3);
-    expect(li._scrolled).toBeCalledTimes(0);
 
     // case when scrollIntoViewIfNeeded doesn't exist on component
     jest.clearAllMocks();

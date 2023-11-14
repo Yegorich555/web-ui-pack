@@ -327,30 +327,10 @@ export default abstract class WUPBaseComboControl<
     this._focusedMenuItem = next;
   }
 
-  #scrolltid?: ReturnType<typeof setTimeout>;
-  #scrollFrame?: ReturnType<typeof requestAnimationFrame>;
   /** Scroll to element if previous scroll is not in processing (debounce by empty timeout) */
   tryScrollTo(el: HTMLElement): void {
-    if (this.#scrolltid) {
-      return;
-    }
-    this.#scrolltid = setTimeout(() => {
-      this.#scrolltid = undefined;
-      this.#scrollFrame && window.cancelAnimationFrame(this.#scrollFrame); // cancel previous scrolling
-      this.#scrollFrame = undefined;
-      const act = (): void => {
-        const p = el.parentElement!; // WARN: expected that parent is scrollable
-        const prev = p.scrollTop;
-        const ifneed = (el as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
-        ifneed ? ifneed.call(el, false) : el.scrollIntoView({ behavior: "instant" as ScrollBehavior });
-        if (p.scrollTop !== prev) {
-          this.#scrollFrame = window.requestAnimationFrame(act); // try scroll again later because during the popup animation scrolling can be wrong
-        } else {
-          this.#scrollFrame = undefined;
-        }
-      };
-      act();
-    });
+    const scroll = (el as any).scrollIntoViewIfNeeded as undefined | ((center?: boolean) => void);
+    scroll ? scroll.call(el, false) : el.scrollIntoView({ behavior: "instant" as ScrollBehavior });
   }
 
   _selectedMenuItem?: HTMLElement | null;
