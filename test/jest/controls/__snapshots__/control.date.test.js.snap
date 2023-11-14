@@ -396,6 +396,7 @@ padding:0;}
         --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
+        flex: 1;
         margin: var(--base-margin) 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
@@ -535,9 +536,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
         WUP-DATE {
-          contain: style;
           cursor: text;
-          flex: 1;
         }
         WUP-DATE label &gt; span {
           width: 100%;

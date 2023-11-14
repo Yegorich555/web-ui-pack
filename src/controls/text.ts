@@ -137,9 +137,7 @@ export default class WUPTextControl<
   static get $style(): string {
     return `${super.$style}
         :host {
-          contain: style;
           cursor: text;
-          flex: 1;
         }
         :host label > span {
           width: 100%;
