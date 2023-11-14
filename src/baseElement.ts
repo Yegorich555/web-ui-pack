@@ -690,6 +690,11 @@ export default abstract class WUPBaseElement<
     });
   }
 
+  /** Removes empty attr [style] */
+  removeEmptyStyle(): void {
+    !this.getAttribute("style") && this.removeAttribute("style");
+  }
+
   // /** Forces to re-calc render-logic of browser */
   // refreshRender(): void {
   //   const was = this.style.display;

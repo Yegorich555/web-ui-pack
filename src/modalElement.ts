@@ -542,7 +542,7 @@ export default class WUPModalElement<
       this.$refFade = undefined;
       const p = this._openedModals[this._mid! - 2];
       p.$refFade!.style.display = "";
-      !p.$refFade!.getAttribute("style") && p.$refFade!.removeAttribute("style");
+      this.removeEmptyStyle.call(p.$refFade!);
       p.removeAttribute("hide");
     }
     this._openedModals.splice(this._mid! - 1, 1); // self remove from array

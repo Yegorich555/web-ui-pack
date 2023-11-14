@@ -189,7 +189,7 @@ export default class WUPDropdownElement<
     }
     const p = WUPPopupElement.prototype.goClose.call(this.$refPopup, closeCase, ev).finally(() => {
       t.style.zIndex = "";
-      !t.getAttribute("style") && t.removeAttribute("style");
+      this.removeEmptyStyle.call(t);
     });
     const t = this.$refPopup.$options.target!;
     t.setAttribute("aria-expanded", false);
