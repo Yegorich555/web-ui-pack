@@ -638,7 +638,7 @@ describe("popupElement", () => {
 
     await nextFrame();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px);" position="top" open="" w-animation="drawer"><div></div><div></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px);" position="top" w-animation="drawer"><div></div><div></div></wup-popup>"`
     );
     await h.wait();
     await nextFrame();

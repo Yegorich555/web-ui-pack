@@ -623,7 +623,14 @@ export default class WUPPopupElement<
     immediately?: boolean
   ): void {
     this._stopAnimation?.call(this);
-    !immediately && this.goAnimate(this.animTime, true);
+    !immediately &&
+      this.goAnimate(this.animTime, true).then((isEnd) => {
+        if (isEnd) {
+          const fix = this._whenClose;
+          this.resetState(); // custom animation can finish faster so need to reset state immediately
+          this._whenClose = fix; // WARN: event $close fired after strict this.animTime
+        }
+      });
   }
 
   /** Returns `target.getBoundingClientRect()` Use function to change placement logic based on target-rect

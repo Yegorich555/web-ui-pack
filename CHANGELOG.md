@@ -8,6 +8,7 @@
 ---
 
 - [ModalElement](src/modalElement.ts.ts). _Wrong behavior on confirmModal + replace: true + click outside on previous/hidden modal_
+- [PopupElement](src/popup/popupElement.ts). _Popup blinks on fast open+close_
 - **Controls**
   - _Missed css-var `--base-margin`_
   - _Missed style `flex: 1` for switch/checkbox_ controls
