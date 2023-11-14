@@ -276,6 +276,8 @@ export default abstract class WUPBaseControl<
     // NiceToHave: change icons to fonts: wupfont: in this case possible to improve btnClear: hover
   }
 
+  // todo change margin 20px to --base-margin;
+
   /** StyleContent related to component */
   static get $style(): string {
     // WARN: 'contain:style' is tricky rule
@@ -284,7 +286,7 @@ export default abstract class WUPBaseControl<
         --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
-        margin: 20px 0;
+        margin: var(--base-margin) 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
         color: var(--ctrl-text);

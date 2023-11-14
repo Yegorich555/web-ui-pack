@@ -7,6 +7,7 @@
 ---
 
 - [ModalElement](src/modalElement.ts.ts). _Wrong behavior on confirmModal + replace: true + click outside on previous/hidden modal_
+- **Controls**. _Missed css-var `--base-margin`_
 
 ---
 
