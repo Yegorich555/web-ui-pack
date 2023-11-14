@@ -607,7 +607,7 @@ describe("popupElement", () => {
     el.$open();
     expect(el.$isOpened).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px);" position="top" open="" w-animation="drawer"><div></div><div></div></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px); opacity: 0;" position="top" open="" w-animation="drawer"><div></div><div></div></wup-popup>"`
     );
 
     await nextFrame();
@@ -1657,18 +1657,18 @@ describe("popupElement", () => {
     });
     el.$open();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px);" position="top" show="" open=""></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px); opacity: 0;" position="top" show="" open=""></wup-popup>"`
     );
 
     el.$close();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px);" position="top" open=""></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px); opacity: 0;" position="top" open=""></wup-popup>"`
     );
 
     el.$open();
     await h.wait(1);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px);" position="top" open="" show=""></wup-popup>"`
+      `"<wup-popup style="opacity: 0; transform: translate(190px, 100px);" position="top" open="" show=""></wup-popup>"`
     );
 
     // checking the same with attach
@@ -1717,7 +1717,7 @@ describe("popupElement", () => {
     el.$open();
     await h.wait(1);
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup style="transform: translate(190px, 100px);" position="top" open="" show=""></wup-popup>"`
+      `"<wup-popup style="transform: translate(190px, 100px); opacity: 0;" position="top" open="" show=""></wup-popup>"`
     );
     jest.advanceTimersByTime(200);
     const v = { ...trg.getBoundingClientRect() };

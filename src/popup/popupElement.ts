@@ -529,6 +529,10 @@ export default class WUPPopupElement<
   /** Required to stop previous animations/timeouts (for case when option animation is changed) */
   _stopAnimation?: () => void;
   protected goAnimate(animTime: number, isHide: boolean): Promise<boolean> {
+    if (!isHide && animTime) {
+      this.style.opacity = "0";
+      setTimeout(() => (this.style.opacity = ""), 2); // such logic allows to calc layout & scroll to element & then animate properly
+    }
     this._isStopChanges = true;
     if (this._opts.animation === PopupAnimations.drawer) {
       this.setAttribute("w-animation", "drawer");
