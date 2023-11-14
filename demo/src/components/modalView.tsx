@@ -126,7 +126,7 @@ export default function ModalView() {
           </button>
           <wup-modal w-target="prev" w-placement="top">
             <h2>Modal with placement: top</h2>
-            <div>{bigContent}</div>
+            <div>{smallContent}</div>
             <SameFooter />
           </wup-modal>
           {/*  */}
@@ -135,7 +135,7 @@ export default function ModalView() {
           </button>
           <wup-modal w-target="prev" w-placement="center">
             <h2>Modal with placement: center</h2>
-            <div>{bigContent}</div>
+            <div>{smallContent}</div>
             <SameFooter />
           </wup-modal>
           {/*  */}
@@ -211,6 +211,15 @@ const confirmHookHTML = `html
 </button>
 `;
 
+const smallContentRaw = [
+  `Let's explain the popup element. During the 10+ years, I've worked with 10s libraries included popup. Every library has huge amount of issues!`,
+  `* almost with every library impossible to place popup inside parent with position relative. In web-ui-pack it's possible.`,
+  `* almost in every library popup time to time is wrongly positioned when there is not enough space (sometimes outside the viewport). In web-ui-pack it works like a charm.`,
+  `* most of popups are extremely difficult to position/resize on the fly, or even impossible to set position priorities
+when there is not enough space for the popup at the first pointed position. In web-ui-pack it's very flexible!`,
+];
+const smallContent = smallContentRaw.map((s) => s.replace(/\n/g, " ")).join("\r\n\r\n");
+
 const bigContent = [
   `I've been in development since 2010. And nowadays, I'm really impressed that web browsers don't suggest good
 elements with rich functionality, perfect styles and easy customizable at the same time.
@@ -245,11 +254,7 @@ then developers can change styles completely with a single custom class without 
 
   `THE LIBRARY WEB-UI-PACK FITS ALL REQUIREMENTS ABOVE!`,
 
-  `Let's explain the popup element. During the 10+ years, I've worked with 10s libraries included popup. Every library has huge amount of issues!`,
-  `* almost with every library impossible to place popup inside parent with position relative. In web-ui-pack it's possible.`,
-  `* almost in every library popup time to time is wrongly positioned when there is not enough space (sometimes outside the viewport). In web-ui-pack it works like a charm.`,
-  `* most of popups are extremely difficult to position/resize on the fly, or even impossible to set position priorities
-when there is not enough space for the popup at the first pointed position. In web-ui-pack it's very flexible`,
+  ...smallContentRaw,
 
   `So every element/helper is the result of many years of experience collected in one place to help the web community develop faster, easier and better overall.
 This library is a wonderful solution that must fit the requirements of every developer, every user, and the highest standards nowadays!`,
