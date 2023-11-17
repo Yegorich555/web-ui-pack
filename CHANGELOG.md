@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD024 -->
 # Changelog
 
-## 1.0.1 (\_\_\_)
+## 1.0.1 (Nov 17, 2023)
 
 ### Fixes
 
