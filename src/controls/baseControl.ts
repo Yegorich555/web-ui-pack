@@ -284,7 +284,8 @@ export default abstract class WUPBaseControl<
         --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
-        margin: 20px 0;
+        flex: 1;
+        margin: var(--base-margin) 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
         color: var(--ctrl-text);

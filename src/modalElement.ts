@@ -314,6 +314,12 @@ export default class WUPModalElement<
       :host[show] {
         transform: none;
       }
+      :host[hide] {
+        opacity: 0!important;
+        pointer-events: none!important;
+        user-select: none!important;
+        touch-action: none!important;
+      }
       @media (max-width: 600px) {
         :host {
           --modal-margin: 0px;
@@ -481,9 +487,7 @@ export default class WUPModalElement<
       this.$refFade ??= (isReplace ? document.body : p).appendChild(document.createElement("div")); // append to parent to hide modal parent
       this.$refFade.setAttribute("show", ""); // WARN without timeout to show immediately
       p.$refFade!.style.display = "none";
-      if (isReplace) {
-        p.style.opacity = "0"; // hide such modal
-      }
+      isReplace && p.setAttribute("hide", ""); // hide such modal
     }
 
     this.$refFade.className = this.#ctr.$classFade;
@@ -538,9 +542,8 @@ export default class WUPModalElement<
       this.$refFade = undefined;
       const p = this._openedModals[this._mid! - 2];
       p.$refFade!.style.display = "";
-      !p.$refFade!.getAttribute("style") && p.$refFade!.removeAttribute("style");
-      p.style.opacity = "";
-      !p.getAttribute("style") && p.removeAttribute("style");
+      this.removeEmptyStyle.call(p.$refFade!);
+      p.removeAttribute("hide");
     }
     this._openedModals.splice(this._mid! - 1, 1); // self remove from array
 

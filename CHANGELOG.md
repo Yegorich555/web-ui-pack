@@ -1,4 +1,21 @@
+<!-- markdownlint-disable MD024 -->
 # Changelog
+
+## 1.0.1 (\_\_\_)
+
+### Fixes
+
+---
+
+- [ModalElement](src/modalElement.ts.ts). _Wrong behavior on confirmModal + replace: true + click outside on previous/hidden modal_
+- [PopupElement](src/popup/popupElement.ts). _Popup blinks on fast open+close_
+- **Controls**
+  - _Missed css-var `--base-margin`_
+  - _Missed style `flex: 1` for switch/checkbox_ controls
+
+---
+
+---
 
 ## 1.0.0 (Nov 13, 2023)
 
@@ -45,6 +62,7 @@
 
   - Added static `.$use()`. Call it before using element: `WUPTextControl.$use()` (_self-registration by import_ works now and will be removed in the future)
   - Renamed css-vars:
+
     - `--ctrl-select-menu-hover` >>> `--menu-hover-bg`
     - `--anim-time` >>> `--anim-t`
     - `--popup` >>> `popup-text`
@@ -78,7 +96,7 @@
     - enum `HideCases` >>> `MenuHideCases`
     - event `$showMenu` >>> `$openMenu`
     - event `$hideMenu` >>> `$closeMenu`
-    etc.
+      etc.
 
 ---
 

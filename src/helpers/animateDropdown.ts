@@ -71,7 +71,7 @@ export default function animateDropdown(el: HTMLElement, ms: number, isHide = fa
     const pos = el.getAttribute("position");
     let tmo = "bottom";
     let tmo2 = "top";
-    let scale = "scaleY" as "scaleY" | "scaleX";
+    let scale: "scaleY" | "scaleX" = "scaleY";
     /* prettier-ignore */
     switch (pos) {
       case "bottom": tmo="top"; tmo2="bottom"; break;

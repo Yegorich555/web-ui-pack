@@ -197,7 +197,8 @@ WUP-FORM button[type=submit][aria-busy] {
         --ctrl-focus-border: var(--ctrl-focus);
         contain: style;
         display: block;
-        margin: 20px 0;
+        flex: 1;
+        margin: var(--base-margin) 0;
         box-shadow: 0 0 0 1px var(--ctrl-border);
         border-radius: var(--ctrl-border-radius);
         color: var(--ctrl-text);
@@ -336,9 +337,7 @@ mask-image: var(--ctrl-icon-img);
         }
       }
         WUP-TEXT {
-          contain: style;
           cursor: text;
-          flex: 1;
         }
         WUP-TEXT label &gt; span {
           width: 100%;

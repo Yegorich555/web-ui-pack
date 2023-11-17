@@ -44,12 +44,13 @@ a.headerLink {
 }
 
 .darkMode {
+  flex: 0;
   font-size: 14px;
   margin: 0 4px;
   box-shadow: none !important;
   border: none !important;
 
-  --ctrl-switch-r: 1.4em;
+  --ctrl-switch-r: 20px;
   --ctrl-switch-r-hover: 2em;
   --ctrl-switch-h: 2em;
   --ctrl-switch-w: 3.6em;

@@ -529,6 +529,10 @@ export default class WUPPopupElement<
   /** Required to stop previous animations/timeouts (for case when option animation is changed) */
   _stopAnimation?: () => void;
   protected goAnimate(animTime: number, isHide: boolean): Promise<boolean> {
+    if (!isHide && animTime) {
+      this.style.opacity = "0";
+      setTimeout(() => (this.style.opacity = ""), 2); // such logic allows to calc layout & scroll to element & then animate properly
+    }
     this._isStopChanges = true;
     if (this._opts.animation === PopupAnimations.drawer) {
       this.setAttribute("w-animation", "drawer");
@@ -623,7 +627,14 @@ export default class WUPPopupElement<
     immediately?: boolean
   ): void {
     this._stopAnimation?.call(this);
-    !immediately && this.goAnimate(this.animTime, true);
+    !immediately &&
+      this.goAnimate(this.animTime, true).then((isEnd) => {
+        if (isEnd) {
+          const fix = this._whenClose;
+          this.resetState(); // custom animation can finish faster so need to reset state immediately
+          this._whenClose = fix; // WARN: event $close fired after strict this.animTime
+        }
+      });
   }
 
   /** Returns `target.getBoundingClientRect()` Use function to change placement logic based on target-rect
@@ -784,7 +795,7 @@ export default class WUPPopupElement<
       // suggestion: if height/width is very small we can use another side
       let sp = this.#state!.scrollParents[0];
       /* istanbul ignore next */
-      sp = sp === document.documentElement ? document.body : sp; // when scrollParent is html element then rect.top can be negative: to test place target at bottom body+margin taget+html vert.scroll
+      sp = sp === document.documentElement ? document.body : sp; // when scrollParent is html element then rect.top can be negative: to test place target at bottom body+margin target+html vert.scroll
       const scrollRect = getBoundingInternalRect(sp); // warn: it's important to fit only first parent
       t.top = Math.max(scrollRect.top, t.top);
       t.bottom = Math.min(scrollRect.bottom, t.bottom);
@@ -845,7 +856,7 @@ export default class WUPPopupElement<
             me.arrow.h = maxArrowSize / 2;
             this.$refArrow!.style.width = `${me.arrow.w}px`;
             this.$refArrow!.style.height = `${me.arrow.h}px`;
-            pos = lastRule(t, me, fit); // recalc position because size of arrow is changed
+            pos = lastRule(t, me, fit); // re-calc position because size of arrow is changed
           }
         };
 
@@ -936,5 +947,6 @@ customElements.define(tagName, WUPPopupElement);
 // manual testcase: show as dropdown & scroll parent - blur effect can appear
 
 // NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore
-// NiceToHave 2 popups can oveflow each other: need option to try place several popups at once without oveflow. Example on wup-pwd page: issue with 2 errors
+// NiceToHave 2 popups can overflow each other: need option to try place several popups at once without overflow. Example on wup-pwd page: issue with 2 errors
 // NiceToHave animation.default animates to opacity: 1 but need to animate to opacityFromCss
+// todo issue if combobox open+close+open in a short time
