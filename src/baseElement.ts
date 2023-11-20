@@ -348,7 +348,7 @@ export default abstract class WUPBaseElement<
     return this === a || this.includes(a);
   }
 
-  /** Try to focus self or first possible children; returns true if succesful */
+  /** Try to focus self or first possible children; returns true if successful */
   focus(): boolean {
     delete this._willFocus;
     return focusFirst(this);
@@ -738,7 +738,16 @@ declare global {
     //   T
     // > &
     //   toJSX<Opts>;
-
+    type ReactHTML<T> = React.DetailedHTMLProps<
+      // react doesn't support [className] attr for WebComponents; use [class] instead: https://github.com/facebook/react/issues/4933
+      Omit<React.HTMLAttributes<T>, "className"> & {
+        class?: string | undefined;
+        /** @deprecated isn't supported for React & WebComponents; use attr `class` instead
+         * @see {@link https://react.dev/reference/react-dom/components#custom-html-elements} */
+        className?: never;
+      },
+      T
+    >;
     type JSXProps<T> = React.DetailedHTMLProps<
       // react doesn't support [className] attr for WebComponents; use [class] instead: https://github.com/facebook/react/issues/4933
       Omit<React.HTMLAttributes<T>, "className"> & { class?: string | undefined },

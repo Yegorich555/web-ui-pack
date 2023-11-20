@@ -87,7 +87,20 @@ declare global {
     interface IntrinsicElements {
       /** Form-control with text input
        *  @see {@link WUPTextControl} */
-      [tagName]: WUP.Text.JSXProps; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPTextControl> & WUP.Text.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Form-control with text input
+       *  @see {@link WUPTextControl} */
+      [tagName]: HTMLAttributes<WUPTextControl> & WUP.Text.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }

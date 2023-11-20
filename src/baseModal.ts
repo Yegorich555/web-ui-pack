@@ -29,7 +29,7 @@ declare global {
       /** Fires after element is closed (after animation ends) */
       $close: Event;
     }
-    interface JSXProps<T = WUPBaseModal> extends WUP.Base.JSXProps<T>, WUP.Base.OnlyNames<Options> {
+    interface JSXProps extends WUP.Base.OnlyNames<Options> {
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willOpen') instead */
       onWillOpen?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$open') instead */

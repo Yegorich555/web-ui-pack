@@ -23,7 +23,7 @@ Template repo with React: [webpack-must-have](https://github.com/Yegorich555/web
 - Built-in css-variables to use custom color-themes with native ordinary styling (css, scss etc.)
 - Built-in dark color scheme. Add attribute `wupdark` (`<body wupdark>`) and define main background & text colors
 - Built-in Typescript (coverage types 100%)
-- Built-in `.jsx/.tsx` support (for React/Vue)
+- Built-in `.jsx/.tsx` support (for React/Preact)
 - Supports different locales (based on [localeInfo](src/objects/localeInfo.ts) helper). For changing built-in messages override global function `window.__wupln` (details you can find in your editor during the coding via built-in intellisense)
 - Well documented with JSDoc (use intellisense power of your editor to get details about each property/option/usage)
 - Optimized for webpack (build includes only used components and helpers via **side-effects** option)

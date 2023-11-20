@@ -22,7 +22,7 @@ declare global {
        * @defaultValue `auto`: parentElement */
       overflowTarget: HTMLElement | "auto";
     }
-    interface JSXProps<T extends WUPSpinElement> extends WUP.Base.JSXProps<T>, WUP.Base.OnlyNames<Options> {
+    interface JSXProps extends WUP.Base.OnlyNames<Options> {
       "w-inline"?: boolean | "";
       "w-fit"?: boolean | "" | "auto";
       /** Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px;
@@ -54,7 +54,20 @@ declare global {
     interface IntrinsicElements {
       /** Flexible animated element with ability to place over target element without position relative
        * @see {@link WUPSpinElement} */
-      [tagName]: WUP.Spin.JSXProps<WUPSpinElement>; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPSpinElement> & WUP.Spin.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Flexible animated element with ability to place over target element without position relative
+       * @see {@link WUPSpinElement} */
+      [tagName]: HTMLAttributes<WUPSpinElement> & WUP.Spin.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }

@@ -177,7 +177,8 @@ declare global {
       storage?: "local" | "session" | "url";
     }
 
-    interface JSXProps<C = WUPBaseControl> extends WUP.Base.JSXProps<C>, WUP.Base.OnlyNames<Options> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface JSXProps<C = WUPBaseControl> extends WUP.Base.OnlyNames<Options> {
       /** Default value in string/boolean/number representation (depends on `control.prototype.parse()`) */
       "w-initValue"?: string | boolean | number;
       "w-label"?: string;

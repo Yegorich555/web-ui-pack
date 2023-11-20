@@ -1,5 +1,19 @@
 <!-- markdownlint-disable MD024 -->
+
 # Changelog
+
+## 1.0.2 (\_\_\_)
+
+### New Features
+
+---
+
+- **Global**
+  - Add Preact tsx/jsx support
+
+---
+
+---
 
 ## 1.0.1 (Nov 17, 2023)
 

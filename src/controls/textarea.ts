@@ -22,7 +22,20 @@ declare global {
     interface IntrinsicElements {
       /** Form-control with multiline text-input
        *  @see {@link WUPTextareaControl} */
-      [tagName]: WUP.Textarea.JSXProps; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPTextareaControl> & WUP.Textarea.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Form-control with multiline text-input
+       *  @see {@link WUPTextareaControl} */
+      [tagName]: HTMLAttributes<WUPTextareaControl> & WUP.Textarea.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }

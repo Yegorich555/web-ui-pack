@@ -76,9 +76,7 @@ declare global {
       /** Items related to circle-segments */
       items: Item[];
     }
-    interface JSXProps<T = WUPCircleElement>
-      extends WUP.Base.JSXProps<T>,
-        WUP.Base.OnlyNames<Omit<Options, "hoverOpenTimeout" | "hoverCloseTimeout" | "items">> {
+    interface JSXProps extends WUP.Base.OnlyNames<Omit<Options, "hoverOpenTimeout" | "hoverCloseTimeout" | "items">> {
       "w-width"?: number;
       "w-corner"?: number;
       "w-back"?: boolean | "";
@@ -106,7 +104,20 @@ declare global {
     interface IntrinsicElements {
       /** Arc/circle chart based on SVG
        *  @see {@link WUPCircleElement} */
-      [tagName]: WUP.Circle.JSXProps; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPCircleElement> & WUP.Circle.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Arc/circle chart based on SVG
+       *  @see {@link WUPCircleElement} */
+      [tagName]: HTMLAttributes<WUPCircleElement> & WUP.Circle.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }

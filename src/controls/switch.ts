@@ -15,7 +15,7 @@ declare global {
     interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       "w-reverse"?: boolean | "";
-      /** InitValue for control @deprecated use `initValue` instead */
+      /** @deprecated use `initValue` instead */
       defaultChecked?: boolean;
     }
   }
@@ -27,7 +27,20 @@ declare global {
     interface IntrinsicElements {
       /** Form-control with toggle button
        *  @see {@link WUPSwitchControl} */
-      [tagName]: WUP.Switch.JSXProps; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPSwitchControl> & WUP.Switch.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Form-control with toggle button
+       *  @see {@link WUPSwitchControl} */
+      [tagName]: HTMLAttributes<WUPSwitchControl> & WUP.Switch.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }

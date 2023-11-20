@@ -65,7 +65,7 @@ declare global {
       confirmUnsaved: boolean; // NiceToHave: confirmKey to show CheckBox "Don't show again" + some option to rollback it
     }
     interface EventMap extends WUP.BaseModal.EventMap<ModalOpenCases, ModalCloseCases> {}
-    interface JSXProps<T = WUPModalElement> extends WUP.BaseModal.JSXProps<T>, WUP.Base.OnlyNames<Options> {
+    interface JSXProps extends WUP.BaseModal.JSXProps, WUP.Base.OnlyNames<Options> {
       /** QuerySelector to find target - element that modal need to listen for click. If `target` missed modal will be opened on init
        * @tutorial rules
        * * point 'prev' to select previousSibling */
@@ -87,7 +87,7 @@ declare global {
     interface IntrinsicElements {
       /**  Modal element
        *  @see {@link WUPModalElement} */
-      [tagName]: WUP.Modal.JSXProps; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPModalElement> & WUP.Modal.JSXProps; // add element to tsx/jsx intellisense (react)
     }
   }
 
@@ -100,6 +100,24 @@ declare global {
     }
   }
 }
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {
+      /** Point message for confirm-modal then`click` event will be fired only after btn-confirm click
+       * @see {@link WUPModalElement.$useConfirmHook} */
+      [attrConfirm]?: string;
+    }
+    interface IntrinsicElements {
+      /**  Modal element
+       *  @see {@link WUPModalElement} */
+      [tagName]: HTMLAttributes<WUPModalElement> & WUP.Modal.JSXProps; // add element to tsx/jsx intellisense (preact)
+    }
+  }
+}
+
 /** Modal element
  * @example
  * JS/TS

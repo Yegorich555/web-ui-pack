@@ -16,7 +16,20 @@ declare global {
     interface IntrinsicElements {
       /** Form-control with checkbox
        *  @see {@link WUPCheckControl} */
-      [tagName]: WUP.Check.JSXProps; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPCheckControl> & WUP.Check.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Form-control with checkbox
+       *  @see {@link WUPCheckControl} */
+      [tagName]: HTMLAttributes<WUPCheckControl> & WUP.Check.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }
