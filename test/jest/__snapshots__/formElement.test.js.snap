@@ -336,6 +336,11 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
+      @media not all and (prefers-reduced-motion) {
+        WUP-TEXT {
+          transition: box-shadow var(--anim);
+        }
+      }
         WUP-TEXT {
           cursor: text;
           text-align: start;

@@ -202,8 +202,7 @@ export default class WUPRadioControl<
         :host label:hover [icon] {
           --ctrl-radio-item-border: var(--ctrl-selected);
         }
-      }
-     `;
+      }`;
   }
 
   static $defaults: WUP.Radio.Options = {

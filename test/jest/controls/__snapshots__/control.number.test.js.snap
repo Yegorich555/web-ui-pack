@@ -511,6 +511,11 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
+      @media not all and (prefers-reduced-motion) {
+        WUP-NUM {
+          transition: box-shadow var(--anim);
+        }
+      }
         WUP-NUM {
           cursor: text;
           text-align: start;

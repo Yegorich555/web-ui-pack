@@ -406,6 +406,11 @@ export default abstract class WUPBaseControl<
         :host[hovered]>[menu] {
           box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
+      }
+      @media not all and (prefers-reduced-motion) {
+        :host {
+          transition: box-shadow var(--anim);
+        }
       }`;
   }
 

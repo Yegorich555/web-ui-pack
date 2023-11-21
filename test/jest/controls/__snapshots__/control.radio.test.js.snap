@@ -918,6 +918,11 @@ mask-image: var(--ctrl-icon-img);
           box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
         }
       }
+      @media not all and (prefers-reduced-motion) {
+        WUP-RADIO {
+          transition: box-shadow var(--anim);
+        }
+      }
       WUP-RADIO {
         position: relative;
         padding: var(--ctrl-padding);
@@ -1011,7 +1016,6 @@ padding:0;}
           --ctrl-radio-item-border: var(--ctrl-selected);
         }
       }
-     
 </style>
 `;
 
