@@ -101,7 +101,7 @@ describe("control.radio", () => {
     jest.advanceTimersByTime(2);
     expect(onErr).not.toBeCalled();
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for="txt7">Helica<input id="txt7" type="radio" name="txt6473" tabindex="0" autocomplete="off"><span icon=""></span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for="txt7" checked="">Helica<input id="txt7" type="radio" name="txt6473" tabindex="0" autocomplete="off"><span icon=""></span></label></fieldset>"`
     );
     // after ready
     el.$options.items = [{ text: "Harry", value: 11 }];
@@ -109,7 +109,7 @@ describe("control.radio", () => {
     jest.advanceTimersByTime(2);
     expect(onErr).not.toBeCalled();
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for="txt9">Harry<input id="txt9" type="radio" name="txt8473" tabindex="0" autocomplete="off"><span icon=""></span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for="txt9" checked="">Harry<input id="txt9" type="radio" name="txt8473" tabindex="0" autocomplete="off"><span icon=""></span></label></fieldset>"`
     );
 
     const item = { text: "Helica", value: 5 };
@@ -309,6 +309,7 @@ describe("control.radio", () => {
                 />
               </label>
               <label
+                checked=""
                 for="txt8"
               >
                 Mikky

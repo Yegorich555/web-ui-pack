@@ -1167,6 +1167,7 @@ exports[`control.radio validations $options.validationShowAll 2`] = `
       <strong />
     </legend>
     <label
+      checked=""
       for="txt2"
     >
       Donny
@@ -1488,6 +1489,7 @@ exports[`control.radio validations options.validationCase 3`] = `
       </strong>
     </legend>
     <label
+      checked=""
       for="txt2"
     >
       Donny

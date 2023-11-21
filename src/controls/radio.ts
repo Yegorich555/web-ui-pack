@@ -293,6 +293,7 @@ export default class WUPRadioControl<
   /** Called when need to update check-state of inputs */
   protected checkInput(v: ValueType | undefined): void {
     this.$refInput.checked = false;
+    this.$refLabel.removeAttribute("checked");
 
     if (v === undefined) {
       // eslint-disable-next-line prefer-destructuring
@@ -311,6 +312,7 @@ export default class WUPRadioControl<
     }
     this.setupInput();
     this.$refLabel = this.$refInput.parentElement as HTMLLabelElement;
+    this.$refInput.checked && this.$refLabel.setAttribute("checked", "");
   }
 
   protected override setValue(v: ValueType, reason: SetValueReasons): boolean | null {

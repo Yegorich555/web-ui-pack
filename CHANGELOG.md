@@ -12,6 +12,7 @@
   - Add Preact tsx/jsx support
 - **Controls**
   - Added `text-align: start` by default to avoid unexpected inheritance
+  - [RadioControl](src/controls/radio.ts). Added attribute `[checked]` to re-style whole item
 
 ---
 
