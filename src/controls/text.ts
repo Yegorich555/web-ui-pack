@@ -123,8 +123,7 @@ declare module "preact/jsx-runtime" {
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
- * </label>
- */
+ * </label> */
 export default class WUPTextControl<
   ValueType = string,
   TOptions extends WUP.Text.Options = WUP.Text.Options,
@@ -151,6 +150,7 @@ export default class WUPTextControl<
     return `${super.$style}
         :host {
           cursor: text;
+          text-align: start;
         }
         :host label > span {
           width: 100%;
@@ -167,6 +167,7 @@ export default class WUPTextControl<
           padding-left: 0;
           padding-right: 0;
           font: inherit;
+          text-align: inherit;
           color: inherit;
           margin: 0;
           text-overflow: ellipsis;

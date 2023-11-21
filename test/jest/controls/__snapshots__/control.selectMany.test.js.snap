@@ -550,6 +550,7 @@ mask-image: var(--ctrl-icon-img);
       }
         WUP-SELECTMANY {
           cursor: text;
+          text-align: start;
         }
         WUP-SELECTMANY label &gt; span {
           width: 100%;
@@ -566,6 +567,7 @@ mask-image: var(--ctrl-icon-img);
           padding-left: 0;
           padding-right: 0;
           font: inherit;
+          text-align: inherit;
           color: inherit;
           margin: 0;
           text-overflow: ellipsis;

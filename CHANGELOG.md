@@ -10,6 +10,8 @@
 
 - **Global**
   - Add Preact tsx/jsx support
+- **Controls**
+  - Added `text-align: start` by default to avoid unexpected inheritance
 
 ---
 

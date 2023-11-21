@@ -520,6 +520,7 @@ mask-image: var(--ctrl-icon-img);
       }
         WUP-TEXTAREA {
           cursor: text;
+          text-align: start;
         }
         WUP-TEXTAREA label &gt; span {
           width: 100%;
@@ -536,6 +537,7 @@ mask-image: var(--ctrl-icon-img);
           padding-left: 0;
           padding-right: 0;
           font: inherit;
+          text-align: inherit;
           color: inherit;
           margin: 0;
           text-overflow: ellipsis;
