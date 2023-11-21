@@ -116,7 +116,19 @@ export default function RadioControlView() {
             w-initValue={items[1].value.toString()}
             w-items="storedRadioItems.items"
           />
-
+          <wup-radio
+            class={styles.custom2}
+            w-name="customViewNext"
+            w-initValue={items[1].value.toString()}
+            ref={(el) => {
+              if (el) {
+                el.$options.items = items.slice(0, 4);
+                setTimeout(() => {
+                  console.warn(el.$value);
+                });
+              }
+            }}
+          />
           <wup-radio
             ref={(el) => {
               if (el) {

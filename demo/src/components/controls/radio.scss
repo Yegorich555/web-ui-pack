@@ -1,3 +1,4 @@
+/* stylelint-disable no-descending-specificity */
 .custom {
   --ctrl-radio-item-r: 16px;
 
@@ -14,5 +15,46 @@
 
   input:checked + [icon] {
     border: 4px solid var(--ctrl-selected);
+  }
+}
+
+.custom2 {
+  box-shadow: none !important;
+  padding: var(--ctrl-radio-gap);
+  padding-top: 0;
+  // padding: 0;
+  // background: none;
+
+  [icon] {
+    display: none;
+  }
+
+  legend {
+    transform: none;
+    position: static;
+    margin: 0;
+    padding: var(--ctrl-radio-gap) 0;
+  }
+
+  > fieldset {
+    flex-direction: column;
+    gap: var(--ctrl-radio-gap);
+    margin: 0;
+
+    > label {
+      // background: #fff;
+      box-shadow: 0 0 0 1px var(--ctrl-border);
+      border-radius: var(--ctrl-border-radius);
+      padding: 0.75em;
+      transition: color var(--anim), box-shadow var(--anim);
+
+      &:hover {
+        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+      }
+
+      &[checked] {
+        box-shadow: 0 0 0 2px var(--ctrl-focus-border);
+      }
+    }
   }
 }
