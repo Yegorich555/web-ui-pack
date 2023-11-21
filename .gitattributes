@@ -2,3 +2,6 @@
 *.jsx text eol=lf
 *.ts text eol=lf
 *.tsx text eol=lf
+
+* linguist-vendored
+src/* linguist-vendored=false
