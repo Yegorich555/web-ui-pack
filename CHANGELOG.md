@@ -2,6 +2,19 @@
 
 # Changelog
 
+## 1.0.3 (\_\_\_)
+
+### New Features
+
+---
+
+- **Controls**
+  - Add css-animation for box-shadow/borders
+
+---
+
+---
+
 ## 1.0.2 (Nov 21, 2023)
 
 ### New Features
