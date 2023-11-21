@@ -1,0 +1,63 @@
+.complex {
+  margin: 10px auto auto;
+  max-width: 200px;
+  position: relative;
+  padding: 20px;
+
+  > wup-circle > strong {
+    font-size: 1em;
+    top: 3%;
+    transform: none;
+    left: initial;
+    right: calc(50% + 6px);
+  }
+
+  > wup-circle:first-child {
+    margin: 0;
+  }
+
+  > wup-circle:nth-child(2) {
+    width: 48%;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    > strong {
+      top: 4%;
+    }
+  }
+
+  > ul {
+    position: absolute;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+    touch-action: none;
+
+    > li {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform-origin: left;
+      width: 100%;
+      height: 100%;
+
+      > i {
+        font-style: normal;
+        position: absolute;
+      }
+    }
+  }
+}
+
+.small {
+  max-width: 140px;
+}
