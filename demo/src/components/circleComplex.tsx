@@ -1,8 +1,12 @@
 import styles from "./circleComplex.scss";
 
-export default function CircleComplex() {
+interface Props {
+  isSmall?: boolean;
+}
+
+export default function CircleComplex(p: Props) {
   return (
-    <div className={styles.complex}>
+    <div className={`${styles.complex} ${p.isSmall ? styles.small : ""}`}>
       <wup-circle
         w-from={0}
         w-to={270}
@@ -32,8 +36,8 @@ export default function CircleComplex() {
       <ul>
         {Array.from({ length: 11 }).map((_, i) => (
           // eslint-disable-next-line react/no-array-index-key
-          <li key={`lbl${i}`} style={{ transform: `rotate(${(270 / 10) * i}deg)` }}>
-            <i style={{ transform: `rotate(-${(270 / 10) * i}deg)` }}>{i}</i>
+          <li key={`lbl${i}`} style={{ transform: `rotate(${(266 / 10) * i - 2}deg)` }}>
+            <i style={{ transform: `rotate(-${(266 / 10) * i - 2}deg)` }}>{i}</i>
           </li>
         ))}
       </ul>

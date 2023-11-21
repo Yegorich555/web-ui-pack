@@ -169,6 +169,7 @@ export default function CircleView() {
           See details in <MyLink href="/demo/src/components/circleComplex.scss">demo/src...</MyLink>
         </small>
         <CircleComplex />
+        <CircleComplex isSmall />
       </section>
     </Page>
   );

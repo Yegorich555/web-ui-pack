@@ -4,25 +4,29 @@
   position: relative;
   padding: 20px;
 
+  > wup-circle > strong {
+    font-size: 1em;
+    top: 3%;
+    transform: none;
+    left: initial;
+    right: calc(50% + 6px);
+  }
+
   > wup-circle:first-child {
     margin: 0;
   }
 
   > wup-circle:nth-child(2) {
-    width: 120px;
+    width: 48%;
     margin: 0;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-  }
 
-  > wup-circle > strong {
-    font-size: 1em;
-    top: 0.5em;
-    transform: none;
-    left: initial;
-    right: calc(50% + 6px);
+    > strong {
+      top: 4%;
+    }
   }
 
   > ul {
@@ -52,4 +56,8 @@
       }
     }
   }
+}
+
+.small {
+  max-width: 140px;
 }
