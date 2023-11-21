@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 1.0.2 (\_\_\_)
+## 1.0.2 (Nov 21, 2023)
 
 ### New Features
 
