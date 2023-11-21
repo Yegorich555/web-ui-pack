@@ -71,9 +71,7 @@ declare global {
       autoComplete: boolean;
     }
 
-    interface JSXProps<T extends WUPFormElement>
-      extends Omit<WUP.Base.JSXProps<T>, "autoStore">,
-        WUP.Base.OnlyNames<Options> {
+    interface JSXProps extends WUP.Base.OnlyNames<Options> {
       "w-submitActions"?: SubmitActions | number;
       "w-autoStore"?: boolean | string;
       "w-autoFocus"?: boolean | "";
@@ -102,7 +100,20 @@ declare global {
     interface IntrinsicElements {
       /** Wrapper of FormHTMLElement that collect values from controls
        *  @see {@link WUPFormElement} */
-      [tagName]: WUP.Form.JSXProps<WUPFormElement>; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPFormElement> & WUP.Form.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Wrapper of FormHTMLElement that collect values from controls
+       *  @see {@link WUPFormElement} */
+      [tagName]: HTMLAttributes<WUPFormElement> & WUP.Form.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }

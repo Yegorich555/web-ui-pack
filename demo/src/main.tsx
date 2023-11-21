@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 import "./styles/main.scss";
 import React, { useEffect } from "react";
-import ReactDom from "react-dom";
+import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from "react-router-dom";
 import { WUPHelpers, WUPSwitchControl } from "web-ui-pack";
 import { useBuiltinStyle, WUPcssButton, WUPcssScrollSmall } from "web-ui-pack/styles";
@@ -158,12 +158,10 @@ export default function AppContainer() {
   );
 }
 
-const el = document.getElementById("app")!;
-ReactDom.render(
+ReactDOM.createRoot(document.getElementById("app")!).render(
   <BrowserRouter>
     <AppContainer />
-  </BrowserRouter>,
-  el
+  </BrowserRouter>
 );
 
 useBuiltinStyle(

@@ -22,7 +22,20 @@ declare global {
     interface IntrinsicElements {
       /**  Popup element
        *  @see {@link WUPPopupElement} */
-      [tagName]: WUP.BaseModal.JSXProps<WUPPopupElement> & WUP.Popup.Attributes; // add element to tsx/jsx intellisense
+      [tagName]: WUP.BaseModal.JSXProps & WUP.Popup.Attributes; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /**  Popup element
+       *  @see {@link WUPPopupElement} */
+      [tagName]: HTMLAttributes<WUPPopupElement> & WUP.Modal.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }
@@ -949,4 +962,3 @@ customElements.define(tagName, WUPPopupElement);
 // NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore
 // NiceToHave 2 popups can overflow each other: need option to try place several popups at once without overflow. Example on wup-pwd page: issue with 2 errors
 // NiceToHave animation.default animates to opacity: 1 but need to animate to opacityFromCss
-// todo issue if combobox open+close+open in a short time

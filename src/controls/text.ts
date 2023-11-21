@@ -87,7 +87,20 @@ declare global {
     interface IntrinsicElements {
       /** Form-control with text input
        *  @see {@link WUPTextControl} */
-      [tagName]: WUP.Text.JSXProps; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPTextControl> & WUP.Text.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Form-control with text input
+       *  @see {@link WUPTextControl} */
+      [tagName]: HTMLAttributes<WUPTextControl> & WUP.Text.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }
@@ -110,8 +123,7 @@ declare global {
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
- * </label>
- */
+ * </label> */
 export default class WUPTextControl<
   ValueType = string,
   TOptions extends WUP.Text.Options = WUP.Text.Options,
@@ -138,6 +150,7 @@ export default class WUPTextControl<
     return `${super.$style}
         :host {
           cursor: text;
+          text-align: start;
         }
         :host label > span {
           width: 100%;
@@ -154,6 +167,7 @@ export default class WUPTextControl<
           padding-left: 0;
           padding-right: 0;
           font: inherit;
+          text-align: inherit;
           color: inherit;
           margin: 0;
           text-overflow: ellipsis;

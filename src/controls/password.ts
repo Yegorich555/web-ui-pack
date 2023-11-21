@@ -40,7 +40,20 @@ declare global {
     interface IntrinsicElements {
       /** Form-control with password input
        *  @see {@link WUPPasswordControl} */
-      [tagName]: WUP.Password.JSXProps<WUPPasswordControl>; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPPasswordControl> & WUP.Password.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Form-control with password input
+       *  @see {@link WUPPasswordControl} */
+      [tagName]: HTMLAttributes<WUPPasswordControl> & WUP.Password.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }

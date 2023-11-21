@@ -42,7 +42,20 @@ declare global {
     interface IntrinsicElements {
       /** Form-control with radio buttons
        *  @see {@link WUPRadioControl} */
-      [tagName]: WUP.Radio.JSXProps<WUPRadioControl>; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPRadioControl> & WUP.Radio.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Form-control with radio buttons
+       *  @see {@link WUPRadioControl} */
+      [tagName]: HTMLAttributes<WUPRadioControl> & WUP.Radio.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }
@@ -280,6 +293,7 @@ export default class WUPRadioControl<
   /** Called when need to update check-state of inputs */
   protected checkInput(v: ValueType | undefined): void {
     this.$refInput.checked = false;
+    this.$refLabel.removeAttribute("checked");
 
     if (v === undefined) {
       // eslint-disable-next-line prefer-destructuring
@@ -298,6 +312,7 @@ export default class WUPRadioControl<
     }
     this.setupInput();
     this.$refLabel = this.$refInput.parentElement as HTMLLabelElement;
+    this.$refInput.checked && this.$refLabel.setAttribute("checked", "");
   }
 
   protected override setValue(v: ValueType, reason: SetValueReasons): boolean | null {

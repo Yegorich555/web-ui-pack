@@ -50,7 +50,20 @@ declare global {
     interface IntrinsicElements {
       /** Form-control with datepicker
        *  @see {@link WUPDateControl} */
-      [tagName]: WUP.Date.JSXProps; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPDateControl> & WUP.Date.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Form-control with datepicker
+       *  @see {@link WUPDateControl} */
+      [tagName]: HTMLAttributes<WUPDateControl> & WUP.Date.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }

@@ -7,6 +7,7 @@
       "web-ui-pack/*": ["../src/*"]
     },
     "jsx": "react-jsx",
+    // "jsxImportSource": "preact",
     "allowJs": true,
     "outDir": "",
     "noEmit": true, // exclude errors in console because it should be wrapped by webpack

@@ -39,7 +39,20 @@ declare global {
     interface IntrinsicElements {
       /** Form-control with dropdown/combobox behavior
        *  @see {@link WUPSelectManyControl} */
-      [tagName]: WUP.SelectMany.JSXProps; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPSelectManyControl> & WUP.SelectMany.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Form-control with dropdown/combobox behavior
+       *  @see {@link WUPSelectManyControl} */
+      [tagName]: HTMLAttributes<WUPSelectManyControl> & WUP.SelectMany.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }

@@ -40,8 +40,8 @@ declare global {
        *  @defaultValue true */
       minHeightByTarget: boolean;
     }
-    // WARN: all options must be applied to wup-popup directly
-    interface JSXProps<C = WUPDropdownElement> extends WUP.Base.JSXProps<C> {
+    /* WARN: all options must be applied to wup-popup directly */
+    interface JSXProps {
       /** Close menu on popup click
        * @defaultValue true */
       "w-closeOnPopupClick"?: boolean;
@@ -55,7 +55,20 @@ declare global {
     interface IntrinsicElements {
       /** Dropdown element
        *  @see {@link WUPDropdownElement} */
-      [tagName]: WUP.Dropdown.JSXProps; // add element to tsx/jsx intellisense
+      [tagName]: WUP.Base.ReactHTML<WUPDropdownElement> & WUP.Dropdown.JSXProps; // add element to tsx/jsx intellisense (react)
+    }
+  }
+}
+
+// @ts-ignore - because Preact & React can't work together
+declare module "preact/jsx-runtime" {
+  namespace JSX {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface HTMLAttributes<RefType> {}
+    interface IntrinsicElements {
+      /** Dropdown element
+       *  @see {@link WUPDropdownElement} */
+      [tagName]: HTMLAttributes<WUPDropdownElement> & WUP.Dropdown.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }

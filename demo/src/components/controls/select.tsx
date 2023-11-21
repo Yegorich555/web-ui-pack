@@ -60,6 +60,8 @@ export default function SelectControlView() {
       }}
       features={[
         "Inheritted features from TextControl",
+        "Menu is opened outside parent with position: relative",
+        "Perfect keyboard support",
         "Pending state with spinner if $options.items is a function with promise-result",
         "Possible to customize render of items (via $options.items; see below...)",
         "Possible to create any value not pointed in items (via $options.allowNewValue)",
