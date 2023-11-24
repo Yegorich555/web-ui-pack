@@ -36,22 +36,6 @@ export const enum AttributeTypes {
   selector,
 }
 
-declare global {
-  /** Translate function that need to replace to translate content according to requirements
-   * @param text Text that must be translated
-   * @param type Type of related text
-   * @returns the same string by default */
-  const __wupln: Window["__wupln"]; // NiceToHave: interpolation `Max length ${setV} is chars` where (-s) can depend on value
-  interface Window {
-    /** Translate function that need to replace to translate content according to requirements
-     * @param text Text that must be translated
-     * @param type Type of related text
-     * @returns the same string by default */
-    __wupln: (text: string, type: "aria" | "content" | "validation") => string;
-  }
-}
-window.__wupln = (s) => s;
-
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement<
   TOptions extends Record<string, any> = Record<string, any>,
@@ -501,14 +485,14 @@ export default abstract class WUPBaseElement<
   fireEvent<K extends keyof Events, T extends Events[K]["detail"]>(type: K, eventInit: CustomEventInit<T> = {}): Event {
     eventInit.cancelable ??= false;
     eventInit.bubbles ??= true;
-    const ev = new CustomEvent<T>(type as string, eventInit);
+    const ev = new CustomEvent<T>(type as string);
 
     let sip = false;
     const isCustom = (type as string).startsWith("$");
     if (isCustom) {
       ev.stopImmediatePropagation = () => {
         sip = true;
-        CustomEvent.prototype.stopImmediatePropagation.call(ev);
+        CustomEvent.prototype.stopImmediatePropagation.call(ev); // todo issue target is missed here
       };
       const str = (type as string).substring(1, 2).toUpperCase() + (type as string).substring(2);
       (this as any)[`$on${str}`]?.call(this, ev);
@@ -716,8 +700,27 @@ export default abstract class WUPBaseElement<
   // }
 }
 
+window.__wupln = (s) => s;
+
 declare global {
+  /** Translate function that need to replace to translate content according to requirements
+   * @param text Text that must be translated
+   * @param type Type of related text
+   * @returns the same string by default */
+  const __wupln: WUP.Base.LangFunc; // NiceToHave: interpolation `Max length ${setV} is chars` where (-s) can depend on value
+  interface Window {
+    /** Translate function that need to replace to translate content according to requirements
+     * @param text Text that must be translated
+     * @param type Type of related text
+     * @returns the same string by default */
+    __wupln: WUP.Base.LangFunc;
+  }
+
   namespace WUP.Base {
+    interface LangFunc {
+      (text: string, type: "aria" | "content" | "validation"): string;
+    }
+
     /** Cast not-supported props to optional string */
     type toJSX<T> = {
       [P in keyof T]?: T[P] extends number | boolean | string | undefined ? T[P] : string;
