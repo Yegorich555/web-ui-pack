@@ -95,7 +95,7 @@ declare global {
       label: string | undefined | null;
       /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
        * * @tutorial
-       * * point `undefined` to completely detach from FormElement
+       * * point `null` or 'undefined' to completely detach from FormElement
        * * point `''`(empty string) to partially detach (exclude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
       name: string | undefined | null;
       /** Focus element when it's appended to layout @defaultValue false */
@@ -240,7 +240,8 @@ export default abstract class WUPBaseControl<
   /** Text announced by screen-readers; @defaultValue `Error for` */
   static $ariaError = __wupln("Error for", "aria");
 
-  /** Css-variables related to component */
+  // todo impossible to re-use icons till some WUP element appended to layout
+  /** CSS-variables related to component */
   static get $styleRoot(): string {
     return `:root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
