@@ -101,7 +101,7 @@ export default function AppContainer() {
     const prevPath = window.localStorage.getItem("path");
     if (prevPath) {
       window.localStorage.removeItem("path");
-      const p = prevPath.split("?")[0];
+      const p = prevPath.split(/[?#]/)[0];
       const r = routes.find((v) => v.path === p);
       r && navigate(process.env.BASE_URL + prevPath); // window.location.replace(r.url as string);
     }
