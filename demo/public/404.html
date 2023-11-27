@@ -1,8 +1,8 @@
 <script>
   const host = window.location.origin;
-  const href = window.location.href;
-  const domainURL = host + href.substring(host.length, href.indexOf("/", host.length + 1) + 1);
-  const path = window.location.href.substring(domainURL.length);
+  const fullURL = window.location.href;
+  const domainURL = host + fullURL.substring(host.length, fullURL.indexOf("/", host.length + 1) + 1);
+  const path = fullURL.substring(domainURL.length);
   localStorage.setItem('path', path);
   window.location.href = domainURL;
 

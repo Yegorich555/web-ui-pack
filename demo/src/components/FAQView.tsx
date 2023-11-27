@@ -50,11 +50,21 @@ export default function FAQView() {
           },
           {
             link: "redefine-styles",
-            question: "How to redefine styles",
+            question: "Styles. How to redefine existed built-in styles",
             answer: (
               <>
                 <i>Redefine css variables</i>
                 <Code code={codeCssVars} />
+              </>
+            ),
+          },
+          {
+            link: "shared-styles",
+            question: "Styles. How to reuse built-in styles",
+            answer: (
+              <>
+                <i>Some styles (scroll, button submit etc.) are shared and placed in web-ui-pack/styles.js</i>
+                <Code code={codeSharedStyles} />
               </>
             ),
           },
@@ -99,6 +109,10 @@ export default function FAQView() {
                     <b>$aria...</b> and defined as static prop in class
                     {/* eslint-disable-next-line react/no-unescaped-entities */}.
                     <b>WUPPasswordControl.$ariaDescription = 'press Alt + V to show/hide password'</b>
+                  </li>
+                  <li>
+                    Use/redefine global <b>window.__wupln(...)</b> to translate built-in text content according to
+                    required language
                   </li>
                 </ol>
               </section>
@@ -184,16 +198,6 @@ export default function FAQView() {
                   string-type. But you can override behavior
                 </i>
                 <Code code={codeParseInitValue} />
-              </>
-            ),
-          },
-          {
-            link: "shared-styles",
-            question: "Styles. How to reuse built-in styles",
-            answer: (
-              <>
-                <i>Some styles (scroll, button submit etc.) are shared and placed in web-ui-pack/styles.js</i>
-                <Code code={codeSharedStyles} />
               </>
             ),
           },
