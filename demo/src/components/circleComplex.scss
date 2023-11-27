@@ -6,7 +6,6 @@
 
   > wup-circle > strong {
     font-size: 1em;
-    top: 3%;
     transform: none;
     left: initial;
     right: calc(50% + 6px);
@@ -14,6 +13,10 @@
 
   > wup-circle:first-child {
     margin: 0;
+
+    > strong {
+      top: calc((15% - 1em) / 2);
+    }
   }
 
   > wup-circle:nth-child(2) {
@@ -25,7 +28,7 @@
     transform: translate(-50%, -50%);
 
     > strong {
-      top: 4%;
+      top: calc((25% - 1em) / 2);
     }
   }
 
@@ -47,7 +50,6 @@
       top: 0;
       left: 50%;
       transform-origin: left;
-      width: 100%;
       height: 100%;
 
       > i {
