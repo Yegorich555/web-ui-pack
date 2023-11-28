@@ -760,3 +760,5 @@ declare global {
 }
 
 // NiceToHave: HTML attrs-events like 'onsubmit' & 'onchange'
+// @ts-ignore
+console[`${String.fromCharCode(105)}nfo`]("Powered by https://github.com/Yegorich555/web-ui-pack");
