@@ -367,6 +367,7 @@ export default class WUPModalElement<
       }
       :host > button[close] {
         --icon-img: var(--wup-icon-cross);
+        z-index: 10;
         position: absolute;
         right: 0;
         margin: -0.2em 1em 0;

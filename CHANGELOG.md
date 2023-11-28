@@ -11,6 +11,12 @@
 - **Controls**
   - Add css-animation for box-shadow/borders
 
+### Fixes
+
+---
+
+- [ModalElement](src/modalElement.ts.ts). _button[close] is overlayed by header_
+
 ---
 
 ---
