@@ -485,7 +485,7 @@ export default abstract class WUPBaseElement<
   fireEvent<K extends keyof Events, T extends Events[K]["detail"]>(type: K, eventInit: CustomEventInit<T> = {}): Event {
     eventInit.cancelable ??= false;
     eventInit.bubbles ??= true;
-    const ev = new CustomEvent<T>(type as string);
+    const ev = new CustomEvent<T>(type as string, eventInit);
 
     let sip = false;
     const isCustom = (type as string).startsWith("$");
