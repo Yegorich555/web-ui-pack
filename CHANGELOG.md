@@ -15,6 +15,8 @@
 
 ---
 
+- **Controls**
+  - _Wrong TS-type on **$onChange()** callback_
 - [ModalElement](src/modalElement.ts.ts). _button[close] is overlayed by header_
 
 ---
