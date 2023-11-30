@@ -117,6 +117,7 @@ ${tag}::-webkit-scrollbar-track-piece:horizontal:end {
 }`;
 }
 
+// todo min-width here affects on all buttons if: useBuiltinStyle(WUPcssButton("button"));
 /** Returns default style for primary/submit button */
 /* istanbul ignore next */
 export function WUPcssButton(tag: string, type: 1 | 2 | 3 = 1): string {

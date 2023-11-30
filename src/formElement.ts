@@ -371,7 +371,7 @@ export default class WUPFormElement<
       this.querySelectorAll("[type='submit']").forEach((b) => {
         spins.push(this.appendChild(this.renderSpin(b as HTMLButtonElement)));
         (b as HTMLButtonElement & { _wupDisabled: boolean })._wupDisabled = (b as HTMLButtonElement).disabled;
-        (b as HTMLButtonElement).disabled = true;
+        (b as HTMLButtonElement).disabled = true; // todo it moves focus to body; need somehow resolve it
         btns.push(b as HTMLButtonElement & { _wupDisabled: boolean });
       });
 
