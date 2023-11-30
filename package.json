@@ -49,6 +49,8 @@
     "modal",
     "spin",
     "spinner",
+    "gauge",
+    "circle",
     "checkbox",
     "radiobox",
     "switchbox",
