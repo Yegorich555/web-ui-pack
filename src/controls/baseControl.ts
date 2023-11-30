@@ -355,8 +355,8 @@ export default abstract class WUPBaseControl<
       :host strong:empty {
         display: none;
       }
-      :host [aria-required="true"] + strong:after,
-      :host fieldset[aria-required="true"] > legend:after {
+      :host [aria-required=true] + strong:after,
+      :host fieldset[aria-required=true] > legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;

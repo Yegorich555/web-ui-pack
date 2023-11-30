@@ -446,8 +446,8 @@ padding:0;}
       WUP-TEXTAREA strong:empty {
         display: none;
       }
-      WUP-TEXTAREA [aria-required="true"] + strong:after,
-      WUP-TEXTAREA fieldset[aria-required="true"] &gt; legend:after {
+      WUP-TEXTAREA [aria-required=true] + strong:after,
+      WUP-TEXTAREA fieldset[aria-required=true] &gt; legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;

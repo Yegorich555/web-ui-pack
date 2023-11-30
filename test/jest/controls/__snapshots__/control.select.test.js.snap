@@ -463,8 +463,8 @@ padding:0;}
       WUP-SELECT strong:empty {
         display: none;
       }
-      WUP-SELECT [aria-required="true"] + strong:after,
-      WUP-SELECT fieldset[aria-required="true"] &gt; legend:after {
+      WUP-SELECT [aria-required=true] + strong:after,
+      WUP-SELECT fieldset[aria-required=true] &gt; legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;

@@ -439,8 +439,8 @@ padding:0;}
       WUP-NUM strong:empty {
         display: none;
       }
-      WUP-NUM [aria-required="true"] + strong:after,
-      WUP-NUM fieldset[aria-required="true"] &gt; legend:after {
+      WUP-NUM [aria-required=true] + strong:after,
+      WUP-NUM fieldset[aria-required=true] &gt; legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;

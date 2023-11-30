@@ -417,8 +417,8 @@ padding:0;}
       WUP-SWITCH strong:empty {
         display: none;
       }
-      WUP-SWITCH [aria-required="true"] + strong:after,
-      WUP-SWITCH fieldset[aria-required="true"] &gt; legend:after {
+      WUP-SWITCH [aria-required=true] + strong:after,
+      WUP-SWITCH fieldset[aria-required=true] &gt; legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;

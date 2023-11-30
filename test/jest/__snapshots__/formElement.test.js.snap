@@ -264,8 +264,8 @@ WUP-FORM button[type=submit][aria-busy] {
       WUP-TEXT strong:empty {
         display: none;
       }
-      WUP-TEXT [aria-required="true"] + strong:after,
-      WUP-TEXT fieldset[aria-required="true"] &gt; legend:after {
+      WUP-TEXT [aria-required=true] + strong:after,
+      WUP-TEXT fieldset[aria-required=true] &gt; legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;

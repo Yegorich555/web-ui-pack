@@ -117,7 +117,7 @@ export default class WUPPasswordControl<
         :host[w-reverse] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
-        :host input[type='password'] {
+        :host input[type=password] {
           font-family: Verdana, sans-serif;
           letter-spacing: 0.125em;
         }
@@ -128,7 +128,7 @@ export default class WUPPasswordControl<
           -webkit-mask-size: calc(var(--ctrl-icon-size) * 1.3);
           mask-size: calc(var(--ctrl-icon-size) * 1.3);
         }
-        :host button[eye="off"] {
+        :host button[eye=off] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
         :host[w-reverse] button[eye="off"] {

@@ -401,8 +401,8 @@ padding:0;}
       WUP-CHECK strong:empty {
         display: none;
       }
-      WUP-CHECK [aria-required="true"] + strong:after,
-      WUP-CHECK fieldset[aria-required="true"] &gt; legend:after {
+      WUP-CHECK [aria-required=true] + strong:after,
+      WUP-CHECK fieldset[aria-required=true] &gt; legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;

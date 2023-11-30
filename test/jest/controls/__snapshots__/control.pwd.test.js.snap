@@ -503,8 +503,8 @@ padding:0;}
       WUP-PWD strong:empty {
         display: none;
       }
-      WUP-PWD [aria-required="true"] + strong:after,
-      WUP-PWD fieldset[aria-required="true"] &gt; legend:after {
+      WUP-PWD [aria-required=true] + strong:after,
+      WUP-PWD fieldset[aria-required=true] &gt; legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;
@@ -787,7 +787,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD[w-reverse] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
-        WUP-PWD input[type='password'] {
+        WUP-PWD input[type=password] {
           font-family: Verdana, sans-serif;
           letter-spacing: 0.125em;
         }
@@ -817,7 +817,7 @@ mask-image: var(--ctrl-icon-img);
           -webkit-mask-size: calc(var(--ctrl-icon-size) * 1.3);
           mask-size: calc(var(--ctrl-icon-size) * 1.3);
         }
-        WUP-PWD button[eye="off"] {
+        WUP-PWD button[eye=off] {
           --ctrl-icon-img: var(--wup-icon-eye-off);
         }
         WUP-PWD[w-reverse] button[eye="off"] {

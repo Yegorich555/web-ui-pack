@@ -1162,8 +1162,8 @@ padding:0;}
       WUP-CALENDAR strong:empty {
         display: none;
       }
-      WUP-CALENDAR [aria-required="true"] + strong:after,
-      WUP-CALENDAR fieldset[aria-required="true"] &gt; legend:after {
+      WUP-CALENDAR [aria-required=true] + strong:after,
+      WUP-CALENDAR fieldset[aria-required=true] &gt; legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;

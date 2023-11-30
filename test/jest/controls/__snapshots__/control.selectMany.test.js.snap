@@ -476,8 +476,8 @@ padding:0;}
       WUP-SELECTMANY strong:empty {
         display: none;
       }
-      WUP-SELECTMANY [aria-required="true"] + strong:after,
-      WUP-SELECTMANY fieldset[aria-required="true"] &gt; legend:after {
+      WUP-SELECTMANY [aria-required=true] + strong:after,
+      WUP-SELECTMANY fieldset[aria-required=true] &gt; legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;
