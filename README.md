@@ -56,52 +56,52 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
 ## TODO
 
 - [x] [Helpers](#helpers)
-- _HTMLElement_
+- _HTMLElement_ > _BaseElement_
 
-  - _BaseElement_
+  - [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
+  - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
+  - [x] [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
+  - _BaseModal_
 
-    - [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
-    - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
-    - [x] [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
-    - _BaseModal_
+    - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
+      - [ ] Tooltip Hook
+    - [x] [ModalElement](src/modalElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
+      - [x] Modal in modal
+      - [x] Confirm modal
+      - [x] Confirm hook (use WUPModal.$useConfirmHook)
+      - [x] Modal form
+    - [ ] Notice (alt of react-tostify)
 
-      - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
-        - [ ] Tooltip Hook
-      - [x] [ModalElement](src/modalElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
-        - [x] Modal in modal
-        - [x] Confirm modal
-        - [x] Confirm hook (use WUPModal.$useConfirmHook)
-        - [x] Modal form
-      - [ ] Notice (alt of react-tostify)
-    - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
+  - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
 
-    - _BaseControl_
-      - [x] [SwitchControl (toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
-        - [x] [CheckControl (checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
-          - [ ] CheckTreeControl
-      - [x] [RadioControl (radioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
-        - [ ] Full customized items
-      - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-        - [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-        - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
-          - [ ] TextRichControl
-        - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
-        - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
-        - [x] [_BaseComboControl_](src/controls/baseCombo.ts)
-          - [x] [SelectControl (combobox)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-            - [ ] Full customized menu
-            - [x] [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
-          - [ ] SearchControl
-          - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
-          - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
-            - [ ] DateTimeControl
-            - [ ] DateRangeControl
-            - [ ] option `multiple`
-      - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
-      - [ ] SliderControl (progress bar)
-      - [ ] FileControl
-      - [ ] ImageControl (AvatarEditor)
-      - [ ] ColorControl (ColorPicker)
+  - _BaseControl_
+
+    - [x] [SwitchControl (toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
+      - [x] [CheckControl (checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
+        - [ ] CheckTreeControl
+    - [x] [RadioControl (radioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
+      - [ ] Full customized items
+    - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+      - [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+      - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
+        - [ ] TextRichControl
+      - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
+      - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
+      - [x] [_BaseComboControl_](src/controls/baseCombo.ts)
+        - [x] [SelectControl (combobox)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
+          - [ ] Full customized menu
+          - [x] [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
+        - [ ] SearchControl
+        - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
+        - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
+          - [ ] DateTimeControl
+          - [ ] DateRangeControl
+          - [ ] option `multiple`
+    - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
+    - [ ] SliderControl (progress bar)
+    - [ ] FileControl
+    - [ ] ImageControl (AvatarEditor)
+    - [ ] ColorControl (ColorPicker)
 
   - [ ] MediaPlayer (Video player)
   - [ ] InfiniteScroll
