@@ -52,7 +52,7 @@ describe("localeInfo", () => {
     localeInfo.namesDayShort = undefined;
     expect(localeInfo.namesDayShort).toBeDefined();
 
-    if (Intl.Locale.prototype.weekInfo) {
+    if (new Intl.Locale("en-US").weekInfo) {
       jest.spyOn(Intl.Locale.prototype, "weekInfo", "get").mockImplementationOnce(() => ({ firstDay: 7 }));
     } else {
       Intl.Locale.prototype.weekInfo = { firstDay: 7 };
