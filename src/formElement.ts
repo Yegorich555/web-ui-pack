@@ -40,7 +40,9 @@ declare global {
     interface EventMap extends WUP.Base.EventMap {
       /** Fires before $submit is happened; can be prevented via `e.preventDefault()` */
       $willSubmit: CustomEvent<Pick<SubmitDetails, "relatedEvent" | "relatedForm" | "submitter">>;
-      /** Fires by user-submit when validation successful and model is collected */
+      /** Fires by user-submit when validation successful and model is collected
+       *  * @tutorial
+       * call `e.preventDefault()` to prevent dispatching `$submitEnd` & closing modal (if form in modal) */
       $submit: CustomEvent<SubmitDetails>;
       /** Fires when submit is end (after http-response);
        * @tutorial
@@ -278,7 +280,8 @@ export default class WUPFormElement<
   $onWillSubmit?: (ev: WUP.Form.EventMap["$willSubmit"]) => void;
   /** Dispatched on submit
    * @tutorial
-   * need to return promise to lock form and show spinner on http-request */
+   * * need to return promise to lock form and show spinner on http-request
+   * * call `e.preventDefault()` to prevent dispatching `$submitEnd` & closing modal (if form in modal) */
   $onSubmit?: (ev: WUP.Form.EventMap["$submit"]) => void | Promise<unknown>;
   /** Fires when submit is end (after http-response);
    * @tutorial
@@ -349,6 +352,8 @@ export default class WUPFormElement<
   $submit(): void {
     this.gotSubmit(null, this);
   }
+
+  // todo add $validate()
 
   /** Called on every spin-render */
   renderSpin(target: HTMLElement): WUPSpinElement {
@@ -439,22 +444,29 @@ export default class WUPFormElement<
     const onlyChanged = this._opts.submitActions & SubmitActions.collectChanged;
     const m = this.#ctr.$modelFromControls({}, arrCtrl, "$value", !!onlyChanged);
     // fire events
-    const ev: WUP.Form.EventMap["$submit"] = new CustomEvent("$submit", {
-      cancelable: false,
-      bubbles: true,
-      detail: {
-        model: m,
-        relatedEvent: e,
-        relatedForm: this,
-        submitter,
-      },
-    });
-
     const needReset = this._opts.submitActions & SubmitActions.reset;
     setTimeout(() => {
-      // todo allow preventDefault on submit to prevent submitEnd event
-      const p1 = this.$onSubmit?.call(this, ev); // todo it's wrong because target is null here
-      this.dispatchEvent(ev);
+      let p1: Promise<void> | unknown;
+      const orig = this.$onSubmit;
+      if (orig) {
+        // hook on callback otherwise this.$onSubmit = ()=>return Promise; can prevent event
+        this.$onSubmit = (ev) => {
+          p1 = orig.call(this, ev);
+          this.$onSubmit = orig; // rollback to prev
+        };
+      }
+      const ev = this.fireEvent("$submit", {
+        cancelable: true,
+        bubbles: true,
+        detail: {
+          model: m,
+          relatedEvent: e,
+          relatedForm: this,
+          submitter,
+        },
+      }) as Events["$submit"];
+      this.$onSubmit = orig; // again here because event propagation can be stopped
+
       // SubmitEvent constructor doesn't exist on some browsers: https://developer.mozilla.org/en-US/docs/Web/API/SubmitEvent/SubmitEvent
       const ev2 = new (window.SubmitEvent || Event)("submit", { submitter, cancelable: false, bubbles: true });
       /* istanbul ignore else */
@@ -474,7 +486,8 @@ export default class WUPFormElement<
           success = true;
         })
         .finally(() => {
-          this.fireEvent("$submitEnd", { detail: { success }, cancelable: true, bubbles: true });
+          !ev.defaultPrevented &&
+            this.fireEvent("$submitEnd", { detail: { success }, cancelable: true, bubbles: true });
         });
     });
   }

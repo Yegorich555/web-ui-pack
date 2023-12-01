@@ -347,7 +347,7 @@ describe("formElement", () => {
 
       // when request failed
       jest.clearAllMocks();
-      $onSubmit.mockImplementationOnce(() => Promise.reject());
+      $onSubmit.mockImplementationOnce(() => Promise.reject(new Error("test reject")));
       btnSubmit.click();
       await h.wait();
       expect($submitEvEnd).toBeCalledTimes(1);
@@ -410,6 +410,33 @@ describe("formElement", () => {
       expect($willSubmitEv).toBeCalledTimes(1);
       expect(submitEv).toBeCalledTimes(1);
       expect(onsubmit).toBeCalledTimes(1);
+
+      // whole call-chain
+      el = document.body.appendChild(document.createElement(el.tagName));
+      const arrChain = [];
+      const eventResult = { isPrevented: false, isTargetDefined: false };
+      // check default scenario
+      const onSubmitOriginal = (e) => {
+        arrChain.push("callback");
+        e.preventDefault();
+        eventResult.isPrevented = e.defaultPrevented;
+        eventResult.isTargetDefined = !!e.target;
+      };
+      el.$onSubmit = onSubmitOriginal;
+      el.addEventListener("$submit", () => arrChain.push("event"), { once: true });
+      // el.addEventListener("$onSubmitEnd", () => arrChain.push("eventEnd"), { once: true });
+      el.addEventListener("$submit", () => arrChain.push("event-capture"), { once: true, capture: true });
+      el.addEventListener("$submit", () => arrChain.push("event-capture2"), { once: true, capture: true });
+      el.$submit();
+      await h.wait();
+      expect(arrChain).toStrictEqual([
+        "event-capture", //
+        "event-capture2",
+        "callback",
+        "event",
+      ]);
+      expect(eventResult).toStrictEqual({ isPrevented: true, isTargetDefined: true });
+      expect(el.$onSubmit).toBe(onSubmitOriginal);
     });
 
     test("prevent submit", async () => {
@@ -453,6 +480,27 @@ describe("formElement", () => {
       inputs[0].dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }));
       await h.wait(1);
       expect($submitEv).toBeCalledTimes(0);
+
+      // prevent $submitEnd
+      jest.clearAllMocks();
+      const onSubmit = jest.fn();
+      const onSubmitEnd = jest.fn();
+      el.$onSubmit = onSubmit;
+      el.$onSubmitEnd = onSubmitEnd;
+      btnSubmit.click();
+      await h.wait();
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(onSubmitEnd).toBeCalledTimes(1);
+      // when prevented
+      jest.clearAllMocks();
+      onSubmit.mockImplementationOnce((e) => {
+        e.preventDefault();
+        return Promise.resolve(true);
+      });
+      btnSubmit.click();
+      await h.wait();
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(onSubmitEnd).toBeCalledTimes(0);
     });
 
     test("collected model", async () => {
