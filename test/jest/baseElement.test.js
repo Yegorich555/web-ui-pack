@@ -489,6 +489,50 @@ describe("baseElement", () => {
     el.$onTestCustom = evCallback;
     el.fireEvent("testCustom");
     expect(el.$onTestCustom).not.toBeCalled();
+
+    // whole call-chain
+    el = document.body.appendChild(document.createElement(el.tagName));
+    let arrChain = [];
+    let clickResult = { isPrevented: false, isTargetDefined: false };
+    // check default scenario
+    el.onclick = (e) => {
+      arrChain.push("callback");
+      e.preventDefault();
+      clickResult.isPrevented = e.defaultPrevented;
+      clickResult.isTargetDefined = !!e.target;
+    };
+    el.addEventListener("click", () => arrChain.push("event"), { once: true });
+    el.addEventListener("click", () => arrChain.push("event-capture"), { once: true, capture: true });
+    el.addEventListener("click", () => arrChain.push("event-capture2"), { once: true, capture: true });
+    el.dispatchEvent(new Event("click", { bubbles: true, cancelable: true }));
+    expect(arrChain).toStrictEqual([
+      "event-capture", //
+      "event-capture2",
+      "callback",
+      "event",
+    ]);
+    expect(clickResult).toStrictEqual({ isPrevented: true, isTargetDefined: true });
+
+    // same with custom event
+    arrChain = [];
+    clickResult = { isPrevented: false, isTargetDefined: false };
+    el.$onChange = (e) => {
+      arrChain.push("callback");
+      e.preventDefault();
+      clickResult.isPrevented = e.defaultPrevented;
+      clickResult.isTargetDefined = !!e.target;
+    };
+    el.addEventListener("$change", () => arrChain.push("event"), { once: true });
+    el.addEventListener("$change", () => arrChain.push("event-capture"), { once: true, capture: true });
+    el.addEventListener("$change", () => arrChain.push("event-capture2"), { once: true, capture: true });
+    el.fireEvent("$change", { cancelable: true, bubbles: true });
+    expect(arrChain).toStrictEqual([
+      "event-capture", //
+      "event-capture2",
+      "callback",
+      "event",
+    ]);
+    expect(clickResult).toStrictEqual({ isPrevented: true, isTargetDefined: true });
   });
 
   test("appendEvent", () => {

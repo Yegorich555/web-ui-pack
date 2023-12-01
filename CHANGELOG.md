@@ -15,6 +15,7 @@
 
 ---
 
+- **Global**. _Custom event callbacks like $onChange(e) have `e.target: null`_
 - **Controls**
   - _Wrong TS-type on **$onChange()** callback_
 - [ModalElement](src/modalElement.ts.ts). _button[close] is overlayed by header_

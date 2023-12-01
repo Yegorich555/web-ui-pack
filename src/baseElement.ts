@@ -486,19 +486,14 @@ export default abstract class WUPBaseElement<
     eventInit.cancelable ??= false;
     eventInit.bubbles ??= true;
     const ev = new CustomEvent<T>(type as string, eventInit);
-
-    let sip = false;
     const isCustom = (type as string).startsWith("$");
     if (isCustom) {
-      ev.stopImmediatePropagation = () => {
-        sip = true;
-        CustomEvent.prototype.stopImmediatePropagation.call(ev); // todo issue target is missed here
-      };
       const str = (type as string).substring(1, 2).toUpperCase() + (type as string).substring(2);
-      (this as any)[`$on${str}`]?.call(this, ev);
+      const f = (this as any)[`$on${str}`];
+      f && this.addEventListener(type, (evHook) => f.call(this, evHook), { once: true, capture: true });
     }
 
-    !sip && super.dispatchEvent(ev);
+    super.dispatchEvent(ev);
     return ev;
   }
 
