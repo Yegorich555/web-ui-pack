@@ -8,6 +8,8 @@
 
 ---
 
+- **Modal**
+  - Allow to prevent auto closing via `form.$onSubmitEnd = (e) => e.preventDefault()`
 - **Controls**
   - Add css-animation for box-shadow/borders
 

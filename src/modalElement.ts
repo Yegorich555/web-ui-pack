@@ -520,7 +520,7 @@ export default class WUPModalElement<
     this.appendEvent(this, "keydown", (ev) => this.gotKeyDown(ev), { passive: false });
     // @ts-expect-error - TS isn't good enough for looking for types
     this.appendEvent(this, "$submitEnd", (sev: WUP.Form.EventMap["$submitEnd"]) => {
-      sev.detail.success && this.goClose(ModalCloseCases.onSubmitEnd, sev);
+      sev.detail.success && !sev.defaultPrevented && this.goClose(ModalCloseCases.onSubmitEnd, sev);
     });
     // this.appendEvent(this, "focusout", (ev) => this.gotFocusOut(ev), { passive: false });
 

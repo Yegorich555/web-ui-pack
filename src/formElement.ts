@@ -42,7 +42,9 @@ declare global {
       $willSubmit: CustomEvent<Pick<SubmitDetails, "relatedEvent" | "relatedForm" | "submitter">>;
       /** Fires by user-submit when validation successful and model is collected */
       $submit: CustomEvent<SubmitDetails>;
-      /** Fires when submit is end (after http-response) */
+      /** Fires when submit is end (after http-response);
+       * @tutorial
+       * call `e.preventDefault()` to prevent closing modal (if form in modal) */
       $submitEnd: CustomEvent<{ success: boolean }>;
     }
 
@@ -274,9 +276,13 @@ export default class WUPFormElement<
 
   /** Fires before $submit is happened; can be prevented via `e.preventDefault()` */
   $onWillSubmit?: (ev: WUP.Form.EventMap["$willSubmit"]) => void;
-  /** Dispatched on submit. Return promise to lock form and show spinner on http-request */
+  /** Dispatched on submit
+   * @tutorial
+   * need to return promise to lock form and show spinner on http-request */
   $onSubmit?: (ev: WUP.Form.EventMap["$submit"]) => void | Promise<unknown>;
-  /** Fires when submit is end (after http-response) */
+  /** Fires when submit is end (after http-response);
+   * @tutorial
+   * call `e.preventDefault()` to prevent closing modal (if form in modal) */
   $onSubmitEnd?: (ev: WUP.Form.EventMap["$submitEnd"]) => void;
   /** Dispatched on submit */
   // It's not required but called: $onsubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void;
@@ -446,7 +452,8 @@ export default class WUPFormElement<
 
     const needReset = this._opts.submitActions & SubmitActions.reset;
     setTimeout(() => {
-      const p1 = this.$onSubmit?.call(this, ev);
+      // todo allow preventDefault on submit to prevent submitEnd event
+      const p1 = this.$onSubmit?.call(this, ev); // todo it's wrong because target is null here
       this.dispatchEvent(ev);
       // SubmitEvent constructor doesn't exist on some browsers: https://developer.mozilla.org/en-US/docs/Web/API/SubmitEvent/SubmitEvent
       const ev2 = new (window.SubmitEvent || Event)("submit", { submitter, cancelable: false, bubbles: true });
@@ -467,8 +474,7 @@ export default class WUPFormElement<
           success = true;
         })
         .finally(() => {
-          // todo use ev.preventDefault() to prevent submitEnd + modalClose
-          this.fireEvent("$submitEnd", { detail: { success }, cancelable: false, bubbles: true });
+          this.fireEvent("$submitEnd", { detail: { success }, cancelable: true, bubbles: true });
         });
     });
   }
