@@ -467,6 +467,7 @@ export default class WUPFormElement<
           success = true;
         })
         .finally(() => {
+          // todo use ev.preventDefault() to prevent submitEnd + modalClose
           this.fireEvent("$submitEnd", { detail: { success }, cancelable: false, bubbles: true });
         });
     });
