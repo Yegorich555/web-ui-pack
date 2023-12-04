@@ -1130,8 +1130,15 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
+      WUP-CALENDAR[busy] {
+        opacity: 0.8;
+        cursor: inherit;
+       -webkit-user-select: none;
+        user-select: none;
+      }
       [disabled] WUP-CALENDAR &gt; label,
-      WUP-CALENDAR[disabled] &gt; label {
+      WUP-CALENDAR[disabled] &gt; label,
+      WUP-CALENDAR[busy] &gt; label {
         pointer-events: none;
       }
       WUP-CALENDAR label {

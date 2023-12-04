@@ -414,8 +414,15 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
+      WUP-TEXTAREA[busy] {
+        opacity: 0.8;
+        cursor: inherit;
+       -webkit-user-select: none;
+        user-select: none;
+      }
       [disabled] WUP-TEXTAREA &gt; label,
-      WUP-TEXTAREA[disabled] &gt; label {
+      WUP-TEXTAREA[disabled] &gt; label,
+      WUP-TEXTAREA[busy] &gt; label {
         pointer-events: none;
       }
       WUP-TEXTAREA label {

@@ -431,8 +431,15 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
+      WUP-DATE[busy] {
+        opacity: 0.8;
+        cursor: inherit;
+       -webkit-user-select: none;
+        user-select: none;
+      }
       [disabled] WUP-DATE &gt; label,
-      WUP-DATE[disabled] &gt; label {
+      WUP-DATE[disabled] &gt; label,
+      WUP-DATE[busy] &gt; label {
         pointer-events: none;
       }
       WUP-DATE label {

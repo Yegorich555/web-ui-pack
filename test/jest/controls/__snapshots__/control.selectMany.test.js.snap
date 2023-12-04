@@ -444,8 +444,15 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
+      WUP-SELECTMANY[busy] {
+        opacity: 0.8;
+        cursor: inherit;
+       -webkit-user-select: none;
+        user-select: none;
+      }
       [disabled] WUP-SELECTMANY &gt; label,
-      WUP-SELECTMANY[disabled] &gt; label {
+      WUP-SELECTMANY[disabled] &gt; label,
+      WUP-SELECTMANY[busy] &gt; label {
         pointer-events: none;
       }
       WUP-SELECTMANY label {

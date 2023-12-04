@@ -369,8 +369,15 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
+      WUP-CHECK[busy] {
+        opacity: 0.8;
+        cursor: inherit;
+       -webkit-user-select: none;
+        user-select: none;
+      }
       [disabled] WUP-CHECK &gt; label,
-      WUP-CHECK[disabled] &gt; label {
+      WUP-CHECK[disabled] &gt; label,
+      WUP-CHECK[busy] &gt; label {
         pointer-events: none;
       }
       WUP-CHECK label {

@@ -323,8 +323,15 @@ export default abstract class WUPBaseControl<
         -webkit-user-select: none;
         user-select: none;
       }
+      :host[busy] {
+        opacity: 0.8;
+        cursor: inherit;
+       -webkit-user-select: none;
+        user-select: none;
+      }
       [disabled] :host > label,
-      :host[disabled] > label {
+      :host[disabled] > label,
+      :host[busy] > label {
         pointer-events: none;
       }
       :host label {

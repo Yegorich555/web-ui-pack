@@ -407,8 +407,15 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
+      WUP-NUM[busy] {
+        opacity: 0.8;
+        cursor: inherit;
+       -webkit-user-select: none;
+        user-select: none;
+      }
       [disabled] WUP-NUM &gt; label,
-      WUP-NUM[disabled] &gt; label {
+      WUP-NUM[disabled] &gt; label,
+      WUP-NUM[busy] &gt; label {
         pointer-events: none;
       }
       WUP-NUM label {

@@ -471,8 +471,15 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
+      WUP-PWD[busy] {
+        opacity: 0.8;
+        cursor: inherit;
+       -webkit-user-select: none;
+        user-select: none;
+      }
       [disabled] WUP-PWD &gt; label,
-      WUP-PWD[disabled] &gt; label {
+      WUP-PWD[disabled] &gt; label,
+      WUP-PWD[busy] &gt; label {
         pointer-events: none;
       }
       WUP-PWD label {

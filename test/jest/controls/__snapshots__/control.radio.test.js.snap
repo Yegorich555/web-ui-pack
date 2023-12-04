@@ -814,8 +814,15 @@ padding:0;}
         -webkit-user-select: none;
         user-select: none;
       }
+      WUP-RADIO[busy] {
+        opacity: 0.8;
+        cursor: inherit;
+       -webkit-user-select: none;
+        user-select: none;
+      }
       [disabled] WUP-RADIO &gt; label,
-      WUP-RADIO[disabled] &gt; label {
+      WUP-RADIO[disabled] &gt; label,
+      WUP-RADIO[busy] &gt; label {
         pointer-events: none;
       }
       WUP-RADIO label {
