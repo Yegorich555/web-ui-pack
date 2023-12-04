@@ -13,6 +13,8 @@
   - Allow to prevent auto closing via `form.$onSubmit = (e) => e.preventDefault()`
 - **Controls**
   - Add css-animation for box-shadow/borders
+- **Form**
+  - Add `form.$validate(...)` for manual triggering validations
 
 ### Fixes
 

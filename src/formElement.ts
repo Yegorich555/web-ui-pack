@@ -353,7 +353,20 @@ export default class WUPFormElement<
     this.gotSubmit(null, this);
   }
 
-  // todo add $validate()
+  /** Validate all attached & not disabled controls
+   * @param tillFirstInvalid point `true` if need to find first invalid control; if skipped then will be defined from `$options.submitActions: SubmitActions.validateUntilFirst`
+   * @returns array of invalid controls (empty if all are valid) */
+  $validate(tillFirstInvalid?: boolean): Array<IBaseControl> {
+    if (tillFirstInvalid === undefined) {
+      tillFirstInvalid = !!(this._opts.submitActions & SubmitActions.validateUntilFirst);
+    }
+    const arrCtrl = this.$controlsAttached;
+    if (tillFirstInvalid) {
+      const ctrl = arrCtrl.find((c) => c.validateBySubmit() && c.canShowError);
+      return ctrl ? [ctrl] : [];
+    }
+    return arrCtrl.filter((c) => c.validateBySubmit() && c.canShowError);
+  }
 
   /** Called on every spin-render */
   renderSpin(target: HTMLElement): WUPSpinElement {

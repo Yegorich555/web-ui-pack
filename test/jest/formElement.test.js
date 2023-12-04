@@ -943,4 +943,30 @@ describe("formElement", () => {
       `"<h2>..</h2><h3>..</h3><h3><wup-form aria-labelledby="sid" role="form"><div id="sid">.</div></wup-form></h3>"`
     );
   });
+
+  test("$validate()", async () => {
+    inputs.forEach((a) => (a.$options.validations = { required: true }));
+    inputs[0].$options.validations.email = true;
+    inputs[0].$value = "bad-email";
+    inputs[1].$value = "firstName";
+
+    inputs[2].$options.name = null;
+    expect(inputs[0].$isValid).toBe(false);
+    expect(inputs[1].$isValid).toBe(true);
+    // expect(inputs[2].$isValid).toBe(false);
+
+    expect(el.$validate(true).map((a) => a.$options.name)).toStrictEqual(["email"]);
+    expect(el.$validate(false).map((a) => a.$options.name)).toStrictEqual(["email"]);
+    expect(el.$validate().map((a) => a.$options.name)).toStrictEqual(["email"]);
+
+    inputs[1].$value = "";
+    expect(el.$validate(true).map((a) => a.$options.name)).toStrictEqual(["email"]);
+    expect(el.$validate(false).map((a) => a.$options.name)).toStrictEqual(["email", "firstName"]);
+    expect(el.$validate().map((a) => a.$options.name)).toStrictEqual(["email"]); // because depends on submitActions
+
+    inputs.forEach((a) => (a.$options.validations = null));
+    expect(el.$validate(true).map((a) => a.$options.name)).toStrictEqual([]);
+    expect(el.$validate(false).map((a) => a.$options.name)).toStrictEqual([]);
+    expect(el.$validate().map((a) => a.$options.name)).toStrictEqual([]);
+  });
 });
