@@ -208,6 +208,9 @@ export default class WUPFormElement<
           --base-btn-bg: var(--btn-submit-bg);
           --base-btn-focus: var(--btn-submit-focus);
           display: block;
+        }
+        :host[aria-busy] {
+          cursor: progress;
         }`;
   }
 
@@ -370,6 +373,7 @@ export default class WUPFormElement<
 
   /** Called on every spin-render */
   renderSpin(target: HTMLElement): WUPSpinElement {
+    // todo maybe drop spinner and use custom border spin ???
     WUPSpinElement.$use();
     const spin = document.createElement("wup-spin");
     spin.$options.fit = true;
@@ -386,23 +390,28 @@ export default class WUPFormElement<
     }
 
     if (v) {
-      const wasDisabled = this._opts.disabled;
+      const wasDisabled = this._opts.readOnly;
       if (this._opts.submitActions & SubmitActions.lockOnPending) {
-        this.$options.disabled = true;
+        this.$options.readOnly = true;
+        this.setAttribute("aria-busy", true);
+        this.$controls.forEach((c) => {
+          c.setAttribute("busy", "");
+          // c.$refInput.setAttribute("aria-busy", true);
+        });
       }
-      const btns: Array<HTMLButtonElement & { _wupDisabled: boolean }> = [];
       const spins: Array<WUPSpinElement> = [];
-      this.querySelectorAll("[type='submit']").forEach((b) => {
+      this.querySelectorAll("[type=submit]").forEach((b) => {
         spins.push(this.appendChild(this.renderSpin(b as HTMLButtonElement)));
-        (b as HTMLButtonElement & { _wupDisabled: boolean })._wupDisabled = (b as HTMLButtonElement).disabled;
-        (b as HTMLButtonElement).disabled = true; // todo it moves focus to body; need somehow resolve it
-        btns.push(b as HTMLButtonElement & { _wupDisabled: boolean });
       });
 
       this.#stopPending = () => {
         this.#stopPending = undefined;
-        this.$options.disabled = wasDisabled;
-        btns.forEach((b) => (b.disabled = b._wupDisabled));
+        this.$options.readOnly = wasDisabled;
+        this.removeAttribute("aria-busy");
+        this.$controls.forEach((c) => {
+          c.removeAttribute("busy");
+          // c.$refInput.removeAttribute("aria-busy");
+        }); // WARN: possible that aria-busy somewhere before
         spins.forEach((s) => s.remove());
       };
     } else {
@@ -413,6 +422,10 @@ export default class WUPFormElement<
   /** Called on submit before validation (to fire validation & $onSubmit if successful) */
   gotSubmit(e: KeyboardEvent | MouseEvent | null, submitter: HTMLElement): void {
     e?.preventDefault(); // prevent default keyboard or mouse event because it's handled in custom event
+
+    if (this.$isPending && this._opts.submitActions & SubmitActions.lockOnPending) {
+      return;
+    }
 
     const willEv = this.fireEvent("$willSubmit", {
       bubbles: true,

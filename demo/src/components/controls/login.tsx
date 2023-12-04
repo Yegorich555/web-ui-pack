@@ -6,14 +6,15 @@ export default function Login() {
           el.$initModel = { email: "some@email.com", password: "some pwd" };
           el.$onSubmit = (e) => {
             console.warn("submit details:", e.detail);
-            // return new Promise((res) =>
-            //   setTimeout(() => {
-            //     res(true);
-            //   }, 1000)
-            // );
+            return new Promise((res) =>
+              setTimeout(() => {
+                res(true);
+              }, 1000)
+            );
           };
           // el.$onSubmitEnd = (e) => console.warn("submit end", e.detail);
           el.addEventListener("$submitEnd", (e) => console.warn("submit end", e.detail));
+          // el.$isPending = true;
         }
       }}
     >

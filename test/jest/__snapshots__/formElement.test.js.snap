@@ -149,6 +149,9 @@ WUP-FORM button[type=submit][aria-busy] {
           --base-btn-focus: var(--btn-submit-focus);
           display: block;
         }
+        WUP-FORM[aria-busy] {
+          cursor: progress;
+        }
   :root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
         --ctrl-focus: var(--base-focus);
@@ -232,8 +235,15 @@ WUP-FORM button[type=submit][aria-busy] {
         -webkit-user-select: none;
         user-select: none;
       }
+      WUP-TEXT[busy] {
+        opacity: 0.8;
+        cursor: inherit;
+       -webkit-user-select: none;
+        user-select: none;
+      }
       [disabled] WUP-TEXT &gt; label,
-      WUP-TEXT[disabled] &gt; label {
+      WUP-TEXT[disabled] &gt; label,
+      WUP-TEXT[busy] &gt; label {
         pointer-events: none;
       }
       WUP-TEXT label {

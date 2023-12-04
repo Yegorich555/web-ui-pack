@@ -23,6 +23,9 @@
 - **Global**. _Custom event callbacks like $onChange(e) have `e.target: null`_
 - **Controls**
   - _Wrong TS-type on **$onChange()** callback_
+- **Form**
+  - _Focus lost on pending (because every active element is disabled)_. Refactored pending state: elements changes to `readonly` + applied css-style [busy] + added attribute `aria-busy` to form
+  - _Possible to submit by Enter key in pending state_
 - [ModalElement](src/modalElement.ts.ts). _button[close] is overlayed by header_
 
 ---
