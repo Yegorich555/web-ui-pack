@@ -143,11 +143,32 @@ WUP-FORM button[type=submit][disabled] {
 WUP-FORM button[type=submit][aria-busy] {
   cursor: wait;
 }
+WUP-FORM button[type=submit][busy] {
+  position: relative;
+}
+WUP-FORM button[type=submit][busy]:after {
+    content: "";
+    display: block;
+    position: absolute;
+    height: 3px;
+    width: 90%;
+    width: calc(100% - calc(var(--base-margin) * 2));
+    background-color: #fff;
+    animation: BTN-BUSY 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+    opacity: 0.3;
+    left: 50%;
+  }
+  @keyframes BTN-BUSY {
+    0% { transform: translateX(-50%) scaleX(40%); }
+    50% { transform: translateX(-50%) scaleX(100%); }
+    100% { transform: translateX(-50%) scaleX(40%); }
+  }
         WUP-FORM button[type=submit] {
           --base-btn-text: var(--btn-submit-text);
           --base-btn-bg: var(--btn-submit-bg);
           --base-btn-focus: var(--btn-submit-focus);
           display: block;
+          position: relative;
         }
         WUP-FORM[aria-busy] {
           cursor: progress;

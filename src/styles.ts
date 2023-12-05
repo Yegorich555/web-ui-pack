@@ -157,7 +157,27 @@ ${tag}[disabled] {
 }
 ${tag}[aria-busy] {
   cursor: wait;
-}`;
+}
+${tag}[busy] {
+  position: relative;
+}
+${tag}[busy]:after {
+    content: "";
+    display: block;
+    position: absolute;
+    height: 3px;
+    width: 90%;
+    width: calc(100% - calc(var(--base-margin) * 2));
+    background-color: #fff;
+    animation: BTN-BUSY 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+    opacity: 0.3;
+    left: 50%;
+  }
+  @keyframes BTN-BUSY {
+    0% { transform: translateX(-50%) scaleX(40%); }
+    50% { transform: translateX(-50%) scaleX(100%); }
+    100% { transform: translateX(-50%) scaleX(40%); }
+  }`;
 }
 
 /** Returns default style for popup menu */

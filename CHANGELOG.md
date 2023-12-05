@@ -15,6 +15,7 @@
   - Add css-animation for box-shadow/borders
 - **Form**
   - Add `form.$validate(...)` for manual triggering validations
+  - Changed spinner to custom friendly looked
 
 ### Fixes
 

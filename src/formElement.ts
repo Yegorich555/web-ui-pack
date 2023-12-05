@@ -1,7 +1,6 @@
 import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
-import WUPSpinElement from "./spinElement";
 import { WUPcssButton } from "./styles";
 
 export const enum SubmitActions {
@@ -208,6 +207,7 @@ export default class WUPFormElement<
           --base-btn-bg: var(--btn-submit-bg);
           --base-btn-focus: var(--btn-submit-focus);
           display: block;
+          position: relative;
         }
         :host[aria-busy] {
           cursor: progress;
@@ -372,14 +372,22 @@ export default class WUPFormElement<
   }
 
   /** Called on every spin-render */
-  renderSpin(target: HTMLElement): WUPSpinElement {
-    // todo maybe drop spinner and use custom border spin ???
-    WUPSpinElement.$use();
-    const spin = document.createElement("wup-spin");
-    spin.$options.fit = true;
-    spin.$options.overflowFade = false;
-    spin.$options.overflowTarget = target as HTMLButtonElement;
-    return spin;
+  renderSpin(target: HTMLElement): { dispose: () => void } {
+    // WUPSpinElement.$use();
+    // const spin = document.createElement("wup-spin");
+    // spin.$options.fit = true;
+    // spin.$options.overflowFade = false;
+    // spin.$options.overflowTarget = target;
+    // target.appendChild(spin);
+    // return { dispose: ()=>spin.remove() }
+    target.setAttribute("aria-busy", true);
+    target.setAttribute("busy", "");
+    return {
+      dispose: () => {
+        target.removeAttribute("busy");
+        target.removeAttribute("aria-busy");
+      },
+    };
   }
 
   #stopPending?: () => void;
@@ -399,9 +407,9 @@ export default class WUPFormElement<
           // c.$refInput.setAttribute("aria-busy", true);
         });
       }
-      const spins: Array<WUPSpinElement> = [];
+      const backArr: Array<Func> = [];
       this.querySelectorAll("[type=submit]").forEach((b) => {
-        spins.push(this.appendChild(this.renderSpin(b as HTMLButtonElement)));
+        backArr.push(this.renderSpin(b as HTMLButtonElement).dispose);
       });
 
       this.#stopPending = () => {
@@ -412,7 +420,7 @@ export default class WUPFormElement<
           c.removeAttribute("busy");
           // c.$refInput.removeAttribute("aria-busy");
         }); // WARN: possible that aria-busy somewhere before
-        spins.forEach((s) => s.remove());
+        backArr.forEach((s) => s());
       };
     } else {
       this.#stopPending!();
