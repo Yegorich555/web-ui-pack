@@ -117,8 +117,10 @@ ${tag}::-webkit-scrollbar-track-piece:horizontal:end {
 }`;
 }
 
-// todo min-width here affects on all buttons if: useBuiltinStyle(WUPcssButton("button"));
-/** Returns default style for primary/submit button */
+/** Returns default style for primary/submit button
+ * @tutorial
+ * WARN: it contains min-width: 10em...
+ */
 /* istanbul ignore next */
 export function WUPcssButton(tag: string, type: 1 | 2 | 3 = 1): string {
   if (type === 1) {
