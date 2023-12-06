@@ -101,7 +101,7 @@ export default class WUPNumberControl<
   TOptions extends WUP.Number.Options = WUP.Number.Options,
   EventMap extends WUP.Number.EventMap = WUP.Number.EventMap
 > extends TextAnyControl<ValueType, TOptions, EventMap> {
-  // #ctr = this.constructor as typeof WUPNumberControl;
+  #ctr = this.constructor as typeof WUPNumberControl;
 
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Number.Options = {
@@ -115,6 +115,42 @@ export default class WUPNumberControl<
     },
     format: null,
   };
+
+  /** Custom number parsing: better Number.parse because ignores wrong chars + depends format */
+  static $parse(s: string, format: Required<WUP.Number.Format>): number | undefined {
+    let v: number | undefined = 0;
+    let ok = false;
+    let dec: number | null = null;
+    let decLn = 1;
+    let decI = 0;
+    const f = format;
+    for (let i = 0; i < s.length; ++i) {
+      const ascii = s.charCodeAt(i);
+      const num = ascii - 48;
+      if (num >= 0 && num <= 9) {
+        ok = true;
+        if (dec === null) {
+          v = v * 10 + num;
+        } else if (f.maxDecimal >= ++decI) {
+          dec = dec * 10 + num;
+          decLn *= 10;
+        }
+      } else if (ascii === f.sepDecimal.charCodeAt(0)) {
+        // WARN: expected sepDecimal is single char
+        dec = 0;
+      }
+    }
+
+    if (dec) {
+      v += dec / decLn;
+    }
+    if (!ok) {
+      v = undefined; // case impossible but maybe...
+    } else if (s.charCodeAt(0) === 45) {
+      v *= -1; // case: "-123"
+    }
+    return v;
+  }
 
   /** Returns $options.format joined with defaults */
   get $format(): Required<WUP.Number.Format> {
@@ -175,41 +211,9 @@ export default class WUPNumberControl<
   }
 
   override parseInput(text: string): ValueType | undefined {
-    // such parsing is better then Number.parse because ignores wrong chars
-    let v: number | undefined = 0;
-    let ok = false;
-    let dec: number | null = null;
-    let decLn = 1;
-    let decI = 0;
-    const f = this.$format;
-    for (let i = 0; i < text.length; ++i) {
-      const ascii = text.charCodeAt(i);
-      const num = ascii - 48;
-      if (num >= 0 && num <= 9) {
-        ok = true;
-        if (dec === null) {
-          v = v * 10 + num;
-        } else if (f.maxDecimal >= ++decI) {
-          dec = dec * 10 + num;
-          decLn *= 10;
-        }
-      } else if (ascii === f.sepDecimal.charCodeAt(0)) {
-        // WARN: expected sepDecimal is single char
-        dec = 0;
-      }
-    }
-
-    if (dec) {
-      v += dec / decLn;
-    }
-    if (!ok) {
-      v = undefined; // case impossible but maybe...
-    } else if (text.charCodeAt(0) === 45) {
-      v *= -1; // case: "-123"
-    }
-
-    if (ok && (v! > Number.MAX_SAFE_INTEGER || v! < Number.MIN_SAFE_INTEGER)) {
-      this.declineInput(); // decline looks better than error "Out of range"
+    const v = this.#ctr.$parse(text, this.$format);
+    if (v != null && (v! > Number.MAX_SAFE_INTEGER || v! < Number.MIN_SAFE_INTEGER)) {
+      this.declineInput(); // decline looks better validation "Out of range"
       throw new RangeError("Out of range");
       // return v as any;
     }
@@ -237,7 +241,7 @@ export default class WUPNumberControl<
           }
         }
         // el.value = next;
-        this.setInputValue(v as any, SetValueReasons.userInput); // WARN: it refreshes onceError but calls valueToInput again
+        this.setInputValue(v as any, SetValueReasons.userInput); // WARN: it calls valueToInput again
         const end = pos + dp;
         el.setSelectionRange(end, end);
       }
