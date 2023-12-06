@@ -5,7 +5,7 @@ import focusFirst from "./helpers/focusFirst";
 import nestedProperty from "./helpers/nestedProperty";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
-import { WUPcssHidden, WUPcssBtnIcon } from "./styles";
+import { WUPcssHidden, WUPcssBtnIcon, WUPcssIconSet } from "./styles";
 
 // theoretically such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
@@ -85,6 +85,7 @@ export default abstract class WUPBaseElement<
           --icon-size: 14px;
           --menu-hover-text: inherit;
           --menu-hover-bg: #f1f1f1;
+          ${WUPcssIconSet}
         }
         [wupdark] {
           --base-btn-focus: #bdbdbd;

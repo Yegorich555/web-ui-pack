@@ -8,6 +8,7 @@
 
 ---
 
+- **Styles**. Move all icons to single `./styles.ts const WUPcssIconSet` to allow re-use it
 - **Modal**
   - Allow to prevent auto closing via `form.$onSubmitEnd = (e) => e.preventDefault()`
   - Allow to prevent auto closing via `form.$onSubmit = (e) => e.preventDefault()`

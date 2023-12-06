@@ -61,7 +61,7 @@ describe("baseElement", () => {
     expect(TestA.$refStyle).toBeDefined();
 
     let style = TestA.$refStyle.textContent.toLowerCase();
-    expect(style).toContain(WUPBaseElement.$styleRoot);
+    expect(style).toContain(WUPBaseElement.$styleRoot.toLowerCase());
     expect(style).toContain("t-a { display: block }");
     expect(style.lastIndexOf("t-a")).toBe(style.indexOf("t-a")); // checking if style applied once
 
