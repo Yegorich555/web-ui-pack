@@ -298,8 +298,7 @@ export default class WUPRadioControl<
       // eslint-disable-next-line prefer-destructuring
       this.$refInput = this.$refItems[0] || this.$refInput;
     } else {
-      // todo need find by id - resuse method $isEqual
-      const item = this.$refItems[this.getItems().findIndex((a) => a.value === v)];
+      const item = this.$refItems[this.getItems().findIndex((a) => this.#ctr.$isEqual(a.value, v, this))];
       if (!item) {
         console.error(`${this.tagName}${this._opts.name ? `[${this._opts.name}]` : ""}. Not found in items`, {
           items: this._opts.items,

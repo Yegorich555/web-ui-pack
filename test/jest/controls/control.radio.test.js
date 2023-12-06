@@ -128,7 +128,7 @@ describe("control.radio", () => {
     el.$value = { id: 2 };
     jest.advanceTimersByTime(2);
     expect(el.innerHTML).toMatchInlineSnapshot(
-      `"<fieldset><legend><strong></strong></legend><label for="txt13">Helica<input id="txt13" type="radio" name="txt12473" tabindex="0"><span icon=""></span></label><label for="txt14">Diana<input id="txt14" type="radio" name="txt12473"><span icon=""></span></label></fieldset>"`
+      `"<fieldset><legend><strong></strong></legend><label for="txt13">Helica<input id="txt13" type="radio" name="txt12473" tabindex="0"><span icon=""></span></label><label for="txt14" checked="">Diana<input id="txt14" type="radio" name="txt12473" autocomplete="off"><span icon=""></span></label></fieldset>"`
     );
   });
 
