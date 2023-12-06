@@ -152,6 +152,35 @@ export default class WUPNumberControl<
     return v;
   }
 
+  static $stringify(v: number | undefined | null, format: Required<WUP.Number.Format>): string {
+    if (v == null) {
+      return "";
+    }
+
+    // if (this._opts.mask) {
+    //   return (v as any).toString();
+    // }
+    // eslint-disable-next-line prefer-const
+    let [int, dec] = (v as any).toString().split(".");
+    const f = format;
+    if (f.sep1000) {
+      const to = (v as number)! > 0 ? 0 : 1;
+      for (let i = int.length - 3; i > to; i -= 3) {
+        int = `${int.substring(0, i)}${f.sep1000}${int.substring(i)}`;
+      }
+    }
+
+    if (dec || f.minDecimal || f.maxDecimal) {
+      dec = dec === undefined ? "" : dec.substring(0, Math.min(f.maxDecimal, dec.length));
+      dec += "0".repeat(Math.max(f.minDecimal - dec.length, 0));
+      if (dec.length) {
+        return int + f.sepDecimal + dec;
+      }
+    }
+
+    return int;
+  }
+
   /** Returns $options.format joined with defaults */
   get $format(): Required<WUP.Number.Format> {
     const f = this._opts.format;
@@ -166,32 +195,10 @@ export default class WUPNumberControl<
 
   // WARN usage format #.### impossible because unclear what sepDec/sep100 and what if user wants only limit decimal part
   valueToInput(v: ValueType | undefined): string {
-    if (v == null) {
-      return "";
-    }
-
     if (this._opts.mask) {
-      return (v as any).toString();
+      return v ? (v as any).toString() : v;
     }
-    // eslint-disable-next-line prefer-const
-    let [int, dec] = (v as any).toString().split(".");
-    const f = this.$format;
-    if (f.sep1000) {
-      const to = (v as number)! > 0 ? 0 : 1;
-      for (let i = int.length - 3; i > to; i -= 3) {
-        int = `${int.substring(0, i)}${f.sep1000}${int.substring(i)}`;
-      }
-    }
-
-    if (dec || f.minDecimal || f.maxDecimal) {
-      dec = dec === undefined ? "" : dec.substring(0, Math.min(f.maxDecimal, dec.length));
-      dec += "0".repeat(Math.max(f.minDecimal - dec.length, 0));
-      if (dec.length) {
-        return int + this.$format.sepDecimal + dec;
-      }
-    }
-
-    return int;
+    return this.#ctr.$stringify(v as number, this.$format);
   }
 
   override parse(text: string): ValueType | undefined {
@@ -220,9 +227,9 @@ export default class WUPNumberControl<
 
     if (!this._opts.mask) {
       // otherwise it conflicts with mask
-      const next = this.valueToInput(v as any); // todo it's poor that parse depends on valueToInput: need fix this cycle...
+      const next = this.#ctr.$stringify(v as number, this.$format);
       const hasDeclined = this._canShowDeclined && text.length > next.length;
-      if (hasDeclined && next === this.valueToInput(this.$value)) {
+      if (hasDeclined && next === this.#ctr.$stringify(this.$value as number, this.$format)) {
         // WARN: don't compare v === this.$value because $value=4.567 but format can be 4.56
         this.declineInput();
       } else if (text !== next) {
