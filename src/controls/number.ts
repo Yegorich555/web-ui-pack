@@ -387,7 +387,8 @@ export default class WUPNumberControl<
     } else if (this._isShiftDown) dval *= 10;
     else if (this._isCtrlDown) dval *= 100;
 
-    const v = +(this.$value ?? 0); // todo got increment depends on realValue but better to depend on input value directly
+    const tv = this.$refInput.value;
+    const v = (tv && this.#ctr.$parse(tv, this.$format)) || 0;
     const hasFloat = this._isAltDown || v % 1 !== 0;
     const next = hasFloat ? mathSumFloat(v, dval) : v + dval;
 
