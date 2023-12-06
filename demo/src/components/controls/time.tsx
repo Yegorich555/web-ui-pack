@@ -49,7 +49,7 @@ export default function TimeControlView() {
         <div className={stylesCom.group}>
           <wup-time w-name="readonly" readonly w-initValue="02:43" />
           <wup-time w-name="disabled" disabled w-initValue="02:43" />
-          <wup-date w-name="required" w-validations="window.myTimeValidations" />
+          <wup-time w-name="required" w-validations="window.myTimeValidations" />
         </div>
         <wup-time
           w-label="Without buttons (see $options.menuButtonsOff)"
