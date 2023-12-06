@@ -287,23 +287,27 @@ export default abstract class WUPBaseElement<
     return protos;
   }
 
+  /** Add common styles */
+  static firstInit(): void {
+    this.$refStyle = document.createElement("style");
+    /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
+    this.$refStyle.append(`${this.$styleRoot}\r\n`);
+    appendedRootStyles.add(WUPBaseElement);
+    this.$refStyle.append(`.${this.classNameHidden}, [${this.classNameHidden}] {${WUPcssHidden}}\r\n`);
+    this.$refStyle.append(`${WUPcssBtnIcon(`[${this.classNameBtnIcon}]`)}\r\n`);
+
+    document.head.prepend(this.$refStyle);
+  }
+
   constructor() {
     super();
     this.$options = null as any;
 
-    if (!this.#ctr.$refStyle) {
-      this.#ctr.$refStyle = document.createElement("style");
-      /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
-      this.#ctr.$refStyle.append(`.${this.#ctr.classNameHidden}, [${this.#ctr.classNameHidden}] {${WUPcssHidden}}\r\n`);
-      this.#ctr.$refStyle.append(`${WUPcssBtnIcon(`[${this.#ctr.classNameBtnIcon}]`)}\r\n`);
-
-      document.head.prepend(this.#ctr.$refStyle);
-    }
-    const refStyle = this.#ctr.$refStyle;
     // setup styles
     if (!appendedStyles.has(this.tagName)) {
       appendedStyles.add(this.tagName);
 
+      const refStyle = this.#ctr.$refStyle!;
       // NiceToHave refactor to append styles via CDN or somehow else
       const protos = this.#ctr.findAllProtos(this, []);
       protos.reverse().forEach((p) => {
@@ -696,6 +700,7 @@ export default abstract class WUPBaseElement<
   // }
 }
 
+WUPBaseElement.firstInit();
 window.__wupln = (s) => s;
 
 declare global {

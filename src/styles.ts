@@ -83,7 +83,7 @@ ${tag}:focus:after {
 }
 @media (hover: hover) and (pointer: fine) {
   ${tag}:hover {
-   box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+    box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
   }
   ${tag}:hover:after {
     background: var(--icon-hover, var(--icon, #000));

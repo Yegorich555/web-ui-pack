@@ -6,7 +6,6 @@ const WUPTextControl = require("web-ui-pack/controls/text").default;
 /** @type WUPFormElement */
 let testEl;
 beforeEach(async () => {
-  jest.spyOn(document, "createElement").getMockImplementation(() => ({ append: () => {} }));
   await page.evaluate(() => {
     WUPFormElement.$use();
     WUPTextControl.$use();

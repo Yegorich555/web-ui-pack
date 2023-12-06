@@ -7,7 +7,6 @@ beforeEach(async () => {
     { name: "prefers-reduced-motion", value: "reduce" }, // disable animations
   ]);
 
-  jest.spyOn(document, "createElement").getMockImplementation(() => ({ append: () => {} }));
   await page.evaluate(() => {
     WUPModalElement.$use();
     renderHtml(
