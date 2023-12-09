@@ -27,7 +27,7 @@ export function mathScaleValue(v: number, fromMin: number, fromMax: number, toMi
 }
 
 /** Apply transform.rotate on point */
-export function rotate(cx: number, cy: number, x: number, y: number, angle: number): [number, number] {
+export function mathRotate(cx: number, cy: number, x: number, y: number, angle: number): [number, number] {
   const rad = (Math.PI / 180) * angle;
   const cos = Math.cos(rad);
   const sin = Math.sin(rad);

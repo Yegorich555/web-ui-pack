@@ -241,6 +241,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**isIntoView**](src/helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
 - [**mathSumFloat**](src/helpers/math.ts) ⇒ `Sum without float-precision-issue`
 - [**mathScaleValue**](src/helpers/math.ts) ⇒ `Scale value from one range to another`
+- [**mathRotate**](src/helpers/math.ts) ⇒ `Apply transform.rotate on point`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
 - [**objectClone**](src/helpers/objectClone.ts) ⇒ `deep cloning object`
