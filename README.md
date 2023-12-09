@@ -239,7 +239,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**findScrollParentAll**](src/helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
 - [**focusFirst**](src/helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
 - [**isIntoView**](src/helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
-- [**mathFixFP**](src/helpers/math.ts) ⇒ `Sum without float-precision-issue`
+- [**mathFixFP**](src/helpers/math.ts) ⇒ `Fix float precision issue after math operations when 10.53+0.1=>10.629999999999999`
 - [**mathScaleValue**](src/helpers/math.ts) ⇒ `Scale value from one range to another`
 - [**mathRotate**](src/helpers/math.ts) ⇒ `Apply transform.rotate on point`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
