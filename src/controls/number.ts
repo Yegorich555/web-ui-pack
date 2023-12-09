@@ -34,6 +34,14 @@ declare global {
       /** String representation of displayed value
        * @defaultValue no-decimal and separators from localeInfo */
       format: Format | null;
+      /** Multiply value to store value different from text-value
+       * @example point 0.01 when need to cast text value `100` to 1 (user sees `100` but stored 1)
+       * @defaultValue 1 */
+      scale: number;
+      /** Shift value to store value different from text-value
+       * @example point 20 when need to cast text value `100` to 120 (user sees `100` but stored 120)
+       * @defaultValue 0 */
+      offset: number;
     }
     interface TextAnyOptions<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM> {}
     interface Options<T = number, VM extends ValidityMap = ValidityMap> extends TextAnyOptions<T, VM>, NewOptions {}
@@ -47,6 +55,9 @@ declare global {
        * ```
        * @defaultValue no-decimal and separators from localeInfo */
       "w-format"?: string; // NiceToHave: parse from string
+      "w-scale"?: number;
+      "w-offset"?: number;
+      "w-initValue"?: number;
     }
   }
   interface HTMLElementTagNameMap {
@@ -105,7 +116,7 @@ export default class WUPNumberControl<
 
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Number.Options = {
-    ...(WUPTextControl.$defaults as any),
+    ...(WUPTextControl.$defaults as WUP.Number.TextAnyOptions<any, any>),
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
       min: (v, setV, c) =>
@@ -114,6 +125,8 @@ export default class WUPNumberControl<
         (v == null || v > setV) && __wupln(`Max value is ${(c as WUPNumberControl).valueToInput(setV)}`, "validation"),
     },
     format: null,
+    scale: 1,
+    offset: 0,
   };
 
   /** Custom number parsing: better Number.parse because ignores wrong chars + depends format */
@@ -194,9 +207,18 @@ export default class WUPNumberControl<
   }
 
   // WARN usage format #.### impossible because unclear what sepDec/sep100 and what if user wants only limit decimal part
-  valueToInput(v: ValueType | undefined): string {
+  valueToInput(v: ValueType | undefined, skipScaling?: boolean): string {
+    if (v == null) {
+      return "";
+    }
+    if (!skipScaling) {
+      const { scale, offset } = this._opts;
+      (v as number) /= scale || 1;
+      (v as number) += offset || 0;
+      (v as number) = mathFixFP(v as number); // WARN: 95 + scale: 0.01 => need avoid 0.9500000000000001
+    }
     if (this._opts.mask) {
-      return v ? (v as any).toString() : v;
+      return (v as any).toString();
     }
     return this.#ctr.$stringify(v as number, this.$format);
   }
@@ -218,16 +240,23 @@ export default class WUPNumberControl<
   }
 
   override parseInput(text: string): ValueType | undefined {
-    const v = this.#ctr.$parse(text, this.$format);
+    let v = this.#ctr.$parse(text, this.$format);
     if (v != null && (v! > Number.MAX_SAFE_INTEGER || v! < Number.MIN_SAFE_INTEGER)) {
       this.declineInput(); // decline looks better validation "Out of range"
       throw new RangeError("Out of range");
       // return v as any;
     }
 
+    const rawValue = v;
+    if (v != null) {
+      const { scale, offset } = this._opts;
+      v -= offset || 0;
+      v = mathFixFP(v * (scale || 1)); // WARN: 95 + scale: 0.01 => need avoid 0.9500000000000001
+    }
+
     if (!this._opts.mask) {
       // otherwise it conflicts with mask
-      const next = this.#ctr.$stringify(v as number, this.$format);
+      const next = this.#ctr.$stringify(rawValue, this.$format);
       const hasDeclined = this._canShowDeclined && text.length > next.length;
       if (hasDeclined && next === this.#ctr.$stringify(this.$value as number, this.$format)) {
         // WARN: don't compare v === this.$value because $value=4.567 but format can be 4.56
@@ -401,7 +430,7 @@ export default class WUPNumberControl<
 
     const el = this.$refInput;
     const inputType = dval > 0 ? "_inc" : "_dec";
-    const data = this.valueToInput(next as any);
+    const data = this.valueToInput(next as any, true);
     setTimeout(() => {
       const isPrevented = !el.dispatchEvent(
         new InputEvent("beforeinput", { inputType, data, bubbles: true, cancelable: true })

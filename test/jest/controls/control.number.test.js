@@ -31,6 +31,8 @@ describe("control.number", () => {
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       "w-format": { value: {} },
+      "w-scale": { value: 1 },
+      "w-offset": { value: 0 },
     },
     validationsSkip: ["_parse", "_mask"],
   });
@@ -428,7 +430,7 @@ describe("control.number", () => {
     expect(el.$refInput.value).toBe("111.53");
   });
 
-  test("1000s separtor", () => {
+  test("1000s separator", () => {
     el.$value = 123;
     expect(el.$refInput.value).toBe("123");
 
@@ -463,5 +465,113 @@ describe("control.number", () => {
     expect(el.$value).toBe(0);
 
     window.localStorage.clear();
+  });
+
+  test("options scale & offset", async () => {
+    el.$options.scale = 0.01;
+    el.$options.format = { maxDecimal: 15 };
+    await h.wait(1);
+    el.$value = 1;
+    expect(el.$refInput.value).toBe("100");
+    el.$value = 0.95;
+    expect(el.$refInput.value).toBe("95");
+
+    el.focus();
+    await h.wait();
+    el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("96");
+    expect(el.$value).toBe(0.96);
+    el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("95");
+    expect(el.$value).toBe(0.95);
+    el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("94");
+    expect(el.$value).toBe(0.94);
+
+    expect(await h.userTypeText(el.$refInput, "23", { clearPrevious: true })).toBe("23|");
+    expect(el.$value).toBe(0.23);
+
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.setAttribute("w-scale", "0.1");
+    el.setAttribute("w-initvalue", "5.3");
+    await h.wait(1);
+    expect(el.$initValue).toBe(5.3);
+    expect(el.$refInput.value).toBe("53");
+
+    // offset
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.format = { maxDecimal: 15 };
+    el.setAttribute("w-offset", "4");
+    el.setAttribute("w-initvalue", "20");
+    await h.wait(1);
+    expect(el.$initValue).toBe(20);
+    expect(el.$refInput.value).toBe("24");
+    el.focus();
+    await h.wait();
+    el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("25");
+    expect(el.$value).toBe(21);
+    el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("24");
+    expect(el.$value).toBe(20);
+    el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("23");
+    expect(el.$value).toBe(19);
+
+    expect(await h.userTypeText(el.$refInput, "12", { clearPrevious: true })).toBe("12|");
+    expect(el.$value).toBe(8);
+
+    // offset + scale
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.format = { maxDecimal: 15 };
+    el.setAttribute("w-offset", "4");
+    el.setAttribute("w-scale", "0.1");
+    el.setAttribute("w-initvalue", "2");
+    await h.wait(1);
+    expect(el.$initValue).toBe(2);
+    expect(el.$refInput.value).toBe("24");
+
+    el.focus();
+    await h.wait();
+    el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100 })); // scrollUp
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("25");
+    expect(el.$value).toBe(2.1);
+    el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("24");
+    expect(el.$value).toBe(2);
+    el.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: 100 })); // scrollDown
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("23");
+    expect(el.$value).toBe(1.9);
+    expect(await h.userTypeText(el.$refInput, "12", { clearPrevious: true })).toBe("12|");
+    expect(el.$value).toBe(0.8);
+
+    // when value empty
+    await expect(h.userRemove(el.$refInput, { removeCount: 2 })).resolves.not.toThrow();
+    expect(el.$value).toBe(undefined);
+    expect(() => WUPNumberControl.$stringify(null, el.$format)).not.toThrow();
+
+    // modifiers should not affect on formatting
+    await h.wait();
+    expect(await h.userTypeText(el.$refInput, "12345", { clearPrevious: true })).toBe("12,345|");
+    await h.wait(1);
+    expect(el.$value).toBe(1234.1);
+
+    // cover when /0
+    el.$options.scale = 0;
+    el.$options.offset = 0;
+    await h.wait(1);
+    expect(await h.userTypeText(el.$refInput, "12", { clearPrevious: true })).toBe("12|");
+    expect(el.$value).toBe(12);
+    el.$value = 24;
+    expect(el.$refInput.value).toBe("24");
   });
 });

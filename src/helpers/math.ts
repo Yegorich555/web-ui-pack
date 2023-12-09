@@ -1,6 +1,9 @@
 /** Fix float precision issue when: 10.53 + 0.1 === 10.629999999999999 */
 export function mathFixFP(v: number): number {
   // return Math.round(v * 1e15) / 1e15; // WARN:  it doesn't work with -10.53 + 6
+  if (Number.isInteger(v)) {
+    return v; // possible check with Number.MAX_SAFE_INTEGER
+  }
   return Number(v.toPrecision(15));
 }
 

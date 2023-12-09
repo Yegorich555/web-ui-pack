@@ -17,7 +17,7 @@
   - Allow to prevent auto closing via `form.$onSubmit = (e) => e.preventDefault()`
 - **Controls**. Added css-animation for box-shadow/borders
 - [RadioControl](src/controls/radio.ts). Added comparison by item.id to allow use cloned items/value
-- **Radio**. Add comparison by item.id to allow use cloned items/value
+- [NumberControl](src/controls/number.ts). New options `scale` & `offset`
 - **Form**
   - Added `form.$validate(...)` for manual triggering validations
   - Changed spinner to custom friendly looked
