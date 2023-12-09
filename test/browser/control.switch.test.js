@@ -6,7 +6,6 @@ const WUPSwitchControl = require("web-ui-pack/controls/switch").default;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let testEl;
 beforeEach(async () => {
-  jest.spyOn(document, "createElement").getMockImplementation(() => ({ append: () => {} }));
   await page.evaluate(() => {
     renderHtml(`<wup-switch></wup-switch>`);
   });

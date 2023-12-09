@@ -2,7 +2,7 @@ import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
 import { PopupOpenCases } from "./popup/popupElement.types";
 import animate from "./helpers/animate";
-import { mathScaleValue, rotate } from "./helpers/math";
+import { mathScaleValue, mathRotate } from "./helpers/math";
 import { parseMsTime } from "./helpers/styleHelpers";
 import onEvent from "./helpers/onEvent";
 
@@ -364,7 +364,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
           path._hasTooltip = true;
           // calc center for tooltip
           const ca = c.angleFrom + (c.angleTo - c.angleFrom) / 2;
-          [path._center.x, path._center.y] = rotate(radius, radius, radius, hw, ca);
+          [path._center.x, path._center.y] = mathRotate(radius, radius, radius, hw, ca);
         }
         path._relatedItem = a;
         // animate

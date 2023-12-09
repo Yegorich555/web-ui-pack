@@ -748,6 +748,14 @@
 			],
 			"attributes": [
 				{
+					"name": "w-scale",
+					"description": "Multiply value to store value different from text-value\n\rPoint 0.01 to scale 100 to 1 (user sees `100` but stored 1)"
+				},
+				{
+					"name": "w-offset",
+					"description": "Shift value to store value different from text-value\n\rPoint 20 to scale 100 to 120 (user sees `100` but stored 120)"
+				},
+				{
 					"name": "w-format",
 					"description": "String representation of displayed value by default inherits from localeInfo \n\r Point Global reference to object",
 					"values": [

@@ -5,7 +5,7 @@ import focusFirst from "./helpers/focusFirst";
 import nestedProperty from "./helpers/nestedProperty";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
-import { WUPcssHidden, WUPcssBtnIcon } from "./styles";
+import { WUPcssHidden, WUPcssBtnIcon, WUPcssIconSet } from "./styles";
 
 // theoretically such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
@@ -35,22 +35,6 @@ export const enum AttributeTypes {
   /** Element accessed via `document.querySelector` */
   selector,
 }
-
-declare global {
-  /** Translate function that need to replace to translate content according to requirements
-   * @param text Text that must be translated
-   * @param type Type of related text
-   * @returns the same string by default */
-  const __wupln: Window["__wupln"]; // NiceToHave: interpolation `Max length ${setV} is chars` where (-s) can depend on value
-  interface Window {
-    /** Translate function that need to replace to translate content according to requirements
-     * @param text Text that must be translated
-     * @param type Type of related text
-     * @returns the same string by default */
-    __wupln: (text: string, type: "aria" | "content" | "validation") => string;
-  }
-}
-window.__wupln = (s) => s;
 
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement<
@@ -101,6 +85,7 @@ export default abstract class WUPBaseElement<
           --icon-size: 14px;
           --menu-hover-text: inherit;
           --menu-hover-bg: #f1f1f1;
+          ${WUPcssIconSet}
         }
         [wupdark] {
           --base-btn-focus: #bdbdbd;
@@ -302,23 +287,27 @@ export default abstract class WUPBaseElement<
     return protos;
   }
 
+  /** Add common styles */
+  static firstInit(): void {
+    this.$refStyle = document.createElement("style");
+    /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
+    this.$refStyle.append(`${this.$styleRoot}\r\n`);
+    appendedRootStyles.add(WUPBaseElement);
+    this.$refStyle.append(`.${this.classNameHidden}, [${this.classNameHidden}] {${WUPcssHidden}}\r\n`);
+    this.$refStyle.append(`${WUPcssBtnIcon(`[${this.classNameBtnIcon}]`)}\r\n`);
+
+    document.head.prepend(this.$refStyle);
+  }
+
   constructor() {
     super();
     this.$options = null as any;
 
-    if (!this.#ctr.$refStyle) {
-      this.#ctr.$refStyle = document.createElement("style");
-      /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
-      this.#ctr.$refStyle.append(`.${this.#ctr.classNameHidden}, [${this.#ctr.classNameHidden}] {${WUPcssHidden}}\r\n`);
-      this.#ctr.$refStyle.append(`${WUPcssBtnIcon(`[${this.#ctr.classNameBtnIcon}]`)}\r\n`);
-
-      document.head.prepend(this.#ctr.$refStyle);
-    }
-    const refStyle = this.#ctr.$refStyle;
     // setup styles
     if (!appendedStyles.has(this.tagName)) {
       appendedStyles.add(this.tagName);
 
+      const refStyle = this.#ctr.$refStyle!;
       // NiceToHave refactor to append styles via CDN or somehow else
       const protos = this.#ctr.findAllProtos(this, []);
       protos.reverse().forEach((p) => {
@@ -502,19 +491,14 @@ export default abstract class WUPBaseElement<
     eventInit.cancelable ??= false;
     eventInit.bubbles ??= true;
     const ev = new CustomEvent<T>(type as string, eventInit);
-
-    let sip = false;
     const isCustom = (type as string).startsWith("$");
     if (isCustom) {
-      ev.stopImmediatePropagation = () => {
-        sip = true;
-        CustomEvent.prototype.stopImmediatePropagation.call(ev);
-      };
       const str = (type as string).substring(1, 2).toUpperCase() + (type as string).substring(2);
-      (this as any)[`$on${str}`]?.call(this, ev);
+      const f = (this as any)[`$on${str}`];
+      f && this.addEventListener(type, (evHook) => f.call(this, evHook), { once: true, capture: true });
     }
 
-    !sip && super.dispatchEvent(ev);
+    super.dispatchEvent(ev);
     return ev;
   }
 
@@ -716,8 +700,28 @@ export default abstract class WUPBaseElement<
   // }
 }
 
+WUPBaseElement.firstInit();
+window.__wupln = (s) => s;
+
 declare global {
+  /** Translate function that need to replace to translate content according to requirements
+   * @param text Text that must be translated
+   * @param type Type of related text
+   * @returns the same string by default */
+  const __wupln: WUP.Base.LangFunc; // NiceToHave: interpolation `Max length ${setV} is chars` where (-s) can depend on value
+  interface Window {
+    /** Translate function that need to replace to translate content according to requirements
+     * @param text Text that must be translated
+     * @param type Type of related text
+     * @returns the same string by default */
+    __wupln: WUP.Base.LangFunc;
+  }
+
   namespace WUP.Base {
+    interface LangFunc {
+      (text: string, type: "aria" | "content" | "validation"): string;
+    }
+
     /** Cast not-supported props to optional string */
     type toJSX<T> = {
       [P in keyof T]?: T[P] extends number | boolean | string | undefined ? T[P] : string;
@@ -757,3 +761,5 @@ declare global {
 }
 
 // NiceToHave: HTML attrs-events like 'onsubmit' & 'onchange'
+// @ts-ignore
+console[`${String.fromCharCode(105)}nfo`]("Powered by https://github.com/Yegorich555/web-ui-pack");

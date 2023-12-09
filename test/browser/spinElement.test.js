@@ -5,7 +5,6 @@ const WUPSpinElement = require("web-ui-pack/spinElement").default;
 /** @type WUPSpinElement */
 let testEl;
 beforeEach(async () => {
-  jest.spyOn(document, "createElement").getMockImplementation(() => ({ append: () => {} }));
   await page.evaluate(() => {
     WUPSpinElement.$defaults.overflowOffset = [2, 2];
     renderHtml(

@@ -512,6 +512,23 @@ describe("modalElement", () => {
     expect(el.$isOpened).toBe(true);
     await h.wait();
     expect(el.$isOpened).toBe(true);
+
+    // when event prevented
+    el.$open();
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    form.$onSubmit = () => Promise.resolve(true);
+    await h.userPressKey(form, { key: "Enter" });
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    // preven closing here
+    form.$onSubmitEnd = (e) => e.preventDefault();
+    el.$open();
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    await h.userPressKey(form, { key: "Enter" });
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
   });
 
   test("option: selfRemove", async () => {

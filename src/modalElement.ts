@@ -367,6 +367,7 @@ export default class WUPModalElement<
       }
       :host > button[close] {
         --icon-img: var(--wup-icon-cross);
+        z-index: 10;
         position: absolute;
         right: 0;
         margin: -0.2em 1em 0;
@@ -519,7 +520,7 @@ export default class WUPModalElement<
     this.appendEvent(this, "keydown", (ev) => this.gotKeyDown(ev), { passive: false });
     // @ts-expect-error - TS isn't good enough for looking for types
     this.appendEvent(this, "$submitEnd", (sev: WUP.Form.EventMap["$submitEnd"]) => {
-      sev.detail.success && this.goClose(ModalCloseCases.onSubmitEnd, sev);
+      sev.detail.success && !sev.defaultPrevented && this.goClose(ModalCloseCases.onSubmitEnd, sev);
     });
     // this.appendEvent(this, "focusout", (ev) => this.gotFocusOut(ev), { passive: false });
 

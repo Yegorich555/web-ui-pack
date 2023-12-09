@@ -11,7 +11,7 @@ export { default as focusFirst } from "./helpers/focusFirst";
 export { default as isEqual } from "./helpers/isEqual";
 export { isBothNaN } from "./helpers/isEqual";
 export { default as isIntoView } from "./helpers/isIntoView";
-export { mathSumFloat, mathScaleValue } from "./helpers/math";
+export { mathFixFP, mathScaleValue, mathRotate } from "./helpers/math";
 
 export { default as nestedProperty } from "./helpers/nestedProperty";
 export { default as observer } from "./helpers/observer";

@@ -132,17 +132,15 @@ export default class WUPSelectControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPSelectControl;
 
-  static get $styleRoot(): string {
-    return `:root {
-        --ctrl-select-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
-      }`;
-  }
+  // static get $styleRoot(): string {
+  //   return "";
+  // }
 
   // WARN: scroll sets for ul otherwise animation broken scroll to selectItem because animation affects on scrollSize
   static get $style(): string {
     return `${super.$style}
       :host {
-        --ctrl-icon-img: var(--ctrl-select-icon-img);
+        --ctrl-icon-img: var(--wup-icon-chevron);
       }
       :host label:after {
         height: 100%;

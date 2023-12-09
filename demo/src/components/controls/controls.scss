@@ -1,6 +1,7 @@
 .group {
   display: flex;
   gap: 1em;
+  margin: var(--base-margin) 0;
 
   > * {
     margin: 0;

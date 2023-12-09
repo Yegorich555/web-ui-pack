@@ -91,16 +91,14 @@ export default class WUPDateControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPDateControl;
 
-  static get $styleRoot(): string {
-    return `:root {
-        --ctrl-date-icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M652.801 76.8c42.24 0 76.8 34.56 76.8 76.8v537.601c0 42.24-34.56 76.8-76.8 76.8H115.2c-42.624 0-76.8-34.56-76.8-76.8l.384-537.601c0-42.24 33.792-76.8 76.416-76.8h38.4V0h76.8v76.8h307.2V0h76.8v76.8h38.4zM192 345.6h76.8v76.8H192v-76.8zm230.4 0v76.8h-76.8v-76.8h76.8zm153.601 0h-76.8v76.8h76.8v-76.8zM115.2 691.2h537.601V268.8H115.2v422.4z'/%3E%3C/svg%3E");
-      }`;
-  }
+  // static get $styleRoot(): string {
+  //   return "";
+  // }
 
   static get $style(): string {
     return `${super.$style}
       :host {
-        --ctrl-icon-img: var(--ctrl-date-icon-img);
+        --ctrl-icon-img: var(--wup-icon-date);
       }
       :host > [menu] {
         overflow: hidden;

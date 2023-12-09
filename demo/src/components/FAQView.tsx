@@ -244,12 +244,13 @@ spinUseDualRing(WUPSpin2Element);
 const tagName = "wup-spin-form";
 customElements.define(tagName, WUPSpin2Element);
 
-WUPFormElement.prototype.renderSpin = function renderSpin(target: HTMLElement): WUPSpinElement {
+WUPFormElement.prototype.renderSpin = function renderSpin(target: HTMLElement) {
   const spin = document.createElement("wup-spin-form");
   spin.$options.fit = true;
   spin.$options.overflowFade = false;
   spin.$options.overflowTarget = target as HTMLButtonElement;
-  return spin;
+  target.appendChild(spin);
+  return { dispose: () => spin.remove(); }
 };`;
 
 const codeControlDetach = `js

@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import onScroll from "../helpers/onScroll";
-import { mathSumFloat, onEvent } from "../indexHelpers";
+import { mathFixFP, onEvent } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
@@ -34,6 +34,14 @@ declare global {
       /** String representation of displayed value
        * @defaultValue no-decimal and separators from localeInfo */
       format: Format | null;
+      /** Multiply value to store value different from text-value
+       * @example point 0.01 when need to cast text value `100` to 1 (user sees `100` but stored 1)
+       * @defaultValue 1 */
+      scale: number;
+      /** Shift value to store value different from text-value
+       * @example point 20 when need to cast text value `100` to 120 (user sees `100` but stored 120)
+       * @defaultValue 0 */
+      offset: number;
     }
     interface TextAnyOptions<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM> {}
     interface Options<T = number, VM extends ValidityMap = ValidityMap> extends TextAnyOptions<T, VM>, NewOptions {}
@@ -47,6 +55,9 @@ declare global {
        * ```
        * @defaultValue no-decimal and separators from localeInfo */
       "w-format"?: string; // NiceToHave: parse from string
+      "w-scale"?: number;
+      "w-offset"?: number;
+      "w-initValue"?: number;
     }
   }
   interface HTMLElementTagNameMap {
@@ -101,11 +112,11 @@ export default class WUPNumberControl<
   TOptions extends WUP.Number.Options = WUP.Number.Options,
   EventMap extends WUP.Number.EventMap = WUP.Number.EventMap
 > extends TextAnyControl<ValueType, TOptions, EventMap> {
-  // #ctr = this.constructor as typeof WUPNumberControl;
+  #ctr = this.constructor as typeof WUPNumberControl;
 
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Number.Options = {
-    ...(WUPTextControl.$defaults as any),
+    ...(WUPTextControl.$defaults as WUP.Number.TextAnyOptions<any, any>),
     validationRules: {
       ...WUPBaseControl.$defaults.validationRules,
       min: (v, setV, c) =>
@@ -114,76 +125,20 @@ export default class WUPNumberControl<
         (v == null || v > setV) && __wupln(`Max value is ${(c as WUPNumberControl).valueToInput(setV)}`, "validation"),
     },
     format: null,
+    scale: 1,
+    offset: 0,
   };
 
-  /** Returns $options.format joined with defaults */
-  get $format(): Required<WUP.Number.Format> {
-    const f = this._opts.format;
-    return {
-      sepDecimal: localeInfo.sepDecimal,
-      sep1000: localeInfo.sep1000,
-      ...f,
-      maxDecimal: f?.maxDecimal ?? f?.minDecimal ?? 0,
-      minDecimal: f?.minDecimal ?? 0,
-    };
-  }
-
-  // WARN usage format #.### impossible because unclear what sepDec/sep100 and what if user wants only limit decimal part
-  valueToInput(v: ValueType | undefined): string {
-    if (v == null) {
-      return "";
-    }
-
-    if (this._opts.mask) {
-      return (v as any).toString();
-    }
-    // eslint-disable-next-line prefer-const
-    let [int, dec] = (v as any).toString().split(".");
-    const f = this.$format;
-    if (f.sep1000) {
-      const to = (v as number)! > 0 ? 0 : 1;
-      for (let i = int.length - 3; i > to; i -= 3) {
-        int = `${int.substring(0, i)}${f.sep1000}${int.substring(i)}`;
-      }
-    }
-
-    if (dec || f.minDecimal || f.maxDecimal) {
-      dec = dec === undefined ? "" : dec.substring(0, Math.min(f.maxDecimal, dec.length));
-      dec += "0".repeat(Math.max(f.minDecimal - dec.length, 0));
-      if (dec.length) {
-        return int + this.$format.sepDecimal + dec;
-      }
-    }
-
-    return int;
-  }
-
-  override parse(text: string): ValueType | undefined {
-    const v = Number(text);
-    if (!text || Number.isNaN(v)) {
-      return undefined;
-    }
-    return v as any;
-  }
-
-  override canParseInput(text: string): boolean {
-    const f = this.$format;
-    if (f.maxDecimal > 0 && text.endsWith(f.sepDecimal)) {
-      return false; // case "4.|" - use must able to type '.'
-    }
-    return true;
-  }
-
-  override parseInput(text: string): ValueType | undefined {
-    // such parsing is better then Number.parse because ignores wrong chars
+  /** Custom number parsing: better Number.parse because ignores wrong chars + depends format */
+  static $parse(s: string, format: Required<WUP.Number.Format>): number | undefined {
     let v: number | undefined = 0;
     let ok = false;
     let dec: number | null = null;
     let decLn = 1;
     let decI = 0;
-    const f = this.$format;
-    for (let i = 0; i < text.length; ++i) {
-      const ascii = text.charCodeAt(i);
+    const f = format;
+    for (let i = 0; i < s.length; ++i) {
+      const ascii = s.charCodeAt(i);
       const num = ascii - 48;
       if (num >= 0 && num <= 9) {
         ok = true;
@@ -204,21 +159,106 @@ export default class WUPNumberControl<
     }
     if (!ok) {
       v = undefined; // case impossible but maybe...
-    } else if (text.charCodeAt(0) === 45) {
+    } else if (s.charCodeAt(0) === 45) {
       v *= -1; // case: "-123"
     }
+    return v;
+  }
 
-    if (ok && (v! > Number.MAX_SAFE_INTEGER || v! < Number.MIN_SAFE_INTEGER)) {
-      this.declineInput(); // decline looks better than error "Out of range"
+  static $stringify(v: number | undefined | null, format: Required<WUP.Number.Format>): string {
+    if (v == null) {
+      return "";
+    }
+
+    // if (this._opts.mask) {
+    //   return (v as any).toString();
+    // }
+    // eslint-disable-next-line prefer-const
+    let [int, dec] = (v as any).toString().split(".");
+    const f = format;
+    if (f.sep1000) {
+      const to = (v as number)! > 0 ? 0 : 1;
+      for (let i = int.length - 3; i > to; i -= 3) {
+        int = `${int.substring(0, i)}${f.sep1000}${int.substring(i)}`;
+      }
+    }
+
+    if (dec || f.minDecimal || f.maxDecimal) {
+      dec = dec === undefined ? "" : dec.substring(0, Math.min(f.maxDecimal, dec.length));
+      dec += "0".repeat(Math.max(f.minDecimal - dec.length, 0));
+      if (dec.length) {
+        return int + f.sepDecimal + dec;
+      }
+    }
+
+    return int;
+  }
+
+  /** Returns $options.format joined with defaults */
+  get $format(): Required<WUP.Number.Format> {
+    const f = this._opts.format;
+    return {
+      sepDecimal: localeInfo.sepDecimal,
+      sep1000: localeInfo.sep1000,
+      ...f,
+      maxDecimal: f?.maxDecimal ?? f?.minDecimal ?? 0,
+      minDecimal: f?.minDecimal ?? 0,
+    };
+  }
+
+  // WARN usage format #.### impossible because unclear what sepDec/sep100 and what if user wants only limit decimal part
+  valueToInput(v: ValueType | undefined, skipScaling?: boolean): string {
+    if (v == null) {
+      return "";
+    }
+    if (!skipScaling) {
+      const { scale, offset } = this._opts;
+      (v as number) /= scale || 1;
+      (v as number) += offset || 0;
+      (v as number) = mathFixFP(v as number); // WARN: 95 + scale: 0.01 => need avoid 0.9500000000000001
+    }
+    if (this._opts.mask) {
+      return (v as any).toString();
+    }
+    return this.#ctr.$stringify(v as number, this.$format);
+  }
+
+  override parse(text: string): ValueType | undefined {
+    const v = Number(text);
+    if (!text || Number.isNaN(v)) {
+      return undefined;
+    }
+    return v as any;
+  }
+
+  override canParseInput(text: string): boolean {
+    const f = this.$format;
+    if (f.maxDecimal > 0 && text.endsWith(f.sepDecimal)) {
+      return false; // case "4.|" - use must able to type '.'
+    }
+    return true;
+  }
+
+  override parseInput(text: string): ValueType | undefined {
+    let v = this.#ctr.$parse(text, this.$format);
+    if (v != null && (v! > Number.MAX_SAFE_INTEGER || v! < Number.MIN_SAFE_INTEGER)) {
+      this.declineInput(); // decline looks better validation "Out of range"
       throw new RangeError("Out of range");
       // return v as any;
     }
 
+    const rawValue = v;
+    if (v != null) {
+      const { scale, offset } = this._opts;
+      v -= offset || 0;
+      v = mathFixFP(v * (scale || 1)); // WARN: 95 + scale: 0.01 => need avoid 0.9500000000000001
+    }
+
     if (!this._opts.mask) {
       // otherwise it conflicts with mask
-      const next = this.valueToInput(v as any); // todo it's poor that parse depends on valueToInput: need fix this cycle...
+      const next = this.#ctr.$stringify(rawValue, this.$format);
       const hasDeclined = this._canShowDeclined && text.length > next.length;
-      if (hasDeclined && next === this.valueToInput(this.$value)) {
+      if (hasDeclined && next === this.#ctr.$stringify(this.$value as number, this.$format)) {
         // WARN: don't compare v === this.$value because $value=4.567 but format can be 4.56
         this.declineInput();
       } else if (text !== next) {
@@ -237,7 +277,7 @@ export default class WUPNumberControl<
           }
         }
         // el.value = next;
-        this.setInputValue(v as any, SetValueReasons.userInput); // WARN: it refreshes onceError but calls valueToInput again
+        this.setInputValue(v as any, SetValueReasons.userInput); // WARN: it calls valueToInput again
         const end = pos + dp;
         el.setSelectionRange(end, end);
       }
@@ -383,13 +423,14 @@ export default class WUPNumberControl<
     } else if (this._isShiftDown) dval *= 10;
     else if (this._isCtrlDown) dval *= 100;
 
-    const v = +(this.$value ?? 0); // todo got increment depends on realValue but better to depend on input value directly
+    const tv = this.$refInput.value;
+    const v = (tv && this.#ctr.$parse(tv, this.$format)) || 0;
     const hasFloat = this._isAltDown || v % 1 !== 0;
-    const next = hasFloat ? mathSumFloat(v, dval) : v + dval;
+    const next = hasFloat ? mathFixFP(v + dval) : v + dval;
 
     const el = this.$refInput;
     const inputType = dval > 0 ? "_inc" : "_dec";
-    const data = this.valueToInput(next as any);
+    const data = this.valueToInput(next as any, true);
     setTimeout(() => {
       const isPrevented = !el.dispatchEvent(
         new InputEvent("beforeinput", { inputType, data, bubbles: true, cancelable: true })

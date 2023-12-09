@@ -16,11 +16,11 @@ Template repo with React: [webpack-must-have](https://github.com/Yegorich555/web
 
 ## Features
 
-- Possible to use **with any frameworks** like Angular, React, Vue etc. **or even directly with HTML & JS** (because it's js-native logic that doesn't required anything external)
-- Form/controls are ready to use and has built-in validation logic for any case that you can imagine (see [demo/controls](https://yegorich555.github.io/web-ui-pack/controls))
-- Focus on web-accessibility best practices (most of popular packages has lower accessibility)
-- High scalable and easy customizable (every component is developed to easy inherit and redefine/extend default logic)
-- Built-in css-variables to use custom color-themes with native ordinary styling (css, scss etc.)
+- Possible to use **with any frameworks** like Angular, React, Vue, etc. **or even directly with HTML & JS** (because it's js-native logic that doesn't require anything external)
+- Form/controls are ready to use and have built-in validation logic for any case that you can imagine (see [demo/controls](https://yegorich555.github.io/web-ui-pack/controls))
+- Focus on web-accessibility best practices (most popular packages have lower accessibility)
+- High scalable and easily customizable (every component is developed for easy inheritance and redefine/extend default logic)
+- Built-in CSS variables to use custom color themes with native ordinary styling (CSS, SCSS, etc.)
 - Built-in dark color scheme. Add attribute `wupdark` (`<body wupdark>`) and define main background & text colors
 - Built-in Typescript (coverage types 100%)
 - Built-in `.jsx/.tsx` support (for React/Preact)
@@ -28,20 +28,20 @@ Template repo with React: [webpack-must-have](https://github.com/Yegorich555/web
 - Well documented with JSDoc (use intellisense power of your editor to get details about each property/option/usage)
 - Optimized for webpack (build includes only used components and helpers via **side-effects** option)
 - Zero dependency (don't need to wait for bug-fixing of other packages)
-- Always 100% test coverage via e2e and unit tests (it's must-have and always will be so)
-- Focus on performance (it's important to have low-memory consumption and fastest initialization)
+- Always 100% test coverage via e2e and unit tests (it's a must-have and always will be so)
+- Focus on performance (it's important to have low memory consumption and fast initialization)
 
 ## Why the package is so big
 
-It's developed with [Typescript](https://www.typescriptlang.org/) and has huge built-in documentation (JSDoc). Every method,property,event and even local variables are documented well so you don't need extra resource to take an example to implement or configure elements. In build-result without comments you will see that it's small-enough
+It's developed with [Typescript](https://www.typescriptlang.org/) and has huge built-in documentation (JSDoc). Every method, property, event, and even local variables are documented well so you don't need extra resources to take an example to implement or configure elements. In the build result, without comments, you will see that it's small enough
 
 ## Installing & usage
 
 1. Install with npm `npm install web-ui-pack`
 2. Add `import { WUPPopupElement } from "web-ui-pack";` into any file (`main.js` for example)
-3. Call `WUPPopupElement.$use()` to register HTML tag into web-browser
+3. Call `WUPPopupElement.$use()` to register the HTML tag into web-browser
 4. For usage with React see [CODESTYLE.md](CODESTYLE.md) (for other frameworks it's very similar)
-5. For usage with HTML + VSCode extend VSCode settings (For WebStorm it works out of box - without extra config)
+5. For usage with HTML + VSCode extend VSCode settings (For WebStorm it works out of the box - without extra config)
 
    ```json
    // .vscode/settings.json
@@ -56,52 +56,52 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
 ## TODO
 
 - [x] [Helpers](#helpers)
-- _HTMLElement_
+- _HTMLElement_ > _BaseElement_
 
-  - _BaseElement_
+  - [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
+  - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
+  - [x] [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
+  - _BaseModal_
 
-    - [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
-    - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
-    - [x] [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
-    - _BaseModal_
+    - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
+      - [ ] Tooltip Hook
+    - [x] [ModalElement](src/modalElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
+      - [x] Modal in modal
+      - [x] Confirm modal
+      - [x] Confirm hook (use WUPModal.$useConfirmHook)
+      - [x] Modal form
+    - [ ] Notice (alt of react-tostify)
 
-      - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
-        - [ ] Tooltip Hook
-      - [x] [ModalElement](src/modalElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
-        - [x] Modal in modal
-        - [x] Confirm modal
-        - [x] Confirm hook (use WUPModal.$useConfirmHook)
-        - [x] Modal form
-      - [ ] Notice (alt of react-tostify)
-    - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
+  - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
 
-    - _BaseControl_
-      - [x] [SwitchControl (toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
-        - [x] [CheckControl (checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
-          - [ ] CheckTreeControl
-      - [x] [RadioControl (radioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
-        - [ ] Full customized items
-      - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-        - [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-        - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
-          - [ ] TextRichControl
-        - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
-        - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
-        - [x] [_BaseComboControl_](src/controls/baseCombo.ts)
-          - [x] [SelectControl (combobox)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-            - [ ] Full customized menu
-            - [x] [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
-          - [ ] SearchControl
-          - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
-          - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
-            - [ ] DateTimeControl
-            - [ ] DateRangeControl
-            - [ ] option `multiple`
-      - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
-      - [ ] SliderControl (progress bar)
-      - [ ] FileControl
-      - [ ] ImageControl (AvatarEditor)
-      - [ ] ColorControl (ColorPicker)
+  - _BaseControl_
+
+    - [x] [SwitchControl (toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
+      - [x] [CheckControl (checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
+        - [ ] CheckTreeControl
+    - [x] [RadioControl (radioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
+      - [ ] Full customized items
+    - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+      - [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+      - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
+        - [ ] TextRichControl
+      - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
+      - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
+      - [x] [_BaseComboControl_](src/controls/baseCombo.ts)
+        - [x] [SelectControl (combobox)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
+          - [ ] Full customized menu
+          - [x] [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
+        - [ ] SearchControl
+        - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
+        - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
+          - [ ] DateTimeControl
+          - [ ] DateRangeControl
+          - [ ] option `multiple`
+    - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
+    - [ ] SliderControl (progress bar)
+    - [ ] FileControl
+    - [ ] ImageControl (AvatarEditor)
+    - [ ] ColorControl (ColorPicker)
 
   - [ ] MediaPlayer (Video player)
   - [ ] InfiniteScroll
@@ -114,11 +114,11 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
 **Common rules**:
 
 1. **Naming**
-   - All components named as `WUP..Element`, `WUP..Control` and has `<wup-...>` html-tags
+   - All components named `WUP..Element`, `WUP..Control` and have `<wup-...>` HTML-tags
    - Public properties/options/events/methods startsWith `$...` (events `$onOpen`, `$onClose`, methods `$open()`, `$close()`, props like `$isOpened` etc.)
-   - Every component/class has static `$defaults` (common options for current class) and personal `$options` (per each component). See details in [example](#example)
-   - `$options` are observed. So changing options affects on component immediately after empty timeout (every component has static `observedOptions` as set of watched options)
-   - all custom `attributes` updates `$options` automatically. So `document.querySelector('wup-spin').$options.inline` equal to `<wup-spin inline />`
+   - Every component/class has static `$defaults` (common options for the current class) and personal `$options` (per each component). See details in [example](#example)
+   - `$options` are observed. So changing options affects the component immediately after empty timeout (every component has static `observedOptions` as a set of watched options)
+   - all custom `attributes` update `$options` automatically. So `document.querySelector('wup-spin').$options.inline` equal to `<wup-spin inline />`
 2. **Recommendations**
    - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched on (for optimization). But **if you don't use webpack** don't import from `web-ui-pack` directly (due to tree-shaking can be not smart enough). Instead use `web-ui-pack/path-to-element`
    - Every component has a good JSDoc so go ahead and read details directly during the coding
@@ -127,10 +127,10 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
    - In `jsx/tsx` instead of `className` use `class` attribute (React issue)
    - If you change custom html-attributes it will update `$options`, but if you change some option it removes related attribute (for performance reasons). Better to avoid usage attributes at all
 4. **Inheritance**
-   - Components are developed to be easy customized and inherited. Use ...$defaults of every class to configure behavior You can rewrite everything that you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
+   - Components are developed to be easily customized and inherited. Use ...$defaults of every class to configure behavior You can rewrite everything you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
    - All Components inherited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
-   - To redefine component just extend it and register with new html tag OR redefine default behavior via prototype functions (if $defaults are not included something). See details in [example](#example)
+   - To redefine the component just extend it and register with a new html tag OR redefine default behavior via prototype functions (if $defaults are not included something). See details in [example](#example)
 
 ---
 
@@ -157,8 +157,8 @@ el.$options.openCase = PopupOpenCases.onClick | PopupOpenCases.onFocus; // show 
 el.$options.target = document.querySelector("button");
 /*
   Placement can be $top, $right, $bottom, $left (top - above at the target etc.)
-  every placement has align options: $start, $middle, $end (left - to align at start of target)
-  also you can set $adjust to allow Reduce popup to fit layout
+  every placement has align options: $start, $middle, $end (left - to align at the start of target)
+  also, you can set $adjust to allow Reduce popup to fit layout
 */
 el.$options.placement = [
   WUPPopupElement.$placements.$top.$middle; // place at the top of target and align by vertical line
@@ -172,7 +172,7 @@ HTML, JSX, TSX
 
 ```html
 <button id="btn1">Target</button>
-<!-- You can skip pointing attribute 'target' if popup appended after target -->
+<!-- You can skip pointing attribute 'target' if popup is appended after target -->
 <wup-popup w-target="#btn1" w-placement="top-start">Some content here</wup-popup>
 ```
 
@@ -239,8 +239,9 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**findScrollParentAll**](src/helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
 - [**focusFirst**](src/helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
 - [**isIntoView**](src/helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
-- [**mathSumFloat**](src/helpers/math.ts) ⇒ `Sum without float-precision-issue`
+- [**mathFixFP**](src/helpers/math.ts) ⇒ `Sum without float-precision-issue`
 - [**mathScaleValue**](src/helpers/math.ts) ⇒ `Scale value from one range to another`
+- [**mathRotate**](src/helpers/math.ts) ⇒ `Apply transform.rotate on point`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
 - [**objectClone**](src/helpers/objectClone.ts) ⇒ `deep cloning object`
@@ -251,7 +252,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 - [**onScrollStop**](src/helpers/onScrollStop.ts) ⇒ `Returns callback when scrolling is stopped (via checking scroll position every frame-render)`
 - [**onFocusLost**](src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
 - [**onSpy**](src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
-- [**promiseWait**](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast api-request in case: pending > waitResponse > resetPending`
+- [**promiseWait**](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast API-request in case: pending > waitResponse > resetPending`
 - [**scrollIntoView**](src/helpers/scrollIntoView.ts) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
 - [class **WUPScrolled**](src/helpers/scrolled.ts) ⇒ `Class makes pointed element scrollable and implements carousel-scroll behavior (appends new items during the scrolling). Supports swipe/pageUp/pageDown/mouseWheel events.`
 - [**stringLowerCount**](src/helpers/string.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
@@ -267,11 +268,11 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
 
 ### Troubleshooting
 
-Be sure that you familiar with [common rules](#components)
+Be sure that you are familiar with [common rules](#components)
 
 #### Library doesn't work in some browsers
 
-> web-ui-pack is compiled to ESNext. So some features maybe don't exist in browsers. To resolve it include the lib into babel-loader (for webpack check module.rules...exclude sections
+> web-ui-pack is compiled to ESNext. So some features may not exist in browsers. To resolve it include the lib into babel-loader (for webpack check module.rules...exclude sections
 >
 > ```js
 > // webpack.config.js
@@ -286,9 +287,9 @@ Be sure that you familiar with [common rules](#components)
 >     },
 > ```
 
-#### UI doesn't recognize html tags like `<wup-popup />` etc
+#### UI doesn't recognize HTML tags like `<wup-popup />` etc
 
-> It's possible if you missed import or it was removed by optimizer of webpack etc. To fix this need to force import at least once and don't forget to call `.$use()`
+> It's possible that you missed import or it was removed by the optimizer of webpack etc. To fix this need to force import at least once and don't forget to call `.$use()`
 >
 > ```js
 > import { WUPSelectControl, WUPTextControl } from "web-ui-pack";

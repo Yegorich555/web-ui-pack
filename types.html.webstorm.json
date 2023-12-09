@@ -1,7 +1,7 @@
 {
 	"$schema": "https://raw.githubusercontent.com/JetBrains/web-types/master/schema/web-types.json",
 	"name": "web-ui-pack",
-	"version": "0.10.2",
+	"version": "1.0.2",
 	"description-markup": "markdown",
 	"contributions": {
 		"html": {
@@ -449,6 +449,14 @@
 					"description": "Form-control with number-input",
 					"doc-url": "https://yegorich555.github.io/web-ui-pack/control/number",
 					"attributes": [
+						{
+							"name": "w-scale",
+							"description": "Multiply value to store value different from text-value\n\rPoint 0.01 to scale 100 to 1 (user sees `100` but stored 1)"
+						},
+						{
+							"name": "w-offset",
+							"description": "Shift value to store value different from text-value\n\rPoint 20 to scale 100 to 120 (user sees `100` but stored 120)"
+						},
 						{
 							"name": "w-format",
 							"description": "String representation of displayed value by default inherits from localeInfo \n\r Point Global reference to object",

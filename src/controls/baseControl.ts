@@ -95,7 +95,7 @@ declare global {
       label: string | undefined | null;
       /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
        * * @tutorial
-       * * point `undefined` to completely detach from FormElement
+       * * point `null` or 'undefined' to completely detach from FormElement
        * * point `''`(empty string) to partially detach (exclude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
       name: string | undefined | null;
       /** Focus element when it's appended to layout @defaultValue false */
@@ -240,7 +240,7 @@ export default abstract class WUPBaseControl<
   /** Text announced by screen-readers; @defaultValue `Error for` */
   static $ariaError = __wupln("Error for", "aria");
 
-  /** Css-variables related to component */
+  /** CSS-variables related to component */
   static get $styleRoot(): string {
     return `:root {
         --ctrl-padding: 1.5em 1em 0.5em 1em;
@@ -258,10 +258,6 @@ export default abstract class WUPBaseControl<
         --ctrl-err-bg: #fff4fa;
         --ctrl-err-valid: green;
         --ctrl-invalid-border: red;
-        --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
-        --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
-        --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
-        --wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
       }
       [wupdark] {
         --ctrl-bg: none;
@@ -322,8 +318,15 @@ export default abstract class WUPBaseControl<
         -webkit-user-select: none;
         user-select: none;
       }
+      :host[busy] {
+        opacity: 0.8;
+        cursor: inherit;
+       -webkit-user-select: none;
+        user-select: none;
+      }
       [disabled] :host > label,
-      :host[disabled] > label {
+      :host[disabled] > label,
+      :host[busy] > label {
         pointer-events: none;
       }
       :host label {
@@ -354,8 +357,8 @@ export default abstract class WUPBaseControl<
       :host strong:empty {
         display: none;
       }
-      :host [aria-required="true"] + strong:after,
-      :host fieldset[aria-required="true"] > legend:after {
+      :host [aria-required=true] + strong:after,
+      :host fieldset[aria-required=true] > legend:after {
         content: "*";
         font-size: larger;
         font-weight: bolder;
@@ -473,7 +476,7 @@ export default abstract class WUPBaseControl<
   }
 
   /** Called on value change */
-  $onChange?: (e: CustomEvent<SetValueReasons>) => void;
+  $onChange?: (e: WUP.BaseControl.EventMap["$change"]) => void;
 
   #value?: ValueType;
   /** Current value of control; You can change it without affecting on $isDirty state */
