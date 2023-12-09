@@ -8,17 +8,18 @@
 
 ---
 
+- **Helpers**. Deprecate `mathSumFloat` in favor of `mathFixFP`
 - **Styles**.
-  - Move all icons to single `./styles.ts const WUPcssIconSet` to allow re-use it
-  - Add init root styles on script run (to allow re-use css variables before any WUP component is appended)
+  - Moved all icons to single `./styles.ts const WUPcssIconSet` to allow re-use it
+  - Added init root styles on script run (to allow re-use css variables before any WUP component is appended)
 - **Modal**
   - Allow to prevent auto closing via `form.$onSubmitEnd = (e) => e.preventDefault()`
   - Allow to prevent auto closing via `form.$onSubmit = (e) => e.preventDefault()`
-- **Controls**
-  - Add css-animation for box-shadow/borders
+- **Controls**. Added css-animation for box-shadow/borders
+- [RadioControl](src/controls/radio.ts). Added comparison by item.id to allow use cloned items/value
 - **Radio**. Add comparison by item.id to allow use cloned items/value
 - **Form**
-  - Add `form.$validate(...)` for manual triggering validations
+  - Added `form.$validate(...)` for manual triggering validations
   - Changed spinner to custom friendly looked
 
 ### Fixes
@@ -44,7 +45,7 @@
 ---
 
 - **Global**
-  - Add Preact tsx/jsx support
+  - Added Preact tsx/jsx support
 - **Controls**
   - Added `text-align: start` by default to avoid unexpected inheritance
   - [RadioControl](src/controls/radio.ts). Added attribute `[checked]` to re-style whole item

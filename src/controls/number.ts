@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import onScroll from "../helpers/onScroll";
-import { mathSumFloat, onEvent } from "../indexHelpers";
+import { mathFixFP, onEvent } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
@@ -397,7 +397,7 @@ export default class WUPNumberControl<
     const tv = this.$refInput.value;
     const v = (tv && this.#ctr.$parse(tv, this.$format)) || 0;
     const hasFloat = this._isAltDown || v % 1 !== 0;
-    const next = hasFloat ? mathSumFloat(v, dval) : v + dval;
+    const next = hasFloat ? mathFixFP(v + dval) : v + dval;
 
     const el = this.$refInput;
     const inputType = dval > 0 ? "_inc" : "_dec";
