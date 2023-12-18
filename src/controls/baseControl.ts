@@ -95,8 +95,8 @@ declare global {
       label: string | undefined | null;
       /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
        * * @tutorial
-       * * point `null` or 'undefined' to completely detach from FormElement
-       * * point `''`(empty string) to partially detach (exclude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
+       * * point `null` or `undefined` to completely detach from FormElement
+       * * point `''`(empty string) to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) */
       name: string | undefined | null;
       /** Focus element when it's appended to layout @defaultValue false */
       autoFocus: boolean;
