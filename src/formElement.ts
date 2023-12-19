@@ -709,3 +709,4 @@ export default class WUPFormElement<
 customElements.define(tagName, WUPFormElement);
 
 // todo show success/error result in <wup-alert> at the left/right angle + add autoSubmit option
+// todo $model = {} doesn't work - is it expected ???
