@@ -2,6 +2,18 @@
 
 # Changelog
 
+## 1.0.4 (\_\_\_)
+
+### New Features
+
+---
+
+- [WUPTimeObject](src/objects/timeObject.ts). Add init by date to constructor
+
+---
+
+---
+
 ## 1.0.3 (Dec 9, 2023)
 
 ### New Features
