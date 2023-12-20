@@ -4,10 +4,12 @@ import dateCopyTime from "../helpers/dateCopyTime";
 import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
 import localeInfo from "../objects/localeInfo";
+import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 import WUPCalendarControl from "./calendar";
+import WUPTimeControl from "./time";
 
 WUPCalendarControl.$use();
 
@@ -138,6 +140,15 @@ export default class WUPDateControl<
     // format: localeInfo.date.toLowerCase()
   };
 
+  get $initValue(): ValueType | undefined {
+    return super.$initValue;
+  }
+
+  set $initValue(v: ValueType | undefined) {
+    super.$initValue = v;
+    this.setTimeValue(this.refTime, v, SetValueReasons.initValue);
+  }
+
   constructor() {
     super();
     this.#ctr.$defaults.firstWeekDay ||= localeInfo.firstWeekDay;
@@ -241,19 +252,34 @@ export default class WUPDateControl<
   }
 
   protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
-    if (v && skipInput) {
-      const prev = this.$value || this.$initValue;
-      prev && dateCopyTime(v, prev, !!this._opts.utc); // copy time if was changing from input (calendar do it itself)
+    if (v) {
+      let isCopied = false;
+      if (skipInput) {
+        const prev = this.$value || this.$initValue;
+        prev && dateCopyTime(v, prev, this._opts.utc); // copy time if was changing from input (calendar do it itself)
+        isCopied = !!prev;
+      }
+
+      // copy time value from synced timeControl
+      if (!isCopied && reason !== SetValueReasons.manual && reason !== SetValueReasons.initValue) {
+        const vt = this.refTime?.$value;
+        if (vt) {
+          v = vt.copyToDate(v, this._opts.utc) as ValueType;
+        }
+      }
     }
+
     const isChanged = super.setValue(v, reason, skipInput);
     if (isChanged) {
       const c = this.$refPopup?.firstElementChild as WUPCalendarControl;
       if (c) {
         c._isStopChanges = true; // to prevent hiding popup by calendar valueChange
         c.$value = v && !Number.isNaN(v.valueOf()) ? v : undefined;
-        setTimeout(() => (c._isStopChanges = false)); // without timeout calendar $changeEvent is fired
+        setTimeout(() => (c._isStopChanges = false)); // without timeout calendar.$changeEvent is fired
       }
     }
+
+    reason === SetValueReasons.manual && this.setTimeValue(this.refTime, v, reason);
     return isChanged;
   }
 
@@ -281,9 +307,54 @@ export default class WUPDateControl<
     const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
     clnd.gotKeyDown.call(clnd, e);
   }
+
+  /** Returns tied TimeControl (nextSibling + name === '' F) */
+  get refTime(): WUPTimeControl | null {
+    const el = this.nextElementSibling as WUPTimeControl | null;
+    return el instanceof WUPTimeControl && el.$options.name === "" ? el : null;
+  }
+
+  /** Set value if found tied timeControl@see refTime  */
+  protected setTimeValue(elTime: WUPTimeControl | null, v: ValueType | undefined, reason: SetValueReasons): void {
+    if (!elTime) {
+      return;
+    }
+
+    // @ts-expect-error
+    delete elTime.setValue; // delete hook to prevent cycle
+
+    const t = v && new WUPTimeObject(v, this._opts.utc);
+    // eslint-disable-next-line default-case
+    switch (reason) {
+      case SetValueReasons.initValue:
+        elTime.$initValue = t;
+        break;
+      case SetValueReasons.manual:
+        elTime.$value = t;
+        break;
+    }
+
+    // set hook on value change
+    // @ts-expect-error - because protected
+    const orig = WUPTimeControl.prototype.setValue;
+    // @ts-expect-error - because protected
+    elTime.setValue = (...args) => {
+      const isChanged = orig.call(elTime, ...args);
+      const dt = this.$value;
+      if (isChanged && dt) {
+        (elTime.$value || new WUPTimeObject(0, 0)).copyToDate(dt, this._opts.utc);
+      }
+      return isChanged;
+    };
+  }
 }
 
 customElements.define(tagName, WUPDateControl);
 // NiceToHave: role 'spinbutton" + changing input value via scrolling: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/spinbutton_role
 // NiceToHave: allowYear, allowMonth, allowDays based on format: "YYYY-MM" - only for selection year & month
 // NiceToHave: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
+
+/* todo sync with time
+ >> Date changed => update time validation min/max/exclude + re-validate if time was selected before
+ >> Storage: need separate keys
+*/
