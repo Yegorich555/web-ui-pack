@@ -20,6 +20,7 @@ describe("control.dateTime", () => {
   test("date + time", async () => {
     WUPDateControl.$use();
     WUPTimeControl.$use();
+
     document.body.innerHTML = `
         <wup-form>
           <wup-date w-name="sch"></wup-date>
@@ -110,5 +111,42 @@ describe("control.dateTime", () => {
 
     // date select => skip because expected same logic
     // time select => skip because expected same logic
+
+    // validations min/max/exclude
+    document.body.innerHTML = `
+        <wup-form>
+          <wup-date w-name="sch"></wup-date>
+          <wup-time w-name=""></wup-time>
+        </wup-form>`;
+    elDate = document.body.querySelector("wup-date");
+    elTime = document.body.querySelector("wup-time");
+    form = document.body.querySelector("wup-form");
+
+    elDate.$options.min = new Date(Date.UTC(2022, 9, 15, 2, 36));
+    elDate.$options.max = new Date(Date.UTC(2022, 9, 18, 17, 39));
+    await h.wait();
+    expect(elTime.$options.min).toBeFalsy();
+    expect(elTime.$options.max).toBeFalsy();
+    await h.userTypeText(elDate.$refInput, "20221014");
+    expect(elDate.$value).toEqual(new Date(Date.UTC(2022, 9, 14, 0, 0)));
+    expect(elTime.$value).toBe(undefined);
+    expect(elTime.$options.min).toBeFalsy();
+    expect(elTime.$options.max).toBeFalsy();
+    await h.userTypeText(elDate.$refInput, "20221015");
+    expect(elDate.$value).toEqual(new Date(Date.UTC(2022, 9, 15, 0, 0)));
+    expect(elTime.$value).toBe(undefined);
+    expect(elTime.$options.max).toBeFalsy();
+    expect(elTime.$options.min).toEqual(new WUPTimeObject(2, 36));
+    await h.userTypeText(elDate.$refInput, "20221016");
+    expect(elDate.$value).toEqual(new Date(Date.UTC(2022, 9, 16, 0, 0)));
+    expect(elTime.$options.min).toBeFalsy();
+    // again with value change
+    elDate.$value = new Date(Date.UTC(2022, 9, 18, 0, 0));
+    await h.wait();
+    expect(elTime.$options.min).toBeFalsy();
+    expect(elTime.$options.max).toEqual(new WUPTimeObject(17, 39));
+
+    // todo when time previously selected need to trigger validation ???
+    // validations exclude
   });
 });

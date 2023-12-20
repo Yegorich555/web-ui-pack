@@ -252,6 +252,8 @@ export default class WUPDateControl<
   }
 
   protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
+    const elTime = this.refTime;
+
     if (v) {
       let isCopied = false;
       if (skipInput) {
@@ -262,7 +264,7 @@ export default class WUPDateControl<
 
       // copy time value from synced timeControl
       if (!isCopied && reason !== SetValueReasons.manual && reason !== SetValueReasons.initValue) {
-        const vt = this.refTime?.$value;
+        const vt = elTime?.$value;
         if (vt) {
           v = vt.copyToDate(v, this._opts.utc) as ValueType;
         }
@@ -279,7 +281,14 @@ export default class WUPDateControl<
       }
     }
 
-    reason === SetValueReasons.manual && this.setTimeValue(this.refTime, v, reason);
+    if (elTime) {
+      this.setTimeValidations(elTime);
+      if (reason === SetValueReasons.manual) {
+        this.setTimeValue(elTime, v, reason);
+      } else if (elTime.$value) {
+        // todo trigger validation here if time value exists ???
+      }
+    }
     return isChanged;
   }
 
@@ -291,7 +300,7 @@ export default class WUPDateControl<
   }
 
   protected override focusMenuItem(next: HTMLElement | null): void {
-    // WARN: it's important don't use call super... because the main logic is implemented inside calendar
+    // WARN: it's important not use super... because the main logic is implemented inside calendar
     // can be fired from baseCombo => when need to clear selection
     const el = this.$refPopup?.firstElementChild as WUPCalendarControl;
     if (el) {
@@ -311,7 +320,11 @@ export default class WUPDateControl<
   /** Returns tied TimeControl (nextSibling + name === '' F) */
   get refTime(): WUPTimeControl | null {
     const el = this.nextElementSibling as WUPTimeControl | null;
-    return el instanceof WUPTimeControl && el.$options.name === "" ? el : null;
+    return el instanceof WUPTimeControl &&
+      // @ts-expect-error - because protected
+      el._opts.name === ""
+      ? el
+      : null;
   }
 
   /** Set value if found tied timeControl@see refTime  */
@@ -347,6 +360,40 @@ export default class WUPDateControl<
       return isChanged;
     };
   }
+
+  /** Called when possible need to update min/max/exclude for time control */
+  protected setTimeValidations(elTime: WUPTimeControl | null): void {
+    if (!elTime) {
+      return;
+    }
+
+    const v = this.$value;
+    const obj: { min?: WUPTimeObject; max?: WUPTimeObject } = {};
+    if (v) {
+      const vld = this._opts.validations;
+      (["min", "max"] as Array<"min" | "max">).forEach((k) => {
+        const dFrom = this._opts[k] || (vld && vld[k]);
+        if (dFrom) {
+          if (typeof dFrom === "function") {
+            this.throwError("Impossible to sync [min] with time. Expected Date instead of function");
+            return;
+          }
+          const c = dateCompareWithoutTime(v, dFrom, this._opts.utc);
+          obj[k] = c === 0 ? new WUPTimeObject(dFrom, this._opts.utc) : obj[k]; // in other cases dateControl must show error
+        }
+      });
+    }
+
+    const o = elTime.$options;
+    o.min = obj.min;
+    o.max = obj.max;
+    if (o.validations) {
+      o.validations.min = undefined;
+      o.validations.max = undefined;
+    }
+  }
+
+  // todo exclude here
 }
 
 customElements.define(tagName, WUPDateControl);
@@ -355,6 +402,6 @@ customElements.define(tagName, WUPDateControl);
 // NiceToHave: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
 
 /* todo sync with time
- >> Date changed => update time validation min/max/exclude + re-validate if time was selected before
+ >> Date changed => update time validation exclude
  >> Storage: need separate keys
 */
