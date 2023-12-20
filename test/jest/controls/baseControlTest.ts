@@ -28,7 +28,7 @@ let tagName = "";
 let el: WUPBaseControl;
 let elType: typeof WUPBaseControl;
 
-/** Function with init-cylce beforeEach/afterEach */
+/** Function with init-cycle beforeEach/afterEach */
 export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T>) {
   !cfg.type && console.error("missed");
   tagName = cfg.htmlTag;
@@ -36,7 +36,6 @@ export function initTestBaseControl<T extends WUPBaseControl>(cfg: InitOptions<T
 
   beforeEach(async () => {
     jest.useFakeTimers();
-    Element.prototype.scrollIntoView = jest.fn();
     let lastUniqueNum = 0;
     jest.spyOn(cfg.type, "$uniqueId", "get").mockImplementation(() => `txt${++lastUniqueNum}`);
     (elType.$defaults.validationRules as any).$alwaysValid = () => false;

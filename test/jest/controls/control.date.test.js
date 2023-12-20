@@ -254,7 +254,7 @@ describe("control.date", () => {
     await h.userTypeText(el.$refInput, "20221030");
     await h.wait(150);
     expect(el.$isOpened).toBe(true);
-    expect(el.$refInput.value).toBe("2022-10-30"); // becahuse mask is applied
+    expect(el.$refInput.value).toBe("2022-10-30"); // because mask is applied
     expect(el.$isValid).toBe(true);
     expect(el.$refError).toBe(undefined);
     // el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
