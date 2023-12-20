@@ -159,7 +159,10 @@ declare global {
       /** Wait for pointed time after valueChange before showError (it's summarized with $options.debounce); WARN: hide error without debounce
        *  @defaultValue 500 */
       validateDebounceMs: number;
-      /** Show all validation-rules with checkpoints as list instead of single error @defaultValue false */
+      /** Show all validation-rules with checkpoints as list instead of single error @defaultValue false;
+       * @tutorial rules
+       * * All listed rules must return error-message when value === undefined OR
+       * * To skip rule from listing name with underscore, for example `_old: (v,c) => ...` */
       validationShowAll: boolean;
       /** Storage key for auto saving value in storage;
        * @tutorial rules
