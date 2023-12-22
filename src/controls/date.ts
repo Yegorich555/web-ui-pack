@@ -32,6 +32,13 @@ declare global {
        * @tutorial Troubleshooting
        * * with changing $options.format need to change/reset mask/maskholder also */
       format: string;
+      /** Anchor to TimeControl to sync with date
+       * @example
+       * ```html
+       * <wup-date w-sync="next" w-min="2016-01-02 12:40"></wup-date>
+       * <wup-time></wup-time>
+       * ``` */
+      sync: WUPTimeControl | null;
     }
     interface Options<T = Date, VM = ValidityMap>
       extends WUP.Calendar.Options<T, VM>,
@@ -43,6 +50,14 @@ declare global {
         WUP.Base.OnlyNames<NewOptions> {
       "w-initValue"?: string;
       "w-format"?: string;
+      /** Anchor to TimeControl to sync with date
+       *  * Point querySelector (id, `next` or`false`) to related element
+       * @example
+       * ```html
+       * <wup-date w-sync="next" w-min="2016-01-02 12:40"></wup-date>
+       * <wup-time></wup-time>
+       * ``` */
+      "w-sync"?: string;
     }
   }
   interface HTMLElementTagNameMap {
@@ -116,6 +131,7 @@ export default class WUPDateControl<
     m.max = { type: AttributeTypes.parsedObject };
     m.firstweekday = { type: AttributeTypes.number };
     m.startwith = { type: AttributeTypes.string };
+    m.sync = { type: AttributeTypes.selector };
     return m;
   }
 
@@ -136,6 +152,7 @@ export default class WUPDateControl<
         __wupln(`This value is disabled`, "validation"),
     },
     format: "",
+    sync: null,
     // firstWeekDay: 1,
     // format: localeInfo.date.toLowerCase()
   };
@@ -200,6 +217,13 @@ export default class WUPDateControl<
       .replace(/mm|MM/, "00")
       .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
     this._opts.maskholder ||= this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
+
+    if (this._opts.name) {
+      const el = this.refTime;
+      if (el && !el.$options.name) {
+        el.$options.name = ""; // important to enable validation for time control
+      }
+    }
 
     super.gotChanges(propsChanged as any);
   }
@@ -317,14 +341,13 @@ export default class WUPDateControl<
     clnd.gotKeyDown.call(clnd, e);
   }
 
-  /** Returns tied TimeControl (nextSibling + name === '' F) */
+  /** Returns tied TimeControl related to option */
   get refTime(): WUPTimeControl | null {
-    const el = this.nextElementSibling as WUPTimeControl | null;
-    return el instanceof WUPTimeControl &&
-      // @ts-expect-error - because protected
-      el._opts.name === ""
-      ? el
-      : null;
+    const s = this._opts.sync;
+    if (s && typeof s === "string") {
+      this._opts.sync = this.findBySelector(s);
+    }
+    return this._opts.sync;
   }
 
   /** Set value if found tied timeControl@see refTime  */
@@ -362,11 +385,7 @@ export default class WUPDateControl<
   }
 
   /** Called when possible need to update min/max/exclude for time control */
-  protected setTimeValidations(elTime: WUPTimeControl | null): void {
-    if (!elTime) {
-      return;
-    }
-
+  protected setTimeValidations(elTime: WUPTimeControl): void {
     const v = this.$value;
     const obj: { min?: WUPTimeObject; max?: WUPTimeObject } = {};
     if (v) {
@@ -384,6 +403,7 @@ export default class WUPDateControl<
       });
     }
 
+    // todo if date is required then time also is required
     const o = elTime.$options;
     o.min = obj.min;
     o.max = obj.max;

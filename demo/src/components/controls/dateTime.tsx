@@ -13,21 +13,18 @@ WUPDateControl.$use();
 export default function DateTimeView() {
   return (
     <Page
-      header="DateTimeControl"
-      link="src/controls/date.ts" // todo update it
+      header="Date & Time"
+      link="src/controls/date.ts"
       details={{
-        tag: "wup-date", // todo update it
+        tag: "wup-date",
         linkDemo: "demo/src/components/controls/dateTime.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
         excludeCssVars: ["--ctrl-clr-cell-day-w", "--ctrl-clr-cell-h", "--ctrl-clr-cell-w", "--ctrl-clr-h"],
+        customHTML,
       }}
       features={[
         "Inheritted features from DateControl & TimeControl",
-        "Powerful accessibility support (keyboard, announcement)",
-        "Scrollable & well animated pickers (with swipe for touchscreens)",
-        "Wide ability to disable particular dates (options min/max/exclude)",
-        "No dependency for working with dates (usage momentJS doesn't make sense)",
-        "Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
+        "Date is master and controls related time control (validations, values, etc.)",
       ]}
     >
       <wup-form
@@ -39,43 +36,39 @@ export default function DateTimeView() {
         }}
         w-autoFocus
       >
-        {/*  todo update to dateTime */}
-        <wup-date
-          w-name="dateTime"
-          w-initValue="2022-03-01 23:50"
-          w-min="2016-01-02 12:40"
-          w-max="2034-05-01 23:55"
-          w-exclude="window.myDateTimeExclude"
-          w-startWith="day"
-          w-utc
-          w-validations="window.myDateTimeValidations"
-        />
         <div className={stylesCom.group}>
           <wup-date
+            w-sync="#time"
             w-name="scheduled"
+            w-initValue="2022-03-01 23:50"
             w-min="2016-01-02 12:40"
-            ref={(el) => {
-              if (el) {
-                el.$onChange = () => console.warn("changed");
-              }
-            }}
+            w-max="2034-05-01 23:55"
+            w-exclude="window.myDateTimeExclude"
+            w-utc
+            w-validations="window.myDateTimeValidations"
           />
-          <wup-time w-name="" w-label="Tied time" />
+          <wup-time id="time" w-name="" w-label="Tied time" />
         </div>
-        {/* <div className={stylesCom.group}>
-          <wup-date w-name="readonly" readonly w-initValue="2022-03-01 23:50" />
-          <wup-date w-name="disabled" disabled w-initValue="2022-03-01" />
-          <wup-date w-name="required" w-validations="window.myDateValidations" />
-        </div>
-        <wup-date w-name="another" w-label="Another format: yyyy-m-d" w-format="yyyy-m-d" />
-        <wup-date //
-          w-name="saveUrl"
-          w-label="With saving to URL (see $options.storageKey & storage)"
-          w-storageKey
-          w-storage="url"
-        /> */}
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
   );
 }
+
+const customHTML = [
+  `html
+<div class="inline">
+  <wup-date
+    w-sync="#time"
+    ...
+    w-name="scheduled"
+    w-initValue="2022-03-01 23:50"
+    w-min="2016-01-02 12:40"
+    w-max="2034-05-01 23:55"
+    w-exclude="window.myDateTimeExclude"
+    w-validations="window.myDateTimeValidations"
+    w-utc
+  />
+  <wup-time id="time" w-label="Tied time" />
+</div>`,
+];

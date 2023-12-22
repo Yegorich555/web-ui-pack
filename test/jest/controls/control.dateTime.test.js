@@ -23,8 +23,8 @@ describe("control.dateTime", () => {
 
     document.body.innerHTML = `
         <wup-form>
-          <wup-date w-name="sch"></wup-date>
-          <wup-time w-name=""></wup-time>
+          <wup-date w-name="sch" w-sync="next"></wup-date>
+          <wup-time></wup-time>
         </wup-form>`;
     let elDate = document.body.querySelector("wup-date");
     let elTime = document.body.querySelector("wup-time");
@@ -95,11 +95,21 @@ describe("control.dateTime", () => {
     expect(elTime.$value).toEqual(new WUPTimeObject(2, 47));
     expect(elDate.$value).toEqual(new Date(Date.UTC(2022, 9, 30, 2, 47)));
 
+    // with initValue
+    document.body.innerHTML = `<wup-date w-name="sch" w-sync="next" w-initvalue="2022-11-15 12:46"></wup-date>`;
+    elDate = document.querySelector("wup-date");
+    elDate.$initValue = new Date(Date.UTC(2022, 10, 15, 12, 46));
+    document.body.appendChild(document.createElement("wup-time"));
+    elTime = document.querySelector("wup-time");
+    await h.wait();
+    expect(elDate.$initValue).toEqual(new Date(Date.UTC(2022, 10, 15, 12, 46)));
+    expect(elTime.$initValue).toEqual(new WUPTimeObject(12, 46));
+
     // without UTC
     document.body.innerHTML = `
         <wup-form>
-          <wup-date w-name="sch" w-utc='false'></wup-date>
-          <wup-time w-name=""></wup-time>
+          <wup-date w-name="sch" w-utc='false' w-sync="next"></wup-date>
+          <wup-time></wup-time>
         </wup-form>`;
     elDate = document.body.querySelector("wup-date");
     elTime = document.body.querySelector("wup-time");
@@ -115,8 +125,8 @@ describe("control.dateTime", () => {
     // validations min/max/exclude
     document.body.innerHTML = `
         <wup-form>
-          <wup-date w-name="sch"></wup-date>
-          <wup-time w-name=""></wup-time>
+          <wup-date w-name="sch" w-sync="next"></wup-date>
+          <wup-time></wup-time>
         </wup-form>`;
     elDate = document.body.querySelector("wup-date");
     elTime = document.body.querySelector("wup-time");
@@ -149,8 +159,8 @@ describe("control.dateTime", () => {
     // when time previously selected need to trigger validation
     document.body.innerHTML = `
         <wup-form>
-          <wup-date w-name="sch" w-min='2016-01-02 12:40'></wup-date>
-          <wup-time w-name=""></wup-time>
+          <wup-date w-sync="next" w-name="sch" w-min='2016-01-02 12:40'></wup-date>
+          <wup-time></wup-time>
         </wup-form>`;
     elDate = document.body.querySelector("wup-date");
     elTime = document.body.querySelector("wup-time");
@@ -163,8 +173,8 @@ describe("control.dateTime", () => {
     // again when time value is empty
     document.body.innerHTML = `
         <wup-form>
-          <wup-date w-name="sch" w-min='2016-01-02 12:40'></wup-date>
-          <wup-time w-name=""></wup-time>
+          <wup-date w-sync="next" w-name="sch" w-min='2016-01-02 12:40'></wup-date>
+          <wup-time></wup-time>
         </wup-form>`;
     elDate = document.body.querySelector("wup-date");
     elTime = document.body.querySelector("wup-time");

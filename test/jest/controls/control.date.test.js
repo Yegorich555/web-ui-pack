@@ -89,6 +89,7 @@ describe("control.date", () => {
       "w-exclude": { value: [new Date("2009-02-06")] },
       "w-startwith": { skip: true }, // tested manually
       "w-firstweekday": { value: 1 },
+      "w-sync": { value: "body", parsedValue: document.body },
     },
     validationsSkip: ["_parse", "_mask"],
   });
