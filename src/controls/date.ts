@@ -218,11 +218,12 @@ export default class WUPDateControl<
       .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
     this._opts.maskholder ||= this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
 
-    if (this._opts.name) {
-      const el = this.refTime;
-      if (el && !el.$options.name) {
+    const el = this.refTime;
+    if (el) {
+      if (this._opts.name && !el.$options.name) {
         el.$options.name = ""; // important to enable validation for time control
       }
+      this.setTimeValidations(el); // to sync validation required
     }
 
     super.gotChanges(propsChanged as any);
@@ -388,8 +389,8 @@ export default class WUPDateControl<
   protected setTimeValidations(elTime: WUPTimeControl): void {
     const v = this.$value;
     const obj: { min?: WUPTimeObject; max?: WUPTimeObject } = {};
+    const vld = this._opts.validations;
     if (v) {
-      const vld = this._opts.validations;
       (["min", "max"] as Array<"min" | "max">).forEach((k) => {
         const dFrom = this._opts[k] || (vld && vld[k]);
         if (dFrom) {
@@ -403,14 +404,13 @@ export default class WUPDateControl<
       });
     }
 
-    // todo if date is required then time also is required
     const o = elTime.$options;
     o.min = obj.min;
     o.max = obj.max;
-    if (o.validations) {
-      o.validations.min = undefined;
-      o.validations.max = undefined;
-    }
+    o.validations ||= {};
+    o.validations.required = !!vld?.required; // if date is required then time also is required
+    o.validations.min = undefined;
+    o.validations.max = undefined;
   }
 
   // todo exclude here
@@ -422,6 +422,5 @@ customElements.define(tagName, WUPDateControl);
 // NiceToHave: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
 
 /* todo sync with time
- >> Date changed => update time validation exclude
  >> Storage: need separate keys
 */

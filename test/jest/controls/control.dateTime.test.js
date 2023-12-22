@@ -203,7 +203,18 @@ describe("control.dateTime", () => {
     // when validation is function
     elDate.$options.validations = { max: () => false };
     elDate.$value = new Date(Date.UTC(1985, 10, 15));
-    expect(() => jest.advanceTimersByTime()).toThrow(); // because vld is function and impossible to assign to timeControl
+    expect(() => jest.advanceTimersByTime(1)).toThrow(); // because vld is function and impossible to assign to timeControl
+
+    // validation required
+    document.body.innerHTML = `
+          <wup-date w-sync="next"></wup-date>
+          <wup-time></wup-time>`;
+    elDate = document.body.querySelector("wup-date");
+    elTime = document.body.querySelector("wup-time");
+    elDate.$options.validations = { required: true };
+    await h.wait();
+    expect(elTime.$options.validations?.required).toBe(true);
+
     // todo validations exclude
   });
 });
