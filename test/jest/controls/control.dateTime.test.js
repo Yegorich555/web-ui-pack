@@ -185,6 +185,25 @@ describe("control.dateTime", () => {
     expect(elDate.$refError).toBeFalsy();
     expect(elTime.$refError).toBeFalsy(); // because value is empty
 
+    // when validations instead of direct options
+    document.body.innerHTML = `
+          <wup-date w-sync="next"></wup-date>
+          <wup-time></wup-time>`;
+    elDate = document.body.querySelector("wup-date");
+    elTime = document.body.querySelector("wup-time");
+    elDate.$options.validations = { max: new Date(Date.UTC(2022, 10, 15, 12, 46)) };
+    elDate.$value = new Date(Date.UTC(2022, 10, 15));
+    expect(elTime.$options.max).toEqual(new WUPTimeObject(12, 46));
+    // time validations must be changed by date
+    elTime.$options.validations = { max: new WUPTimeObject(20, 14) };
+    elDate.$value = undefined;
+    elDate.$value = new Date(Date.UTC(2022, 10, 15));
+    expect(elTime.$options.validations.max).not.toEqual(new WUPTimeObject(20, 14));
+
+    // when validation is function
+    elDate.$options.validations = { max: () => false };
+    elDate.$value = new Date(Date.UTC(1985, 10, 15));
+    expect(() => jest.advanceTimersByTime()).toThrow(); // because vld is function and impossible to assign to timeControl
     // todo validations exclude
   });
 });
