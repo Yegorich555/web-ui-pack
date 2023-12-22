@@ -286,7 +286,7 @@ export default class WUPDateControl<
       if (reason === SetValueReasons.manual) {
         this.setTimeValue(elTime, v, reason);
       } else if (elTime.$value) {
-        // todo trigger validation here if time value exists ???
+        !elTime.$isEmpty && elTime.$validate();
       }
     }
     return isChanged;

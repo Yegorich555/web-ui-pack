@@ -53,6 +53,7 @@ export default function DateTimeView() {
         <div className={stylesCom.group}>
           <wup-date
             w-name="scheduled"
+            w-min="2016-01-02 12:40"
             ref={(el) => {
               if (el) {
                 el.$onChange = () => console.warn("changed");

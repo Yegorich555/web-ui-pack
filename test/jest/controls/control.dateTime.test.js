@@ -146,7 +146,35 @@ describe("control.dateTime", () => {
     expect(elTime.$options.min).toBeFalsy();
     expect(elTime.$options.max).toEqual(new WUPTimeObject(17, 39));
 
-    // todo when time previously selected need to trigger validation ???
-    // validations exclude
+    // when time previously selected need to trigger validation
+    document.body.innerHTML = `
+        <wup-form>
+          <wup-date w-name="sch" w-min='2016-01-02 12:40'></wup-date>
+          <wup-time w-name=""></wup-time>
+        </wup-form>`;
+    elDate = document.body.querySelector("wup-date");
+    elTime = document.body.querySelector("wup-time");
+    form = document.body.querySelector("wup-form");
+    elTime.$value = new WUPTimeObject(11, 34);
+    expect(elDate.$options.min).toBeTruthy();
+    await h.userTypeText(elDate.$refInput, "20160102");
+    expect(elDate.$refError).toBeFalsy();
+    expect(elTime.$refError).toBeTruthy();
+    // again when time value is empty
+    document.body.innerHTML = `
+        <wup-form>
+          <wup-date w-name="sch" w-min='2016-01-02 12:40'></wup-date>
+          <wup-time w-name=""></wup-time>
+        </wup-form>`;
+    elDate = document.body.querySelector("wup-date");
+    elTime = document.body.querySelector("wup-time");
+    form = document.body.querySelector("wup-form");
+    // elTime.$value = new WUPTimeObject(11, 34);
+    expect(elDate.$options.min).toBeTruthy();
+    await h.userTypeText(elDate.$refInput, "20160102");
+    expect(elDate.$refError).toBeFalsy();
+    expect(elTime.$refError).toBeFalsy(); // because value is empty
+
+    // todo validations exclude
   });
 });
