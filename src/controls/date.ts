@@ -373,7 +373,7 @@ export default class WUPDateControl<
 
     // set hook on value change
     // @ts-expect-error - because protected
-    const orig = WUPTimeControl.prototype.setValue;
+    const orig = WUPTimeControl.prototype.setValue; // todo need exclude direct relation to WUPTimeControl for tree-shake
     // @ts-expect-error - because protected
     elTime.setValue = (...args) => {
       const isChanged = orig.call(elTime, ...args);
@@ -412,8 +412,6 @@ export default class WUPDateControl<
     o.validations.min = undefined;
     o.validations.max = undefined;
   }
-
-  // todo exclude here
 }
 
 customElements.define(tagName, WUPDateControl);

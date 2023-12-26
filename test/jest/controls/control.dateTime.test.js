@@ -214,7 +214,5 @@ describe("control.dateTime", () => {
     elDate.$options.validations = { required: true };
     await h.wait();
     expect(elTime.$options.validations?.required).toBe(true);
-
-    // todo validations exclude
   });
 });

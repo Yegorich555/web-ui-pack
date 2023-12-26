@@ -6,7 +6,9 @@ WUPTimeControl.$use();
 
 (window as any).myTimeValidations = { required: true } as WUP.Time.Options["validations"];
 (window as any).myTimeValidations2 = { required: false } as WUP.Time.Options["validations"];
-(window as any).myTimeExclude = { test: (v: WUPTimeObject) => v.hours === 12 && v.minutes === 48 };
+(window as any).myTimeExclude = {
+  test: (v) => v.hours === 12 && v.minutes === 48,
+} as WUP.Time.ValidityMap["exclude"];
 
 export default function TimeControlView() {
   return (
