@@ -373,7 +373,7 @@ export default class WUPDateControl<
 
     // set hook on value change
     // @ts-expect-error - because protected
-    const orig = WUPTimeControl.prototype.setValue; // todo need exclude direct relation to WUPTimeControl for tree-shake
+    const orig = (Object.getPrototypeOf(elTime) as WUPTimeControl).setValue;
     // @ts-expect-error - because protected
     elTime.setValue = (...args) => {
       const isChanged = orig.call(elTime, ...args);
