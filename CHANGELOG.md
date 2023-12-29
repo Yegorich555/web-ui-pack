@@ -9,6 +9,7 @@
 ---
 
 - [WUPTimeObject](src/objects/timeObject.ts). Add init by date to constructor
+- [DateControl](src/controls/date.ts). Add sync with time (value, min, max)
 
 ---
 
