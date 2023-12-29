@@ -33,6 +33,11 @@ declare global {
        * * with changing $options.format need to change/reset mask/maskholder also */
       format: string;
       /** Anchor to TimeControl to sync with date
+       * @tutorial dateControl is master and it means
+       * * DateControl value merged with TimeControl value (don't need to look for timeControl value at all)
+       * * DateControl options/validations `min`, `max` & `required` are applied to TimeControl according to selected data
+       * * Option `exclude` are not sync between control for performance purpose (check demo code to implement custom `exclude` for TimControl)
+       * * Option `
        * @example
        * ```html
        * <wup-date w-sync="next" w-min="2016-01-02 12:40"></wup-date>
@@ -418,7 +423,3 @@ customElements.define(tagName, WUPDateControl);
 // NiceToHave: role 'spinbutton" + changing input value via scrolling: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/spinbutton_role
 // NiceToHave: allowYear, allowMonth, allowDays based on format: "YYYY-MM" - only for selection year & month
 // NiceToHave: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
-
-/* todo sync with time
- >> Storage: need separate keys
-*/

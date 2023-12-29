@@ -11,7 +11,7 @@ WUPTimeControl.$use();
   new Date("2022-02-28T00:00:00.000Z"), //
   new Date("2022-04-01T00:00:00.000Z"),
 ];
-(window as any).myTimeExcludeFunc = {
+(window as any).timeExcludeFunc = {
   // eslint-disable-next-line arrow-body-style
   test: (v, c) => {
     // find related date control
@@ -86,7 +86,11 @@ const customHTML = [
     w-exclude="window.myDateTimeExclude"
     w-validations="window.myDateTimeValidations"
     w-utc
-  />
-  <wup-time id="time" w-label="Tied time" w-exclude="window.myTimeExcludeFunc"/>
+  ></wup-date>
+  <wup-time
+    id="time"
+    w-label="Tied time"
+    w-exclude="window.timeExcludeFunc"
+  ></wup-time>
 </div>`,
 ];
