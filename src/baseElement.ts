@@ -579,6 +579,22 @@ export default abstract class WUPBaseElement<
     return this === el || (el instanceof Node && this.contains(el));
   }
 
+  /** Returns first element according to pointed selector
+   * @tutorial rules
+   * * point 'prev' to return previousElementSibling
+   * * point 'next' to return nextElementSibling
+   * * point ordinary selector to execute `document.querySelector(selector)` */
+  findBySelector<T extends HTMLElement>(selector: string): T | null {
+    switch (selector) {
+      case "prev":
+        return this.previousElementSibling as T;
+      case "next":
+        return this.nextElementSibling as T;
+      default:
+        return document.querySelector(selector);
+    }
+  }
+
   /** Returns parsed value according to pointed type OR current value if something wrong;
    * override method for implementation custom parsing OR static method mappedAttributes to redefine map-types */
   parseAttr(type: AttributeTypes, attrValue: string, propName: string, attrName: string): any {
@@ -631,11 +647,10 @@ export default abstract class WUPBaseElement<
         if (!attrValue) {
           return undefined;
         }
-        const isPrev = attrValue === "prev";
-        let el = isPrev ? this.previousElementSibling : document.querySelector(attrValue);
+        let el = this.findBySelector(attrValue);
         if (!el) {
           setTimeout(() => {
-            el = isPrev ? this.previousElementSibling : document.querySelector(attrValue);
+            el = this.findBySelector(attrValue);
             if (el) {
               this._opts[propName as keyof TOptions] = el as any;
             } else {

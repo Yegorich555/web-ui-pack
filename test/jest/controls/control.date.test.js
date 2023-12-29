@@ -89,6 +89,7 @@ describe("control.date", () => {
       "w-exclude": { value: [new Date("2009-02-06")] },
       "w-startwith": { skip: true }, // tested manually
       "w-firstweekday": { value: 1 },
+      "w-sync": { skip: true }, // tested manually
     },
     validationsSkip: ["_parse", "_mask"],
   });
@@ -254,7 +255,7 @@ describe("control.date", () => {
     await h.userTypeText(el.$refInput, "20221030");
     await h.wait(150);
     expect(el.$isOpened).toBe(true);
-    expect(el.$refInput.value).toBe("2022-10-30"); // becahuse mask is applied
+    expect(el.$refInput.value).toBe("2022-10-30"); // because mask is applied
     expect(el.$isValid).toBe(true);
     expect(el.$refError).toBe(undefined);
     // el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));

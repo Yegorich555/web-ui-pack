@@ -23,6 +23,7 @@ import RadioControlView from "./components/controls/radio";
 import CalendarControlView from "./components/controls/calendar";
 import DateControlView from "./components/controls/date";
 import TimeControlView from "./components/controls/time";
+import DateTimeView from "./components/controls/dateTime";
 import NumberControlView from "./components/controls/number";
 import FAQView from "./components/FAQView";
 import SelectManyControlView from "./components/controls/selectMany";
@@ -64,6 +65,7 @@ const routes: IRoute[] = [
   { path: "control/calendar", el: CalendarControlView, isNested: true },
   { path: "control/date", el: DateControlView, isNested: true },
   { path: "control/time", el: TimeControlView, isNested: true },
+  { path: "control/dateTime", el: DateTimeView, isNested: true },
   { path: "faq", label: "FAQ", el: FAQView },
 ];
 

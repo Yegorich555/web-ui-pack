@@ -95,8 +95,8 @@ declare global {
       label: string | undefined | null;
       /** Property/key of model (collected by form); For name `firstName` >> `model.firstName`; for `nested.firstName` >> `model.nested.firstName` etc.
        * * @tutorial
-       * * point `null` or 'undefined' to completely detach from FormElement
-       * * point `''`(empty string) to partially detach (exclude from `form.$model`, `form.$isChanged`, but included in validations & submit) */
+       * * point `null` or `undefined` to completely detach from FormElement
+       * * point `''`(empty string) to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) */
       name: string | undefined | null;
       /** Focus element when it's appended to layout @defaultValue false */
       autoFocus: boolean;
@@ -159,7 +159,10 @@ declare global {
       /** Wait for pointed time after valueChange before showError (it's summarized with $options.debounce); WARN: hide error without debounce
        *  @defaultValue 500 */
       validateDebounceMs: number;
-      /** Show all validation-rules with checkpoints as list instead of single error @defaultValue false */
+      /** Show all validation-rules with checkpoints as list instead of single error @defaultValue false;
+       * @tutorial rules
+       * * All listed rules must return error-message when value === undefined OR
+       * * To skip rule from listing name with underscore, for example `_old: (v,c) => ...` */
       validationShowAll: boolean;
       /** Storage key for auto saving value in storage;
        * @tutorial rules

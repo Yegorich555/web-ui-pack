@@ -12,7 +12,9 @@
     "esModuleInterop": true,
     "strict": true,
     "allowJs": true,
-    "preserveConstEnums": true
+    "preserveConstEnums": true,
+    "incremental": true,
+    "newLine": "lf",
   },
   "files": ["src/index.ts"],
   "include": ["src/**/*"],

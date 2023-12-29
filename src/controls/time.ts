@@ -20,7 +20,7 @@ declare global {
       /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max time is {x}` */
       max: WUPTimeObject;
       /** User can't select time in excluded range */
-      exclude: { test: (v: WUPTimeObject) => boolean };
+      exclude: { test: (v: WUPTimeObject, c: WUPTimeControl) => boolean };
     }
     interface NewOptions {
       /** String representation of displayed time (enables mask, - to disable mask set $options.mask="");
@@ -45,7 +45,7 @@ declare global {
       /** User can't select time more than max */
       max: WUPTimeObject | null;
       /** User can't select time in excluded range */
-      exclude: { test: (v: WUPTimeObject) => boolean } | null;
+      exclude: { test: (v: WUPTimeObject, c: WUPTimeControl) => boolean } | null;
     }
     interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
@@ -305,7 +305,8 @@ export default class WUPTimeControl<
       max: (v, setV, c) =>
         (v === undefined || v > setV) &&
         __wupln(`Max value is ${setV.format((c as WUPTimeControl)._opts.format)}`, "validation"),
-      exclude: (v, fn) => (v === undefined || fn.test(v)) && __wupln("This value is disabled", "validation"),
+      exclude: (v, fn, c) =>
+        (v === undefined || fn.test(v, c as WUPTimeControl)) && __wupln("This value is disabled", "validation"),
     },
     step: 1,
     format: "",
@@ -390,7 +391,7 @@ export default class WUPTimeControl<
         const el = lst.children.item(i)!;
         lst._value = (el as any)._value;
         const v = this.getMenuValue();
-        const isDisabled = v < min || v > max || exclude?.test(v);
+        const isDisabled = v < min || v > max || exclude?.test(v, this as WUPTimeControl<any, any>);
         this.setAttr.call(el, "disabled", isDisabled, true);
       }
       lst._value = was;
@@ -405,7 +406,7 @@ export default class WUPTimeControl<
       }
     }
     const v = this.getMenuValue();
-    const isDisabled = v < min || v > max || exclude?.test(v);
+    const isDisabled = v < min || v > max || exclude?.test(v, this as WUPTimeControl<any, any>);
     this.$refButtonOk && this.setAttr.call(this.$refButtonOk!, "disabled", isDisabled, true);
   }
 

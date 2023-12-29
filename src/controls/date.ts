@@ -4,10 +4,12 @@ import dateCopyTime from "../helpers/dateCopyTime";
 import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
 import localeInfo from "../objects/localeInfo";
+import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 import WUPCalendarControl from "./calendar";
+import WUPTimeControl from "./time";
 
 WUPCalendarControl.$use();
 
@@ -30,6 +32,18 @@ declare global {
        * @tutorial Troubleshooting
        * * with changing $options.format need to change/reset mask/maskholder also */
       format: string;
+      /** Anchor to TimeControl to sync with date
+       * @tutorial dateControl is master and it means
+       * * DateControl value merged with TimeControl value (don't need to look for timeControl value at all)
+       * * DateControl options/validations `min`, `max` & `required` are applied to TimeControl according to selected data
+       * * Option `exclude` are not sync between control for performance purpose (check demo code to implement custom `exclude` for TimControl)
+       * * Option `
+       * @example
+       * ```html
+       * <wup-date w-sync="next" w-min="2016-01-02 12:40"></wup-date>
+       * <wup-time></wup-time>
+       * ``` */
+      sync: WUPTimeControl | null;
     }
     interface Options<T = Date, VM = ValidityMap>
       extends WUP.Calendar.Options<T, VM>,
@@ -41,6 +55,14 @@ declare global {
         WUP.Base.OnlyNames<NewOptions> {
       "w-initValue"?: string;
       "w-format"?: string;
+      /** Anchor to TimeControl to sync with date
+       *  * Point querySelector (id, `next` or`false`) to related element
+       * @example
+       * ```html
+       * <wup-date w-sync="next" w-min="2016-01-02 12:40"></wup-date>
+       * <wup-time></wup-time>
+       * ``` */
+      "w-sync"?: string;
     }
   }
   interface HTMLElementTagNameMap {
@@ -114,6 +136,7 @@ export default class WUPDateControl<
     m.max = { type: AttributeTypes.parsedObject };
     m.firstweekday = { type: AttributeTypes.number };
     m.startwith = { type: AttributeTypes.string };
+    m.sync = { type: AttributeTypes.selector };
     return m;
   }
 
@@ -134,9 +157,19 @@ export default class WUPDateControl<
         __wupln(`This value is disabled`, "validation"),
     },
     format: "",
+    sync: null,
     // firstWeekDay: 1,
     // format: localeInfo.date.toLowerCase()
   };
+
+  get $initValue(): ValueType | undefined {
+    return super.$initValue;
+  }
+
+  set $initValue(v: ValueType | undefined) {
+    super.$initValue = v;
+    this.setTimeValue(this.refTime, v, SetValueReasons.initValue);
+  }
 
   constructor() {
     super();
@@ -190,6 +223,14 @@ export default class WUPDateControl<
       .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
     this._opts.maskholder ||= this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
 
+    const el = this.refTime;
+    if (el) {
+      if (this._opts.name && !el.$options.name) {
+        el.$options.name = ""; // important to enable validation for time control
+      }
+      this.setTimeValidations(el); // to sync validation required
+    }
+
     super.gotChanges(propsChanged as any);
   }
 
@@ -241,17 +282,41 @@ export default class WUPDateControl<
   }
 
   protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
-    if (v && skipInput) {
-      const prev = this.$value || this.$initValue;
-      prev && dateCopyTime(v, prev, !!this._opts.utc); // copy time if was changing from input (calendar do it itself)
+    const elTime = this.refTime;
+
+    if (v) {
+      let isCopied = false;
+      if (skipInput) {
+        const prev = this.$value || this.$initValue;
+        prev && dateCopyTime(v, prev, this._opts.utc); // copy time if was changing from input (calendar do it itself)
+        isCopied = !!prev;
+      }
+
+      // copy time value from synced timeControl
+      if (!isCopied && reason !== SetValueReasons.manual && reason !== SetValueReasons.initValue) {
+        const vt = elTime?.$value;
+        if (vt) {
+          v = vt.copyToDate(v, this._opts.utc) as ValueType;
+        }
+      }
     }
+
     const isChanged = super.setValue(v, reason, skipInput);
     if (isChanged) {
       const c = this.$refPopup?.firstElementChild as WUPCalendarControl;
       if (c) {
         c._isStopChanges = true; // to prevent hiding popup by calendar valueChange
         c.$value = v && !Number.isNaN(v.valueOf()) ? v : undefined;
-        setTimeout(() => (c._isStopChanges = false)); // without timeout calendar $changeEvent is fired
+        setTimeout(() => (c._isStopChanges = false)); // without timeout calendar.$changeEvent is fired
+      }
+    }
+
+    if (elTime) {
+      this.setTimeValidations(elTime);
+      if (reason === SetValueReasons.manual) {
+        this.setTimeValue(elTime, v, reason);
+      } else if (elTime.$value) {
+        !elTime.$isEmpty && elTime.$validate();
       }
     }
     return isChanged;
@@ -265,7 +330,7 @@ export default class WUPDateControl<
   }
 
   protected override focusMenuItem(next: HTMLElement | null): void {
-    // WARN: it's important don't use call super... because the main logic is implemented inside calendar
+    // WARN: it's important not use super... because the main logic is implemented inside calendar
     // can be fired from baseCombo => when need to clear selection
     const el = this.$refPopup?.firstElementChild as WUPCalendarControl;
     if (el) {
@@ -280,6 +345,77 @@ export default class WUPDateControl<
   protected focusMenuItemByKeydown(e: KeyboardEvent): void {
     const clnd = this.$refPopup?.firstElementChild as WUPCalendarControl;
     clnd.gotKeyDown.call(clnd, e);
+  }
+
+  /** Returns tied TimeControl related to option */
+  get refTime(): WUPTimeControl | null {
+    const s = this._opts.sync;
+    if (s && typeof s === "string") {
+      this._opts.sync = this.findBySelector(s);
+    }
+    return this._opts.sync;
+  }
+
+  /** Set value if found tied timeControl@see refTime  */
+  protected setTimeValue(elTime: WUPTimeControl | null, v: ValueType | undefined, reason: SetValueReasons): void {
+    if (!elTime) {
+      return;
+    }
+
+    // @ts-expect-error
+    delete elTime.setValue; // delete hook to prevent cycle
+
+    const t = v && new WUPTimeObject(v, this._opts.utc);
+    // eslint-disable-next-line default-case
+    switch (reason) {
+      case SetValueReasons.initValue:
+        elTime.$initValue = t;
+        break;
+      case SetValueReasons.manual:
+        elTime.$value = t;
+        break;
+    }
+
+    // set hook on value change
+    // @ts-expect-error - because protected
+    const orig = (Object.getPrototypeOf(elTime) as WUPTimeControl).setValue;
+    // @ts-expect-error - because protected
+    elTime.setValue = (...args) => {
+      const isChanged = orig.call(elTime, ...args);
+      const dt = this.$value;
+      if (isChanged && dt) {
+        (elTime.$value || new WUPTimeObject(0, 0)).copyToDate(dt, this._opts.utc);
+      }
+      return isChanged;
+    };
+  }
+
+  /** Called when possible need to update min/max/exclude for time control */
+  protected setTimeValidations(elTime: WUPTimeControl): void {
+    const v = this.$value;
+    const obj: { min?: WUPTimeObject; max?: WUPTimeObject } = {};
+    const vld = this._opts.validations;
+    if (v) {
+      (["min", "max"] as Array<"min" | "max">).forEach((k) => {
+        const dFrom = this._opts[k] || (vld && vld[k]);
+        if (dFrom) {
+          if (typeof dFrom === "function") {
+            this.throwError("Impossible to sync [min] with time. Expected Date instead of function");
+            return;
+          }
+          const c = dateCompareWithoutTime(v, dFrom, this._opts.utc);
+          obj[k] = c === 0 ? new WUPTimeObject(dFrom, this._opts.utc) : obj[k]; // in other cases dateControl must show error
+        }
+      });
+    }
+
+    const o = elTime.$options;
+    o.min = obj.min;
+    o.max = obj.max;
+    o.validations ||= {};
+    o.validations.required = !!vld?.required; // if date is required then time also is required
+    o.validations.min = undefined;
+    o.validations.max = undefined;
   }
 }
 

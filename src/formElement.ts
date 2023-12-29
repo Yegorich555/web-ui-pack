@@ -302,8 +302,11 @@ export default class WUPFormElement<
   }
 
   _model?: Partial<Model>;
-  /** Model related to every control inside (with $options.name);
-   *  @see {@link BaseControl.prototype.$value} */
+  /** Model related to every control inside (mapped object via control.$options.name);
+   *  @see {@link BaseControl.prototype.$value}
+   * @tutorial rules
+   * * `form.$model = { firstName: 'Hell' }` updates only control with $options.name==='firstName'
+   * * `form.$model = { firstName: undefined }` reset only control with $options.name==='firstName' */
   get $model(): Partial<Model> {
     return Object.assign(this._model || {}, this.#ctr.$modelFromControls({}, this.$controls, "$value"));
   }

@@ -39,6 +39,11 @@ describe("timeObject", () => {
     expect(new WUPTimeObject("2:10 PM")).toEqual({ hours: 14, minutes: 10 });
     expect(new WUPTimeObject("2:35:10.105 AM")).toEqual({ hours: 2, minutes: 35 });
     expect(new WUPTimeObject("2:35:10.105 am")).toEqual({ hours: 2, minutes: 35 });
+
+    expect(new WUPTimeObject(new Date(2020, 10, 15, 2, 35), false)).toEqual({ hours: 2, minutes: 35 });
+    expect(new WUPTimeObject(new Date(2020, 10, 15, 15, 47), false)).toEqual({ hours: 15, minutes: 47 });
+    expect(new WUPTimeObject(new Date(Date.UTC(2020, 10, 15, 2, 35)), true)).toEqual({ hours: 2, minutes: 35 });
+    expect(new WUPTimeObject(new Date(Date.UTC(2020, 10, 15, 15, 46)), true)).toEqual({ hours: 15, minutes: 46 });
   });
 
   test("toString()", () => {
