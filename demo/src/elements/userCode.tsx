@@ -175,10 +175,10 @@ function UserCode(props: React.PropsWithChildren<UserCodeProps>) {
   if (!props.tag) {
     return null;
   }
-  const el = document.querySelector(props.tag);
-  const [, updateState] = useState<number>();
+  const [el, setEl] = useState<HTMLElement | null>();
   useEffect(() => {
-    !el && setTimeout(() => updateState(1));
+    // timeout for waiting for layout update otherwise can be found previous item
+    setTimeout(() => setEl(document.querySelector(props!.tag as string) as HTMLElement), 1);
   }, []);
 
   if (!el) {

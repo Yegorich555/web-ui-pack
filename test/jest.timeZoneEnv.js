@@ -18,7 +18,7 @@ module.exports = class TimeZoneEnv extends TestEnvironment {
     const tz = cfg.projectConfig.testEnvironmentOptions.timezone;
     if (tz) {
       process.env.TZ = tz;
-      this.global.TZ = tz; // othwerise local process.env.TZ is empty
+      this.global.TZ = tz; // otherwise local process.env.TZ is empty
     }
     // ctx.console.warn({ tz });
   }

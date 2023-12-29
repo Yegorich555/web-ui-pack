@@ -373,6 +373,21 @@
 			],
 			"attributes": [
 				{
+					"name": "w-sync",
+					"description": "Anchor to TimeControl to sync with date",
+					"values": [
+						{
+							"name": "#timeId"
+						},
+						{
+							"name": "prev"
+						},
+						{
+							"name": "next"
+						}
+					]
+				},
+				{
 					"name": "w-format",
 					"description": "String representation of displayed date (enables mask, - to disable mask set $options.mask='') @defaultValue localeInfo",
 					"values": [

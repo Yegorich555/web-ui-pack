@@ -13,6 +13,8 @@ export default class WUPTimeObject {
   constructor(value: number | string);
   /** @param isPM set true/false if hours is 12h format */
   constructor(hours: number, minutes: number, isPM?: boolean);
+  /** Extract hh & mm from date */
+  constructor(value: Date, isUTC: boolean);
   constructor(...args: any[]) {
     this.hours = 0;
     this.minutes = 0;
@@ -32,10 +34,16 @@ export default class WUPTimeObject {
         this.minutes = args[0] - this.hours * 60;
       }
     } else if (args.length >= 2) {
-      this.hours = args[0] as number;
-      this.minutes = args[1] as number;
-      // eslint-disable-next-line prefer-destructuring
-      isPM = args[2];
+      if (args.length === 2 && typeof args[0] === "object") {
+        const u = args[1] ? "UTC" : "";
+        this.hours = args[0][`get${u}Hours`]();
+        this.minutes = args[0][`get${u}Minutes`]();
+      } else {
+        this.hours = args[0] as number;
+        this.minutes = args[1] as number;
+        // eslint-disable-next-line prefer-destructuring
+        isPM = args[2];
+      }
     }
 
     const h12Invalid = isPM != null && (this.hours < 1 || this.hours > 12); // with AM/PM only 1...12 is valid

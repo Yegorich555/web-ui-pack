@@ -32,7 +32,8 @@ export default function DateControlView() {
         "Wide ability to disable particular dates (options min/max/exclude)",
         "No dependency for working with dates (usage momentJS doesn't make sense)",
         "Saves hours. So $value='2022-11-06 23:50' & click on '20 Dec' => '2022-12-20 23:50'",
-        "Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
+        "Localized. Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
+        "Smart mask. Don't worry about separators (it adds automatically); need only type numbers",
       ]}
     >
       <wup-form
