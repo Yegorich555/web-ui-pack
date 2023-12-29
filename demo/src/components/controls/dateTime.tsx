@@ -42,7 +42,7 @@ export default function DateTimeView() {
       }}
       features={[
         "Inheritted features from DateControl & TimeControl",
-        "Date is master and controls related timeControl (synced are $value, $initValue and options min, max)",
+        "Date is master and controls related TimeControl (synced are $value, $initValue and options min, max)",
       ]}
     >
       <wup-form
