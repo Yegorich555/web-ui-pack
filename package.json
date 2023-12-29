@@ -20,7 +20,7 @@
     "lint-styles": ".\\node_modules\\.bin\\stylelint --fix --cache ./**/*.{css,scss,less}",
     "lint-md": ".\\node_modules\\.bin\\markdownlint --fix **/*.md --ignore node_modules --ignore dist",
     "lint": "npm run lint-code && npm run lint-styles && npm run lint-md",
-    "build": "node .\\build.copyFiles.js && tsc --listEmittedFiles --incremental",
+    "build": "node .\\build.copyFiles.js && tsc --listEmittedFiles --removeComments && tsc --emitDeclarationOnly",
     "build-prod": "npm run build",
     "release": "node ./release.js",
     "go-publish": "cd ./dist && npm publish"

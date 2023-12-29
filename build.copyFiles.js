@@ -6,7 +6,7 @@ const out = "./dist/";
 if (!fs.existsSync(out)) {
   console.warn("Re-run again after 1st build when dir './dist/' is created");
 } else {
-  fs.rmdirSync(out, {
+  fs.rmSync(out, {
     recursive: true,
   });
   fs.mkdirSync(out);
