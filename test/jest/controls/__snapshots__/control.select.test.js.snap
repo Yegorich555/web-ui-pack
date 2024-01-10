@@ -684,6 +684,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT textarea:not(:placeholder-shown) ~ [prefix],
         WUP-SELECT textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
+          opacity: 1;
         }
         /* style for icons */
         WUP-SELECT label:after,

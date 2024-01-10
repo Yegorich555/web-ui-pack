@@ -663,6 +663,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-NUM textarea:not(:placeholder-shown) ~ [prefix],
         WUP-NUM textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
+          opacity: 1;
         }
         /* style for icons */
         WUP-NUM label:after,

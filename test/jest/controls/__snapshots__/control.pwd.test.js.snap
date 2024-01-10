@@ -723,6 +723,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-PWD textarea:not(:placeholder-shown) ~ [prefix],
         WUP-PWD textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
+          opacity: 1;
         }
         /* style for icons */
         WUP-PWD label:after,

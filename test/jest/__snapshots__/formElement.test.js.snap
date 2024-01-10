@@ -512,6 +512,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXT textarea:not(:placeholder-shown) ~ [prefix],
         WUP-TEXT textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
+          opacity: 1;
         }
         /* style for icons */
         WUP-TEXT label:after,

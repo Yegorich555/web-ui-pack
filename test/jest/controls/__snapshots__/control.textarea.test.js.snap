@@ -670,6 +670,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA textarea:not(:placeholder-shown) ~ [prefix],
         WUP-TEXTAREA textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
+          opacity: 1;
         }
         /* style for icons */
         WUP-TEXTAREA label:after,

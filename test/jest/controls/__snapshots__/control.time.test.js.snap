@@ -696,6 +696,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TIME textarea:not(:placeholder-shown) ~ [prefix],
         WUP-TIME textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
+          opacity: 1;
         }
         /* style for icons */
         WUP-TIME label:after,

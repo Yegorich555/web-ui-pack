@@ -280,6 +280,7 @@ export default class WUPTextControl<
         :host textarea:not(:placeholder-shown) ~ [prefix],
         :host textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
+          opacity: 1;
         }
         /* style for icons */
         :host label:after,
@@ -764,3 +765,13 @@ export default class WUPTextControl<
 customElements.define(tagName, WUPTextControl);
 // todo example how to create built-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
+
+// todo set controls in flex-row in modal: when hover btn[clear] affects on width
+/**
+ * Alternative behavior: is
+  button[clear],
+  [prefix] {
+    display: inline-block;
+    opacity: 0; // fix when hover/focus affects on inline flex container
+  }
+ */
