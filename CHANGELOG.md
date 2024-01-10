@@ -2,6 +2,18 @@
 
 # Changelog
 
+## 1.0. (\_\_\_)
+
+### Fixes
+
+---
+
+- Fixed HTML intellisense (html.json was missed in the package)
+
+---
+
+---
+
 ## 1.0.4 (Dec 29, 2023)
 
 ### New Features

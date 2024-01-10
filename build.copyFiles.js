@@ -17,6 +17,8 @@ if (!fs.existsSync(out)) {
     "./.npmignore",
     "./README.md",
     "./LICENSE.md",
+    "./types.html.json",
+    "./types.html.webstorm.json", // https://plugins.jetbrains.com/docs/intellij/websymbols-web-types.html#including-web-types
   ].forEach((f) => {
     fs.copyFileSync(f, path.resolve(out, f));
   });
