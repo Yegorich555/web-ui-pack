@@ -394,6 +394,21 @@ describe("formElement", () => {
       expect(submitEv).toBeCalledTimes(1);
       expect(submitEv.mock.calls[0][0].submitter).toBe(inputs[0]);
 
+      // just for coverage - when SubmitEvent protype doesn't exist (in old browsers)
+      jest.clearAllMocks();
+      const isSE = !!window.SubmitEvent;
+      if (isSE) {
+        jest.spyOn(window, "SubmitEvent").mockImplementationOnce(Event);
+      } else {
+        window.SubmitEvent = Event;
+      }
+      el.$submit();
+      await h.wait();
+      expect($willSubmitEv).toBeCalledTimes(1);
+      expect(submitEv).toBeCalledTimes(1);
+      expect(onsubmit).toBeCalledTimes(1);
+      !isSE && delete window.SubmitEvent;
+
       // try again when submitter is not HTMLElement
       jest.clearAllMocks();
       expect($willSubmitEv).toBeCalledTimes(0);
