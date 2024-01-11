@@ -12,6 +12,15 @@ const getItems = () => [
   { value: 40, text: "Splinter" },
 ];
 
+const setItems = async (items) => {
+  el.$closeMenu();
+  await h.wait();
+  el.$options.items = items;
+  await h.wait();
+  el.$openMenu();
+  await h.wait();
+};
+
 /** @type WUPSelectControl */
 let el;
 initTestBaseControl({
@@ -207,6 +216,39 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$value).toBe(20);
     expect(el.$refInput.value).toBe("D");
+
+    // when items is function with promise
+    el.$options.items = getItems();
+    el.$value = getItems()[3].value;
+    await setItems(() => Promise.resolve(getItems()));
+    expect(el.$isOpened).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt7" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option" aria-selected="true">Splinter</li></ul>"`
+    );
+
+    h.mockConsoleError();
+    // when items is function without promise
+    await setItems(() => getItems().slice(0, 2));
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li></ul>"`
+    );
+
+    // when items has custom render
+    await setItems([
+      {
+        value: 123,
+        text: (val, li, i) => {
+          li.textContent = `testVal-${val}_${i}`;
+          // li.onclick = (e)=>e.preventDefault() // todo test it
+          return li.textContent;
+        },
+        // onClick = e=>e.preventDefault(); // todo test it
+      },
+    ]);
+    el.$value = 123;
+    await h.wait();
+    h.unMockConsoleError();
+    expect(el.$refInput.value).toBe("testVal-123_0");
   });
 
   test("pending state", async () => {
@@ -300,15 +342,6 @@ describe("control.select", () => {
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup menu="" open="" style="min-width: 100px; display: none;" w-animation="drawer" show=""><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
     );
-
-    const setItems = async (items) => {
-      el.$closeMenu();
-      await h.wait();
-      el.$options.items = items;
-      await h.wait();
-      el.$openMenu();
-      await h.wait();
-    };
 
     await setItems([]);
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
@@ -431,33 +464,6 @@ describe("control.select", () => {
       `"<wup-popup menu="" hidden="" open="" style="min-width: 100px; display: none;" w-animation="drawer" show=""><ul id="txt10" role="listbox" aria-label="Items" tabindex="-1"></ul></wup-popup>"`
     );
     WUPSelectControl.$textNoItems = wasText;
-
-    // when items is function with promise
-    await setItems(() => Promise.resolve(getItems()));
-    expect(el.$isOpened).toBe(true);
-    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt11" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option" aria-selected="true">Splinter</li></ul>"`
-    );
-
-    // when items is function without promise
-    await setItems(() => getItems().slice(0, 2));
-    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li></ul>"`
-    );
-
-    // when items has custom render
-    await setItems([
-      {
-        value: 123,
-        text: (val, li, i) => {
-          li.textContent = `testVal-${val}_${i}`;
-          return li.textContent;
-        },
-      },
-    ]);
-    el.$value = 123;
-    await h.wait();
-    expect(el.$refInput.value).toBe("testVal-123_0");
 
     // cover impossible case
     const el2 = document.body.appendChild(document.createElement("wup-select"));
