@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPTextControl } from "web-ui-pack";
+import Anchor from "src/elements/anchor";
 import stylesCom from "./controls.scss";
 import styles from "./text.scss";
 
@@ -118,7 +119,9 @@ export default function TextControlView() {
           w-storage="url"
         />
         <section>
-          <h3>Masked inputs</h3>
+          <h3>
+            <Anchor hash="mask">Masked inputs</Anchor>
+          </h3>
           <wup-text
             w-name="phone"
             w-label="Phone number"

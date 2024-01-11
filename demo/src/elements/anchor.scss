@@ -1,0 +1,8 @@
+.anchor {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    color: $basicActiveBgColor;
+  }
+}
