@@ -18,3 +18,21 @@
 .text2 {
   color: $basicTextColor2;
 }
+
+.inlineGroup {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+
+  > * {
+    flex: 0 1 auto;
+    margin: 4px 0 8px;
+  }
+
+  // uncomment to fix
+  // button[clear],
+  // [prefix],
+  // [postfix] {
+  //   display: inline-block;
+  // }
+}

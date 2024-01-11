@@ -12,7 +12,7 @@ function tryScrollTo(hash: string) {
     setTimeout(() => {
       el.scrollIntoView({ behavior: "smooth", block: "start", inline: "start" });
       setTimeout(() => el.focus(), 500);
-    }, 10);
+    }, 100);
   }
 }
 

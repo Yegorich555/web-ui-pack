@@ -2,6 +2,8 @@
 import Page from "src/elements/page";
 import { WUPTextControl } from "web-ui-pack";
 import Anchor from "src/elements/anchor";
+import FAQ from "src/elements/faq";
+import Code from "src/elements/code";
 import stylesCom from "./controls.scss";
 import styles from "./text.scss";
 
@@ -178,8 +180,42 @@ export default function TextControlView() {
             <li>usage details see during the coding (via jsdoc)</li>
           </ul>
         </section>
+
+        <FAQ
+          items={[
+            {
+              link: "troubleshooting",
+              question: "Troubleshooting. Controls resized on hover/focus",
+              answer: (
+                <>
+                  <div className={styles.inlineGroup}>
+                    <wup-text w-label="Input 1" w-prefix="prefix " />
+                    <wup-text w-label="Input 2" w-postfix=" postfix" />
+                    <wup-text w-label="Input 3" />
+                  </div>
+                  <i>
+                    <b>Reason:</b> css rule `flex: 1` was changed. <br />
+                    Rollback it or change display-style for button[clear]/prefix/postfix (it has display:none for
+                    performance reason, and showed on hover/focus)
+                  </i>
+                  <Code code={codeCssHoverRes} />
+                </>
+              ),
+            },
+          ]}
+        />
+
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
   );
 }
+
+const codeCssHoverRes = `css
+  .someInlineGroup {
+    button[clear],
+    [prefix],
+    [postfix] {
+      display: inline-block; /* it's enough to fix */
+    }
+  }`;

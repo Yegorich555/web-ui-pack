@@ -123,7 +123,8 @@ declare module "preact/jsx-runtime" {
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
- * </label> */
+ * </label>
+ * @tutorial Troubleshooting @see {@link https://yegorich555.github.io/web-ui-pack/control/text#troubleshooting} */
 export default class WUPTextControl<
   ValueType = string,
   TOptions extends WUP.Text.Options = WUP.Text.Options,
@@ -767,13 +768,3 @@ export default class WUPTextControl<
 customElements.define(tagName, WUPTextControl);
 // todo example how to create built-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask
-
-// todo set controls in flex-row in modal: when hover btn[clear] affects on width
-/**
- * Alternative behavior: is
-  button[clear],
-  [prefix] {
-    display: inline-block;
-    opacity: 0; // fix when hover/focus affects on inline flex container
-  }
- */
