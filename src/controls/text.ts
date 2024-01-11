@@ -194,6 +194,7 @@ export default class WUPTextControl<
         :host [prefix],
         :host [postfix] {
           display: none;
+          opacity: 0;
           pointer-events: none;
           text-overflow: initial;
           white-space: pre;
@@ -311,6 +312,7 @@ export default class WUPTextControl<
           --icon-hover: var(--ctrl-clear);
           --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
+          opacity: 0;
           margin-right: -0.5em;
         }
         :host button[clear=back] {

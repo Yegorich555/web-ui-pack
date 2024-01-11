@@ -9,7 +9,7 @@
 ---
 
 - **HTML**. Fixed intellisense (html.json was missed in the package)
-- **Styles**. Textbased controls. Added `opacity: 1` for `prefix/postfix` as fix when controls in a row and it resizes on hover
+- **Styles**. Textbased controls. Added `opacity: 1` for `button[clear]/prefix/postfix` as fix when controls in a flex-row and it resizes on hover
 
 ---
 

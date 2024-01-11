@@ -570,6 +570,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXT [prefix],
         WUP-TEXT [postfix] {
           display: none;
+          opacity: 0;
           pointer-events: none;
           text-overflow: initial;
           white-space: pre;
@@ -706,6 +707,7 @@ mask-image: var(--ctrl-icon-img);
           --icon-hover: var(--ctrl-clear);
           --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
+          opacity: 0;
           margin-right: -0.5em;
         }
         WUP-TEXT button[clear=back] {
