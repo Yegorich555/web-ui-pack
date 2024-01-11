@@ -1047,6 +1047,7 @@ export default abstract class WUPBaseControl<
     if (v == null) {
       return "null";
     }
+    // todo use JSON instead here
     if (typeof v === "object") {
       this.throwError(
         new Error(
