@@ -5,7 +5,7 @@ import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
 import { WUPcssMenu } from "../styles";
 import WUPBaseComboControl, { MenuOpenCases } from "./baseCombo";
-import { SetValueReasons } from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-select";
 declare global {
@@ -31,7 +31,7 @@ declare global {
             },
           },
         ]; */
-      text: string | ((value: T, el: HTMLElement, i: number) => string);
+      text: string | ((value: T, el: HTMLElement, i: number, control: WUPBaseControl) => string);
       /** Value tied with menu item */
       value: T;
     }
@@ -492,7 +492,7 @@ export default class WUPSelectControl<
     const item = items[i];
     if (typeof item.text === "function") {
       const li = document.createElement("li");
-      const s = item.text(item.value, li, i);
+      const s = item.text(item.value, li, i, this);
       li.remove();
       return s;
     }
@@ -537,7 +537,7 @@ export default class WUPSelectControl<
 
       let s = a.text;
       if (typeof s === "function") {
-        s = s(a.value, li, i);
+        s = s(a.value, li, i, this);
       } else {
         li.textContent = s;
       }

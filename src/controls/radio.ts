@@ -269,7 +269,7 @@ export default class WUPRadioControl<
       const lbl = document.createElement("label");
       const s = item.text;
       if (typeof s === "function") {
-        s(item.value, lbl, i);
+        s(item.value, lbl, i, this);
       } else {
         lbl.appendChild(document.createTextNode(item.text as string));
       }
