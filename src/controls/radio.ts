@@ -16,7 +16,7 @@ declare global {
        * setTimeout(()=> console.warn(el.$options.items === items)},1) // returns 'false'
        * setTimeout(()=> console.warn(el.$options.items[0].value === items[0].value)},1) // returns 'true'
        * ``` */
-      items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>);
+      items: WUP.Select.MenuItem<T>[] | (() => WUP.Select.MenuItem<T>[]);
       /** Reversed-style (radio+label for true vs label+radio)
        * @defaultValue false */
       reverse: boolean;
@@ -220,7 +220,7 @@ export default class WUPRadioControl<
 
   /** Called when need to parse attr [initValue] */
   override parse(attrValue: string): ValueType | undefined {
-    const a = this.getItems() as WUP.Select.MenuItemText<ValueType>[];
+    const a = this.getItems() as WUP.Select.MenuItem<ValueType>[];
     if (!a?.length) {
       return undefined;
     }
@@ -240,8 +240,8 @@ export default class WUPRadioControl<
   }
 
   /** Items resolved from options */
-  #cachedItems?: WUP.Select.MenuItems<ValueType>;
-  protected getItems(): WUP.Select.MenuItems<ValueType> {
+  #cachedItems?: WUP.Select.MenuItem<ValueType>[];
+  protected getItems(): WUP.Select.MenuItem<ValueType>[] {
     if (!this.#cachedItems) {
       const { items } = this._opts;
       this.#cachedItems = typeof items === "function" ? items() : items;
@@ -265,11 +265,11 @@ export default class WUPRadioControl<
       return;
     }
     const nm = this.#ctr.$uniqueId + (Date.now() % 1000);
-    const isFunc = arr[0].text && typeof arr[0].text === "function";
     arr.forEach((item, i) => {
       const lbl = document.createElement("label");
-      if (isFunc) {
-        (item as WUP.Select.MenuItemFn<ValueType>).text(item.value, lbl, i);
+      const s = item.text;
+      if (typeof s === "function") {
+        s(item.value, lbl, i);
       } else {
         lbl.appendChild(document.createTextNode(item.text as string));
       }

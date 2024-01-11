@@ -10,18 +10,32 @@ import { SetValueReasons } from "./baseControl";
 const tagName = "wup-select";
 declare global {
   namespace WUP.Select {
-    interface MenuItemText<T> {
-      text: string;
-      value: T;
-    }
-    /** Use li.innerHTML to render value & return string required for input; */
-    interface MenuItemFn<T> {
-      text: (value: T, el: HTMLElement, i: number) => string;
+    interface MenuItem<T> {
+      /** Provide ordinary string for rendering as menuItem OR
+       *  Use li.innerHTML to render value & return string required for input
+       * @example
+         el.$options.items = [
+          { value: 1, text: "Item N 1"}, // this ordinary behavior
+          {
+            value: 2,
+            text: (value, li, i, control) => {
+              li.innerHTML =
+              `<button class='delete'><button>Item N ${i+1}` // some custom HTML here
+              // li.textContent = `Item N ${i+1}`; // or use this for fastest render
+              const btn = li.querySelector('button')!;
+              btn.onclick = (e) => {
+                e.stopPropagation();
+                control.$closeMenu();
+              }
+              return `Item N ${value}`; // this is text rendered in input when related item selected
+            },
+          },
+        ]; */
+      text: string | ((value: T, el: HTMLElement, i: number) => string);
+      /** Value tied with menu item */
       value: T;
     }
 
-    type MenuItem<T> = MenuItemText<T> | MenuItemFn<T>;
-    type MenuItems<T> = MenuItemText<T>[] | MenuItemFn<T>[];
     interface MenuItemElement extends HTMLLIElement {
       _value: any;
       _text: string;
@@ -29,12 +43,14 @@ declare global {
 
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {
+      /** Count of minimal values that must be selected (only for option `multi`) */
       minCount: number;
+      /** Count of minimal values that must be selected (only for option `multi`) */
       maxCount: number;
     }
     interface NewOptions<T = any> {
       /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
-      items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>) | Promise<MenuItems<T>>;
+      items: MenuItem<T>[] | Promise<MenuItem<T>[]> | (() => MenuItem<T>[] | Promise<MenuItem<T>[]>);
       /** Allow user to create new value if value not found in items
        * @defaultValue false */
       allowNewValue: boolean;
@@ -262,6 +278,7 @@ export default class WUPSelectControl<
   }
 
   valueToUrl(v: ValueType): string | null {
+    // todo need to store text as is instead of real value
     if (this.$options.multiple) {
       return (v as Array<any>).map((vi) => super.valueToUrl(vi)).join("_");
     }
@@ -290,7 +307,7 @@ export default class WUPSelectControl<
   /** Required to wait for fetching items to setup initValue */
   _onPendingInitValue?: () => void;
   /** Called to get/fetch items based on $options.items */
-  fetchItems(): Promise<WUP.Select.MenuItems<ValueType>> | WUP.Select.MenuItems<ValueType> {
+  fetchItems(): Promise<WUP.Select.MenuItem<ValueType>[]> | WUP.Select.MenuItem<ValueType>[] {
     this._cachedItems = undefined;
     this.#findValT && clearTimeout(this.#findValT); // prevent setInputValue if fetchItems is started
     this.#findValT = undefined;
@@ -384,7 +401,7 @@ export default class WUPSelectControl<
   };
 
   /** Items resolved from options */
-  _cachedItems?: WUP.Select.MenuItems<ValueType>;
+  _cachedItems?: WUP.Select.MenuItem<ValueType>[];
 
   /** Called when NoItems need to show */
   protected renderMenuNoItems(popup: WUPPopupElement, isReset: boolean): void {
@@ -451,7 +468,7 @@ export default class WUPSelectControl<
   }
 
   /** Method returns items defined based on $options.items */
-  protected getItems(): WUP.Select.MenuItems<ValueType> {
+  protected getItems(): WUP.Select.MenuItem<ValueType>[] {
     if (!this._cachedItems) {
       this.throwError(new Error("Internal bug. No cached items"));
       return [];
@@ -460,7 +477,7 @@ export default class WUPSelectControl<
   }
 
   /* Called when need to show text related to value */
-  protected valueToText(v: ItemType, items: WUP.Select.MenuItems<ItemType>): string {
+  protected valueToText(v: ItemType, items: WUP.Select.MenuItem<ItemType>[]): string {
     const i = items.findIndex((o) => this.#ctr.$isEqual(o.value, v, this));
     if (i === -1) {
       if (this._opts.allowNewValue) {
@@ -503,39 +520,31 @@ export default class WUPSelectControl<
     // WARN: possible case when value changed but prev getItems.then still in progress
     const items = this.getItems();
     if (this._opts.multiple) {
-      const s = (v as Array<any>)?.map((vi) => this.valueToText(vi, items as WUP.Select.MenuItems<any>)).join(", ");
+      const s = (v as Array<any>)?.map((vi) => this.valueToText(vi, items as WUP.Select.MenuItem<any>[])).join(", ");
       return this.$isFocused ? `${s}, ` : s;
     }
-    return this.valueToText(v as any, items as WUP.Select.MenuItems<any>);
+    return this.valueToText(v as any, items as WUP.Select.MenuItem<any>[]);
   }
 
   /** Create menuItems as array of HTMLLiElement with option _text required to filtering by input (otherwise content can be html-structure) */
   protected renderMenuItems(ul: HTMLUListElement): WUP.Select.MenuItemElement[] {
     const arr = this.getItems();
-
-    const arrLi = arr.map((a) => {
+    return arr.map((a, i) => {
       const li = ul.appendChild(document.createElement("li")) as WUP.Select.MenuItemElement;
       li.setAttribute("role", "option");
       // li.setAttribute("aria-selected", "false");
       li._value = a.value;
-      return li;
-    }) as Array<WUP.Select.MenuItemElement> & { _focused: number; _selected: number };
 
-    if (arr.length) {
-      if (typeof arr[0].text === "function") {
-        arr.forEach((v, i) => {
-          arrLi[i]._text = (v as WUP.Select.MenuItemFn<ValueType>).text(v.value, arrLi[i], i).toLowerCase();
-        });
+      let s = a.text;
+      if (typeof s === "function") {
+        s = s(a.value, li, i);
       } else {
-        arr.forEach((v, i) => {
-          const txt = (v as WUP.Select.MenuItemText<ValueType>).text;
-          arrLi[i].textContent = txt;
-          arrLi[i]._text = txt.toLowerCase();
-        });
+        li.textContent = s;
       }
-    }
+      li._text = s.toLowerCase();
 
-    return arrLi;
+      return li;
+    }); // as Array<WUP.Select.MenuItemElement> & { _focused: number; _selected: number };
   }
 
   /** Called when need to setValue & close base on clicked item */
@@ -892,3 +901,5 @@ customElements.define(tagName, WUPSelectControl);
 // NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
 // NiceToHave: color differently text-chunk that matches in menu
 // NiceToHave: for allowNewValue add at the end of menu `[text] (New option)` like it works in JIRA. `label` dropdown on ticket
+
+// todo issue: focus ctrl > menu opened > click outside on the body > menu closed but not destroyed even if focus next ctrl later

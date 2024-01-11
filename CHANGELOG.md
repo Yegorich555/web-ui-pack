@@ -10,6 +10,8 @@
 
 - **HTML**. Fixed intellisense (html.json was missed in the package)
 - **Styles**. Textbased controls. Added `opacity: 1` for `button[clear]/prefix/postfix` as fix when controls in a flex-row and it resizes on hover
+- [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). [RadioControl](src/controls/radio.ts).
+  - Allow to use mixed types in `$options.items`. Improved JSDoc. Added example
 
 ---
 

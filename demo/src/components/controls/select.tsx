@@ -110,6 +110,14 @@ export default function SelectControlView() {
           w-multiple
         />
         <wup-select
+          w-name="testMe2"
+          ref={(el) => {
+            if (el) {
+              el.$options.items ||= [];
+            }
+          }}
+        />
+        <wup-select
           ref={(el) => {
             if (el) {
               el.$options.name = "withPending";
@@ -152,7 +160,7 @@ export default function SelectControlView() {
               // el.$options.autoFocus = true;
               setTimeout(() => {
                 el.$options.clearActions = ClearActions.clear;
-                el.$options.items = [{ text: "Test", value: 1 }];
+                el.$options.items = [{ text: "Test", value: 1 }]; // todo need to add onClick event to allow overrider default logic
                 el.$value = [1];
 
                 el.$options.items = items;
@@ -188,3 +196,5 @@ export default function SelectControlView() {
     </Page>
   );
 }
+
+// todo add Troubleshooting section to explain why equal object values can be not matched (need to compare by id or implement valueOf)
