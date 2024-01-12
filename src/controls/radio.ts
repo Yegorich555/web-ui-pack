@@ -282,6 +282,9 @@ export default class WUPRadioControl<
       inp.type = "radio";
       inp.name = nm; // required otherwise tabbing, arrow-keys doesn't work inside single fieldset
       parent.appendChild(lbl);
+      if (item.onClick) {
+        lbl.onclick = (e) => item.onClick?.call(lbl, e, item);
+      }
     });
 
     this.$refItems[0].tabIndex = 0;
@@ -352,7 +355,7 @@ export default class WUPRadioControl<
 
   protected gotFocus(e: FocusEvent): Array<() => void> {
     if (e.target !== this.$refInput) {
-      this.$refInput.focus(); // focus current input instead of focused 1st - possible when item is focused via form.autofocs
+      this.$refInput.focus(); // focus current input instead of focused 1st - possible when item is focused via form.autofocus
     }
     return super.gotFocus(e);
   }

@@ -80,7 +80,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
       - [x] [CheckControl (checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
         - [ ] CheckTreeControl
     - [x] [RadioControl (radioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
-      - [ ] Full customized items
+      - [ ] Full customized menu
     - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
       - [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
       - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)

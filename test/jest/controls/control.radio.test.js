@@ -130,6 +130,22 @@ describe("control.radio", () => {
     expect(el.innerHTML).toMatchInlineSnapshot(
       `"<fieldset><legend><strong></strong></legend><label for="txt13">Helica<input id="txt13" type="radio" name="txt12473" tabindex="0"><span icon=""></span></label><label for="txt14" checked="">Diana<input id="txt14" type="radio" name="txt12473" autocomplete="off"><span icon=""></span></label></fieldset>"`
     );
+
+    // onclick with preventDefault
+    const spyClick = jest.fn().mockImplementation((e) => e.preventDefault());
+    jest.clearAllMocks();
+    el.$options.items = [
+      { text: "Item 1", value: 1, onClick: spyClick },
+      { text: "Item 2", value: 2 },
+    ];
+    el.$value = 1;
+    jest.advanceTimersByTime(2);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<fieldset><legend><strong></strong></legend><label for="txt16" checked="">Item 1<input id="txt16" type="radio" name="txt15473" tabindex="0" autocomplete="off"><span icon=""></span></label><label for="txt17">Item 2<input id="txt17" type="radio" name="txt15473"><span icon=""></span></label></fieldset>"`
+    );
+    const inp1 = el.querySelector("input");
+    inp1.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(spyClick).toBeCalledTimes(1);
   });
 
   test("$options.items is complex object", async () => {
