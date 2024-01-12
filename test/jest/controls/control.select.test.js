@@ -53,9 +53,9 @@ describe("control.select", () => {
       "w-items": { value: getItems() },
     },
     initValues: [
-      { attrValue: "10", value: 10 },
-      { attrValue: "20", value: 20 },
-      { attrValue: "30", value: 30 },
+      { attrValue: "10", value: 10, urlValue: "Donny" },
+      { attrValue: "20", value: 20, urlValue: "Mikky" },
+      { attrValue: "30", value: 30, urlValue: "Leo" },
     ],
     validations: {},
     validationsSkip: ["_parse", "_mask", "minCount", "maxCount"], // min & max tested with selectMany
@@ -363,7 +363,9 @@ describe("control.select", () => {
     // when somehow items not fetched before
     el = document.body.appendChild(document.createElement(el.tagName));
     expect(el.getItems()).toStrictEqual([]);
+    h.mockConsoleError();
     expect(() => jest.advanceTimersByTime(1)).toThrow(); // because items not fetched yet but gotItems is called
+    h.unMockConsoleError();
 
     // when fetching items is rejected
     el = document.body.appendChild(document.createElement(el.tagName));
@@ -1123,6 +1125,78 @@ describe("control.select", () => {
     expect(el.$value).toStrictEqual([10, 30]);
     expect(await h.userRedo(el.$refInput)).toBe("Donny, Leo, 123, |");
     expect(el.$value).toStrictEqual([10, 30, "123"]);
+  });
+
+  test("value to storage: extra", async () => {
+    async function init() {
+      await h.wait(10);
+      el = document.body.appendChild(document.createElement(el.tagName));
+      el.$options.storageKey = "userName";
+      el.$options.items = [
+        { value: null, text: "New Item" },
+        { value: 10, text: "Dark Men" },
+        {
+          value: 20,
+          text: (_, li) => {
+            li.textContent = "Lucy";
+            return li.textContent;
+          },
+        },
+      ];
+      await h.wait();
+      return el;
+    }
+
+    const sSet = jest.spyOn(Storage.prototype, "setItem");
+    // const sGet = jest.spyOn(Storage.prototype, "getItem");
+
+    // when value is null
+    el = await init();
+    el.$value = null;
+    expect(sSet).lastCalledWith("userName", "null");
+    el = await init();
+    expect(el.$value).toBe(null);
+
+    // text must be stored
+    el.$value = 10;
+    expect(sSet).lastCalledWith("userName", "DarkMen");
+    el = await init();
+    expect(el.$value).toBe(10);
+
+    // when .text is function
+    el.$value = 20;
+    el = await init();
+    expect(sSet).lastCalledWith("userName", "20");
+    expect(el.$value).toBe(20);
+
+    expect(() =>
+      el.valueToStrCompare({
+        value: null,
+        text: (_, li) => {
+          li.textContent = "Lucy";
+          return li.textContent;
+        },
+      })
+    ).not.toThrow(); // case impossible in live but better to check
+
+    // when item not found
+    h.mockConsoleError();
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.storageKey = "userName";
+    el.$options.items = [
+      { value: 1, text: "New Item" },
+      { value: 2, text: "Dark Men" },
+      {
+        value: 3,
+        text: (_, li) => {
+          li.textContent = "Lucy";
+          return li.textContent;
+        },
+      },
+    ];
+    expect(() => jest.advanceTimersByTime(10)).toThrow();
+    expect(el.$value).toBe(undefined);
+    h.unMockConsoleError();
   });
 });
 

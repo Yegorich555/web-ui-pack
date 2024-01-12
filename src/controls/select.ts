@@ -269,22 +269,47 @@ export default class WUPSelectControl<
     return v as ValueType;
   }
 
-  valueFromStorage(str: string): ValueType | undefined {
-    if (this.$options.multiple) {
-      this._opts.multiple = false;
-      const v = str.split("_").map((si) => super.valueFromStorage(si)) as any;
-      this._opts.multiple = true; // otherwise parse is wrong
-      return v;
-    }
-    return super.valueFromStorage(str) as any;
+  /** Returns string for storage */
+  valueToStrCompare(a: WUP.Select.MenuItem<ValueType>): string | null {
+    const at = typeof a.text === "function" ? a.value?.toString() : a.text;
+    return at?.replace(/\s/g, "") ?? null;
   }
 
-  valueToStorage(v: ValueType): string | null {
-    // todo need to store text as is instead of real value
-    if (this.$options.multiple) {
-      return (v as Array<any>).map((vi) => super.valueToStorage(vi)).join("_");
+  valueFromStorage(str: string, skipMultiple?: boolean): ValueType | undefined {
+    if (this._opts.multiple && !skipMultiple) {
+      const v = str.split("_").map((si) => this.valueFromStorage(si, true)) as any;
+      return v;
     }
-    return super.valueToStorage(v);
+    if (str === "null") {
+      return null as ValueType;
+    }
+    const s = str.toLowerCase();
+    const items = this.getItems();
+    const item = items.find((a) => this.valueToStrCompare(a)?.toLowerCase() === s);
+    if (item === undefined) {
+      this.throwError("Not found in items (search by item.value.toString() & item.text", {
+        items,
+        searchText: str,
+      });
+
+      return undefined;
+    }
+    return item.value;
+    // return super.valueFromStorage(str) as any;
+  }
+
+  /** Store value to storage; if item.text is not function then stored text, otherwise value.toString()
+   *  @see {@link valueToStrCompare} */
+  valueToStorage(v: ValueType, skipMultiple?: boolean): string | null {
+    if (this._opts.multiple && !skipMultiple) {
+      return (v as Array<any>).map((vi) => this.valueToStorage(vi, true)).join("_");
+    }
+    if (v == null) {
+      return "null";
+    }
+    const items = this.getItems();
+    const item = items.find((o) => this.#ctr.$isEqual(o.value, v, this)) || { value: v, text: v?.toString() };
+    return this.valueToStrCompare(item!);
   }
 
   /** It's called with option allowNewValue to find value related to text */
