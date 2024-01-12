@@ -269,22 +269,22 @@ export default class WUPSelectControl<
     return v as ValueType;
   }
 
-  valueFromUrl(str: string): ValueType | undefined {
+  valueFromStorage(str: string): ValueType | undefined {
     if (this.$options.multiple) {
       this._opts.multiple = false;
-      const v = str.split("_").map((si) => super.valueFromUrl(si)) as any;
+      const v = str.split("_").map((si) => super.valueFromStorage(si)) as any;
       this._opts.multiple = true; // otherwise parse is wrong
       return v;
     }
-    return super.valueFromUrl(str) as any;
+    return super.valueFromStorage(str) as any;
   }
 
-  valueToUrl(v: ValueType): string | null {
+  valueToStorage(v: ValueType): string | null {
     // todo need to store text as is instead of real value
     if (this.$options.multiple) {
-      return (v as Array<any>).map((vi) => super.valueToUrl(vi)).join("_");
+      return (v as Array<any>).map((vi) => super.valueToStorage(vi)).join("_");
     }
-    return super.valueToUrl(v);
+    return super.valueToStorage(v);
   }
 
   /** It's called with option allowNewValue to find value related to text */

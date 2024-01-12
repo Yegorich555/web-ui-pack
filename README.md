@@ -13,6 +13,7 @@ Universal web package with high scalable [WebComponents](#components) and [helpe
 You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone repo and run `npm i & npm start`
 
 Template repo with React: [webpack-must-have](https://github.com/Yegorich555/webpack-must-have)
+Template repo with Angular: [webpack-angular](https://github.com/Yegorich555/web-angular)
 
 ## Features
 

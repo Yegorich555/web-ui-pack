@@ -2,7 +2,13 @@
 
 # Changelog
 
-## 1.0. (\_\_\_)
+## 1.1.0 (\_\_\_)
+
+### New Features
+
+---
+
+- **BREAKING**. **Controls**. Renamed `valueToUrl/valueFromUrl` to `valueToStorage/valueFromStorage`
 
 ### Fixes
 

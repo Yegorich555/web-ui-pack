@@ -456,7 +456,7 @@ export default class WUPCalendarControl<
     // WARN: for render picker see gotReady
   }
 
-  override valueToUrl(v: ValueType): string {
+  override valueToStorage(v: ValueType): string {
     return dateToString(v, "yyyy-MM-dd");
   }
 

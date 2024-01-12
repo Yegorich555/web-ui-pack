@@ -184,7 +184,7 @@ export default class WUPSwitchControl<
     return text === "" || text === "1" || text.toLowerCase() === "true";
   }
 
-  override valueToUrl(v: boolean): string | null {
+  override valueToStorage(v: boolean): string | null {
     return v ? "1" : null;
   }
 

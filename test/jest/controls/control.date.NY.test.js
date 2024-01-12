@@ -86,10 +86,10 @@ describe("control.date.NY", () => {
 
   test("storageURL", () => {
     // el.$options.utc = true;
-    expect(el.valueToUrl(new Date("1990-02-10T00:00:00.000Z"))).toBe("1990-02-10");
-    expect(el.valueFromUrl("1990-02-10")).toEqual(new Date("1990-02-10T00:00:00.000Z"));
+    expect(el.valueToStorage(new Date("1990-02-10T00:00:00.000Z"))).toBe("1990-02-10");
+    expect(el.valueFromStorage("1990-02-10")).toEqual(new Date("1990-02-10T00:00:00.000Z"));
     el.$options.utc = false;
-    expect(el.valueToUrl(new Date(1990, 1, 10))).toBe("1990-02-10");
-    expect(el.valueFromUrl("1990-02-10")).toEqual(new Date(1990, 1, 10));
+    expect(el.valueToStorage(new Date(1990, 1, 10))).toBe("1990-02-10");
+    expect(el.valueFromStorage("1990-02-10")).toEqual(new Date(1990, 1, 10));
   });
 });

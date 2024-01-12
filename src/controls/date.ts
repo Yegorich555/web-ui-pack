@@ -203,7 +203,7 @@ export default class WUPDateControl<
     return !this.refMask || this.refMask.isCompleted;
   }
 
-  override valueToUrl(v: ValueType): string {
+  override valueToStorage(v: ValueType): string {
     return dateToString(v, `yyyy-MM-dd${this._opts.utc ? "Z" : ""}`);
   }
 
