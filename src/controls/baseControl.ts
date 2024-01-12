@@ -984,7 +984,7 @@ export default abstract class WUPBaseControl<
   /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
   protected goShowError(err: string, target: HTMLElement): void {
     if (!err) {
-      this.throwError(new Error("missed error message"));
+      this.throwError("Error message missed");
       return;
     }
     if (this._errMsg === err) {

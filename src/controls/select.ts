@@ -450,7 +450,7 @@ export default class WUPSelectControl<
   /** Method returns items defined based on $options.items */
   protected getItems(): WUP.Select.MenuItem<ValueType>[] {
     if (!this._cachedItems) {
-      this.throwError(new Error("Internal bug. No cached items"));
+      this.throwError("Internal bug. No cached items", { options: this._opts, value: this.$value });
       return [];
     }
     return this._cachedItems;
@@ -463,10 +463,7 @@ export default class WUPSelectControl<
       if (this._opts.allowNewValue) {
         return v != null ? (v as any).toString() : "";
       }
-      console.error(`${this.tagName}${this._opts.name ? `[${this._opts.name}]` : ""}. Not found in items`, {
-        items,
-        value: v,
-      });
+      this.throwError("Not found in items", { items, value: v }, true);
       return `Error: not found for ${v != null ? (v as any).toString() : ""}`;
     }
     const item = items[i];
