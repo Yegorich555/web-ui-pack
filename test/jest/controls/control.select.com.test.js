@@ -106,7 +106,7 @@ describe("control.select common", () => {
     el._focusedMenuItem.addEventListener("click", (e) => e.preventDefault(), { once: true });
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
     await h.wait();
-    expect(el.$isOpened).toBe(false);
+    expect(el.$isOpened).toBe(true);
 
     // hide by outside click
     el.$openMenu();

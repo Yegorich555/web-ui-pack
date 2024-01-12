@@ -24,7 +24,7 @@ declare global {
               // li.textContent = `Item N ${i+1}`; // or use this for fastest render
               const btn = li.querySelector('button')!;
               btn.onclick = (e) => {
-                e.stopPropagation();
+                e.preventDefault();
                 control.$closeMenu();
               }
               return `Item N ${value}`; // this is text rendered in input when related item selected
@@ -34,6 +34,8 @@ declare global {
       text: string | ((value: T, el: HTMLElement, i: number, control: WUPBaseControl) => string);
       /** Value tied with menu item */
       value: T;
+      /** Use `(e)=>e.preventDefault()` to prevent selection & closing menu and do custom action */
+      onClick?: (e: MouseEvent, me: MenuItem<T>) => void;
     }
 
     interface MenuItemElement extends HTMLLIElement {
@@ -441,29 +443,7 @@ export default class WUPSelectControl<
     this._menuItems = { all, focused: -1 };
     !all.length && this.renderMenuNoItems(popup, false);
     // it happens on every show because by hide it dispose events
-    onEvent(
-      ul,
-      "click",
-      (e) => {
-        e.preventDefault(); // to prevent popup-hide-show
-
-        let t = e.target as Node | HTMLElement;
-        if (t === ul) {
-          return;
-        }
-        while (1) {
-          const parent = t.parentElement as HTMLElement;
-          if (parent === ul) {
-            const isDisabled = (t as HTMLElement).hasAttribute("aria-disabled");
-            !isDisabled && this.gotMenuItemClick(e, t as WUP.Select.MenuItemElement);
-            break;
-          }
-          t = parent;
-        }
-      },
-      { passive: false }
-    );
-
+    onEvent(ul, "click", (e) => this.gotMenuClick(e), { passive: false });
     return ul;
   }
 
@@ -534,7 +514,6 @@ export default class WUPSelectControl<
       li.setAttribute("role", "option");
       // li.setAttribute("aria-selected", "false");
       li._value = a.value;
-
       let s = a.text;
       if (typeof s === "function") {
         s = s(a.value, li, i, this);
@@ -542,18 +521,43 @@ export default class WUPSelectControl<
         li.textContent = s;
       }
       li._text = s.toLowerCase();
-
       return li;
     }); // as Array<WUP.Select.MenuItemElement> & { _focused: number; _selected: number };
   }
 
+  protected gotMenuClick(e: MouseEvent): void {
+    if (e.defaultPrevented) {
+      return;
+    }
+    const ul = e.currentTarget;
+    let t = e.target as Node | HTMLElement;
+    if (t === ul) {
+      return;
+    }
+    while (1) {
+      const parent = t.parentElement as HTMLElement;
+      if (parent === ul) {
+        const isDisabled = (t as HTMLElement).hasAttribute("aria-disabled");
+        !isDisabled && this.gotMenuItemClick(e, t as WUP.Select.MenuItemElement);
+        break;
+      }
+      t = parent;
+    }
+
+    e.preventDefault(); // to prevent popup-hide-show - because it handles by selectMenuItem
+  }
+
   /** Called when need to setValue & close base on clicked item */
-  protected gotMenuItemClick(_e: MouseEvent, item: WUP.Select.MenuItemElement): void {
-    const i = this._menuItems!.all.indexOf(item);
+  protected gotMenuItemClick(e: MouseEvent, li: WUP.Select.MenuItemElement): void {
+    const i = this._menuItems!.all.indexOf(li);
     const o = this._cachedItems![i];
-    const canOff = this._opts.multiple && item.getAttribute("aria-selected") === "true";
-    this.selectMenuItem(canOff ? null : item); // select/deselect
-    canOff && item.setAttribute("aria-selected", "false");
+    o.onClick?.call(e.target, e, o);
+    if (e.defaultPrevented) {
+      return;
+    }
+    const canOff = this._opts.multiple && li.getAttribute("aria-selected") === "true";
+    this.selectMenuItem(canOff ? null : li); // select/deselect
+    canOff && li.setAttribute("aria-selected", "false");
 
     this.selectValue(o.value, !this._opts.multiple);
   }

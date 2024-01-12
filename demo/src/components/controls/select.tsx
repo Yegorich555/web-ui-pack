@@ -160,7 +160,7 @@ export default function SelectControlView() {
               // el.$options.autoFocus = true;
               setTimeout(() => {
                 el.$options.clearActions = ClearActions.clear;
-                el.$options.items = [{ text: "Test", value: 1 }]; // todo need to add onClick event to allow overrider default logic
+                el.$options.items = [{ text: "Test", value: 1 }];
                 el.$value = [1];
 
                 el.$options.items = items;
@@ -198,3 +198,4 @@ export default function SelectControlView() {
 }
 
 // todo add Troubleshooting section to explain why equal object values can be not matched (need to compare by id or implement valueOf)
+// todo add an example with custom menu

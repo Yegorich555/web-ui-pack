@@ -239,16 +239,55 @@ describe("control.select", () => {
         value: 123,
         text: (val, li, i) => {
           li.textContent = `testVal-${val}_${i}`;
-          // li.onclick = (e)=>e.preventDefault() // todo test it
           return li.textContent;
         },
-        // onClick = e=>e.preventDefault(); // todo test it
       },
     ]);
     el.$value = 123;
     await h.wait();
     h.unMockConsoleError();
     expect(el.$refInput.value).toBe("testVal-123_0");
+
+    // onclick with preventDefault
+    const spyClick = jest.fn().mockImplementation((e) => e.preventDefault());
+    el.$value = undefined;
+    await setItems([
+      {
+        value: 123,
+        text: (val, li, i) => {
+          li.textContent = `testVal-${val}_${i}`;
+          li.onclick = spyClick;
+          return li.textContent;
+        },
+      },
+    ]);
+    expect(el.$isOpened).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt10" role="listbox" aria-label="Items" tabindex="-1"><li role="option">testVal-123_0</li></ul>"`
+    );
+    let li = el.$refPopup.querySelector("li");
+    await h.userClick(li);
+    await h.wait();
+    expect(el.$isOpened).toBe(true); // because was prevented
+    expect(el.$value).toBe(undefined);
+
+    // onclick with preventDefault
+    jest.clearAllMocks();
+    await setItems([
+      {
+        value: 123,
+        text: "Item N 1",
+        onClick: spyClick,
+      },
+    ]);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt11" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Item N 1</li></ul>"`
+    );
+    li = el.$refPopup.querySelector("li");
+    await h.userClick(li);
+    await h.wait();
+    expect(el.$isOpened).toBe(true); // because was prevented
+    expect(el.$value).toBe(undefined);
   });
 
   test("pending state", async () => {
