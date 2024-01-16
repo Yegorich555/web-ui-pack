@@ -369,8 +369,42 @@ export default class WUPRadioControl<
   protected override goShowError(err: string, target: HTMLElement): void {
     super.goShowError(err, this.$refFieldset);
   }
+
+  /** Returns string for storage */
+  valueToStrCompare(a: WUP.Select.MenuItem<ValueType>): string | null {
+    const at = typeof a.text === "function" ? a.value?.toString() : a.text;
+    return at?.replace(/\s/g, "") ?? null;
+  }
+
+  override valueFromStorage(str: string): ValueType | undefined {
+    if (str === "null") {
+      return null as ValueType;
+    }
+    const s = str.toLowerCase();
+    const items = this.getItems();
+    const item = items.find((a) => this.valueToStrCompare(a)?.toLowerCase() === s);
+    if (item === undefined) {
+      this.throwError("Not found in items (search by item.value.toString() & item.text", {
+        items,
+        searchText: str,
+      });
+
+      return undefined;
+    }
+    return item.value;
+    // return super.valueFromStorage(str) as any;
+  }
+
+  /** Store value to storage; if item.text is not function then stored text, otherwise value.toString()
+   *  @see {@link valueToStrCompare} */
+  override valueToStorage(v: ValueType): string | null {
+    if (v == null) {
+      return "null";
+    }
+    const items = this.getItems();
+    const item = items.find((o) => this.#ctr.$isEqual(o.value, v, this)) || { value: v, text: v?.toString() };
+    return this.valueToStrCompare(item!);
+  }
 }
 
 customElements.define(tagName, WUPRadioControl);
-
-// todo: add saveToStorage like it works with selectControl
