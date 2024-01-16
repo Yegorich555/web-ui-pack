@@ -32,6 +32,7 @@ import MyLink from "./elements/myLink";
 import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
 import Login from "./components/controls/login";
+import ModalAsAlertView from "./components/modalAsAlertView";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -51,6 +52,7 @@ const routes: IRoute[] = [
     { path: "circle", el: CircleView },
     { path: "dropdown", el: DropdownView },
     { path: "modal", el: ModalView },
+    { path: "modal-alert", label: "Alert", el: ModalAsAlertView },
   ].sort((a, b) => a.path.localeCompare(b.path)),
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
@@ -140,7 +142,7 @@ export default function AppContainer() {
                     [isActive ? styles.activeLink : "", r.isNested ? styles.nested : ""].join(" ")
                   }
                 >
-                  {r.label || WUPHelpers.stringPrettify(r.label || last(r.path.split("/")))}
+                  {WUPHelpers.stringPrettify(r.label || last(r.path.split("/")))}
                 </NavLink>
               </li>
             ))}
