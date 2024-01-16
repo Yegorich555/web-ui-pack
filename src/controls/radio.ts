@@ -372,3 +372,5 @@ export default class WUPRadioControl<
 }
 
 customElements.define(tagName, WUPRadioControl);
+
+// todo: add saveToStorage like it works with selectControl

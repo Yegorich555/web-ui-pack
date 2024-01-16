@@ -347,7 +347,7 @@ export default class WUPSelectControl<
     const act = (): void => {
       this._onPendingInitValue?.call(this);
       delete this._onPendingInitValue;
-      this.setInputValue(this.$value, SetValueReasons.initValue);
+      this.setInputValue(this.$value, SetValueReasons.initValue); // todo issue here  update options, then update again - it will provide an error (because inside 2ms timeout and _cachedItems are cleared)
       this.setupInputReadonly(); // call it because opt readonlyInput can depend on items.length
     };
     if (d instanceof Promise) {

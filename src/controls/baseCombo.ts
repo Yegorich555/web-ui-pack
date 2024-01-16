@@ -210,6 +210,7 @@ export default abstract class WUPBaseComboControl<
     // this.$hideError(); // it resolves overflow menu vs error
 
     if (!this.$refPopup) {
+      // todo use goInitPopup
       const p = document.createElement("wup-popup");
       this.$refPopup = p;
       p.$options.openCase = PopupOpenCases.onManualCall;
