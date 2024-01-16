@@ -120,11 +120,12 @@ export default function TextControlView() {
           w-storageKey
           w-storage="url"
         />
+        <h3>
+          <Anchor hash="mask">Masked inputs</Anchor>
+        </h3>
         <section>
-          <h3>
-            <Anchor hash="mask">Masked inputs</Anchor>
-          </h3>
           <wup-text
+            class={styles.noMarginTop}
             w-name="phone"
             w-label="Phone number"
             w-mask="+0 (000) 000-0000"
@@ -182,12 +183,13 @@ export default function TextControlView() {
         </section>
 
         <FAQ
+          endString=""
           items={[
             {
               link: "troubleshooting",
-              question: "Troubleshooting. Controls resized on hover/focus",
+              question: "Troubleshooting. Controls resizes on hover/focus",
               answer: (
-                <>
+                <section>
                   <div className={styles.inlineGroup}>
                     <wup-text w-label="Input 1" w-prefix="prefix " />
                     <wup-text w-label="Input 2" w-postfix=" postfix" />
@@ -199,7 +201,7 @@ export default function TextControlView() {
                     performance reason, and showed on hover/focus)
                   </i>
                   <Code code={codeCssHoverRes} />
-                </>
+                </section>
               ),
             },
           ]}

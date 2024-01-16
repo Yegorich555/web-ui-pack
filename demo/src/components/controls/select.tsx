@@ -3,6 +3,7 @@ import Page from "src/elements/page";
 import { WUPSelectControl, WUPSpinElement } from "web-ui-pack";
 import { ClearActions } from "web-ui-pack/controls/baseControl";
 import { spinUseDualRing } from "web-ui-pack/spinElement";
+import FAQ from "src/elements/faq";
 import stylesCom from "./controls.scss";
 
 WUPSelectControl.$use();
@@ -191,11 +192,31 @@ export default function SelectControlView() {
             }
           }}
         />
+
+        <FAQ
+          endString=""
+          items={[
+            {
+              link: "troubleshooting",
+              question: "Troubleshooting. Exception 'Not found in items'",
+              answer: (
+                <section>
+                  <i>
+                    Possible if $value/$initValue is object and item.value is object <br />
+                    In this case control tries to find item related to $value. It searches by item.value.id &
+                    item.value.valueOf(). Also you can check if $options.items set only once (in React possible it
+                    re-creates on every render)
+                  </i>
+                </section>
+              ),
+            },
+          ]}
+        />
+
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
   );
 }
 
-// todo add Troubleshooting section to explain why equal object values can be not matched (need to compare by id or implement valueOf)
 // todo add an example with custom menu
