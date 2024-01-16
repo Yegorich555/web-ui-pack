@@ -275,7 +275,7 @@ export default class WUPSelectControl<
     return at?.replace(/\s/g, "") ?? null;
   }
 
-  valueFromStorage(str: string, skipMultiple?: boolean): ValueType | undefined {
+  override valueFromStorage(str: string, skipMultiple?: boolean): ValueType | undefined {
     if (this._opts.multiple && !skipMultiple) {
       const v = str.split("_").map((si) => this.valueFromStorage(si, true)) as any;
       return v;
@@ -300,7 +300,7 @@ export default class WUPSelectControl<
 
   /** Store value to storage; if item.text is not function then stored text, otherwise value.toString()
    *  @see {@link valueToStrCompare} */
-  valueToStorage(v: ValueType, skipMultiple?: boolean): string | null {
+  override valueToStorage(v: ValueType, skipMultiple?: boolean): string | null {
     if (this._opts.multiple && !skipMultiple) {
       return (v as Array<any>).map((vi) => this.valueToStorage(vi, true)).join("_");
     }

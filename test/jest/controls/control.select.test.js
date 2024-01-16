@@ -1127,7 +1127,7 @@ describe("control.select", () => {
     expect(el.$value).toStrictEqual([10, 30, "123"]);
   });
 
-  test("value to storage: extra", async () => {
+  test("storage", async () => {
     async function init() {
       await h.wait(10);
       el = document.body.appendChild(document.createElement(el.tagName));
