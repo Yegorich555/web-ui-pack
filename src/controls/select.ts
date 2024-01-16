@@ -31,7 +31,7 @@ declare global {
             },
           },
         ]; */
-      text: string | ((value: T, el: HTMLElement, i: number, control: WUPBaseControl) => string);
+      text: string | ((value: T, li: HTMLElement, i: number, control: WUPBaseControl) => string);
       /** Value tied with menu item */
       value: T;
       /** Use `(e)=>e.preventDefault()` to prevent selection & closing menu and do custom action */

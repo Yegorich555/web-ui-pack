@@ -1,6 +1,6 @@
 /* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
-import { WUPSelectControl, WUPSpinElement } from "web-ui-pack";
+import { WUPModalElement, WUPSelectControl, WUPSpinElement } from "web-ui-pack";
 import { ClearActions } from "web-ui-pack/controls/baseControl";
 import { spinUseDualRing } from "web-ui-pack/spinElement";
 import FAQ from "src/elements/faq";
@@ -192,7 +192,46 @@ export default function SelectControlView() {
             }
           }}
         />
-
+        <wup-select
+          w-name="custom"
+          w-label="With custom menu"
+          ref={(el) => {
+            if (el) {
+              el.$options.items = [
+                {
+                  value: 1,
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  text: (_value, li, _i, _control) => {
+                    const txt = "Item N 1";
+                    li.className = stylesCom.flexInline;
+                    li.innerHTML = `<button aria-label='delete' type='button' class='${stylesCom.btnIcon}'>&#8722;</button> ${txt}`;
+                    const btn = li.firstElementChild as HTMLButtonElement;
+                    btn.onclick = (e) => {
+                      e.stopPropagation();
+                      WUPModalElement.$showConfirm({
+                        question:
+                          "Selection on click is prevented. Implement custom action yourself and close menu if required yourself via el.$closeMenu()",
+                      });
+                    };
+                    // li.onclick = (e) => e.preventDefault();
+                    return txt;
+                  },
+                },
+                {
+                  text: "Add New",
+                  value: 0,
+                  onClick: (e) => {
+                    e.preventDefault(); // prevent item selection
+                    WUPModalElement.$showConfirm({
+                      question:
+                        "Selection on click is prevented. Implement custom action yourself and close menu if required yourself via el.$closeMenu()",
+                    });
+                  },
+                },
+              ];
+            }
+          }}
+        />
         <FAQ
           endString=""
           items={[
@@ -218,5 +257,3 @@ export default function SelectControlView() {
     </Page>
   );
 }
-
-// todo add an example with custom menu

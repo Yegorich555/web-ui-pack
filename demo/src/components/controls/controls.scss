@@ -13,3 +13,34 @@
   border: none !important;
   --ctrl-switch-padding: 1em 4px;
 }
+
+.flexInline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btnIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin: 0;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 15px;
+  cursor: pointer;
+  box-shadow: none;
+  background: none;
+  border: 2px solid $basicActiveBgColor;
+  color: $basicActiveBgColor;
+  border-radius: $borderRadius;
+
+  &:hover {
+    background: $basicActiveBgColor;
+    color: $basicActiveColor;
+  }
+}
