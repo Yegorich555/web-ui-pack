@@ -194,6 +194,35 @@ export default abstract class WUPBaseComboControl<
     return can;
   }
 
+  /** Called when need to create new popup for menu */
+  protected renderPopup(menuId: string): WUPPopupElement {
+    const p = document.createElement("wup-popup");
+    this.$refPopup = p;
+    p.$options.openCase = PopupOpenCases.onManualCall;
+    p.$options.target = this;
+    p.$options.offsetFitElement = [1, 1];
+    p.$options.minWidthByTarget = true;
+    p.$options.placement = [
+      WUPPopupElement.$placements.$bottom.$start,
+      WUPPopupElement.$placements.$bottom.$end,
+      WUPPopupElement.$placements.$top.$start,
+      WUPPopupElement.$placements.$top.$end,
+      WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
+      WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
+      WUPPopupElement.$placements.$top.$start.$resizeHeight,
+      WUPPopupElement.$placements.$top.$end.$resizeHeight,
+    ];
+
+    p.setAttribute("menu", "");
+    p.$options.animation = PopupAnimations.drawer;
+
+    const i = this.$refInput;
+    i.setAttribute("aria-owns", menuId);
+    i.setAttribute("aria-controls", menuId);
+
+    return p;
+  }
+
   protected async goOpenMenu(
     openCase: MenuOpenCases,
     e?: MouseEvent | FocusEvent | KeyboardEvent | null
@@ -210,34 +239,10 @@ export default abstract class WUPBaseComboControl<
     // this.$hideError(); // it resolves overflow menu vs error
 
     if (!this.$refPopup) {
-      // todo use goInitPopup
-      const p = document.createElement("wup-popup");
-      this.$refPopup = p;
-      p.$options.openCase = PopupOpenCases.onManualCall;
-      p.$options.target = this;
-      p.$options.offsetFitElement = [1, 1];
-      p.$options.minWidthByTarget = true;
-      p.$options.placement = [
-        WUPPopupElement.$placements.$bottom.$start,
-        WUPPopupElement.$placements.$bottom.$end,
-        WUPPopupElement.$placements.$top.$start,
-        WUPPopupElement.$placements.$top.$end,
-        WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
-        WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
-        WUPPopupElement.$placements.$top.$start.$resizeHeight,
-        WUPPopupElement.$placements.$top.$end.$resizeHeight,
-      ];
-
-      p.setAttribute("menu", "");
-      p.$options.animation = PopupAnimations.drawer;
-
       const menuId = this.#ctr.$uniqueId;
-      const i = this.$refInput;
-      i.setAttribute("aria-owns", menuId);
-      i.setAttribute("aria-controls", menuId);
-
+      this.$refPopup = this.renderPopup(menuId);
       // const wasFcs = this.$isFocused;
-      this.renderMenu(p, menuId);
+      this.renderMenu(this.$refPopup, menuId);
       // WARN: rollback the logic if renderMenu() returns Promise
       // const fcs = this.$isFocused;
       // if (!fcs && wasFcs) {
@@ -245,7 +250,7 @@ export default abstract class WUPBaseComboControl<
       //   this.removePopup(); // fix case when user waited for loading and moved focus to another
       //   return null;
       // }
-      this.appendChild(p); // WARN: it will open onInit
+      this.appendChild(this.$refPopup); // WARN: it will open onInit
       // eslint-disable-next-line no-promise-executor-return
       await new Promise((res) => setTimeout(res)); // wait for appending to body so size is defined and possible to scroll
     }

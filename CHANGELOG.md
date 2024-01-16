@@ -9,6 +9,7 @@
 ---
 
 - **BREAKING**. **Controls**. Renamed `valueToUrl/valueFromUrl` to `valueToStorage/valueFromStorage`
+- **Combobox controls (Select, SelectMany, Date, Time)**. Added method `.renderPopup()` to have ability to override popup options
 - [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). [RadioControl](src/controls/radio.ts).
   - Allowed to use mixed types in `$options.items`. Improved JSDoc (added example)
   - Allowed to prevent closing menu via **ev.preventDefault** => `$options.items = [{value: 1, text: (v, li) => {... li.onclick = (e) => e.preventDefault();... } }]`
