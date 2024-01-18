@@ -370,7 +370,7 @@ export default class WUPSelectControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
     this._opts.items ??= [];
     if (!propsChanged || propsChanged.includes("items")) {
-      this.removePopup();
+      propsChanged && this.removePopup(); // reset state only if props changed
       this.fetchItems(); // WARN: it's important to be before super otherwise initValue won't work
     }
 
