@@ -23,12 +23,19 @@ export const enum MenuOpenCases {
 }
 
 export const enum MenuCloseCases {
+  /** When $closeMenu() called programmatically; Don't use it for $options (it's for nested cycle) */
   onManualCall,
+  /** When user clicks on control but not menu (beside editable not-empty input) */
   onClick,
+  /** When user clicks on menu item and it's selected */
   onSelect,
+  /** When control loses focus */
   onFocusLost,
+  /** When user presses Escape key */
   OnPressEsc,
+  /** When user presses Enter key */
   OnPressEnter,
+  /** When options are changed and need to re-render */
   OnOptionsChange,
 }
 
