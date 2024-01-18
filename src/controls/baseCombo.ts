@@ -448,7 +448,7 @@ export default abstract class WUPBaseComboControl<
 
     const dsps2 = onEvent(document, "click", (e) => {
       // close by outside click
-      !onInputStartClick && !isInsideClick && this.goCloseMenu(MenuCloseCases.onClick, e);
+      !onInputStartClick && !isInsideClick && this.goCloseMenu(MenuCloseCases.onFocusLost, e); // WARN: actually focusLost called later & need to remove popup with action
       onInputStartClick = false;
     });
 

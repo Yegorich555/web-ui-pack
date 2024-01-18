@@ -110,12 +110,16 @@ describe("control.select common", () => {
 
     // hide by outside click
     el.$openMenu();
+    expect(el.$isFocused).toBe(true);
     await h.wait();
     expect(el.$isOpened).toBe(true);
     HTMLInputElement.prototype.focus.call(el.$refInput); // without focus click events are not handled
     document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    document.activeElement.blur();
     await h.wait();
     expect(el.$isOpened).toBe(false);
+    expect(el.$isFocused).toBe(false);
+    expect(el.$refPopup).toBeFalsy(); // when user clicks outside happens document click and in this case popup must be remove in another way
 
     // open by click control
     await h.userClick(el);
@@ -172,7 +176,7 @@ describe("control.select common", () => {
     expect(el.$refInput.readOnly).toBe(true);
     expect(el.$refInput.value).toBeTruthy();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt2" aria-controls="txt2" readonly=""><strong></strong></span><button wup-icon="" clear="back" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt5" aria-controls="txt5" readonly=""><strong></strong></span><button wup-icon="" clear="back" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-select>"`
     );
     await h.userClick(el.$refInput);
     await h.wait();

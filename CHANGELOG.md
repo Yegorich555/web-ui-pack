@@ -13,7 +13,7 @@
 - [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). [RadioControl](src/controls/radio.ts).
   - Allowed to use mixed types in `$options.items`. Improved JSDoc (added example)
   - Allowed to prevent closing menu via **ev.preventDefault** => `$options.items = [{value: 1, text: (v, li) => {... li.onclick = (e) => e.preventDefault();... } }]`
-  - Allow to use complex values with saving to storage (refactored methods `valueToStorage/valueFromStorage`)
+  - Allowed to use complex values with saving to storage (refactored methods `valueToStorage/valueFromStorage`)
 
 ### Fixes
 
@@ -21,6 +21,7 @@
 
 - **HTML**. Fixed intellisense (html.json was missed in the package)
 - **Styles**. Textbased controls. Added `opacity: 1` for `button[clear]/prefix/postfix` as fix when controls in a flex-row and it resizes on hover
+- **Combobox controls (Select, SelectMany, Date, Time)**. _Memory leak: menu is closed but not removed when click on body outside control_
 
 ---
 
