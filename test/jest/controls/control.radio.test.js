@@ -1,6 +1,7 @@
 /* eslint-disable prefer-destructuring */
 import { WUPRadioControl } from "web-ui-pack";
 import observer from "web-ui-pack/helpers/observer";
+import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -447,6 +448,17 @@ describe("control.radio", () => {
     ];
     expect(() => jest.advanceTimersByTime(10)).toThrow();
     expect(el.$value).toBe(undefined);
+    h.unMockConsoleError();
+
+    // when item not found in items
+    expect(el.valueToStorage(15)).toBe("15");
+
+    // cover universal cases with basic proto
+    expect(WUPBaseControl.prototype.valueFromStorage.call(el, "null")).toBe(null);
+    expect(WUPBaseControl.prototype.valueToStorage.call(el, null)).toBe("null");
+    h.mockConsoleError();
+    expect(WUPBaseControl.prototype.valueToStorage.call(el, { value: 1 })).toBe(null);
+    expect(() => jest.advanceTimersByTime(10)).toThrow();
     h.unMockConsoleError();
   });
 });
