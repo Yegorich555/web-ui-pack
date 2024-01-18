@@ -1,7 +1,7 @@
 /* eslint-disable prefer-destructuring */
 import { WUPRadioControl } from "web-ui-pack";
-import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import observer from "web-ui-pack/helpers/observer";
+import WUPBaseControl from "web-ui-pack/controls/baseControl";
 import { initTestBaseControl, testBaseControl } from "./baseControlTest";
 import * as h from "../../testHelper";
 
@@ -28,9 +28,9 @@ describe("control.radio", () => {
   testBaseControl({
     noInputSelection: true,
     initValues: [
-      { attrValue: "10", value: 10 },
-      { attrValue: "20", value: 20 },
-      { attrValue: "30", value: 30 },
+      { attrValue: "10", value: 10, urlValue: "Donny" },
+      { attrValue: "20", value: 20, urlValue: "Mikky" },
+      { attrValue: "30", value: 30, urlValue: "Leo" },
     ],
     validations: {},
     attrs: {
@@ -130,6 +130,22 @@ describe("control.radio", () => {
     expect(el.innerHTML).toMatchInlineSnapshot(
       `"<fieldset><legend><strong></strong></legend><label for="txt13">Helica<input id="txt13" type="radio" name="txt12473" tabindex="0"><span icon=""></span></label><label for="txt14" checked="">Diana<input id="txt14" type="radio" name="txt12473" autocomplete="off"><span icon=""></span></label></fieldset>"`
     );
+
+    // onclick with preventDefault
+    const spyClick = jest.fn().mockImplementation((e) => e.preventDefault());
+    jest.clearAllMocks();
+    el.$options.items = [
+      { text: "Item 1", value: 1, onClick: spyClick },
+      { text: "Item 2", value: 2 },
+    ];
+    el.$value = 1;
+    jest.advanceTimersByTime(2);
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<fieldset><legend><strong></strong></legend><label for="txt16" checked="">Item 1<input id="txt16" type="radio" name="txt15473" tabindex="0" autocomplete="off"><span icon=""></span></label><label for="txt17">Item 2<input id="txt17" type="radio" name="txt15473"><span icon=""></span></label></fieldset>"`
+    );
+    const inp1 = el.querySelector("input");
+    inp1.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(spyClick).toBeCalledTimes(1);
   });
 
   test("$options.items is complex object", async () => {
@@ -363,45 +379,86 @@ describe("control.radio", () => {
   });
 
   test("storage", async () => {
-    let el = testEl;
-    const onThrowErr = jest.spyOn(WUPBaseControl.prototype, "throwError");
-    const onConsoleErr = h.mockConsoleError();
-    // with falsy value
-    const items = getItems();
-    items[0].value = null;
+    let el = testEl.tagName;
+    async function init() {
+      await h.wait(10);
+      el = document.body.appendChild(document.createElement(testEl.tagName));
+      el.$options.storageKey = "rd";
+      el.$options.items = [
+        { value: null, text: "New Item" },
+        { value: 10, text: "Dark Men" },
+        {
+          value: 20,
+          text: (_, li) => {
+            li.textContent = "Lucy";
+            return li.textContent;
+          },
+        },
+      ];
+      await h.wait();
+      return el;
+    }
 
-    el.$options.storageKey = "rd";
-    el.$options.items = items;
-    await h.wait(1);
+    const sSet = jest.spyOn(Storage.prototype, "setItem");
+    // const sGet = jest.spyOn(Storage.prototype, "getItem");
+
+    // when value is null
+    el = await init();
     el.$value = null;
-    await h.wait(1);
-    expect(window.localStorage.getItem("rd")).toBe("null");
-    expect(onThrowErr).not.toBeCalled();
-    expect(onConsoleErr).not.toBeCalled();
-
-    el = document.body.appendChild(document.createElement(el.tagName));
-    el.$options.items = items;
-    expect(el.$value).toBe(undefined);
-    el.$options.storageKey = "rd";
-    await h.wait(1);
+    expect(sSet).lastCalledWith("rd", "null");
+    el = await init();
     expect(el.$value).toBe(null);
-    window.localStorage.clear();
-    await h.wait();
-    expect(onConsoleErr).not.toBeCalled();
-    expect(onThrowErr).not.toBeCalled();
 
-    // value is complex object
-    items[0].value = { name: "Serge" };
+    // text must be stored
+    el.$value = 10;
+    expect(sSet).lastCalledWith("rd", "DarkMen");
+    el = await init();
+    expect(el.$value).toBe(10);
+
+    // when .text is function
+    el.$value = 20;
+    el = await init();
+    expect(sSet).lastCalledWith("rd", "20");
+    expect(el.$value).toBe(20);
+
+    expect(() =>
+      el.valueToStrCompare({
+        value: null,
+        text: (_, li) => {
+          li.textContent = "Lucy";
+          return li.textContent;
+        },
+      })
+    ).not.toThrow(); // case impossible in live but better to check
+
+    // when item not found
+    h.mockConsoleError();
     el = document.body.appendChild(document.createElement(el.tagName));
-    el.$options.items = items;
-    await h.wait(1);
     el.$options.storageKey = "rd";
-    await h.wait(1);
-    onConsoleErr.mockClear();
-    // eslint-disable-next-line prefer-destructuring
-    el.$value = items[0].value;
-    expect(() => jest.advanceTimersByTime(1000)).toThrow(); // complex value isn't supported
-    expect(onThrowErr).toBeCalled();
-    expect(onConsoleErr).not.toBeCalled();
+    el.$options.items = [
+      { value: 1, text: "New Item" },
+      { value: 2, text: "Dark Men" },
+      {
+        value: 3,
+        text: (_, li) => {
+          li.textContent = "Lucy";
+          return li.textContent;
+        },
+      },
+    ];
+    expect(() => jest.advanceTimersByTime(10)).toThrow();
+    expect(el.$value).toBe(undefined);
+    h.unMockConsoleError();
+
+    // when item not found in items
+    expect(el.valueToStorage(15)).toBe("15");
+
+    // cover universal cases with basic proto
+    expect(WUPBaseControl.prototype.valueFromStorage.call(el, "null")).toBe(null);
+    expect(WUPBaseControl.prototype.valueToStorage.call(el, null)).toBe("null");
+    h.mockConsoleError();
+    expect(WUPBaseControl.prototype.valueToStorage.call(el, { value: 1 })).toBe(null);
+    expect(() => jest.advanceTimersByTime(10)).toThrow();
+    h.unMockConsoleError();
   });
 });

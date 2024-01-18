@@ -123,7 +123,8 @@ declare module "preact/jsx-runtime" {
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
- * </label> */
+ * </label>
+ * @tutorial Troubleshooting @see {@link https://yegorich555.github.io/web-ui-pack/control/text#troubleshooting} */
 export default class WUPTextControl<
   ValueType = string,
   TOptions extends WUP.Text.Options = WUP.Text.Options,
@@ -194,6 +195,7 @@ export default class WUPTextControl<
         :host [prefix],
         :host [postfix] {
           display: none;
+          opacity: 0;
           pointer-events: none;
           text-overflow: initial;
           white-space: pre;
@@ -280,6 +282,7 @@ export default class WUPTextControl<
         :host textarea:not(:placeholder-shown) ~ [prefix],
         :host textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
+          opacity: 1;
         }
         /* style for icons */
         :host label:after,
@@ -310,6 +313,7 @@ export default class WUPTextControl<
           --icon-hover: var(--ctrl-clear);
           --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
+          opacity: 0;
           margin-right: -0.5em;
         }
         :host button[clear=back] {

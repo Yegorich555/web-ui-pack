@@ -140,6 +140,7 @@ export default function calendarTZtest() {
         daysSet.forEach((ds) => {
           test(`firstOfWeek: ${ds.label}`, async () => {
             const curMonth = 11; // December WARN: it's important to test with December to check DST
+            jest.useFakeTimers();
             jest.setSystemTime(new Date(2022, curMonth, 16, 23, 49));
             el.remove(); // otherwise option startWith doesn't work
             el.$options.utc = opt.utc;
@@ -171,7 +172,6 @@ export default function calendarTZtest() {
             el.addEventListener("$change", onChange);
             let item = el.$refCalendarItems.children.item(15) as HTMLElement;
             expect(onChange).toBeCalledTimes(0);
-            jest.useFakeTimers();
             await h.userClick(item);
             expect(item.getAttribute("aria-selected")).toBe("true");
             expect(el.querySelectorAll("[aria-selected]").length).toBe(1);
@@ -252,7 +252,7 @@ export default function calendarTZtest() {
             el.$options.startWith = "a-b-c";
             document.body.appendChild(el);
             await h.wait();
-            expect(el.$refCalendarTitle.textContent).toBe("January 2023");
+            expect(el.$refCalendarTitle.textContent).toBe("January 2022");
             // option startWith: is wrong
             el.remove();
             el.$options.startWith = "1990-01-01-06";

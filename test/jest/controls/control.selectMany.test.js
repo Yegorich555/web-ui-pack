@@ -37,9 +37,9 @@ describe("control.selectMany", () => {
   testBaseControl({
     noInputSelection: true,
     initValues: [
-      { attrValue: "window.$1Value", value: [10] },
-      { attrValue: "window.$2Value", value: [20, 40], urlValue: "20_40" },
-      { attrValue: "window.$3Value", value: [30] },
+      { attrValue: "window.$1Value", value: [10], urlValue: "Donny" },
+      { attrValue: "window.$2Value", value: [20, 40], urlValue: "Mikky_Splinter" },
+      { attrValue: "window.$3Value", value: [30], urlValue: "Leo" },
     ],
     validations: {
       minCount: { set: 2, failValue: [10], trueValue: [10, 20] },

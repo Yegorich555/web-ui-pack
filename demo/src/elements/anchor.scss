@@ -1,0 +1,8 @@
+.anchor {
+  color: $activeLinkColor;
+  text-decoration: none;
+
+  &:hover {
+    color: $basicActiveBgColor;
+  }
+}

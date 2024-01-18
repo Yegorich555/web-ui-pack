@@ -339,7 +339,7 @@ export default class WUPTimeControl<
     return !this.refMask || this.refMask.isCompleted;
   }
 
-  override valueToUrl(v: ValueType): string {
+  override valueToStorage(v: ValueType): string {
     return v.toString("-");
   }
 

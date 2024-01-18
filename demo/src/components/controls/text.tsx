@@ -1,6 +1,9 @@
 /* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
 import { WUPTextControl } from "web-ui-pack";
+import Anchor from "src/elements/anchor";
+import FAQ from "src/elements/faq";
+import Code from "src/elements/code";
 import stylesCom from "./controls.scss";
 import styles from "./text.scss";
 
@@ -117,9 +120,12 @@ export default function TextControlView() {
           w-storageKey
           w-storage="url"
         />
+        <h3>
+          <Anchor hash="mask">Masked inputs</Anchor>
+        </h3>
         <section>
-          <h3>Masked inputs</h3>
           <wup-text
+            class={styles.noMarginTop}
             w-name="phone"
             w-label="Phone number"
             w-mask="+0 (000) 000-0000"
@@ -175,8 +181,43 @@ export default function TextControlView() {
             <li>usage details see during the coding (via jsdoc)</li>
           </ul>
         </section>
+
+        <FAQ
+          endString=""
+          items={[
+            {
+              link: "troubleshooting",
+              question: "Troubleshooting. Controls resizes on hover/focus",
+              answer: (
+                <section>
+                  <div className={styles.inlineGroup}>
+                    <wup-text w-label="Input 1" w-prefix="prefix " />
+                    <wup-text w-label="Input 2" w-postfix=" postfix" />
+                    <wup-text w-label="Input 3" />
+                  </div>
+                  <i>
+                    <b>Reason:</b> css rule `flex: 1` was changed. <br />
+                    Rollback it or change display-style for button[clear]/prefix/postfix (it has display:none for
+                    performance reason, and showed on hover/focus)
+                  </i>
+                  <Code code={codeCssHoverRes} />
+                </section>
+              ),
+            },
+          ]}
+        />
+
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
   );
 }
+
+const codeCssHoverRes = `css
+  .someInlineGroup {
+    button[clear],
+    [prefix],
+    [postfix] {
+      display: inline-block; /* it's enough to fix */
+    }
+  }`;

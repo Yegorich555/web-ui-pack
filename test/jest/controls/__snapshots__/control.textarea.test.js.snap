@@ -584,6 +584,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA [prefix],
         WUP-TEXTAREA [postfix] {
           display: none;
+          opacity: 0;
           pointer-events: none;
           text-overflow: initial;
           white-space: pre;
@@ -670,6 +671,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-TEXTAREA textarea:not(:placeholder-shown) ~ [prefix],
         WUP-TEXTAREA textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
+          opacity: 1;
         }
         /* style for icons */
         WUP-TEXTAREA label:after,
@@ -719,6 +721,7 @@ mask-image: var(--ctrl-icon-img);
           --icon-hover: var(--ctrl-clear);
           --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
+          opacity: 0;
           margin-right: -0.5em;
         }
         WUP-TEXTAREA button[clear=back] {

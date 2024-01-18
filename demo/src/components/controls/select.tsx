@@ -1,8 +1,9 @@
 /* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
-import { WUPSelectControl, WUPSpinElement } from "web-ui-pack";
+import { WUPModalElement, WUPSelectControl, WUPSpinElement } from "web-ui-pack";
 import { ClearActions } from "web-ui-pack/controls/baseControl";
 import { spinUseDualRing } from "web-ui-pack/spinElement";
+import FAQ from "src/elements/faq";
 import stylesCom from "./controls.scss";
 
 WUPSelectControl.$use();
@@ -110,6 +111,14 @@ export default function SelectControlView() {
           w-multiple
         />
         <wup-select
+          w-name="testMe2"
+          ref={(el) => {
+            if (el) {
+              el.$options.items ||= [];
+            }
+          }}
+        />
+        <wup-select
           ref={(el) => {
             if (el) {
               el.$options.name = "withPending";
@@ -183,6 +192,66 @@ export default function SelectControlView() {
             }
           }}
         />
+        <wup-select
+          w-name="custom"
+          w-label="With custom menu"
+          ref={(el) => {
+            if (el) {
+              el.$options.items = [
+                {
+                  value: 1,
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  text: (_value, li, _i, _control) => {
+                    const txt = "Item N 1";
+                    li.className = stylesCom.flexInline;
+                    li.innerHTML = `<button aria-label='delete' type='button' class='${stylesCom.btnIcon}'>&#8722;</button> ${txt}`;
+                    const btn = li.firstElementChild as HTMLButtonElement;
+                    btn.onclick = (e) => {
+                      e.stopPropagation();
+                      WUPModalElement.$showConfirm({
+                        question:
+                          "Selection on click is prevented. Implement custom action yourself and close menu if required yourself via el.$closeMenu()",
+                      });
+                    };
+                    // li.onclick = (e) => e.preventDefault();
+                    return txt;
+                  },
+                },
+                {
+                  text: "Add New",
+                  value: 0,
+                  onClick: (e) => {
+                    e.preventDefault(); // prevent item selection
+                    WUPModalElement.$showConfirm({
+                      question:
+                        "Selection on click is prevented. Implement custom action yourself and close menu if required yourself via el.$closeMenu()",
+                    });
+                  },
+                },
+              ];
+            }
+          }}
+        />
+        <FAQ
+          endString=""
+          items={[
+            {
+              link: "troubleshooting",
+              question: "Troubleshooting. Exception 'Not found in items'",
+              answer: (
+                <section>
+                  <i>
+                    Possible if $value/$initValue is object and item.value is object <br />
+                    In this case control tries to find item related to $value. It searches by item.value.id &
+                    item.value.valueOf(). Also you can check if $options.items set only once (in React possible it
+                    re-creates on every render)
+                  </i>
+                </section>
+              ),
+            },
+          ]}
+        />
+
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

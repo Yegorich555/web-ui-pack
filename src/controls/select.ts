@@ -5,23 +5,39 @@ import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
 import { WUPcssMenu } from "../styles";
 import WUPBaseComboControl, { MenuOpenCases } from "./baseCombo";
-import { SetValueReasons } from "./baseControl";
+import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-select";
 declare global {
   namespace WUP.Select {
-    interface MenuItemText<T> {
-      text: string;
+    interface MenuItem<T> {
+      /** Provide ordinary string for rendering as menuItem OR
+       *  Use li.innerHTML to render value & return string required for input
+       * @example
+         el.$options.items = [
+          { value: 1, text: "Item N 1"}, // this ordinary behavior
+          {
+            value: 2,
+            text: (value, li, i, control) => {
+              li.innerHTML =
+              `<button class='delete'><button>Item N ${i+1}` // some custom HTML here
+              // li.textContent = `Item N ${i+1}`; // or use this for fastest render
+              const btn = li.querySelector('button')!;
+              btn.onclick = (e) => {
+                e.preventDefault();
+                control.$closeMenu();
+              }
+              return `Item N ${value}`; // this is text rendered in input when related item selected
+            },
+          },
+        ]; */
+      text: string | ((value: T, li: HTMLElement, i: number, control: WUPBaseControl) => string);
+      /** Value tied with menu item */
       value: T;
-    }
-    /** Use li.innerHTML to render value & return string required for input; */
-    interface MenuItemFn<T> {
-      text: (value: T, el: HTMLElement, i: number) => string;
-      value: T;
+      /** Use `(e)=>e.preventDefault()` to prevent selection & closing menu and do custom action */
+      onClick?: (e: MouseEvent, me: MenuItem<T>) => void;
     }
 
-    type MenuItem<T> = MenuItemText<T> | MenuItemFn<T>;
-    type MenuItems<T> = MenuItemText<T>[] | MenuItemFn<T>[];
     interface MenuItemElement extends HTMLLIElement {
       _value: any;
       _text: string;
@@ -29,12 +45,14 @@ declare global {
 
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {
+      /** Count of minimal values that must be selected (only for option `multi`) */
       minCount: number;
+      /** Count of minimal values that must be selected (only for option `multi`) */
       maxCount: number;
     }
     interface NewOptions<T = any> {
       /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
-      items: MenuItems<T> | (() => MenuItems<T> | Promise<MenuItems<T>>) | Promise<MenuItems<T>>;
+      items: MenuItem<T>[] | Promise<MenuItem<T>[]> | (() => MenuItem<T>[] | Promise<MenuItem<T>[]>);
       /** Allow user to create new value if value not found in items
        * @defaultValue false */
       allowNewValue: boolean;
@@ -251,21 +269,47 @@ export default class WUPSelectControl<
     return v as ValueType;
   }
 
-  valueFromUrl(str: string): ValueType | undefined {
-    if (this.$options.multiple) {
-      this._opts.multiple = false;
-      const v = str.split("_").map((si) => super.valueFromUrl(si)) as any;
-      this._opts.multiple = true; // otherwise parse is wrong
-      return v;
-    }
-    return super.valueFromUrl(str) as any;
+  /** Returns string for storage */
+  valueToStrCompare(a: WUP.Select.MenuItem<ValueType>): string | null {
+    const at = typeof a.text === "function" ? a.value?.toString() : a.text;
+    return at?.replace(/\s/g, "") ?? null;
   }
 
-  valueToUrl(v: ValueType): string | null {
-    if (this.$options.multiple) {
-      return (v as Array<any>).map((vi) => super.valueToUrl(vi)).join("_");
+  override valueFromStorage(str: string, skipMultiple?: boolean): ValueType | undefined {
+    if (this._opts.multiple && !skipMultiple) {
+      const v = str.split("_").map((si) => this.valueFromStorage(si, true)) as any;
+      return v;
     }
-    return super.valueToUrl(v);
+    if (str === "null") {
+      return null as ValueType;
+    }
+    const s = str.toLowerCase();
+    const items = this.getItems();
+    const item = items.find((a) => this.valueToStrCompare(a)?.toLowerCase() === s);
+    if (item === undefined) {
+      this.throwError("Not found in items (search by item.value.toString() & item.text", {
+        items,
+        searchText: str,
+      });
+
+      return undefined;
+    }
+    return item.value;
+    // return super.valueFromStorage(str) as any;
+  }
+
+  /** Store value to storage; if item.text is not function then stored text, otherwise value.toString()
+   *  @see {@link valueToStrCompare} */
+  override valueToStorage(v: ValueType, skipMultiple?: boolean): string | null {
+    if (this._opts.multiple && !skipMultiple) {
+      return (v as Array<any>).map((vi) => this.valueToStorage(vi, true)).join("_");
+    }
+    if (v == null) {
+      return "null";
+    }
+    const items = this.getItems();
+    const item = items.find((o) => this.#ctr.$isEqual(o.value, v, this)) || { value: v, text: v?.toString() };
+    return this.valueToStrCompare(item!);
   }
 
   /** It's called with option allowNewValue to find value related to text */
@@ -290,7 +334,7 @@ export default class WUPSelectControl<
   /** Required to wait for fetching items to setup initValue */
   _onPendingInitValue?: () => void;
   /** Called to get/fetch items based on $options.items */
-  fetchItems(): Promise<WUP.Select.MenuItems<ValueType>> | WUP.Select.MenuItems<ValueType> {
+  fetchItems(): Promise<WUP.Select.MenuItem<ValueType>[]> | WUP.Select.MenuItem<ValueType>[] {
     this._cachedItems = undefined;
     this.#findValT && clearTimeout(this.#findValT); // prevent setInputValue if fetchItems is started
     this.#findValT = undefined;
@@ -326,7 +370,7 @@ export default class WUPSelectControl<
   protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
     this._opts.items ??= [];
     if (!propsChanged || propsChanged.includes("items")) {
-      this.removePopup();
+      propsChanged && this.removePopup(); // reset state only if props changed
       this.fetchItems(); // WARN: it's important to be before super otherwise initValue won't work
     }
 
@@ -384,7 +428,7 @@ export default class WUPSelectControl<
   };
 
   /** Items resolved from options */
-  _cachedItems?: WUP.Select.MenuItems<ValueType>;
+  _cachedItems?: WUP.Select.MenuItem<ValueType>[];
 
   /** Called when NoItems need to show */
   protected renderMenuNoItems(popup: WUPPopupElement, isReset: boolean): void {
@@ -424,58 +468,33 @@ export default class WUPSelectControl<
     this._menuItems = { all, focused: -1 };
     !all.length && this.renderMenuNoItems(popup, false);
     // it happens on every show because by hide it dispose events
-    onEvent(
-      ul,
-      "click",
-      (e) => {
-        e.preventDefault(); // to prevent popup-hide-show
-
-        let t = e.target as Node | HTMLElement;
-        if (t === ul) {
-          return;
-        }
-        while (1) {
-          const parent = t.parentElement as HTMLElement;
-          if (parent === ul) {
-            const isDisabled = (t as HTMLElement).hasAttribute("aria-disabled");
-            !isDisabled && this.gotMenuItemClick(e, t as WUP.Select.MenuItemElement);
-            break;
-          }
-          t = parent;
-        }
-      },
-      { passive: false }
-    );
-
+    onEvent(ul, "click", (e) => this.gotMenuClick(e), { passive: false });
     return ul;
   }
 
   /** Method returns items defined based on $options.items */
-  protected getItems(): WUP.Select.MenuItems<ValueType> {
+  protected getItems(): WUP.Select.MenuItem<ValueType>[] {
     if (!this._cachedItems) {
-      this.throwError(new Error("Internal bug. No cached items"));
+      this.throwError("Internal bug. No cached items", { options: this._opts, value: this.$value });
       return [];
     }
     return this._cachedItems;
   }
 
   /* Called when need to show text related to value */
-  protected valueToText(v: ItemType, items: WUP.Select.MenuItems<ItemType>): string {
+  protected valueToText(v: ItemType, items: WUP.Select.MenuItem<ItemType>[]): string {
     const i = items.findIndex((o) => this.#ctr.$isEqual(o.value, v, this));
     if (i === -1) {
       if (this._opts.allowNewValue) {
         return v != null ? (v as any).toString() : "";
       }
-      console.error(`${this.tagName}${this._opts.name ? `[${this._opts.name}]` : ""}. Not found in items`, {
-        items,
-        value: v,
-      });
+      this.throwError("Not found in items", { items, value: v }, true);
       return `Error: not found for ${v != null ? (v as any).toString() : ""}`;
     }
     const item = items[i];
     if (typeof item.text === "function") {
       const li = document.createElement("li");
-      const s = item.text(item.value, li, i);
+      const s = item.text(item.value, li, i, this);
       li.remove();
       return s;
     }
@@ -503,48 +522,64 @@ export default class WUPSelectControl<
     // WARN: possible case when value changed but prev getItems.then still in progress
     const items = this.getItems();
     if (this._opts.multiple) {
-      const s = (v as Array<any>)?.map((vi) => this.valueToText(vi, items as WUP.Select.MenuItems<any>)).join(", ");
+      const s = (v as Array<any>)?.map((vi) => this.valueToText(vi, items as WUP.Select.MenuItem<any>[])).join(", ");
       return this.$isFocused ? `${s}, ` : s;
     }
-    return this.valueToText(v as any, items as WUP.Select.MenuItems<any>);
+    return this.valueToText(v as any, items as WUP.Select.MenuItem<any>[]);
   }
 
   /** Create menuItems as array of HTMLLiElement with option _text required to filtering by input (otherwise content can be html-structure) */
   protected renderMenuItems(ul: HTMLUListElement): WUP.Select.MenuItemElement[] {
     const arr = this.getItems();
-
-    const arrLi = arr.map((a) => {
+    return arr.map((a, i) => {
       const li = ul.appendChild(document.createElement("li")) as WUP.Select.MenuItemElement;
       li.setAttribute("role", "option");
       // li.setAttribute("aria-selected", "false");
       li._value = a.value;
-      return li;
-    }) as Array<WUP.Select.MenuItemElement> & { _focused: number; _selected: number };
-
-    if (arr.length) {
-      if (typeof arr[0].text === "function") {
-        arr.forEach((v, i) => {
-          arrLi[i]._text = (v as WUP.Select.MenuItemFn<ValueType>).text(v.value, arrLi[i], i).toLowerCase();
-        });
+      let s = a.text;
+      if (typeof s === "function") {
+        s = s(a.value, li, i, this);
       } else {
-        arr.forEach((v, i) => {
-          const txt = (v as WUP.Select.MenuItemText<ValueType>).text;
-          arrLi[i].textContent = txt;
-          arrLi[i]._text = txt.toLowerCase();
-        });
+        li.textContent = s;
       }
+      li._text = s.toLowerCase();
+      return li;
+    }); // as Array<WUP.Select.MenuItemElement> & { _focused: number; _selected: number };
+  }
+
+  protected gotMenuClick(e: MouseEvent): void {
+    if (e.defaultPrevented) {
+      return;
+    }
+    const ul = e.currentTarget;
+    let t = e.target as Node | HTMLElement;
+    if (t === ul) {
+      return;
+    }
+    while (1) {
+      const parent = t.parentElement as HTMLElement;
+      if (parent === ul) {
+        const isDisabled = (t as HTMLElement).hasAttribute("aria-disabled");
+        !isDisabled && this.gotMenuItemClick(e, t as WUP.Select.MenuItemElement);
+        break;
+      }
+      t = parent;
     }
 
-    return arrLi;
+    e.preventDefault(); // to prevent popup-hide-show - because it handles by selectMenuItem
   }
 
   /** Called when need to setValue & close base on clicked item */
-  protected gotMenuItemClick(_e: MouseEvent, item: WUP.Select.MenuItemElement): void {
-    const i = this._menuItems!.all.indexOf(item);
+  protected gotMenuItemClick(e: MouseEvent, li: WUP.Select.MenuItemElement): void {
+    const i = this._menuItems!.all.indexOf(li);
     const o = this._cachedItems![i];
-    const canOff = this._opts.multiple && item.getAttribute("aria-selected") === "true";
-    this.selectMenuItem(canOff ? null : item); // select/deselect
-    canOff && item.setAttribute("aria-selected", "false");
+    o.onClick?.call(e.target, e, o);
+    if (e.defaultPrevented) {
+      return;
+    }
+    const canOff = this._opts.multiple && li.getAttribute("aria-selected") === "true";
+    this.selectMenuItem(canOff ? null : li); // select/deselect
+    canOff && li.setAttribute("aria-selected", "false");
 
     this.selectValue(o.value, !this._opts.multiple);
   }

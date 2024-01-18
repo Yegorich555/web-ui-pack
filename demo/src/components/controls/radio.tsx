@@ -134,7 +134,7 @@ export default function RadioControlView() {
               if (el) {
                 el.$options.name = "With custom render function";
                 el.$options.items = () => {
-                  const renderText: WUP.Select.MenuItemFn<number>["text"] = (value, li, i) => {
+                  const renderText: WUP.Select.MenuItem<number>["text"] = (value, li, i) => {
                     li.innerHTML = `<span><b>Value</b>: ${value}, <span style="color: red">index</span>: ${i}</span>`;
                     return li.textContent as string;
                   };

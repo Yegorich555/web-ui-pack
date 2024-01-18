@@ -12,6 +12,15 @@ const getItems = () => [
   { value: 40, text: "Splinter" },
 ];
 
+const setItems = async (items) => {
+  el.$closeMenu();
+  await h.wait();
+  el.$options.items = items;
+  await h.wait();
+  el.$openMenu();
+  await h.wait();
+};
+
 /** @type WUPSelectControl */
 let el;
 initTestBaseControl({
@@ -44,9 +53,9 @@ describe("control.select", () => {
       "w-items": { value: getItems() },
     },
     initValues: [
-      { attrValue: "10", value: 10 },
-      { attrValue: "20", value: 20 },
-      { attrValue: "30", value: 30 },
+      { attrValue: "10", value: 10, urlValue: "Donny" },
+      { attrValue: "20", value: 20, urlValue: "Mikky" },
+      { attrValue: "30", value: 30, urlValue: "Leo" },
     ],
     validations: {},
     validationsSkip: ["_parse", "_mask", "minCount", "maxCount"], // min & max tested with selectMany
@@ -207,6 +216,78 @@ describe("control.select", () => {
     await h.wait();
     expect(el.$value).toBe(20);
     expect(el.$refInput.value).toBe("D");
+
+    // when items is function with promise
+    el.$options.items = getItems();
+    el.$value = getItems()[3].value;
+    await setItems(() => Promise.resolve(getItems()));
+    expect(el.$isOpened).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt7" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option" aria-selected="true">Splinter</li></ul>"`
+    );
+
+    h.mockConsoleError();
+    // when items is function without promise
+    await setItems(() => getItems().slice(0, 2));
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt8" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li></ul>"`
+    );
+
+    // when items has custom render
+    await setItems([
+      {
+        value: 123,
+        text: (val, li, i) => {
+          li.textContent = `testVal-${val}_${i}`;
+          return li.textContent;
+        },
+      },
+    ]);
+    el.$value = 123;
+    await h.wait();
+    h.unMockConsoleError();
+    expect(el.$refInput.value).toBe("testVal-123_0");
+
+    // onclick with preventDefault
+    const spyClick = jest.fn().mockImplementation((e) => e.preventDefault());
+    el.$value = undefined;
+    await setItems([
+      {
+        value: 123,
+        text: (val, li, i) => {
+          li.textContent = `testVal-${val}_${i}`;
+          li.onclick = spyClick;
+          return li.textContent;
+        },
+      },
+    ]);
+    expect(el.$isOpened).toBe(true);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt10" role="listbox" aria-label="Items" tabindex="-1"><li role="option">testVal-123_0</li></ul>"`
+    );
+    let li = el.$refPopup.querySelector("li");
+    await h.userClick(li);
+    await h.wait();
+    expect(el.$isOpened).toBe(true); // because was prevented
+    expect(el.$value).toBe(undefined);
+
+    // onclick with preventDefault
+    jest.clearAllMocks();
+    await setItems([
+      {
+        value: 123,
+        text: "Item N 1",
+        onClick: spyClick,
+      },
+    ]);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt11" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Item N 1</li></ul>"`
+    );
+    li = el.$refPopup.querySelector("li");
+    await h.userClick(li);
+    await h.wait();
+    expect(el.$isOpened).toBe(true); // because was prevented
+    expect(el.$value).toBe(undefined);
   });
 
   test("pending state", async () => {
@@ -282,7 +363,9 @@ describe("control.select", () => {
     // when somehow items not fetched before
     el = document.body.appendChild(document.createElement(el.tagName));
     expect(el.getItems()).toStrictEqual([]);
+    h.mockConsoleError();
     expect(() => jest.advanceTimersByTime(1)).toThrow(); // because items not fetched yet but gotItems is called
+    h.unMockConsoleError();
 
     // when fetching items is rejected
     el = document.body.appendChild(document.createElement(el.tagName));
@@ -300,15 +383,6 @@ describe("control.select", () => {
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
       `"<wup-popup menu="" open="" style="min-width: 100px; display: none;" w-animation="drawer" show=""><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup>"`
     );
-
-    const setItems = async (items) => {
-      el.$closeMenu();
-      await h.wait();
-      el.$options.items = items;
-      await h.wait();
-      el.$openMenu();
-      await h.wait();
-    };
 
     await setItems([]);
     expect(el.$refPopup.outerHTML).toMatchInlineSnapshot(
@@ -431,33 +505,6 @@ describe("control.select", () => {
       `"<wup-popup menu="" hidden="" open="" style="min-width: 100px; display: none;" w-animation="drawer" show=""><ul id="txt10" role="listbox" aria-label="Items" tabindex="-1"></ul></wup-popup>"`
     );
     WUPSelectControl.$textNoItems = wasText;
-
-    // when items is function with promise
-    await setItems(() => Promise.resolve(getItems()));
-    expect(el.$isOpened).toBe(true);
-    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt11" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li><li role="option">Leo</li><li role="option" aria-selected="true">Splinter</li></ul>"`
-    );
-
-    // when items is function without promise
-    await setItems(() => getItems().slice(0, 2));
-    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
-      `"<ul id="txt12" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li></ul>"`
-    );
-
-    // when items has custom render
-    await setItems([
-      {
-        value: 123,
-        text: (val, li, i) => {
-          li.textContent = `testVal-${val}_${i}`;
-          return li.textContent;
-        },
-      },
-    ]);
-    el.$value = 123;
-    await h.wait();
-    expect(el.$refInput.value).toBe("testVal-123_0");
 
     // cover impossible case
     const el2 = document.body.appendChild(document.createElement("wup-select"));
@@ -1078,6 +1125,78 @@ describe("control.select", () => {
     expect(el.$value).toStrictEqual([10, 30]);
     expect(await h.userRedo(el.$refInput)).toBe("Donny, Leo, 123, |");
     expect(el.$value).toStrictEqual([10, 30, "123"]);
+  });
+
+  test("storage", async () => {
+    async function init() {
+      await h.wait(10);
+      el = document.body.appendChild(document.createElement(el.tagName));
+      el.$options.storageKey = "userName";
+      el.$options.items = [
+        { value: null, text: "New Item" },
+        { value: 10, text: "Dark Men" },
+        {
+          value: 20,
+          text: (_, li) => {
+            li.textContent = "Lucy";
+            return li.textContent;
+          },
+        },
+      ];
+      await h.wait();
+      return el;
+    }
+
+    const sSet = jest.spyOn(Storage.prototype, "setItem");
+    // const sGet = jest.spyOn(Storage.prototype, "getItem");
+
+    // when value is null
+    el = await init();
+    el.$value = null;
+    expect(sSet).lastCalledWith("userName", "null");
+    el = await init();
+    expect(el.$value).toBe(null);
+
+    // text must be stored
+    el.$value = 10;
+    expect(sSet).lastCalledWith("userName", "DarkMen");
+    el = await init();
+    expect(el.$value).toBe(10);
+
+    // when .text is function
+    el.$value = 20;
+    el = await init();
+    expect(sSet).lastCalledWith("userName", "20");
+    expect(el.$value).toBe(20);
+
+    expect(() =>
+      el.valueToStrCompare({
+        value: null,
+        text: (_, li) => {
+          li.textContent = "Lucy";
+          return li.textContent;
+        },
+      })
+    ).not.toThrow(); // case impossible in live but better to check
+
+    // when item not found
+    h.mockConsoleError();
+    el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.storageKey = "userName";
+    el.$options.items = [
+      { value: 1, text: "New Item" },
+      { value: 2, text: "Dark Men" },
+      {
+        value: 3,
+        text: (_, li) => {
+          li.textContent = "Lucy";
+          return li.textContent;
+        },
+      },
+    ];
+    expect(() => jest.advanceTimersByTime(10)).toThrow();
+    expect(el.$value).toBe(undefined);
+    h.unMockConsoleError();
   });
 });
 

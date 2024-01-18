@@ -169,7 +169,7 @@ declare global {
        * * On init value from storage applies to `$value` and triggers onChange event
        * * Point empty string or `true` to inherit from $options.name
        * * Expected value can be converted toString & parsed from string itself.
-       * * Override `valueFromUrl` & `valueToUrl` to change serializing (for complex objects, arrays etc.)
+       * * Override `valueFromStorage` & `valueToStorage` to change serializing (for complex objects, arrays etc.)
        * * Before API-call gather form.$model on init OR use $onChange event
        * @see {@link WUP.BaseControl.Options.storage}
        * @defaultValue emptyString (means `false`) */
@@ -984,7 +984,7 @@ export default abstract class WUPBaseControl<
   /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
   protected goShowError(err: string, target: HTMLElement): void {
     if (!err) {
-      this.throwError(new Error("missed error message"));
+      this.throwError("Error message missed");
       return;
     }
     if (this._errMsg === err) {
@@ -1038,19 +1038,19 @@ export default abstract class WUPBaseControl<
   }
 
   /** Called to serialize value from URL/storage; override it if you have object */
-  valueFromUrl(str: string): ValueType | undefined {
+  valueFromStorage(str: string): ValueType | undefined {
     return str === "null" ? (null as ValueType) : this.parse(str);
   }
 
   /** Called to serialize value to URL/storage & must return null if need to remove */
-  valueToUrl(v: ValueType | null): string | null {
+  valueToStorage(v: ValueType | null): string | null {
     if (v == null) {
       return "null";
     }
     if (typeof v === "object") {
       this.throwError(
         new Error(
-          "Option `storageKey` with object-values are not supported. Override `valueToUrl` & `valueFromUrl` to fix it"
+          "Option `storageKey` with object-values are not supported. Override `valueToStorage` & `valueFromStorage` to fix it"
         )
       );
       return null;
@@ -1081,7 +1081,7 @@ export default abstract class WUPBaseControl<
           break;
       }
       if (v != null) {
-        return this.valueFromUrl(v);
+        return this.valueFromStorage(v);
       }
     }
     return this.$initValue;
@@ -1123,7 +1123,7 @@ export default abstract class WUPBaseControl<
       if (this.#ctr.$isEmpty(v)) {
         strg.removeItem(key);
       } else {
-        const sv = this.valueToUrl(v!);
+        const sv = this.valueToStorage(v!);
         sv === null ? strg.removeItem(key) : strg.setItem(key, sv);
       }
     } catch (err) {

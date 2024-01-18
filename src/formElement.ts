@@ -506,7 +506,6 @@ export default class WUPFormElement<
 
       // SubmitEvent constructor doesn't exist on some browsers: https://developer.mozilla.org/en-US/docs/Web/API/SubmitEvent/SubmitEvent
       const ev2 = new (window.SubmitEvent || Event)("submit", { submitter, cancelable: false, bubbles: true });
-      /* istanbul ignore else */
       if (!window.SubmitEvent) {
         (ev2 as any).submitter = submitter;
       }

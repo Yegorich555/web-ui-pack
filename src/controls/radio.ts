@@ -16,7 +16,7 @@ declare global {
        * setTimeout(()=> console.warn(el.$options.items === items)},1) // returns 'false'
        * setTimeout(()=> console.warn(el.$options.items[0].value === items[0].value)},1) // returns 'true'
        * ``` */
-      items: WUP.Select.MenuItems<T> | (() => WUP.Select.MenuItems<T>);
+      items: WUP.Select.MenuItem<T>[] | (() => WUP.Select.MenuItem<T>[]);
       /** Reversed-style (radio+label for true vs label+radio)
        * @defaultValue false */
       reverse: boolean;
@@ -220,7 +220,7 @@ export default class WUPRadioControl<
 
   /** Called when need to parse attr [initValue] */
   override parse(attrValue: string): ValueType | undefined {
-    const a = this.getItems() as WUP.Select.MenuItemText<ValueType>[];
+    const a = this.getItems() as WUP.Select.MenuItem<ValueType>[];
     if (!a?.length) {
       return undefined;
     }
@@ -240,8 +240,8 @@ export default class WUPRadioControl<
   }
 
   /** Items resolved from options */
-  #cachedItems?: WUP.Select.MenuItems<ValueType>;
-  protected getItems(): WUP.Select.MenuItems<ValueType> {
+  #cachedItems?: WUP.Select.MenuItem<ValueType>[];
+  protected getItems(): WUP.Select.MenuItem<ValueType>[] {
     if (!this.#cachedItems) {
       const { items } = this._opts;
       this.#cachedItems = typeof items === "function" ? items() : items;
@@ -265,11 +265,11 @@ export default class WUPRadioControl<
       return;
     }
     const nm = this.#ctr.$uniqueId + (Date.now() % 1000);
-    const isFunc = arr[0].text && typeof arr[0].text === "function";
     arr.forEach((item, i) => {
       const lbl = document.createElement("label");
-      if (isFunc) {
-        (item as WUP.Select.MenuItemFn<ValueType>).text(item.value, lbl, i);
+      const s = item.text;
+      if (typeof s === "function") {
+        s(item.value, lbl, i, this);
       } else {
         lbl.appendChild(document.createTextNode(item.text as string));
       }
@@ -282,6 +282,9 @@ export default class WUPRadioControl<
       inp.type = "radio";
       inp.name = nm; // required otherwise tabbing, arrow-keys doesn't work inside single fieldset
       parent.appendChild(lbl);
+      if (item.onClick) {
+        lbl.onclick = (e) => item.onClick?.call(lbl, e, item);
+      }
     });
 
     this.$refItems[0].tabIndex = 0;
@@ -352,7 +355,7 @@ export default class WUPRadioControl<
 
   protected gotFocus(e: FocusEvent): Array<() => void> {
     if (e.target !== this.$refInput) {
-      this.$refInput.focus(); // focus current input instead of focused 1st - possible when item is focused via form.autofocs
+      this.$refInput.focus(); // focus current input instead of focused 1st - possible when item is focused via form.autofocus
     }
     return super.gotFocus(e);
   }
@@ -365,6 +368,42 @@ export default class WUPRadioControl<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override goShowError(err: string, target: HTMLElement): void {
     super.goShowError(err, this.$refFieldset);
+  }
+
+  /** Returns string for storage */
+  valueToStrCompare(a: WUP.Select.MenuItem<ValueType>): string | null {
+    const at = typeof a.text === "function" ? a.value?.toString() : a.text;
+    return at?.replace(/\s/g, "") ?? null;
+  }
+
+  override valueFromStorage(str: string): ValueType | undefined {
+    if (str === "null") {
+      return null as ValueType;
+    }
+    const s = str.toLowerCase();
+    const items = this.getItems();
+    const item = items.find((a) => this.valueToStrCompare(a)?.toLowerCase() === s);
+    if (item === undefined) {
+      this.throwError("Not found in items (search by item.value.toString() & item.text", {
+        items,
+        searchText: str,
+      });
+
+      return undefined;
+    }
+    return item.value;
+    // return super.valueFromStorage(str) as any;
+  }
+
+  /** Store value to storage; if item.text is not function then stored text, otherwise value.toString()
+   *  @see {@link valueToStrCompare} */
+  override valueToStorage(v: ValueType): string | null {
+    if (v == null) {
+      return "null";
+    }
+    const items = this.getItems();
+    const item = items.find((o) => this.#ctr.$isEqual(o.value, v, this)) || { value: v, text: v?.toString() };
+    return this.valueToStrCompare(item!);
   }
 }
 

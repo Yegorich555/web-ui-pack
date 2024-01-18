@@ -682,9 +682,15 @@ export default abstract class WUPBaseElement<
 
   // NiceToHave: throwError in 90% must be excluded from prod-build
   /** Throws unhandled error via empty setTimeout */
-  throwError(err: string | Error | unknown): void {
-    const e = new Error(`${this.tagName}. ${err}`, { cause: err });
+  throwError(err: string | Error | unknown, details?: any, consoleOnly?: boolean): void {
+    const msg = `${this.tagName}${this._opts.name ? `[${this._opts.name}]` : ""}. ${err}`;
+    const e = new Error(msg, { cause: err });
+    if (consoleOnly) {
+      console.error(msg, details);
+      return;
+    }
     setTimeout(() => {
+      details && console.error(details);
       throw e;
     });
   }

@@ -649,7 +649,7 @@ export default class WUPModalElement<
       (el as HTMLElement).focus();
     } else {
       this.throwError(
-        "Impossible to return focus back: element is missed. Before opening modal set 'id' to focused element"
+        "Impossible to return focus back: element missed. Before opening modal set 'id' to focused element"
       );
       /* istanbul ignore next */
       (document.activeElement as HTMLElement)?.blur?.();

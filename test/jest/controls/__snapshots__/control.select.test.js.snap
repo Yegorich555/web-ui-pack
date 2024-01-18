@@ -598,6 +598,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT [prefix],
         WUP-SELECT [postfix] {
           display: none;
+          opacity: 0;
           pointer-events: none;
           text-overflow: initial;
           white-space: pre;
@@ -684,6 +685,7 @@ mask-image: var(--ctrl-icon-img);
         WUP-SELECT textarea:not(:placeholder-shown) ~ [prefix],
         WUP-SELECT textarea:not(:placeholder-shown) ~ [postfix] {
           display: inline-block;
+          opacity: 1;
         }
         /* style for icons */
         WUP-SELECT label:after,
@@ -733,6 +735,7 @@ mask-image: var(--ctrl-icon-img);
           --icon-hover: var(--ctrl-clear);
           --icon-hover-bg: var(--ctrl-clear-hover);
           display: none;
+          opacity: 0;
           margin-right: -0.5em;
         }
         WUP-SELECT button[clear=back] {

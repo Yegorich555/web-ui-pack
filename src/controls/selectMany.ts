@@ -499,7 +499,7 @@ export default class WUPSelectManyControl<
   }
 
   /** Called to update/remove selected items on control */
-  protected renderItems(v: ValueType[], all: WUP.Select.MenuItems<any>): void {
+  protected renderItems(v: ValueType[], all: WUP.Select.MenuItem<any>[]): void {
     const refs = this.$refItems ?? [];
     v.forEach((vi, i) => {
       let r = refs[i];

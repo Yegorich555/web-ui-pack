@@ -52,7 +52,8 @@ async function go() {
   // await exec("npm version patch --commit-hooks false --git-tag-version false", []);
   // await exec("npm run build"); // run build again because version is changed
 
-  await exec("npm run coverage"); // run tests + publish coverage
+  await exec("npm run coverage"); // build for test + tests + publish coverage
+  await exec("npm run build"); // building prod version with removing comments
   await exec("npm run build-demo"); // building demo
 
   /* commit files */

@@ -65,7 +65,7 @@ export default function DateTimeView() {
             w-utc
             w-validations="window.myDateTimeValidations"
           />
-          <wup-time id="time" w-name="" w-label="Tied time" w-exclude="window.myTimeExcludeFunc" />
+          <wup-time id="time" w-name="" w-label="Tied time" w-exclude="window.timeExcludeFunc" />
         </div>
         <button type="submit">Submit</button>
       </wup-form>

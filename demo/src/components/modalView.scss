@@ -55,3 +55,25 @@ wup-modal footer {
     // margin: 0;
   }
 }
+
+.modalAlert {
+  > footer {
+    > button[data-close="confirm"] {
+      margin: auto;
+    }
+
+    > button[data-close="modal"] {
+      display: none;
+    }
+  }
+}
+
+.inlineCenter {
+  display: flex;
+  margin: 0;
+  justify-content: center;
+}
+
+.widePage {
+  max-width: 600px !important;
+}
