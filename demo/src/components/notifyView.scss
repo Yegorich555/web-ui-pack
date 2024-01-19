@@ -1,0 +1,65 @@
+.block {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  margin: 20px auto;
+  box-sizing: border-box;
+  border: 1px solid $basicActiveBgColor;
+  border-radius: $borderRadius;
+
+  > button {
+    position: absolute;
+    min-height: 30px;
+    margin: 0;
+  }
+}
+
+.topLeft {
+  top: 0;
+  left: 0;
+  border-radius: 0;
+  border-top-left-radius: $borderRadius;
+  border-bottom-right-radius: $borderRadius;
+}
+
+.bottomLeft {
+  bottom: 0;
+  left: 0;
+  border-radius: 0;
+  border-top-right-radius: $borderRadius;
+  border-bottom-left-radius: $borderRadius;
+}
+
+.topMiddle {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 0;
+  border-bottom-left-radius: $borderRadius;
+  border-bottom-right-radius: $borderRadius;
+}
+
+.bottomMiddle {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 0;
+  border-top-left-radius: $borderRadius;
+  border-top-right-radius: $borderRadius;
+}
+
+.topRight {
+  top: 0;
+  right: 0;
+  border-radius: 0;
+  border-bottom-left-radius: $borderRadius;
+  border-top-right-radius: $borderRadius;
+}
+
+.bottomRight {
+  bottom: 0;
+  right: 0;
+  border-radius: 0;
+  border-bottom-right-radius: $borderRadius;
+  border-top-left-radius: $borderRadius;
+}

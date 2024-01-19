@@ -69,7 +69,10 @@
     "time",
     "timepicker",
     "numeric",
-    "textarea"
+    "textarea",
+    "toastify",
+    "alert",
+    "notify"
   ],
   "author": "Yegor.Golubchik",
   "license": "MIT",
