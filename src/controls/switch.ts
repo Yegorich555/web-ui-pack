@@ -77,7 +77,7 @@ export default class WUPSwitchControl<
       --ctrl-switch-on: #fff;
       --ctrl-switch-off: #fff;
       --ctrl-switch-off-bg: #9f9f9f;
-      --ctrl-switch-on-bg: var(--ctrl-focus);
+      --ctrl-switch-on-bg: #00778d;
       --ctrl-switch-shadow: #0003;
       --ctrl-switch-h: var(--ctrl-icon-size);
       --ctrl-switch-w: calc(var(--ctrl-icon-size) * 2.8);

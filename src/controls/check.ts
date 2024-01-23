@@ -61,7 +61,7 @@ export default class WUPCheckControl<
   static get $styleRoot(): string {
     return `:root {
         --ctrl-check-off-bg: #fff;
-        --ctrl-check-on-bg: var(--ctrl-focus);
+        --ctrl-check-on-bg: #00778d;
         --ctrl-check-on: #fff;
         --ctrl-check-border-r: 3px;
         --ctrl-check-shadow: #0003;
