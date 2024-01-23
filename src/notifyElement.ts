@@ -19,6 +19,16 @@ export const enum NotifyCloseCases {
 const tagName = "wup-notify";
 declare global {
   namespace WUP.Notify {
+    interface ShowOptions {
+      /** Message appended to element  */
+      textContent: string;
+      /** Options to override defaults */
+      defaults?: Partial<WUP.Notify.Options>;
+      /** Called when element is already rendered; so possible to change innerHTML */
+      onRender?: (el: WUPNotifyElement) => void;
+      /** Default class that appended to element */
+      className?: string;
+    }
     interface Options {
       /** Case when need to show;
        * @defaultValue `NotifyOpenCases.onInit` */
@@ -101,24 +111,41 @@ export default class WUPNotifyElement<
     return [];
   }
 
+  // perfect bg color is: #121212c8
   // WARN: modal-anim shouldn't affect on animation of nested
   static get $styleRoot(): string {
     return `:root {
-        --modal-anim-t: 400ms;
-        --modal-text: inherit;
-        --modal-bg: #fff;
-        --modal-fade: #0007;
-        --modal-margin: 2em;
+        --notify-anim-t: 400ms;
+        --notify-margin: 1em 0;
+        --notify-w: 320px;
+        --notify-text: #fff;
+        --notify-bg: rgba(16, 70, 82, 0.9);
+        --notify-shadow: #0003;
       }
       [wupdark] {
-        --modal-bg: #222a36;
+
       }`;
   }
 
   static get $style(): string {
     return `${super.$style}
       :host {
-        z-index: 9000;
+        z-index: 9010;
+        margin: var(--notify-margin);
+        color: var(--notify-text);
+        background: var(--notify-bg);
+        box-shadow: 0 1px 4px 0 var(--notify-shadow);
+      }
+      :host[show] {
+        transform: none;
+      }
+      :host > button[close] {
+        --icon-img: var(--wup-icon-cross);
+        --icon: var(--notify-text);
+        z-index: 10;
+        position: absolute;
+        right:0; top:0;
+        margin: 0.4em;
       }
     `;
   }
@@ -132,23 +159,32 @@ export default class WUPNotifyElement<
     single: false,
   };
 
-  static $show(textContent: string, opts?: WUP.Notify.Options & { className?: string }): void {
-    // todo reuse from modal
-    throw new Error("Not implemented yet");
+  static $show(opts: WUP.Notify.ShowOptions): void {
+    const me = document.createElement(tagName);
+    opts.className && me.classList.add(opts.className);
+    me.$options.selfRemove = true;
+    Object.assign(me.$options, opts.defaults);
+    me.$options.openCase = NotifyOpenCases.onInit;
+    // render
+    me.textContent = opts.textContent;
+    // append to root
+    document.body.appendChild(me);
+    // call callback to allow user re-define it
+    // me.gotOpen(NotifyOpenCases.onInit, null);
+    opts.onRender?.(me); // todo onRender called here but real render will be on gotOpen
   }
 
   /** Reference to button[close] */
   $refClose?: HTMLButtonElement;
+  /** Reference to progress bar  */
+  $refProgress?: HTMLDivElement;
 
-  protected override gotRender(): void {
-    /** empty because component is hidden by default and need render in GotOpen */
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  gotOpen(openCase: NotifyOpenCases, e: MouseEvent | null): void {
-    // todo show at the top
-    // todo if $options are not observed then need to merge it manually ???
+  protected override gotRender(isOpening = false): void {
+    if (!isOpening) {
+      return; // empty because component is hidden by default and need to focus on open-phase
+    }
     this.setAttribute("role", "alert");
+    this.setAttribute("w-placement", this._opts.placement);
 
     // init button[close]
     this.$refClose ??= document.createElement("button");
@@ -156,21 +192,38 @@ export default class WUPNotifyElement<
     this.$refClose.setAttribute("aria-label", __wupln("close", "aria"));
     this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
     this.$refClose.setAttribute("close", "");
-
     this.prepend(this.$refClose);
 
+    this.$refProgress ??= document.createElement("div");
+    const pr = this.$refProgress;
+    pr.setAttribute("progress", "");
+    pr.setAttribute("role", "progressbar");
+    this.appendChild(pr);
     // apply open styles
-    this.setAttribute("w-placement", this._opts.placement);
+  }
+
+  /** Called once on opening */
+  protected override gotChanges(propsChanged: string[] | null): void {
+    super.gotChanges(propsChanged);
+    this._opts.openCase === NotifyOpenCases.onInit && this.goOpen(NotifyOpenCases.onInit, null);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  gotOpen(openCase: NotifyOpenCases, e: MouseEvent | null): void {
+    // todo if $options are not observed then need to merge it manually ???
+    this.gotRender(true);
     // listen for close-events
     this._opts.closeOnClick && this.appendEvent(this, "click", (ev) => this.gotClick(ev));
 
-    const ms = this._opts.autoClose;
-    ms && setTimeout(() => this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
+    // todo show at the top
+    // todo uncomment it
+    // const ms = this._opts.autoClose;
+    // ms && setTimeout(() => this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotClose(closeCase: NotifyCloseCases, ev: MouseEvent | null): void {
-    /** empty because no extra logic */
+    // todo need to return focus back if item is focused
   }
 
   protected resetState(): void {

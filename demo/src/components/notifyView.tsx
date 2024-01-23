@@ -1,5 +1,6 @@
 import Page from "src/elements/page";
-import { WUPNotifyElement } from "web-ui-pack";
+import { Fragment } from "react";
+import WUPNotifyElement from "web-ui-pack/notifyElement";
 import styles from "./notifyView.scss";
 
 WUPNotifyElement.$use();
@@ -27,6 +28,7 @@ export default function NotifyView() {
 >
  Some message here
 </wup-notify>
+
 <!--EQUAL TO-->
 <wup-notify>
   Some message here
@@ -44,6 +46,7 @@ export default function NotifyView() {
       ]}
     >
       <section>
+        <wup-notify style={{ display: "none" }}>Only for gathering CSS vars</wup-notify>
         <h3>Different placements</h3>
         <small>Use $options.placement or attribute [w-placement]</small>
         <div className={styles.block}>
@@ -57,25 +60,49 @@ export default function NotifyView() {
               { placement: "bottom-right", className: styles.bottomRight },
             ] as IExample[]
           ).map((a) => (
-            <>
-              <button className={`btn ${a.className}`} type="button">
+            <Fragment key={a.placement}>
+              <button
+                className={`btn ${a.className}`}
+                type="button"
+                onClick={(e) => {
+                  // const btn = e.currentTarget as HTMLButtonElement;
+                  WUPNotifyElement.$show({
+                    textContent: `I am wup-notify element with $options.placement: ${a.placement}`,
+                    defaults: { placement: a.placement },
+                    className: styles.notify,
+                  });
+                }}
+              >
                 {a.placement}
               </button>
-              <wup-notify w-placement={a.placement} w-autoClose={5000} w-selfremove="true" w-closeonclick="true">
+              {/* <wup-notify
+                w-placement={a.placement}
+                w-autoClose={5000}
+                w-selfremove="true"
+                w-closeonclick="true"
+                ref={(el) => {
+                  if (el) {
+                    el.$options.openCase = NotifyOpenCases.onManualCall;
+                  }
+                }}
+              >
                 I am wup-notify element with $options.placement: {a.placement}
-              </wup-notify>
-            </>
+              </wup-notify> */}
+            </Fragment>
           ))}
         </div>
-      </section>
-      <section>
-        <h3>Integrated with form</h3>
-        <small>Comming soon...</small>
       </section>
       <section>
         <h3>Single function call</h3>
         <small>Comming soon...</small>
       </section>
+      <section>
+        <h3>Integrated with form</h3>
+        <small>Comming soon...</small>
+      </section>
     </Page>
   );
 }
+
+// todo test with small content - 1 word
+// todo test with huge content - must be scrollable ???
