@@ -10,6 +10,12 @@
 
 - [NotifyElement](src/notifyElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/notify)
 
+### Fixes
+
+---
+
+- [PopupElement](src/popup/popupElement.ts). _Wrong definition for React: it doesn't allow to use children, ref etc._
+
 ---
 
 ---

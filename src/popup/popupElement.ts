@@ -22,7 +22,7 @@ declare global {
     interface IntrinsicElements {
       /**  Popup element
        *  @see {@link WUPPopupElement} */
-      [tagName]: WUP.BaseModal.JSXProps & WUP.Popup.Attributes; // add element to tsx/jsx intellisense (react)
+      [tagName]: WUP.Base.ReactHTML<WUPPopupElement> & WUP.BaseModal.JSXProps & WUP.Popup.Attributes; // add element to tsx/jsx intellisense (react)
     }
   }
 }
