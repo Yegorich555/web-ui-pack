@@ -187,7 +187,7 @@ export default class WUPModalElement<
    * * On close modal self-removed */
   static async $showConfirm(opts?: WUP.Modal.ConfirmOptions): Promise<boolean> {
     // init
-    const me = document.createElement("wup-modal");
+    const me = document.createElement(tagName);
     opts?.className && me.classList.add(opts.className);
     me.$options.selfRemove = true;
     Object.assign(me.$options, opts?.defaults);
@@ -421,8 +421,34 @@ export default class WUPModalElement<
   /** Reference to button[close] */
   $refClose?: HTMLButtonElement;
 
-  protected override gotRender(): void {
-    /** empty because component is hidden by default and need to focus on open-phase */
+  protected override gotRender(isOpening = false): void {
+    if (!isOpening) {
+      return; // empty because component is hidden by default and need to focus on open-phase
+    }
+    // setup Accessibility attrs
+    this.tabIndex = -1; // WA: to allow scroll modal - possible that tabindex: -1 doesn't allow tabbing inside
+    this.role = "dialog"; // possible alert-dialog for Confirm modal
+    this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
+
+    const header = this.querySelector("h1,h2,h3,h4,h5,h6,[role=heading]");
+    if (!header) {
+      console.warn("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
+    } else {
+      header.id ||= this.#ctr.$uniqueId;
+      this.setAttribute("aria-labelledby", header.id); // issue: NVDA reads content twice if modal has aria-labelledby: https://github.com/nvaccess/nvda/issues/8971
+    }
+
+    // init button[close]
+    this.$refClose ??= document.createElement("button");
+    this.$refClose.type = "button";
+    this.$refClose.setAttribute("aria-label", __wupln("close", "aria"));
+    this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
+    this.$refClose.setAttribute("close", "");
+    this.$refClose.setAttribute("data-close", "modal");
+    this.prepend(this.$refClose);
+    // apply open styles
+    this.setAttribute("w-placement", this._opts.placement);
+    document.body.classList.add(this.#ctr.$classOpened); // to maybe hide scroll-bars
   }
 
   /** Override it to change default render for modalConfirm */
@@ -470,29 +496,8 @@ export default class WUPModalElement<
     const ael = document.activeElement;
     this._lastFocused = ael?.id || ael;
 
-    // setup Accessibility attrs
-    this.tabIndex = -1; // WA: to allow scroll modal - possible that tabindex: -1 doesn't allow tabbing inside
-    this.role = "dialog"; // possible alert-dialog for Confirm modal
-    this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
-
+    this.gotRender(true);
     (this._target as HTMLElement | null)?.$onRenderModal?.call(this._target, this as WUPModalElement<any, any>);
-
-    const header = this.querySelector("h1,h2,h3,h4,h5,h6,[role=heading]");
-    if (!header) {
-      console.warn("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
-    } else {
-      header.id ||= this.#ctr.$uniqueId;
-      this.setAttribute("aria-labelledby", header.id); // issue: NVDA reads content twice if modal has aria-labelledby: https://github.com/nvaccess/nvda/issues/8971
-    }
-    // init button[close]
-    this.$refClose ??= document.createElement("button");
-    this.$refClose.type = "button";
-    this.$refClose.setAttribute("aria-label", __wupln("close", "aria"));
-    this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
-    this.$refClose.setAttribute("close", "");
-    this.$refClose.setAttribute("data-close", "modal");
-
-    this.prepend(this.$refClose);
 
     // init fade
     this._openedModals.push(this as WUPModalElement<any, any>);
@@ -508,12 +513,8 @@ export default class WUPModalElement<
       p.$refFade!.style.display = "none";
       isReplace && p.setAttribute("hide", ""); // hide such modal
     }
-
     this.$refFade.className = this.#ctr.$classFade;
 
-    // apply open styles
-    this.setAttribute("w-placement", this._opts.placement);
-    document.body.classList.add(this.#ctr.$classOpened); // to maybe hide scroll-bars
     // listen for close-events
     this.$refFade.onclick = (ev) => this.goClose(ModalCloseCases.onOutsideClick, ev);
     this.appendEvent(this, "click", (ev) => this.gotClick(ev));
