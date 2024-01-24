@@ -65,8 +65,8 @@ export default function NotifyView() {
             [
               { placement: "top-left", className: styles.topLeft },
               { placement: "bottom-left", className: styles.bottomLeft },
-              // { placement: "top-middle", className: styles.topMiddle },
-              // { placement: "bottom-middle", className: styles.bottomMiddle },
+              { placement: "top-middle", className: styles.topMiddle },
+              { placement: "bottom-middle", className: styles.bottomMiddle },
               { placement: "top-right", className: styles.topRight },
               { placement: "bottom-right", className: styles.bottomRight },
             ] as IExample[]
@@ -74,10 +74,14 @@ export default function NotifyView() {
             <Fragment key={a.placement}>
               <button
                 ref={(el) => {
-                  if (el && i === 1) {
+                  if (el && i === 2) {
                     [0, 1, 100, 100].forEach((t) => {
                       setTimeout(() => el.click(), t);
                     });
+                    setTimeout(() => {
+                      const all = document.querySelectorAll("wup-notify");
+                      all[all.length - 1].refreshVertical(); // just for checking the method
+                    }, 300);
                   }
                 }}
                 className={`btn ${a.className}`}
@@ -85,8 +89,8 @@ export default function NotifyView() {
                 onClick={() => {
                   // const btn = e.currentTarget as HTMLButtonElement;
                   WUPNotifyElement.$show({
-                    textContent: `I am wup-notify element with $options.placement: ${a.placement}${
-                      ++iter % 2 ? "\r\nTest \rBigger content" : ""
+                    textContent: `${++iter}. I am wup-notify element with $options.placement: ${a.placement}${
+                      iter % 2 ? "\r\nTest \rBigger content" : ""
                     }`,
                     defaults: { placement: a.placement, autoClose: iter % 2 ? 5000 : 10000 },
                     className: styles.notify,
@@ -110,5 +114,3 @@ export default function NotifyView() {
     </Page>
   );
 }
-
-// todo test with small content - 1 word

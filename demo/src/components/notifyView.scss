@@ -99,12 +99,22 @@
   transform: translateX(100%);
 }
 
+.notify[w-placement="top-middle"],
+.notify[w-placement="bottom-middle"] {
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+}
+
 .notify[w-placement="top-left"],
+.notify[w-placement="top-middle"],
 .notify[w-placement="top-right"] {
   top: 0;
 }
 
 .notify[w-placement="bottom-left"],
+.notify[w-placement="bottom-middle"],
 .notify[w-placement="bottom-right"] {
   bottom: 0;
 }

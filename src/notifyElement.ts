@@ -1,4 +1,5 @@
 import WUPBaseModal from "./baseModal";
+import { px2Number } from "./helpers/styleHelpers";
 import viewportSize from "./helpers/viewportSize";
 
 export const enum NotifyOpenCases {
@@ -36,19 +37,16 @@ declare global {
       openCase: NotifyOpenCases;
       /** Position on the screen
        * @defaultValue 'bottom-left' */
-      placement: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+      placement: "top-left" | "top-middle" | "top-right" | "bottom-left" | "bottom-middle" | "bottom-right";
       /** Default time (ms) after that notify is closed; if provide false then it will be closed only by click event
        *  @defaultValue 5000 (ms) */
       autoClose: number | null;
       /** Close on element click
-       * @defaultValue true */
+       * @defaultValue false */
       closeOnClick: boolean;
       /** Remove itself after closing
        * @defaultValue true */
       selfRemove: boolean;
-      /** Set `true` if only single notification possible to show otherwise it will showed in stack
-       * @defaultValue false */
-      single: boolean;
     }
     interface EventMap extends WUP.BaseModal.EventMap<NotifyOpenCases, NotifyCloseCases> {}
     interface JSXProps extends WUP.BaseModal.JSXProps, WUP.Base.OnlyNames<Options> {
@@ -162,9 +160,8 @@ export default class WUPNotifyElement<
     openCase: NotifyOpenCases.onInit,
     placement: "bottom-left",
     autoClose: 5000,
-    closeOnClick: true,
+    closeOnClick: false,
     selfRemove: true,
-    single: false,
   };
 
   static $show(opts: WUP.Notify.ShowOptions): void {
@@ -201,6 +198,7 @@ export default class WUPNotifyElement<
     this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
     this.$refClose.setAttribute("close", "");
     this.prepend(this.$refClose);
+    this.$refClose.onclick = (e) => this.goClose(NotifyCloseCases.onCloseClick, e);
 
     this.$refProgress ??= document.createElement("div");
     const pr = this.$refProgress;
@@ -221,7 +219,7 @@ export default class WUPNotifyElement<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotOpen(openCase: NotifyOpenCases, e: MouseEvent | null): void {
     // todo if $options are not observed then need to merge it manually ???
-    this.gotRender(true);
+    this.gotRender(true); // todo it called again
     // listen for close-events
     this._opts.closeOnClick && this.appendEvent(this, "click", (ev) => this.gotClick(ev));
 
@@ -232,24 +230,46 @@ export default class WUPNotifyElement<
         (a, i) => i <= lastI && a._opts.placement === this._opts.placement && a.offsetHeight > 0 // offsetHeight is 0 when item is hidden
       );
 
+      // todo the logic is repetitive for 99% with refreshVertical: need somehow merge it
       if (prev) {
         let isBottom = false;
+        let isMiddle = false;
         switch (this._opts.placement) {
           case "bottom-left":
+          case "bottom-middle":
           case "bottom-right":
             isBottom = true;
             break;
           default:
             break;
         }
-        const { top, bottom } = prev.getBoundingClientRect(); // position of previous item
-        this._dx = getComputedStyle(this).transform;
-        this._dy = Math.round(isBottom ? top - viewportSize().vh : bottom);
-        this.style.transition = "none";
+        switch (this._opts.placement) {
+          case "top-middle":
+          case "bottom-middle":
+            isMiddle = true;
+            break;
+          default:
+            break;
+        }
+        // eslint-disable-next-line prefer-const
+        let { top, bottom, height } = prev.getBoundingClientRect(); // position of previous item
+        const styles = getComputedStyle(this);
+        this._dx = styles.transform;
+        if (isMiddle) {
+          this._dy = Math.round(
+            isBottom
+              ? prev._dy - height - px2Number(styles.marginBottom)
+              : prev._dy + height + px2Number(styles.marginTop)
+          );
+        } else {
+          // todo it's equal with logic if (isMiddle) above maybe reuse solution upper ?
+          this._dy = Math.round(isBottom ? top - viewportSize().vh : bottom);
+        }
+        this.style.transition = "none"; // prevent animation for Y
         this.style.transform = `${this._dx} translateY(${this._dy}px)`;
         setTimeout(() => {
           this.style.transform = `translateY(${this._dy}px)`;
-          this.style.transition = "";
+          this.style.transition = ""; // animate
         });
       }
     }
@@ -264,8 +284,10 @@ export default class WUPNotifyElement<
     let prev: WUPNotifyElement | undefined;
     let vh = 0;
     let isBottom = false;
+    let isMiddle = false;
     switch (this._opts.placement) {
       case "bottom-left":
+      case "bottom-middle":
       case "bottom-right":
         isBottom = true;
         vh = viewportSize().vh;
@@ -273,20 +295,37 @@ export default class WUPNotifyElement<
       default:
         break;
     }
-    let sumY = 0;
+    switch (this._opts.placement) {
+      case "top-middle":
+      case "bottom-middle":
+        isMiddle = true;
+        break;
+      default:
+        break;
+    }
+    let prevShiftY = 0;
     this._openedItems.forEach((a) => {
       if (a.offsetHeight > 0 && a._opts.placement === this._opts.placement) {
         const isNext = !!prev;
         const wasY = a._dy;
         if (isNext) {
-          const { top, bottom } = prev!.getBoundingClientRect(); // position of previous item
-          a._dy = sumY + Math.round(isBottom ? top - vh : bottom);
+          const { top, bottom, height } = prev!.getBoundingClientRect(); // position of previous item
+          if (isMiddle) {
+            const styles = getComputedStyle(a);
+            a._dy = Math.round(
+              isBottom
+                ? prev!._dy - height - px2Number(styles.marginBottom)
+                : prev!._dy + height + px2Number(styles.marginTop)
+            );
+          } else {
+            a._dy = prevShiftY + Math.round(isBottom ? top - vh : bottom);
+          }
           a.style.transform = `translateY(${a._dy}px)`;
         } else {
           a.style.transform = "";
           a._dy = 0;
         }
-        sumY = a._dy - wasY;
+        prevShiftY = a._dy - wasY; // otherwise animation brokes it
         prev = a;
       }
     });
