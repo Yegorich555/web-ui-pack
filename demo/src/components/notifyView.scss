@@ -66,27 +66,11 @@
 
 :root {
   --notify-info: #009fbc;
-  // todo
+  // todo develop different types ???
   --toastify-color-info: #3498db;
   --toastify-color-success: #07bc0c;
   --toastify-color-warning: #f1c40f;
   --toastify-color-error: #e74c3c;
-}
-
-[wupdark] {
-  --notify-text: #d8d8d8;
-  --notify-bg: rgba(16, 70, 82, 0.9);
-  --notify-shadow: #0006;
-}
-
-.notify[open] {
-}
-
-.notify {
-  min-height: 64px;
-  max-height: 50vh;
-  width: var(--notify-w);
-  // max-width: var(--notify-w);
 }
 
 .notify > [progress] {
@@ -99,12 +83,30 @@
   // todo animate bar
 }
 
-.notify[w-placement="top-left"] {
+.notify[w-placement="top-left"],
+.notify[w-placement="bottom-left"] {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  top: 0;
   left: 0;
   transform: translateX(-100%);
+}
+
+.notify[w-placement="top-right"],
+.notify[w-placement="bottom-right"] {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  right: 0;
+  transform: translateX(100%);
+}
+
+.notify[w-placement="top-left"],
+.notify[w-placement="top-right"] {
+  top: 0;
+}
+
+.notify[w-placement="bottom-left"],
+.notify[w-placement="bottom-right"] {
+  bottom: 0;
 }
 
 .notify[show] {

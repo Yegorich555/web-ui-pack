@@ -261,7 +261,7 @@ export default abstract class WUPBaseModal<
     return super.focus();
   }
 
-  /* Called to clear current state/vars to init: after gotClose end */
+  /* Called to clear current state/vars to init: after gotClose end & on dispose */
   protected resetState(): void {
     this.removeAttribute("open");
     this.#isOpened = false;

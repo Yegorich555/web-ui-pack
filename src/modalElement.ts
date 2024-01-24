@@ -199,7 +199,7 @@ export default class WUPModalElement<
 
     setTimeout(() => {
       if (me._mid && me._mid > 1) {
-        const p = me._openedModals[me._mid - 2];
+        const p = me._openedItems[me._mid - 2];
         // case impossible because _openedModal must contain only opened modals
         // if (!p.$isOpened || p.$isClosing) {
         //   return; // it should work only if prev modal is opened
@@ -500,13 +500,12 @@ export default class WUPModalElement<
     (this._target as HTMLElement | null)?.$onRenderModal?.call(this._target, this as WUPModalElement<any, any>);
 
     // init fade
-    this._openedModals.push(this as WUPModalElement<any, any>);
-    this._mid = this._openedModals.length;
+    this._mid = this._openedItems.push(this as WUPModalElement<any, any>);
     if (this._mid === 1) {
       this.$refFade ??= document.body.appendChild(document.createElement("div"));
       setTimeout(() => this.$refFade?.setAttribute("show", "")); // timeout to allow animation works
     } else {
-      const p = this._openedModals[this._mid - 2];
+      const p = this._openedItems[this._mid - 2];
       const isReplace = this._opts.replace;
       this.$refFade ??= (isReplace ? document.body : p).appendChild(document.createElement("div")); // append to parent to hide modal parent
       this.$refFade.setAttribute("show", ""); // WARN without timeout to show immediately
@@ -560,12 +559,12 @@ export default class WUPModalElement<
     } else {
       this.$refFade!.remove(); // immediately hide if opened 2+ modals
       this.$refFade = undefined;
-      const p = this._openedModals[this._mid! - 2];
+      const p = this._openedItems[this._mid! - 2];
       p.$refFade!.style.display = "";
       this.removeEmptyStyle.call(p.$refFade!);
       p.removeAttribute("hide");
     }
-    this._openedModals.splice(this._mid! - 1, 1); // self remove from array
+    this._openedItems.splice(this._mid! - 1, 1); // self remove from array
 
     this.focusBack();
   }
@@ -684,20 +683,18 @@ export default class WUPModalElement<
     !bd.className && bd.removeAttribute("class");
     (this._target as HTMLElement)?.removeEventListener("click", this._targetClick!);
 
-    const i = this._openedModals.findIndex((m) => (this as WUPModalElement<any, any>) === m);
-    if (i > -1) {
-      this._openedModals.splice(i, 1);
-    }
+    const i = this._openedItems.indexOf(this as WUPModalElement<any, any>);
+    i > -1 && this._openedItems.splice(i, 1);
     super.dispose();
   }
 
-  /** Singleton array with opened modals */
-  get _openedModals(): Array<WUPModalElement> {
-    return __openedModals;
+  /** Singleton array with opened elements */
+  get _openedItems(): Array<WUPModalElement> {
+    return __openedItems;
   }
 }
 
-const __openedModals: Array<WUPModalElement> = [];
+const __openedItems: Array<WUPModalElement> = [];
 
 customElements.define(tagName, WUPModalElement);
 

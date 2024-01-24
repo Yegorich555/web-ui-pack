@@ -1,4 +1,5 @@
 import WUPBaseModal from "./baseModal";
+import viewportSize from "./helpers/viewportSize";
 
 export const enum NotifyOpenCases {
   /** When $open() is called programmatically */
@@ -35,7 +36,7 @@ declare global {
       openCase: NotifyOpenCases;
       /** Position on the screen
        * @defaultValue 'bottom-left' */
-      placement: "top-left" | "top-middle" | "top-right" | "bottom-left" | "bottom-middle" | "bottom-right";
+      placement: "top-left" | "top-right" | "bottom-left" | "bottom-right";
       /** Default time (ms) after that notify is closed; if provide false then it will be closed only by click event
        *  @defaultValue 5000 (ms) */
       autoClose: number | null;
@@ -117,20 +118,27 @@ export default class WUPNotifyElement<
     return `:root {
         --notify-anim-t: 400ms;
         --notify-margin: 1em 0;
-        --notify-w: 320px;
+        --notify-w: 300px;
         --notify-text: #fff;
         --notify-bg: rgba(16, 70, 82, 0.9);
         --notify-shadow: #0003;
       }
       [wupdark] {
-
+        --notify-text: #d8d8d8;
+        --notify-bg: rgba(16, 70, 82, 0.9);
+        --notify-shadow: #0006;
       }`;
   }
 
   static get $style(): string {
     return `${super.$style}
       :host {
+        --modal-anim: var(--notify-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
         z-index: 9010;
+        min-height: 64px;
+        max-height: 80vh;
+        width: var(--notify-w);
+        max-width: 80wv;
         margin: var(--notify-margin);
         color: var(--notify-text);
         background: var(--notify-bg);
@@ -208,6 +216,8 @@ export default class WUPNotifyElement<
     this._opts.openCase === NotifyOpenCases.onInit && this.goOpen(NotifyOpenCases.onInit, null);
   }
 
+  _dy = 0;
+  _dx = "";
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotOpen(openCase: NotifyOpenCases, e: MouseEvent | null): void {
     // todo if $options are not observed then need to merge it manually ???
@@ -215,20 +225,87 @@ export default class WUPNotifyElement<
     // listen for close-events
     this._opts.closeOnClick && this.appendEvent(this, "click", (ev) => this.gotClick(ev));
 
-    // todo show at the top
-    // todo uncomment it
+    const curNum = this._openedItems.push(this as WUPNotifyElement<any, any>);
+    if (curNum > 1) {
+      const lastI = curNum - 2;
+      const prev = this._openedItems.findLast(
+        (a, i) => i <= lastI && a._opts.placement === this._opts.placement && a.offsetHeight > 0 // offsetHeight is 0 when item is hidden
+      );
+
+      if (prev) {
+        let isBottom = false;
+        switch (this._opts.placement) {
+          case "bottom-left":
+          case "bottom-right":
+            isBottom = true;
+            break;
+          default:
+            break;
+        }
+        const { top, bottom } = prev.getBoundingClientRect(); // position of previous item
+        this._dx = getComputedStyle(this).transform;
+        this._dy = Math.round(isBottom ? top - viewportSize().vh : bottom);
+        this.style.transition = "none";
+        this.style.transform = `${this._dx} translateY(${this._dy}px)`;
+        setTimeout(() => {
+          this.style.transform = `translateY(${this._dy}px)`;
+          this.style.transition = "";
+        });
+      }
+    }
+
+    // todo uncomment it after tests
     // const ms = this._opts.autoClose;
     // ms && setTimeout(() => this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
   }
 
+  /** Update vertical positions of all items + shift if something required */
+  refreshVertical(): void {
+    let prev: WUPNotifyElement | undefined;
+    let vh = 0;
+    let isBottom = false;
+    switch (this._opts.placement) {
+      case "bottom-left":
+      case "bottom-right":
+        isBottom = true;
+        vh = viewportSize().vh;
+        break;
+      default:
+        break;
+    }
+    let sumY = 0;
+    this._openedItems.forEach((a) => {
+      if (a.offsetHeight > 0 && a._opts.placement === this._opts.placement) {
+        const isNext = !!prev;
+        const wasY = a._dy;
+        if (isNext) {
+          const { top, bottom } = prev!.getBoundingClientRect(); // position of previous item
+          a._dy = sumY + Math.round(isBottom ? top - vh : bottom);
+          a.style.transform = `translateY(${a._dy}px)`;
+        } else {
+          a.style.transform = "";
+          a._dy = 0;
+        }
+        sumY = a._dy - wasY;
+        prev = a;
+      }
+    });
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotClose(closeCase: NotifyCloseCases, ev: MouseEvent | null): void {
-    // todo need to return focus back if item is focused
+    // todo need to return focus back if item (btnClose) is focused
+    this.style.transform = this._dx ? `${this._dx} translateY(${this._dy}px)` : "";
   }
 
   protected resetState(): void {
-    // todo shift other alerts
     super.resetState();
+    this.style.transform = "";
+    const i = this._openedItems.indexOf(this as WUPNotifyElement<any, any>);
+    if (i > -1) {
+      this._openedItems.splice(i, 1);
+      this.refreshVertical();
+    }
     this.isConnected && this._opts.selfRemove && this.remove();
   }
 
@@ -238,7 +315,7 @@ export default class WUPNotifyElement<
     if (e.defaultPrevented || t === this || e.button) {
       return;
     }
-    const all = this.querySelectorAll("[close]").values(); // allow to use any button with attr to close modal
+    const all = this.querySelectorAll("[close]").values(); // allow to use any button with attr to close
     // eslint-disable-next-line no-restricted-syntax
     for (const el of all) {
       if (this.itsMe.call(el, t)) {
@@ -247,9 +324,18 @@ export default class WUPNotifyElement<
       }
     }
   }
+
+  /** Singleton array with opened elements */
+  get _openedItems(): Array<WUPNotifyElement> {
+    return __openedItems;
+  }
 }
+
+const __openedItems: Array<WUPNotifyElement> = [];
 
 customElements.define(tagName, WUPNotifyElement);
 
 // todo add to types.html
 // todo bind with form
+// todo add Ctrl+Z hook ???
+// todo add ID to ability refresh existed
