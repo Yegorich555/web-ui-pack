@@ -1,6 +1,6 @@
 import Page from "src/elements/page";
 import { WUPDateControl } from "web-ui-pack";
-// import stylesCom from "./controls.scss";
+import stylesCom from "./controls.scss";
 
 WUPDateControl.$use();
 
@@ -33,7 +33,7 @@ export default function DateTimeView() {
       <wup-form
         ref={(el) => {
           if (el) {
-            el.$initModel = { readonly: new Date("1990-02-10 14:23") };
+            el.$initModel = { scheduled: new Date("1990-02-10 14:23") };
             el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
@@ -50,6 +50,10 @@ export default function DateTimeView() {
           w-utc
           w-validations="window.myDateTimeValidations"
         />
+        <div className={stylesCom.group}>
+          <wup-date w-name="scheduled" />
+          <wup-time w-name="scheduled2" />
+        </div>
         {/* <div className={stylesCom.group}>
           <wup-date w-name="readonly" readonly w-initValue="2022-03-01 23:50" />
           <wup-date w-name="disabled" disabled w-initValue="2022-03-01" />

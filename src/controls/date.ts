@@ -26,7 +26,7 @@ declare global {
     interface NewOptions {
       /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
        * @defaultValue localeInfo.date
-       * @example `yyyy-mm-dd` or `dd/mm/yyyy`
+       * @example `yyyy-MM-dd` or `dd/MM/yyyy`
        * @tutorial Troubleshooting
        * * with changing $options.format need to change/reset mask/maskholder also */
       format: string;
@@ -73,10 +73,13 @@ declare module "preact/jsx-runtime" {
  * * $options.format related only to displayed text, to work with other date-options like min/max use strict format 'YYYY-MM-DD'
  * @example
   const el = document.createElement("wup-date");
+  el.$options.utc = true;
   el.$options.name = "dateOfBirthday";
-  el.$initValue = "1990-10-24";
   el.$options.validations = { required: true };
   el.$options.format = "yyyy-MM-dd";
+  el.$initValue = new Date(1990,9,24) || el.parse("1990-10-24");
+  el.$options.min = el.parse("1930-01-01");
+  el.$options.max = el.parse("2010-01-01");
   const form = document.body.appendChild(document.createElement("wup-form"));
   form.appendChild(el);
   // or HTML
@@ -135,7 +138,7 @@ export default class WUPDateControl<
     },
     format: "",
     // firstWeekDay: 1,
-    // format: localeInfo.date.toLowerCase()
+    // format: localeInfo.date
   };
 
   constructor() {
@@ -261,7 +264,7 @@ export default class WUPDateControl<
     if (v === undefined) {
       return "";
     }
-    return dateToString(v, this._opts.format.toUpperCase() + (this._opts.utc ? "Z" : ""));
+    return dateToString(v, this._opts.format + (this._opts.utc ? "Z" : ""));
   }
 
   protected override focusMenuItem(next: HTMLElement | null): void {
