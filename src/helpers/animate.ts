@@ -15,14 +15,12 @@ declare global {
   }
 }
 
-// todo animateDropdown left/right
-
 /** Animate (open/close) element as dropdown via scale and counter-scale for children
  * @param ms animation time
  * @returns Promise<isFinished> that resolved by animation end;
  * Rules
- * * To define direction set attribute to element position="top" or position="bottom"
- * * Before call it again on the same element don't forget to call stop(false) to cancel prev animation */
+ * * To define direction set attribute to element `position="top" | "bottom" | "left" | "right"`
+ * * Before call it again on the same element don't forget to call stop(false) to cancel prev animation (if it's not finished) */
 export function animateDropdown(el: HTMLElement, ms: number, isClose = false): WUP.PromiseCancel<boolean> {
   if (!ms) {
     const p = Promise.resolve(false);
@@ -78,7 +76,23 @@ export function animateDropdown(el: HTMLElement, ms: number, isClose = false): W
       reset();
       return;
     }
-    el.style.transformOrigin = el.getAttribute("position") === "top" ? "bottom" : "top";
+
+    let origin: string;
+    switch (el.getAttribute("position")) {
+      case "top":
+        origin = "bottom";
+        break;
+      case "left":
+        origin = "right";
+        break;
+      case "right":
+        origin = "left";
+        break;
+      default:
+        origin = "top";
+        break;
+    }
+    el.style.transformOrigin = origin; // todo check transform right/left. Add examples with dropdowns
     styleTransform(el, "scaleY", v);
     v !== 0 &&
       nested.forEach((e) => {
