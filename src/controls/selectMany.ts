@@ -59,16 +59,16 @@ export default class WUPSelectManyControl<
         margin: calc(var(--ctrl-select-gap) / -2);
       }
       :host [item],
-      :host input {
+      :host [contenteditable=true] {
         margin: calc(var(--ctrl-select-gap) / 2);
         padding: var(--ctrl-select-gap);
       }
-      :host input {
+      :host [contenteditable=true] {
         flex: 1 1 auto;
         width: 0;
         min-width: 2em;
         padding-left: 0; padding-right: 0;
-        background: #f7d4f7;
+        //background: #f7d4f7;
       }
       :host [item] {
         --ctrl-icon: var(--ctrl-select-item-del);
@@ -136,16 +136,23 @@ export default class WUPSelectManyControl<
 
   protected override _opts = this.$options;
 
+  $refInput = document.createElement("wup-areainput") as HTMLInputElement;
+
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
-  /** Copy of $refTitle element to fix reading title as first (resolves accessibility issue) */
-  #refTitleAria = document.createElement("span");
+  // /** Copy of $refTitle element to fix reading title as first (resolves accessibility issue) */
+  // #refTitleAria = document.createElement("span");
 
   protected override renderControl(): void {
     super.renderControl();
-    this.#refTitleAria.className = this.#ctr.classNameHidden;
-    this.$refTitle.parentElement!.prepend(this.#refTitleAria);
-    this.$refTitle.setAttribute("aria-hidden", "true");
+    const { id } = this.$refInput;
+    this.$refInput.removeAttribute("id");
+    this.$refInput.setAttribute("aria-labelledby", id);
+    this.$refTitle.id = id;
+
+    // this.#refTitleAria.className = this.#ctr.classNameHidden;
+    // this.$refTitle.parentElement!.prepend(this.#refTitleAria);
+    // this.$refTitle.setAttribute("aria-hidden", "true");
   }
 
   protected override async renderMenu(popup: WUPPopupElement, menuId: string): Promise<HTMLElement> {
@@ -161,10 +168,13 @@ export default class WUPSelectManyControl<
     v.forEach((vi, i) => {
       let r = refs[i];
       if (!r) {
-        r = this.$refInput.parentNode!.insertBefore(document.createElement("span"), this.$refInput) as HTMLElement & {
+        const bf = this.$refInput.appendChild(document.createElement("span"));
+        bf.textContent = "";
+        r = this.$refInput.appendChild(document.createElement("span")) as HTMLElement & {
           _wupValue: ValueType;
         };
         r.setAttribute("item", "");
+        // r.setAttribute("contenteditable", false);
         refs.push(r);
       }
 
@@ -187,7 +197,7 @@ export default class WUPSelectManyControl<
       this.renderItems(v, items);
       // return this.$refItems?.map((el) => el.textContent).join(",") || "";
       // todo blank-string autoselected on IOS if user touchStart+Move on item
-      return v?.length ? " " : ""; // otherwise broken css:placeholder-shown & screenReaders reads 'Blank'
+      return `${this.$refInput.value}`; // v?.length ? " " : ""; // otherwise broken css:placeholder-shown & screenReaders reads 'Blank'
     });
 
     return r;
@@ -219,7 +229,7 @@ export default class WUPSelectManyControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.SelectMany.Options> | null): void {
     super.gotChanges(propsChanged);
-    this.#refTitleAria.textContent = this.$refTitle.textContent;
+    // this.#refTitleAria.textContent = this.$refTitle.textContent;
   }
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
@@ -254,3 +264,19 @@ customElements.define(tagName, WUPSelectManyControl);
 // todo keyboard
 // todo develop autowidth for input so it can render in the same row without new empty row
 // todo drag & drop
+
+/**
+ * known issues:
+ *
+ *  <span contenteditalbe='true'>
+ *    <span></span>
+ *    <span contenteditalbe='false'>Item 1</span>
+ *    <span></span>
+ *    <span contenteditalbe='false'>Item 2</span>
+ *    <span>Input text here</span>
+ *  </span>
+ * 0. NVDA. Reads only first line (the same issue for textarea)
+ * 1. Firefox. Carret position is wrong/missed between Items is use try to use ArrowKeys
+ * 2. Firefox. Carret position is missed if no empty spans between items
+ * 3. Without contenteditalbe='false' browser moves cursor into item, but it should be outside
+ */

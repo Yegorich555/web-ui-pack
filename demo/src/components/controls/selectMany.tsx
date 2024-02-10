@@ -58,6 +58,38 @@ export default function SelectManyControlView() {
           }
         }}
       >
+        <label style={{ display: "block" }}>
+          <strong>Label 1st</strong>
+          <span contentEditable>
+            <span>Item 1</span>
+            <br />
+            <span>Item 2</span>
+            <span>input text</span>
+          </span>
+        </label>
+
+        <label style={{ display: "block" }}>
+          <strong>Label 2nd</strong>
+          <span contentEditable>
+            <span />
+            <span contentEditable={false}>Item 1</span>
+            <span />
+            <br />
+            <span contentEditable={false}>Item 2</span>
+            <span>input text</span>
+          </span>
+        </label>
+
+        <label style={{ display: "block" }}>
+          <strong>Label 3rd</strong>
+          <span>
+            {/* <span className="wup-hidden" tabIndex={-1}>
+              Item 1, Item 2
+            </span> */}
+            <input value="Item 1, Item 2" />
+          </span>
+        </label>
+
         <wup-select-many
           items="inputSelect.items"
           name="selectMany"
