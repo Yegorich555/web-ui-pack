@@ -2,6 +2,18 @@
 
 # Changelog
 
+## 1.1.1 (\_\_\_)
+
+### Fixes
+
+---
+
+- [SelectManyControl](src/controls/selectMany.ts). Fixed behavior for sorting (drag/drop) when item moved between lines
+
+---
+
+---
+
 ## 1.1.0 (Jan 18, 2024)
 
 ### New Features

@@ -412,7 +412,7 @@ export default class WUPSelectManyControl<
         // find nearest item in the nearest line
         dist = Number.MAX_SAFE_INTEGER;
         // console.warn(nearest, nearestEnd, lineY);
-        const isSinglePerLine = nearest === nearestEnd; // todo cover with tests
+        const nearestStart = nearest;
         for (let i = nearest; i <= nearestEnd; ++i) {
           const r = rects[i];
           const dx = ev.clientX - (r.x + r.width / 2);
@@ -428,7 +428,8 @@ export default class WUPSelectManyControl<
         if (eli !== nearest) {
           const trg = this.$refItems![nearest];
           const r = rects[nearest];
-          const isLeftOrTop = isSinglePerLine
+          const isYChangeByEdges = nearestStart === nearest || nearestEnd === nearest;
+          const isLeftOrTop = isYChangeByEdges
             ? eli > nearest
             : Math.abs(r.x - ev.clientX) < Math.abs(r.x + r.width - ev.clientX);
 
@@ -436,8 +437,8 @@ export default class WUPSelectManyControl<
           if (nearest < eli) {
             nextEli = isLeftOrTop ? nearest : nearest + 1; // shift from right to left
           } else {
-            // if (nearest > eli) {
-            nextEli = isLeftOrTop ? nearest - 1 : nearest; // shift from left to right
+            // if (nearest >= eli) {
+            nextEli = /* isLeftOrTop ? nearest - 1 : */ nearest; // shift from left to right
           }
 
           if (nextEli !== eli) {

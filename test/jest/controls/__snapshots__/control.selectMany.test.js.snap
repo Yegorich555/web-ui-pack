@@ -1286,13 +1286,13 @@ exports[`control.selectMany sortable: drag&drop 14`] = `
         aria-hidden="true"
         item=""
       >
-        Splinter
+        Donny
       </span>
       <span
         aria-hidden="true"
         item=""
       >
-        Donny
+        Splinter
       </span>
       <input
         aria-autocomplete="list"
@@ -1335,13 +1335,13 @@ exports[`control.selectMany sortable: drag&drop 16`] = `
         aria-hidden="true"
         item=""
       >
-        Splinter
+        Donny
       </span>
       <span
         aria-hidden="true"
         item=""
       >
-        Donny
+        Splinter
       </span>
       <input
         aria-autocomplete="list"
