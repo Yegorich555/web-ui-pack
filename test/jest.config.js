@@ -1,6 +1,6 @@
 const rootDir = process.cwd();
 const moduleNameMapper = {
-  "^web-ui-pack/(.*)": `${rootDir}/dist/$1`,
+  "^web-ui-pack/*(.*)": `${rootDir}/dist/$1`,
 };
 
 // details here: https://jestjs.io/docs/configuration
