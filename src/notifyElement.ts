@@ -261,19 +261,16 @@ export default class WUPNotifyElement<
     let isBottom = false;
     let isMiddle = false;
     switch (this._opts.placement) {
-      case "bottom-left":
+      case "top-middle":
+        isMiddle = true;
+        break;
       case "bottom-middle":
+        isMiddle = true;
+      // eslint-disable-next-line no-fallthrough
+      case "bottom-left":
       case "bottom-right":
         isBottom = true;
         vh = viewportSize().vh;
-        break;
-      default:
-        break;
-    }
-    switch (this._opts.placement) {
-      case "top-middle":
-      case "bottom-middle":
-        isMiddle = true;
         break;
       default:
         break;
@@ -320,7 +317,7 @@ export default class WUPNotifyElement<
     this.style.transform = "";
     const i = this._openedItems.indexOf(this as WUPNotifyElement<any, any>);
     if (i > -1) {
-      this._openedItems.splice(i, 1); // todo process only affected items
+      this._openedItems.splice(i, 1);
       this.refreshVertical();
     }
     this.isConnected && this._opts.selfRemove && this.remove();
