@@ -118,13 +118,13 @@ export default class WUPNotifyElement<
         --notify-margin: 1em 0;
         --notify-w: 300px;
         --notify-text: #fff;
-        --notify-bg: rgba(16, 70, 82, 0.9);
+        --notify-bg: rgba(16,70,82,0.9);
         --notify-shadow: #0003;
         --notify-progress: #009fbc;
       }
       [wupdark] {
         --notify-text: #d8d8d8;
-        --notify-bg: rgba(16, 70, 82, 0.9);
+        --notify-bg: rgba(16,70,82,0.9);
         --notify-shadow: #0006;
       }`;
   }
@@ -132,7 +132,7 @@ export default class WUPNotifyElement<
   static get $style(): string {
     return `${super.$style}
       :host {
-        --modal-anim: var(--notify-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+        --modal-anim: var(--notify-anim-t) cubic-bezier(0,0,0.2,1) 0ms;
         z-index: 9010;
         min-height: 64px;
         max-height: 80vh;
@@ -142,6 +142,35 @@ export default class WUPNotifyElement<
         color: var(--notify-text);
         background: var(--notify-bg);
         box-shadow: 0 1px 4px 0 var(--notify-shadow);
+      }
+      :host[w-placement=top-left],
+      :host[w-placement=bottom-left] {
+        border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        left: 0;
+        transform: translateX(-100%);
+      }
+      :host[w-placement=top-right],
+      :host[w-placement=bottom-right] {
+        border-radius: var(--border-radius) 0 0 var(--border-radius);
+        right: 0;
+        transform: translateX(100%);
+      }
+      :host[w-placement=top-middle],
+      :host[w-placement="bottom-middle"] {
+        margin-left: auto;
+        margin-right: auto;
+        left:0; right:0;
+        transform: translateY(-100%);
+      }
+      :host[w-placement=top-left],
+      :host[w-placement=top-middle],
+      :host[w-placement=top-right] {
+        top:0;
+      }
+      :host[w-placement=bottom-left],
+      :host[w-placement=bottom-middle],
+      :host[w-placement=bottom-right] {
+        bottom:0;
       }
       :host[show] {
         transform: none;
@@ -292,6 +321,7 @@ export default class WUPNotifyElement<
 
     if (!items) items = this._openedItems.filter((x) => this.isSameSibling(x));
 
+    // todo some collision is happened when removed several items
     items.forEach((a) => {
       const isNext = !!prev;
       const wasY = a._dy;
@@ -364,4 +394,5 @@ customElements.define(tagName, WUPNotifyElement);
 // todo add to types.html
 // todo bind with form
 // todo add Ctrl+Z hook ???
-// todo add ID to ability refresh existed
+// todo add ID to ability to refresh existed
+// todo options: pauseOnWinFocusBlur, pauseOnHover, closeOnClick, closeOnSwipe
