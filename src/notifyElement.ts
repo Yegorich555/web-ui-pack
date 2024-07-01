@@ -230,20 +230,25 @@ export default class WUPNotifyElement<
     this.setAttribute("w-placement", this._opts.placement);
 
     // init button[close]
-    this.$refClose ??= document.createElement("button");
-    this.$refClose.type = "button";
-    this.$refClose.setAttribute("aria-label", __wupln("close", "aria"));
-    this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
-    this.$refClose.setAttribute("close", "");
-    this.prepend(this.$refClose);
-    this.$refClose.onclick = (e) => this.goClose(NotifyCloseCases.onCloseClick, e);
+    if (!this.$refClose) {
+      this.$refClose = document.createElement("button");
+      const q = this.$refClose;
+      q.type = "button";
+      q.setAttribute("aria-label", __wupln("close", "aria"));
+      q.setAttribute(this.#ctr.classNameBtnIcon, "");
+      q.setAttribute("close", "");
+      this.prepend(q);
+      q.onclick = (e) => this.goClose(NotifyCloseCases.onCloseClick, e);
+    }
 
-    this.$refProgress ??= document.createElement("div");
-    const pr = this.$refProgress;
-    pr.setAttribute("progress", "");
-    pr.setAttribute("role", "progressbar");
-    this.appendChild(pr);
-    // apply open styles
+    if (!this.$refProgress) {
+      this.$refProgress = document.createElement("div");
+      const q = this.$refProgress;
+      q.setAttribute("progress", "");
+      q.setAttribute("role", "progressbar");
+      this.appendChild(q);
+      // apply open styles
+    }
   }
 
   /** Called once on opening */
@@ -259,7 +264,7 @@ export default class WUPNotifyElement<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotOpen(openCase: NotifyOpenCases, e: MouseEvent | null): void {
     // todo if $options are not observed then need to merge it manually ???
-    this.gotRender(true); // todo it called again
+    this.gotRender(true);
     // listen for close-events
     this._opts.closeOnClick && this.appendEvent(this, "click", (ev) => this.gotClick(ev));
 
@@ -272,9 +277,7 @@ export default class WUPNotifyElement<
         this.style.transition = "none"; // temp disable animation otherwise 1st position will be wrong
         this.refreshVertical([prev, this as WUPNotifyElement<any, any>], true);
         const savedState = this.style.transform; // save position so later to process it animation
-        // todo maybe possible to improve such anim-cycle ???
         this.style.transform = `${this._dx} translateY(${this._dy}px)`; // set default position before showing to the user
-
         // enable animation and move to position before
         setTimeout(() => {
           this.style.transition = "";
@@ -395,4 +398,4 @@ customElements.define(tagName, WUPNotifyElement);
 // todo bind with form
 // todo add Ctrl+Z hook ???
 // todo add ID to ability to refresh existed
-// todo options: pauseOnWinFocusBlur, pauseOnHover, closeOnClick, closeOnSwipe
+// todo options: pauseOnWinFocusBlur, pauseOnHover,  closeOnSwipe
