@@ -214,7 +214,9 @@ export default class WUPNotifyElement<
     this._opts.openCase === NotifyOpenCases.onInit && this.goOpen(NotifyOpenCases.onInit, null);
   }
 
+  /** Saved dy position */
   _dy = 0;
+  /** Saved dx position */
   _dx = "";
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotOpen(openCase: NotifyOpenCases, e: MouseEvent | null): void {
@@ -225,63 +227,36 @@ export default class WUPNotifyElement<
 
     const curNum = this._openedItems.push(this as WUPNotifyElement<any, any>);
     if (curNum > 1) {
+      this._dx = getComputedStyle(this).transform;
       const lastI = curNum - 2;
-      const prev = this._openedItems.findLast(
-        (a, i) => i <= lastI && a._opts.placement === this._opts.placement && a.offsetHeight > 0 // offsetHeight is 0 when item is hidden
-      );
-
-      // todo the logic is repetitive for 99% with refreshVertical: need somehow merge it
+      const prev = this._openedItems.findLast((a, i) => i <= lastI && this.isSameSibling(a));
       if (prev) {
-        let isBottom = false;
-        let isMiddle = false;
-        switch (this._opts.placement) {
-          case "bottom-left":
-          case "bottom-middle":
-          case "bottom-right":
-            isBottom = true;
-            break;
-          default:
-            break;
-        }
-        switch (this._opts.placement) {
-          case "top-middle":
-          case "bottom-middle":
-            isMiddle = true;
-            break;
-          default:
-            break;
-        }
-        // eslint-disable-next-line prefer-const
-        let { top, bottom, height } = prev.getBoundingClientRect(); // position of previous item
-        const styles = getComputedStyle(this);
-        this._dx = styles.transform;
-        if (isMiddle) {
-          this._dy = Math.round(
-            isBottom
-              ? prev._dy - height - px2Number(styles.marginBottom)
-              : prev._dy + height + px2Number(styles.marginTop)
-          );
-        } else {
-          // todo it's equal with logic if (isMiddle) above maybe reuse solution upper ?
-          this._dy = Math.round(isBottom ? top - viewportSize().vh : bottom);
-        }
-        this.style.transition = "none"; // prevent animation for Y
-        this.style.transform = `${this._dx} translateY(${this._dy}px)`;
+        this.style.transition = "none"; // temp disable animation otherwise 1st position will be wrong
+        this.refreshVertical([prev, this as WUPNotifyElement<any, any>], true);
+        const savedState = this.style.transform; // save position so later to process it animation
+        // todo maybe possible to improve such anim-cycle ???
+        this.style.transform = `${this._dx} translateY(${this._dy}px)`; // set default position before showing to the user
+
+        // animate
         setTimeout(() => {
-          this.style.transform = `translateY(${this._dy}px)`;
-          this.style.transition = ""; // animate
+          this.style.transition = ""; // enable animation and move to position before
+          this.style.transform = savedState;
         });
       }
-    }
 
-    // todo uncomment it after tests
-    // const ms = this._opts.autoClose;
-    // ms && setTimeout(() => this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
+      // todo uncomment it after tests
+      // const ms = this._opts.autoClose;
+      // ms && setTimeout(() => ms && this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
+    }
   }
 
-  /** Update vertical positions of all items + shift if something required */
-  refreshVertical(): void {
-    let prev: WUPNotifyElement | undefined;
+  /** Returns if item is visible and has same placement option */
+  isSameSibling(item: WUPNotifyElement): boolean {
+    return item._opts.placement === this._opts.placement && item.offsetHeight > 0;
+  }
+
+  /** Update vertical positions of all (or pointed) items + shift if something required */
+  refreshVertical(items?: WUPNotifyElement[], isInit = false): void {
     let vh = 0;
     let isBottom = false;
     let isMiddle = false;
@@ -303,31 +278,34 @@ export default class WUPNotifyElement<
       default:
         break;
     }
+    let prev: WUPNotifyElement;
     let prevShiftY = 0;
-    this._openedItems.forEach((a) => {
-      if (a.offsetHeight > 0 && a._opts.placement === this._opts.placement) {
-        const isNext = !!prev;
-        const wasY = a._dy;
-        if (isNext) {
-          const { top, bottom, height } = prev!.getBoundingClientRect(); // position of previous item
-          if (isMiddle) {
-            const styles = getComputedStyle(a);
-            a._dy = Math.round(
-              isBottom
-                ? prev!._dy - height - px2Number(styles.marginBottom)
-                : prev!._dy + height + px2Number(styles.marginTop)
-            );
-          } else {
-            a._dy = prevShiftY + Math.round(isBottom ? top - vh : bottom);
-          }
-          a.style.transform = `translateY(${a._dy}px)`;
+
+    if (!items) items = this._openedItems.filter((x) => this.isSameSibling(x));
+
+    items.forEach((a) => {
+      const isNext = !!prev;
+      const wasY = a._dy;
+      let styles: CSSStyleDeclaration | undefined;
+      if (isNext) {
+        const { top, bottom, height } = prev.getBoundingClientRect(); // position of previous item
+        if (isMiddle) {
+          styles = getComputedStyle(a);
+          a._dy = Math.round(
+            isBottom
+              ? prev._dy - height - px2Number(styles.marginBottom)
+              : prev._dy + height + px2Number(styles.marginTop)
+          );
         } else {
-          a.style.transform = "";
-          a._dy = 0;
+          a._dy = prevShiftY + Math.round(isBottom ? top - vh : bottom);
         }
-        prevShiftY = a._dy - wasY; // otherwise animation brokes it
-        prev = a;
+        a.style.transform = `translateY(${a._dy}px)`;
+      } else if (!isInit) {
+        a.style.transform = "";
+        a._dy = 0;
       }
+      prevShiftY = a._dy - wasY; // otherwise animation breaks it
+      prev = a;
     });
   }
 
@@ -342,7 +320,7 @@ export default class WUPNotifyElement<
     this.style.transform = "";
     const i = this._openedItems.indexOf(this as WUPNotifyElement<any, any>);
     if (i > -1) {
-      this._openedItems.splice(i, 1);
+      this._openedItems.splice(i, 1); // todo process only affected items
       this.refreshVertical();
     }
     this.isConnected && this._opts.selfRemove && this.remove();

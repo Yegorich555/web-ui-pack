@@ -74,14 +74,15 @@ export default function NotifyView() {
             <Fragment key={a.placement}>
               <button
                 ref={(el) => {
-                  if (el && i === 2) {
-                    [0, 1, 100, 100].forEach((t) => {
+                  if (el && i === 1) {
+                    [0, 1, 100, 100, 1000].forEach((t) => {
                       setTimeout(() => el.click(), t);
                     });
                     setTimeout(() => {
+                      console.warn("refresh again: for checking");
                       const all = document.querySelectorAll("wup-notify");
                       all[all.length - 1].refreshVertical(); // just for checking the method
-                    }, 300);
+                    }, 1500);
                   }
                 }}
                 className={`btn ${a.className}`}
