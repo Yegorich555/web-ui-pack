@@ -120,6 +120,7 @@ export default class WUPNotifyElement<
         --notify-text: #fff;
         --notify-bg: rgba(16, 70, 82, 0.9);
         --notify-shadow: #0003;
+        --notify-progress: #009fbc;
       }
       [wupdark] {
         --notify-text: #d8d8d8;
@@ -152,6 +153,14 @@ export default class WUPNotifyElement<
         position: absolute;
         right:0; top:0;
         margin: 0.4em;
+      }
+      :host > [progress] {
+        position: absolute;
+        bottom:0; left:0;
+        width: 100%;
+        height: 5px;
+        background: var(--notify-progress);
+        transform-origin: left;
       }
     `;
   }
@@ -237,20 +246,19 @@ export default class WUPNotifyElement<
         // todo maybe possible to improve such anim-cycle ???
         this.style.transform = `${this._dx} translateY(${this._dy}px)`; // set default position before showing to the user
 
-        // animate
+        // enable animation and move to position before
         setTimeout(() => {
-          this.style.transition = ""; // enable animation and move to position before
+          this.style.transition = "";
           this.style.transform = savedState;
         });
       }
 
       const ms = this._opts.autoClose;
-      ms && setTimeout(() => this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
-      ms &&
-        this.$refProgress?.animate([{ width: "100%" }, { width: 0 }], {
-          duration: ms - 100, // 100ms faster so animation visually more correct before timeout is finished
-          fill: "forwards",
-        });
+      if (ms) {
+        setTimeout(() => this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
+        this.$refProgress!.style.transition = `transform ${ms}ms linear`;
+        this.$refProgress!.style.transform = "scaleX(0)";
+      }
     }
   }
 

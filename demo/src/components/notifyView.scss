@@ -65,22 +65,11 @@
 }
 
 :root {
-  --notify-info: #009fbc;
   // todo develop different types ???
   --toastify-color-info: #3498db;
   --toastify-color-success: #07bc0c;
   --toastify-color-warning: #f1c40f;
   --toastify-color-error: #e74c3c;
-}
-
-.notify > [progress] {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 5px;
-  background: var(--notify-info);
-  // todo animate bar
 }
 
 .notify[w-placement="top-left"],
