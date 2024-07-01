@@ -244,9 +244,13 @@ export default class WUPNotifyElement<
         });
       }
 
-      // todo uncomment it after tests
-      // const ms = this._opts.autoClose;
-      // ms && setTimeout(() => ms && this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
+      const ms = this._opts.autoClose;
+      ms && setTimeout(() => this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
+      ms &&
+        this.$refProgress?.animate([{ width: "100%" }, { width: 0 }], {
+          duration: ms - 100, // 100ms faster so animation visually more correct before timeout is finished
+          fill: "forwards",
+        });
     }
   }
 
