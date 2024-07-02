@@ -18,7 +18,7 @@ export default function ModalAsAlertView() {
     >
       <section>
         <h3>Ordinary modal possible to use as alert</h3>
-        <small>Use WUPModalElement.$showConfirm</small>
+        <small>Use WUPModalElement.$showConfirm(...)</small>
         <Code code={codeJS} />
         <Code code={codeCSS} />
         <div className={styles.inlineCenter}>
@@ -55,7 +55,7 @@ WUPModalElement.$use();
 
 WUPModalElement.$showConfirm({
   defaults: { ... }, // override init options here
-  className: styles.modalAlert,
+  className: "modalAlert",
   onRender: (el) => {
     const btnConfirm = el.querySelector("[data-close=confirm]") as HTMLButtonElement;
     btnConfirm.textContent = "OK";

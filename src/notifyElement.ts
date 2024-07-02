@@ -37,7 +37,7 @@ declare global {
       /** Position on the screen
        * @defaultValue 'bottom-left' */
       placement: "top-left" | "top-middle" | "top-right" | "bottom-left" | "bottom-middle" | "bottom-right";
-      /** Default time (ms) after that notify is closed; if provide false then it will be closed only by click event
+      /** Default time (ms) after that notify is closed; if provide `0` then it will be closed only by click event
        *  @defaultValue 5000 (ms) */
       autoClose: number | null;
       /** Close on element click
@@ -211,9 +211,8 @@ export default class WUPNotifyElement<
     me.textContent = opts.textContent;
     // append to root
     document.body.appendChild(me);
-    // call callback to allow user re-define it
-    // me.gotOpen(NotifyOpenCases.onInit, null);
-    opts.onRender?.(me); // todo onRender called here but real render will be on gotOpen
+    // callback to allow user re-define it
+    opts.onRender?.(me); // WARN: onRender called here but real render will be on gotOpen
   }
 
   /** Reference to button[close] */
@@ -221,6 +220,7 @@ export default class WUPNotifyElement<
   /** Reference to progress bar  */
   $refProgress?: HTMLDivElement;
 
+  /** Called once on opening */
   protected override gotRender(isOpening = false): void {
     if (!isOpening) {
       return; // empty because component is hidden by default and need to focus on open-phase
@@ -239,14 +239,13 @@ export default class WUPNotifyElement<
       this.prepend(q);
       q.onclick = (e) => this.goClose(NotifyCloseCases.onCloseClick, e);
     }
-
-    if (!this.$refProgress) {
+    // init progress bar
+    if (!this.$refProgress && this._opts.autoClose) {
       this.$refProgress = document.createElement("div");
       const q = this.$refProgress;
       q.setAttribute("progress", "");
       q.setAttribute("role", "progressbar");
       this.appendChild(q);
-      // apply open styles
     }
   }
 
@@ -352,15 +351,21 @@ export default class WUPNotifyElement<
   /** Called when handles click to check if was close-click */
   gotClick(e: MouseEvent): void {
     const t = e.target;
-    if (e.defaultPrevented || t === this || e.button) {
+    if (e.defaultPrevented || (t === this && !this._opts.closeOnClick) || e.button) {
       return;
     }
+
+    if (this._opts.closeOnClick) {
+      this.goClose(NotifyCloseCases.onCloseClick, e);
+      return;
+    }
+
     const all = this.querySelectorAll("[close]").values(); // allow to use any button with attr to close
     // eslint-disable-next-line no-restricted-syntax
     for (const el of all) {
       if (this.itsMe.call(el, t)) {
         this.goClose(NotifyCloseCases.onCloseClick, e);
-        break;
+        return;
       }
     }
   }
@@ -379,4 +384,4 @@ customElements.define(tagName, WUPNotifyElement);
 // todo bind with form
 // todo add Ctrl+Z hook ???
 // todo add ID to ability to refresh existed
-// todo options: pauseOnWinFocusBlur, pauseOnHover,  closeOnSwipe
+// todo options: pauseOnWinFocusBlur, pauseOnHover, closeOnSwipe

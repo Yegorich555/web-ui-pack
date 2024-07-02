@@ -71,3 +71,33 @@
   --toastify-color-warning: #f1c40f;
   --toastify-color-error: #e74c3c;
 }
+
+.inlineCenter {
+  display: flex;
+  justify-content: center;
+}
+
+.myTooltip {
+  &[open] {
+    display: flex;
+  }
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+
+  > button[close] {
+    display: none;
+  }
+
+  .iconAlert {
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 14px;
+    border-radius: 50%;
+    margin-left: auto;
+    color: white;
+    background: #e74c3c;
+    text-align: center;
+  }
+}

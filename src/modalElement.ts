@@ -421,6 +421,7 @@ export default class WUPModalElement<
   /** Reference to button[close] */
   $refClose?: HTMLButtonElement;
 
+  /** Called once on opening */
   protected override gotRender(isOpening = false): void {
     if (!isOpening) {
       return; // empty because component is hidden by default and need to focus on open-phase

@@ -1,6 +1,7 @@
 import Page from "src/elements/page";
 import { Fragment } from "react";
 import WUPNotifyElement, { NotifyOpenCases } from "web-ui-pack/notifyElement";
+import Code from "src/elements/code";
 import styles from "./notifyView.scss";
 
 WUPNotifyElement.$use();
@@ -74,15 +75,10 @@ export default function NotifyView() {
             <Fragment key={a.placement}>
               <button
                 ref={(el) => {
-                  if (el && i === 1) {
+                  if (DEV && el && i === 1) {
                     [0, 1, 100, 100, 1000, 101, 102, 402, 403, 404].forEach((t) => {
                       setTimeout(() => el.click(), t);
                     });
-                    window.onclick = () => {
-                      const all = document.querySelectorAll("wup-notify");
-                      // all[all.length - 1].refreshVertical();
-                    };
-
                     setTimeout(() => {
                       console.warn("refresh again: for checking");
                       const all = document.querySelectorAll("wup-notify");
@@ -95,11 +91,11 @@ export default function NotifyView() {
                 onClick={() => {
                   // const btn = e.currentTarget as HTMLButtonElement;
                   WUPNotifyElement.$show({
+                    defaults: { placement: a.placement, autoClose: iter % 2 ? 5000 : 10000 },
+                    className: styles.notify,
                     textContent: `${++iter}. I am wup-notify element with $options.placement: ${a.placement}${
                       iter % 2 ? "\r\nTest \rBigger content" : ""
                     }`,
-                    defaults: { placement: a.placement, autoClose: iter % 2 ? 5000 : 10000 },
-                    className: styles.notify,
                   });
                 }}
               >
@@ -111,7 +107,30 @@ export default function NotifyView() {
       </section>
       <section>
         <h3>Single function call</h3>
-        <small>Comming soon...</small>
+        <small>Use WUPNotifyElement.$show(...)</small>
+        <Code code={codeJS} />
+        <Code code={codeCSS} />
+        <div className={styles.inlineCenter}>
+          <button
+            className="btn"
+            type="button"
+            onClick={() => {
+              WUPNotifyElement.$show({
+                defaults: { placement: "top-middle", autoClose: 0, closeOnClick: true },
+                className: styles.myTooltip,
+                textContent: `Example how to show me in 1 call`,
+                onRender: (el) => {
+                  const iconEl = document.createElement("div");
+                  iconEl.className = styles.iconAlert;
+                  iconEl.textContent = "!";
+                  el.append(iconEl);
+                },
+              });
+            }}
+          >
+            Show Notification on click
+          </button>
+        </div>
       </section>
       <section>
         <h3>Integrated with form</h3>
@@ -120,3 +139,46 @@ export default function NotifyView() {
     </Page>
   );
 }
+
+const codeJS = `js
+/* TS */
+import WUPNotifyElement from "web-ui-pack/notifyElement";
+WUPNotifyElement.$use();
+
+WUPModalElement.$showConfirm({
+  defaults: { placement: "top-middle", autoClose: 0, closeOnClick: true }, // override init options here
+  className: "myTooltip",
+  textContent: "Simple example how to show me in 1 call",
+  // OR use onRender for customization
+  onRender: (el) => {
+    const iconEl = document.createElement("div");
+    iconEl.className = "iconAlert";
+    iconEl.textContent = "!";
+    el.prepend(iconEl);
+  },
+})`;
+
+const codeCSS = `css
+/* SCSS */
+.myTooltip {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+
+  > button[close] {
+    display: none;
+  }
+
+  >.iconAlert {
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 14px;
+    border-radius: 50%;
+    margin-left: auto;
+    color: white;
+    background: #e74c3c;
+    text-align: center;
+  }
+} `;
