@@ -1,6 +1,5 @@
 import WUPBaseModal from "./baseModal";
 import { px2Number } from "./helpers/styleHelpers";
-import viewportSize from "./helpers/viewportSize";
 
 export const enum NotifyOpenCases {
   /** When $open() is called programmatically */
@@ -301,51 +300,34 @@ export default class WUPNotifyElement<
 
   /** Update vertical positions of all (or pointed) items + shift if something required */
   refreshVertical(items?: WUPNotifyElement[], isInit = false): void {
-    let vh = 0;
     let isBottom = false;
-    let isMiddle = false;
     switch (this._opts.placement) {
-      case "top-middle":
-        isMiddle = true;
-        break;
-      case "bottom-middle":
-        isMiddle = true;
-      // eslint-disable-next-line no-fallthrough
       case "bottom-left":
       case "bottom-right":
         isBottom = true;
-        vh = viewportSize().vh;
         break;
       default:
         break;
     }
     let prev: WUPNotifyElement;
-    let prevShiftY = 0;
 
     if (!items) items = this._openedItems.filter((x) => this.isSameSibling(x));
 
+    const { marginBottom, marginTop } = getComputedStyle(this); // WARN: expected that every component has same options
     items.forEach((a) => {
       const isNext = !!prev;
-      const wasY = a._dy;
       if (isNext) {
-        // todo top & bottom could be wrong if refresh is happened during the shift/animation
-        const { top, bottom, height } = prev.getBoundingClientRect(); // position of previous item
-        if (isMiddle) {
-          const { marginBottom, marginTop } = getComputedStyle(a);
-          a._dy = Math.round(
-            isBottom
-              ? prev._dy - height - px2Number(marginBottom) //
-              : prev._dy + height + px2Number(marginTop)
-          );
-        } else {
-          a._dy = prevShiftY + Math.round(isBottom ? top - vh : bottom);
-        }
+        const height = prev.offsetHeight;
+        a._dy = Math.round(
+          isBottom
+            ? prev._dy - height - px2Number(marginBottom) //
+            : prev._dy + height + px2Number(marginTop)
+        );
         a.style.transform = `translateY(${a._dy}px)`;
       } else if (!isInit) {
         a.style.transform = "";
         a._dy = 0;
       }
-      prevShiftY = a._dy - wasY; // otherwise animation breaks it
       prev = a;
     });
   }
