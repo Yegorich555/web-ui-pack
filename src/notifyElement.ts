@@ -239,6 +239,7 @@ export default class WUPNotifyElement<
       this.prepend(q);
       q.onclick = (e) => this.goClose(NotifyCloseCases.onCloseClick, e);
     }
+
     // init progress bar
     if (!this.$refProgress && this._opts.autoClose) {
       this.$refProgress = document.createElement("div");
@@ -282,13 +283,15 @@ export default class WUPNotifyElement<
           this.style.transform = savedState;
         });
       }
+    }
 
-      const ms = this._opts.autoClose;
-      if (ms) {
-        setTimeout(() => this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
+    const ms = this._opts.autoClose;
+    if (ms) {
+      setTimeout(() => this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
+      setTimeout(() => {
         this.$refProgress!.style.transition = `transform ${ms}ms linear`;
         this.$refProgress!.style.transform = "scaleX(0)";
-      }
+      }); // without timeout possible effect without animation
     }
   }
 

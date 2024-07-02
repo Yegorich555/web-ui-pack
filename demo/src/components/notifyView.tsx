@@ -76,7 +76,7 @@ export default function NotifyView() {
               <button
                 ref={(el) => {
                   if (DEV && el && i === 1) {
-                    [0, 1, 100, 100, 1000, 101, 102, 402, 403, 404].forEach((t) => {
+                    [0 /* 1, 100, 100, 1000, 101, 102, 402, 403, 404 */].forEach((t) => {
                       setTimeout(() => el.click(), t);
                     });
                     setTimeout(() => {
