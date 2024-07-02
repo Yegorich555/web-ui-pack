@@ -324,19 +324,18 @@ export default class WUPNotifyElement<
 
     if (!items) items = this._openedItems.filter((x) => this.isSameSibling(x));
 
-    // todo some collision is happened when removed several items
     items.forEach((a) => {
       const isNext = !!prev;
       const wasY = a._dy;
-      let styles: CSSStyleDeclaration | undefined;
       if (isNext) {
+        // todo top & bottom could be wrong if refresh is happened during the shift/animation
         const { top, bottom, height } = prev.getBoundingClientRect(); // position of previous item
         if (isMiddle) {
-          styles = getComputedStyle(a);
+          const { marginBottom, marginTop } = getComputedStyle(a);
           a._dy = Math.round(
             isBottom
-              ? prev._dy - height - px2Number(styles.marginBottom)
-              : prev._dy + height + px2Number(styles.marginTop)
+              ? prev._dy - height - px2Number(marginBottom) //
+              : prev._dy + height + px2Number(marginTop)
           );
         } else {
           a._dy = prevShiftY + Math.round(isBottom ? top - vh : bottom);

@@ -75,9 +75,14 @@ export default function NotifyView() {
               <button
                 ref={(el) => {
                   if (el && i === 1) {
-                    [0, 1, 100, 100, 1000].forEach((t) => {
+                    [0, 1, 100, 100, 1000, 101, 102, 402, 403, 404].forEach((t) => {
                       setTimeout(() => el.click(), t);
                     });
+                    window.onclick = () => {
+                      const all = document.querySelectorAll("wup-notify");
+                      // all[all.length - 1].refreshVertical();
+                    };
+
                     setTimeout(() => {
                       console.warn("refresh again: for checking");
                       const all = document.querySelectorAll("wup-notify");
