@@ -1,3 +1,4 @@
+import { AttributeMap } from "./baseElement";
 import WUPBaseModal from "./baseModal";
 import { px2Number } from "./helpers/styleHelpers";
 
@@ -262,7 +263,25 @@ export default class WUPNotifyElement<
   _dx = "";
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotOpen(openCase: NotifyOpenCases, e: MouseEvent | null): void {
-    // todo if $options are not observed then need to merge it manually ???
+    {
+      // WARN: removing attr doesn't affects
+
+      // WARN: $options/attributes are not observed so need to merge it manually
+      let lstAttr: Record<string, AttributeMap>;
+      const allAttr = this.attributes;
+      for (let i = 0, attr = allAttr[i]; i < allAttr.length; attr = allAttr[++i]) {
+        let { name } = attr;
+        if (name.startsWith("w-")) {
+          name = name.substring(2);
+          lstAttr ??= this.#ctr.mappedAttributes; // get collection only once if some attr exists
+          const mapped = lstAttr[name];
+          if (mapped) {
+            this._opts[mapped.prop as keyof TOptions] = this.parseAttr(mapped.type, attr.value, mapped.prop!, name);
+          }
+        }
+      }
+    }
+
     this.gotRender(true);
     // listen for close-events
     this._opts.closeOnClick && this.appendEvent(this, "click", (ev) => this.gotClick(ev));

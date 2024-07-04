@@ -59,6 +59,9 @@ export default function NotifyView() {
         >
           Only for gathering CSS vars
         </wup-notify>
+        <wup-notify w-placement="bottom-middle" w-autoclose="8000" w-selfremove="true" w-closeonclick="true">
+          Some message here
+        </wup-notify>
         <h3>Different placements</h3>
         <small>Use $options.placement or attribute [w-placement]</small>
         <div className={styles.block}>
@@ -76,6 +79,7 @@ export default function NotifyView() {
               <button
                 ref={(el) => {
                   if (DEV && el && i === 1) {
+                    return;
                     [0 /* 1, 100, 100, 1000, 101, 102, 402, 403, 404 */].forEach((t) => {
                       setTimeout(() => el.click(), t);
                     });
