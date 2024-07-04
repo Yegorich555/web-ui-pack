@@ -274,7 +274,7 @@ Be sure that you are familiar with [common rules](#components)
 
 #### Library doesn't work in some browsers
 
-> web-ui-pack is compiled to ESNext. So some features may not exist in browsers. To resolve it include the lib into babel-loader (for webpack check module.rules...exclude sections
+> web-ui-pack is compiled to ESNext. So some features may not exist in browsers. To resolve it include the lib into babel-loader (for webpack check module.rules...exclude sections)
 >
 > ```js
 > // webpack.config.js
