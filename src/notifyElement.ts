@@ -49,6 +49,9 @@ declare global {
       /** Pause on mouse-hover OR touch AND when autoClose > 0
        * @defaultValue true */
       pauseOnHover: boolean;
+      /** Pause when window loses focus
+       * @defaultValue true */
+      pauseOnWinBlur: boolean;
     }
     interface EventMap extends WUP.BaseModal.EventMap<NotifyOpenCases, NotifyCloseCases> {}
     interface JSXProps extends WUP.BaseModal.JSXProps, WUP.Base.OnlyNames<Options> {
@@ -57,6 +60,7 @@ declare global {
       "w-selfRemove"?: boolean | "";
       "w-closeOnClick"?: boolean | "";
       "w-pauseOnHover"?: boolean | "";
+      "w-pauseOnWinBlur"?: boolean | "";
     }
   }
   interface HTMLElementTagNameMap {
@@ -206,6 +210,7 @@ export default class WUPNotifyElement<
     closeOnClick: false,
     selfRemove: true,
     pauseOnHover: true,
+    pauseOnWinBlur: true,
   };
 
   static $show(opts: WUP.Notify.ShowOptions): void {
@@ -346,7 +351,15 @@ export default class WUPNotifyElement<
 
     const ms = this._opts.autoClose;
     if (ms) {
-      this.$play(ms);
+      let allowByFocus = true;
+      if (this._opts.pauseOnWinBlur) {
+        this.appendEvent(window as any, "blur", () => this.$pause());
+        this.appendEvent(window as any, "focus", () => this.$play());
+        allowByFocus = document.hasFocus();
+      }
+      // play
+      allowByFocus && this.$play(ms);
+      // add other events
       if (this._opts.pauseOnHover) {
         this.appendEvent(this, "mouseenter", () => {
           const left = this.$pause();
@@ -453,6 +466,6 @@ customElements.define(tagName, WUPNotifyElement);
 // todo bind with form
 // todo add Ctrl+Z hook ???
 // todo add ID to ability to refresh existed
-// todo options: pauseOnWinFocusBlur, closeOnSwipe
+// todo options: closeOnSwipe
 
 // NiceToHave: mirror progress bar animation (attach to right)

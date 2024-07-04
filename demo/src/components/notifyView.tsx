@@ -29,6 +29,7 @@ export default function NotifyView() {
   w-pauseonhover="true"
   w-selfremove="true"
   w-closeonclick="true"
+  w-pauseonwinblur="true"
 >
  Some message here
 </wup-notify>
@@ -84,9 +85,9 @@ export default function NotifyView() {
                       setTimeout(() => el.click(), t);
                     });
                     setTimeout(() => {
-                      console.warn("refresh again: for checking");
                       const all = document.querySelectorAll("wup-notify");
                       all[all.length - 1].refreshVertical(); // just for checking the method
+                      all[all.length - 1].$options.pauseOnWinBlur = false;
                     }, 1500);
                   }
                 }}
