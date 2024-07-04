@@ -37,15 +37,18 @@ declare global {
       /** Position on the screen
        * @defaultValue 'bottom-left' */
       placement: "top-left" | "top-middle" | "top-right" | "bottom-left" | "bottom-middle" | "bottom-right";
-      /** Default time (ms) after that notify is closed; if provide `0` then it will be closed only by click event
+      /** Default time (ms) after that Notify is closed; if provide `0` then it will be closed only by click event
        *  @defaultValue 5000 (ms) */
-      autoClose: number | null;
+      autoClose: number | null | false;
       /** Close on element click
        * @defaultValue false */
       closeOnClick: boolean;
       /** Remove itself after closing
        * @defaultValue true */
       selfRemove: boolean;
+      /** Pause on mouse-hover OR touch AND when autoClose > 0
+       * @defaultValue true */
+      pauseOnHover: boolean;
     }
     interface EventMap extends WUP.BaseModal.EventMap<NotifyOpenCases, NotifyCloseCases> {}
     interface JSXProps extends WUP.BaseModal.JSXProps, WUP.Base.OnlyNames<Options> {
@@ -53,6 +56,7 @@ declare global {
       "w-autoClose"?: number | "";
       "w-selfRemove"?: boolean | "";
       "w-closeOnClick"?: boolean | "";
+      "w-pauseOnHover"?: boolean | "";
     }
   }
   interface HTMLElementTagNameMap {
@@ -201,6 +205,7 @@ export default class WUPNotifyElement<
     autoClose: 5000,
     closeOnClick: false,
     selfRemove: true,
+    pauseOnHover: true,
   };
 
   static $show(opts: WUP.Notify.ShowOptions): void {
@@ -221,6 +226,50 @@ export default class WUPNotifyElement<
   $refClose?: HTMLButtonElement;
   /** Reference to progress bar  */
   $refProgress?: HTMLDivElement;
+
+  /** Pause progress bar & closing by time (if option autoClose is set)
+   * @returns ms that left before closing */
+  $pause(): number {
+    return this.#pauseRef?.pause() ?? -1;
+  }
+
+  #pauseRef?: {
+    leftPlayTime?: number;
+    pause: () => number;
+    anim: Animation;
+  };
+
+  /** Play/resume progress bar & close/hide by pointed time
+   * @param ms time closing; if missed then will be used stored time from $pause OR from $options.autoClose */
+  $play(ms?: number | null): void {
+    if (!ms) {
+      ms = this.#pauseRef?.leftPlayTime ?? (this._opts.autoClose || 0);
+    }
+
+    const now = Date.now();
+    const t1 = setTimeout(() => {
+      this.goClose(NotifyCloseCases.onTimeEnd, null);
+    }, ms);
+
+    const anim =
+      this.#pauseRef?.anim ??
+      this.$refProgress!.animate([{ transform: "scaleX(100%)" }, { transform: "scaleX(0)" }], {
+        fill: "forwards",
+        duration: ms - 100, // less time for more native effect
+      });
+    anim.play();
+
+    this.#pauseRef = {
+      anim,
+      pause: () => {
+        clearTimeout(t1);
+        anim.pause();
+        const left = ms - Date.now() + now;
+        this.#pauseRef!.leftPlayTime = left;
+        return left;
+      },
+    };
+  }
 
   /** Called once on opening */
   protected override gotRender(isOpening = false): void {
@@ -287,11 +336,14 @@ export default class WUPNotifyElement<
 
     const ms = this._opts.autoClose;
     if (ms) {
-      setTimeout(() => this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
-      setTimeout(() => {
-        this.$refProgress!.style.transition = `transform ${ms}ms linear`;
-        this.$refProgress!.style.transform = "scaleX(0)";
-      }); // without timeout possible effect without animation
+      this.$play(ms);
+      if (this._opts.pauseOnHover) {
+        // todo add same on touch (for touchPads)
+        this.appendEvent(this, "mouseenter", () => {
+          const left = this.$pause();
+          this.appendEvent(this, "mouseleave", () => this.$play(left), { once: true });
+        });
+      }
     }
   }
 
@@ -337,8 +389,8 @@ export default class WUPNotifyElement<
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotClose(closeCase: NotifyCloseCases, ev: MouseEvent | null): void {
-    // todo need to return focus back if item (btnClose) is focused
     this.style.transform = this._dx ? `${this._dx} translateY(${this._dy}px)` : "";
+    this.disposeEvents(); // remove all events added on opening (for case when item is not removed and will be opened again)
   }
 
   protected resetState(): void {
@@ -388,6 +440,6 @@ customElements.define(tagName, WUPNotifyElement);
 // todo bind with form
 // todo add Ctrl+Z hook ???
 // todo add ID to ability to refresh existed
-// todo options: pauseOnWinFocusBlur, pauseOnHover, closeOnSwipe
+// todo options: pauseOnWinFocusBlur, closeOnSwipe
 
 // NiceToHave: mirror progress bar animation (attach to right)

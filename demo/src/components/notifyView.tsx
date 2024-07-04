@@ -26,6 +26,7 @@ export default function NotifyView() {
 <wup-notify
   w-placement="bottom-left"
   w-autoclose="5000"
+  w-pauseonhover="true"
   w-selfremove="true"
   w-closeonclick="true"
 >
@@ -74,7 +75,7 @@ export default function NotifyView() {
               { placement: "top-right", className: styles.topRight },
               { placement: "bottom-right", className: styles.bottomRight },
             ] as IExample[]
-          ).map((a, i) => (
+          ).map((a) => (
             <Fragment key={a.placement}>
               <button
                 ref={(el) => {
@@ -94,7 +95,7 @@ export default function NotifyView() {
                 onClick={() => {
                   // const btn = e.currentTarget as HTMLButtonElement;
                   WUPNotifyElement.$show({
-                    defaults: { placement: a.placement, autoClose: iter % 2 ? 5000 : 10000 },
+                    defaults: { placement: a.placement, autoClose: iter % 2 ? 5000 : 2000 },
                     className: styles.notify,
                     textContent: `${++iter}. I am wup-notify element with $options.placement: ${a.placement}${
                       iter % 2 ? "\r\nTest \rBigger content" : ""
