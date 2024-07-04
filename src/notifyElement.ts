@@ -1,4 +1,3 @@
-import { AttributeMap } from "./baseElement";
 import WUPBaseModal from "./baseModal";
 import { px2Number } from "./helpers/styleHelpers";
 
@@ -107,7 +106,9 @@ export default class WUPNotifyElement<
   }
 
   static get observedAttributes(): Array<string> {
-    return [];
+    const arr = super.observedAttributes as Array<Lowercase<keyof WUP.Notify.JSXProps>>;
+    arr.push("w-autoclose", "w-closeonclick", "w-opencase", "w-placement", "w-selfremove");
+    return arr;
   }
 
   // perfect bg color is: #121212c8
@@ -251,7 +252,6 @@ export default class WUPNotifyElement<
     }
   }
 
-  /** Called once on opening */
   protected override gotChanges(propsChanged: string[] | null): void {
     super.gotChanges(propsChanged);
     this._opts.openCase === NotifyOpenCases.onInit && this.goOpen(NotifyOpenCases.onInit, null);
@@ -263,25 +263,6 @@ export default class WUPNotifyElement<
   _dx = "";
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotOpen(openCase: NotifyOpenCases, e: MouseEvent | null): void {
-    {
-      // WARN: removing attr doesn't affects
-
-      // WARN: $options/attributes are not observed so need to merge it manually
-      let lstAttr: Record<string, AttributeMap>;
-      const allAttr = this.attributes;
-      for (let i = 0, attr = allAttr[i]; i < allAttr.length; attr = allAttr[++i]) {
-        let { name } = attr;
-        if (name.startsWith("w-")) {
-          name = name.substring(2);
-          lstAttr ??= this.#ctr.mappedAttributes; // get collection only once if some attr exists
-          const mapped = lstAttr[name];
-          if (mapped) {
-            this._opts[mapped.prop as keyof TOptions] = this.parseAttr(mapped.type, attr.value, mapped.prop!, name);
-          }
-        }
-      }
-    }
-
     this.gotRender(true);
     // listen for close-events
     this._opts.closeOnClick && this.appendEvent(this, "click", (ev) => this.gotClick(ev));
@@ -407,3 +388,5 @@ customElements.define(tagName, WUPNotifyElement);
 // todo add Ctrl+Z hook ???
 // todo add ID to ability to refresh existed
 // todo options: pauseOnWinFocusBlur, pauseOnHover, closeOnSwipe
+
+// NiceToHave: mirror progress bar animation (attach to right)
