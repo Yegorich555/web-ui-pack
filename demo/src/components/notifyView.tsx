@@ -59,9 +59,9 @@ export default function NotifyView() {
         >
           Only for gathering CSS vars
         </wup-notify>
-        <wup-notify w-placement="bottom-middle" w-autoclose="8000" w-selfremove="true" w-closeonclick="true">
+        {/* <wup-notify w-placement="bottom-middle" w-autoclose="8000" w-selfremove="true" w-closeonclick="true">
           Some message here
-        </wup-notify>
+        </wup-notify> */}
         <h3>Different placements</h3>
         <small>Use $options.placement or attribute [w-placement]</small>
         <div className={styles.block}>
@@ -78,8 +78,7 @@ export default function NotifyView() {
             <Fragment key={a.placement}>
               <button
                 ref={(el) => {
-                  if (DEV && el && i === 1) {
-                    return;
+                  if (DEV && el && a.placement === "bottom-middle") {
                     [0 /* 1, 100, 100, 1000, 101, 102, 402, 403, 404 */].forEach((t) => {
                       setTimeout(() => el.click(), t);
                     });

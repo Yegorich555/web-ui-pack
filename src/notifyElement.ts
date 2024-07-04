@@ -305,6 +305,7 @@ export default class WUPNotifyElement<
     let isBottom = false;
     switch (this._opts.placement) {
       case "bottom-left":
+      case "bottom-middle":
       case "bottom-right":
         isBottom = true;
         break;
