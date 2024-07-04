@@ -227,9 +227,11 @@ export default class WUPNotifyElement<
   /** Reference to progress bar  */
   $refProgress?: HTMLDivElement;
 
+  $isPaused = false;
   /** Pause progress bar & closing by time (if option autoClose is set)
    * @returns ms that left before closing */
   $pause(): number {
+    this.#isPlayed = false;
     return this.#pauseRef?.pause() ?? -1;
   }
 
@@ -239,12 +241,20 @@ export default class WUPNotifyElement<
     anim: Animation;
   };
 
+  #isPlayed = false;
+  /** Returns whethere element in play mode and will be closed after a time */
+  get $isPlayed(): boolean {
+    return this.#isPlayed;
+  }
+
   /** Play/resume progress bar & close/hide by pointed time
    * @param ms time closing; if missed then will be used stored time from $pause OR from $options.autoClose */
   $play(ms?: number | null): void {
     if (!ms) {
       ms = this.#pauseRef?.leftPlayTime ?? (this._opts.autoClose || 0);
     }
+
+    this.#isPlayed = true;
 
     const now = Date.now();
     const t1 = setTimeout(() => {
@@ -338,10 +348,13 @@ export default class WUPNotifyElement<
     if (ms) {
       this.$play(ms);
       if (this._opts.pauseOnHover) {
-        // todo add same on touch (for touchPads)
         this.appendEvent(this, "mouseenter", () => {
           const left = this.$pause();
           this.appendEvent(this, "mouseleave", () => this.$play(left), { once: true });
+        });
+        this.appendEvent(this, "touchstart", () => {
+          // if (ev.type && ev.type !== "mouse") // allow only on touch & stylus: https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerType
+          this.$isPlayed ? this.$pause() : this.$play();
         });
       }
     }
