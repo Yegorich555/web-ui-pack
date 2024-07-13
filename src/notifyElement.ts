@@ -37,7 +37,7 @@ declare global {
       /** Position on the screen
        * @defaultValue 'bottom-left' */
       placement: "top-left" | "top-middle" | "top-right" | "bottom-left" | "bottom-middle" | "bottom-right";
-      /** Default time (ms) after that Notify is closed; if provide `0` then it will be closed only by click event
+      /** Time (ms) after that Notify is closed; if provide `0` then it will be closed only by click event
        *  @defaultValue 5000 (ms) */
       autoClose: number | null | false;
       /** Close on element click
@@ -46,7 +46,7 @@ declare global {
       /** Remove itself after closing
        * @defaultValue true */
       selfRemove: boolean;
-      /** Pause on mouse-hover OR touch AND when autoClose > 0
+      /** Pause on mouse-hover OR touch; AND when autoClose > 0
        * @defaultValue true */
       pauseOnHover: boolean;
       /** Pause when window loses focus
@@ -57,8 +57,8 @@ declare global {
     interface JSXProps extends WUP.BaseModal.JSXProps, WUP.Base.OnlyNames<Options> {
       "w-placement"?: Options["placement"];
       "w-autoClose"?: number | "";
-      "w-selfRemove"?: boolean | "";
       "w-closeOnClick"?: boolean | "";
+      "w-selfRemove"?: boolean | "";
       "w-pauseOnHover"?: boolean | "";
       "w-pauseOnWinBlur"?: boolean | "";
     }
@@ -462,7 +462,6 @@ const __openedItems: Array<WUPNotifyElement> = [];
 
 customElements.define(tagName, WUPNotifyElement);
 
-// todo add to types.html
 // todo bind with form
 // todo add Ctrl+Z hook ???
 // todo add ID to ability to refresh existed

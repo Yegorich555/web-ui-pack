@@ -753,6 +753,102 @@
 			]
 		},
 		{
+			"name": "wup-notify",
+			"description": "Notify element",
+			"references": [
+				{
+					"name": "demo",
+					"url": "https://yegorich555.github.io/web-ui-pack/notiy"
+				}
+			],
+			"attributes": [
+				{
+					"name": "w-placement",
+					"description": "Position on the screen @defaultValue `bottom-left`",
+					"values": [
+						{
+							"name": "top-left"
+						},
+						{
+							"name": "top-middle"
+						},
+						{
+							"name": "top-right"
+						},
+						{
+							"name": "bottom-left"
+						},
+						{
+							"name": "bottom-middle"
+						},
+						{
+							"name": "bottom-right"
+						}
+					]
+				},
+				{
+					"name": "w-autoclose",
+					"description": "Time (ms) after that Notify is closed; if provide `0` then it will be closed only by click event",
+					"values": [
+						{
+							"name": "0"
+						},
+						{
+							"name": "5000"
+						}
+					]
+				},
+				{
+					"name": "w-closeonclick",
+					"description": "Close on element click",
+					"values": [
+						{
+							"name": "true"
+						},
+						{
+							"name": "false"
+						}
+					]
+				},
+				{
+					"name": "w-selfremove",
+					"description": "Remove itself after closing",
+					"values": [
+						{
+							"name": "true"
+						},
+						{
+							"name": "false"
+						}
+					]
+				},
+				{
+					"name": "w-pauseonhover",
+					"description": "Pause on mouse-hover OR touch; AND when w-autoclose > 0",
+					"values": [
+						{
+							"name": "true"
+						},
+						{
+							"name": "false"
+						}
+					]
+				},
+				{
+					"name": "w-pauseonwinblur",
+					"description": "Pause when window loses focus",
+					"values": [
+						{
+							"name": "true"
+						},
+						{
+							"name": "false"
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "wup-num",
 			"description": "Form-control with number-input",
 			"references": [
