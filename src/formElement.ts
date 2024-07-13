@@ -124,6 +124,7 @@ declare module "preact/jsx-runtime" {
 const formStore: WUPFormElement[] = [];
 
 /** Wrapper of FormHTMLElement that collect values from controls
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/controls}
  * @example
  *  // init form
  *  const form = document.createElement("wup-form");

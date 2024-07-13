@@ -41,6 +41,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Popup element
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/popup}
  * @example
  * JS/TS
  * ```js

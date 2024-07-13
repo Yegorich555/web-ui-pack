@@ -92,6 +92,7 @@ abstract class TextAnyControl<
 > extends WUPTextControl<ValueType, TOptions, EventMap> {}
 
 /** Form-control with number-input
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/number}
  * @example
   const el = document.createElement("wup-num");
   el.$options.name = "number";

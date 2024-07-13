@@ -59,6 +59,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Form-control with password input
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/password}
  * @example
   const el = document.createElement("wup-pwd");
   el.$options.name = "password";

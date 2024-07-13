@@ -35,6 +35,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Form-control with checkbox
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/check}
  * @example
   const el = document.createElement("wup-check");
   el.$options.name = "accepted";

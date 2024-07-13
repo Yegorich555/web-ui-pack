@@ -123,6 +123,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Arc/circle chart based on SVG
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/circle}
  * @example
  * <wup-circle
  *   w-back="true"

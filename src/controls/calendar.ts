@@ -126,6 +126,7 @@ const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) 
 ) => el.appendChild(document.createElement(tag));
 
 /** Form-control represented by date picker
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/calendar}
  * @example
   const el = document.createElement("wup-calendar");
   el.$options.name = "dateOfBirthday";

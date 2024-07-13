@@ -89,7 +89,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Notify element
- * @see demo {@link https://yegorich555.github.io/web-ui-pack/notify} // todo add such demo link to every component
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/notify}
  * @example
  * JS/TS
  * ```js

@@ -91,6 +91,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Form-control with datepicker
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/date}
  * @tutorial Troubleshooting
  * * $options.format related only to displayed text, to work with other date-options like min/max use strict format 'YYYY-MM-DD'
  * @example

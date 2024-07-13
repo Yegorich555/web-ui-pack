@@ -65,6 +65,7 @@ interface ExtInputElement extends HTMLInputElement {
 }
 
 /** Form-control with radio buttons
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/radio}
  * @example
   const el = document.createElement("wup-radio");
   el.$options.name = "gender";

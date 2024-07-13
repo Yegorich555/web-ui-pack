@@ -41,6 +41,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Form-control with multiline text-input
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textarea}
  * @example
   const el = document.createElement("wup-textarea");
   el.$options.name = "textarea";

@@ -119,6 +119,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Modal element
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/modal}
  * @example
  * JS/TS
  * ```js

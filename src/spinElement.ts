@@ -73,6 +73,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Flexible animated element with ability to place over target element without position relative
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/spin}
  * @tutorial Troubleshooting
  * * when used several spin-types at once: define `--spin-1` & `--spin-2` colors manually per each spin-type
  * @example

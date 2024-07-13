@@ -46,6 +46,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Form-control with toggle button
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/switch}
  * @example
   const el = document.createElement("wup-switch");
   el.$options.name = "isDarkMode";
