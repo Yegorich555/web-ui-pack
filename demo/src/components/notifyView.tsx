@@ -35,9 +35,7 @@ export default function NotifyView() {
 </wup-notify>
 
 <!--EQUAL TO-->
-<wup-notify>
-  Some message here
-</wup-notify>`,
+<wup-notify>Some message here</wup-notify>`,
         ],
       }}
       features={[
@@ -123,7 +121,7 @@ export default function NotifyView() {
               WUPNotifyElement.$show({
                 defaults: { placement: "top-middle", autoClose: 0, closeOnClick: true },
                 className: styles.myTooltip,
-                textContent: `Example how to show me in 1 call`,
+                textContent: "Example how to show me in 1 call",
                 onRender: (el) => {
                   const iconEl = document.createElement("div");
                   iconEl.className = styles.iconAlert;
@@ -150,23 +148,24 @@ const codeJS = `js
 import WUPNotifyElement from "web-ui-pack/notifyElement";
 WUPNotifyElement.$use();
 
-WUPModalElement.$showConfirm({
-  defaults: { placement: "top-middle", autoClose: 0, closeOnClick: true }, // override init options here
-  className: "myTooltip",
-  textContent: "Simple example how to show me in 1 call",
-  // OR use onRender for customization
+ WUPNotifyElement.$show({
+  defaults: { placement: "top-middle", autoClose: 0, closeOnClick: true },
+  className: styles.myTooltip,
+  textContent: 'Example how to show me in 1 call',
   onRender: (el) => {
     const iconEl = document.createElement("div");
-    iconEl.className = "iconAlert";
+    iconEl.className = styles.iconAlert;
     iconEl.textContent = "!";
-    el.prepend(iconEl);
+    el.append(iconEl);
   },
-})`;
+});`;
 
 const codeCSS = `css
 /* SCSS */
 .myTooltip {
-  display: flex !important;
+  &[open] {
+    display: flex;
+  }
   justify-content: center;
   align-items: center;
   gap: 6px;
@@ -175,7 +174,7 @@ const codeCSS = `css
     display: none;
   }
 
-  >.iconAlert {
+  .iconAlert {
     width: 20px;
     height: 20px;
     line-height: 20px;
@@ -186,4 +185,4 @@ const codeCSS = `css
     background: #e74c3c;
     text-align: center;
   }
-} `;
+}`;

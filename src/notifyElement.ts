@@ -89,6 +89,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Notify element
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/notify} // todo add such demo link to every component
  * @example
  * JS/TS
  * ```js
@@ -213,7 +214,11 @@ export default class WUPNotifyElement<
     pauseOnWinBlur: true,
   };
 
-  static $show(opts: WUP.Notify.ShowOptions): void {
+  /** Create & show notification
+   * @returns created element
+   * @tutorial Troubleshooting
+   * * On close notify-element self-removed */
+  static $show(opts: WUP.Notify.ShowOptions): WUPNotifyElement {
     const me = document.createElement(tagName);
     opts.className && me.classList.add(opts.className);
     me.$options.selfRemove = true;
@@ -225,6 +230,7 @@ export default class WUPNotifyElement<
     document.body.appendChild(me);
     // callback to allow user re-define it
     opts.onRender?.(me); // WARN: onRender called here but real render will be on gotOpen
+    return me;
   }
 
   /** Reference to button[close] */
