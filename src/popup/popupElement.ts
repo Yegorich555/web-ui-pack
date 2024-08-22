@@ -165,7 +165,7 @@ export default class WUPPopupElement<
         --popup-bg: #fff;
         --popup-shadow: #0003;
         --tooltip-text: inherit;
-        --tooltip-bg: #fff8;
+        --tooltip-bg: rgba(255,255,255,0.9);
         --tooltip-shadow: #0003;
       }
       [wupdark] {
@@ -173,7 +173,7 @@ export default class WUPPopupElement<
         --popup-bg: #2b3645;
         --popup-shadow: #0006;
         --tooltip-text: #d8d8d8;
-        --tooltip-bg: rgba(16,70,82,0.8);
+        --tooltip-bg: rgba(16,70,82,0.9);
         --tooltip-shadow: #0006;
       }`;
   }
