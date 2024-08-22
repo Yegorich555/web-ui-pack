@@ -28,7 +28,7 @@ declare global {
        * * use below example to use custom logic @example
        *  items = [{
        *    value: 5,
-       *    label: (item, popup) => {
+       *    tooltip: (item, popup) => {
        *     setTimeout(()=>popup.innerHTML=...);
        *     return ""
        *  }] */
@@ -165,6 +165,8 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         position: relative;
         overflow: visible;
         margin: auto;
+        min-width: 100px;
+        min-height: 100px;
         --anim-t: 400ms;
       }
       :host>strong {

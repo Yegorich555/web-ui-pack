@@ -115,7 +115,7 @@ export default function CircleView() {
         <h3>Segmented</h3>
         <small>point several items in $options.items</small>
         <small>
-          point <b>label</b> per item to show tooltip
+          point <b>tooltip</b> per item to show tooltip
         </small>
         <wup-circle
           style={{ maxWidth: "120px" }}
