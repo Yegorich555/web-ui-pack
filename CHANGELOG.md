@@ -16,7 +16,9 @@
   - Handled case with custom label: so `<wup-circle><strong>Custom label</strong></wup-circle>` works in a proper way now
   - Extended default colors to 8 items
   - Added auto definition for half-size (radar-charts without whole circle) based on `$options.from` & `$options.to`
-- [helpers](README.md#helpers) [isIntoView](src/helpers/isIntoView.ts) [findScrollParentAll](src/helpers/findScrollParent.ts) [findScrollParent](src/helpers/findScrollParent.ts). Fixed `calling helpers triggers scroll events`
+- [helpers](README.md#helpers)
+  - [isIntoView](src/helpers/isIntoView.ts), [findScrollParentAll](src/helpers/findScrollParent.ts), [findScrollParent](src/helpers/findScrollParent.ts). Fixed `calling helpers triggers scroll events`
+  - [onScroll](src/helpers/onScroll.ts). Added event to option skip: `{ skip?: (ev: WheelEvent | TouchEvent, isTouchAction: boolean) => boolean; }`
 
 ---
 

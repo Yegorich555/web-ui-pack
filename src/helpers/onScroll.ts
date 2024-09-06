@@ -10,7 +10,7 @@ export interface IScrollOptions {
    * @defaultValue 10 */
   swipeDebounceDelta?: number;
   /** Return true to skip scroll event (when element somehow is disabled for example) */
-  skip?: () => boolean;
+  skip?: (ev: WheelEvent | TouchEvent, isTouchAction: boolean) => boolean;
 }
 
 /** Handles wheel & touch events for custom scrolling (without real scroll)
@@ -27,7 +27,7 @@ export default function onScroll(
     el,
     "wheel",
     (e) => {
-      if (options?.skip?.call(el)) {
+      if (options?.skip?.call(el, e, false)) {
         return;
       }
       e.preventDefault(); // prevent body scroll
@@ -38,7 +38,7 @@ export default function onScroll(
 
   const rOnTouch = onEvent(el, "touchstart", (ev) => {
     // WARN: don't prevent touchstart because it can prevent click events
-    if (options?.skip?.call(el)) {
+    if (options?.skip?.call(el, ev, true)) {
       return;
     }
     const isYScroll = !options?.isXScroll;
