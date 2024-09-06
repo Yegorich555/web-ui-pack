@@ -167,6 +167,8 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
           --circle-4: #9482bd;
           --circle-5: #8bc4d7;
           --circle-6: #1abdb5;
+          --circle-7: #a0db67;
+          --circle-8: #67dbba;
         }
         [wupdark] {
           --circle-0: #104652;
@@ -210,6 +212,8 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       :host>svg>g>path:nth-child(4) { fill: var(--circle-4); }
       :host>svg>g>path:nth-child(5) { fill: var(--circle-5); }
       :host>svg>g>path:nth-child(6) { fill: var(--circle-6); }
+      :host>svg>g>path:nth-child(7) { fill: var(--circle-7); }
+      :host>svg>g>path:nth-child(8) { fill: var(--circle-8); }
       :host>wup-popup,
       :host>wup-popup-arrow {
         white-space: pre;

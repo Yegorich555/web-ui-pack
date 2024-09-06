@@ -113,6 +113,8 @@ padding:0;}
           --circle-4: #9482bd;
           --circle-5: #8bc4d7;
           --circle-6: #1abdb5;
+          --circle-7: #a0db67;
+          --circle-8: #67dbba;
         }
         [wupdark] {
           --circle-0: #104652;
@@ -153,6 +155,8 @@ padding:0;}
       WUP-CIRCLE&gt;svg&gt;g&gt;path:nth-child(4) { fill: var(--circle-4); }
       WUP-CIRCLE&gt;svg&gt;g&gt;path:nth-child(5) { fill: var(--circle-5); }
       WUP-CIRCLE&gt;svg&gt;g&gt;path:nth-child(6) { fill: var(--circle-6); }
+      WUP-CIRCLE&gt;svg&gt;g&gt;path:nth-child(7) { fill: var(--circle-7); }
+      WUP-CIRCLE&gt;svg&gt;g&gt;path:nth-child(8) { fill: var(--circle-8); }
       WUP-CIRCLE&gt;wup-popup,
       WUP-CIRCLE&gt;wup-popup-arrow {
         white-space: pre;
