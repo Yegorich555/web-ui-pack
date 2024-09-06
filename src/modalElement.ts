@@ -242,6 +242,7 @@ export default class WUPModalElement<
     let isConfirmed = false;
     if (btnConfirm) {
       (btnConfirm as HTMLElement).onclick = (ev) => {
+        // todo need await here
         isConfirmed = true;
         setTimeout(() => (isConfirmed = false), 1);
         (window as any).__wupFixCycleClick = true;
