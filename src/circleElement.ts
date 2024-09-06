@@ -197,6 +197,14 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         white-space: pre-line;
         text-align: center;
       }
+      :host[half] {
+        aspect-ratio: 2;
+      }
+      :host[half]>strong {
+        top: initial;
+        bottom: 0;
+        transform: translateX(-50%);
+      }
       :host>svg {
         overflow: visible;
         display: block;
@@ -268,6 +276,10 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       this.removeChildren.call(this.$refSVG); // clean before new render
       skipAnim = true; // renderNew without animation
     }
+
+    const isHalf = Math.abs(this._opts.to - this._opts.from) === 180;
+    this.setAttr("half", isHalf, true);
+
     this.renderItems(skipAnim);
   }
 
@@ -619,5 +631,3 @@ export function drawArc(
     "Z", // end path
   ].join(" ");
 }
-
-// todo add auto-half-size for radar

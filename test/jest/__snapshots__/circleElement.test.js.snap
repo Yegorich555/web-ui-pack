@@ -140,6 +140,14 @@ padding:0;}
         white-space: pre-line;
         text-align: center;
       }
+      WUP-CIRCLE[half] {
+        aspect-ratio: 2;
+      }
+      WUP-CIRCLE[half]&gt;strong {
+        top: initial;
+        bottom: 0;
+        transform: translateX(-50%);
+      }
       WUP-CIRCLE&gt;svg {
         overflow: visible;
         display: block;

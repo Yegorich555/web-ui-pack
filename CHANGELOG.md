@@ -15,6 +15,7 @@
   - Add defined color for tooltip function `item.tooltip = (itemResult, popup) => console.warn(itemResult.color)`
   - Handled case with custom label: so `<wup-circle><strong>Custom label</strong></wup-circle>` works in a proper way now
   - Extended default colors to 8 items
+  - Added auto definition for half-size (radar-charts without whole circle) based on `$options.from` & `$options.to`
 
 ---
 

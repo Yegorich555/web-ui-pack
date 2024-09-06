@@ -32,6 +32,11 @@ export default function CircleView() {
   w-items="window.circleItems"
 >
   <strong>Custom label</strong>
+</wup-circle>
+
+<!--EQUAL TO-->
+<wup-circle w-items="window.circleItems">
+  <strong>Custom label</strong>
 </wup-circle>`,
         ],
       }}
@@ -62,9 +67,16 @@ export default function CircleView() {
       <section>
         <h3>Gauge style</h3>
         <small>
-          single segment with corners 50% and custom <b>$options.from</b> & <b>to</b>
+          single segment with <b>.$options.corner=0.5</b> and <b>.$options.from=-90</b> & <b>.$options.to=90</b>
           <br />
-          <b>WARN:</b> don't forget to reduce height in half of size (via styles)
+          <b>WARN:</b> half-size doesn't work for Safari 14- see{" "}
+          <a
+            href="https://developer.mozilla.org/en-US/docs/Web/CSS/aspect-ratio#browser_compatibility"
+            target="_blank"
+            rel="noreferrer"
+          >
+            CSS compatibility
+          </a>
         </small>
         <div className={styles.group}>
           <wup-circle
@@ -162,7 +174,7 @@ export default function CircleView() {
           <strong>Your Label</strong>
         </wup-circle>
         <small>
-          point options <b>from=-90 & to=90</b>
+          point options <b>w-from='-90''</b> and <b>w-to='90'</b>
         </small>
         <wup-circle
           class={styles.half}
