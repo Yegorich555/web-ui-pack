@@ -125,7 +125,7 @@ padding:0;}
         overflow: visible;
         margin: auto;
         min-width: 100px;
-        min-height: 100px;
+        min-height: 50px;
         --anim-t: 400ms;
       }
       WUP-CIRCLE&gt;strong {
@@ -134,6 +134,9 @@ padding:0;}
         transform: translate(-50%,-50%);
         top: 50%; left: 50%;
         font-size: larger;
+        max-width: calc(100% - 20px);
+        white-space: pre-line;
+        text-align: center;
       }
       WUP-CIRCLE&gt;svg {
         overflow: visible;

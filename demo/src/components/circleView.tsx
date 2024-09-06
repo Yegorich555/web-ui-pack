@@ -128,8 +128,10 @@ export default function CircleView() {
                 { value: 1, tooltip: "Item 1\nvalue: {#}, percent: {#%}" },
                 {
                   value: 100,
-                  tooltip: (item) =>
-                    `Custom tooltip\nvalue: ${item.value}, percent: ${Math.round(item.percentage * 10) / 10}%`,
+                  tooltip: (item) => {
+                    console.warn(item.color);
+                    return `Custom tooltip\nvalue: ${item.value}, percent: ${Math.round(item.percentage * 10) / 10}%`;
+                  },
                 },
                 { value: 13, tooltip: "Item 3\nvalue: {#}" },
                 { value: 27, tooltip: "Item 4\nvalue: {#}" },

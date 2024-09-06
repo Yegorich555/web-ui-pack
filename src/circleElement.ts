@@ -17,7 +17,9 @@ declare global {
   namespace WUP.Circle {
     /** Item object related to */
     interface Item {
+      /** Value of item that will be rendered; depends on @see {@link Options.min}, {@link Options.max}, {@link Options.from}, {@link Options.to}  */
       value: number;
+      /** Color for item. Default colors defined in css-variables like `--circle-X: #e4e4e4;` where `X` is number of item */
       color?: string;
       /** Point any text | function to show tooltip
        * @hints
@@ -32,12 +34,23 @@ declare global {
        *     setTimeout(()=>popup.innerHTML=...);
        *     return ""
        *  }] */
-      tooltip?: string | ((item: Item & { percentage: number }, popup: WUPPopupElement) => string);
+      tooltip?: string | ItemTooltipFn;
     }
+    /** Callback function for rendering tooltip */
+    type ItemTooltipFn = (item: ItemResult, popup: WUPPopupElement) => string;
+    /** Returns in tooltip callback function with extra fields */
+    interface ItemResult extends Item {
+      /** Pointed {@link Item.color} OR defined from css-variable like `--circle-X: #e4e4e4;` where `X` is number of item */
+      color: string;
+      /** Value relative to another items where 100% is SUM or difference max-min for single item */
+      percentage: number;
+    }
+
     interface SVGItem extends SVGPathElement {
       _relatedItem: Item;
       _hasTooltip?: true;
       _center: { x: number; y: number };
+      _definedColor: string;
     }
     interface Options {
       /** Width of each segment; expected 1..100 (perecentage)
@@ -166,7 +179,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         overflow: visible;
         margin: auto;
         min-width: 100px;
-        min-height: 100px;
+        min-height: 50px;
         --anim-t: 400ms;
       }
       :host>strong {
@@ -175,6 +188,9 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         transform: translate(-50%,-50%);
         top: 50%; left: 50%;
         font-size: larger;
+        max-width: calc(100% - 20px);
+        white-space: pre-line;
+        text-align: center;
       }
       :host>svg {
         overflow: visible;
@@ -354,12 +370,12 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         const c = arr[i];
         // apply colors
         const path = this.$refItems.appendChild(this.make("path")) as WUP.Circle.SVGItem;
-        const col = a.color || style.getPropertyValue(`--circle-${i + 1}`).trim();
-        col && path.setAttribute("fill", col); // only for saving as file-image
+        const cssVar = a.color || style.getPropertyValue(`--circle-${i + 1}`).trim() || "#000";
+        path.setAttribute("fill", cssVar); // only for saving as file-image
         if (a.color) {
           path.style.fill = a.color; // attr [fill] can't override css-rules
         }
-
+        path._definedColor = a.color || cssVar;
         path._center = { x: radius, y: hw };
         if (a.tooltip) {
           hasTooltip = true;
@@ -410,7 +426,12 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       return DOMRect.fromRect({ x, y, width: 0.01, height: 0.01 });
     };
     const total = this.$options.items!.reduce((sum, a) => sum + a.value, 0);
-    const item = { ...segment._relatedItem, percentage: mathScaleValue(segment._relatedItem.value, 0, total, 0, 100) };
+    const item: WUP.Circle.ItemResult = {
+      ...segment._relatedItem,
+      color: segment._definedColor,
+      percentage: mathScaleValue(segment._relatedItem.value, 0, total, 0, 100),
+    };
+
     const lbl = item.tooltip!;
 
     popup.innerText =
@@ -575,3 +596,6 @@ export function drawArc(
     "Z", // end path
   ].join(" ");
 }
+
+// todo add more details about label
+// todo add auto-half-size for radar

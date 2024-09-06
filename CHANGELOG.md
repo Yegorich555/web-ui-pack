@@ -4,13 +4,15 @@
 
 ## 1.1.1 (\_\_\_)
 
-### Fixes
+### Fixes & Improvements
 
 ---
 
 - [SelectManyControl](src/controls/selectMany.ts). Fixed behavior for sorting (drag/drop) when item moved between lines
 - [PopupElement](src/popup/popupElement.ts). Reduced opacity for tooltip background `0.8` => `0.9`
-- [CircleElement](src/circleElement.ts). Set `minWidth: 100px` & `minHeight: 100px` to avoid init size 0 for some cases
+- [CircleElement](src/circleElement.ts)
+  - Set `minWidth: 100px` & `minHeight: 50px` to avoid init size 0 for some cases
+  - Add defined color for tooltip function `item.tooltip = (itemResult, popup) => console.warn(itemResult.color)`
 
 ---
 
