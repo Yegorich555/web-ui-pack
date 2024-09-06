@@ -13,6 +13,7 @@
 - [CircleElement](src/circleElement.ts)
   - Set `minWidth: 100px` & `minHeight: 50px` to avoid init size 0 for some cases
   - Add defined color for tooltip function `item.tooltip = (itemResult, popup) => console.warn(itemResult.color)`
+  - Handled case with custom label: so `<wup-circle><strong>Custom label</strong></wup-circle>` works in a proper way now
 
 ---
 

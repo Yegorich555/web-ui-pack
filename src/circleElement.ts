@@ -17,7 +17,7 @@ declare global {
   namespace WUP.Circle {
     /** Item object related to */
     interface Item {
-      /** Value of item that will be rendered; depends on @see {@link Options.min}, {@link Options.max}, {@link Options.from}, {@link Options.to}  */
+      /** Value of item that will be rendered; depends on @see {@link Options.min}, {@link Options.max}, {@link Options.from}, {@link Options.to} */
       value: number;
       /** Color for item. Default colors defined in css-variables like `--circle-X: #e4e4e4;` where `X` is number of item */
       color?: string;
@@ -26,7 +26,7 @@ declare global {
        * * set `Item value {#}` to use tooltip where `{#}` is pointed value
        * * point function to use custom logic
        * * override `WUPCircleElement.prototype.renderTooltip` to use custom logic
-       * * to change hover-timeouts see `WUPCircleElement.$defaults.hover...`
+       * * to change hover-timeouts see {@link WUPCircleElement.$defaults.hoverOpenTimeout}, {@link WUPCircleElement.$defaults.hoverCloseTimeout}_
        * * use below example to use custom logic @example
        *  items = [{
        *    value: 5,
@@ -86,7 +86,8 @@ declare global {
       /** Timeout in ms before popup closes on mouse-leave of target;
        * @defaultValue 0 */
       hoverCloseTimeout: number;
-      /** Items related to circle-segments */
+      /** Items related to circle-segments;
+       * If pointed single item then label will be auto created. For other label-details @see {@link WUPCircleElement.prototype.$refLabel}  */
       items: Item[];
     }
     interface JSXProps extends WUP.Base.OnlyNames<Omit<Options, "hoverOpenTimeout" | "hoverCloseTimeout" | "items">> {
@@ -147,7 +148,9 @@ declare module "preact/jsx-runtime" {
  *   w-width="14"
  *   w-corner="0.25"
  *   w-items="window.circleItems"
- *  ></wup-circle>
+ *  >
+ *   <strong>Some custom label</strong>
+ * </wup-circle>
  * // or JS/TS
  * const el = document.createElement("wup-circle");
  * el.$options.items = [{value:20}]; // etc.
@@ -239,6 +242,11 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
 
   $refSVG = this.make("svg");
   $refItems = this.make("g");
+  /** Reference to <strong> element
+   * @tutorial Troubleshooting/rules:
+   * * label auto created only when pointed items.length === 1
+   * * if you need custom label then use `<wup-circle><strong>Custom label here</strong><wup-circle>`
+   * * Override {@link WUPCircleElement.prototype.renderLabel} to customize behavior when single item */
   $refLabel?: HTMLElement;
 
   /** Creates new svg-part */
@@ -397,13 +405,24 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     // render/remove label
     let ariaLbl = "";
     if (items.length === 1) {
-      this.$refLabel = this.$refLabel ?? this.appendChild(document.createElement("strong"));
-      const rawV = items[0].value;
-      const perc = mathScaleValue(rawV, vMin, vMax, 0, 100);
-      this.renderLabel(this.$refLabel, perc, rawV);
-      ariaLbl = this.$refLabel.textContent!;
+      let isCustomLabel = false;
+      if (!this.$refLabel) {
+        // allow to use label created outside internal logic
+        const existed = this.querySelector("strong");
+        if (existed) {
+          ariaLbl = existed.textContent || "";
+          isCustomLabel = true;
+        }
+      }
+      if (!isCustomLabel) {
+        this.$refLabel ??= this.appendChild(document.createElement("strong"));
+        const rawV = items[0].value;
+        const perc = mathScaleValue(rawV, vMin, vMax, 0, 100);
+        this.renderLabel(this.$refLabel, perc, rawV);
+        ariaLbl = this.$refLabel.textContent!;
+      }
     } else {
-      this.$refLabel && this.$refLabel.remove();
+      this.$refLabel?.remove();
       delete this.$refLabel;
       ariaLbl = `Values: ${items.map((a) => a.value).join(",")}`;
     }
@@ -504,7 +523,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     this.appendChild(this.$refSVG);
   }
 
-  /** Called every time as need text-value */
+  /** Called every time as need text-value (only if $options.items.length === 1) */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   renderLabel(label: HTMLElement, percent: number, rawValue: number): void {
     label.textContent = `${Math.round(percent)}%`;
@@ -597,5 +616,4 @@ export function drawArc(
   ].join(" ");
 }
 
-// todo add more details about label
 // todo add auto-half-size for radar

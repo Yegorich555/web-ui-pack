@@ -511,4 +511,46 @@ describe("circleElement", () => {
     await h.wait();
     expect(onTooltip).toBeCalledTimes(0); // no new actions because no tooltips anymore
   });
+
+  test("custom label", async () => {
+    // default behavior
+    el.$options.items = [{ value: 23 }];
+    await nextFrame();
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<svg viewBox="0 0 100 100" role="img" aria-label="23%"><path d="M0 50 A50 50 0 1 0 100 50 A50 50 0 1 0 0 50 M14 50 A36 36 0 1 0 86 50 A36 36 0 1 0 14 50 Z"></path><g><path fill="#000" d="M 50 3.5 A 3.5 3.5 0 0 1 53.497142366876645 0.12244998733601875 A 50 50 0 0 1 99.04594247203667 40.279119019879495 A 3.5 3.5 0 0 1 96.13333361112322 44.17200463925985 L 89.18853070192188 45.04933727420998 A 3.5 3.5 0 0 1 85.10948928416866 42.04237710086449 A 36 36 0 0 0 53.49448884497292 14.170004916099138 A 3.5 3.5 0 0 1 50 10.5 Z"></path></g></svg><strong>23%</strong>"`
+    );
+
+    // must able to override default strong
+    el = document.body.appendChild(document.createElement("wup-circle"));
+    el.$options.items = [{ value: 23 }];
+    const lbl = document.createElement("strong");
+    lbl.textContent = "My Custom";
+    el.appendChild(lbl);
+    await nextFrame();
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<svg viewBox="0 0 100 100" role="img" aria-label="My Custom"><path d="M0 50 A50 50 0 1 0 100 50 A50 50 0 1 0 0 50 M14 50 A36 36 0 1 0 86 50 A36 36 0 1 0 14 50 Z"></path><g><path fill="#000" d="M 50 3.5 A 3.5 3.5 0 0 1 53.497142366876645 0.12244998733601875 A 50 50 0 0 1 99.04594247203667 40.279119019879495 A 3.5 3.5 0 0 1 96.13333361112322 44.17200463925985 L 89.18853070192188 45.04933727420998 A 3.5 3.5 0 0 1 85.10948928416866 42.04237710086449 A 36 36 0 0 0 53.49448884497292 14.170004916099138 A 3.5 3.5 0 0 1 50 10.5 Z"></path></g></svg><strong>My Custom</strong>"`
+    );
+
+    // when several items
+    el = document.body.appendChild(document.createElement("wup-circle"));
+    el.$options.items = [{ value: 23 }, { value: 25 }];
+    const lbl2 = document.createElement("strong");
+    lbl2.textContent = "My Custom";
+    el.appendChild(lbl2);
+    await nextFrame();
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<svg viewBox="0 0 100 100" role="img" aria-label="Values: 23,25"><path d="M0 50 A50 50 0 1 0 100 50 A50 50 0 1 0 0 50 M14 50 A36 36 0 1 0 86 50 A36 36 0 1 0 14 50 Z"></path><g><path fill="#000" d="M 50 3.5 A 3.5 3.5 0 0 1 53.497142366876645 0.12244998733601875 A 50 50 0 0 1 61.61062948523617 98.63325285189717 A 3.5 3.5 0 0 1 57.6080015954423 95.87339437761007 L 56.46271103268755 88.96772210571177 A 3.5 3.5 0 0 1 59.30964999347546 84.77542835104957 A 36 36 0 0 0 53.49448884497292 14.170004916099138 A 3.5 3.5 0 0 1 50 10.5 Z"></path></g></svg><strong>My Custom</strong>"`
+    );
+
+    // just for coverage - when strong is empty
+    el = document.body.appendChild(document.createElement("wup-circle"));
+    el.$options.items = [{ value: 23 }];
+    const lbl3 = document.createElement("strong");
+    // lbl3.textContent = "My Custom";
+    el.appendChild(lbl3);
+    await nextFrame();
+    expect(el.innerHTML).toMatchInlineSnapshot(
+      `"<svg viewBox="0 0 100 100" role="img" aria-label=""><path d="M0 50 A50 50 0 1 0 100 50 A50 50 0 1 0 0 50 M14 50 A36 36 0 1 0 86 50 A36 36 0 1 0 14 50 Z"></path><g><path fill="#000" d="M 50 3.5 A 3.5 3.5 0 0 1 53.497142366876645 0.12244998733601875 A 50 50 0 0 1 99.04594247203667 40.279119019879495 A 3.5 3.5 0 0 1 96.13333361112322 44.17200463925985 L 89.18853070192188 45.04933727420998 A 3.5 3.5 0 0 1 85.10948928416866 42.04237710086449 A 36 36 0 0 0 53.49448884497292 14.170004916099138 A 3.5 3.5 0 0 1 50 10.5 Z"></path></g></svg><strong></strong>"`
+    );
+  });
 });

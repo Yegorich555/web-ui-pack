@@ -17,11 +17,28 @@ export default function CircleView() {
       details={{
         tag: "wup-circle",
         linkDemo: "demo/src/components/circleView.tsx",
+        customHTML: [
+          `html
+<wup-circle
+  w-back="true"
+  w-from="0"
+  w-to="360"
+  w-space="2"
+  w-minsize="10"
+  w-min="0"
+  w-max="100"
+  w-width="14"
+  w-corner="0.25"
+  w-items="window.circleItems"
+>
+  <strong>Custom label</strong>
+</wup-circle>`,
+        ],
       }}
       features={[
-        "With rounded corners (use $options.corner)", //
+        "Rounded corners (use $options.corner)",
         "Highly configurable (via css-vars, attrs)",
-        "Fits parent size",
+        "Auto fits parent size",
       ]}
       className={styles.page}
     >
@@ -141,7 +158,9 @@ export default function CircleView() {
               ];
             }
           }}
-        />
+        >
+          <strong>Your Label</strong>
+        </wup-circle>
         <small>
           point options <b>from=-90 & to=90</b>
         </small>
@@ -163,7 +182,9 @@ export default function CircleView() {
               ];
             }
           }}
-        />
+        >
+          <strong>Your Label</strong>
+        </wup-circle>
       </section>
       <section>
         <h3>Complex view with labels</h3>
