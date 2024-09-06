@@ -19,11 +19,19 @@ export default function findScrollParent(el: Element): HTMLElement | null {
   if (p.scrollTop > 0 || p.scrollLeft > 0) {
     return p;
   }
+
+  // prevent event triggering via p.onscroll = e => e.stopImmediatePropagation...
+  const orig = p.onscroll;
+  p.onscroll = (e) => {
+    e.stopImmediatePropagation();
+  };
+
   // try to change and check if it's affected
   let prev = p.scrollTop;
   p.scrollTop += 10; // 10 to fix case when zoom applied
   if (prev !== p.scrollTop) {
     p.scrollTop = prev;
+    p.onscroll = orig;
     return p; // WARN: scroll changeable even if css overflow:hidden
   }
 
@@ -31,8 +39,12 @@ export default function findScrollParent(el: Element): HTMLElement | null {
   p.scrollLeft += 10; // 10 to fix case when zoom applied
   if (prev !== p.scrollLeft) {
     p.scrollLeft = prev;
+    p.onscroll = orig;
     return p;
   }
+
+  p.onscroll = orig;
+
   if (hasFixedPos(p)) {
     return null; // skip search if current element with fixed position
   }

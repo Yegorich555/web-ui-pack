@@ -29,8 +29,14 @@ describe("helper.findScrollParent", () => {
     expect(findScrollParent(el)).toBeNull();
     expect(findScrollParent(document.body)).toBeNull();
 
-    jest.restoreAllMocks(); // to allow change srollTop for body
+    jest.restoreAllMocks(); // to allow change scrollTop for body
+    const onScroll = jest.fn();
+    const onScroll2 = jest.fn();
+    document.body.onscroll = onScroll;
+    document.body.addEventListener("scroll", onScroll2);
     expect(findScrollParent(el) === document.body).toBe(true);
+    expect(onScroll).not.toBeCalled();
+    expect(onScroll2).not.toBeCalled();
 
     document.body.scrollLeft = 2; // cover case when item is scrolled
     expect(findScrollParent(el) === document.body).toBe(true);
@@ -56,7 +62,7 @@ describe("helper.findScrollParent", () => {
     lockScroll(main);
     expect(findScrollParent(div)?.tagName.toLowerCase()).toBeFalsy(); // despite body is scrollable but main with fixed position
 
-    // again when posiotion-fixed added via classNames
+    // again when position-fixed added via classNames
     main.style.position = "";
     // simulate defaults
     const orig = window.getComputedStyle;
