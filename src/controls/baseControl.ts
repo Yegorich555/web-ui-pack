@@ -982,7 +982,7 @@ export default abstract class WUPBaseControl<
   _errMsg?: string;
   #refErrTarget?: HTMLElement;
   /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
-  protected goShowError(err: string, target: HTMLElement): void {
+  protected goShowError(err: string, target: HTMLInputElement): void {
     if (!err) {
       this.throwError("Error message missed");
       return;
@@ -1004,7 +1004,7 @@ export default abstract class WUPBaseControl<
     this._opts.validationShowAll && this.renderValidations(this.$refError);
 
     this.#refErrTarget = target;
-    (target as HTMLInputElement).setCustomValidity?.call(target, err);
+    target.setCustomValidity?.call(target, err);
     this.setAttribute("invalid", "");
     const lbl = this.$refTitle.textContent;
     this.$refError.firstElementChild!.textContent = lbl ? `${this.#ctr.$ariaError} ${lbl}:` : "";
@@ -1014,7 +1014,7 @@ export default abstract class WUPBaseControl<
     const renderedErr = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
     this.setAttr.call(el, "class", renderedErr ? this.#ctr.classNameHidden : null);
 
-    target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
+    target.setAttribute("aria-errormessage", this.$refError.id);
     if (!this.$isFocused) {
       this.$refError!.setAttribute("role", "alert"); // force to announce error when focus is already missed
       renderedErr?.scrollIntoView();
@@ -1031,7 +1031,7 @@ export default abstract class WUPBaseControl<
       this.$refError = undefined;
 
       (this.#refErrTarget as HTMLInputElement).setCustomValidity?.call(this.#refErrTarget, "");
-      this.#refErrTarget!.removeAttribute("aria-describedby");
+      this.#refErrTarget!.removeAttribute("aria-errormessage");
       this.removeAttribute("invalid");
       this.#refErrTarget = undefined;
     }
