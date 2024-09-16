@@ -22,7 +22,7 @@ Template repo with Angular: [webpack-angular](https://github.com/Yegorich555/web
 - Focus on web-accessibility best practices (most popular packages have lower accessibility)
 - High scalable and easily customizable (every component is developed for easy inheritance and redefine/extend default logic)
 - Built-in CSS variables to use custom color themes with native ordinary styling (CSS, SCSS, etc.)
-- Built-in dark color scheme. Add attribute `wupdark` (`<body wupdark>`) and define main background & text colors
+- Built-in dark color scheme. Add attribute `wupdark` (`<body wupdark>`) and define your colors for other content outside web-ui-pack
 - Built-in Typescript (coverage types 100%)
 - Built-in `.jsx/.tsx` support (for React/Preact)
 - Supports different locales (based on [localeInfo](src/objects/localeInfo.ts) helper). For changing built-in messages override global function `window.__wupln` (details you can find in your editor during the coding via built-in intellisense)
@@ -52,7 +52,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
    }
    ```
 
-6. Type `<wup w-` to see suggestions (if it doesn't work reload VSCode). More details below
+6. Type `<wup-` & `<wup-circle w-...` to see suggestions (if it doesn't work reload VSCode). More details below
 
 ## TODO
 
