@@ -25,19 +25,51 @@ beforeEach(() => {
 
 describe("helper.findScrollParent", () => {
   test("default behavior", () => {
+    jest.useFakeTimers();
+
     const el = document.body.appendChild(document.createElement("div"));
     expect(findScrollParent(el)).toBeNull();
     expect(findScrollParent(document.body)).toBeNull();
 
     jest.restoreAllMocks(); // to allow change scrollTop for body
-    const onScroll = jest.fn();
-    const onScroll2 = jest.fn();
-    document.body.onscroll = onScroll;
-    document.body.addEventListener("scroll", onScroll2);
+    let { scrollTop } = document.body;
+    let isStopped = false;
+    jest.spyOn(document.body, "scrollTop", "set").mockImplementation((v) => {
+      scrollTop = v;
+      // simulate default behavior
+      const ev = new Event("scroll", { bubbles: true, cancelable: true });
+      ev.stopImmediatePropagation = () => {
+        isStopped = true;
+      };
+      document.body.dispatchEvent(ev);
+    });
+    jest.spyOn(document.body, "scrollTop", "get").mockImplementation(() => scrollTop);
     expect(findScrollParent(el) === document.body).toBe(true);
-    expect(onScroll).not.toBeCalled();
-    expect(onScroll2).not.toBeCalled();
+    expect(isStopped).toBe(true);
+    jest.advanceTimersByTime(10);
+    jest.restoreAllMocks(); // to allow change scrollTop for body
 
+    // again with scrollLeft
+    let { scrollLeft } = document.body;
+    isStopped = false;
+    jest.spyOn(document.body, "scrollTop", "get").mockImplementation(() => 0);
+    jest.spyOn(document.body, "scrollLeft", "set").mockImplementation((v) => {
+      scrollLeft = v;
+      // simulate default behavior
+      const ev = new Event("scroll", { bubbles: true, cancelable: true });
+      ev.stopImmediatePropagation = () => {
+        isStopped = true;
+      };
+      document.body.dispatchEvent(ev);
+    });
+    jest.spyOn(document.body, "scrollLeft", "get").mockImplementation(() => scrollLeft);
+    expect(findScrollParent(el) === document.body).toBe(true);
+    expect(isStopped).toBe(true);
+    jest.advanceTimersByTime(10);
+    jest.restoreAllMocks();
+    unLockScroll(document.body); // WARN: jest-bug: previous restoreAllMocks doesn't restore all actually
+
+    document.body.scrollTop = 0;
     document.body.scrollLeft = 2; // cover case when item is scrolled
     expect(findScrollParent(el) === document.body).toBe(true);
     document.body.scrollLeft = 0;

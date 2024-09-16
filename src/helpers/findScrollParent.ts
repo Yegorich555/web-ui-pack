@@ -31,7 +31,7 @@ export default function findScrollParent(el: Element): HTMLElement | null {
   p.scrollTop += 10; // 10 to fix case when zoom applied
   if (prev !== p.scrollTop) {
     p.scrollTop = prev;
-    p.onscroll = orig;
+    setTimeout(() => (p.onscroll = orig), 1);
     return p; // WARN: scroll changeable even if css overflow:hidden
   }
 
@@ -39,7 +39,7 @@ export default function findScrollParent(el: Element): HTMLElement | null {
   p.scrollLeft += 10; // 10 to fix case when zoom applied
   if (prev !== p.scrollLeft) {
     p.scrollLeft = prev;
-    p.onscroll = orig;
+    setTimeout(() => (p.onscroll = orig), 1);
     return p;
   }
 
