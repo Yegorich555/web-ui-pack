@@ -8,16 +8,18 @@ export const enum SubmitActions {
   none = 0,
   /** Scroll to first error (if exists) and focus control */
   goToError = 1,
-  /** Validate until first error is found (otherwise validate all) */
+  /** Validate until first error (otherwise validate all) */
   validateUntilFirst = 1 << 1,
+  /** Validate only that user can change and skip controls that notVisible/disabled/readonly (values from such items still collected) */
+  validateChangeable = 1 << 2,
   /** Collect to model only changed values */
-  collectChanged = 1 << 2,
+  collectChanged = 1 << 3,
   /** Reset isDirty and assign $value to $initValue for controls (on success only) */
-  reset = 1 << 3,
+  reset = 1 << 4,
   /** Lock the whole form during the pending state (set $isPending = true or provide `promise` to submitEvent.waitFor);
    * Otherwise user can submit several times in a short time;
    * If promise resolves during the short-time pending state won't be set, otherwise it takes at least 300ms via helper {@link promiseWait} */
-  lockOnPending = 1 << 4,
+  lockOnPending = 1 << 5,
 }
 
 const tagName = "wup-form";
@@ -271,7 +273,11 @@ export default class WUPFormElement<
   /** Default options - applied to every element. Change it to configure default behavior */
   static $defaults: WUP.Form.Options = {
     submitActions:
-      SubmitActions.goToError | SubmitActions.validateUntilFirst | SubmitActions.reset | SubmitActions.lockOnPending,
+      SubmitActions.goToError |
+      SubmitActions.validateUntilFirst |
+      SubmitActions.validateChangeable |
+      SubmitActions.reset |
+      SubmitActions.lockOnPending,
     autoComplete: false,
     autoFocus: false,
     autoStore: false,
@@ -359,19 +365,23 @@ export default class WUPFormElement<
     this.gotSubmit(null, this);
   }
 
-  /** Validate all attached & not disabled controls
+  /** Validate all attached controls
    * @param tillFirstInvalid point `true` if need to find first invalid control; if skipped then will be defined from `$options.submitActions: SubmitActions.validateUntilFirst`
+   * @param includeLocked collect & validate also hidden/readonly/disabled controls
    * @returns array of invalid controls (empty if all are valid) */
-  $validate(tillFirstInvalid?: boolean): Array<IBaseControl> {
+  $validate(tillFirstInvalid?: boolean, includeLocked = false): Array<IBaseControl> {
     if (tillFirstInvalid === undefined) {
       tillFirstInvalid = !!(this._opts.submitActions & SubmitActions.validateUntilFirst);
     }
-    const arrCtrl = this.$controlsAttached;
+    let arrCtrl = this.$controlsAttached;
+    if (!includeLocked) {
+      arrCtrl = arrCtrl.filter((c) => c.offsetHeight > 0 && !c.$isReadOnly && !c.$isDisabled);
+    }
     if (tillFirstInvalid) {
-      const ctrl = arrCtrl.find((c) => c.validateBySubmit() && c.canShowError);
+      const ctrl = arrCtrl.find((c) => c.validateBySubmit());
       return ctrl ? [ctrl] : [];
     }
-    return arrCtrl.filter((c) => c.validateBySubmit() && c.canShowError);
+    return arrCtrl.filter((c) => c.validateBySubmit());
   }
 
   /** Called on every spin-render */
@@ -454,10 +464,14 @@ export default class WUPFormElement<
     // validate
     let errCtrl: IBaseControl | undefined;
     let arrCtrl = this.$controlsAttached;
+    const ctrlsAffected =
+      this._opts.submitActions & SubmitActions.validateChangeable
+        ? arrCtrl.filter((c) => c.offsetHeight > 0 && !c.$isReadOnly && !c.$isDisabled)
+        : arrCtrl;
     if (this._opts.submitActions & SubmitActions.validateUntilFirst) {
-      errCtrl = arrCtrl.find((c) => c.validateBySubmit() && c.canShowError);
+      errCtrl = ctrlsAffected.find((c) => c.validateBySubmit() && c.canShowError);
     } else {
-      arrCtrl.forEach((c) => {
+      ctrlsAffected.forEach((c) => {
         const err = c.validateBySubmit();
         if (err && !errCtrl && c.canShowError) {
           errCtrl = c;

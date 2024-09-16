@@ -8,6 +8,8 @@
 
 ---
 
+- [Form](src/formElement.ts)
+  - Added skip-validation (by default) for `readonly/disabled/hidden` controls. **BREAKING:** changed enum `SubmitActions` & `FormElement.$defaults.submitActions`
 - [SelectManyControl](src/controls/selectMany.ts). Fixed behavior for sorting (drag/drop) when item moved between lines
 - [PopupElement](src/popup/popupElement.ts). Reduced opacity for tooltip background `0.8` => `0.9`
 - [CircleElement](src/circleElement.ts)
@@ -78,7 +80,7 @@
 - **Controls**. Added css-animation for box-shadow/borders
 - [RadioControl](src/controls/radio.ts). Added comparison by item.id to allow use cloned items/value
 - [NumberControl](src/controls/number.ts). New options `scale` & `offset`
-- **Form**
+- [Form](src/formElement.ts)
   - Added `form.$validate(...)` for manual triggering validations
   - Changed spinner to custom friendly looked
 
@@ -89,7 +91,7 @@
 - **Global**. _Custom event callbacks like $onChange(e) have `e.target: null`_
 - **Controls**
   - _Wrong TS-type on **$onChange()** callback_
-- **Form**
+- [Form](src/formElement.ts)
   - _Focus lost on pending (because every active element is disabled)_. Refactored pending state: elements changes to `readonly` + applied css-style [busy] + added attribute `aria-busy` to form
   - _Possible to submit by Enter key in pending state_
 - [ModalElement](src/modalElement.ts.ts). _button[close] is overlayed by header_
