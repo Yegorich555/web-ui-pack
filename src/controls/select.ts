@@ -109,6 +109,7 @@ declare module "preact/jsx-runtime" {
   }
 }
 /** Form-control with dropdown/combobox behavior
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/select}
  * @example
   const el = document.createElement("wup-select");
   el.$options.name = "gender";
@@ -287,7 +288,7 @@ export default class WUPSelectControl<
     const items = this.getItems();
     const item = items.find((a) => this.valueToStrCompare(a)?.toLowerCase() === s);
     if (item === undefined) {
-      this.throwError("Not found in items (search by item.value.toString() & item.text", {
+      this.throwError("Not found in items (search by item.value.toString() & item.text)", {
         items,
         searchText: str,
       });

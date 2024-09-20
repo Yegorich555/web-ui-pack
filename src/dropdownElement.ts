@@ -74,6 +74,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Dropdown element
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/dropdown}
  * @example
  * ```html
   <wup-dropdown class="custom">

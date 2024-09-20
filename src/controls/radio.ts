@@ -65,6 +65,7 @@ interface ExtInputElement extends HTMLInputElement {
 }
 
 /** Form-control with radio buttons
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/radio}
  * @example
   const el = document.createElement("wup-radio");
   el.$options.name = "gender";
@@ -384,7 +385,7 @@ export default class WUPRadioControl<
     const items = this.getItems();
     const item = items.find((a) => this.valueToStrCompare(a)?.toLowerCase() === s);
     if (item === undefined) {
-      this.throwError("Not found in items (search by item.value.toString() & item.text", {
+      this.throwError("Not found in items (search by item.value.toString() & item.text)", {
         items,
         searchText: str,
       });

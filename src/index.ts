@@ -8,6 +8,7 @@ export { default as localeInfo } from "./objects/localeInfo";
 // export { default as WUPBaseElement } from "./baseElement";
 export { default as WUPPopupElement } from "./popup/popupElement";
 export { default as WUPModalElement } from "./modalElement";
+export { default as WUPNotifyElement } from "./notifyElement";
 export { default as WUPSpinElement } from "./spinElement";
 export { default as WUPCircleElement } from "./circleElement";
 export { default as WUPDropdownElement } from "./dropdownElement";

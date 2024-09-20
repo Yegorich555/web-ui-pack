@@ -33,6 +33,7 @@ import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
 import Login from "./components/controls/login";
 import ModalAsAlertView from "./components/modalAsAlertView";
+import NotifyView from "./components/notifyView";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -47,12 +48,13 @@ const baseURL = process.env.BASE_URL || "/";
 
 const routes: IRoute[] = [
   ...[
-    { path: "popup", el: PopupView },
     { path: "spin", el: SpinView },
     { path: "circle", el: CircleView },
+    { path: "popup", el: PopupView },
     { path: "dropdown", el: DropdownView },
     { path: "modal", el: ModalView },
     { path: "modal-alert", label: "Alert", el: ModalAsAlertView },
+    { path: "notify", el: NotifyView },
   ].sort((a, b) => a.path.localeCompare(b.path)),
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },

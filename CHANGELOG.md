@@ -32,6 +32,24 @@
 
 ---
 
+- [NotifyElement](src/notifyElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/notify)
+
+### Fixes
+
+---
+
+- [PopupElement](src/popup/popupElement.ts). _Wrong definition for React: it doesn't allow to use children, ref etc._
+
+---
+
+---
+
+## 1.1.0 (Jan 18, 2024)
+
+### New Features
+
+---
+
 - **BREAKING**. **Controls**. Renamed `valueToUrl/valueFromUrl` to `valueToStorage/valueFromStorage`
 - **Combobox controls (Select, SelectMany, Date, Time)**. Added method `.renderPopup()` to have ability to override popup options
 - [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). [RadioControl](src/controls/radio.ts).

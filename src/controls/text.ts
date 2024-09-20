@@ -106,6 +106,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Form-control with text-input
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/text}
  * @example
   const el = document.createElement("wup-text");
   el.$options.name = "email";

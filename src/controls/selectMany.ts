@@ -58,6 +58,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Form-control with dropdown/combobox behavior
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/selectMany}
  * @example
   const el = document.createElement("wup-selectmany");
   el.$options.name = "gender";

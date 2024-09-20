@@ -40,6 +40,7 @@ export default function PopupView() {
     <Page
       header="PopupElement"
       link="src/popup/popupElement.ts"
+      // todo issue: click CSS Vars then HTML tab => it renders extra attrs open & show
       details={{ tag: "wup-popup", linkDemo: "demo/src/components/popup/popupView.tsx" }}
       features={[
         "The main goal: place inside visible area without overflow of target",
