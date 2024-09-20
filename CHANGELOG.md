@@ -2,7 +2,13 @@
 
 # Changelog
 
-## 1.1.1 (\_\_\_)
+## 1.2.0 (\_\_\_)
+
+### New Features
+
+---
+
+- [NotifyElement](src/notifyElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/notify)
 
 ### Fixes & Improvements
 
@@ -11,7 +17,9 @@
 - [Form](src/formElement.ts)
   - Added skip-validation (by default) for `readonly/disabled/hidden` controls. **BREAKING:** changed enum `SubmitActions` & `FormElement.$defaults.submitActions`
 - [SelectManyControl](src/controls/selectMany.ts). Fixed behavior for sorting (drag/drop) when item moved between lines
-- [PopupElement](src/popup/popupElement.ts). Reduced opacity for tooltip background `0.8` => `0.9`
+- [PopupElement](src/popup/popupElement.ts).
+  - Reduced opacity for tooltip background `0.8` => `0.9`
+  - Fixed _Typescript shows error on children inside wup-popup_
 - [CircleElement](src/circleElement.ts)
   - Set `minWidth: 100px` & `minHeight: 50px` to avoid init size 0 for some cases
   - Add defined color for tooltip function `item.tooltip = (itemResult, popup) => console.warn(itemResult.color)`
@@ -21,24 +29,6 @@
 - [helpers](README.md#helpers)
   - [isIntoView](src/helpers/isIntoView.ts), [findScrollParentAll](src/helpers/findScrollParent.ts), [findScrollParent](src/helpers/findScrollParent.ts). Fixed `calling helpers triggers scroll events`
   - [onScroll](src/helpers/onScroll.ts). Added event to option skip: `{ skip?: (ev: WheelEvent | TouchEvent, isTouchAction: boolean) => boolean; }`
-
----
-
----
-
-## 1.1.0 (Jan 18, 2024)
-
-### New Features
-
----
-
-- [NotifyElement](src/notifyElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/notify)
-
-### Fixes
-
----
-
-- [PopupElement](src/popup/popupElement.ts). _Wrong definition for React: it doesn't allow to use children, ref etc._
 
 ---
 

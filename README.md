@@ -71,7 +71,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
       - [x] Confirm modal
       - [x] Confirm hook (use WUPModal.$useConfirmHook)
       - [x] Modal form
-    - [x] [Notify] (alt of react-tostify) [**demo**](https://yegorich555.github.io/web-ui-pack/notify)
+    - [x] [Notify](src/notifyElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/notify)
 
   - [x] [FormElement](src/formElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/controls)
 
