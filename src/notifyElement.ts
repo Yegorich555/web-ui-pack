@@ -280,12 +280,13 @@ export default class WUPNotifyElement<
       });
     anim.play();
 
+    const msConst = ms;
     this.#pauseRef = {
       anim,
       pause: () => {
         clearTimeout(t1);
         anim.pause();
-        const left = ms - Date.now() + now;
+        const left = msConst - Date.now() + now;
         this.#pauseRef!.leftPlayTime = left;
         return left;
       },
