@@ -39,13 +39,15 @@ export default function NotifyView() {
         ],
       }}
       features={[
+        "WARNING: this EXPERIMENTAL element that means hasn't been covered 100% tests yet",
         "Built-in styles & animation",
         "Notifications placed in stack",
         "Easy to use. Add to HTML or just call WUPNotifyElement.$show({textContent: 'Some text'}, ...)",
         "JS Native. Possible to use with any UI framerworks",
-        <>
-          Integrated with <b>{"<wup-form/>"}</b> (shows submit result; more details see in on Form page)
-        </>,
+        "Low resource consumption: most popular alternatives (like react-toastify) use width, height, top, and left properties along with animations, which negatively impact resource usage since any change or animation step triggers a full layout recalculation. WUPNotify, however, is positioned and animated solely using the style.transform property, which does not re-trigger the browser's layout recalculation.",
+        // <>
+        //   Integrated with <b>{"<wup-form/>"}</b> (shows submit result; more details see in on Form page)
+        // </>,
       ]}
     >
       <section>
@@ -135,10 +137,10 @@ export default function NotifyView() {
           </button>
         </div>
       </section>
-      <section>
+      {/* <section>
         <h3>Integrated with form</h3>
         <small>Comming soon...</small>
-      </section>
+      </section> */}
     </Page>
   );
 }

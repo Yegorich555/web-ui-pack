@@ -8,7 +8,7 @@
 
 ---
 
-- [NotifyElement](src/notifyElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/notify)
+- [NotifyElement](src/notifyElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/notify) - **EXPERIMENTAL** (not test-covered yet)
 
 ### Fixes & Improvements
 
