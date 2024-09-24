@@ -39,7 +39,7 @@ describe("control.pwd", () => {
     expect(t.activeElementId).toBe(t.trueId);
     expect(t.selection).toEqual([0, 5]);
     expect(t.html).toMatchInlineSnapshot(
-      `"<wup-pwd id="trueEl"><label for="wup5"><span><input placeholder=" " type="text" id="wup5" autocomplete="new-password" style="height: 44px;"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="off" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd id="trueEl"><label for="wup6"><span><input placeholder=" " type="text" id="wup6" autocomplete="new-password" style="height: 44px;"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="off" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
     expect(t.h).toBe(44); // height can change because style changed
 
@@ -49,7 +49,7 @@ describe("control.pwd", () => {
     expect(t.activeElementId).toBe(t.trueId);
     expect(t.selection).toEqual([0, 5]);
     expect(t.html).toMatchInlineSnapshot(
-      `"<wup-pwd id="trueEl"><label for="wup5"><span><input placeholder=" " type="password" id="wup5" autocomplete="new-password" style="height: 44px;"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd id="trueEl"><label for="wup6"><span><input placeholder=" " type="password" id="wup6" autocomplete="new-password" style="height: 44px;"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
     expect(t.h).toBe(44);
 
