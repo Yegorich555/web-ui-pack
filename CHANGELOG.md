@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 1.2.0 (\_\_\_)
+## 1.2.0 (Sep 24, 2024)
 
 ### New Features
 
