@@ -67,7 +67,8 @@ async function go() {
   // push files
   // await exec("git push && git push --tags", []);
 
-  console.log("SUCCESS");
+  console.warn("The current release is DONE. Check commit, tag and push both into Github");
+  console.warn("use `npm run go-publish` to publish you package");
 }
 
 go();
