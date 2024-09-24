@@ -4,6 +4,7 @@ const moduleNameMapper = {
 };
 
 // details here: https://jestjs.io/docs/configuration
+process.env.JEST_PUPPETEER_CONFIG = `${__dirname}/browser/.jest-puppeteer.config.js`;
 
 /** @type {import('@jest/types').Config.InitialOptions} */
 module.exports = {

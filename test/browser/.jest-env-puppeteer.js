@@ -1,6 +1,6 @@
 const fs = require("fs");
 const nodePath = require("path");
-const Env = require("jest-environment-puppeteer");
+const Env = require("jest-environment-puppeteer").TestEnvironment;
 
 function getCallerFile() {
   const originalFunc = Error.prepareStackTrace;
