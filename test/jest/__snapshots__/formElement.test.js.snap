@@ -594,7 +594,7 @@ exports[`formElement common tests snapshot of $defaults 1`] = `
   "autoStore": false,
   "disabled": false,
   "readOnly": false,
-  "submitActions": 27,
+  "submitActions": 55,
 }
 `;
 

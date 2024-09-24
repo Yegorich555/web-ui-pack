@@ -109,6 +109,7 @@ declare module "preact/jsx-runtime" {
   }
 }
 /** Form-control with dropdown/combobox behavior
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/select}
  * @example
   const el = document.createElement("wup-select");
   el.$options.name = "gender";
@@ -287,7 +288,7 @@ export default class WUPSelectControl<
     const items = this.getItems();
     const item = items.find((a) => this.valueToStrCompare(a)?.toLowerCase() === s);
     if (item === undefined) {
-      this.throwError("Not found in items (search by item.value.toString() & item.text", {
+      this.throwError("Not found in items (search by item.value.toString() & item.text)", {
         items,
         searchText: str,
       });
@@ -927,3 +928,4 @@ customElements.define(tagName, WUPSelectControl);
 // NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
 // NiceToHave: color differently text-chunk that matches in menu
 // NiceToHave: for allowNewValue add at the end of menu `[text] (New option)` like it works in JIRA. `label` dropdown on ticket
+// NiceToHave: add example how to modify input result (2 rows where 2nd is description with grayText)

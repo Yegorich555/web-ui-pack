@@ -17,11 +17,33 @@ export default function CircleView() {
       details={{
         tag: "wup-circle",
         linkDemo: "demo/src/components/circleView.tsx",
+        customHTML: [
+          `html
+<wup-circle
+  w-back="true"
+  w-from="0"
+  w-to="360"
+  w-space="2"
+  w-minsize="10"
+  w-min="0"
+  w-max="100"
+  w-width="14"
+  w-corner="0.25"
+  w-items="window.circleItems"
+>
+  <strong>Custom label</strong>
+</wup-circle>
+
+<!--EQUAL TO-->
+<wup-circle w-items="window.circleItems">
+  <strong>Custom label</strong>
+</wup-circle>`,
+        ],
       }}
       features={[
-        "With rounded corners (use $options.corner)", //
+        "Rounded corners (use $options.corner)",
         "Highly configurable (via css-vars, attrs)",
-        "Fits parent size",
+        "Auto fits parent size",
       ]}
       className={styles.page}
     >
@@ -45,9 +67,16 @@ export default function CircleView() {
       <section>
         <h3>Gauge style</h3>
         <small>
-          single segment with corners 50% and custom <b>$options.from</b> & <b>to</b>
+          single segment with <b>.$options.corner=0.5</b> and <b>.$options.from=-90</b> & <b>.$options.to=90</b>
           <br />
-          <b>WARN:</b> don't forget to reduce height in half of size (via styles)
+          <b>WARN:</b> half-size doesn't work for Safari 14- see{" "}
+          <a
+            href="https://developer.mozilla.org/en-US/docs/Web/CSS/aspect-ratio#browser_compatibility"
+            target="_blank"
+            rel="noreferrer"
+          >
+            CSS compatibility
+          </a>
         </small>
         <div className={styles.group}>
           <wup-circle
@@ -115,7 +144,7 @@ export default function CircleView() {
         <h3>Segmented</h3>
         <small>point several items in $options.items</small>
         <small>
-          point <b>label</b> per item to show tooltip
+          point <b>tooltip</b> per item to show tooltip
         </small>
         <wup-circle
           style={{ maxWidth: "120px" }}
@@ -128,8 +157,10 @@ export default function CircleView() {
                 { value: 1, tooltip: "Item 1\nvalue: {#}, percent: {#%}" },
                 {
                   value: 100,
-                  tooltip: (item) =>
-                    `Custom tooltip\nvalue: ${item.value}, percent: ${Math.round(item.percentage * 10) / 10}%`,
+                  tooltip: (item) => {
+                    console.warn(item.color);
+                    return `Custom tooltip\nvalue: ${item.value}, percent: ${Math.round(item.percentage * 10) / 10}%`;
+                  },
                 },
                 { value: 13, tooltip: "Item 3\nvalue: {#}" },
                 { value: 27, tooltip: "Item 4\nvalue: {#}" },
@@ -139,9 +170,11 @@ export default function CircleView() {
               ];
             }
           }}
-        />
+        >
+          <strong>Your Label</strong>
+        </wup-circle>
         <small>
-          point options <b>from=-90 & to=90</b>
+          point options <b>w-from='-90''</b> and <b>w-to='90'</b>
         </small>
         <wup-circle
           class={styles.half}
@@ -161,7 +194,9 @@ export default function CircleView() {
               ];
             }
           }}
-        />
+        >
+          <strong>Your Label</strong>
+        </wup-circle>
       </section>
       <section>
         <h3>Complex view with labels</h3>

@@ -600,7 +600,7 @@ describe("modalElement", () => {
     await h.wait();
     expect(el.$isClosed).toBe(true);
     expect(m2.$isClosed).toBe(true);
-    expect(el._openedModals.length).toBe(0);
+    expect(el._openedItems.length).toBe(0);
   });
 
   test("modal in modal: replace", async () => {

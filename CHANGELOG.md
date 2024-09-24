@@ -2,6 +2,38 @@
 
 # Changelog
 
+## 1.2.0 (\_\_\_)
+
+### New Features
+
+---
+
+- [NotifyElement](src/notifyElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/notify) - **EXPERIMENTAL** (not test-covered yet)
+
+### Fixes & Improvements
+
+---
+
+- [Form](src/formElement.ts)
+  - Added skip-validation (by default) for `readonly/disabled/hidden` controls. **BREAKING:** changed enum `SubmitActions` & `FormElement.$defaults.submitActions`
+- [SelectManyControl](src/controls/selectMany.ts). Fixed behavior for sorting (drag/drop) when item moved between lines
+- [PopupElement](src/popup/popupElement.ts).
+  - Reduced opacity for tooltip background `0.8` => `0.9`
+  - Fixed _Typescript shows error on children inside wup-popup_
+- [CircleElement](src/circleElement.ts)
+  - Set `minWidth: 100px` & `minHeight: 50px` to avoid init size 0 for some cases
+  - Add defined color for tooltip function `item.tooltip = (itemResult, popup) => console.warn(itemResult.color)`
+  - Handled case with custom label: so `<wup-circle><strong>Custom label</strong></wup-circle>` works in a proper way now
+  - Extended default colors to 8 items
+  - Added auto definition for half-size (radar-charts without whole circle) based on `$options.from` & `$options.to`
+- [helpers](README.md#helpers)
+  - [isIntoView](src/helpers/isIntoView.ts), [findScrollParentAll](src/helpers/findScrollParent.ts), [findScrollParent](src/helpers/findScrollParent.ts). Fixed `calling helpers triggers scroll events`
+  - [onScroll](src/helpers/onScroll.ts). Added event to option skip: `{ skip?: (ev: WheelEvent | TouchEvent, isTouchAction: boolean) => boolean; }`
+
+---
+
+---
+
 ## 1.1.0 (Jan 18, 2024)
 
 ### New Features
@@ -56,7 +88,7 @@
 - **Controls**. Added css-animation for box-shadow/borders
 - [RadioControl](src/controls/radio.ts). Added comparison by item.id to allow use cloned items/value
 - [NumberControl](src/controls/number.ts). New options `scale` & `offset`
-- **Form**
+- [Form](src/formElement.ts)
   - Added `form.$validate(...)` for manual triggering validations
   - Changed spinner to custom friendly looked
 
@@ -67,7 +99,7 @@
 - **Global**. _Custom event callbacks like $onChange(e) have `e.target: null`_
 - **Controls**
   - _Wrong TS-type on **$onChange()** callback_
-- **Form**
+- [Form](src/formElement.ts)
   - _Focus lost on pending (because every active element is disabled)_. Refactored pending state: elements changes to `readonly` + applied css-style [busy] + added attribute `aria-busy` to form
   - _Possible to submit by Enter key in pending state_
 - [ModalElement](src/modalElement.ts.ts). _button[close] is overlayed by header_

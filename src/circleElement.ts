@@ -17,27 +17,40 @@ declare global {
   namespace WUP.Circle {
     /** Item object related to */
     interface Item {
+      /** Value of item that will be rendered; depends on @see {@link Options.min}, {@link Options.max}, {@link Options.from}, {@link Options.to} */
       value: number;
+      /** Color for item. Default colors defined in css-variables like `--circle-X: #e4e4e4;` where `X` is number of item */
       color?: string;
       /** Point any text | function to show tooltip
        * @hints
        * * set `Item value {#}` to use tooltip where `{#}` is pointed value
        * * point function to use custom logic
        * * override `WUPCircleElement.prototype.renderTooltip` to use custom logic
-       * * to change hover-timeouts see `WUPCircleElement.$defaults.hover...`
+       * * to change hover-timeouts see {@link WUPCircleElement.$defaults.hoverOpenTimeout}, {@link WUPCircleElement.$defaults.hoverCloseTimeout}_
        * * use below example to use custom logic @example
        *  items = [{
        *    value: 5,
-       *    label: (item, popup) => {
+       *    tooltip: (item, popup) => {
        *     setTimeout(()=>popup.innerHTML=...);
        *     return ""
        *  }] */
-      tooltip?: string | ((item: Item & { percentage: number }, popup: WUPPopupElement) => string);
+      tooltip?: string | ItemTooltipFn;
     }
+    /** Callback function for rendering tooltip */
+    type ItemTooltipFn = (item: ItemResult, popup: WUPPopupElement) => string;
+    /** Returns in tooltip callback function with extra fields */
+    interface ItemResult extends Item {
+      /** Pointed {@link Item.color} OR defined from css-variable like `--circle-X: #e4e4e4;` where `X` is number of item */
+      color: string;
+      /** Value relative to another items where 100% is SUM or difference max-min for single item */
+      percentage: number;
+    }
+
     interface SVGItem extends SVGPathElement {
       _relatedItem: Item;
       _hasTooltip?: true;
       _center: { x: number; y: number };
+      _definedColor: string;
     }
     interface Options {
       /** Width of each segment; expected 1..100 (perecentage)
@@ -73,7 +86,8 @@ declare global {
       /** Timeout in ms before popup closes on mouse-leave of target;
        * @defaultValue 0 */
       hoverCloseTimeout: number;
-      /** Items related to circle-segments */
+      /** Items related to circle-segments;
+       * If pointed single item then label will be auto created. For other label-details @see {@link WUPCircleElement.prototype.$refLabel}  */
       items: Item[];
     }
     interface JSXProps extends WUP.Base.OnlyNames<Omit<Options, "hoverOpenTimeout" | "hoverCloseTimeout" | "items">> {
@@ -123,6 +137,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Arc/circle chart based on SVG
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/circle}
  * @example
  * <wup-circle
  *   w-back="true"
@@ -134,7 +149,9 @@ declare module "preact/jsx-runtime" {
  *   w-width="14"
  *   w-corner="0.25"
  *   w-items="window.circleItems"
- *  ></wup-circle>
+ *  >
+ *   <strong>Some custom label</strong>
+ * </wup-circle>
  * // or JS/TS
  * const el = document.createElement("wup-circle");
  * el.$options.items = [{value:20}]; // etc.
@@ -151,6 +168,8 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
           --circle-4: #9482bd;
           --circle-5: #8bc4d7;
           --circle-6: #1abdb5;
+          --circle-7: #a0db67;
+          --circle-8: #67dbba;
         }
         [wupdark] {
           --circle-0: #104652;
@@ -165,6 +184,8 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         position: relative;
         overflow: visible;
         margin: auto;
+        min-width: 100px;
+        min-height: 50px;
         --anim-t: 400ms;
       }
       :host>strong {
@@ -173,6 +194,17 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         transform: translate(-50%,-50%);
         top: 50%; left: 50%;
         font-size: larger;
+        max-width: calc(100% - 20px);
+        white-space: pre-line;
+        text-align: center;
+      }
+      :host[half] {
+        aspect-ratio: 2;
+      }
+      :host[half]>strong {
+        top: initial;
+        bottom: 0;
+        transform: translateX(-50%);
       }
       :host>svg {
         overflow: visible;
@@ -189,6 +221,8 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       :host>svg>g>path:nth-child(4) { fill: var(--circle-4); }
       :host>svg>g>path:nth-child(5) { fill: var(--circle-5); }
       :host>svg>g>path:nth-child(6) { fill: var(--circle-6); }
+      :host>svg>g>path:nth-child(7) { fill: var(--circle-7); }
+      :host>svg>g>path:nth-child(8) { fill: var(--circle-8); }
       :host>wup-popup,
       :host>wup-popup-arrow {
         white-space: pre;
@@ -221,6 +255,11 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
 
   $refSVG = this.make("svg");
   $refItems = this.make("g");
+  /** Reference to <strong> element
+   * @tutorial Troubleshooting/rules:
+   * * label auto created only when pointed items.length === 1
+   * * if you need custom label then use `<wup-circle><strong>Custom label here</strong><wup-circle>`
+   * * Override {@link WUPCircleElement.prototype.renderLabel} to customize behavior when single item */
   $refLabel?: HTMLElement;
 
   /** Creates new svg-part */
@@ -238,6 +277,10 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       this.removeChildren.call(this.$refSVG); // clean before new render
       skipAnim = true; // renderNew without animation
     }
+
+    const isHalf = Math.abs(this._opts.to - this._opts.from) === 180;
+    this.setAttr("half", isHalf, true);
+
     this.renderItems(skipAnim);
   }
 
@@ -352,12 +395,12 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         const c = arr[i];
         // apply colors
         const path = this.$refItems.appendChild(this.make("path")) as WUP.Circle.SVGItem;
-        const col = a.color || style.getPropertyValue(`--circle-${i + 1}`).trim();
-        col && path.setAttribute("fill", col); // only for saving as file-image
+        const cssVar = a.color || style.getPropertyValue(`--circle-${i + 1}`).trim() || "#000";
+        path.setAttribute("fill", cssVar); // only for saving as file-image
         if (a.color) {
           path.style.fill = a.color; // attr [fill] can't override css-rules
         }
-
+        path._definedColor = a.color || cssVar;
         path._center = { x: radius, y: hw };
         if (a.tooltip) {
           hasTooltip = true;
@@ -379,13 +422,24 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     // render/remove label
     let ariaLbl = "";
     if (items.length === 1) {
-      this.$refLabel = this.$refLabel ?? this.appendChild(document.createElement("strong"));
-      const rawV = items[0].value;
-      const perc = mathScaleValue(rawV, vMin, vMax, 0, 100);
-      this.renderLabel(this.$refLabel, perc, rawV);
-      ariaLbl = this.$refLabel.textContent!;
+      let isCustomLabel = false;
+      if (!this.$refLabel) {
+        // allow to use label created outside internal logic
+        const existed = this.querySelector("strong");
+        if (existed) {
+          ariaLbl = existed.textContent || "";
+          isCustomLabel = true;
+        }
+      }
+      if (!isCustomLabel) {
+        this.$refLabel ??= this.appendChild(document.createElement("strong"));
+        const rawV = items[0].value;
+        const perc = mathScaleValue(rawV, vMin, vMax, 0, 100);
+        this.renderLabel(this.$refLabel, perc, rawV);
+        ariaLbl = this.$refLabel.textContent!;
+      }
     } else {
-      this.$refLabel && this.$refLabel.remove();
+      this.$refLabel?.remove();
       delete this.$refLabel;
       ariaLbl = `Values: ${items.map((a) => a.value).join(",")}`;
     }
@@ -408,7 +462,12 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       return DOMRect.fromRect({ x, y, width: 0.01, height: 0.01 });
     };
     const total = this.$options.items!.reduce((sum, a) => sum + a.value, 0);
-    const item = { ...segment._relatedItem, percentage: mathScaleValue(segment._relatedItem.value, 0, total, 0, 100) };
+    const item: WUP.Circle.ItemResult = {
+      ...segment._relatedItem,
+      color: segment._definedColor,
+      percentage: mathScaleValue(segment._relatedItem.value, 0, total, 0, 100),
+    };
+
     const lbl = item.tooltip!;
 
     popup.innerText =
@@ -481,7 +540,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     this.appendChild(this.$refSVG);
   }
 
-  /** Called every time as need text-value */
+  /** Called every time as need text-value (only if $options.items.length === 1) */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   renderLabel(label: HTMLElement, percent: number, rawValue: number): void {
     label.textContent = `${Math.round(percent)}%`;

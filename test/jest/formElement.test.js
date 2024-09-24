@@ -28,6 +28,9 @@ beforeEach(() => {
   inp3.$options.name = "";
 
   inputs.push(inp1, inp2, inp3);
+  inputs.forEach((ctrl) => {
+    h.setupLayout(ctrl, { h: 20, w: 100, x: 1, y: 1 });
+  });
 
   btnSubmit = el.appendChild(document.createElement("button"));
   btnSubmit.type = "submit";
@@ -995,7 +998,9 @@ describe("formElement", () => {
     expect(inputs[1].$isValid).toBe(true);
     // expect(inputs[2].$isValid).toBe(false);
 
+    let includeLocked = false;
     expect(el.$validate(true).map((a) => a.$options.name)).toStrictEqual(["email"]);
+    expect(el.$validate(true, includeLocked).map((a) => a.$options.name)).toStrictEqual(["email"]);
     expect(el.$validate(false).map((a) => a.$options.name)).toStrictEqual(["email"]);
     expect(el.$validate().map((a) => a.$options.name)).toStrictEqual(["email"]);
 
@@ -1008,5 +1013,33 @@ describe("formElement", () => {
     expect(el.$validate(true).map((a) => a.$options.name)).toStrictEqual([]);
     expect(el.$validate(false).map((a) => a.$options.name)).toStrictEqual([]);
     expect(el.$validate().map((a) => a.$options.name)).toStrictEqual([]);
+
+    // validate with including locked
+    includeLocked = false;
+    inputs.forEach((a) => {
+      a.$options.validations = { required: true };
+      a.$value = "";
+    });
+    expect(el.$validate(false, includeLocked).map((a) => a.$options.name)).toStrictEqual(["email", "firstName"]);
+    // readonly
+    includeLocked = false;
+    inputs[0].$options.readOnly = true;
+    expect(el.$validate(false, includeLocked).map((a) => a.$options.name)).toStrictEqual(["firstName"]);
+    includeLocked = true;
+    expect(el.$validate(false, includeLocked).map((a) => a.$options.name)).toStrictEqual(["email", "firstName"]);
+    // disabled
+    inputs[0].$options.readOnly = false;
+    inputs[0].$options.disabled = true;
+    includeLocked = false;
+    expect(el.$validate(false, includeLocked).map((a) => a.$options.name)).toStrictEqual(["firstName"]);
+    includeLocked = true;
+    expect(el.$validate(false, includeLocked).map((a) => a.$options.name)).toStrictEqual(["email", "firstName"]);
+    // hidden
+    inputs[0].$options.disabled = false;
+    h.setupLayout(inputs[0], { h: 0, w: 0 });
+    includeLocked = false;
+    expect(el.$validate(false, includeLocked).map((a) => a.$options.name)).toStrictEqual(["firstName"]);
+    includeLocked = true;
+    expect(el.$validate(false, includeLocked).map((a) => a.$options.name)).toStrictEqual(["email", "firstName"]);
   });
 });

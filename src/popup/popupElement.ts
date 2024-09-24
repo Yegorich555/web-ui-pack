@@ -22,7 +22,7 @@ declare global {
     interface IntrinsicElements {
       /**  Popup element
        *  @see {@link WUPPopupElement} */
-      [tagName]: WUP.BaseModal.JSXProps & WUP.Popup.Attributes; // add element to tsx/jsx intellisense (react)
+      [tagName]: WUP.Base.ReactHTML<WUPPopupElement> & WUP.BaseModal.JSXProps & WUP.Popup.Attributes; // add element to tsx/jsx intellisense (react)
     }
   }
 }
@@ -41,6 +41,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Popup element
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/popup}
  * @example
  * JS/TS
  * ```js
@@ -165,7 +166,7 @@ export default class WUPPopupElement<
         --popup-bg: #fff;
         --popup-shadow: #0003;
         --tooltip-text: inherit;
-        --tooltip-bg: #fff8;
+        --tooltip-bg: rgba(255,255,255,0.9);
         --tooltip-shadow: #0003;
       }
       [wupdark] {
@@ -173,7 +174,7 @@ export default class WUPPopupElement<
         --popup-bg: #2b3645;
         --popup-shadow: #0006;
         --tooltip-text: #d8d8d8;
-        --tooltip-bg: rgba(16,70,82,0.8);
+        --tooltip-bg: rgba(16,70,82,0.9);
         --tooltip-shadow: #0006;
       }`;
   }

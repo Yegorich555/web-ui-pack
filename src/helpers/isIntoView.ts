@@ -31,7 +31,14 @@ interface IntoViewResult {
   partialVisible: false | HTMLElement;
 }
 
-/** Check if element is visible in scrollable parents */
+/** Checks if element is visible in scrollable parents and returns detailed result;
+ *
+ * If need to get scrollable parents too then use the following logic
+ * @example
+ * ```js
+ * const scrollParents = findScrollParentAll(el) || [document.body];
+ * const result = isIntoView(el, { scrollParents });
+ * ``` */
 export default function isIntoView(el: Element, options?: IntoViewOptions): IntoViewResult {
   const scrollParents = options?.scrollParents || findScrollParentAll(el) || [document.body];
 

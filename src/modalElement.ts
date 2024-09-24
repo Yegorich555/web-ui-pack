@@ -119,6 +119,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Modal element
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/modal}
  * @example
  * JS/TS
  * ```js
@@ -187,7 +188,7 @@ export default class WUPModalElement<
    * * On close modal self-removed */
   static async $showConfirm(opts?: WUP.Modal.ConfirmOptions): Promise<boolean> {
     // init
-    const me = document.createElement("wup-modal");
+    const me = document.createElement(tagName);
     opts?.className && me.classList.add(opts.className);
     me.$options.selfRemove = true;
     Object.assign(me.$options, opts?.defaults);
@@ -199,7 +200,7 @@ export default class WUPModalElement<
 
     setTimeout(() => {
       if (me._mid && me._mid > 1) {
-        const p = me._openedModals[me._mid - 2];
+        const p = me._openedItems[me._mid - 2];
         // case impossible because _openedModal must contain only opened modals
         // if (!p.$isOpened || p.$isClosing) {
         //   return; // it should work only if prev modal is opened
@@ -242,6 +243,7 @@ export default class WUPModalElement<
     let isConfirmed = false;
     if (btnConfirm) {
       (btnConfirm as HTMLElement).onclick = (ev) => {
+        // todo need await here
         isConfirmed = true;
         setTimeout(() => (isConfirmed = false), 1);
         (window as any).__wupFixCycleClick = true;
@@ -421,8 +423,35 @@ export default class WUPModalElement<
   /** Reference to button[close] */
   $refClose?: HTMLButtonElement;
 
-  protected override gotRender(): void {
-    /** empty because component is hidden by default and need to focus on open-phase */
+  /** Called once on opening */
+  protected override gotRender(isOpening = false): void {
+    if (!isOpening) {
+      return; // empty because component is hidden by default and need to focus on open-phase
+    }
+    // setup Accessibility attrs
+    this.tabIndex = -1; // WA: to allow scroll modal - possible that tabindex: -1 doesn't allow tabbing inside
+    this.role = "dialog"; // possible alert-dialog for Confirm modal
+    this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
+
+    const header = this.querySelector("h1,h2,h3,h4,h5,h6,[role=heading]");
+    if (!header) {
+      console.warn("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
+    } else {
+      header.id ||= this.#ctr.$uniqueId;
+      this.setAttribute("aria-labelledby", header.id); // issue: NVDA reads content twice if modal has aria-labelledby: https://github.com/nvaccess/nvda/issues/8971
+    }
+
+    // init button[close]
+    this.$refClose ??= document.createElement("button");
+    this.$refClose.type = "button";
+    this.$refClose.setAttribute("aria-label", __wupln("close", "aria"));
+    this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
+    this.$refClose.setAttribute("close", "");
+    this.$refClose.setAttribute("data-close", "modal");
+    this.prepend(this.$refClose);
+    // apply open styles
+    this.setAttribute("w-placement", this._opts.placement);
+    document.body.classList.add(this.#ctr.$classOpened); // to maybe hide scroll-bars
   }
 
   /** Override it to change default render for modalConfirm */
@@ -470,50 +499,24 @@ export default class WUPModalElement<
     const ael = document.activeElement;
     this._lastFocused = ael?.id || ael;
 
-    // setup Accessibility attrs
-    this.tabIndex = -1; // WA: to allow scroll modal - possible that tabindex: -1 doesn't allow tabbing inside
-    this.role = "dialog"; // possible alert-dialog for Confirm modal
-    this.setAttribute("aria-modal", true); // WARN for old readers it doesn't work and need set aria-hidden to all content around modal
-
+    this.gotRender(true);
     (this._target as HTMLElement | null)?.$onRenderModal?.call(this._target, this as WUPModalElement<any, any>);
 
-    const header = this.querySelector("h1,h2,h3,h4,h5,h6,[role=heading]");
-    if (!header) {
-      console.warn("WA: header missed. Add <h2>..<h6> or role='heading' to modal content");
-    } else {
-      header.id ||= this.#ctr.$uniqueId;
-      this.setAttribute("aria-labelledby", header.id); // issue: NVDA reads content twice if modal has aria-labelledby: https://github.com/nvaccess/nvda/issues/8971
-    }
-    // init button[close]
-    this.$refClose ??= document.createElement("button");
-    this.$refClose.type = "button";
-    this.$refClose.setAttribute("aria-label", __wupln("close", "aria"));
-    this.$refClose.setAttribute(this.#ctr.classNameBtnIcon, "");
-    this.$refClose.setAttribute("close", "");
-    this.$refClose.setAttribute("data-close", "modal");
-
-    this.prepend(this.$refClose);
-
     // init fade
-    this._openedModals.push(this as WUPModalElement<any, any>);
-    this._mid = this._openedModals.length;
+    this._mid = this._openedItems.push(this as WUPModalElement<any, any>);
     if (this._mid === 1) {
       this.$refFade ??= document.body.appendChild(document.createElement("div"));
       setTimeout(() => this.$refFade?.setAttribute("show", "")); // timeout to allow animation works
     } else {
-      const p = this._openedModals[this._mid - 2];
+      const p = this._openedItems[this._mid - 2];
       const isReplace = this._opts.replace;
       this.$refFade ??= (isReplace ? document.body : p).appendChild(document.createElement("div")); // append to parent to hide modal parent
       this.$refFade.setAttribute("show", ""); // WARN without timeout to show immediately
       p.$refFade!.style.display = "none";
       isReplace && p.setAttribute("hide", ""); // hide such modal
     }
-
     this.$refFade.className = this.#ctr.$classFade;
 
-    // apply open styles
-    this.setAttribute("w-placement", this._opts.placement);
-    document.body.classList.add(this.#ctr.$classOpened); // to maybe hide scroll-bars
     // listen for close-events
     this.$refFade.onclick = (ev) => this.goClose(ModalCloseCases.onOutsideClick, ev);
     this.appendEvent(this, "click", (ev) => this.gotClick(ev));
@@ -559,12 +562,12 @@ export default class WUPModalElement<
     } else {
       this.$refFade!.remove(); // immediately hide if opened 2+ modals
       this.$refFade = undefined;
-      const p = this._openedModals[this._mid! - 2];
+      const p = this._openedItems[this._mid! - 2];
       p.$refFade!.style.display = "";
       this.removeEmptyStyle.call(p.$refFade!);
       p.removeAttribute("hide");
     }
-    this._openedModals.splice(this._mid! - 1, 1); // self remove from array
+    this._openedItems.splice(this._mid! - 1, 1); // self remove from array
 
     this.focusBack();
   }
@@ -683,20 +686,18 @@ export default class WUPModalElement<
     !bd.className && bd.removeAttribute("class");
     (this._target as HTMLElement)?.removeEventListener("click", this._targetClick!);
 
-    const i = this._openedModals.findIndex((m) => (this as WUPModalElement<any, any>) === m);
-    if (i > -1) {
-      this._openedModals.splice(i, 1);
-    }
+    const i = this._openedItems.indexOf(this as WUPModalElement<any, any>);
+    i > -1 && this._openedItems.splice(i, 1);
     super.dispose();
   }
 
-  /** Singleton array with opened modals */
-  get _openedModals(): Array<WUPModalElement> {
-    return __openedModals;
+  /** Singleton array with opened elements */
+  get _openedItems(): Array<WUPModalElement> {
+    return __openedItems;
   }
 }
 
-const __openedModals: Array<WUPModalElement> = [];
+const __openedItems: Array<WUPModalElement> = [];
 
 customElements.define(tagName, WUPModalElement);
 

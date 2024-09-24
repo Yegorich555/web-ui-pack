@@ -21,6 +21,8 @@
 
   > wup-circle:nth-child(2) {
     width: 48%;
+    min-width: initial;
+    min-height: initial;
     margin: 0;
     position: absolute;
     top: 50%;

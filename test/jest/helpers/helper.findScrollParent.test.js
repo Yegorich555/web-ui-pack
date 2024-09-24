@@ -25,13 +25,51 @@ beforeEach(() => {
 
 describe("helper.findScrollParent", () => {
   test("default behavior", () => {
+    jest.useFakeTimers();
+
     const el = document.body.appendChild(document.createElement("div"));
     expect(findScrollParent(el)).toBeNull();
     expect(findScrollParent(document.body)).toBeNull();
 
-    jest.restoreAllMocks(); // to allow change srollTop for body
+    jest.restoreAllMocks(); // to allow change scrollTop for body
+    let { scrollTop } = document.body;
+    let isStopped = false;
+    jest.spyOn(document.body, "scrollTop", "set").mockImplementation((v) => {
+      scrollTop = v;
+      // simulate default behavior
+      const ev = new Event("scroll", { bubbles: true, cancelable: true });
+      ev.stopImmediatePropagation = () => {
+        isStopped = true;
+      };
+      document.body.dispatchEvent(ev);
+    });
+    jest.spyOn(document.body, "scrollTop", "get").mockImplementation(() => scrollTop);
     expect(findScrollParent(el) === document.body).toBe(true);
+    expect(isStopped).toBe(true);
+    jest.advanceTimersByTime(10);
+    jest.restoreAllMocks(); // to allow change scrollTop for body
 
+    // again with scrollLeft
+    let { scrollLeft } = document.body;
+    isStopped = false;
+    jest.spyOn(document.body, "scrollTop", "get").mockImplementation(() => 0);
+    jest.spyOn(document.body, "scrollLeft", "set").mockImplementation((v) => {
+      scrollLeft = v;
+      // simulate default behavior
+      const ev = new Event("scroll", { bubbles: true, cancelable: true });
+      ev.stopImmediatePropagation = () => {
+        isStopped = true;
+      };
+      document.body.dispatchEvent(ev);
+    });
+    jest.spyOn(document.body, "scrollLeft", "get").mockImplementation(() => scrollLeft);
+    expect(findScrollParent(el) === document.body).toBe(true);
+    expect(isStopped).toBe(true);
+    jest.advanceTimersByTime(10);
+    jest.restoreAllMocks();
+    unLockScroll(document.body); // WARN: jest-bug: previous restoreAllMocks doesn't restore all actually
+
+    document.body.scrollTop = 0;
     document.body.scrollLeft = 2; // cover case when item is scrolled
     expect(findScrollParent(el) === document.body).toBe(true);
     document.body.scrollLeft = 0;
@@ -56,7 +94,7 @@ describe("helper.findScrollParent", () => {
     lockScroll(main);
     expect(findScrollParent(div)?.tagName.toLowerCase()).toBeFalsy(); // despite body is scrollable but main with fixed position
 
-    // again when posiotion-fixed added via classNames
+    // again when position-fixed added via classNames
     main.style.position = "";
     // simulate defaults
     const orig = window.getComputedStyle;

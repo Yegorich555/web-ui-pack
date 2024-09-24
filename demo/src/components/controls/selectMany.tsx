@@ -116,7 +116,7 @@ export default function SelectManyControlView() {
           ref={(el) => {
             if (el) {
               el.$options.items = items;
-              el.$initValue = [12, 15, 16, 17, 18];
+              el.$initValue = [12, 15, 16, 17, 18, 19, 20, 13];
             }
           }}
         />

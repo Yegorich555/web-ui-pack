@@ -152,7 +152,7 @@ describe("control.selectMany", () => {
     await h.userClick(el.$refInput.parentElement); // just for coverage
     expect(el.$value).toStrictEqual([30, 20, 40]);
 
-    // touch-click on item doesn't remove item but allow to focus control first - othewise user can't focus on touchscreens
+    // touch-click on item doesn't remove item but allow to focus control first - otherwise user can't focus on touchscreens
     el.blur();
     await h.wait();
     jest
@@ -790,7 +790,7 @@ describe("control.selectMany", () => {
       ]
     `);
 
-    // checking thottling here
+    // checking throttling here
     updateLayout();
     r = el.$refItems[2].getBoundingClientRect();
     h.userMouseMove(trg, { x: r.right, y: trg.offsetHeight / 2 });
@@ -807,7 +807,7 @@ describe("control.selectMany", () => {
     await h.wait(5);
     expect(onChanged).toBeCalledTimes(0); // because user don't mouseup
 
-    // move to the end of 1st line after throtling
+    // move to the end of 1st line after throttling
     await h.wait(); // wait for throttling to get new position at the right side of 2nd item
     updateLayout();
     h.userMouseMove(trg, { x: r.right - 2, y: trg.offsetHeight / 2 + 5 });
@@ -854,7 +854,7 @@ describe("control.selectMany", () => {
     `);
 
     // moving to 2nd line; left side
-    await h.wait(); // wait for throttling to get new position at the right side of 2nd item
+    await h.wait(); // wait for throttling to get new position of 2nd item
     updateLayout();
     h.userMouseMove(trg, { x: 0, y: trg.offsetHeight + 5 });
     expect(getChildren()).toMatchInlineSnapshot(`
@@ -862,24 +862,25 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(-30px, 20px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" aria-hidden="true" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
+        "<span item="" aria-hidden="true" drop="">Donny</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
       ]
     `);
     await h.wait(5);
     expect(onChanged).toBeCalledTimes(0); // because user don't mouseup
 
-    // moving to 2nd line; right side
-    await h.wait(); // wait for throttling to get new position at the right side of 2nd item
-    h.userMouseMove(trg, { x: trg.offsetWidth, y: trg.offsetHeight + 5 });
+    // moving to 1st line; right side
+    await h.wait(); // wait for throttling to get new position of 2nd item
+    updateLayout();
+    h.userMouseMove(trg, { x: w * 2, y: 0 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(30px, 20px);">Donny</span>",
+        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(90px, -15px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" aria-hidden="true">Splinter</span>",
         "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
       ]
     `);
@@ -888,26 +889,27 @@ describe("control.selectMany", () => {
     updateLayout();
     bindDragEl();
 
-    const { nextFrame } = h.useFakeAnimation(); // animation for return mirrored element
+    trg = el.$refItems[0];
+    const { nextFrame } = h.useFakeAnimation(); // animation to return mirrored element
     trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
     trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await h.wait(1);
     expect(onChanged).toBeCalledTimes(1);
-    expect(el.$value).toStrictEqual([20, 30, 40, 10]);
+    expect(el.$value).toStrictEqual([20, 30, 10, 40]);
     expect(dragEl.outerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(30px, 20px);">Donny</span>"`
+      `"<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(90px, -15px);">Donny</span>"`
     );
     await nextFrame(5);
     expect(dragEl.outerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(0px, 30px);">Donny</span>"`
+      `"<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(120px, 0px);">Donny</span>"`
     );
     await nextFrame(50);
     expect(getChildren()).toMatchInlineSnapshot(`
       [
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" aria-hidden="true">Splinter</span>",
         "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
       ]
     `);
@@ -927,8 +929,8 @@ describe("control.selectMany", () => {
         "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(970px, 985px);" remove="">Mikky</span>",
         "<span item="" aria-hidden="true" drop="">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" aria-hidden="true">Splinter</span>",
         "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
       ]
     `);
@@ -936,7 +938,7 @@ describe("control.selectMany", () => {
     trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await nextFrame(50);
     expect(onChanged).toBeCalledTimes(2);
-    expect(el.$value).toStrictEqual([30, 40, 10]);
+    expect(el.$value).toStrictEqual([30, 10, 40]);
     expect(el).toMatchSnapshot();
 
     // cancel without move
@@ -1003,7 +1005,7 @@ describe("control.selectMany", () => {
     trg.dispatchEvent(new MouseEvent("touchend", { cancelable: false, bubbles: true }));
     await h.wait(1);
     expect(onChanged).toBeCalledTimes(0);
-    expect(el.$value).toStrictEqual([30, 40, 10]);
+    expect(el.$value).toStrictEqual([30, 10, 40]);
 
     // case when touch event possible to prevent
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
@@ -1017,7 +1019,7 @@ describe("control.selectMany", () => {
     trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
     trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await nextFrame(50);
-    expect(el.$value).toStrictEqual([30, 40, 10]);
+    expect(el.$value).toStrictEqual([30, 10, 40]);
     expect(onChanged).toBeCalledTimes(0);
 
     // test disposing - no sort listener when option is disabled

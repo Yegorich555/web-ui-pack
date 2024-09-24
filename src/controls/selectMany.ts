@@ -58,6 +58,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Form-control with dropdown/combobox behavior
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/selectMany}
  * @example
   const el = document.createElement("wup-selectmany");
   el.$options.name = "gender";
@@ -412,6 +413,7 @@ export default class WUPSelectManyControl<
         // find nearest item in the nearest line
         dist = Number.MAX_SAFE_INTEGER;
         // console.warn(nearest, nearestEnd, lineY);
+        const nearestStart = nearest;
         for (let i = nearest; i <= nearestEnd; ++i) {
           const r = rects[i];
           const dx = ev.clientX - (r.x + r.width / 2);
@@ -427,17 +429,21 @@ export default class WUPSelectManyControl<
         if (eli !== nearest) {
           const trg = this.$refItems![nearest];
           const r = rects[nearest];
-          const isLeft = Math.abs(r.x - ev.clientX) < Math.abs(r.x + r.width - ev.clientX);
+          const isYChangeByEdges = nearestStart === nearest || nearestEnd === nearest;
+          const isLeftOrTop = isYChangeByEdges
+            ? eli > nearest
+            : Math.abs(r.x - ev.clientX) < Math.abs(r.x + r.width - ev.clientX);
+
           let nextEli = eli;
           if (nearest < eli) {
-            nextEli = isLeft ? nearest : nearest + 1; // shift from right to left
+            nextEli = isLeftOrTop ? nearest : nearest + 1; // shift from right to left
           } else {
-            // if (nearest > eli) {
-            nextEli = isLeft ? nearest - 1 : nearest; // shift from left to right
+            // if (nearest >= eli) {
+            nextEli = /* isLeftOrTop ? nearest - 1 : */ nearest; // shift from left to right
           }
 
           if (nextEli !== eli) {
-            if (isLeft) {
+            if (isLeftOrTop) {
               trg.parentElement!.insertBefore(el, trg);
             } else {
               trg.parentElement!.insertBefore(el, trg.nextElementSibling);
@@ -538,6 +544,7 @@ export default class WUPSelectManyControl<
   }
 
   protected override valueToInput(v: ValueType[] | undefined, isReset?: boolean): string {
+    // todo issue when items is promise and called .$value =
     !isReset && setTimeout(() => this.renderItems(v ?? [], this.getItems())); // timeout required otherwise filter is reset by empty input
     return this.$isFocused || !v?.length ? "" : " "; // otherwise broken css:placeholder-shown
   }

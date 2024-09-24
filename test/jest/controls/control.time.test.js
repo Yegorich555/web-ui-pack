@@ -217,6 +217,7 @@ describe("control.time", () => {
     const onSubmit = jest.fn();
     form.$onSubmit = onSubmit;
     el.$options.name = "test";
+    h.setupLayout(el, { h: 20, w: 100 });
     await h.wait(1);
     HTMLInputElement.prototype.focus.call(el.$refInput);
     const onParse = jest.spyOn(el, "parseInput");
