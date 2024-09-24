@@ -3,7 +3,6 @@ import { initTestTextControl, testTextControl } from "./control.textTest";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const WUPSelectControl = require("web-ui-pack/controls/select").default;
-const { setTimeout: waitTimeout } = require("node:timers/promises");
 
 initTestTextControl({ htmlTag: "wup-select", type: "WUPSelectControl" });
 
@@ -67,15 +66,15 @@ describe("control.select", () => {
 
     // set focus & close
     await page.click("#trueEl input");
-    await waitTimeout(500);
+    await page.waitForTimeout(500);
     expect(await page.evaluate(() => document.querySelector("#trueEl [menu]").scrollTop)).toBe(0);
     await page.click("#trueEl strong");
-    await waitTimeout(500);
+    await page.waitForTimeout(500);
     expect((await getInfo()).isShown).toBe(false);
 
     // open by ArrowKey
     await page.keyboard.press("ArrowUp");
-    await waitTimeout(500);
+    await page.waitForTimeout(500);
     expect((await getInfo()).isShown).toBe(true);
     expect(
       await page.evaluate(() => {
@@ -89,30 +88,30 @@ describe("control.select", () => {
     await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "no-preference" }]); // allow animations
     // show
     await page.evaluate(() => HTMLElement.prototype.focus.call(document.querySelector("#trueEl input")));
-    await waitTimeout(310); // animation takes 300ms by default
+    await page.waitForTimeout(310); // animation takes 300ms by default
     let r = await getInfo();
     expect(r.isShown).toBe(true);
     expect(r.isMenuExists).toBe(true);
 
     // hide
     await page.evaluate(() => document.activeElement.blur());
-    await waitTimeout(250); // animation takes 300ms by default but we wait partially
+    await page.waitForTimeout(250); // animation takes 300ms by default but we wait partially
     r = await getInfo();
     expect(r.isShown).toBe(false);
     expect(r.isMenuExists).toBe(true); // because still closing
 
-    await waitTimeout(100); // animation takes 300ms by default
+    await page.waitForTimeout(100); // animation takes 300ms by default
     r = await getInfo();
     expect(r.isShown).toBe(false);
     expect(r.isMenuExists).toBe(false); // because removed after animation end
 
     // case: focus again during the closing by focusout must open
     await page.evaluate(() => HTMLElement.prototype.focus.call(document.querySelector("#trueEl input")));
-    await waitTimeout(200);
+    await page.waitForTimeout(200);
     await page.evaluate(() => document.activeElement.blur());
-    await waitTimeout(100);
+    await page.waitForTimeout(100);
     await page.evaluate(() => HTMLElement.prototype.focus.call(document.querySelector("#trueEl input")));
-    await waitTimeout(300);
+    await page.waitForTimeout(300);
     r = await getInfo();
     expect(r.isMenuExists).toBe(true);
     expect(r.isShown).toBe(true);

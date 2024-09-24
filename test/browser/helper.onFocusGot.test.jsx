@@ -1,7 +1,7 @@
 /* eslint-disable react/button-has-type */
 // ES5 import is required otherwise jest-env conflicts with puppeeter-env
 const onFocusGot = require("web-ui-pack/helpers/onFocusGot").default;
-const { setTimeout: waitTimeout } = require("node:timers/promises");
+
 // impossible testCase: Click on dev.console - focusStay, because no-way to implement click on dev.console properly
 
 const debounceMs = 1;
@@ -51,7 +51,7 @@ describe("helper.onFocusGot", () => {
 
     // click on btnInside > no-focusLost for control
     await page.click("#btn");
-    await waitTimeout(debounceMs);
+    await page.waitForTimeout(debounceMs);
     expect(await page.evaluate(() => document.activeElement.id)).toBe("btn");
     expect(await page.evaluate(() => window.gotFocus)).toBe(1);
 
@@ -63,20 +63,20 @@ describe("helper.onFocusGot", () => {
 
   test("focusDebounce with mouse", async () => {
     // click on the label
-    await waitTimeout(debounceMs + 5);
+    await page.waitForTimeout(debounceMs + 5);
     await page.click("#text", { delay: 5 });
     expect(await page.evaluate(() => window.gotFocus)).toBe(1);
-    await waitTimeout(debounceMs + 5);
+    await page.waitForTimeout(debounceMs + 5);
     expect(await page.evaluate(() => window.gotFocus)).toBe(1);
     // click on btn sibling
     await page.click("#btn", { delay: 5 });
     expect(await page.evaluate(() => window.gotFocus)).toBe(1);
-    await waitTimeout(debounceMs + 5);
+    await page.waitForTimeout(debounceMs + 5);
     expect(await page.evaluate(() => window.gotFocus)).toBe(1);
 
     // click outside
     await page.click("#c2", { delay: 5 });
-    await waitTimeout(debounceMs + 5);
+    await page.waitForTimeout(debounceMs + 5);
     expect(await page.evaluate(() => window.gotFocus)).toBe(1);
   });
 
@@ -86,9 +86,9 @@ describe("helper.onFocusGot", () => {
     expect(await page.evaluate(() => document.activeElement.id)).toBe("c1");
     expect(await page.evaluate(() => window.gotFocus)).toBe(1);
     await page.tap("#c2");
-    await waitTimeout(debounceMs);
+    await page.waitForTimeout(debounceMs);
     await page.tap("#text");
-    await waitTimeout(debounceMs);
+    await page.waitForTimeout(debounceMs);
     expect(await page.evaluate(() => window.gotFocus)).toBe(2);
   });
 

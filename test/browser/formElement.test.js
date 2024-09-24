@@ -2,7 +2,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const WUPFormElement = require("web-ui-pack/formElement").default;
 const WUPTextControl = require("web-ui-pack/controls/text").default;
-const { setTimeout: waitTimeout } = require("node:timers/promises");
 
 /** @type WUPFormElement */
 let testEl;
@@ -18,7 +17,7 @@ beforeEach(async () => {
       </wup-form>`
     );
   });
-  await waitTimeout(2); // timeout required because of debounceFilters
+  await page.waitForTimeout(2); // timeout required because of debounceFilters
   await page.evaluate(() => (window.testEl = document.querySelector("wup-form")));
 
   page.getInfo = () =>
@@ -52,7 +51,7 @@ describe("formElement", () => {
     });
 
     await page.click("[type='submit']");
-    await waitTimeout(500); // timeout to wait for scrolling
+    await page.waitForTimeout(500); // timeout to wait for scrolling
     let t = await page.getInfo();
     expect(t.activeId).toBe(t.inputId1);
     expect(t.$isValid).toBe(false);
@@ -66,7 +65,7 @@ describe("formElement", () => {
 
     await page.type("#inp1 input", "Katty");
     await page.click("[type='submit']");
-    await waitTimeout(500); // timeout to wait for scrolling
+    await page.waitForTimeout(500); // timeout to wait for scrolling
     t = await page.getInfo();
     expect(t.activeId).toBe(t.inputId2);
     expect(t.$isValid).toBe(false);
@@ -80,7 +79,7 @@ describe("formElement", () => {
 
     await page.type("#inp2 input", "Newton");
     await page.click("[type='submit']");
-    await waitTimeout(500); // timeout to wait for scrolling
+    await page.waitForTimeout(500); // timeout to wait for scrolling
     t = await page.getInfo();
     expect(t.$isValid).toBe(true);
     expect(t.html).toMatchInlineSnapshot(`

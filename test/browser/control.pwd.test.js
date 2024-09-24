@@ -3,7 +3,6 @@ import { initTestTextControl, testTextControl } from "./control.textTest";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const WUPPasswordControl = require("web-ui-pack/controls/password").default;
-const { setTimeout: waitTimeout } = require("node:timers/promises");
 
 initTestTextControl({ htmlTag: "wup-pwd", type: "WUPPasswordControl" });
 
@@ -34,7 +33,7 @@ describe("control.pwd", () => {
 
     // click on btn-eye must send focus + select all
     await page.click("button[eye]");
-    await waitTimeout(20);
+    await page.waitForTimeout(20);
     t = await getInfo();
     expect(t.activeElementId).toBe(t.trueId);
     expect(t.selection).toEqual([0, 5]);
@@ -44,7 +43,7 @@ describe("control.pwd", () => {
     expect(t.h).toBe(44); // height can change because style changed
 
     await page.click("button[eye]");
-    await waitTimeout(20);
+    await page.waitForTimeout(20);
     t = await getInfo();
     expect(t.activeElementId).toBe(t.trueId);
     expect(t.selection).toEqual([0, 5]);
@@ -58,12 +57,12 @@ describe("control.pwd", () => {
       el.$refInput.selectionStart = el.$refInput.selectionEnd;
     });
     await page.click("button[eye]");
-    await waitTimeout(20);
+    await page.waitForTimeout(20);
     t = await getInfo();
     expect(t.selection).toEqual([5, 5]); // selection must stay the same
 
     await page.click("button[eye]");
-    await waitTimeout(20);
+    await page.waitForTimeout(20);
     t = await getInfo();
     expect(t.selection).toEqual([5, 5]); // selection must stay the same
   });

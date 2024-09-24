@@ -1,5 +1,4 @@
 const WUPScrolled = require("web-ui-pack/helpers/scrolled").default;
-const { setTimeout: waitTimeout } = require("node:timers/promises");
 
 beforeAll(async () => {
   await page.emulateMediaFeatures([
@@ -46,10 +45,10 @@ describe("helper.scrolled (carousel)", () => {
       `"<div id="app"><ul style="overflow: hidden; touch-action: none; max-height: 54px;"><li>Item 1</li><li>Item 2</li><li>Item 3</li><li>Item 4</li><li>Item 5</li><li>Item 6</li></ul></div>"`
     );
 
-    await waitTimeout("50");
+    await page.waitForTimeout("50");
     expect(await page.evaluate(() => document.querySelector("ul").scrollTop)).not.toBe(0); // scrolling is started
 
-    await waitTimeout("1000");
+    await page.waitForTimeout("1000");
     expect(await page.evaluate(() => document.querySelector("ul").scrollTop)).toBe(0); // scrolling is finished and prev items removed
     expect(await page.evaluate(() => document.body.innerHTML)).toMatchInlineSnapshot(
       `"<div id="app"><ul style="overflow: hidden; touch-action: none;"><li>Item 4</li><li>Item 5</li><li>Item 6</li></ul></div>"`
@@ -61,10 +60,10 @@ describe("helper.scrolled (carousel)", () => {
     );
     expect(await page.evaluate(() => document.querySelector("ul").scrollTop)).not.toBe(0); // scrolling is not started but elemens is added at the top
 
-    await waitTimeout("50");
+    await page.waitForTimeout("50");
     expect(await page.evaluate(() => document.querySelector("ul").scrollTop)).not.toBe(54); // scrolling is started
 
-    await waitTimeout("1000");
+    await page.waitForTimeout("1000");
     expect(await page.evaluate(() => document.querySelector("ul").scrollTop)).toBe(0); // scrolling is finished and prev items removed
     expect(await page.evaluate(() => document.body.innerHTML)).toMatchInlineSnapshot(
       `"<div id="app"><ul style="overflow: hidden; touch-action: none;"><li>Item 7</li><li>Item 8</li><li>Item 9</li></ul></div>"`
