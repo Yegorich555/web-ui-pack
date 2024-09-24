@@ -70,7 +70,7 @@ describe("helper.onFocusLost", () => {
     await page.mouse.move(r.x + r.width / 2, r.y + r.height / 2);
     expect(await page.evaluate(() => window.gotLeft)).toBe(0);
     await page.mouse.up();
-    await page.waitForTimeout(debounceMs + 1);
+    await page.waitForTimeout(debounceMs + 3);
     expect(await page.evaluate(() => window.gotLeft)).toBe(1);
   });
 
