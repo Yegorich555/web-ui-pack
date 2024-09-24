@@ -1,6 +1,7 @@
 /* eslint-disable react/button-has-type */
 // ES5 import is required otherwise jest-env conflicts with puppeeter-env
 const onFocusLost = require("web-ui-pack/helpers/onFocusLost").default;
+const { setTimeout: waitTimeout } = require("node:timers/promises");
 
 // impossible testCase: Click on dev.console - focusStay, because no-way to implement click on dev.console properly
 
@@ -37,7 +38,7 @@ describe("helper.onFocusLost", () => {
 
     // click outside the control
     await page.click("#c2");
-    await page.waitForTimeout(debounceMs + 1);
+    await waitTimeout(debounceMs + 1);
     expect(await page.evaluate(() => window.gotLeft)).toBe(1);
 
     // ordinary click on the label > should return focus to input
@@ -51,7 +52,7 @@ describe("helper.onFocusLost", () => {
     expect(await page.evaluate(() => window.gotLeft)).toBe(1);
     // click on btnInside > no-focusLost for control
     await page.click("#btn");
-    await page.waitForTimeout(debounceMs + 1);
+    await waitTimeout(debounceMs + 1);
     expect(await page.evaluate(() => document.activeElement.id)).toBe("btn");
     expect(await page.evaluate(() => window.gotLeft)).toBe(1);
 
@@ -70,7 +71,7 @@ describe("helper.onFocusLost", () => {
     await page.mouse.move(r.x + r.width / 2, r.y + r.height / 2);
     expect(await page.evaluate(() => window.gotLeft)).toBe(0);
     await page.mouse.up();
-    await page.waitForTimeout(debounceMs + 1);
+    await waitTimeout(debounceMs + 1);
     expect(await page.evaluate(() => window.gotLeft)).toBe(1);
   });
 
@@ -78,12 +79,12 @@ describe("helper.onFocusLost", () => {
     // click on the label
     await page.click("#text", { delay: 5 });
     expect(await page.evaluate(() => window.gotLeft)).toBe(0);
-    await page.waitForTimeout(debounceMs + 5);
+    await waitTimeout(debounceMs + 5);
     expect(await page.evaluate(() => window.gotLeft)).toBe(0);
 
     // click outside
     await page.click("#c2", { delay: 5 });
-    await page.waitForTimeout(debounceMs + 5);
+    await waitTimeout(debounceMs + 5);
     expect(await page.evaluate(() => window.gotLeft)).toBe(1);
   });
 
@@ -93,7 +94,7 @@ describe("helper.onFocusLost", () => {
     expect(await page.evaluate(() => document.activeElement.id)).toBe("c1");
     expect(await page.evaluate(() => window.gotLeft)).toBe(0);
     await page.tap("#c2");
-    await page.waitForTimeout(debounceMs + 1);
+    await waitTimeout(debounceMs + 1);
     expect(await page.evaluate(() => window.gotLeft)).toBe(1);
   });
 

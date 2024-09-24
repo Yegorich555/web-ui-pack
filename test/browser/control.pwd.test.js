@@ -3,6 +3,7 @@ import { initTestTextControl, testTextControl } from "./control.textTest";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const WUPPasswordControl = require("web-ui-pack/controls/password").default;
+const { setTimeout: waitTimeout } = require("node:timers/promises");
 
 initTestTextControl({ htmlTag: "wup-pwd", type: "WUPPasswordControl" });
 
@@ -33,22 +34,22 @@ describe("control.pwd", () => {
 
     // click on btn-eye must send focus + select all
     await page.click("button[eye]");
-    await page.waitForTimeout(20);
+    await waitTimeout(20);
     t = await getInfo();
     expect(t.activeElementId).toBe(t.trueId);
     expect(t.selection).toEqual([0, 5]);
     expect(t.html).toMatchInlineSnapshot(
-      `"<wup-pwd id="trueEl"><label for="wup6"><span><input placeholder=" " type="text" id="wup6" autocomplete="new-password" style="height: 44px;"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="off" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd id="trueEl"><label for="wup5"><span><input placeholder=" " type="text" id="wup5" autocomplete="new-password" style="height: 44px;"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="off" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
     expect(t.h).toBe(44); // height can change because style changed
 
     await page.click("button[eye]");
-    await page.waitForTimeout(20);
+    await waitTimeout(20);
     t = await getInfo();
     expect(t.activeElementId).toBe(t.trueId);
     expect(t.selection).toEqual([0, 5]);
     expect(t.html).toMatchInlineSnapshot(
-      `"<wup-pwd id="trueEl"><label for="wup6"><span><input placeholder=" " type="password" id="wup6" autocomplete="new-password" style="height: 44px;"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
+      `"<wup-pwd id="trueEl"><label for="wup5"><span><input placeholder=" " type="password" id="wup5" autocomplete="new-password" style="height: 44px;"><strong></strong><span class="wup-hidden">press Alt + V to show/hide password</span></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button><button eye="" aria-hidden="true" type="button" tabindex="-1"></button></label></wup-pwd>"`
     );
     expect(t.h).toBe(44);
 
@@ -57,12 +58,12 @@ describe("control.pwd", () => {
       el.$refInput.selectionStart = el.$refInput.selectionEnd;
     });
     await page.click("button[eye]");
-    await page.waitForTimeout(20);
+    await waitTimeout(20);
     t = await getInfo();
     expect(t.selection).toEqual([5, 5]); // selection must stay the same
 
     await page.click("button[eye]");
-    await page.waitForTimeout(20);
+    await waitTimeout(20);
     t = await getInfo();
     expect(t.selection).toEqual([5, 5]); // selection must stay the same
   });

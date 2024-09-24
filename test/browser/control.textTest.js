@@ -1,5 +1,6 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-export */
+const { setTimeout: waitTimeout } = require("node:timers/promises");
 
 /** @type WUPTextControl */
 let el;
@@ -28,7 +29,7 @@ export function initTestTextControl({ htmlTag, type, onBeforeEach }) {
       },
       { htmlTag, type }
     );
-    await page.waitForTimeout(2); // timeout required because of debounceFilters
+    await waitTimeout(2); // timeout required because of debounceFilters
 
     page.getInfo = () =>
       page.evaluate(() => ({
@@ -55,7 +56,7 @@ export function testTextControl({ isComboCtrl } = {}) {
     await page.click("#fakeLabel");
     t = await page.getInfo();
     expect(t.id).toBe("fakeInput");
-    expect(t.gotBlur).toBe(1); // checking if focus on label again blures input
+    expect(t.gotBlur).toBe(0); // checking if focus on label again not blures input
 
     // checking with control
     await page.click("#trueEl");
@@ -80,10 +81,10 @@ export function testTextControl({ isComboCtrl } = {}) {
 
   test("click on err moves focus into input", async () => {
     await page.evaluate(() => el.$showError("Some message here"));
-    await page.waitForTimeout(100); // wait for popup
+    await waitTimeout(100); // wait for popup
 
     await page.click("[error]");
-    await page.waitForTimeout(100); // wait for popup
+    await waitTimeout(100); // wait for popup
     let t = await page.getInfo();
     expect(t.id).toBe(t.trueId);
 

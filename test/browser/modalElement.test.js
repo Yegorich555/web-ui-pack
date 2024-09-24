@@ -1,6 +1,7 @@
 // ES5 import is required otherwise jest-env conflicts with puppeeter-env
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const WUPModalElement = require("web-ui-pack/modalElement").default;
+const { setTimeout: waitTimeout } = require("node:timers/promises");
 
 beforeEach(async () => {
   await page.emulateMediaFeatures([
@@ -18,7 +19,7 @@ beforeEach(async () => {
     );
     document.getElementById("clickBtn").focus();
   });
-  await page.waitForTimeout(20); // timeout required because of debounceFilters
+  await waitTimeout(20); // timeout required because of debounceFilters
 });
 
 describe("modalElement", () => {
@@ -45,7 +46,7 @@ describe("modalElement", () => {
 
     // focus on input inside: by default skip btnClose
     await page.click("#clickBtn");
-    await page.waitForTimeout(10);
+    await waitTimeout(10);
     t = await getInfo();
     expect(t.isOpened).toBe(true);
     expect(t.html).toMatchInlineSnapshot(`
@@ -59,7 +60,7 @@ describe("modalElement", () => {
 
     // focus back on close
     await page.evaluate(() => document.querySelector("wup-modal").$close());
-    await page.waitForTimeout(10);
+    await waitTimeout(10);
     t = await getInfo();
     expect(t.isOpened).toBe(false);
     expect(t.html).toMatchInlineSnapshot(`

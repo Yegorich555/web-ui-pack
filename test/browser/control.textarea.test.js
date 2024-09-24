@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const WUPTextareaControl = require("web-ui-pack/controls/textarea").default;
+const { setTimeout: waitTimeout } = require("node:timers/promises");
 
 /** @type WUPTextareaControl */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -9,7 +10,7 @@ beforeEach(async () => {
   await page.evaluate(() => {
     renderHtml(`<wup-textarea></wup-textarea>`);
   });
-  await page.waitForTimeout(20); // timeout required because of debounceFilters
+  await waitTimeout(20); // timeout required because of debounceFilters
   await page.evaluate(() => (window.el = document.querySelector("wup-textarea")));
 });
 

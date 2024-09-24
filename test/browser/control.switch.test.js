@@ -1,6 +1,7 @@
 // ES5 import is required otherwise jest-env conflicts with puppeeter-env
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const WUPSwitchControl = require("web-ui-pack/controls/switch").default;
+const { setTimeout: waitTimeout } = require("node:timers/promises");
 
 /** @type WUPSwitchControl */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -9,7 +10,7 @@ beforeEach(async () => {
   await page.evaluate(() => {
     renderHtml(`<wup-switch></wup-switch>`);
   });
-  await page.waitForTimeout(20); // timeout required because of debounceFilters
+  await waitTimeout(20); // timeout required because of debounceFilters
   await page.evaluate(() => (window.testEl = document.querySelector("wup-switch")));
 });
 

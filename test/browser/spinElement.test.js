@@ -1,6 +1,7 @@
 // ES5 import is required otherwise jest-env conflicts with puppeeter-env
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const WUPSpinElement = require("web-ui-pack/spinElement").default;
+const { setTimeout: waitTimeout } = require("node:timers/promises");
 
 /** @type WUPSpinElement */
 let testEl;
@@ -14,7 +15,7 @@ beforeEach(async () => {
       </button>`
     );
   });
-  await page.waitForTimeout(20); // timeout required because of debounceFilters
+  await waitTimeout(20); // timeout required because of debounceFilters
   await page.evaluate(() => (window.testEl = document.querySelector("wup-spin")));
 });
 
@@ -55,7 +56,7 @@ describe("spinElement", () => {
 
   test("target with position:relative", async () => {
     await page.evaluate(() => (testEl.parentElement.style.position = "relative"));
-    await page.waitForTimeout(20);
+    await waitTimeout(20);
     const t = await page.evaluate(() => ({
       html: testEl.parentElement.outerHTML,
       /** @type DOMRect */
@@ -83,7 +84,7 @@ describe("spinElement", () => {
 
   test("target.parent with position:relative", async () => {
     await page.evaluate(() => (document.body.style.position = "relative"));
-    await page.waitForTimeout(20);
+    await waitTimeout(20);
     const t = await page.evaluate(() => ({
       html: testEl.parentElement.outerHTML,
       /** @type DOMRect */
@@ -111,7 +112,7 @@ describe("spinElement", () => {
 
   test("target hidden > spinner hidden", async () => {
     await page.evaluate(() => (testEl.parentElement.style.display = "none"));
-    await page.waitForTimeout(20);
+    await waitTimeout(20);
     const t = await page.evaluate(() => ({ html: testEl.parentElement.outerHTML }));
     expect(t.html).toMatchInlineSnapshot(`
       "<button aria-busy="true" style="display: none;">
@@ -126,7 +127,7 @@ describe("spinElement", () => {
       testEl.$options.inline = true;
       testEl.$options.fit = false;
     });
-    await page.waitForTimeout(20);
+    await waitTimeout(20);
     let t = await page.evaluate(() => ({ html: testEl.parentElement.outerHTML }));
     expect(t.html).toMatchInlineSnapshot(`
       "<button aria-busy="true">
@@ -136,12 +137,12 @@ describe("spinElement", () => {
     `);
 
     await page.evaluate(() => (testEl.$options.fit = true));
-    await page.waitForTimeout(20);
+    await waitTimeout(20);
     t = await page.evaluate(() => ({ html: testEl.parentElement.outerHTML }));
     expect(t.html).toMatchInlineSnapshot(`
       "<button aria-busy="true">
               <span>Some text</span>
-              <wup-spin aria-label="Loading. Please wait" style="--spin-size: 14px; --spin-item-size: calc( calc( 3em / 8) * 0.35);">
+              <wup-spin aria-label="Loading. Please wait" style="--spin-size: 14px; --spin-item-size: calc(calc(3em / 8) * 0.35);">
             <div></div></wup-spin></button>"
     `);
   });

@@ -1,5 +1,7 @@
 import { initTestTextControl, testTextControl } from "./control.textTest";
 
+const { setTimeout: waitTimeout } = require("node:timers/promises");
+
 initTestTextControl({ htmlTag: "wup-text", type: "WUPTextControl" });
 
 const histUndo = async () => {
@@ -37,7 +39,7 @@ describe("control.text", () => {
       el.$initValue = "Mike";
       el.focus();
     });
-    await page.waitForTimeout(2); // timeout required because of debounceFilters
+    await waitTimeout(2); // timeout required because of debounceFilters
     await page.click("#newEl [clear]");
     expect(await page.evaluate(() => document.getElementById("newEl").$refInput.value)).toBe("");
     await histUndo();
