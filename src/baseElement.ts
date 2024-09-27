@@ -156,7 +156,7 @@ export default abstract class WUPBaseElement<
   }
 
   /** Array of attribute names to listen for changes
-   * @defaultValue every option from $defaults (in lowerCase) */
+   * @defaultValue every option from `observedOptions` OR $defaults (in  `w-${k.toLowerCase()}`) */
   static get observedAttributes(): Array<string> {
     return (this.observedOptions || Object.keys(this.$defaults)).map((k) => `w-${k.toLowerCase()}`);
   }
@@ -379,7 +379,7 @@ export default abstract class WUPBaseElement<
     this.dispose();
   }
 
-  /** Called on Init and every time as options/attributes changed */
+  /** Called on Init (with propsChanged: null) and every time as options/attributes changed */
   protected gotChanges(propsChanged: Array<string> | null): void {
     this.#ctr.mergeDefaults(this._opts); // WARN during the init it fired twice: 1st: cloned defaults, 2nd: merge defaults here
   }
@@ -423,6 +423,26 @@ export default abstract class WUPBaseElement<
   #attrChanged?: string[];
   /** Called when any of observedAttributes is changed */
   protected gotAttributeChanged(name: string, value: string | null): void {
+    const key = this.attrToProp(name, value);
+
+    if (this.#isReady) {
+      if (!this.#attrTimer) {
+        this.#attrChanged = [];
+        this.#attrTimer = setTimeout(() => {
+          this.#attrTimer = undefined;
+          this._isStopChanges = true;
+          this.gotChanges(this.#attrChanged!);
+          this._isStopChanges = false;
+          this.#attrChanged = undefined;
+        });
+      }
+      this.#attrChanged!.push(key);
+    }
+  }
+
+  /** Parse attribute & assign to related property
+   * @returns defined propertyName */
+  protected attrToProp(name: string, value: string | null): string {
     if (name.startsWith("w-")) {
       name = name.substring(2);
     }
@@ -443,19 +463,7 @@ export default abstract class WUPBaseElement<
       ? m.parse(value)
       : this.parseAttr(m.type, value, key, name);
 
-    if (this.#isReady) {
-      if (!this.#attrTimer) {
-        this.#attrChanged = [];
-        this.#attrTimer = setTimeout(() => {
-          this.#attrTimer = undefined;
-          this._isStopChanges = true;
-          this.gotChanges(this.#attrChanged!);
-          this._isStopChanges = false;
-          this.#attrChanged = undefined;
-        });
-      }
-      this.#attrChanged!.push(key);
-    }
+    return key;
   }
 
   /** Browser calls this method when attrs pointed in observedAttributes is changed */
