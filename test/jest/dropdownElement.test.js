@@ -90,7 +90,7 @@ describe("dropdownElement", () => {
     expect(el.$refPopup.$isOpened).toBe(true);
     expect(el.outerHTML).toMatchInlineSnapshot(`
       "<wup-dropdown>
-          <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="true" style="z-index: 8002;">Click me</button>
+          <button aria-owns="wup1" aria-controls="wup1" aria-haspopup="listbox" aria-expanded="true" style="z-index: 2;">Click me</button>
           <wup-popup menu="" open="" style="min-width: 100px; min-height: 50px; display: none;" w-animation="drawer" show="">
             <ul id="wup1" tabindex="-1">
               <li><button>A</button></li>
