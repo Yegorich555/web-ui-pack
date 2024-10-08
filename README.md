@@ -7,13 +7,14 @@ Universal web package with high scalable [WebComponents](#components) and [helpe
 [![install size](https://packagephobia.now.sh/badge?p=web-ui-pack)](https://packagephobia.now.sh/result?p=web-ui-pack)
 [![npm downloads](https://img.shields.io/npm/dm/web-ui-pack.svg?style=flat-square)](http://npm-stat.com/charts.html?package=web-ui-pack)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<!-- [![GitHub Sponsors](https://img.shields.io/github/sponsors/Yegorich555)](https://github.com/sponsors/Yegorich555) -->
 
 ## Demo
 
 You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone repo and run `npm i & npm start`
 
-Template repo with React: [webpack-must-have](https://github.com/Yegorich555/webpack-must-have)
-Template repo with Angular: [webpack-angular](https://github.com/Yegorich555/web-angular)
+Template repos with React: [webpack-must-have](https://github.com/Yegorich555/webpack-must-have), [webpack-react](https://github.com/Yegorich555/webpack-react) (in progress)\
+Template repo with Angular: [webpack-angular](https://github.com/Yegorich555/web-angular) (in progress)
 
 ## Features
 
