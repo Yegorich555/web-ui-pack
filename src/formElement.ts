@@ -55,7 +55,7 @@ declare global {
       /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
        * @defaultValue goToError | validateUntilFirst | reset | lockOnPending */
       submitActions: SubmitActions;
-      /** Enable to tore data in localStorage to prevent losing till submitted;
+      /** Enable to store data in localStorage to prevent losing till submitted;
        * @defaultValue false
        * @tutorial Troubleshooting
        * * It doesn't save values that are complex objects. So `wup-select.$options.items = [{text: "N1",value: {id:1,name:'Nik'} }]` is skipped
