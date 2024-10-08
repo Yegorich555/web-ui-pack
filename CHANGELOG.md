@@ -2,6 +2,15 @@
 
 # Changelog
 
+## 1.2.2 (\_\_\_)
+
+### Fixes & Improvements
+
+---
+
+- [NotifyElement](src/notifyElement.ts)
+  - Fixed _changing $options doesn't clear related attributes_
+
 ## 1.2.1 (Sep 24, 2024)
 
 ### New Features

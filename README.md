@@ -130,7 +130,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
    - In `jsx/tsx` instead of `className` use `class` attribute (React issue)
    - If you change custom html-attributes it will update `$options`, but if you change some option it removes related attribute (for performance reasons). Better to avoid usage attributes at all
 4. **Inheritance**
-   - Components are developed to be easily customized and inherited. Use ...$defaults of every class to configure behavior You can rewrite everything you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
+   - Components are developed to be easily customized and inherited. Use ...$defaults of every class to configure behavior. You can rewrite everything you can imagine without digging a lot in a code. To be sure don't hesitate to take a look on \*.d.ts or source code (there are enough comments to clarify even weird/difficult cases)
    - All Components inherited from [WUPBaseElement](src/baseElement.ts) that extends default HTMLElement
    - All internal event-callbacks startsWith `got...` (gotReady, gotRemoved)
    - To redefine the component just extend it and register with a new html tag OR redefine default behavior via prototype functions (if $defaults are not included something). See details in [example](#example)
@@ -229,8 +229,8 @@ declare global {
 
 ### Helpers
 
-use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.
-**WARN**: don't use `import {focusFirst} from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
+use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
+**WARN**: avoid using `import { focusFirst } from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
 - [**animateDropdown**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) element as dropdown via scale and counter-scale for children`
 - [**animateStack**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) every element via moving from target to own position`

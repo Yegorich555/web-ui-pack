@@ -111,13 +111,12 @@ export default class WUPNotifyElement<
   #ctr = this.constructor as typeof WUPNotifyElement;
 
   static get observedOptions(): Array<keyof WUP.Notify.Options> {
-    return [];
+    return ["autoClose", "closeOnClick", "openCase", "placement", "selfRemove"];
   }
 
   static get observedAttributes(): Array<string> {
-    const arr = super.observedAttributes as Array<Lowercase<keyof WUP.Notify.JSXProps>>;
-    arr.push("w-autoclose", "w-closeonclick", "w-opencase", "w-placement", "w-selfremove");
-    return arr;
+    // use as observable to unify parse logic
+    return super.observedAttributes as Array<Lowercase<keyof WUP.Notify.JSXProps>>;
   }
 
   // perfect bg color is: #121212c8
