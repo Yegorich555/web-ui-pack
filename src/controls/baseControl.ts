@@ -429,7 +429,7 @@ export default abstract class WUPBaseControl<
 
   /** Provide logic to check if control is empty (by comparison with value) */
   static $isEmpty(v: unknown): boolean {
-    return v === "" || v === undefined;
+    return v === "" || v === undefined; // todo it's wrong for numberControl, dateControl etc. when `$value == null`, even for radio/select if null or empty string is part of options
   }
 
   static get observedAttributes(): Array<string> {
