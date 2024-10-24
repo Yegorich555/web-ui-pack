@@ -702,3 +702,4 @@ const __openedItems: Array<WUPModalElement> = [];
 customElements.define(tagName, WUPModalElement);
 
 // NiceToHave: handle Ctrl+S, Meta+S for submit & close ???
+// todo user can select outside via Ctrl + A
