@@ -4,24 +4,24 @@
 
 ## 1.2.2 (\_\_\_)
 
-### Fixes & Improvements
+### New Features
 
----
+- helper [objectToFormData](src/helpers/objectToFormData.ts)
+
+### Fixes & Improvements
 
 - [NotifyElement](src/notifyElement.ts)
   - Fixed _changing $options doesn't clear related attributes_
+
+---
 
 ## 1.2.1 (Sep 24, 2024)
 
 ### New Features
 
----
-
 - [NotifyElement](src/notifyElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/notify) - **EXPERIMENTAL** (not test-covered yet)
 
 ### Fixes & Improvements
-
----
 
 - [Form](src/formElement.ts)
   - Added skip-validation (by default) for `readonly/disabled/hidden` controls. **BREAKING:** changed enum `SubmitActions` & `FormElement.$defaults.submitActions`
@@ -41,13 +41,9 @@
 
 ---
 
----
-
 ## 1.1.0 (Jan 18, 2024)
 
 ### New Features
-
----
 
 - **BREAKING**. **Controls**. Renamed `valueToUrl/valueFromUrl` to `valueToStorage/valueFromStorage`
 - **Combobox controls (Select, SelectMany, Date, Time)**. Added method `.renderPopup()` to have ability to override popup options
@@ -58,13 +54,9 @@
 
 ### Fixes
 
----
-
 - **HTML**. Fixed intellisense (html.json was missed in the package)
 - **Styles**. Textbased controls. Added `opacity: 1` for `button[clear]/prefix/postfix` as fix when controls in a flex-row and it resizes on hover
 - **Combobox controls (Select, SelectMany, Date, Time)**. _Memory leak: menu is closed but not removed when click on body outside control_
-
----
 
 ---
 
@@ -72,20 +64,14 @@
 
 ### New Features
 
----
-
 - [WUPTimeObject](src/objects/timeObject.ts). Add init by date to constructor
 - [DateControl](src/controls/date.ts). Add sync with [TimeControl](src/controls/time.ts) (value, min, max)
-
----
 
 ---
 
 ## 1.0.3 (Dec 9, 2023)
 
 ### New Features
-
----
 
 - **Helpers**. Deprecate `mathSumFloat` in favor of `mathFixFP`
 - **Styles**.
@@ -103,8 +89,6 @@
 
 ### Fixes
 
----
-
 - **Global**. _Custom event callbacks like $onChange(e) have `e.target: null`_
 - **Controls**
   - _Wrong TS-type on **$onChange()** callback_
@@ -115,13 +99,9 @@
 
 ---
 
----
-
 ## 1.0.2 (Nov 21, 2023)
 
 ### New Features
-
----
 
 - **Global**
   - Added Preact tsx/jsx support
@@ -131,13 +111,9 @@
 
 ---
 
----
-
 ## 1.0.1 (Nov 17, 2023)
 
 ### Fixes
-
----
 
 - [ModalElement](src/modalElement.ts.ts). _Wrong behavior on confirmModal + replace: true + click outside on previous/hidden modal_
 - [PopupElement](src/popup/popupElement.ts). _Popup blinks on fast open+close_
@@ -147,13 +123,9 @@
 
 ---
 
----
-
 ## 1.0.0 (Nov 13, 2023)
 
 ### New Features
-
----
 
 - [ModalElement](src/modalElement.ts.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
 - **Global**
@@ -173,8 +145,6 @@
 
 ### Fixes
 
----
-
 - helper [findScrollParent](src/helpers/findScrollParent.ts). _Returns parent despite on parent.child with position-fixed_
 - helper [promiseWait](src/helpers/promiseWait.ts). _Throws error twice instead of 1 time_
 - [PopupElement](src/popup/popupElement.ts). _Popup hidden if target inside content with position: fixed and target.parent.parent is scrollable_
@@ -187,8 +157,6 @@
 - [CircleElement](src/circleElement.ts). _Update options/items colors triggers animated re-render with blink_
 
 ### BREAKING CHANGES
-
----
 
 - **Global**.
 
@@ -242,6 +210,8 @@
 
 - [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). _Error message in console if `$options.items = new Promise` & `$initValue = ...`_
 
+---
+
 ## 0.10.1 (Oct 10, 2023)
 
 **BREAKING CHANGES**:
@@ -262,6 +232,8 @@
 **New/Features**:
 
 - Added built-in colors for darkMode. _Append attr `[wupdark]` to body to use it. Don't forget to define general text & background colors yourself_
+
+---
 
 ## 0.9.1 (Sep 28, 2023)
 
@@ -321,6 +293,8 @@
   - Added validationRules `minCount` & `maxCount`
   - Updated hover style for menu items. User css-var `--ctrl-select-menu-hover` to change
 
+---
+
 ## 0.8.1 (Aug 29, 2023)
 
 **BREAKING CHANGES**:
@@ -367,6 +341,8 @@
 - [CircleElement](src/circleElement.ts). Added percentage for tooltips
 - [TimeControl](src/controls/time.ts). Added option `menuButtonsOff` to hide buttons
 
+---
+
 ## 0.7.1 (Jul 24, 2023)
 
 **BREAKING CHANGES**:
@@ -409,6 +385,8 @@
   - Added readonly property `$isRequired` based on `$options.validations.required`
 - [CalendarControl](src/controls/calendar.ts). [DateControl](src/controls/date.ts). `$options.startWith` can be string-date
 
+---
+
 ## 0.6.1 (Jun 26, 2023)
 
 **Fixes**:
@@ -438,6 +416,8 @@
   - Extended custom validation to `(value, control, reason) => false | string`. Was `(value) => false | string`
   - Hide `button[clear]` by default for disabled/readonly/required
 - **Global**. Added JSDoc comments for `jsx/tsx` files (previously hovering on `<wup-text>` showed nothing)
+
+---
 
 ## 0.6.0 (May 19, 2023)
 
@@ -474,12 +454,16 @@
   - **Controls**. Able to setup `$defaults.validations` (like `WUPNumberControl.$validations = {min: 0}` etc.)
 - **Global**. Added custom callbacks for events. So event `popup.addEventListener("$show",e=>...)` equal to `popup.$onShow = (e)=>...`
 
+---
+
 ## 0.5.2 (Mar 29, 2023)
 
 **Fixes**:
 
 - **Controls**. _Need to add border by default otherwise it's invisible on the white body_
 - [CircleElement](src/circleElement.ts). _Wrong tooltip position when segment is half of circle_
+
+---
 
 ## 0.5.0 (Mar 27, 2023)
 
@@ -533,6 +517,8 @@
 - [PopupElement](src/popup/popupElement.ts). _No popup if mousedown>move>up>click on target_
 - [CircleElement](src/circleElement.ts). _Items **color** doesn't work (because attr `[fill]` can't override css-rule)_
 
+---
+
 ## 0.4.1 (Jan 27, 2023)
 
 **New**:
@@ -545,6 +531,8 @@
 - [CalendarControl](src/controls/calendar.ts). Different pickers height after scrolling
 - helper [WUPScrolled](src/helpers/scrolled.ts). maxHeight left after scrolling finished
 - helper [WUPScrolled](src/helpers/scrolled.ts). goto previous sometimes scrolls through the whole range
+
+---
 
 ## 0.4.0 (Jan 26, 2023)
 
@@ -577,6 +565,8 @@
 - [PopupElement](src/popup/popupElement.ts). Content is blured if transform.translate with float values
 - [DateControl](src/controls/date.ts). Clearing input doesn't reset $value
 - [DateControl](src/controls/date.ts). Required asterisk is removed by opening menu
+
+---
 
 ## 0.3.0 (Dec 27, 2022)
 
@@ -614,6 +604,8 @@
 - [PopupElement](src/popup/popupElement.ts) with arrow. _Firefox bug: css filter `drop-shadow` works wrong with angle 180.0_
 - [SpinElement](src/spinElement.ts). _Impossible to override color via applying css-var to body `--spin-2`_
 
+---
+
 ## 0.2.0 (Dec 09, 2022)
 
 **New**:
@@ -641,9 +633,13 @@
 - [SelectControl](src/controls/select.ts). _`noItems` appeared on 2nd menu opening when user created a new value_
 - helper [observer](src/helpers/observer.ts). _onChange fired even date.setHours didn't change value_
 
+---
+
 ## 0.1.2 (Oct 4, 2022)
 
 - Hotfix: gotReady() calls gotChanges() when element disconnected (possible in React)
+
+---
 
 ## 0.1.0 (Sep 14, 2022)
 
@@ -687,6 +683,8 @@
   - Allowed to use other inline transform styles
   - Improved listener (filter mouse-move, double-click, mouse-right-click etc.)
 
+---
+
 ## 0.0.5 (Apr 4, 2022)
 
 - Fixed helper [onFocusLost](src/helpers/onFocusLost.ts): missed callback when user clicks several times fast
@@ -695,12 +693,16 @@
   - Deprecated shadow mode
   - Fixed half-pixel issue on arrow
 
+---
+
 ## 0.0.4 (Apr 1, 2022)
 
 - [PopupElement](src/popup/popupElement.ts)
   - Fixed $options.offset
   - Fixed behavior on target-remove
 - Added helper [onSpy](src/helpers/onSpy.ts) to spy on method-call
+
+---
 
 ## 0.0.3 (Mar 29, 2022)
 
@@ -713,6 +715,8 @@
   - [observer](src/helpers/observer.ts)
   - [findScrollParent](src/helpers/findScrollParent.ts)
 - Removed helper `detectFocusLeft` in favor `onFocusLost`
+
+---
 
 ## 0.0.2 (Nov 30, 2021)
 

@@ -16,6 +16,7 @@ export { mathFixFP, mathScaleValue, mathRotate } from "./helpers/math";
 export { default as nestedProperty } from "./helpers/nestedProperty";
 export { default as observer } from "./helpers/observer";
 export { default as objectClone } from "./helpers/objectClone";
+export { default as objectToFormData } from "./helpers/objectToFormData";
 
 // export * from "./helpers/observer";
 export { default as onEvent } from "./helpers/onEvent";
