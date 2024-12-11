@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import WUPBaseElement, { AttributeMap, AttributeTypes } from "../baseElement";
 import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";
@@ -429,7 +430,7 @@ export default abstract class WUPBaseControl<
 
   /** Provide logic to check if control is empty (by comparison with value) */
   static $isEmpty(v: unknown): boolean {
-    return v === "" || v === undefined; // todo it's wrong for numberControl, dateControl etc. when `$value == null`, even for radio/select if null or empty string is part of options
+    return v === "" || v === undefined;
   }
 
   static get observedAttributes(): Array<string> {
@@ -841,13 +842,12 @@ export default abstract class WUPBaseControl<
       return false;
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
-    const arr = Object.keys(vls)
+    const arr = Object.keys(vls as Record<string, any>)
       .sort((k1, k2) => {
-        if (k1 === "required") return -1;
-        if (k2 === "required") return 1;
-        return 0;
+        const p1 = k1[0] === "_" ? 1 : k1 === "required" ? 2 : 3;
+        const p2 = k2[0] === "_" ? 1 : k2 === "required" ? 2 : 3;
+        return p1 - p2;
       })
       .map(
         (key) =>
@@ -855,6 +855,7 @@ export default abstract class WUPBaseControl<
             key
           ])
       ); // make object to create named function
+
     return arr;
   }
 

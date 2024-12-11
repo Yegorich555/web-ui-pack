@@ -12,6 +12,8 @@
 
 - [NotifyElement](src/notifyElement.ts)
   - Fixed _changing $options doesn't clear related attributes_
+- **Controls (Date, Time, Number)**
+  - Fixed _Validation **required** shows instead of **Invalid value** OR **Incomplete value**_
 
 ---
 
