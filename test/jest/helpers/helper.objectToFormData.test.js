@@ -39,9 +39,9 @@ describe("helper.objectToFormData", () => {
     `);
 
     // date
-    expect(objectToFormData({ num: 123, dob: new Date(2024, 11, 28) }).toSnap()).toMatchInlineSnapshot(`
+    expect(objectToFormData({ num: 123, dob: new Date(Date.UTC(2024, 11, 28)) }).toSnap()).toMatchInlineSnapshot(`
       {
-        "dob": "2024-12-27T22:00:00.000Z",
+        "dob": "2024-12-28T00:00:00.000Z",
         "num": "123",
       }
     `);
@@ -58,10 +58,10 @@ describe("helper.objectToFormData", () => {
     expect(f.get("icon").size).toBe(4); // count of bytes: somehow it's x2 by default
 
     // array
-    expect(objectToFormData([123, new Date(2024, 11, 28)]).toSnap()).toMatchInlineSnapshot(`
+    expect(objectToFormData([123, new Date(Date.UTC(2024, 11, 28))]).toSnap()).toMatchInlineSnapshot(`
       {
         "[0]": "123",
-        "[1]": "2024-12-27T22:00:00.000Z",
+        "[1]": "2024-12-28T00:00:00.000Z",
       }
     `);
 
@@ -72,7 +72,7 @@ describe("helper.objectToFormData", () => {
         options: {
           includeA: true,
           includeB: false,
-          startFrom: new Date(2024, 11, 29),
+          startFrom: new Date(Date.UTC(2024, 11, 29)),
           title: "Hello world",
           avatar: new File([54], "test2.png"),
         },
@@ -87,7 +87,7 @@ describe("helper.objectToFormData", () => {
         "options[avatar]": File {},
         "options[includeA]": "true",
         "options[includeB]": "false",
-        "options[startFrom]": "2024-12-28T22:00:00.000Z",
+        "options[startFrom]": "2024-12-29T00:00:00.000Z",
         "options[title]": "Hello world",
         "slots[0][id]": "2",
         "slots[0][isEnabled]": "true",
