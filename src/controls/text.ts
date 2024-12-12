@@ -381,7 +381,8 @@ export default class WUPTextControl<
     return true;
   }
 
-  /** Called to parse input text to value (related to locale or pointed format) */
+  /** Called to parse/prettify input text to value (related to locale or pointed format)
+   * @throws {RangeError} if value out of possible range (for DateControl value.month > 12 for example) */
   parseInput(text: string): ValueType | undefined {
     return this.parse(text.trim());
   }
