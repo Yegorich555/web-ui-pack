@@ -50,6 +50,9 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPSpinElement; // add element to document.createElement
   }
+}
+
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Flexible animated element with ability to place over target element without position relative

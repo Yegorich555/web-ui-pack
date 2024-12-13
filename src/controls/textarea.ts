@@ -18,6 +18,9 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPTextareaControl; // add element to document.createElement
   }
+}
+
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with multiline text-input

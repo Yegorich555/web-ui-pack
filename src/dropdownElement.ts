@@ -51,6 +51,9 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPDropdownElement; // add element to document.createElement
   }
+}
+
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Dropdown element

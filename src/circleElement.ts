@@ -114,6 +114,9 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPCircleElement; // add element to document.createElement
   }
+}
+
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Arc/circle chart based on SVG

@@ -10,6 +10,7 @@
 
 ### Fixes & Improvements
 
+- Fixed namespace for JSX/TSX React v19+
 - [NotifyElement](src/notifyElement.ts)
   - Fixed _changing $options doesn't clear related attributes_
 - **Controls (Date, Time, Number)**

@@ -185,14 +185,17 @@ class WUPSpin2Element extends WUPSpinElement {}
 spinUseDualRing(WUPSpin2Element);
 const tagName = "wup-spin2";
 customElements.define(tagName, WUPSpin2Element);
-declare global { // for TS intellisense
+// for TS intellisense
+declare global {
   // add element to document.createElement
   interface HTMLElementTagNameMap {
     [tagName]: WUPSpin2Element;
   }
+}
 
+declare module "react" {
   // add element to tsx/jsx intellisense
-  namespace JSX { // skip it if you don't use JSX/TSX (react/vue)
+  namespace JSX { // skip it if you don't use JSX/TSX files
     interface IntrinsicElements {
       [tagName]: JSX.IntrinsicElements["wup-spin"];
     }

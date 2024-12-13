@@ -79,6 +79,9 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPTimeControl; // add element to document.createElement
   }
+}
+
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with timepicker

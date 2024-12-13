@@ -210,15 +210,17 @@ customElements.define(tagName, Popup);
 
 // add for intellisense (for *.ts only)
 declare global {
-  // add element to document.createElement
+  // add element to DOM document.createElement
   interface HTMLElementTagNameMap {
     [tagName]: Popup;
   }
+}
 
+declare module "react" {
   // add element for tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: IntrinsicElements["wup-popup"];
+      [tagName]: IntrinsicElements["wup-popup"]; // reuse same definition from wup-popup
     }
   }
 }

@@ -26,7 +26,7 @@ export interface UserCodeProps {
   excludeCssVars?: string[];
 }
 
-function renderCssValue(v: string, alt: string | undefined): string | JSX.Element {
+function renderCssValue(v: string, alt: string | undefined): string | React.JSX.Element {
   if (alt) {
     return <small>{alt}</small>;
   }
@@ -69,7 +69,7 @@ function RenderHTMLCode({
 }: {
   el: WUPBaseElement;
   customHTML: string[] | undefined;
-}): JSX.Element | null {
+}): React.JSX.Element | null {
   if (customHTML) {
     return (
       <>
@@ -120,7 +120,7 @@ function RenderHTMLCode({
   return <Code code={parsedCode} />;
 }
 
-function RenderCssVars(props: UserCodeProps & { el: WUPBaseElement }): JSX.Element {
+function RenderCssVars(props: UserCodeProps & { el: WUPBaseElement }): React.JSX.Element {
   const [, updateState] = useState({});
   useEffect(() => {
     window.onDarkModeChanged = () => updateState({});
