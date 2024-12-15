@@ -281,7 +281,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
 
 - [**stringLowerCount**](src/helpers/string.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
 - [**stringUpperCount**](src/helpers/string.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
-- [**stringPrettify**](src/helpers/string.ts) ⇒ `Changes camelCase/snake_case/kebab-case text to user-friendly like 'somePropValue' to 'Some Prop Value'`
+- [**stringPrettify**](src/helpers/string.ts) ⇒ `Changes camelCase/snake_case/kebab-case text to user-friendly title: 'somePropValue' to 'Some Prop Value'`
 
 #### Helpers.Other
 

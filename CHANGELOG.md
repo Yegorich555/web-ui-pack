@@ -10,11 +10,14 @@
 
 ### Fixes & Improvements
 
-- Fixed namespace for JSX/TSX React v19+
+- Fixed namespace for JSX/TSX **React v19+**
 - [NotifyElement](src/notifyElement.ts)
   - Fixed _changing $options doesn't clear related attributes_
 - **Controls (Date, Time, Number)**
   - Fixed _Validation **required** shows instead of **Invalid value** OR **Incomplete value**_
+- Helper [stringPrettify](src/helpers/stringPrettify.ts)
+  - Fixed behavior with abbreviations like `reminderSMS` => `Reminder SMS` (was `Reminder S M S`)
+  - Improved performance up to 3 times (rewritten Regex to for-cycle)
 
 ---
 
