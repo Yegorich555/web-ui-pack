@@ -17,7 +17,7 @@
   - Fixed _Validation **required** shows instead of **Invalid value** OR **Incomplete value**_
 - Helper [stringPrettify](src/helpers/stringPrettify.ts)
   - Fixed behavior with abbreviations like `reminderSMS` => `Reminder SMS` (was `Reminder S M S`)
-  - Improved performance up to 3 times (rewritten Regex to for-cycle)
+  - Improved performance up to 3 times (rewritten Regex to for-cycle). [See benchmark here](https://measurethat.net/Benchmarks/ShowResult/575117)
 
 ---
 
