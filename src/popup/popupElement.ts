@@ -20,8 +20,6 @@ declare global {
   }
 }
 
-// todo add support for Vue: https://chatgpt.com/share/675be5d8-53e8-800a-a521-601907b26917 & https://vuejs.org/guide/extras/web-components#non-vue-web-components-and-typescript
-
 // details here https://react.dev/blog/2024/04/25/react-19-upgrade-guide#the-jsx-namespace-in-typescript
 declare module "react" {
   namespace JSX {
