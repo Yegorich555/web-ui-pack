@@ -2,8 +2,8 @@
 const onScrollStop = require("web-ui-pack/helpers/onScrollStop").default;
 
 beforeAll(async () => {
-  await page.evaluate(() => {
-    renderIt(<div style={{ height: "2000px" }} />);
+  await page.evaluate(async () => {
+    await renderIt(<div style={{ height: "2000px" }} />);
     window.gotEvent = 0;
     onScrollStop(document.body, () => (window.gotEvent += 1));
   });

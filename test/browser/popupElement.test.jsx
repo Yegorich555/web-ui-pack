@@ -10,14 +10,14 @@ beforeEach(async () => {
     { name: "prefers-reduced-motion", value: "no-preference" }, // allow animations
   ]);
 
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     document.activeElement && document.activeElement.blur();
     WUPPopupElement.$defaults.placement = [
       WUPPopupElement.$placements.$top.$start,
       WUPPopupElement.$placements.$bottom.$start,
     ];
     WUPPopupElement.$defaults.openCase = 1 << 3; // onClick;
-    renderIt(
+    await renderIt(
       <label key={Date.now()}>
         <span>Label text</span>
         <input />
@@ -31,7 +31,6 @@ beforeEach(async () => {
     el.addEventListener("$close", () => ++window.t.gotHide);
     window.testEl = el;
   });
-  await page.waitForTimeout(5); // timeout required because of debounceFilters
 });
 
 describe("popupElement", () => {
@@ -114,7 +113,7 @@ describe("popupElement", () => {
       testEl.$options.minHeightByTarget = true;
     });
     await page.click("label");
-    await page.waitForTimeout(1); // timeout required because of debounceFilters
+    await page.waitForTimeout(2); // timeout required because of debounceFilters
     const t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML }));
     expect(t.html).toBe(
       '<wup-popup open="" position="bottom" show="" style="min-width: 177px; min-height: 21px; transform: translate(72px, 29px);">Popup text</wup-popup>'

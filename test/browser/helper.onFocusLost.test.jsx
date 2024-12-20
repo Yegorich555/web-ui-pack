@@ -6,8 +6,8 @@ const onFocusLost = require("web-ui-pack/helpers/onFocusLost").default;
 
 const debounceMs = 1;
 beforeAll(async () => {
-  await page.evaluate(() => {
-    renderIt(
+  await page.evaluate(async () => {
+    await renderIt(
       <>
         <label id="ctrl" htmlFor="c1">
           <span id="text">TextInput</span>
