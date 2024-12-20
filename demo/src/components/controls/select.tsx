@@ -10,7 +10,7 @@ WUPSelectControl.$use();
 
 let ir = 10;
 const items = [
-  { text: "Item N 1", value: ++ir },
+  { text: "Item N 1", value: null },
   { text: "Item N 2", value: ++ir },
   { text: "Item N 3", value: ++ir },
   { text: "Item N 4", value: ++ir },
@@ -82,7 +82,7 @@ export default function SelectControlView() {
           w-items="window.inputSelect.items"
           w-name="select"
           w-label="Select"
-          w-initValue={items[items.length - 3].value.toString()}
+          w-initValue={items[items.length - 3].value!.toString()}
           w-multiple={false}
         />
         <div className={stylesCom.group}>
@@ -90,18 +90,21 @@ export default function SelectControlView() {
             w-name="readonly"
             readonly
             w-items="window.inputSelect.items"
-            w-initValue={items[2].value.toString()}
+            w-initValue={items[2].value!.toString()}
           />
           <wup-select
             w-name="disabled"
             disabled
             w-items="window.inputSelect.items"
-            w-initValue={items[2].value.toString()}
+            w-initValue={items[2].value!.toString()}
           />
           <wup-select
             w-name="required"
             w-items="window.inputSelect.items"
             w-validations="window._someSelectValidations"
+            ref={(el) => {
+              el!.$onChange = () => console.warn("I changed", el?.$value);
+            }}
           />
         </div>
         <wup-select

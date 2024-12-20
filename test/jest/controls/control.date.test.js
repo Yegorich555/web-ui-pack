@@ -336,6 +336,7 @@ describe("control.date", () => {
     // user types invalid text
     h.mockConsoleWarn();
     el = document.body.appendChild(document.createElement(el.tagName));
+    el.$options.validations = { required: true };
     await h.wait(1);
     expect(await h.userTypeText(el.$refInput, "99999999")).toBe("9999-99-99|");
     expect(el.$isOpened).toBe(true);
@@ -346,6 +347,14 @@ describe("control.date", () => {
     expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
       `"<span class="wup-hidden"></span><span>Invalid value</span>"`
     );
+
+    // checking for correct re-validation (possible that 'required' will be here)
+    el.blur();
+    await h.wait(10);
+    expect(el.$refError?.innerHTML).toMatchInlineSnapshot(
+      `"<span class="wup-hidden"></span><span>Invalid value</span>"`
+    );
+
     h.unMockConsoleWarn();
 
     // user types incomplete text (msg: Incomplete value)

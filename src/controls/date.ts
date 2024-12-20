@@ -68,6 +68,9 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPDateControl; // add element to document.createElement
   }
+}
+
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with datepicker

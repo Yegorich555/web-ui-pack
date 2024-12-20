@@ -12,11 +12,13 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPSpin8Element;
   }
+}
 
+declare module "react" {
   // add element to tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: JSX.IntrinsicElements["wup-spin"];
+      [tagName]: React.JSX.IntrinsicElements["wup-spin"];
     }
   }
 }

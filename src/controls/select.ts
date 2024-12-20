@@ -87,6 +87,9 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPSelectControl; // add element to document.createElement
   }
+}
+
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with dropdown/combobox behavior

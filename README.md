@@ -13,8 +13,7 @@ Universal web package with high scalable [WebComponents](#components) and [helpe
 
 You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone repo and run `npm i & npm start`
 
-Template repos with React: [webpack-must-have](https://github.com/Yegorich555/webpack-must-have), [webpack-react](https://github.com/Yegorich555/webpack-react) (in progress)\
-Template repo with Angular: [webpack-angular](https://github.com/Yegorich555/web-angular) (in progress)
+Template repos with React: [webpack-must-have](https://github.com/Yegorich555/webpack-must-have), [webpack-react](https://github.com/Yegorich555/webpack-react) (in progress)
 
 ## Features
 
@@ -211,15 +210,17 @@ customElements.define(tagName, Popup);
 
 // add for intellisense (for *.ts only)
 declare global {
-  // add element to document.createElement
+  // add element to DOM document.createElement
   interface HTMLElementTagNameMap {
     [tagName]: Popup;
   }
+}
 
+declare module "react" {
   // add element for tsx/jsx intellisense
   namespace JSX {
     interface IntrinsicElements {
-      [tagName]: IntrinsicElements["wup-popup"];
+      [tagName]: IntrinsicElements["wup-popup"]; // reuse same definition from wup-popup
     }
   }
 }
@@ -230,40 +231,61 @@ declare global {
 ### Helpers
 
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
-**WARN**: avoid using `import { focusFirst } from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
+**WARNING**: avoid using `import { focusFirst } from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
+
+#### Helpers.Animation
 
 - [**animateDropdown**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) element as dropdown via scale and counter-scale for children`
 - [**animateStack**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) every element via moving from target to own position`
-- [**dateCompareWithoutTime**](src/helpers/dateCompareWithoutTime.ts) ⇒ `Compare by Date-values without Time`
-- [**dateCopyTime**](src/helpers/dateCopyTime.ts) ⇒ `Copy hh:mm:ss.fff part from B to A`
-- [**dateFromString**](src/helpers/dateFromString.ts) ⇒ `Returns parsed date from string based on pointed format`
-- [**dateToString**](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`
+
+#### Helpers.HTML (DOM)
+
 - [**findScrollParent**](src/helpers/findScrollParent.ts) ⇒ `Find first parent with active scroll X/Y`
 - [**findScrollParentAll**](src/helpers/findScrollParent.ts) ⇒ `Find all parents with active scroll X/Y`
 - [**focusFirst**](src/helpers/focusFirst.ts) ⇒ `Set focus on element or first possible nested element`
 - [**isIntoView**](src/helpers/isIntoView.ts) ⇒ `Check if element is visible in scrollable parents`
+- [**scrollIntoView**](src/helpers/scrollIntoView.ts) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
+- [class **WUPScrolled**](src/helpers/scrolled.ts) ⇒ `Class makes pointed element scrollable and implements carousel-scroll behavior (appends new items during the scrolling). Supports swipe/pageUp/pageDown/mouseWheel events.`
+
+#### Helpers.Date
+
+- [**dateCompareWithoutTime**](src/helpers/dateCompareWithoutTime.ts) ⇒ `Compare by Date-values without Time`
+- [**dateCopyTime**](src/helpers/dateCopyTime.ts) ⇒ `Copy hh:mm:ss.fff part from B to A`
+- [**dateFromString**](src/helpers/dateFromString.ts) ⇒ `Returns parsed date from string based on pointed format`
+- [**dateToString**](src/helpers/dateToString.ts) ⇒ `Returns a string representation of a date-time according to pointed format`
+
+#### Helpers.Math
+
 - [**mathFixFP**](src/helpers/math.ts) ⇒ `Fix float precision issue after math operations when 10.53+0.1=>10.629999999999999`
 - [**mathScaleValue**](src/helpers/math.ts) ⇒ `Scale value from one range to another`
 - [**mathRotate**](src/helpers/math.ts) ⇒ `Apply transform.rotate on point`
+
+#### Helpers.Object
+
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
-- [**objectClone**](src/helpers/objectClone.ts) ⇒ `deep cloning object`
-- [**observer**](src/helpers/observer.md) ⇒ `converts object to observable (via Proxy) to allow listen for changes`
+- [**objectClone**](src/helpers/objectClone.ts) ⇒ `Deep cloning object`
+- [**objectToFormData**](src/helpers/objectToFormData.ts) ⇒ `Converts pointed object with nested properties to FormData (including files)`
+- [**observer**](src/helpers/observer.md) ⇒ `Converts object to observable (via Proxy) to allow listen for changes`
+
+#### Helpers.Event
+
 - [**onEvent**](src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
 - [**onFocusGot**](src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
 - [**onScroll**](src/helpers/onScrollStop.ts) ⇒ `Handles wheel & touch events for custom scrolling`
 - [**onScrollStop**](src/helpers/onScrollStop.ts) ⇒ `Returns callback when scrolling is stopped (via checking scroll position every frame-render)`
 - [**onFocusLost**](src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
 - [**onSpy**](src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
-- [**promiseWait**](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast API-request in case: pending > waitResponse > resetPending`
-- [**scrollIntoView**](src/helpers/scrollIntoView.ts) ⇒ `Scroll the HTMLElement's parent container such that the element is visible to the user and return promise by animation end`
-- [class **WUPScrolled**](src/helpers/scrolled.ts) ⇒ `Class makes pointed element scrollable and implements carousel-scroll behavior (appends new items during the scrolling). Supports swipe/pageUp/pageDown/mouseWheel events.`
+
+#### Helpers.String
+
 - [**stringLowerCount**](src/helpers/string.ts) ⇒ `Returns count of chars in lower case (for any language with ignoring numbers, symbols)`
 - [**stringUpperCount**](src/helpers/string.ts) ⇒ `Returns count of chars in upper case (for any language with ignoring numbers, symbols)`
-- [**stringPrettify**](src/helpers/string.ts) ⇒ `Changes camelCase, snakeCase, kebabCase text to user-friendly`
+- [**stringPrettify**](src/helpers/string.ts) ⇒ `Changes camelCase/snake_case/kebab-case text to user-friendly title: 'somePropValue' to 'Some Prop Value'`
 
-### Objects
+#### Helpers.Other
 
+- [**promiseWait**](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast API-request in case: pending > waitResponse > resetPending`
 - [**localeInfo**](src/objects/localeInfo.ts) ⇒ `Locale-object with definitions related to user-locale`
 - [**TimeObject**](src/objects/timeObject.ts) ⇒ `Plane time object without date`
 

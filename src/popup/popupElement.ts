@@ -18,6 +18,10 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPPopupElement; // add element to document.createElement
   }
+}
+
+// details here https://react.dev/blog/2024/04/25/react-19-upgrade-guide#the-jsx-namespace-in-typescript
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /**  Popup element

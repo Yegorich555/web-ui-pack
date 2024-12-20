@@ -271,7 +271,7 @@ export default abstract class WUPBaseElement<
   }
 
   /* Return all prototypes till HTMLElement */
-  static findAllProtos(t: unknown, protos: typeof WUPBaseElement[]): typeof WUPBaseElement[] {
+  static findAllProtos(t: unknown, protos: (typeof WUPBaseElement)[]): (typeof WUPBaseElement)[] {
     const p = Object.getPrototypeOf(t);
     if (p !== HTMLElement.prototype) {
       protos.push(p.constructor);

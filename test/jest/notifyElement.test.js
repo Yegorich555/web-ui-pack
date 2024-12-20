@@ -2,6 +2,7 @@ import { WUPNotifyElement } from "web-ui-pack";
 import * as h from "../testHelper";
 
 /** @type WUPNotifyElement */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let el;
 
 beforeEach(() => {

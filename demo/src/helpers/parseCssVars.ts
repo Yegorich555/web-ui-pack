@@ -112,6 +112,7 @@ export default function getUsedCssVars(scanEl: WUPBaseElement<any>): { own: CssV
 }
 
 /** Returns all css-vars thar used by pointed element */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getUsedCssVarsOld(scanEl: WUPBaseElement<any>, opts?: Options): CssVar[] {
   const styleEl = (scanEl.constructor as typeof WUPBaseElement).$refStyle!;
   const str = styleEl.textContent!;

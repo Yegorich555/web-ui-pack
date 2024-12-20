@@ -76,6 +76,7 @@ export default function ControlsView() {
             el.$isPending = false;
             el.$onSubmit = (e) => {
               console.warn("submitted model", e.detail.model);
+              console.warn("to convert model to FormData use helper: web-ui-pack/helpers/objectToFormData");
               // eslint-disable-next-line no-promise-executor-return
               return new Promise((resolve) => setTimeout(resolve, 1000));
             };
@@ -118,7 +119,7 @@ export default function ControlsView() {
         />
         <wup-date w-name="date" />
         <wup-time w-name="time" />
-        <button type="submit">Submit</button>
+        <button type="submit">Submit (see result into browser console)</button>
       </wup-form>
     </Page>
   );

@@ -83,13 +83,6 @@ declare global {
   interface HTMLElementTagNameMap {
     [tagName]: WUPModalElement; // add element to document.createElement
   }
-  namespace JSX {
-    interface IntrinsicElements {
-      /**  Modal element
-       *  @see {@link WUPModalElement} */
-      [tagName]: WUP.Base.ReactHTML<WUPModalElement> & WUP.Modal.JSXProps; // add element to tsx/jsx intellisense (react)
-    }
-  }
 
   namespace React {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -97,6 +90,16 @@ declare global {
       /** Point message for confirm-modal then`click` event will be fired only after btn-confirm click
        * @see {@link WUPModalElement.$useConfirmHook} */
       [attrConfirm]?: string;
+    }
+  }
+}
+
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements {
+      /**  Modal element
+       *  @see {@link WUPModalElement} */
+      [tagName]: WUP.Base.ReactHTML<WUPModalElement> & WUP.Modal.JSXProps; // add element to tsx/jsx intellisense (react)
     }
   }
 }
@@ -702,3 +705,4 @@ const __openedItems: Array<WUPModalElement> = [];
 customElements.define(tagName, WUPModalElement);
 
 // NiceToHave: handle Ctrl+S, Meta+S for submit & close ???
+// todo user can select outside via Ctrl + A

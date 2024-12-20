@@ -5,7 +5,9 @@ declare global {
   interface HTMLElementTagNameMap {
     [tag]: WUPPopupArrowElement; // add element to document.createElement
   }
+}
 
+declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /**  Internal arrow element for {@link WUPPopupElement} */
