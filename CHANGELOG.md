@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 1.2.3 (\_\_\_)
+## 1.2.3 (Mar 5, 2025)
 
 ### Fixes & Improvements
 
