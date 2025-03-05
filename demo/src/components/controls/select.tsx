@@ -103,7 +103,9 @@ export default function SelectControlView() {
             w-items="window.inputSelect.items"
             w-validations="window._someSelectValidations"
             ref={(el) => {
-              el!.$onChange = () => console.warn("I changed", el?.$value);
+              if (el) {
+                el.$onChange = () => console.warn("I changed", el?.$value);
+              }
             }}
           />
         </div>
