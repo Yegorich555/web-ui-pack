@@ -106,19 +106,19 @@ export default function RadioControlView() {
           }}
         />
         <section>
-          <h3>Customized</h3>
+          <h3>Customized via CSS only</h3>
           <small>
-            See details in <MyLink href="/demo/src/components/controls/radio.scss">demo/src...</MyLink>
+            See details in <MyLink href="/demo/src/components/controls/radio.scss">radio.scss</MyLink>
           </small>
           <wup-radio
             class={styles.custom}
-            w-name="customView"
+            w-name="customView_1"
             w-initValue={items[1].value.toString()}
             w-items="storedRadioItems.items"
           />
           <wup-radio
             class={styles.custom2}
-            w-name="customViewNext"
+            w-name="customView_2"
             w-initValue={items[1].value.toString()}
             ref={(el) => {
               if (el) {
@@ -129,10 +129,16 @@ export default function RadioControlView() {
               }
             }}
           />
+        </section>
+        <section>
+          <h3>Customized via JS dynamically</h3>
+          <small>
+            See details in <MyLink href="/demo/src/components/controls/radio.tsx">radio.tsx</MyLink>
+          </small>
           <wup-radio
             ref={(el) => {
               if (el) {
-                el.$options.name = "With custom render function";
+                el.$options.name = "customViewJS";
                 el.$options.items = () => {
                   const renderText: WUP.Select.MenuItem<number>["text"] = (value, li, i) => {
                     li.innerHTML = `<span><b>Value</b>: ${value}, <span style="color: red">index</span>: ${i}</span>`;
@@ -169,6 +175,7 @@ WUPRadioControl.$use(); // register control
 const el = document.createElement("wup-radio");
 el.$options.name = "customized";
 el.$options.items = () => {
+  // Define custom HTML content in JS
   const renderText: WUPSelect.MenuItemFn<number>["text"] =
   (value, li, i) => {
     li.innerHTML = \`<span><b>Value</b>: \${value},
