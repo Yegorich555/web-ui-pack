@@ -1,10 +1,10 @@
 /* eslint-disable no-promise-executor-return */
-import Code from "src/elements/code";
 import Page from "src/elements/page";
 import { WUPRadioControl } from "web-ui-pack";
 import MyLink from "src/elements/myLink";
+import RadioCustomStyles from "./radio.customStyles";
 import stylesCom from "./controls.scss";
-import styles from "./radio.scss";
+import RadioCustomJS from "./radio.customJS";
 
 WUPRadioControl.$use();
 
@@ -43,8 +43,8 @@ export default function RadioControlView() {
       link="src/controls/radio.ts"
       features={[
         "Easy to change size of items and style via css-variables (ctrl-radio-size...)", //
-        "Possible to reverse labels",
-        "Possible to customize render of items (via $options.items; see below...)",
+        "Possible to reverse labels (icon-label OR label-icon)",
+        "Possible to customize items rendering (via $options.items; see examples below...)",
       ]}
       details={{
         tag: "wup-radio",
@@ -105,79 +105,22 @@ export default function RadioControlView() {
             }
           }}
         />
+
         <section>
-          <h3>Customized</h3>
+          <h3>Customized via CSS only</h3>
           <small>
-            See details in <MyLink href="/demo/src/components/controls/radio.scss">demo/src...</MyLink>
+            See details in{" "}
+            <MyLink href="/demo/src/components/controls/radio.customCss.scss">radio.customStyles.scss</MyLink>
           </small>
-          <wup-radio
-            class={styles.custom}
-            w-name="customView"
-            w-initValue={items[1].value.toString()}
-            w-items="storedRadioItems.items"
-          />
-          <wup-radio
-            class={styles.custom2}
-            w-name="customViewNext"
-            w-initValue={items[1].value.toString()}
-            ref={(el) => {
-              if (el) {
-                el.$options.items = items.slice(0, 4);
-                setTimeout(() => {
-                  console.warn(el.$value);
-                });
-              }
-            }}
-          />
-          <wup-radio
-            ref={(el) => {
-              if (el) {
-                el.$options.name = "With custom render function";
-                el.$options.items = () => {
-                  const renderText: WUP.Select.MenuItem<number>["text"] = (value, li, i) => {
-                    li.innerHTML = `<span><b>Value</b>: ${value}, <span style="color: red">index</span>: ${i}</span>`;
-                    return li.textContent as string;
-                  };
-                  return [
-                    { value: 1, text: renderText },
-                    { value: 2, text: renderText },
-                  ];
-                };
-              }
-            }}
-          />
-          <Code code={codeTypes} />
+          <RadioCustomStyles />
         </section>
-        {/* NiceToHave radio: allow full customization */}
-        {/* <section>
-          <wup-radio>
-            <label>Item 1</label>
-            <label>Item 2<input /><span icon/></label>
-          </wup-radio>
-        </section> */}
+
+        <section>
+          <h3>Customized via JS dynamically</h3>
+          <RadioCustomJS />
+        </section>
         <button type="submit">Submit</button>
       </wup-form>
     </Page>
   );
 }
-
-const codeTypes = `js
-import WUPRadioControl from "web-ui-pack";
-
-WUPRadioControl.$use(); // register control
-
-const el = document.createElement("wup-radio");
-el.$options.name = "customized";
-el.$options.items = () => {
-  const renderText: WUPSelect.MenuItemFn<number>["text"] =
-  (value, li, i) => {
-    li.innerHTML = \`<span><b>Value</b>: \${value},
-       <span style="color: red">index</span>: \${i}</span>\`;
-    return value.toString();
-  };
-  return [
-    { value: 1, text: renderText },
-    { value: 2, text: renderText },
-  ];
-};
-document.body.appendChild(el);`;
