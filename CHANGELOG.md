@@ -2,6 +2,14 @@
 
 # Changelog
 
+## 1.2.3 (\_\_\_)
+
+### Fixes & Improvements
+
+- helper [objectToFormData](src/helpers/objectToFormData.ts). Fixed nulls and files in nested props are not handled on .NET due to wrong serialization
+
+---
+
 ## 1.2.2 (Dec 20, 2024)
 
 ### New Features
