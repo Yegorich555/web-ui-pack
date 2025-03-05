@@ -43,8 +43,8 @@ export default function RadioControlView() {
       link="src/controls/radio.ts"
       features={[
         "Easy to change size of items and style via css-variables (ctrl-radio-size...)", //
-        "Possible to reverse labels",
-        "Possible to customize render of items (via $options.items; see below...)",
+        "Possible to reverse labels (icon-label OR label-icon)",
+        "Possible to customize items rendering (via $options.items; see examples below...)",
       ]}
       details={{
         tag: "wup-radio",
