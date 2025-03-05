@@ -27,12 +27,12 @@ describe("helper.objectToFormData", () => {
     expect(objectToFormData({ num: 123 }, preparedFormData)).toBe(preparedFormData);
 
     // with null/undefined object
-    expect(objectToFormData({ num: 123 }, null).toSnap()).toMatchInlineSnapshot(`
+    expect(objectToFormData({ num: 123 }, null, null).toSnap()).toMatchInlineSnapshot(`
       {
         "num": "123",
       }
     `);
-    expect(objectToFormData({ num: 123 }, undefined).toSnap()).toMatchInlineSnapshot(`
+    expect(objectToFormData({ num: 123 }, undefined, undefined).toSnap()).toMatchInlineSnapshot(`
       {
         "num": "123",
       }
@@ -84,17 +84,17 @@ describe("helper.objectToFormData", () => {
     ).toMatchInlineSnapshot(`
       {
         "id": "5",
-        "options[avatar]": File {},
-        "options[includeA]": "true",
-        "options[includeB]": "false",
-        "options[startFrom]": "2024-12-29T00:00:00.000Z",
-        "options[title]": "Hello world",
-        "slots[0][id]": "2",
-        "slots[0][isEnabled]": "true",
-        "slots[0][value]": "123",
-        "slots[1][id]": "105",
-        "slots[1][isEnabled]": "false",
-        "slots[1][value]": "97",
+        "options.avatar": File {},
+        "options.includeA": "true",
+        "options.includeB": "false",
+        "options.startFrom": "2024-12-29T00:00:00.000Z",
+        "options.title": "Hello world",
+        "slots[0].id": "2",
+        "slots[0].isEnabled": "true",
+        "slots[0].value": "123",
+        "slots[1].id": "105",
+        "slots[1].isEnabled": "false",
+        "slots[1].value": "97",
       }
     `);
 
@@ -114,16 +114,100 @@ describe("helper.objectToFormData", () => {
       }).toSnap()
     ).toMatchInlineSnapshot(`
       {
-        "firstName": "null",
         "id": "5",
-        "lastName": "undefined",
-        "options[includeA]": "true",
-        "options[slots][0][id]": "2",
-        "options[slots][0][isEnabled]": "true",
-        "options[slots][0][value]": "123",
-        "options[slots][1][id]": "105",
-        "options[slots][1][isEnabled]": "false",
-        "options[slots][1][value]": "97",
+        "options.includeA": "true",
+        "options.slots[0].id": "2",
+        "options.slots[0].isEnabled": "true",
+        "options.slots[0].value": "123",
+        "options.slots[1].id": "105",
+        "options.slots[1].isEnabled": "false",
+        "options.slots[1].value": "97",
+      }
+    `);
+
+    // array
+    expect(
+      objectToFormData([
+        {
+          id: 5,
+          options: {
+            includeA: true,
+            slots: [
+              { id: 2, value: 123, isEnabled: true },
+              { id: 105, value: 97, isEnabled: false },
+            ],
+          },
+        },
+      ]).toSnap()
+    ).toMatchInlineSnapshot(`
+      {
+        "[0].id": "5",
+        "[0].options.includeA": "true",
+        "[0].options.slots[0].id": "2",
+        "[0].options.slots[0].isEnabled": "true",
+        "[0].options.slots[0].value": "123",
+        "[0].options.slots[1].id": "105",
+        "[0].options.slots[1].isEnabled": "false",
+        "[0].options.slots[1].value": "97",
+      }
+    `);
+  });
+
+  test("option [includeNulls]", () => {
+    expect(
+      objectToFormData([
+        {
+          id: 5,
+          firstName: null,
+          lastName: undefined,
+          options: [
+            { id: 2, value: 123, name: null, nickName: "" },
+            { id: 105, value: 97, name: null, nickName: "" },
+          ],
+        },
+      ]).toSnap()
+    ).toMatchInlineSnapshot(`
+      {
+        "[0].id": "5",
+        "[0].options[0].id": "2",
+        "[0].options[0].nickName": "",
+        "[0].options[0].value": "123",
+        "[0].options[1].id": "105",
+        "[0].options[1].nickName": "",
+        "[0].options[1].value": "97",
+      }
+    `);
+
+    expect(
+      objectToFormData(
+        [
+          {
+            id: 5,
+            firstName: null,
+            lastName: undefined,
+            options: [
+              { id: 2, value: 123, name: null, nickName: "" },
+              { id: 105, value: 97, name: null, nickName: "" },
+            ],
+          },
+        ],
+
+        null,
+        { includeNulls: true }
+      ).toSnap()
+    ).toMatchInlineSnapshot(`
+      {
+        "[0].firstName": "",
+        "[0].id": "5",
+        "[0].lastName": "",
+        "[0].options[0].id": "2",
+        "[0].options[0].name": "",
+        "[0].options[0].nickName": "",
+        "[0].options[0].value": "123",
+        "[0].options[1].id": "105",
+        "[0].options[1].name": "",
+        "[0].options[1].nickName": "",
+        "[0].options[1].value": "97",
       }
     `);
   });

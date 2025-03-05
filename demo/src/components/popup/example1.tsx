@@ -9,16 +9,11 @@ export default function Example1() {
           id="trg"
           type="button"
           className={[styles.trg, "btn"].join(" ")}
-          ref={(el) =>
+          ref={(el) => {
             setTimeout(() => {
               el?.click();
-              if (el) {
-                el.parentElement?.querySelectorAll("wup-popup").forEach((popup) => {
-                  popup.$onWillClose = (e) => e.preventDefault();
-                });
-              }
-            }, 200)
-          }
+            }, 200);
+          }}
         >
           Target
           <br />

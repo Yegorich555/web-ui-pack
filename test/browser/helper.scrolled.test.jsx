@@ -4,8 +4,8 @@ beforeAll(async () => {
   await page.emulateMediaFeatures([
     { name: "prefers-reduced-motion", value: "no-preference" }, // allow animations
   ]);
-  await page.evaluate(() => {
-    renderIt(
+  await page.evaluate(async () => {
+    await renderIt(
       <ul>
         <li>Item 1</li>
         <li>Item 2</li>
