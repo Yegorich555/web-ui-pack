@@ -710,6 +710,18 @@ export default class WUPPopupElement<
       fit.height = fit.bottom - fit.top;
     }
 
+    // reduce fitElement sizes so don't allow to render out of viewport (see demo:example-3)
+    let ds = fit.bottom - screenSize.vh;
+    if (ds > 0) {
+      fit.bottom -= ds;
+      fit.height -= ds;
+    }
+    ds = fit.right - screenSize.vw;
+    if (ds > 0) {
+      fit.right -= ds;
+      fit.width -= ds;
+    }
+
     const tdef: Omit<DOMRect, "toJSON" | "x" | "y"> = {
       height: Math.round(tRect.height),
       width: Math.round(tRect.width),
