@@ -2,6 +2,15 @@
 
 # Changelog
 
+## 1.2.4 (___)
+
+### Fixes & Improvements
+
+- helper [objectToFormData](src/helpers/objectToFormData.ts). Added option bracket-notation (use for NodeJS) and dot-notation (use for .NET)
+- [PopupElement](src/popup/popupElement.ts). Fixed _rendered out of viewport on custom fitElement and scrollable parent_
+
+---
+
 ## 1.2.3 (Mar 5, 2025)
 
 ### Fixes & Improvements

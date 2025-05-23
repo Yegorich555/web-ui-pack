@@ -154,48 +154,19 @@ describe("helper.objectToFormData", () => {
   });
 
   test("option [includeNulls]", () => {
-    expect(
-      objectToFormData([
-        {
-          id: 5,
-          firstName: null,
-          lastName: undefined,
-          options: [
-            { id: 2, value: 123, name: null, nickName: "" },
-            { id: 105, value: 97, name: null, nickName: "" },
-          ],
-        },
-      ]).toSnap()
-    ).toMatchInlineSnapshot(`
+    const obj = [
       {
-        "[0].id": "5",
-        "[0].options[0].id": "2",
-        "[0].options[0].nickName": "",
-        "[0].options[0].value": "123",
-        "[0].options[1].id": "105",
-        "[0].options[1].nickName": "",
-        "[0].options[1].value": "97",
-      }
-    `);
-
-    expect(
-      objectToFormData(
-        [
-          {
-            id: 5,
-            firstName: null,
-            lastName: undefined,
-            options: [
-              { id: 2, value: 123, name: null, nickName: "" },
-              { id: 105, value: 97, name: null, nickName: "" },
-            ],
-          },
+        id: 5,
+        firstName: null,
+        lastName: undefined,
+        options: [
+          { id: 2, value: 123, name: null, nickName: "" },
+          { id: 105, value: 97, name: null, nickName: "" },
         ],
+      },
+    ];
 
-        null,
-        { includeNulls: true }
-      ).toSnap()
-    ).toMatchInlineSnapshot(`
+    expect(objectToFormData(obj, null, { includeNulls: true }).toSnap()).toMatchInlineSnapshot(`
       {
         "[0].firstName": "",
         "[0].id": "5",
@@ -208,6 +179,72 @@ describe("helper.objectToFormData", () => {
         "[0].options[1].name": "",
         "[0].options[1].nickName": "",
         "[0].options[1].value": "97",
+      }
+    `);
+
+    expect(objectToFormData(obj, null, { includeNulls: false }).toSnap()).toMatchInlineSnapshot(`
+      {
+        "[0].id": "5",
+        "[0].options[0].id": "2",
+        "[0].options[0].nickName": "",
+        "[0].options[0].value": "123",
+        "[0].options[1].id": "105",
+        "[0].options[1].nickName": "",
+        "[0].options[1].value": "97",
+      }
+    `);
+  });
+
+  test("option [bracketNotation]", () => {
+    const obj = [
+      {
+        id: 5,
+        firstName: null,
+        lastName: undefined,
+        options: [
+          { id: 2, value: 123, name: null, nickName: "" },
+          { id: 105, value: 97, name: null, nickName: "" },
+        ],
+      },
+    ];
+
+    expect(objectToFormData(obj, null, { bracketNotation: true }).toSnap()).toMatchInlineSnapshot(`
+      {
+        "[0][id]": "5",
+        "[0][options][0][id]": "2",
+        "[0][options][0][nickName]": "",
+        "[0][options][0][value]": "123",
+        "[0][options][1][id]": "105",
+        "[0][options][1][nickName]": "",
+        "[0][options][1][value]": "97",
+      }
+    `);
+
+    expect(objectToFormData({ id: 2, nickName: "some name here" }, null, { bracketNotation: true }).toSnap())
+      .toMatchInlineSnapshot(`
+      {
+        "id": "2",
+        "nickName": "some name here",
+      }
+    `);
+
+    expect(objectToFormData(obj, null, { bracketNotation: false }).toSnap()).toMatchInlineSnapshot(`
+      {
+        "[0].id": "5",
+        "[0].options[0].id": "2",
+        "[0].options[0].nickName": "",
+        "[0].options[0].value": "123",
+        "[0].options[1].id": "105",
+        "[0].options[1].nickName": "",
+        "[0].options[1].value": "97",
+      }
+    `);
+
+    expect(objectToFormData({ id: 2, nickName: "some name here" }, null, { bracketNotation: false }).toSnap())
+      .toMatchInlineSnapshot(`
+      {
+        "id": "2",
+        "nickName": "some name here",
       }
     `);
   });

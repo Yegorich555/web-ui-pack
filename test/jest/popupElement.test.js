@@ -1364,8 +1364,8 @@ describe("popupElement", () => {
     );
 
     // target is completely hidden at the top of scrollable content
-    trgRect.width = 18;
     trgRect.height = 10;
+    trgRect.width = 18;
     moveTo(0, bodyRect.top - trgRect.height);
     expectIt(WUPPopupElement.$placements.$top.$middle).toMatchInlineSnapshot(
       `"<wup-popup open="" style="display: none;" position="top" show=""></wup-popup>"`
@@ -1382,6 +1382,21 @@ describe("popupElement", () => {
     moveTo(0, bodyRect.bottom - trgRect.height); // move to bottom/partially
     expectIt(WUPPopupElement.$placements.$bottom.$middle).toMatchInlineSnapshot(
       `"<wup-popup open="" style="transform: translate(9px, 390px);" position="top" show=""></wup-popup>"`
+    );
+
+    // body out of viewport - it's partial test: better to re-check behavior on demo: popup-example3 with small viewport height
+    expect(window.innerHeight).toBe(768);
+    expect(window.innerWidth).toBe(1024);
+    trgRect.height = 50;
+    trgRect.width = 70;
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(20);
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(60);
+    h.setupLayout(document.body, { x: 0, y: 0, h: window.innerHeight + 100, w: window.innerWidth + 100 });
+    delete document.body._savedBoundingRect;
+    h.setupLayout(document.documentElement, { h: window.innerHeight, w: window.innerWidth });
+    moveTo(0, window.innerHeight - 20); // partially visible target
+    expectIt(WUPPopupElement.$placements.$right.$middle.$adjust.$resizeHeight).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(70px, 748px);" position="right" show=""></wup-popup>"`
     );
   });
 
