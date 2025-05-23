@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 1.2.4 (___)
+## 1.2.4 (May 23, 2025)
 
 ### Fixes & Improvements
 
