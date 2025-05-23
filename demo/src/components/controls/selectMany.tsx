@@ -107,7 +107,6 @@ export default function SelectManyControlView() {
           w-name="allowNewValue"
           w-items="inputSelectMany.items"
           w-initValue="window.inputSelectMany.initValue"
-          // w-prefix="#" // todo prefix doesn't work with selectMany
         />
         <wup-selectmany
           w-label="Options sortable: true - use drag&drop OR keyboard arrows + Shift"
