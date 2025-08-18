@@ -8,6 +8,8 @@ function hasFixedPos(el: HTMLElement): boolean {
   return p === n || (!p && window.getComputedStyle(el).position === n);
 }
 
+// todo need to implement isScrollable
+
 /** Find first parent with active scroll X/Y */
 export default function findScrollParent(el: Element): HTMLElement | null {
   const p = el.parentElement;

@@ -275,7 +275,7 @@ export default class WUPSelectControl<
 
   /** Returns string for storage */
   valueToStrCompare(a: WUP.Select.MenuItem<ValueType>): string | null {
-    const at = typeof a.text === "function" ? a.value?.toString() : a.text;
+    const at = typeof a.text === "function" ? a.value?.toString() : a.text; // todo #1 it could be wrong on lang-change since used item.text instead of item.value
     return at?.replace(/\s/g, "") ?? null;
   }
 
@@ -287,7 +287,7 @@ export default class WUPSelectControl<
     if (str === "null") {
       return null as ValueType;
     }
-    const s = str.toLowerCase();
+    const s = str.toLowerCase(); // todo #1 we could store value type as localStorage.setItem('_someName__Type', value type as string here)
     const items = this.getItems();
     const item = items.find((a) => this.valueToStrCompare(a)?.toLowerCase() === s);
     if (item === undefined) {
