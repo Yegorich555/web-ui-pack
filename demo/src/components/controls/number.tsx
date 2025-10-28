@@ -67,6 +67,7 @@ export default function NumberControlView() {
             }
           }}
         />
+        {/* todo point options how it works on ordinary text + missed description how to work with format */}
         <wup-num w-name="WithMask" w-label="With Mask (mask always ignores format)" w-mask="0000-0000" />
         <wup-num //
           w-name="saveUrlNum"
