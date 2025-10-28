@@ -189,7 +189,7 @@ export default function SelectControlView() {
         <wup-select //
           w-name="saveUrlSelect"
           w-label="With saving to URL (see $options.storageKey & storage)"
-          w-storageKey
+          w-storageKey // todo check when stored any string-value but items have number-ids - there is exception
           w-storage="url"
           ref={(el) => {
             if (el) {

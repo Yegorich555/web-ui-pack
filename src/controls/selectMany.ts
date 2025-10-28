@@ -25,10 +25,18 @@ declare global {
     interface Options<T = any, VM = ValidityMap> extends WUP.Select.Options<T, VM>, NewOptions {
       /** @readonly Constant value that impossible to change */
       multiple: true;
+      /** @deprecated Not supported in SelectManyControl */
+      prefix?: string | null | undefined;
+      /** @deprecated Not supported in SelectManControl */
+      postfix?: string | null | undefined;
     }
     interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       "w-hideSelected"?: boolean | "";
       "w-sortable"?: boolean | "";
+      /** @deprecated Not supported in SelectManyControl */
+      "w-prefix"?: any;
+      /** @deprecated Not supported in SelectManyControl */
+      "w-postfix"?: any;
     }
   }
 

@@ -2,6 +2,12 @@
 
 # Changelog
 
+## 1.2.5 (___)
+
+### Fixes & Improvements
+
+- helper [objectToFormData](src/helpers/objectToFormData.ts). Added option arrayNotationForPlainTypes (use for NodeJS) and fix serializing Files as collection for .NET
+
 ## 1.2.4 (May 23, 2025)
 
 ### Fixes & Improvements

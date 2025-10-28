@@ -31,7 +31,7 @@ localeInfo.refresh();
 // localeInfo.refresh("fr-FR");
 // OR skip this if you satisfied with defaults "en-US"
 
-// override global __wuln if you need another language
+// override global __wupln if you need another language
 window.__wupln = (text, type) => someTranslateFunction(text);
 
 // use this to apply scroll-style from web-ui-pack to all elements with class=".scrolled"

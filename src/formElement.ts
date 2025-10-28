@@ -728,4 +728,4 @@ export default class WUPFormElement<
 
 customElements.define(tagName, WUPFormElement);
 
-// todo show success/error result in <wup-alert> at the left/right angle + add autoSubmit option
+// todo show success/error result in <wup-alert> at the left/right angle + add autoSubmit option + check autoSubmit on exit + check how it works on unmounted controls

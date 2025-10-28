@@ -1160,6 +1160,7 @@ export default abstract class WUPBaseControl<
     if (reason !== SetValueReasons.initValue) {
       // save to storage
       reason !== SetValueReasons.storage && this._opts.storageKey && this.storageSet(v);
+      // todo figure out case when localStorage is defined but $change not called since value in localStorage is null, but and probably need to use onReady
       setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: { reason } }));
     }
 
