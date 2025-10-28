@@ -1,10 +1,19 @@
 interface FormDataOptions {
-  /** Props with `null` OR `undefined` will be written as empty-string; otherwise it's skipped */
+  /** Props with `null` OR `undefined` will be written as empty-string; otherwise it's skipped
+   * @defaultValue false */
   includeNulls?: boolean;
-  /** Point true for bracket-notation, otherwise dot-notation by default
+  /** Point TRUE for bracket-notation, otherwise dot-notation by default
    * * For NodeJS use bracket-notation `options[slots][0][isEnabled]: "true"`
-   * * For .NET use dot-notation `"options.slots[0].isEnabled": "true"` */
+   * * For .NET use dot-notation `"options.slots[0].isEnabled": "true"
+   * @defaultValue false */
   bracketNotation?: boolean;
+  /** Point true for array-notation for plain types (inside arrays): primitives | Date | File
+   * * If TRUE -  optionIds[0]: "1", optionIds[1]: "2" but items[0].Id = "15" or items[0]Id = "1"
+   * * If FALSE - optionIds: "1",    optionIds:    "2"  but items[0].Id = "15" or items[0]Id = "1"
+   * * For NodeJS it depends on handling library
+   * * For .NET use FALSE
+   * @defaultValue false */
+  arrayNotationForPlainTypes?: boolean;
 }
 
 /** Converts pointed object with nested properties to plain FormData
@@ -17,11 +26,15 @@ export default function objectToFormData(
   toForm ||= new FormData();
   const canNulls = opts?.includeNulls ?? false;
   const isBracketNotation = opts?.bracketNotation ?? false;
+  const useArrayNotation = opts?.arrayNotationForPlainTypes ?? false;
 
   function map(v: any, prop: string): void {
     if (Array.isArray(v)) {
       v.forEach((val, index) => {
-        map(val, `${prop}[${index}]`);
+        const skipArrNotation =
+          !useArrayNotation && (val == null || typeof val !== "object" || val instanceof Date || val instanceof File);
+        const propWithIndex = skipArrNotation ? prop : `${prop}[${index}]`;
+        map(val, propWithIndex);
       });
     } else if (v == null) {
       if (canNulls) {
