@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 1.2.5 (___)
+## 1.2.5 (Oct 28, 2025)
 
 ### Fixes & Improvements
 
