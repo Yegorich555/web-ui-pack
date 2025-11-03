@@ -2,6 +2,13 @@
 
 # Changelog
 
+## 1.2.6 (\_\_\_)
+
+### Fixes & Improvements
+
+- helper [nestedProperty](src/helpers/nestedProperty.ts). Added support for arrays in path: `items[0].id`
+- [Form](src/formElement.ts) & [Controls](src/controls/). Added support for arrays in names: `items[0].id`
+
 ## 1.2.5 (Oct 28, 2025)
 
 ### Fixes & Improvements

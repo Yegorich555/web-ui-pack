@@ -19,6 +19,20 @@ describe("helper.nestedProperty", () => {
     expect(obj).toEqual({ name: "Paul" });
     expect(() => nestedProperty.set(obj, "name.first", "Lara")).toThrow(); // because property is already defined as string and can be converted into object
   });
+  test("set nested with array", () => {
+    const obj = {};
+
+    expect(nestedProperty.set(obj, "items[0].id", 423)).toEqual({ items: [{ id: 423 }] });
+    expect(nestedProperty.set(obj, "items[0].name", "Kale")).toEqual({ items: [{ id: 423, name: "Kale" }] });
+    expect(nestedProperty.set(obj, "items[1].id", 1267)).toEqual({
+      items: [{ id: 423, name: "Kale" }, { id: 1267 }],
+    });
+    expect(nestedProperty.set(obj, "ids[0]", 148)).toEqual({
+      items: [{ id: 423, name: "Kale" }, { id: 1267 }],
+      ids: [148],
+    });
+  });
+
   test("get plain", () => {
     expect(nestedProperty.get({ val: 5 }, "val")).toBe(5);
     expect(nestedProperty.get({ val: null }, "val")).toBe(null);
@@ -51,5 +65,16 @@ describe("helper.nestedProperty", () => {
 
     expect(nestedProperty.get(obj, "v1", out)).toBe(undefined);
     expect(out.hasProp).toBe(false);
+  });
+  test("get nested with array", () => {
+    const obj = {
+      items: [{ id: 423, name: "Kale" }, { id: 1267 }],
+      ids: [148],
+    };
+
+    expect(nestedProperty.get(obj, "items[0].id")).toBe(423);
+    expect(nestedProperty.get(obj, "items[0].name")).toBe("Kale");
+    expect(nestedProperty.get(obj, "items[1].id")).toBe(1267);
+    expect(nestedProperty.get(obj, "ids[0]")).toBe(148);
   });
 });
