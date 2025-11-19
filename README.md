@@ -144,6 +144,7 @@ Typescript
 
 ```typescript
 import WUPPopupElement, { PopupOpenCases } from "web-ui-pack/popup/popupElement";
+import "web-ui-pack/popup/popupPlacements"; // just in case if TS doesn't auto-import tied namespace
 
 WUPPopupElement.$use(); // call it to register in the system
 // redefine some defaults; WARN: you can change placement rules here without changing $options per each element!!!
