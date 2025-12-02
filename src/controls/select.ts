@@ -10,7 +10,7 @@ import WUPBaseControl, { SetValueReasons } from "./baseControl";
 const tagName = "wup-select";
 declare global {
   namespace WUP.Select {
-    interface MenuItem<T> {
+    interface MenuItem<T = any> {
       /** Provide ordinary string for rendering as menuItem OR
        *  Use li.innerHTML to render value & return string required for input
        * @example

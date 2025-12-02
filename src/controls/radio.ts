@@ -255,41 +255,76 @@ export default class WUPRadioControl<
 
   $refFieldset = document.createElement("fieldset");
   $refItems: ExtInputElement[] = [];
+  /** It's true when items was added as children in manual way */
+  _isCustomRendered = false;
+
+  protected override getLabel(): string | null {
+    if (this._isCustomRendered) {
+      return this.$refTitle.textContent || super.getLabel();
+    }
+    return super.getLabel();
+  }
 
   protected override renderControl(): void {
-    this.$refFieldset.appendChild(document.createElement("legend")).appendChild(this.$refTitle);
-    this.appendChild(this.$refFieldset);
+    const fieldset = this.querySelector("fieldset");
+    this._isCustomRendered = fieldset != null;
+
+    if (this._isCustomRendered) {
+      this.$refFieldset = fieldset!;
+      this.$refTitle = this.$refFieldset.querySelector("legend strong") as HTMLElement;
+    } else {
+      this.$refFieldset.appendChild(document.createElement("legend")).appendChild(this.$refTitle);
+      this.appendChild(this.$refFieldset);
+    }
   }
 
   protected renderItems(parent: HTMLFieldSetElement): void {
-    this.$refItems.forEach((r) => r.parentElement!.remove());
+    if (!this._isCustomRendered) {
+      this.$refItems.forEach((r) => r.parentElement!.remove());
+    }
     this.$refItems.length = 0;
     const arr = this.getItems();
     if (!arr?.length) {
       return;
     }
+
     const nm = this.#ctr.$uniqueId + (Date.now() % 1000);
-    arr.forEach((item, i) => {
-      const lbl = document.createElement("label");
-      const s = item.text;
-      if (typeof s === "function") {
-        s(item.value, lbl, i, this);
-      } else {
-        lbl.appendChild(document.createTextNode(item.text as string));
-      }
-      const inp = lbl.appendChild(document.createElement("input")) as ExtInputElement;
-      lbl.appendChild(document.createElement("span")).setAttribute("icon", "");
-      this.$refItems.push(inp);
-      inp.id = this.#ctr.$uniqueId;
+
+    const bindItems = (lbl: HTMLLabelElement, i: number): void => {
+      const inp = this.$refItems[i];
       inp._index = i;
-      lbl.setAttribute("for", inp.id);
-      inp.type = "radio";
-      inp.name = nm; // required otherwise tabbing, arrow-keys doesn't work inside single fieldset
-      parent.appendChild(lbl);
+      const item = arr[i];
       if (item.onClick) {
         lbl.onclick = (e) => item.onClick?.call(lbl, e, item);
       }
-    });
+    };
+
+    if (this._isCustomRendered) {
+      this.$refItems = Array.prototype.slice.call(this.querySelectorAll("input"));
+      const labels = this.querySelectorAll("label");
+      labels.forEach((lbl, i) => bindItems(lbl, i));
+    } else {
+      arr.forEach((item, i) => {
+        const lbl = document.createElement("label");
+        const s = item.text;
+        if (typeof s === "function") {
+          s(item.value, lbl, i, this);
+        } else {
+          lbl.appendChild(document.createTextNode(item.text as string));
+        }
+        const inp = lbl.appendChild(document.createElement("input")) as ExtInputElement;
+        lbl.appendChild(document.createElement("span")).setAttribute("icon", "");
+        this.$refItems.push(inp);
+
+        inp.id = this.#ctr.$uniqueId;
+        lbl.setAttribute("for", inp.id);
+        inp.type = "radio";
+        inp.name = nm; // required otherwise tabbing, arrow-keys doesn't work inside single fieldset
+        bindItems(lbl, i);
+
+        parent.appendChild(lbl);
+      });
+    }
 
     this.$refItems[0].tabIndex = 0;
     // when user changed items

@@ -5,6 +5,7 @@ import MyLink from "src/elements/myLink";
 import RadioCustomStyles from "./radio.customStyles";
 import stylesCom from "./controls.scss";
 import RadioCustomJS from "./radio.customJS";
+import RadioCustomHtml from "./radio.customHtml";
 
 WUPRadioControl.$use();
 
@@ -117,8 +118,21 @@ export default function RadioControlView() {
 
         <section>
           <h3>Customized via JS dynamically</h3>
+          <small>
+            See details in <MyLink href="/demo/src/components/controls/radio.customJS.tsx">radio.customJS.tsx</MyLink>
+          </small>
           <RadioCustomJS />
         </section>
+
+        <section>
+          <h3>Customized via HTML</h3>
+          <small>
+            See details in{" "}
+            <MyLink href="/demo/src/components/controls/radio.customHtml.tsx">radio.customHtml.tsx</MyLink>
+          </small>
+          <RadioCustomHtml />
+        </section>
+
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

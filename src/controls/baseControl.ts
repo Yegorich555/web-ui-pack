@@ -652,13 +652,16 @@ export default abstract class WUPBaseControl<
   //   super();
   // }
 
+  protected getLabel(): string | null {
+    return (this._opts.label ?? (this._opts.name && __wupln(stringPrettify(this._opts.name), "content"))) || null;
+  }
+
   protected override gotChanges(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
     const i = this.$refInput;
     // set label
-    const label =
-      (this._opts.label ?? (this._opts.name && __wupln(stringPrettify(this._opts.name), "content"))) || null;
+    const label = this.getLabel();
     this.$refTitle.textContent = label;
     const n = !label && this._opts.name ? __wupln(stringPrettify(this._opts.name), "aria") : null;
     this.setAttr.call(i, "aria-label", n);

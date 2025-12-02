@@ -292,87 +292,12 @@ describe("control.radio", () => {
       </wup-form>
     `;
     jest.advanceTimersByTime(10);
-    expect(document.body).toMatchInlineSnapshot(`
-      <body>
-        
-            
-        <wup-form
-          role="form"
-          w-autofocus=""
-        >
-          
-              
-          <wup-radio
-            w-initvalue="20"
-            w-items="window.items"
-          >
-            <fieldset>
-              <legend>
-                <strong />
-              </legend>
-              <label
-                for="txt7"
-              >
-                Donny
-                <input
-                  id="txt7"
-                  name="txt6473"
-                  tabindex="0"
-                  type="radio"
-                />
-                <span
-                  icon=""
-                />
-              </label>
-              <label
-                checked=""
-                for="txt8"
-              >
-                Mikky
-                <input
-                  autocomplete="off"
-                  id="txt8"
-                  name="txt6473"
-                  type="radio"
-                />
-                <span
-                  icon=""
-                />
-              </label>
-              <label
-                for="txt9"
-              >
-                Leo
-                <input
-                  id="txt9"
-                  name="txt6473"
-                  type="radio"
-                />
-                <span
-                  icon=""
-                />
-              </label>
-              <label
-                for="txt10"
-              >
-                Splinter
-                <input
-                  id="txt10"
-                  name="txt6473"
-                  type="radio"
-                />
-                <span
-                  icon=""
-                />
-              </label>
-            </fieldset>
-          </wup-radio>
-          
-            
-        </wup-form>
-        
-          
-      </body>
+    expect(document.body.outerHTML).toMatchInlineSnapshot(`
+      "<body>
+            <wup-form w-autofocus="" role="form">
+              <wup-radio w-initvalue="20" w-items="window.items"><fieldset><legend><strong></strong></legend><label for="txt7">Donny<input id="txt7" type="radio" name="txt6473" tabindex="0"><span icon=""></span></label><label for="txt8" checked="">Mikky<input id="txt8" type="radio" name="txt6473" autocomplete="off"><span icon=""></span></label><label for="txt9">Leo<input id="txt9" type="radio" name="txt6473"><span icon=""></span></label><label for="txt10">Splinter<input id="txt10" type="radio" name="txt6473"><span icon=""></span></label></fieldset></wup-radio>
+            </wup-form>
+          </body>"
     `);
     el = document.body.querySelector("wup-radio");
     expect(document.activeElement).toBe(el.$refItems[1]);
@@ -460,5 +385,167 @@ describe("control.radio", () => {
     expect(WUPBaseControl.prototype.valueToStorage.call(el, { value: 1 })).toBe(null);
     expect(() => jest.advanceTimersByTime(10)).toThrow();
     h.unMockConsoleError();
+  });
+
+  test("customization with html", async () => {
+    const el = document.createElement("wup-radio");
+    el.innerHTML = `
+      <fieldset>
+        <legend><strong>Custom Label</strong></legend>
+        <label for="custom_1">
+          First option
+          <input type="radio" name="customTest" id="custom_1" />
+          <span icon=""></span>
+        </label>
+        <label for="custom_2">
+          Second option
+          <input type="radio" name="customTest" id="custom_2" />
+          <span icon=""></span>
+        </label>
+      </fieldset>
+    `;
+    el.$options.items = [
+      { value: 1, text: "" },
+      { value: 2, text: "" },
+    ];
+    document.body.appendChild(el);
+    jest.advanceTimersByTime(1);
+
+    // check that custom HTML was detected
+    expect(el._isCustomRendered).toBe(true);
+    expect(el.$refFieldset).toBe(el.querySelector("fieldset"));
+
+    // check that inputs were bound correctly
+    expect(el.$refItems.length).toBe(2);
+    expect(el.$refItems[0].id).toBe("custom_1");
+    expect(el.$refItems[1].id).toBe("custom_2");
+
+    // check value assignment works
+    el.$value = 1;
+    jest.advanceTimersByTime(1);
+    expect(el.$refItems[0].checked).toBe(true);
+    expect(el.$refItems[1].checked).toBe(false);
+    expect(el.querySelector('label[for="custom_1"]').hasAttribute("checked")).toBe(true);
+
+    el.$value = 2;
+    jest.advanceTimersByTime(1);
+    expect(el.$refItems[0].checked).toBe(false);
+    expect(el.$refItems[1].checked).toBe(true);
+    expect(el.querySelector('label[for="custom_2"]').hasAttribute("checked")).toBe(true);
+
+    // check user click works
+    el.$value = undefined;
+    jest.advanceTimersByTime(1);
+    el.$refItems[1].click();
+    expect(el.$value).toBe(2);
+    expect(el.$isChanged).toBe(true);
+
+    // check that custom HTML is not removed on items update
+    const originalFieldset = el.$refFieldset;
+    const originalLabel = el.querySelector('label[for="custom_1"]');
+    el.$options.items = [
+      { value: 10, text: "" },
+      { value: 2, text: "" },
+    ];
+    jest.advanceTimersByTime(1);
+    expect(el.$refFieldset).toBe(originalFieldset);
+    expect(el.querySelector('label[for="custom_1"]')).toBe(originalLabel);
+    expect(el.$refItems.length).toBe(2);
+
+    // check onClick callback works with custom HTML
+    const spyClick = jest.fn();
+    el.$options.items = [
+      { value: 100, text: "", onClick: spyClick },
+      { value: 2, text: "" },
+    ];
+    jest.advanceTimersByTime(1);
+    el.$refItems[0].click();
+    expect(spyClick).toBeCalledTimes(1);
+    expect(el.$value).toBe(100);
+  });
+
+  test("customization with html - empty legend", async () => {
+    const el = document.createElement("wup-radio");
+    el.innerHTML = `
+      <fieldset>
+        <legend><strong></strong></legend>
+        <label>
+          Option A
+          <input type="radio" name="test2" />
+          <span icon=""></span>
+        </label>
+      </fieldset>
+    `;
+    document.body.appendChild(el);
+    el.$options.items = [{ value: "a", text: "" }];
+    jest.advanceTimersByTime(1);
+
+    // when legend strong is empty, it should be assigned to $refTitle
+    expect(el._isCustomRendered).toBe(true);
+    expect(el.$refTitle).toBe(el.querySelector("legend strong"));
+
+    // check that label can be set
+    el.$options.label = "Dynamic Label";
+    jest.advanceTimersByTime(1);
+    expect(el.$refTitle.textContent).toBe("Dynamic Label");
+  });
+
+  test("customization with html - no custom render", async () => {
+    const el = document.body.appendChild(document.createElement("wup-radio"));
+    el.$options.items = [
+      { value: 1, text: "Auto A" },
+      { value: 2, text: "Auto B" },
+    ];
+    await h.wait(10);
+
+    // when no fieldset is provided, custom render should be false
+    expect(el._isCustomRendered).toBe(false);
+
+    // fieldset should be auto-created
+    expect(el.querySelector("fieldset")).toBeTruthy();
+    expect(el.$refItems.length).toBe(2);
+
+    // labels should contain the text
+    expect(el.innerHTML).toContain("Auto A");
+    expect(el.innerHTML).toContain("Auto B");
+  });
+
+  test("customization with html - readonly", async () => {
+    const el = document.createElement("wup-radio");
+    el.innerHTML = `
+      <fieldset>
+        <legend><strong>Read Only Test</strong></legend>
+        <label for="ro_1">
+          First
+          <input type="radio" name="roTest" id="ro_1" />
+          <span icon=""></span>
+        </label>
+        <label for="ro_2">
+          Second
+          <input type="radio" name="roTest" id="ro_2" />
+          <span icon=""></span>
+        </label>
+      </fieldset>
+    `;
+    el.$options.items = [
+      { value: 1, text: "" },
+      { value: 2, text: "" },
+    ];
+    el.$options.readOnly = true;
+    document.body.appendChild(el);
+    jest.advanceTimersByTime(1);
+
+    expect(el._isCustomRendered).toBe(true);
+    el.$value = 1;
+    jest.advanceTimersByTime(1);
+
+    // readonly should prevent value change on click
+    el.$refItems[1].click();
+    expect(el.$value).toBe(1);
+
+    // all inputs should have readOnly property
+    el.$refItems.forEach((inp) => {
+      expect(inp.readOnly).toBe(true);
+    });
   });
 });

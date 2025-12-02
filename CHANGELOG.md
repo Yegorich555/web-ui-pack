@@ -9,6 +9,7 @@
 - helper [nestedProperty](src/helpers/nestedProperty.ts). Added support for arrays in path: `items[0].id`
 - [Form](src/formElement.ts) & [Controls](src/controls/). Added support for arrays in names: `items[0].id`
 - [ModalElement](src/modalElement.ts.ts). Fix `WUPModalElement.$useConfirmHook produces exception when document.dispatchEvent(...) is called manually`
+- [RadioControl](src/controls/radio.ts). Allow full customization via html (previously possible only with JS)
 
 ## 1.2.5 (Oct 28, 2025)
 
