@@ -41,6 +41,10 @@ const nestedProperty = {
    * @returns pointed same object
    */
   set<T extends Record<string, any>>(obj: T, path: string, value: any): T {
+    if (!path) {
+      return obj;
+    }
+
     const result = obj;
     const [propKeys, isArray] = nestedProperty.parsePath(path);
 
@@ -64,6 +68,10 @@ const nestedProperty = {
    * @return Returns the resolved value.
    */
   get<TObj extends Record<string, any>, TVal>(obj: TObj, path: string, out?: { hasProp?: boolean }): TVal | undefined {
+    if (!path) {
+      return undefined;
+    }
+
     const [propKeys] = nestedProperty.parsePath(path);
     let next = obj;
 

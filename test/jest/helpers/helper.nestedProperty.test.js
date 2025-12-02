@@ -77,4 +77,10 @@ describe("helper.nestedProperty", () => {
     expect(nestedProperty.get(obj, "items[1].id")).toBe(1267);
     expect(nestedProperty.get(obj, "ids[0]")).toBe(148);
   });
+  test("with wrong empty path", () => {
+    const obj = { id: 1 };
+
+    expect(nestedProperty.get(obj, "")).toBe(undefined);
+    expect(nestedProperty.set(obj, "")).toEqual({ id: 1 });
+  });
 });
