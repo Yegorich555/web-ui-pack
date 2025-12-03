@@ -411,19 +411,23 @@ export default class WUPRadioControl<
 
   /** Returns string for storage */
   valueToStrCompare(a: WUP.Select.MenuItem<ValueType>): string | null {
-    const at = typeof a.text === "function" ? a.value?.toString() : a.text;
-    return at?.replace(/\s/g, "") ?? null;
+    let at = null;
+    if (a.value != null) {
+      at = (a.value as any).id ?? a.value.toString();
+    } else {
+      at = typeof a.text === "function" ? a.value?.toString() : a.text;
+    }
+    return at;
   }
 
   override valueFromStorage(str: string): ValueType | undefined {
-    if (str === "null") {
+    if (str === "$null") {
       return null as ValueType;
     }
-    const s = str.toLowerCase();
     const items = this.getItems();
-    const item = items.find((a) => this.valueToStrCompare(a)?.toLowerCase() === s);
+    const item = items.find((a) => this.valueToStrCompare(a) === str);
     if (item === undefined) {
-      this.throwError("Not found in items (search by item.value.toString() & item.text)", {
+      this.throwError("Not found in items (search by item.value.id | item.value.toString() | item.text)", {
         items,
         searchText: str,
       });
@@ -438,7 +442,7 @@ export default class WUPRadioControl<
    *  @see {@link valueToStrCompare} */
   override valueToStorage(v: ValueType): string | null {
     if (v == null) {
-      return "null";
+      return "$null";
     }
     const items = this.getItems();
     const item = items.find((o) => this.#ctr.$isEqual(o.value, v, this)) || { value: v, text: v?.toString() };

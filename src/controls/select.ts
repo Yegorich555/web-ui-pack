@@ -194,8 +194,7 @@ export default class WUPSelectControl<
    * @param menuItemValue value related to items[x].value
    * @param inputValue normalized input value (trimStart + lowercase)
    * @param inputRawValue input value without normalization
-   * @returns true if menuItem must be visible in menu
-   */
+   * @returns true if menuItem must be visible in menu */
   static $filterMenuItem(
     this: WUPSelectControl,
     menuItemText: string,
@@ -273,10 +272,17 @@ export default class WUPSelectControl<
     return v as ValueType;
   }
 
-  /** Returns string for storage */
+  /** Returns string-value representation for storage */
   valueToStrCompare(a: WUP.Select.MenuItem<ValueType>): string | null {
-    const at = typeof a.text === "function" ? a.value?.toString() : a.text; // todo #1 it could be wrong on lang-change since used item.text instead of item.value
-    return at?.replace(/\s/g, "") ?? null;
+    let at = null;
+    if (a.value != null) {
+      at = ((a.value as any).id ?? a.value).toString();
+    } else {
+      at = typeof a.text === "function" ? a.value?.toString() : a.text;
+    }
+    return at;
+
+    // return at?.replace(/\s/g, "") ?? null; // removes all whitespace characters (spaces, tabs, newlines) from the string
   }
 
   override valueFromStorage(str: string, skipMultiple?: boolean): ValueType | undefined {
@@ -284,14 +290,13 @@ export default class WUPSelectControl<
       const v = str.split("_").map((si) => this.valueFromStorage(si, true)) as any;
       return v;
     }
-    if (str === "null") {
+    if (str === "$null") {
       return null as ValueType;
     }
-    const s = str.toLowerCase(); // todo #1 we could store value type as localStorage.setItem('_someName__Type', value type as string here)
     const items = this.getItems();
-    const item = items.find((a) => this.valueToStrCompare(a)?.toLowerCase() === s);
+    const item = items.find((a) => this.valueToStrCompare(a) === str);
     if (item === undefined) {
-      this.throwError("Not found in items (search by item.value.toString() & item.text)", {
+      this.throwError("Not found in items (search by item.value.id | item.value.toString() | item.text)", {
         items,
         searchText: str,
       });
@@ -309,7 +314,7 @@ export default class WUPSelectControl<
       return (v as Array<any>).map((vi) => this.valueToStorage(vi, true)).join("_");
     }
     if (v == null) {
-      return "null";
+      return "$null";
     }
     const items = this.getItems();
     const item = items.find((o) => this.#ctr.$isEqual(o.value, v, this)) || { value: v, text: v?.toString() };

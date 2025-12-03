@@ -28,9 +28,9 @@ describe("control.radio", () => {
   testBaseControl({
     noInputSelection: true,
     initValues: [
-      { attrValue: "10", value: 10, urlValue: "Donny" },
-      { attrValue: "20", value: 20, urlValue: "Mikky" },
-      { attrValue: "30", value: 30, urlValue: "Leo" },
+      { attrValue: "10", value: 10 },
+      { attrValue: "20", value: 20 },
+      { attrValue: "30", value: 30 },
     ],
     validations: {},
     attrs: {
@@ -330,13 +330,13 @@ describe("control.radio", () => {
     // when value is null
     el = await init();
     el.$value = null;
-    expect(sSet).lastCalledWith("rd", "null");
+    expect(sSet).lastCalledWith("rd", "$null");
     el = await init();
     expect(el.$value).toBe(null);
 
     // text must be stored
     el.$value = 10;
-    expect(sSet).lastCalledWith("rd", "DarkMen");
+    expect(sSet).lastCalledWith("rd", "10");
     el = await init();
     expect(el.$value).toBe(10);
 
@@ -379,8 +379,8 @@ describe("control.radio", () => {
     expect(el.valueToStorage(15)).toBe("15");
 
     // cover universal cases with basic proto
-    expect(WUPBaseControl.prototype.valueFromStorage.call(el, "null")).toBe(null);
-    expect(WUPBaseControl.prototype.valueToStorage.call(el, null)).toBe("null");
+    expect(WUPBaseControl.prototype.valueFromStorage.call(el, "$null")).toBe(null);
+    expect(WUPBaseControl.prototype.valueToStorage.call(el, null)).toBe("$null");
     h.mockConsoleError();
     expect(WUPBaseControl.prototype.valueToStorage.call(el, { value: 1 })).toBe(null);
     expect(() => jest.advanceTimersByTime(10)).toThrow();

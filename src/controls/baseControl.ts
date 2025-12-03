@@ -1043,13 +1043,13 @@ export default abstract class WUPBaseControl<
 
   /** Called to serialize value from URL/storage; override it if you have object */
   valueFromStorage(str: string): ValueType | undefined {
-    return str === "null" ? (null as ValueType) : this.parse(str);
+    return str === "$null" ? (null as ValueType) : this.parse(str);
   }
 
   /** Called to serialize value to URL/storage & must return null if need to remove */
   valueToStorage(v: ValueType | null): string | null {
     if (v == null) {
-      return "null";
+      return "$null";
     }
     if (typeof v === "object") {
       this.throwError(
@@ -1160,6 +1160,7 @@ export default abstract class WUPBaseControl<
     const canVld = reason !== SetValueReasons.manual;
     (canVld || this.$refError) && this.validateAfterChange();
 
+    console.warn({ reason, storageKey: this._opts.storageKey });
     if (reason !== SetValueReasons.initValue) {
       // save to storage
       reason !== SetValueReasons.storage && this._opts.storageKey && this.storageSet(v);

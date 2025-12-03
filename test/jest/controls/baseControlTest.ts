@@ -75,6 +75,11 @@ interface TestOptions<T> extends BaseTestOptions {
   noInputSelection?: boolean;
   onCreateNew: (el: WUPBaseControl) => void;
   testReadonly: { true: (el: WUPBaseControl) => void; false: (el: WUPBaseControl) => void };
+  $options?: {
+    readOnly?: {
+      ignoreInput?: boolean;
+    };
+  };
 }
 
 export function testBaseControl<T>(cfg: TestOptions<T>) {
