@@ -123,7 +123,7 @@ export default function SelectManyControlView() {
         <wup-selectmany //
           w-name="saveUrlSmany"
           w-label="With saving to URL (see $options.storageKey & storage)"
-          w-storageKey
+          w-storageKey="true"
           w-storage="url"
           ref={(el) => {
             if (el) {

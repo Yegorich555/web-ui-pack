@@ -98,7 +98,7 @@ export default function RadioControlView() {
         <wup-radio //
           w-name="saveUrlRadio"
           w-label="With saving to URL (see $options.storageKey & storage)"
-          w-storageKey
+          w-storageKey="true"
           w-storage="url"
           ref={(el) => {
             if (el) {

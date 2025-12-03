@@ -72,7 +72,7 @@ export default function NumberControlView() {
         <wup-num //
           w-name="saveUrlNum"
           w-label="With saving to URL (see $options.storageKey & storage)"
-          w-storageKey
+          w-storageKey="true"
           w-storage="url"
         />
         <div className={stylesCom.group}>

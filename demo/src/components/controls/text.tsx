@@ -117,7 +117,7 @@ export default function TextControlView() {
         <wup-text //
           w-name="saveUrl"
           w-label="With saving to URL (see $options.storageKey & storage)"
-          w-storageKey
+          w-storageKey="true"
           w-storage="url"
         />
         <h3>

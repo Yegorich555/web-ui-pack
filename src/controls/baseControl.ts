@@ -215,6 +215,7 @@ declare global {
       "w-validations"?: string;
       "w-validateDebounceMs"?: number;
       "w-validationShowAll"?: boolean | "";
+      /** Expected 'true' for getting from w-name or another string to override default */
       "w-storageKey"?: boolean | string;
       "w-storage"?: "local" | "session" | "url";
       /** @deprecated Use [required] for styling */
@@ -1160,7 +1161,6 @@ export default abstract class WUPBaseControl<
     const canVld = reason !== SetValueReasons.manual;
     (canVld || this.$refError) && this.validateAfterChange();
 
-    console.warn({ reason, storageKey: this._opts.storageKey });
     if (reason !== SetValueReasons.initValue) {
       // save to storage
       reason !== SetValueReasons.storage && this._opts.storageKey && this.storageSet(v);
