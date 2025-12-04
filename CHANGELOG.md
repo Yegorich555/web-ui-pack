@@ -10,7 +10,8 @@
 - [Form](src/formElement.ts) & [Controls](src/controls/). Added support for arrays in names: `items[0].id`
 - [ModalElement](src/modalElement.ts.ts). Fix `WUPModalElement.$useConfirmHook produces exception when document.dispatchEvent(...) is called manually`
 - [RadioControl](src/controls/radio.ts). Allow full customization via html (previously possible only with JS)
-- - [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). [RadioControl](src/controls/radio.ts). Rollback storing values to localStorage, sessionStorage, url so it's stored by item.value.id | item.value?.toString() | item.text now
+- [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). [RadioControl](src/controls/radio.ts). Rollback storing values to localStorage, sessionStorage, url so it's stored by item.value.id | item.value?.toString() | item.text now
+- DEMO: add details about `$options.mask` for [NumberControl](src/controls/number.ts)
 
 ## 1.2.5 (Oct 28, 2025)
 
