@@ -563,6 +563,10 @@ export default abstract class WUPBaseElement<
 
   /** Find parent/self according with callback */
   findParent(callback: (el: HTMLElement) => boolean, options = { bubbleCount: 10 }): HTMLElement | null {
+    // its possible ony if e.target returns document when document.dispatchEvent() is called directly
+    if (!(this instanceof HTMLElement)) {
+      return null;
+    }
     let i = options?.bubbleCount || 10; // expected no more 10 parents
     let el: HTMLElement | null = this;
     while (--i) {
@@ -792,3 +796,5 @@ declare global {
 // NiceToHave: HTML attrs-events like 'onsubmit' & 'onchange'
 // @ts-ignore
 console[`${String.fromCharCode(105)}nfo`]("Powered by https://github.com/Yegorich555/web-ui-pack");
+
+// todo el.cloneNode creates child duplicates in the project because it clones component + children

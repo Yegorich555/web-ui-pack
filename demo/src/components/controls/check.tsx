@@ -42,7 +42,7 @@ export default function CheckControlView() {
         <wup-check //
           w-name="saveUrlCheck"
           w-label="With saving to URL (see $options.storageKey & storage)"
-          w-storageKey
+          w-storageKey="true"
           w-storage="url"
         />
         <section>

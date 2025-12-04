@@ -84,7 +84,7 @@ export default function TimeControlView() {
         <wup-time //
           w-name="saveUrlTime"
           w-label="With saving to URL ($options.storageKey & storage)"
-          w-storageKey
+          w-storageKey="true"
           w-storage="url"
         />
         <button type="submit">Submit</button>

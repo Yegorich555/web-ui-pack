@@ -1,6 +1,7 @@
 import Page from "src/elements/page";
 import { WUPNumberControl } from "web-ui-pack";
 import stylesCom from "./controls.scss";
+import TextControlWithMask from "./text.mask";
 
 WUPNumberControl.$use();
 
@@ -57,7 +58,7 @@ export default function NumberControlView() {
         </div>
         <wup-num
           w-name="prefixPostfix"
-          w-label="With postfix prefix"
+          w-label="Currency: postfix + prefix + $options.format = { maxDecimal: 2 } "
           w-prefix="$ "
           w-postfix=" USD"
           ref={(el) => {
@@ -67,12 +68,10 @@ export default function NumberControlView() {
             }
           }}
         />
-        {/* todo point options how it works on ordinary text + missed description how to work with format */}
-        <wup-num w-name="WithMask" w-label="With Mask (mask always ignores format)" w-mask="0000-0000" />
         <wup-num //
           w-name="saveUrlNum"
           w-label="With saving to URL (see $options.storageKey & storage)"
-          w-storageKey
+          w-storageKey="true"
           w-storage="url"
         />
         <div className={stylesCom.group}>
@@ -123,6 +122,24 @@ export default function NumberControlView() {
             }}
           />
         </div>
+
+        <TextControlWithMask>
+          <wup-num w-name="WithMask" w-label="With Mask 0000-0000" w-mask="0000-0000" />
+          <wup-num
+            ref={(el) => {
+              if (el) {
+                el.$options = { ...el.$options, validations: { min: 0, max: 100 } };
+              }
+            }}
+            w-name="num"
+            w-label="Fixed currency with mask ##0"
+            w-mask="##0"
+            w-maskholder="___"
+            w-postfix=" %"
+            w-initValue={12}
+          />
+        </TextControlWithMask>
+
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

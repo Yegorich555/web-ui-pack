@@ -669,6 +669,7 @@ describe("baseElement", () => {
     const dispEl = document.createElement("a");
     expect(dispEl.parentElement).toBeFalsy();
     expect(WUPBaseElement.prototype.findParent.call(dispEl, (t) => t.tagName === "MAIN")).toBe(null);
+    expect(WUPBaseElement.prototype.findParent.call(document, (t) => !t.hasAttribute("some-missed-attr"))).toBe(null);
   });
 
   test("dispose", () => {

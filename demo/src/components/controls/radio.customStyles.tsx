@@ -28,9 +28,6 @@ export default function RadioCustomStyles() {
         ref={(el) => {
           if (el) {
             el.$options.items = items.slice(0, 4);
-            setTimeout(() => {
-              console.warn(el.$value);
-            });
           }
         }}
       />

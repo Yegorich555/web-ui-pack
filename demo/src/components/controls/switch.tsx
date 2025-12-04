@@ -53,7 +53,7 @@ export default function SwitchControlView() {
         <wup-switch //
           w-name="saveUrlSwitch"
           w-label="With saving to URL (see $options.storageKey & storage)"
-          w-storageKey
+          w-storageKey="true"
           w-storage="url"
         />
         <section>

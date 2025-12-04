@@ -56,7 +56,7 @@ export default function CalendarControlView() {
         <wup-calendar //
           w-name="saveUrlClnd"
           w-label="With saving to URL (see $options.storageKey & storage)"
-          w-storageKey
+          w-storageKey="true"
           w-storage="url"
         />
         <button type="submit">Submit</button>

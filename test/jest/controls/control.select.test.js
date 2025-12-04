@@ -53,9 +53,9 @@ describe("control.select", () => {
       "w-items": { value: getItems() },
     },
     initValues: [
-      { attrValue: "10", value: 10, urlValue: "Donny" },
-      { attrValue: "20", value: 20, urlValue: "Mikky" },
-      { attrValue: "30", value: 30, urlValue: "Leo" },
+      { attrValue: "10", value: 10 },
+      { attrValue: "20", value: 20 },
+      { attrValue: "30", value: 30 },
     ],
     validations: {},
     validationsSkip: ["_parse", "_mask", "minCount", "maxCount"], // min & max tested with selectMany
@@ -1153,13 +1153,13 @@ describe("control.select", () => {
     // when value is null
     el = await init();
     el.$value = null;
-    expect(sSet).lastCalledWith("userName", "null");
+    expect(sSet).lastCalledWith("userName", "$null");
     el = await init();
     expect(el.$value).toBe(null);
 
     // text must be stored
     el.$value = 10;
-    expect(sSet).lastCalledWith("userName", "DarkMen");
+    expect(sSet).lastCalledWith("userName", "10");
     el = await init();
     expect(el.$value).toBe(10);
 

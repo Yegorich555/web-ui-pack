@@ -11,10 +11,11 @@ export default function RadioCustomJS() {
           if (el) {
             el.$options.name = "customViewJS";
             el.$options.items = () => {
-              const renderText: WUP.Select.MenuItem<number>["text"] = (value, li, i) => {
-                li.innerHTML = `<span><b>Value</b>: ${value}, <span style="color: red">index</span>: ${i}</span>`;
+              const renderText: WUP.Select.MenuItem<number>["text"] = (value, li, _i) => {
+                li.innerHTML = `<span><b>Value</b>:<span style="color: red"> ${value}</span></span>`;
                 return li.textContent as string;
               };
+
               return [
                 { value: 1, text: renderText },
                 { value: 2, text: renderText },
@@ -39,8 +40,8 @@ el.$options.items = () => {
   // Define custom HTML content in JS
   const renderText: WUPSelect.MenuItemFn<number>["text"] =
       (value, li, i) => {
-          li.innerHTML = \`<span><b>Value</b>: \${value},
-            <span style="color: red">index</span>: \${i}</span>\`;
+          li.innerHTML = \`<span><b>Value</b>:
+             <span style="color: red">\${value}</span></span>\`;
           return value.toString();
       };
 

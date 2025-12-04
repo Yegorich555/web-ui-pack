@@ -215,6 +215,7 @@ declare global {
       "w-validations"?: string;
       "w-validateDebounceMs"?: number;
       "w-validationShowAll"?: boolean | "";
+      /** Expected 'true' for getting from w-name or another string to override default */
       "w-storageKey"?: boolean | string;
       "w-storage"?: "local" | "session" | "url";
       /** @deprecated Use [required] for styling */
@@ -652,13 +653,16 @@ export default abstract class WUPBaseControl<
   //   super();
   // }
 
+  protected getLabel(): string | null {
+    return (this._opts.label ?? (this._opts.name && __wupln(stringPrettify(this._opts.name), "content"))) || null;
+  }
+
   protected override gotChanges(propsChanged: Array<keyof WUP.BaseControl.Options | any> | null): void {
     super.gotChanges(propsChanged);
 
     const i = this.$refInput;
     // set label
-    const label =
-      (this._opts.label ?? (this._opts.name && __wupln(stringPrettify(this._opts.name), "content"))) || null;
+    const label = this.getLabel();
     this.$refTitle.textContent = label;
     const n = !label && this._opts.name ? __wupln(stringPrettify(this._opts.name), "aria") : null;
     this.setAttr.call(i, "aria-label", n);
@@ -1040,13 +1044,13 @@ export default abstract class WUPBaseControl<
 
   /** Called to serialize value from URL/storage; override it if you have object */
   valueFromStorage(str: string): ValueType | undefined {
-    return str === "null" ? (null as ValueType) : this.parse(str);
+    return str === "$null" ? (null as ValueType) : this.parse(str);
   }
 
   /** Called to serialize value to URL/storage & must return null if need to remove */
   valueToStorage(v: ValueType | null): string | null {
     if (v == null) {
-      return "null";
+      return "$null";
     }
     if (typeof v === "object") {
       this.throwError(

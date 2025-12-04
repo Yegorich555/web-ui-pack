@@ -95,7 +95,7 @@ export default function TextControlView() {
         <wup-textarea //
           w-name="saveLsTa"
           w-label="With saving to localStorage (see $options.storageKey & storage)"
-          w-storageKey
+          w-storageKey="true"
           w-initValue="Type text & reload page"
         />
         <button type="submit">Submit</button>
