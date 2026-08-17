@@ -92,6 +92,10 @@ declare global {
       maxWidthByTarget?: boolean;
       /** Sets minHeight 100% of targetWidth; it can't be more than css-style min-height */
       minHeightByTarget?: boolean;
+      /** Prevents changing position-priority (attribute `position`: top/bottom/left/right) when only sizes of popup or target are changed;
+       * In this case position can be changed only when target is moved (scrolling, resizing of the screen etc.);
+       * Use it to avoid unexpected jumping (bottom <=> top) when content of popup or target is changed */
+      keepPosition?: boolean;
       /** Set true to show arrow with popup; @false by default;
        *  Arrow is placed after popup so it's easy to access (via style @see {@link arrowClass} or @see {@link WUPPopupElement.$refArrow) */
       arrowEnable?: boolean;

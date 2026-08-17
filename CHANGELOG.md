@@ -9,6 +9,7 @@
 - **Global**. Fix `el.cloneNode(true)` produces duplicates of the internal content
 - **Security**. helper [nestedProperty](src/helpers/nestedProperty.ts). Fix prototype pollution: `set()` throws now if path contains `__proto__`, `constructor` or `prototype`
 - **SelectManyControl**. Fix `Internal bug. No cached items` when value is changed right after `$options.items` is assigned to a `Promise`
+- [PopupElement](src/popup/popupElement.ts). Added `$options.keepPosition` to lock position-priority (`bottom` <=> `top`) while target isn't moved. Enabled for menus of [comboControls](src/controls/baseCombo.ts) so menu doesn't jump when height of popup/control is changed (ex. when [SelectManyControl](src/controls/selectMany.ts) collapses items on focus lost)
 
 ---
 

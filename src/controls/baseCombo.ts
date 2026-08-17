@@ -209,6 +209,7 @@ export default abstract class WUPBaseComboControl<
     p.$options.target = this;
     p.$options.offsetFitElement = [1, 1];
     p.$options.minWidthByTarget = true; // todo allow change it from $defaults
+    p.$options.keepPosition = true; // avoid changing position when control-height is changed (ex. selectMany collapses items on focusOut)
     p.$options.placement = [
       WUPPopupElement.$placements.$bottom.$start,
       WUPPopupElement.$placements.$bottom.$end,

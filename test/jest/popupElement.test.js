@@ -1888,6 +1888,58 @@ describe("popupElement", () => {
     h.unMockConsoleError();
   });
 
+  test("$options.keepPosition", async () => {
+    /** Simulates changing sizes/position of target (ex. when control collapses/expands items on focus) */
+    const setTarget = async (y, height) => {
+      h.setupLayout(trg, { x: 140, y, h: height, w: 100 });
+      await h.wait();
+    };
+
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(100);
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(80);
+    el.$options.placement = [
+      WUPPopupElement.$placements.$bottom.$start,
+      WUPPopupElement.$placements.$top.$start,
+      WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
+      WUPPopupElement.$placements.$top.$start.$resizeHeight,
+    ];
+    await setTarget(100, 50);
+    expect(el.getAttribute("position")).toBe("bottom"); // because enough space at the bottom
+
+    // by default position is changed when no space anymore (even if it's caused by resizing of target)
+    await setTarget(100, 290);
+    expect(el.getAttribute("position")).toBe("top");
+
+    // with keepPosition it's not changed if target isn't moved
+    el.$close();
+    await h.wait();
+    el.$options.keepPosition = true;
+    await setTarget(100, 50);
+    el.$open();
+    await h.wait(10);
+    expect(el.getAttribute("position")).toBe("bottom");
+
+    await setTarget(100, 290);
+    expect(el.getAttribute("position")).toBe("bottom"); // position is kept: popup is resized instead of flipping to the top
+    expect(el.style.maxHeight).toBe("10px");
+
+    // position can be changed when target is moved (scrolling etc.)
+    await setTarget(340, 50);
+    expect(el.getAttribute("position")).toBe("top");
+    expect(el.style.maxHeight).toBe("");
+
+    // position is changed even if target isn't moved but impossible to keep it (no space even for resized popup)
+    el.$close();
+    await h.wait();
+    await setTarget(100, 50);
+    el.$open();
+    await h.wait(10);
+    expect(el.getAttribute("position")).toBe("bottom");
+
+    await setTarget(100, 300); // no space at the bottom at all
+    expect(el.getAttribute("position")).toBe("top");
+  });
+
   test("open/close manually + listener", async () => {
     /** @type typeof el */
     el = document.body.appendChild(document.createElement(el.tagName));
