@@ -8,6 +8,9 @@
 
 - **Global**. Fix `el.cloneNode(true)` produces duplicates of the internal content
 - **Security**. helper [nestedProperty](src/helpers/nestedProperty.ts). Fix prototype pollution: `set()` throws now if path contains `__proto__`, `constructor` or `prototype`
+- **SelectManyControl**. Fix `Internal bug. No cached items` when value is changed right after `$options.items` is assigned to a `Promise`
+
+---
 
 ## 1.2.6 (Dec 4, 2025)
 

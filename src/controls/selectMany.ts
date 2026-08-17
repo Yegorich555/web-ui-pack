@@ -555,8 +555,13 @@ export default class WUPSelectManyControl<
   }
 
   protected override valueToInput(v: ValueType[] | undefined, isReset?: boolean): string {
-    // todo issue when items is promise and called .$value =
-    !isReset && setTimeout(() => this.renderItems(v ?? [], this.getItems())); // timeout required otherwise filter is reset by empty input
+    // WARN: items can be not fetched yet (when $options.items is a Promise): in this case rendering is skipped
+    // because it's called again with fetched items - see fetchItems()
+    !isReset &&
+      setTimeout(() => {
+        const all = this._cachedItems;
+        (all || !v?.length) && this.renderItems(v ?? [], all ?? []); // empty value doesn't require items to render
+      }); // timeout required otherwise filter is reset by empty input
     return this.$isFocused || !v?.length ? "" : " "; // otherwise broken css:placeholder-shown
   }
 
