@@ -4,9 +4,10 @@
 
 ## 1.2.7 (Aug 17, 2026)
 
-### Security
+### Fixes & Improvements
 
-- helper [nestedProperty](src/helpers/nestedProperty.ts). Fix prototype pollution: `set()` throws now if path contains `__proto__`, `constructor` or `prototype` (before it was possible to change `Object.prototype` via `nestedProperty.set(obj, "__proto__.someKey", value)`); `get()` returns `undefined` for such keys
+- **Global**. Fix `el.cloneNode(true)` produces duplicates of the internal content
+- **Security**. helper [nestedProperty](src/helpers/nestedProperty.ts). Fix prototype pollution: `set()` throws now if path contains `__proto__`, `constructor` or `prototype`
 
 ## 1.2.6 (Dec 4, 2025)
 
