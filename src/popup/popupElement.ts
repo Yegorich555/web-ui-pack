@@ -979,3 +979,4 @@ customElements.define(tagName, WUPPopupElement);
 // NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore
 // NiceToHave 2 popups can overflow each other: need option to try place several popups at once without overflow. Example on wup-pwd page: issue with 2 errors
 // NiceToHave animation.default animates to opacity: 1 but need to animate to opacityFromCss
+// todo add tooltip hook + need to figure out to use tooltipTargetId or similar pointer as works with area-describedby="id-of-content" for cases when a lot of tooltips in table must show same message

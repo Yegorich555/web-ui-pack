@@ -208,7 +208,7 @@ export default abstract class WUPBaseComboControl<
     p.$options.openCase = PopupOpenCases.onManualCall;
     p.$options.target = this;
     p.$options.offsetFitElement = [1, 1];
-    p.$options.minWidthByTarget = true;
+    p.$options.minWidthByTarget = true; // todo allow change it from $defaults
     p.$options.placement = [
       WUPPopupElement.$placements.$bottom.$start,
       WUPPopupElement.$placements.$bottom.$end,
