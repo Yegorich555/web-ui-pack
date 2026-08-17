@@ -1,3 +1,6 @@
+/** Keys that must never be traversed or assigned: otherwise it's possible to change Object.prototype (prototype pollution) */
+const forbiddenKeys = ["__proto__", "constructor", "prototype"];
+
 const nestedProperty = {
   /** Parse "obj.nestedValue.items[0].id" into array of keys [obj, nestedValues, items, 0, id] */
   parsePath(path: string): [string[], boolean[]] {
@@ -39,6 +42,7 @@ const nestedProperty = {
    * @param path The path of the property to set; point `obj.items[0].id` for example
    * @param value The value to set.
    * @returns pointed same object
+   * @throws TypeError when path contains `__proto__`, `constructor` or `prototype` (prototype pollution)
    */
   set<T extends Record<string, any>>(obj: T, path: string, value: any): T {
     if (!path) {
@@ -48,9 +52,15 @@ const nestedProperty = {
     const result = obj;
     const [propKeys, isArray] = nestedProperty.parsePath(path);
 
+    const forbidden = propKeys.find((k) => forbiddenKeys.includes(k));
+    if (forbidden !== undefined) {
+      throw new TypeError(`Not allowed key '${forbidden}' in path '${path}'`);
+    }
+
     let key = propKeys[0] as keyof T;
     for (let i = 0; i < propKeys.length - 1; key = propKeys[++i] as keyof T) {
-      if (!obj[key]) {
+      // hasOwnProperty: don't reuse (and so don't mutate) anything inherited from the prototype chain
+      if (!obj[key] || !Object.prototype.hasOwnProperty.call(obj, key)) {
         obj[key] = (isArray[i] ? [] : {}) as T[keyof T];
       }
       obj = obj[key];
@@ -80,6 +90,13 @@ const nestedProperty = {
         break;
       }
       const key = propKeys[i];
+      if (forbiddenKeys.includes(key)) {
+        // no throw here because `get` is used for resolving html-attributes and exception breaks rendering
+        if (out != null) {
+          out.hasProp = false;
+        }
+        return undefined;
+      }
 
       if (out != null) {
         out.hasProp = key in next;

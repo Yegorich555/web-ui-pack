@@ -83,4 +83,46 @@ describe("helper.nestedProperty", () => {
     expect(nestedProperty.get(obj, "")).toBe(undefined);
     expect(nestedProperty.set(obj, "")).toEqual({ id: 1 });
   });
+
+  test("set - prototype pollution is not allowed", () => {
+    const paths = [
+      "__proto__.ppBullseye",
+      "constructor.prototype.ppBullseye",
+      "addr.__proto__.ppBullseye",
+      "addr.constructor.prototype.ppBullseye",
+      "items[0].__proto__.ppBullseye",
+      "__proto__",
+      "constructor",
+      "prototype",
+    ];
+    paths.forEach((path) => {
+      expect(() => nestedProperty.set({}, path, "polluted")).toThrow();
+      expect({}.ppBullseye).toBe(undefined); // the main point: Object.prototype must stay clean
+    });
+    expect(Object.prototype.ppBullseye).toBe(undefined);
+    expect({}.constructor).toBe(Object);
+  });
+
+  test("set - inherited props are not mutated", () => {
+    class Model {}
+    Model.prototype.addr = { street: "st" };
+    const obj = new Model();
+
+    nestedProperty.set(obj, "addr.house", 5);
+    expect(Object.prototype.hasOwnProperty.call(obj, "addr")).toBe(true); // own prop created instead of changing prototype
+    expect(obj.addr).toEqual({ house: 5 });
+    expect(Model.prototype.addr).toEqual({ street: "st" }); // prototype isn't touched
+  });
+
+  test("get - prototype chain isn't reachable", () => {
+    const out = { hasProp: null };
+    expect(nestedProperty.get({}, "__proto__")).toBe(undefined);
+    expect(nestedProperty.get({}, "__proto__.toString")).toBe(undefined);
+    expect(nestedProperty.get({}, "constructor")).toBe(undefined);
+    expect(nestedProperty.get({}, "constructor.constructor")).toBe(undefined); // otherwise it's possible to get Function
+    expect(nestedProperty.get({ addr: {} }, "addr.__proto__.toString")).toBe(undefined);
+
+    expect(nestedProperty.get({}, "__proto__", out)).toBe(undefined);
+    expect(out.hasProp).toBe(false);
+  });
 });
