@@ -39,7 +39,6 @@ beforeEach(() => {
   WUPNotifyElement.$use();
   jest.useFakeTimers();
   animations.length = 0;
-  WUPNotifyElement.prototype._openedItems.length = 0; // it's singleton: clear to isolate tests from each other
   jest.spyOn(document, "hasFocus").mockReturnValue(true); // simulate that window is focused
   jest.spyOn(WUPNotifyElement, "$uniqueId", "get").mockImplementation(() => "sID");
   el = document.body.appendChild(document.createElement("wup-notify"));
@@ -50,6 +49,8 @@ beforeEach(() => {
 
 afterEach(() => {
   document.body.innerHTML = "";
+  // eslint-disable-next-line jest/no-standalone-expect
+  expect(WUPNotifyElement.prototype._openedItems).toHaveLength(0); // it's singleton: check for leaking between the tests
   jest.restoreAllMocks();
   jest.clearAllMocks();
 });
@@ -208,9 +209,10 @@ describe("notifyElement", () => {
     expect(thenClose).toBeCalledTimes(1);
     el.$open();
     el.$close();
-    el.$open();
+    el.$open(); // interrupt the closing
     await h.wait();
     expect(el.$isOpened).toBe(true);
+    expect(el._openedItems).toHaveLength(1); // no duplicates in the singleton-list
     el.$close();
     await h.wait(10);
     expect(el.$isClosing).toBe(true);
@@ -634,6 +636,27 @@ describe("notifyElement", () => {
     await h.wait();
     expect(c1._dy).toBe(0);
     expect(c1.style.transform).toBe("");
+
+    // $open() during the closing: item must be moved to the end without duplicates
+    document.body.innerHTML = "";
+    await h.wait(1);
+    const d1 = add("bottom-left");
+    const d2 = add("bottom-left");
+    const d3 = add("bottom-left");
+    await h.wait();
+    expect([d1._dy, d2._dy, d3._dy]).toEqual([0, -60, -120]);
+    d2.$close();
+    d2.$open(); // interrupt the closing: resetState is skipped in this case
+    await h.wait();
+    expect(el._openedItems).toHaveLength(3); // no duplicates
+    expect([d1._dy, d3._dy, d2._dy]).toEqual([0, -60, -120]);
+    expect([d1.style.transform, d3.style.transform, d2.style.transform]).toMatchInlineSnapshot(`
+      [
+        "",
+        "translateY(-60px)",
+        "translateY(-120px)",
+      ]
+    `);
   });
 
   test("static $show", async () => {

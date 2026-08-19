@@ -340,6 +340,7 @@ export default class WUPNotifyElement<
     // listen for close-events
     this._opts.closeOnClick && this.appendEvent(this, "click", (ev) => this.gotClick(ev));
 
+    this.resetPosition(); // WARN: required when $open() is called during the closing: in this case resetState is skipped
     const curNum = this._openedItems.push(this as WUPNotifyElement<any, any>);
     if (curNum > 1) {
       this._dx = getComputedStyle(this).transform;
@@ -428,14 +429,21 @@ export default class WUPNotifyElement<
     this.disposeEvents(); // remove all events added on opening (for case when item is not removed and will be opened again)
   }
 
-  protected resetState(): void {
-    super.resetState();
+  /** Reset saved position & remove itself from the list of opened items (+ update positions of the rest) */
+  protected resetPosition(): void {
     this.style.transform = "";
+    this._dx = "";
+    this._dy = 0;
     const i = this._openedItems.indexOf(this as WUPNotifyElement<any, any>);
     if (i > -1) {
       this._openedItems.splice(i, 1);
       this.refreshVertical();
     }
+  }
+
+  protected resetState(): void {
+    super.resetState();
+    this.resetPosition();
     this.isConnected && this._opts.selfRemove && this.remove();
   }
 
