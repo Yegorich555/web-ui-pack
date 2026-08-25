@@ -97,3 +97,5 @@ test/browser/srv/bundle.js
 .coveralls.yml
 
 demo/build/
+
+.claude/

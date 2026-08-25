@@ -1097,4 +1097,34 @@ describe("control.selectMany", () => {
       </wup-popup>
     `);
   });
+
+  test("value change when items is promise", async () => {
+    el.$options.clearButton = true;
+    el.$value = [10, 20];
+    await h.wait();
+    const onErr = jest.spyOn(el, "throwError");
+
+    // clearing right after items is assigned: items aren't fetched when renderItems is called
+    el.$options.items = new Promise((res) => setTimeout(() => res(getItems()), 100));
+    el.$refBtnClear.click();
+    await h.wait();
+    expect(onErr).not.toBeCalled(); // before: 'Internal bug. No cached items'
+    expect(el.$value).toBe(undefined);
+    expect(el.$refItems?.length).toBeFalsy(); // items must be removed even if $options.items isn't fetched
+
+    // setting value right after items is assigned
+    el.$options.items = new Promise((res) => setTimeout(() => res(getItems()), 100));
+    el.setValue([20, 40], 4); // 4 - SetValueReasons.userSelect
+    await h.wait();
+    expect(onErr).not.toBeCalled(); // before: 'Internal bug. No cached items'
+    expect(el.$refItems.map((a) => a.textContent)).toStrictEqual(["Mikky", "Splinter"]); // rendered after promise is resolved
+
+    // $value assigned during the pending state
+    el.$options.items = new Promise((res) => setTimeout(() => res(getItems()), 100));
+    await h.wait(10);
+    el.$value = [30];
+    await h.wait();
+    expect(onErr).not.toBeCalled();
+    expect(el.$refItems.map((a) => a.textContent)).toStrictEqual(["Leo"]);
+  });
 });

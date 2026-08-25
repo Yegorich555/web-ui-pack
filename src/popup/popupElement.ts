@@ -454,6 +454,8 @@ export default class WUPPopupElement<
       animTime: number;
     };
     placements: Array<WUP.Popup.Place.PlaceFunc>;
+    /** Position-priority of the last placement; it must be kept when option `keepPosition` is enabled */
+    prevPos?: WUP.Popup.Place.Result["attr"];
   };
 
   /** Collect/calc all required values into #state (when menu shows) */
@@ -695,6 +697,12 @@ export default class WUPPopupElement<
       return this.#state!.prevRect;
     }
     isScreenChanged && this.buildState(); // rebuild state because possible difference on mediaquery
+    /* option `keepPosition`: position-priority is locked while target isn't moved so changing sizes of popup/target
+       (ex. when control is collapsed on focusOut) doesn't flip bottom <=> top; buildState() resets prevRect >>> screen-change unlocks it */
+    const lockedPos =
+      this._opts.keepPosition && this.#state!.prevRect?.top === tRect.top && this.#state!.prevRect?.left === tRect.left
+        ? this.#state!.prevPos
+        : null;
     this.#state!.prevScreenSize = { w: screenSize.vw, h: screenSize.vh };
 
     const fitEl = this._opts.toFitElement; /* || document.body */
@@ -847,9 +855,14 @@ export default class WUPPopupElement<
         p.top + Math.min(meSize.h, p.maxH || Number.MAX_SAFE_INTEGER, maxH) > fit.bottom;
 
       let pos: WUP.Popup.Place.Result = <WUP.Popup.Place.Result>{};
-      const isOk = this.#state!.placements!.some((pfn) => {
-        lastRule = pfn;
+      /** 1st round: only rules that keep position-priority (see option `keepPosition`); 2nd round: only the others */
+      let isLockRound = lockedPos != null;
+      const placeFn = (pfn: WUP.Popup.Place.PlaceFunc): boolean => {
         pos = pfn(t, me, fit);
+        if (lockedPos && (pos.attr === lockedPos) !== isLockRound) {
+          return false; // skip rules that don't belong to the current round
+        }
+        lastRule = pfn;
         let ok = !hasOverflow(pos, me);
         if (ok) {
           // maxW/H can be null if resize is not required
@@ -873,7 +886,13 @@ export default class WUPPopupElement<
           }
         }
         return ok;
-      });
+      };
+
+      let isOk = this.#state!.placements!.some(placeFn);
+      if (!isOk && isLockRound) {
+        isLockRound = false; // impossible to keep position-priority - use the rest of rules
+        isOk = this.#state!.placements!.some(placeFn);
+      }
       !isOk && console.error(`${this.tagName}. Impossible to place without overflow`, this);
 
       if (this.$refArrow) {
@@ -916,6 +935,7 @@ export default class WUPPopupElement<
       // transform has performance benefits in comparison with positioning
       this.style.transform = `translate(${pos.left}px, ${pos.top}px)`;
       this.setAttribute("position", pos.attr);
+      this.#state!.prevPos = pos.attr; // store to be able to lock it (see option `keepPosition`)
       return pos;
     };
     const was = styleTransform(this, "translate", ""); // remove prev transformation and save scale transformation
@@ -979,3 +999,4 @@ customElements.define(tagName, WUPPopupElement);
 // NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore
 // NiceToHave 2 popups can overflow each other: need option to try place several popups at once without overflow. Example on wup-pwd page: issue with 2 errors
 // NiceToHave animation.default animates to opacity: 1 but need to animate to opacityFromCss
+// todo add tooltip hook + need to figure out to use tooltipTargetId or similar pointer as works with area-describedby="id-of-content" for cases when a lot of tooltips in table must show same message

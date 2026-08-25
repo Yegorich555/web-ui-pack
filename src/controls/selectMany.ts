@@ -555,8 +555,13 @@ export default class WUPSelectManyControl<
   }
 
   protected override valueToInput(v: ValueType[] | undefined, isReset?: boolean): string {
-    // todo issue when items is promise and called .$value =
-    !isReset && setTimeout(() => this.renderItems(v ?? [], this.getItems())); // timeout required otherwise filter is reset by empty input
+    // WARN: items can be not fetched yet (when $options.items is a Promise): in this case rendering is skipped
+    // because it's called again with fetched items - see fetchItems()
+    !isReset &&
+      setTimeout(() => {
+        const all = this._cachedItems;
+        (all || !v?.length) && this.renderItems(v ?? [], all ?? []); // empty value doesn't require items to render
+      }); // timeout required otherwise filter is reset by empty input
     return this.$isFocused || !v?.length ? "" : " "; // otherwise broken css:placeholder-shown
   }
 
@@ -788,10 +793,6 @@ customElements.define(tagName, WUPSelectManyControl);
  * 1. Firefox. Caret position is wrong/missed between Items is use try to use ArrowKeys
  * 2. Firefox. Caret position is missed if no empty spans between items
  * 3. Without contenteditalbe='false' browser moves cursor into item, but it should be outside
- */
-
-/* todo popup can change position during the hiding by focuslost when input is goes invisible and control size is reduced - need somehow block changing position-priority
-when popup is opened => don't change bottom...top if menu or control height changed. Change bottom to top only during the scrolling
  */
 
 // NiceToHave: Ctrl+Z must should work for the whole control. Not only for `input`

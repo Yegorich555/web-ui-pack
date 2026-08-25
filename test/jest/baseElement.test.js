@@ -654,6 +654,56 @@ describe("baseElement", () => {
     expect(el.textContent).toBe("");
   });
 
+  test("cloneNode", () => {
+    class TestCloneElement extends WUPBaseElement {
+      $options = {};
+      gotRender() {
+        this.$refItem = this.appendChild(document.createElement("i")); // generated on render & stored in $ref...
+        this.appendChild(document.createElement("b")); // generated on render without $ref...
+      }
+    }
+    customElements.define("test-clone-el", TestCloneElement);
+
+    // clone of not-rendered element: default behavior
+    const src = document.createElement("test-clone-el");
+    src.setAttribute("w-some", "1");
+    src.appendChild(document.createElement("span")).textContent = "user content";
+    expect(src.cloneNode(true).outerHTML).toMatchInlineSnapshot(
+      `"<test-clone-el w-some="1"><span>user content</span></test-clone-el>"`
+    );
+    expect(src.cloneNode(false).outerHTML).toMatchInlineSnapshot(`"<test-clone-el w-some="1"></test-clone-el>"`);
+
+    // clone of rendered element: generated content must be skipped
+    document.body.appendChild(src);
+    jest.advanceTimersByTime(1);
+    expect(src.outerHTML).toMatchInlineSnapshot(
+      `"<test-clone-el w-some="1"><span>user content</span><i></i><b></b></test-clone-el>"`
+    );
+    const clone = src.cloneNode(true);
+    expect(clone.outerHTML).toMatchInlineSnapshot(
+      `"<test-clone-el w-some="1"><span>user content</span></test-clone-el>"`
+    );
+
+    // clone must render itself on appending (without duplicates)
+    document.body.appendChild(clone);
+    jest.advanceTimersByTime(1);
+    expect(clone.outerHTML).toMatchInlineSnapshot(
+      `"<test-clone-el w-some="1"><span>user content</span><i></i><b></b></test-clone-el>"`
+    );
+
+    // content appended by user after the render must be cloned
+    src.appendChild(document.createElement("small")).textContent = "later";
+    expect(src.cloneNode(true).outerHTML).toMatchInlineSnapshot(
+      `"<test-clone-el w-some="1"><span>user content</span><small>later</small></test-clone-el>"`
+    );
+
+    // element appended to $ref... after the render must be skipped
+    src.$refAfter = src.appendChild(document.createElement("u"));
+    expect(src.cloneNode(true).outerHTML).toMatchInlineSnapshot(
+      `"<test-clone-el w-some="1"><span>user content</span><small>later</small></test-clone-el>"`
+    );
+  });
+
   test("findParent", () => {
     document.body.innerHTML = "<main><div><button><span>..</span></button></div></main>";
     el = document.querySelector("span");
