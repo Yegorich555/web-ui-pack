@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 1.2.7 (Aug 17, 2026)
+## 1.2.7 (Aug 25, 2026)
 
 ### Fixes & Improvements
 
