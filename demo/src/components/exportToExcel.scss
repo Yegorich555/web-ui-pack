@@ -1,0 +1,67 @@
+.examples {
+  display: flex;
+  flex-flow: column;
+  gap: 14px;
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    > button {
+      flex: 0 0 auto;
+      min-width: 220px;
+      margin: 0;
+    }
+
+    > small {
+      color: $basicTextColor2;
+    }
+  }
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 1.4em;
+  margin-top: 14px;
+  font-weight: bold;
+
+  &[data-error] {
+    color: #e74c3c;
+  }
+}
+
+.tableWrap {
+  overflow: auto;
+  max-width: 100%;
+  border: $borderStyle;
+  border-radius: $borderRadius;
+  background: $basicBgColor;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+  white-space: pre-line;
+
+  th,
+  td {
+    padding: 4px 8px;
+    border: $borderStyle;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    color: $headerColor;
+    background: $headerBgColor;
+    white-space: nowrap;
+  }
+
+  td[data-empty] {
+    color: $borderColor;
+  }
+}

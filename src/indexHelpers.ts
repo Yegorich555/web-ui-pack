@@ -30,3 +30,5 @@ export { default as promiseWait } from "./helpers/promiseWait";
 export { default as WUPScrolled } from "./helpers/scrolled";
 export { default as scrollIntoView } from "./helpers/scrollIntoView";
 export { stringPrettify, stringLowerCount, stringUpperCount } from "./helpers/string";
+
+export { default as exportToExcel } from "./helpers/exportToExcel";

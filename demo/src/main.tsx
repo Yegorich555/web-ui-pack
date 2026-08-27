@@ -34,6 +34,7 @@ import styles from "./main.scss";
 import Login from "./components/controls/login";
 import ModalAsAlertView from "./components/modalAsAlertView";
 import NotifyView from "./components/notifyView";
+import ExportToExcelView from "./components/exportToExcel";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -55,6 +56,7 @@ const routes: IRoute[] = [
     { path: "modal", el: ModalView },
     { path: "modal-alert", label: "Alert", el: ModalAsAlertView },
     { path: "notify", el: NotifyView },
+    { path: "excel", label: "Export to Excel", el: ExportToExcelView },
   ].sort((a, b) => a.path.localeCompare(b.path)),
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
