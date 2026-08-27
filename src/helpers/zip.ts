@@ -23,7 +23,7 @@ const wk = <T>(
   id: number,
   msg: unknown,
   transfer: ArrayBuffer[],
-  cb: (err: FlateError, msg: T) => void
+  cb: (err: ZipError, msg: T) => void
 ): Worker => {
   if (!wkCache[id]) {
     const code = `${c};addEventListener("error",function(e){e=e.error;postMessage({$e$:[e.message,e.code,e.stack]})})`;
@@ -35,7 +35,7 @@ const wk = <T>(
     const ed = data.$e$ as [string, number, string] | undefined;
     if (ed) {
       const [message, code, stack] = ed;
-      const e2 = new Error(message) as FlateError;
+      const e2 = new Error(message) as ZipError;
       e2.code = code;
       e2.stack = stack;
       cb(e2, null!);
@@ -45,7 +45,7 @@ const wk = <T>(
   return w;
 };
 
-// aliases for shorter compressed code (most minifers don't do this)
+// aliases for shorter compressed code (most minifiers don't do this)
 const u8 = Uint8Array;
 const u16 = Uint16Array;
 const i32 = Int32Array;
@@ -97,7 +97,6 @@ for (let i = 0; i < 32768; ++i) {
 
 // create huffman tree from u8 "map": index -> code length for code index
 // mb (max bits) must be at most 15
-// TODO: optimize/split up?
 const hMap = (cd: Uint8Array, mb: number, r: 0 | 1) => {
   const s = cd.length;
   // index
@@ -125,11 +124,11 @@ const hMap = (cd: Uint8Array, mb: number, r: 0 | 1) => {
         // num encoding both symbol and bits read
         const sv = (i << 4) | cd[i];
         // free bits
-        const r = mb - cd[i];
+        const r2 = mb - cd[i];
         // start value
-        let v = le[cd[i] - 1]++ << r;
+        let v = le[cd[i] - 1]++ << r2;
         // m is end value
-        for (const m = v | ((1 << r) - 1); v <= m; ++v) {
+        for (const m = v | ((1 << r2) - 1); v <= m; ++v) {
           // every 16 bit value starting with the code yields the same result
           co[rev[v] >> rvb] = sv;
         }
@@ -194,7 +193,7 @@ const ec = [
 /**
  * An error generated within this library
  */
-export interface FlateError extends Error {
+export interface ZipError extends Error {
   /**
    * The code associated with this error
    */
@@ -202,11 +201,11 @@ export interface FlateError extends Error {
 }
 
 const err = (ind: number, msg?: string | 0, nt?: 1) => {
-  const e: Partial<FlateError> = new Error(msg || ec[ind]);
+  const e: Partial<ZipError> = new Error(msg || ec[ind]);
   e.code = ind;
-  if (Error.captureStackTrace) Error.captureStackTrace(e, err);
+  // probably used on NodeJS side - if (Error.captureStackTrace) Error.captureStackTrace(e, err);
   if (!nt) throw e;
-  return e as FlateError;
+  return e as ZipError;
 };
 
 // starting at p, write the minimum number of bits that can hold v to d
@@ -282,7 +281,6 @@ const hTree = (d: Uint16Array, mb: number) => {
   let mbt = ln(t[i1 - 1], tr, 0);
   if (mbt > mb) {
     // more algorithms from UZIP.js
-    // TODO: find out how this code works (debt)
     //  ind    debt
     let i = 0;
     let dt = 0;
@@ -291,22 +289,22 @@ const hTree = (d: Uint16Array, mb: number) => {
     const cst = 1 << lft;
     t2.sort((a, b) => tr[b.s] - tr[a.s] || a.f - b.f);
     for (; i < s; ++i) {
-      const i2 = t2[i].s;
-      if (tr[i2] > mb) {
-        dt += cst - (1 << (mbt - tr[i2]));
-        tr[i2] = mb;
+      const i3 = t2[i].s;
+      if (tr[i3] > mb) {
+        dt += cst - (1 << (mbt - tr[i3]));
+        tr[i3] = mb;
       } else break;
     }
     dt >>= lft;
     while (dt > 0) {
-      const i2 = t2[i].s;
-      if (tr[i2] < mb) dt -= 1 << (mb - tr[i2]++ - 1);
+      const i3 = t2[i].s;
+      if (tr[i3] < mb) dt -= 1 << (mb - tr[i3]++ - 1);
       else ++i;
     }
     for (; i >= 0 && dt; --i) {
-      const i2 = t2[i].s;
-      if (tr[i2] == mb) {
-        --tr[i2];
+      const i3 = t2[i].s;
+      if (tr[i3] == mb) {
+        --tr[i3];
         ++dt;
       }
     }
@@ -316,7 +314,7 @@ const hTree = (d: Uint16Array, mb: number) => {
 };
 // get the max length and assign length codes
 const ln = (n: HuffNode, l: Uint16Array, d: number): number =>
-  n.s == -1 ? Math.max(ln(n.l, l, d + 1), ln(n.r, l, d + 1)) : (l[n.s] = d);
+  n.s == -1 ? Math.max(ln(n.l!, l, d + 1), ln(n.r!, l, d + 1)) : (l[n.s] = d);
 
 // length codes generation
 const lc = (c: Uint8Array) => {
@@ -488,7 +486,7 @@ const dflt = (dat: Uint8Array, lvl: number, plvl: number, pre: number, post: num
   const lst = st.l;
   let pos = (st.r || 0) & 7;
   if (lvl) {
-    if (pos) w[0] = st.r >> 3;
+    if (pos) w[0] = st.r! >> 3;
     const opt = deo[lvl - 1];
     const n = opt >> 13;
     const c = opt & 8191;
@@ -506,7 +504,7 @@ const dflt = (dat: Uint8Array, lvl: number, plvl: number, pre: number, post: num
     const lf = new u16(288);
     const df = new u16(32);
     //  l/lcnt  exbits  index          l/lind  waitdx          blkpos
-    let lc = 0;
+    let lc2 = 0;
     let eb = 0;
     let i = st.i || 0;
     let li = 0;
@@ -525,9 +523,9 @@ const dflt = (dat: Uint8Array, lvl: number, plvl: number, pre: number, post: num
       if (wi <= i) {
         // bytes remaining
         const rem = s - i;
-        if ((lc > 7000 || li > 24576) && (rem > 423 || !lst)) {
+        if ((lc2 > 7000 || li > 24576) && (rem > 423 || !lst)) {
           pos = wblk(dat, w, 0, syms, lf, df, eb, li, bs, i - bs, pos);
-          (li = lc = eb = 0), (bs = i);
+          (li = lc2 = eb = 0), (bs = i);
           for (let j = 0; j < 286; ++j) lf[j] = 0;
           for (let j = 0; j < 30; ++j) df[j] = 0;
         }
@@ -579,7 +577,7 @@ const dflt = (dat: Uint8Array, lvl: number, plvl: number, pre: number, post: num
           ++lf[257 + lin];
           ++df[din];
           wi = i + l;
-          ++lc;
+          ++lc2;
         } else {
           syms[li++] = dat[i];
           ++lf[dat[i]];
@@ -712,14 +710,14 @@ export interface GzipOptions extends DeflateOptions {
  * @param data The data output from the stream processor
  * @param final Whether this is the final block
  */
-export type AsyncFlateStreamHandler = (err: FlateError | null, data: Uint8Array<ArrayBuffer>, final: boolean) => void;
+export type AsyncFlateStreamHandler = (err: ZipError | null, data: Uint8Array<ArrayBuffer>, final: boolean) => void;
 
 /**
  * Callback for asynchronous (de)compression methods
  * @param err Any error that occurred
  * @param data The resulting data. Only present if `err` is null
  */
-export type FlateCallback = (err: FlateError | null, data: Uint8Array<ArrayBuffer>) => void;
+export type FlateCallback = (err: ZipError | Error | null, data: Uint8Array<ArrayBuffer> | null) => void;
 
 // async callback-based compression
 interface AsyncOptions {
@@ -797,17 +795,17 @@ const wcln = (fn: () => unknown[], fnStr: string, td: Record<string, unknown>) =
     const k = ks[i];
     if (typeof v === "function") {
       fnStr += `;${k}=`;
-      const st = v.toString();
+      const str = v.toString();
       if (v.prototype) {
         // for global objects
-        if (st.indexOf("[native code]") != -1) {
-          const spInd = st.indexOf(" ", 8) + 1;
-          fnStr += st.slice(spInd, st.indexOf("(", spInd));
+        if (str.indexOf("[native code]") != -1) {
+          const spInd = str.indexOf(" ", 8) + 1;
+          fnStr += str.slice(spInd, str.indexOf("(", spInd));
         } else {
-          fnStr += st;
+          fnStr += str;
           for (const t in v.prototype) fnStr += `;${k}.prototype.${t}=${v.prototype[t].toString()}`;
         }
-      } else fnStr += st;
+      } else fnStr += str;
     } else td[k] = v;
   }
   return fnStr;
@@ -826,7 +824,7 @@ const cbfs = (v: Record<string, unknown>) => {
   const tl: ArrayBuffer[] = [];
   for (const k in v) {
     if ((v[k] as Uint8Array).buffer) {
-      tl.push((v[k] = new (v[k].constructor as typeof u8)(v[k] as Uint8Array)).buffer);
+      tl.push((v[k] = new ((v[k] as Uint8Array).constructor as typeof u8)(v[k] as Uint8Array)).buffer);
     }
   }
   return tl;
@@ -837,7 +835,7 @@ const wrkr = <T, R>(
   fns: (() => unknown[])[],
   init: (ev: MessageEvent<T>) => void,
   id: number,
-  cb: (err: FlateError, msg: R) => void
+  cb: (err: ZipError, msg: R) => void
 ) => {
   if (!ch[id]) {
     let fnStr = "";
@@ -901,9 +899,9 @@ const cbify = <T extends AsyncOptions>(
   id: number,
   cb: FlateCallback
 ) => {
-  const w = wrkr<[Uint8Array, T], Uint8Array<ArrayBuffer>>(fns, init, id, (err, dat) => {
+  const w = wrkr<[Uint8Array, T], Uint8Array<ArrayBuffer>>(fns, init, id, (werr, wdat) => {
     w.terminate();
-    cb(err, dat);
+    cb(werr, wdat);
   });
   w.postMessage([dat, opts], opts.consume ? [dat.buffer as ArrayBuffer] : []);
   return () => {
@@ -923,14 +921,14 @@ const wbytes = (d: Uint8Array, b: number, v: number) => {
  * @param cb The function to be called upon compression completion
  * @returns A function that can be used to immediately terminate the compression
  */
-export function deflate(data: Uint8Array, opts: AsyncDeflateOptions, cb: FlateCallback): AsyncTerminable;
+function deflate(data: Uint8Array, opts: AsyncDeflateOptions, cb: FlateCallback): AsyncTerminable;
 /**
  * Asynchronously compresses data with DEFLATE without any wrapper
  * @param data The data to compress
  * @param cb The function to be called upon compression completion
  */
-export function deflate(data: Uint8Array, cb: FlateCallback): AsyncTerminable;
-export function deflate(data: Uint8Array, opts: AsyncDeflateOptions | FlateCallback, cb?: FlateCallback) {
+function deflate(data: Uint8Array, cb: FlateCallback): AsyncTerminable;
+function deflate(data: Uint8Array, opts: AsyncDeflateOptions | FlateCallback, cb?: FlateCallback) {
   if (!cb) (cb = opts as FlateCallback), (opts = {});
   if (typeof cb !== "function") err(7);
   return cbify(data, opts as AsyncDeflateOptions, [bDflt], (ev) => pbf(deflateSync(ev.data[0], ev.data[1])), 0, cb);
@@ -942,7 +940,7 @@ export function deflate(data: Uint8Array, opts: AsyncDeflateOptions | FlateCallb
  * @param opts The compression options
  * @returns The deflated version of the data
  */
-export function deflateSync(data: Uint8Array, opts?: DeflateOptions) {
+function deflateSync(data: Uint8Array, opts?: DeflateOptions) {
   return dopt(data, opts || {}, 0, 0);
 }
 
@@ -1126,9 +1124,10 @@ const wzh = (d: Uint8Array, b: number, f: ZHF, fn: Uint8Array, u: boolean, c: nu
   const col = co && co.length;
   const exl = exfl(ex);
   wbytes(d, b, ce != null ? 0x2014b50 : 0x4034b50), (b += 4);
-  if (ce != null) (d[b++] = 20), (d[b++] = f.os);
+  if (ce != null) (d[b++] = 20), (d[b++] = f.os!);
   (d[b] = 20), (b += 2); // spec compliance? what's that?
-  (d[b++] = (f.flag << 1) | (c < 0 && 8)), (d[b++] = u && 8);
+  // @ts-expect-error
+  (d[b++] = (f.flag! << 1) | (c < 0 && 8)), (d[b++] = u && 8);
   (d[b++] = f.compression & 255), (d[b++] = f.compression >> 8);
   const dt = new Date(f.mtime == null ? Date.now() : f.mtime);
   const y = dt.getFullYear() - 1980;
@@ -1152,15 +1151,15 @@ const wzh = (d: Uint8Array, b: number, f: ZHF, fn: Uint8Array, u: boolean, c: nu
   wbytes(d, b + 12, fl);
   wbytes(d, b + 14, exl), (b += 16);
   if (ce != null) {
-    wbytes(d, b, col);
-    wbytes(d, b + 6, f.attrs);
+    wbytes(d, b, col!);
+    wbytes(d, b + 6, f.attrs!);
     wbytes(d, b + 10, ce), (b += 14);
   }
   d.set(fn, b);
   b += fl;
   if (exl) {
     for (const k in ex) {
-      const exf = ex[k];
+      const exf = ex[k as unknown as number];
       const l = exf.length;
       wbytes(d, b, +k);
       wbytes(d, b + 2, l);
@@ -1315,7 +1314,7 @@ export function zip(data: AsyncZippable, opts: AsyncZipOptions | FlateCallback, 
         out.set(f.c, loc);
         wzh(out, o, f, f.f, f.u, l, tot, f.m), (o += 16 + badd + (f.m ? f.m.length : 0)), (tot = loc + l);
       } catch (e) {
-        return cbd(e, null);
+        return cbd(e as Error, null);
       }
     }
     wzf(out, o, files.length, cdl, oe);
@@ -1336,18 +1335,18 @@ export function zip(data: AsyncZippable, opts: AsyncZipOptions | FlateCallback, 
     const ms = m && m.length;
     const exl = exfl(p.extra);
     const compression = p.level == 0 ? 0 : 8;
-    const cbl = (e: FlateError, d: Uint8Array) => {
+    const cbl = (e: ZipError | Error | null, d: Uint8Array | null) => {
       if (e) {
         tAll();
         cbd(e, null);
       } else {
-        const l = d.length;
+        const l = d!.length;
         files[i] = mrg(p, {
           size,
           crc: c.d(),
-          c: d,
+          c: d!,
           f,
-          m,
+          m: m!,
           u: s != fn.length || (m && com.length != ms),
           compression,
         });
@@ -1362,7 +1361,7 @@ export function zip(data: AsyncZippable, opts: AsyncZipOptions | FlateCallback, 
       try {
         cbl(null, deflateSync(file, p));
       } catch (e) {
-        cbl(e, null);
+        cbl(e as Error, null);
       }
     } else term.push(deflate(file, p, cbl));
   }
