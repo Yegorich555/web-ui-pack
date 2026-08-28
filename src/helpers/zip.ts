@@ -1010,51 +1010,15 @@ const fltn = <A extends boolean, D = A extends true ? AsyncZippable : Zippable>(
   });
 };
 
-// text encoder
-const te = typeof TextEncoder !== "undefined" && /* #__PURE__ */ new TextEncoder();
+// text encoder (created lazily to avoid work on import)
+let te: TextEncoder | undefined;
 
-/** Converts a string into a Uint8Array for use with compression/decompression methods
+/** Converts a string into a Uint8Array for use with compression methods
  * @param str The string to encode
- * @param latin1 Whether or not to interpret the data as Latin-1. This should
- *               not need to be true unless decoding a binary string.
- * @returns The string encoded in UTF-8/Latin-1 binary */
-export function strToU8(str: string, latin1?: boolean): Uint8Array {
-  if (latin1) {
-    const ar = new U8(str.length);
-    for (let i = 0; i < str.length; ++i) ar[i] = str.charCodeAt(i);
-    return ar;
-  }
-  if (te) return te.encode(str);
-  const l = str.length;
-  let ar = new U8(str.length + (str.length >> 1));
-  let ai = 0;
-  const w = (v: number): void => {
-    ar[ai++] = v;
-  };
-  for (let i = 0; i < l; ++i) {
-    if (ai + 5 > ar.length) {
-      const n = new U8(ai + 8 + ((l - i) << 1));
-      n.set(ar);
-      ar = n;
-    }
-    let c = str.charCodeAt(i);
-    if (c < 128 || latin1) w(c);
-    else if (c < 2048) {
-      w(192 | (c >> 6));
-      w(128 | (c & 63));
-    } else if (c > 55295 && c < 57344) {
-      c = (65536 + (c & (1023 << 10))) | (str.charCodeAt(++i) & 1023);
-      w(240 | (c >> 18));
-      w(128 | ((c >> 12) & 63));
-      w(128 | ((c >> 6) & 63));
-      w(128 | (c & 63));
-    } else {
-      w(224 | (c >> 12));
-      w(128 | ((c >> 6) & 63));
-      w(128 | (c & 63));
-    }
-  }
-  return slc(ar, 0, ai);
+ * @returns The string encoded in UTF-8 binary */
+export function strToU8(str: string): Uint8Array {
+  te ??= new TextEncoder();
+  return te.encode(str);
 }
 
 // zip header file
