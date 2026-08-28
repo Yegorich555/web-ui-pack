@@ -160,24 +160,13 @@ const slc = (v: Uint8Array, s: number, e?: number): Uint8Array => {
   return new U8(v.subarray(s, e));
 };
 
-// error codes
-const ec = [
-  "unexpected EOF",
-  "invalid block type",
-  "invalid length/literal",
-  "invalid distance",
-  "stream finished",
-  "no stream handler", // determined by compression function
-  undefined,
-  "no callback",
-  "invalid UTF-8 data",
-  "extra field too long",
-  "date not in range 1980-2099",
-  "filename too long",
-  "stream finishing",
-  "invalid zip data",
-  // determined by unknown compression method
-];
+// error codes: keys match fflate's indexes (kept stable for ZipError.code); only reachable ones are listed
+const ec: Record<number, string> = {
+  7: "no callback",
+  9: "extra field too long",
+  10: "date not in range 1980-2099",
+  11: "filename too long",
+};
 
 /** An error generated within this library */
 export interface ZipError extends Error {
