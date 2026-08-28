@@ -1,4 +1,4 @@
-import { zip, strToU8 } from "./zip";
+import zip, { strToU8 } from "./zip";
 import { stringPrettify } from "./string";
 import dateToString from "./dateToString";
 import localeInfo from "../objects/localeInfo";

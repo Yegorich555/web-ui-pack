@@ -1136,13 +1136,17 @@ type AsyncZipDat = ZHF & {
  * @param opts The main options, merged with per-file options
  * @param cb The callback to call with the generated ZIP archive
  * @returns A function that can be used to immediately terminate the compression */
-export function zip(data: AsyncZippable, opts: AsyncZipOptions, cb: ZipCallback): AsyncTerminable;
+export default function zip(data: AsyncZippable, opts: AsyncZipOptions, cb: ZipCallback): AsyncTerminable;
 /** Asynchronously creates a ZIP file
  * @param data The directory structure for the ZIP archive
  * @param cb The callback to call with the generated ZIP archive
  * @returns A function that can be used to immediately terminate the compression */
-export function zip(data: AsyncZippable, cb: ZipCallback): AsyncTerminable;
-export function zip(data: AsyncZippable, opts: AsyncZipOptions | ZipCallback, cb?: ZipCallback): AsyncTerminable {
+export default function zip(data: AsyncZippable, cb: ZipCallback): AsyncTerminable;
+export default function zip(
+  data: AsyncZippable,
+  opts: AsyncZipOptions | ZipCallback,
+  cb?: ZipCallback
+): AsyncTerminable {
   if (!cb) {
     cb = opts as ZipCallback;
     opts = {};

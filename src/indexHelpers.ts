@@ -31,4 +31,5 @@ export { default as WUPScrolled } from "./helpers/scrolled";
 export { default as scrollIntoView } from "./helpers/scrollIntoView";
 export { stringPrettify, stringLowerCount, stringUpperCount } from "./helpers/string";
 
+export { default as zip } from "./helpers/zip";
 export { default as exportToExcel } from "./helpers/exportToExcel";
