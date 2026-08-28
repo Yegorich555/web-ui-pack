@@ -3,11 +3,13 @@ import { stringPrettify } from "./string";
 import dateToString from "./dateToString";
 import localeInfo from "../objects/localeInfo";
 
-interface HeaderKey<T = any> {
+interface IExcelColumnMap<T = any> {
   /** Item property name to map on excel cell per column */
   propName: keyof T;
   /** Text of header, if `undefined` then extacted from propName via stringPrettify() */
   text?: string;
+  /** Width for column; by default auto-defined by the longest content */
+  width?: number;
   /** Limit max width for column */
   maxWidth?: number;
 }
@@ -16,14 +18,14 @@ export interface IExcelSheet<T = any> {
   /** Items to paste into excel according to mapping in columns */
   data: Array<T>;
   /** Mapping config */
-  columns: HeaderKey<T>[];
+  mapping: IExcelColumnMap<T>[];
   /** Name of the Excel tab; default is `Sheet{number}` */
-  sheetName?: string;
+  name?: string;
 }
 
 interface IExportConfig {
   columns: Array<string>;
-  mappedColumns: Array<{ value: string; style: string; width: number; maxWidth?: number }>;
+  mappedColumns: Array<{ value: string; style: string; width: number }>;
   rows: Array<Array<string>>;
   mappedRows: Array<Array<{ value: string; style: string }>>;
 }
@@ -44,7 +46,7 @@ const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationsh
 
 const styleSheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"><fonts><font></font></fonts><fills><fill></fill></fills><borders><border></border></borders><cellStyleXfs><xf/></cellStyleXfs><cellXfs><xf><alignment vertical="top"/></xf><xf><alignment wrapText="1" vertical="top"/></xf></cellXfs><cellStyles><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles><dxfs/><tableStyles defaultTableStyle="TableStyleMedium2" defaultPivotStyle="PivotStyleLight16"/><extLst><ext uri="{EB79DEF2-80B8-43e5-95BD-54CBDDF9020C}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:slicerStyles defaultSlicerStyle="SlicerStyleLight1"/></ext><ext uri="{9260A510-F301-46a8-8635-F512D64BE5F5}" xmlns:x15="http://schemas.microsoft.com/office/spreadsheetml/2010/11/main"><x15:timelineStyles defaultTimelineStyle="TimeSlicerStyleLight1"/></ext></extLst></styleSheet>`;
 
-function getCellValue<T>(_headerKey: HeaderKey<T>, v: T[keyof T]): string {
+function getCellValue<T>(_headerKey: IExcelColumnMap<T>, v: T[keyof T]): string {
   if (v == null) return "";
   // Not used anymore if (headerKey.type === "email") return <a href={`mailto:${value}`}>{value}</a>;
   if (v instanceof Date) return dateToString(v, localeInfo.dateTime);
@@ -88,7 +90,7 @@ export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>
     return t;
   };
 
-  const getHeaderText = (header: HeaderKey): string => {
+  const getHeaderText = (header: IExcelColumnMap): string => {
     if (header.text !== undefined) {
       return header.text as string;
     }
@@ -96,8 +98,12 @@ export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>
     return stringPrettify(header.propName as string);
   };
 
+  /** Width by the longest content of the column (+1 char as a gap before the column border) */
+  const getAutoWidth = (rows: IExportConfig["mappedRows"], i: number, headerText: string): number =>
+    Math.max(arrayMax(rows.map((row) => getCellLength(row[i]))), headerText.length + 4) + 1;
+
   const getSheetConfig = (sheet: IExcelSheet): IExportConfig => {
-    const headerKeys = sheet.columns;
+    const headerKeys = sheet.mapping;
 
     const config: IExportConfig = {
       columns: headerKeys.map((h) => getHeaderText(h)),
@@ -111,12 +117,12 @@ export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>
     );
 
     config.mappedColumns = config.columns.map((value, i) => {
-      const asString = value as string;
+      const { width, maxWidth } = headerKeys[i];
       return {
-        value: asString,
+        value,
         style: styles.default,
-        maxWidth: headerKeys[i].maxWidth,
-        width: Math.max(arrayMax(config.mappedRows.map((row) => getCellLength(row[i]))), asString.length + 4) || 10,
+        // an explicit width wins & skips scanning of the rows; otherwise it's defined by the longest content
+        width: width ?? Math.min(getAutoWidth(config.mappedRows, i, value), maxWidth ?? Number.MAX_SAFE_INTEGER),
       };
     });
 
@@ -132,39 +138,29 @@ export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>
     return generateColumnLetter(prefix - 1) + letter;
   };
 
-  /** Excel doesn't allow []:*?/\ in a tab name and cuts it by 31 chars */
-  const getSheetName = (sheetName: string | undefined, num: number): string =>
-    escape((sheetName || `Sheet${num}`).replace(/[[\]:*?/\\]/g, " ").substring(0, 31));
-
   const sheets = sheetsData.map((sheet, i) => {
     const num = i + 1;
     const config = getSheetConfig(sheet);
     return {
       num,
       config,
-      name: getSheetName(sheet.sheetName, num),
+      /** Excel doesn't allow []:*?/\ in a tab name and cuts it by 31 chars */
+      name: escape((sheet.name || `Sheet${num}`).replace(/[[\]:*?/\\]/g, " ").substring(0, 31)),
       // an empty table (a header row without data) is treated by Excel as a broken content, so skip it at all
       hasTable: config.mappedRows.length > 0,
     };
   });
 
-  const generatorCellNumber = (index: number, rowNumber: number): string =>
-    `${generateColumnLetter(index)}${rowNumber}`;
-  const generatorStringCell = (index: number, cell: IExportConfig["mappedRows"]["0"]["0"], rowIndex: number): string =>
-    `<c r="${generatorCellNumber(index, rowIndex)}" ${cell.style}t="inlineStr"><is><t>${escape(
-      cell.value
-    )}</t></is></c>`;
-  // var generatorNumberCell = (index, value, rowIndex) => (`<c r="${generatorCellNumber(index, rowIndex)}"><v>${value}</v></c>`);
-
-  const formatCell = (cell: { value: string; style: string }, index: number, rowIndex: number): string =>
-    // return typeof value === 'number' ?
-    //     generatorNumberCell(index, value, rowIndex) :
-    generatorStringCell(index, cell, rowIndex);
-
-  const formatRow = (row: { value: string; style: string }[], index: number): string => {
+  const formatRow = (row: Array<{ value: string; style: string }>, index: number): string => {
     // To ensure the row number starts as in excel.
     const rowIndex = index + 1;
-    const rowCells = row.map((cell, cellIndex) => formatCell(cell, cellIndex, rowIndex)).join("");
+    let rowCells = "";
+    for (let i = 0; i < row.length; ++i) {
+      const cell = row[i];
+      rowCells += `<c r="${generateColumnLetter(i)}${rowIndex}" ${cell.style}t="inlineStr"><is><t>${escape(
+        cell.value
+      )}</t></is></c>`;
+    }
     return `<row r="${rowIndex}">${rowCells}</row>`;
   };
 
@@ -211,12 +207,7 @@ export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>
   ): string =>
     `<?xml version="1.0" ?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:mx="http://schemas.microsoft.com/office/mac/excel/2008/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main"><cols>` +
     `${columns
-      .map(
-        (col, i) =>
-          `<col min="${i + 1}" max="${i + 1}" width="${
-            col.width > (col.maxWidth || Number.MAX_SAFE_INTEGER) ? col.maxWidth : col.width + 1
-          }" bestFit="1" customWidth="1"/>`
-      )
+      .map((col, i) => `<col min="${i + 1}" max="${i + 1}" width="${col.width}" bestFit="1" customWidth="1"/>`)
       .join("")}</cols><sheetData>${
       formatRow(columns, 0) + rows.map((row, index) => formatRow(row, index + 1)).join("")
     }</sheetData>${hasTable ? `<tableParts count="1"><tablePart r:id="rId1"/></tableParts>` : ""}</worksheet>`;
