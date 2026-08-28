@@ -469,40 +469,20 @@ const deo = /* #__PURE__ */ new I32([65540, 131080, 131088, 131104, 262176, 1048
 // empty
 const et = /* #__PURE__ */ new U8(0);
 
-type DeflateState = {
-  // head
-  h?: Uint16Array;
-  // prev
-  p?: Uint16Array;
-  // index
-  i?: number;
-  // end index
-  z?: number;
-  // wait index
-  w?: number;
-  // remainder byte info
-  r?: number;
-  // last chunk
-  l: number;
-};
-
-// compresses data into a raw DEFLATE buffer
-const dflt = (dat: Uint8Array, lvl: number, plvl: number, pre: number, post: number, st: DeflateState): Uint8Array => {
-  const s = st.z || dat.length;
-  const o = new U8(pre + s + 5 * (1 + Math.ceil(s / 7000)) + post);
+// compresses data into a raw DEFLATE buffer; wi0 - wait index: end of the prepended dictionary (if any)
+const dflt = (dat: Uint8Array, lvl: number, plvl: number, wi0: number): Uint8Array => {
+  const s = dat.length;
   // writing to this writes to the output buffer
-  const w = o.subarray(pre, o.length - post);
-  const lst = st.l;
-  let pos = (st.r || 0) & 7;
+  const w = new U8(s + 5 * (1 + Math.ceil(s / 7000)));
+  let pos = 0;
   if (lvl) {
-    if (pos) w[0] = st.r! >> 3;
     const opt = deo[lvl - 1];
     const n = opt >> 13;
     const c = opt & 8191;
     const msk = (1 << plvl) - 1;
     //    prev 2-byte val map    curr 2-byte val map
-    const prev = st.p || new U16(32768);
-    const head = st.h || new U16(msk + 1);
+    const prev = new U16(32768);
+    const head = new U16(msk + 1);
     const bs1 = Math.ceil(plvl / 3);
     const bs2 = 2 * bs1;
     const hsh = (i: number): number => (dat[i] ^ (dat[i + 1] << bs1) ^ (dat[i + 2] << bs2)) & msk;
@@ -515,9 +495,9 @@ const dflt = (dat: Uint8Array, lvl: number, plvl: number, pre: number, post: num
     //  l/lcnt  exbits  index          l/lind  waitdx          blkpos
     let lc2 = 0;
     let eb = 0;
-    let i = st.i || 0;
+    let i = 0;
     let li = 0;
-    let wi = st.w || 0;
+    let wi = wi0;
     let bs = 0;
     for (; i + 2 < s; ++i) {
       // hash value
@@ -532,7 +512,7 @@ const dflt = (dat: Uint8Array, lvl: number, plvl: number, pre: number, post: num
       if (wi <= i) {
         // bytes remaining
         const rem = s - i;
-        if ((lc2 > 7000 || li > 24576) && (rem > 423 || !lst)) {
+        if ((lc2 > 7000 || li > 24576) && rem > 423) {
           pos = wblk(dat, w, 0, syms, lf, df, eb, li, bs, i - bs, pos);
           li = 0;
           lc2 = 0;
@@ -605,30 +585,20 @@ const dflt = (dat: Uint8Array, lvl: number, plvl: number, pre: number, post: num
       syms[li++] = dat[i];
       ++lf[dat[i]];
     }
-    pos = wblk(dat, w, lst, syms, lf, df, eb, li, bs, i - bs, pos);
-    if (!lst) {
-      st.r = (pos & 7) | (w[(pos / 8) | 0] << 3);
-      // shft(pos) now 1 less if pos & 7 != 0
-      pos -= 7;
-      st.h = head;
-      st.p = prev;
-      st.i = i;
-      st.w = wi;
-    }
+    pos = wblk(dat, w, 1, syms, lf, df, eb, li, bs, i - bs, pos);
   } else {
-    for (let i = st.w || 0; i < s + lst; i += 65535) {
+    for (let i = wi0; i < s + 1; i += 65535) {
       // end
       let e = i + 65535;
       if (e >= s) {
         // write final block
-        w[(pos / 8) | 0] = lst;
+        w[(pos / 8) | 0] = 1;
         e = s;
       }
       pos = wfblk(w, pos + 1, dat.subarray(i, e));
     }
-    st.i = s;
   }
-  return slc(o, 0, pre + shft(pos) + post);
+  return slc(w, 0, shft(pos));
 };
 
 // crc check
@@ -722,23 +692,20 @@ export interface AsyncTerminable {
 }
 
 // deflate with opts
-const dopt = (dat: Uint8Array, opt: DeflateOptions, pre: number, post: number, st?: DeflateState): Uint8Array => {
-  if (!st) {
-    st = { l: 1 };
-    if (opt.dictionary) {
-      const dict = opt.dictionary.subarray(-32768);
-      const newDat = new U8(dict.length + dat.length);
-      newDat.set(dict);
-      newDat.set(dat, dict.length);
-      dat = newDat;
-      st.w = dict.length;
-    }
+const dopt = (dat: Uint8Array, opt: DeflateOptions): Uint8Array => {
+  // wait index: dictionary bytes are prepended for matching only, never emitted
+  let wi = 0;
+  if (opt.dictionary) {
+    const dict = opt.dictionary.subarray(-32768);
+    const newDat = new U8(dict.length + dat.length);
+    newDat.set(dict);
+    newDat.set(dat, dict.length);
+    dat = newDat;
+    wi = dict.length;
   }
   // memory level
-  let mem: number;
-  if (opt.mem != null) mem = 12 + opt.mem;
-  else mem = st.l ? Math.ceil(Math.max(8, Math.min(13, Math.log(dat.length))) * 1.5) : 20;
-  return dflt(dat, opt.level == null ? 6 : opt.level, mem, pre, post, st);
+  const mem = opt.mem != null ? 12 + opt.mem : Math.ceil(Math.max(8, Math.min(13, Math.log(dat.length))) * 1.5);
+  return dflt(dat, opt.level == null ? 6 : opt.level, mem, wi);
 };
 
 // Walmart object spread
@@ -911,7 +878,7 @@ function deflate(data: Uint8Array, opts: AsyncDeflateOptions | ZipCallback, cb?:
  * @param opts The compression options
  * @returns The deflated version of the data */
 function deflateSync(data: Uint8Array, opts?: DeflateOptions): Uint8Array {
-  return dopt(data, opts || {}, 0, 0);
+  return dopt(data, opts || {});
 }
 
 /** Attributes for files added to a ZIP archive object */
