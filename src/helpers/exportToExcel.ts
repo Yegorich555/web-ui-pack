@@ -240,7 +240,7 @@ export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>
   const getTableRelationShip = (num: number): string =>
     `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/table" Target="../tables/table${num}.xml"/></Relationships>`;
 
-  // Create a flat file structure for fflate
+  // Create a flat file structure for zip
   const files: Record<string, Uint8Array> = {
     "xl/workbook.xml": strToU8(workbookXML),
     "xl/_rels/workbook.xml.rels": strToU8(workbookXMLRels),
@@ -259,7 +259,7 @@ export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>
 
   const zipped = await new Promise<Uint8Array>((resolve, reject) => {
     zip(files, (err, res) => {
-      if (err) reject(err);
+      if (err || !res) reject(err || new Error("Zip failed"));
       else resolve(res);
     });
   });
