@@ -10,20 +10,19 @@ const wk = <T>(
   id: number,
   msg: unknown,
   transfer: ArrayBuffer[],
-  cb: (err: ZipError, msg: T) => void
+  cb: (err: Error, msg: T) => void
 ): Worker => {
   if (!wkCache[id]) {
-    const code = `${c};addEventListener("error",function(e){e=e.error;postMessage({$e$:[e.message,e.code,e.stack]})})`;
+    const code = `${c};addEventListener("error",function(e){e=e.error;postMessage({$e$:[e.message,e.stack]})})`;
     wkCache[id] = URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
   }
   const w = new Worker(wkCache[id]);
   w.onmessage = (e) => {
     const { data } = e;
-    const ed = data.$e$ as [string, number, string] | undefined;
+    const ed = data.$e$ as [string, string] | undefined;
     if (ed) {
-      const [message, code, stack] = ed;
-      const e2 = new Error(message) as ZipError;
-      e2.code = code;
+      const [message, stack] = ed;
+      const e2 = new Error(message);
       // keep the local stack when the worker error carries none
       if (stack) e2.stack = stack;
       cb(e2, null!);
@@ -173,26 +172,24 @@ const slc = (v: Uint8Array, s: number, e?: number): Uint8Array => {
   return new U8(v.subarray(s, e));
 };
 
-// error codes: keys match fflate's indexes (kept stable for ZipError.code); only reachable ones are listed
-const ec: Record<number, string> = {
-  7: "no callback",
-  9: "extra field too long",
-  10: "date not in range 1980-2099",
-  11: "filename too long",
-};
-
-/** An error generated within this library */
-export interface ZipError extends Error {
-  /** The code associated with this error */
-  code: number;
+/** Error messages of the library */
+const enum ErrMsg {
+  /** When callback isn't pointed */
+  noCallback = "no callback",
+  /** When extra fields are longer than the 2-byte slot in a zip-header */
+  extraTooLong = "extra field too long",
+  /** When file-date is out of the range that a zip-header can store */
+  dateOutOfRange = "date not in range 1980-2099",
+  /** When filename is longer than the 2-byte slot in a zip-header */
+  filenameTooLong = "filename too long",
 }
 
-const err = (ind: number, msg?: string | 0, nt?: 1): ZipError => {
-  const e: Partial<ZipError> = new Error(msg || ec[ind]);
-  e.code = ind;
+/** Throw error with the pointed message; nt: 1 - return error instead of throwing */
+const err = (msg: ErrMsg, nt?: 1): Error => {
+  const e = new Error(msg);
   // probably used on NodeJS side - if (Error.captureStackTrace) Error.captureStackTrace(e, err);
   if (!nt) throw e;
-  return e as ZipError;
+  return e;
 };
 
 // starting at p, write the minimum number of bits that can hold v to d
@@ -675,17 +672,14 @@ export interface DeflateOptions {
 /** Callback for asynchronous (de)compression methods
  * @param err Any error that occurred
  * @param data The resulting data. Only present if `err` is null */
-export type ZipCallback = (err: ZipError | Error | null, data: Uint8Array | null) => void;
+export type ZipCallback = (err: Error | null, data: Uint8Array | null) => void;
 
-// async callback-based compression
-interface AsyncOptions {
+/** Options for compressing data asynchronously into a DEFLATE format */
+export interface AsyncDeflateOptions extends DeflateOptions {
   /** Whether or not to "consume" the source data. This will make the typed array/buffer you pass in
    * unusable but will increase performance and reduce memory usage. */
   consume?: boolean;
 }
-
-/** Options for compressing data asynchronously into a DEFLATE format */
-export interface AsyncDeflateOptions extends DeflateOptions, AsyncOptions {}
 
 /** A terminable compression/decompression process */
 export interface AsyncTerminable {
@@ -775,7 +769,7 @@ const wrkr = <T, R>(
   fns: (() => unknown[])[],
   init: (ev: MessageEvent<T>) => void,
   id: number,
-  cb: (err: ZipError, msg: R) => void
+  cb: (err: Error, msg: R) => void
 ): Worker => {
   if (!ch[id]) {
     let fnStr = "";
@@ -1034,11 +1028,11 @@ const exfl = (ex?: ZHF["extra"]): number => {
   if (ex) {
     Object.values(ex).forEach((v) => {
       const l = v.length;
-      if (l > 65535) err(9);
+      if (l > 65535) err(ErrMsg.extraTooLong);
       le += l + 4;
     });
     // the header's extra-field-length slot is 2 bytes, so the sum must fit too
-    if (le > 65535) err(9);
+    if (le > 65535) err(ErrMsg.extraTooLong);
   }
   return le;
 };
@@ -1072,7 +1066,7 @@ const wzh = (
   d[b++] = f.compression >> 8;
   const dt = new Date(f.mtime == null ? Date.now() : f.mtime);
   const y = dt.getFullYear() - 1980;
-  if (y < 0 || y > 119) err(10);
+  if (y < 0 || y > 119) err(ErrMsg.dateOutOfRange);
   wbytes(
     d,
     b,
@@ -1153,7 +1147,7 @@ export function zip(data: AsyncZippable, opts: AsyncZipOptions | ZipCallback, cb
     cb = opts as ZipCallback;
     opts = {};
   }
-  if (typeof cb !== "function") err(7);
+  if (typeof cb !== "function") err(ErrMsg.noCallback);
   initTables();
   const r: FlatZippable<true> = {};
   fltn(data, "", r, opts as AsyncZipOptions);
@@ -1213,7 +1207,7 @@ export function zip(data: AsyncZippable, opts: AsyncZipOptions | ZipCallback, cb
     const exl = exfl(p.extra);
     const compression = p.level === 0 ? 0 : 8;
     // eslint-disable-next-line no-loop-func -- callback intentionally updates shared counters
-    const cbl = (e: ZipError | Error | null, d: Uint8Array | null): void => {
+    const cbl = (e: Error | null, d: Uint8Array | null): void => {
       if (e) {
         tAll();
         cbd(e, null);
@@ -1235,7 +1229,7 @@ export function zip(data: AsyncZippable, opts: AsyncZipOptions | ZipCallback, cb
     };
     if (s > 65535) {
       // filename too long: report and skip this entry to avoid a 2nd callback + corrupt archive
-      cbl(err(11, 0, 1), null);
+      cbl(err(ErrMsg.filenameTooLong, 1), null);
       continue;
     }
     if (!compression) cbl(null, file);
