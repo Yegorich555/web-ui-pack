@@ -24,7 +24,8 @@ const wk = <T>(
       const [message, code, stack] = ed;
       const e2 = new Error(message) as ZipError;
       e2.code = code;
-      e2.stack = stack;
+      // keep the local stack when the worker error carries none
+      if (stack) e2.stack = stack;
       cb(e2, null!);
     } else cb(null!, data);
   };
@@ -1088,6 +1089,8 @@ const exfl = (ex?: ZHF["extra"]): number => {
       if (l > 65535) err(9);
       le += l + 4;
     });
+    // the header's extra-field-length slot is 2 bytes, so the sum must fit too
+    if (le > 65535) err(9);
   }
   return le;
 };
@@ -1283,7 +1286,11 @@ export function zip(data: AsyncZippable, opts: AsyncZipOptions | ZipCallback, cb
         if (!--lft) cbf();
       }
     };
-    if (s > 65535) cbl(err(11, 0, 1), null);
+    if (s > 65535) {
+      // filename too long: report and skip this entry to avoid a 2nd callback + corrupt archive
+      cbl(err(11, 0, 1), null);
+      continue;
+    }
     if (!compression) cbl(null, file);
     else if (size < 160000) {
       try {
