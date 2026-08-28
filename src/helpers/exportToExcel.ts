@@ -1,4 +1,4 @@
-import zip, { strToU8 } from "./zip";
+import zip from "./zip";
 import { stringPrettify } from "./string";
 import dateToString from "./dateToString";
 import localeInfo from "../objects/localeInfo";
@@ -240,20 +240,20 @@ export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>
   const getTableRelationShip = (num: number): string =>
     `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/table" Target="../tables/table${num}.xml"/></Relationships>`;
 
-  // Create a flat file structure for zip
-  const files: Record<string, Uint8Array> = {
-    "xl/workbook.xml": strToU8(workbookXML),
-    "xl/_rels/workbook.xml.rels": strToU8(workbookXMLRels),
-    "xl/styles.xml": strToU8(styleSheet),
-    "_rels/.rels": strToU8(rels),
-    "[Content_Types].xml": strToU8(contentTypes),
+  // Create a flat file structure for zip: strings are encoded to UTF-8 binary by zip() itself
+  const files: Record<string, string> = {
+    "xl/workbook.xml": workbookXML,
+    "xl/_rels/workbook.xml.rels": workbookXMLRels,
+    "xl/styles.xml": styleSheet,
+    "_rels/.rels": rels,
+    "[Content_Types].xml": contentTypes,
   };
 
   sheets.forEach(({ num, config, hasTable }) => {
-    files[`xl/worksheets/sheet${num}.xml`] = strToU8(getWorkSheet(config.mappedColumns, config.mappedRows, hasTable));
+    files[`xl/worksheets/sheet${num}.xml`] = getWorkSheet(config.mappedColumns, config.mappedRows, hasTable);
     if (hasTable) {
-      files[`xl/tables/table${num}.xml`] = strToU8(getTableTemplate(config.mappedColumns, config.mappedRows, num));
-      files[`xl/worksheets/_rels/sheet${num}.xml.rels`] = strToU8(getTableRelationShip(num));
+      files[`xl/tables/table${num}.xml`] = getTableTemplate(config.mappedColumns, config.mappedRows, num);
+      files[`xl/worksheets/_rels/sheet${num}.xml.rels`] = getTableRelationShip(num);
     }
   });
 

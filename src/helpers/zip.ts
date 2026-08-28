@@ -1,5 +1,5 @@
 /// This is code imported from https://github.com/101arrowz/fflate and refactored to use locally
-/// Only zip() & strToU8() are kept here (with everything they depend on)
+/// Only zip() is kept here (with everything it depends on)
 
 // blob-urls with worker-code: index is workerId
 const wkCache: Record<number, string> = {};
@@ -944,11 +944,15 @@ interface ZipOptions extends DeflateOptions, ZipAttributes {}
 /** Options for asynchronously creating a ZIP archive */
 export interface AsyncZipOptions extends AsyncDeflateOptions, ZipAttributes {}
 
-/** A file that can be used to create a ZIP archive */
-type ZippableFile = Uint8Array | Zippable | [Uint8Array | Zippable, ZipOptions];
+/** A file that can be used to create a ZIP archive; a string is encoded to UTF-8 binary automatically */
+type ZippableFile = Uint8Array | string | Zippable | [Uint8Array | string | Zippable, ZipOptions];
 
-/** A file that can be used to asynchronously create a ZIP archive */
-export type AsyncZippableFile = Uint8Array | AsyncZippable | [Uint8Array | AsyncZippable, AsyncZipOptions];
+/** A file that can be used to asynchronously create a ZIP archive; a string is encoded to UTF-8 binary automatically */
+export type AsyncZippableFile =
+  | Uint8Array
+  | string
+  | AsyncZippable
+  | [Uint8Array | string | AsyncZippable, AsyncZipOptions];
 
 /** The complete directory structure of a ZIPpable archive */
 interface Zippable {
@@ -979,7 +983,8 @@ const fltn = <A extends boolean, D = A extends true ? AsyncZippable : Zippable>(
       op = mrg(o, val[1]);
       [val] = val;
     }
-    if (ArrayBuffer.isView(val)) t[n] = [val, op] as unknown as FlatZippable<A>[string];
+    if (typeof val === "string") t[n] = [strToU8(val), op] as unknown as FlatZippable<A>[string];
+    else if (ArrayBuffer.isView(val)) t[n] = [val, op] as unknown as FlatZippable<A>[string];
     else {
       n += "/";
       t[n] = [new U8(0), op] as unknown as FlatZippable<A>[string];
@@ -991,10 +996,8 @@ const fltn = <A extends boolean, D = A extends true ? AsyncZippable : Zippable>(
 // text encoder (created lazily to avoid work on import)
 let te: TextEncoder | undefined;
 
-/** Converts a string into a Uint8Array for use with compression methods
- * @param str The string to encode
- * @returns The string encoded in UTF-8 binary */
-export function strToU8(str: string): Uint8Array {
+/** Converts a string into a Uint8Array for use with compression methods */
+function strToU8(str: string): Uint8Array {
   te ??= new TextEncoder();
   return te.encode(str);
 }
