@@ -83,7 +83,7 @@ let fdm: Uint16Array;
 
 // create huffman tree from U8 "map": index -> code length for code index
 // mb (max bits) must be at most 15
-const hMap = (cd: Uint8Array, mb: number, r: 0 | 1): Uint16Array => {
+const hMap = (cd: Uint8Array, mb: number): Uint16Array => {
   const s = cd.length;
   // index
   let i = 0;
@@ -98,34 +98,11 @@ const hMap = (cd: Uint8Array, mb: number, r: 0 | 1): Uint16Array => {
   for (i = 1; i < mb; ++i) {
     le[i] = (le[i - 1] + l[i - 1]) << 1;
   }
-  let co: Uint16Array;
-  if (r) {
-    // U16 "map": index -> number of actual bits, symbol for code
-    co = new U16(1 << mb);
-    // bits to remove for reverser
-    const rvb = 15 - mb;
-    for (i = 0; i < s; ++i) {
-      // ignore 0 lengths
-      if (cd[i]) {
-        // num encoding both symbol and bits read
-        const sv = (i << 4) | cd[i];
-        // free bits
-        const r2 = mb - cd[i];
-        // start value
-        let v = le[cd[i] - 1]++ << r2;
-        // m is end value
-        for (const m = v | ((1 << r2) - 1); v <= m; ++v) {
-          // every 16 bit value starting with the code yields the same result
-          co[rev[v] >> rvb] = sv;
-        }
-      }
-    }
-  } else {
-    co = new U16(s);
-    for (i = 0; i < s; ++i) {
-      if (cd[i]) {
-        co[i] = rev[le[cd[i] - 1]++] >> (15 - cd[i]);
-      }
+  // U16 "map": index -> code for code index
+  const co = new U16(s);
+  for (i = 0; i < s; ++i) {
+    if (cd[i]) {
+      co[i] = rev[le[cd[i] - 1]++] >> (15 - cd[i]);
     }
   }
   return co;
@@ -156,8 +133,8 @@ const initTables = (): void => {
   for (let i = 280; i < 288; ++i) flt[i] = 8;
   fdt = new U8(32);
   for (let i = 0; i < 32; ++i) fdt[i] = 5;
-  flm = hMap(flt, 9, 0);
-  fdm = hMap(fdt, 5, 0);
+  flm = hMap(flt, 9);
+  fdm = hMap(fdt, 5);
 };
 
 // get end of byte
@@ -165,12 +142,8 @@ const shft = (p: number): number => ((p + 7) / 8) | 0;
 
 // typed array slice - allows garbage collector to free original reference,
 // while being more compatible than .slice
-const slc = (v: Uint8Array, s: number, e?: number): Uint8Array => {
-  if (s == null || s < 0) s = 0;
-  if (e == null || e > v.length) e = v.length;
-  // can't use .constructor in case user-supplied
-  return new U8(v.subarray(s, e));
-};
+// can't use .constructor in case user-supplied
+const slc = (v: Uint8Array, e: number): Uint8Array => new U8(v.subarray(0, e));
 
 /** Error messages of the library */
 const enum ErrMsg {
@@ -255,10 +228,8 @@ const hTree = (d: Uint16Array, mb: number): { t: Uint8Array; l: number } => {
     r = t[i0 !== i1 && t[i0].f < t[i2].f ? i0++ : i2++];
     t[i1++] = { s: -1, f: l.f + r.f, l, r };
   }
-  let maxSym = t2[0].s;
-  for (let i = 1; i < s; ++i) {
-    if (t2[i].s > maxSym) maxSym = t2[i].s;
-  }
+  // t2 is filled in ascending symbol order, so the last one is the largest
+  const maxSym = t2[s - 1].s;
   // code lengths
   const tr = new U16(maxSym + 1);
   // max bits in tree
@@ -406,11 +377,11 @@ const wblk = (
   wbits(out, p, 1 + ((dtlen < ftlen) as unknown as number));
   p += 2;
   if (dtlen < ftlen) {
-    lm = hMap(dlt, mlb, 0);
+    lm = hMap(dlt, mlb);
     ll = dlt;
-    dm = hMap(ddt, mdb, 0);
+    dm = hMap(ddt, mdb);
     dl = ddt;
-    const llm = hMap(lct, mlcb, 0);
+    const llm = hMap(lct, mlcb);
     wbits(out, p, nlc - 257);
     wbits(out, p + 5, ndc - 1);
     wbits(out, p + 10, nlcc - 4);
@@ -469,135 +440,123 @@ const deo = /* #__PURE__ */ new I32([65540, 131080, 131088, 131104, 262176, 1048
 const et = /* #__PURE__ */ new U8(0);
 
 // compresses data into a raw DEFLATE buffer; wi0 - wait index: end of the prepended dictionary (if any)
+// WARN: lvl must be 1..9 - entries with level 0 are stored by zip() itself and never reach here
 const dflt = (dat: Uint8Array, lvl: number, plvl: number, wi0: number): Uint8Array => {
   const s = dat.length;
   // writing to this writes to the output buffer
   const w = new U8(s + 5 * (1 + Math.ceil(s / 7000)));
   let pos = 0;
-  if (lvl) {
-    const opt = deo[lvl - 1];
-    const n = opt >> 13;
-    const c = opt & 8191;
-    const msk = (1 << plvl) - 1;
-    //    prev 2-byte val map    curr 2-byte val map
-    const prev = new U16(32768);
-    const head = new U16(msk + 1);
-    const bs1 = Math.ceil(plvl / 3);
-    const bs2 = 2 * bs1;
-    const hsh = (i: number): number => (dat[i] ^ (dat[i + 1] << bs1) ^ (dat[i + 2] << bs2)) & msk;
-    // 24576 is an arbitrary number of maximum symbols per block
-    // 424 buffer for last block
-    const syms = new I32(25000);
-    // length/literal freq   distance freq
-    const lf = new U16(288);
-    const df = new U16(32);
-    //  l/lcnt  exbits  index          l/lind  waitdx          blkpos
-    let lc2 = 0;
-    let eb = 0;
-    let i = 0;
-    let li = 0;
-    let wi = wi0;
-    let bs = 0;
-    for (; i + 2 < s; ++i) {
-      // hash value
-      const hv = hsh(i);
-      // index mod 32768    previous index mod
-      let imod = i & 32767;
-      let pimod = head[hv];
-      prev[imod] = pimod;
-      head[hv] = imod;
-      // We always should modify head and prev, but only add symbols if
-      // this data is not yet processed ("wait" for wait index)
-      if (wi <= i) {
-        // bytes remaining
-        const rem = s - i;
-        if ((lc2 > 7000 || li > 24576) && rem > 423) {
-          pos = wblk(dat, w, 0, syms, lf, df, eb, li, bs, i - bs, pos);
-          li = 0;
-          lc2 = 0;
-          eb = 0;
-          bs = i;
-          for (let j = 0; j < 286; ++j) lf[j] = 0;
-          for (let j = 0; j < 30; ++j) df[j] = 0;
-        }
-        //  len    dist   chain
-        let l = 2;
-        let d = 0;
-        let ch = c;
-        let dif = (imod - pimod) & 32767;
-        if (rem > 2 && hv === hsh(i - dif)) {
-          const maxn = Math.min(n, rem) - 1;
-          const maxd = Math.min(32767, i);
-          // max possible length
-          // not capped at dif because decompressors implement "rolling" index population
-          const ml = Math.min(258, rem);
-          while (dif <= maxd && --ch && imod !== pimod) {
-            if (dat[i + l] === dat[i + l - dif]) {
-              let nl = 0;
-              for (; nl < ml && dat[i + nl] === dat[i + nl - dif]; ++nl);
-              if (nl > l) {
-                l = nl;
-                d = dif;
-                // break out early when we reach "nice" (we are satisfied enough)
-                if (nl > maxn) break;
-                // now, find the rarest 2-byte sequence within this
-                // length of literals and search for that instead.
-                // Much faster than just using the start
-                const mmd = Math.min(dif, nl - 2);
-                let md = 0;
-                for (let j = 0; j < mmd; ++j) {
-                  const ti = (i - dif + j) & 32767;
-                  const pti = prev[ti];
-                  const cd = (ti - pti) & 32767;
-                  if (cd > md) {
-                    md = cd;
-                    pimod = ti;
-                  }
+  const opt = deo[lvl - 1];
+  const n = opt >> 13;
+  const c = opt & 8191;
+  const msk = (1 << plvl) - 1;
+  //    prev 2-byte val map    curr 2-byte val map
+  const prev = new U16(32768);
+  const head = new U16(msk + 1);
+  const bs1 = Math.ceil(plvl / 3);
+  const bs2 = 2 * bs1;
+  const hsh = (i: number): number => (dat[i] ^ (dat[i + 1] << bs1) ^ (dat[i + 2] << bs2)) & msk;
+  // 24576 is an arbitrary number of maximum symbols per block
+  // 424 buffer for last block
+  const syms = new I32(25000);
+  // length/literal freq   distance freq
+  const lf = new U16(288);
+  const df = new U16(32);
+  //  l/lcnt  exbits  index          l/lind  waitdx          blkpos
+  let lc2 = 0;
+  let eb = 0;
+  let i = 0;
+  let li = 0;
+  let wi = wi0;
+  let bs = 0;
+  for (; i + 2 < s; ++i) {
+    // hash value
+    const hv = hsh(i);
+    // index mod 32768    previous index mod
+    let imod = i & 32767;
+    let pimod = head[hv];
+    prev[imod] = pimod;
+    head[hv] = imod;
+    // We always should modify head and prev, but only add symbols if
+    // this data is not yet processed ("wait" for wait index)
+    if (wi <= i) {
+      // bytes remaining
+      const rem = s - i;
+      if ((lc2 > 7000 || li > 24576) && rem > 423) {
+        pos = wblk(dat, w, 0, syms, lf, df, eb, li, bs, i - bs, pos);
+        li = 0;
+        lc2 = 0;
+        eb = 0;
+        bs = i;
+        for (let j = 0; j < 286; ++j) lf[j] = 0;
+        for (let j = 0; j < 30; ++j) df[j] = 0;
+      }
+      //  len    dist   chain
+      let l = 2;
+      let d = 0;
+      let ch = c;
+      let dif = (imod - pimod) & 32767;
+      if (rem > 2 && hv === hsh(i - dif)) {
+        const maxn = Math.min(n, rem) - 1;
+        const maxd = Math.min(32767, i);
+        // max possible length
+        // not capped at dif because decompressors implement "rolling" index population
+        const ml = Math.min(258, rem);
+        while (dif <= maxd && --ch && imod !== pimod) {
+          if (dat[i + l] === dat[i + l - dif]) {
+            let nl = 0;
+            for (; nl < ml && dat[i + nl] === dat[i + nl - dif]; ++nl);
+            if (nl > l) {
+              l = nl;
+              d = dif;
+              // break out early when we reach "nice" (we are satisfied enough)
+              if (nl > maxn) break;
+              // now, find the rarest 2-byte sequence within this
+              // length of literals and search for that instead.
+              // Much faster than just using the start
+              const mmd = Math.min(dif, nl - 2);
+              let md = 0;
+              for (let j = 0; j < mmd; ++j) {
+                const ti = (i - dif + j) & 32767;
+                const pti = prev[ti];
+                const cd = (ti - pti) & 32767;
+                if (cd > md) {
+                  md = cd;
+                  pimod = ti;
                 }
               }
             }
-            // check the previous match
-            imod = pimod;
-            pimod = prev[imod];
-            dif += (imod - pimod) & 32767;
           }
-        }
-        // d will be nonzero only when a match was found
-        if (d) {
-          // store both dist and len data in one int32
-          // Make sure this is recognized as a len/dist with 28th bit (2^28)
-          syms[li++] = 268435456 | (revfl[l] << 18) | revfd[d];
-          const lin = revfl[l] & 31;
-          const din = revfd[d] & 31;
-          eb += fleb[lin] + fdeb[din];
-          ++lf[257 + lin];
-          ++df[din];
-          wi = i + l;
-          ++lc2;
-        } else {
-          syms[li++] = dat[i];
-          ++lf[dat[i]];
+          // check the previous match
+          imod = pimod;
+          pimod = prev[imod];
+          dif += (imod - pimod) & 32767;
         }
       }
-    }
-    for (i = Math.max(i, wi); i < s; ++i) {
-      syms[li++] = dat[i];
-      ++lf[dat[i]];
-    }
-    pos = wblk(dat, w, 1, syms, lf, df, eb, li, bs, i - bs, pos);
-  } else {
-    for (let i = wi0; i < s + 1; i += 65535) {
-      // end
-      let e = i + 65535;
-      if (e >= s) {
-        // write final block
-        w[(pos / 8) | 0] = 1;
-        e = s;
+      // d will be nonzero only when a match was found
+      if (d) {
+        // store both dist and len data in one int32
+        // Make sure this is recognized as a len/dist with 28th bit (2^28)
+        syms[li++] = 268435456 | (revfl[l] << 18) | revfd[d];
+        const lin = revfl[l] & 31;
+        const din = revfd[d] & 31;
+        eb += fleb[lin] + fdeb[din];
+        ++lf[257 + lin];
+        ++df[din];
+        wi = i + l;
+        ++lc2;
+      } else {
+        syms[li++] = dat[i];
+        ++lf[dat[i]];
       }
-      pos = wfblk(w, pos + 1, dat.subarray(i, e));
     }
   }
-  return slc(w, 0, shft(pos));
+  for (i = Math.max(i, wi); i < s; ++i) {
+    syms[li++] = dat[i];
+    ++lf[dat[i]];
+  }
+  pos = wblk(dat, w, 1, syms, lf, df, eb, li, bs, i - bs, pos);
+  return slc(w, shft(pos));
 };
 
 // crc check
@@ -716,11 +675,14 @@ const mrg = <A, B>(a: A, b: B): A & B => ({ ...a, ...b } as A & B);
 // The reason we can't just use the original variable names is minifiers mangling the toplevel scope.
 
 // This took me three weeks to figure out how to do.
-const wcln = (fn: () => unknown[], fnStr: string, td: Record<string, unknown>): string => {
+const wcln = (fn: () => unknown[], td: Record<string, unknown>): string => {
+  let fnStr = "";
   const dt = fn();
   const st = fn.toString();
   const ks = st
-    .slice(st.indexOf("[") + 1, st.lastIndexOf("]"))
+    // lastIndexOf: the closure always ends with the array literal, so any bracket a transform (coverage
+    // instrumentation etc.) injects before it is skipped
+    .slice(st.lastIndexOf("[") + 1, st.lastIndexOf("]"))
     .replace(/\s+/g, "")
     .split(",");
   for (let i = 0; i < dt.length; ++i) {
@@ -729,16 +691,10 @@ const wcln = (fn: () => unknown[], fnStr: string, td: Record<string, unknown>): 
     if (typeof v === "function") {
       fnStr += `;${k}=`;
       const str = v.toString();
-      if (v.prototype) {
-        // for global objects
-        if (str.indexOf("[native code]") !== -1) {
-          const spInd = str.indexOf(" ", 8) + 1;
-          fnStr += str.slice(spInd, str.indexOf("(", spInd));
-        } else {
-          fnStr += str;
-          // eslint-disable-next-line no-restricted-syntax, guard-for-in -- inherited members must be cloned also
-          for (const t in v.prototype) fnStr += `;${k}.prototype.${t}=${v.prototype[t].toString()}`;
-        }
+      // for global objects (Uint8Array etc.) only the name is cloned - the worker has its own
+      if (v.prototype && str.indexOf("[native code]") !== -1) {
+        const spInd = str.indexOf(" ", 8) + 1;
+        fnStr += str.slice(spInd, str.indexOf("(", spInd));
       } else fnStr += str;
     } else td[k] = v;
   }
@@ -753,30 +709,24 @@ type CachedWorker = {
 };
 
 const ch: CachedWorker[] = [];
-// clone bufs
-const cbfs = (v: Record<string, unknown>): ArrayBuffer[] => {
-  const tl: ArrayBuffer[] = [];
-  Object.keys(v).forEach((k) => {
-    if ((v[k] as Uint8Array).buffer) {
-      tl.push((v[k] = new ((v[k] as Uint8Array).constructor as typeof U8)(v[k] as Uint8Array)).buffer);
-    }
+// clone bufs: every value of `v` is a typed array (see bDflt)
+const cbfs = (v: Record<string, unknown>): ArrayBuffer[] =>
+  Object.keys(v).map((k) => {
+    const a = v[k] as Uint8Array;
+    v[k] = new (a.constructor as typeof U8)(a);
+    return (v[k] as Uint8Array).buffer;
   });
-  return tl;
-};
 
 // use a worker to execute code
 const wrkr = <T, R>(
-  fns: (() => unknown[])[],
+  fn: () => unknown[],
   init: (ev: MessageEvent<T>) => void,
   id: number,
   cb: (err: Error, msg: R) => void
 ): Worker => {
   if (!ch[id]) {
-    let fnStr = "";
     const td: Record<string, unknown> = {};
-    const m = fns.length - 1;
-    for (let i = 0; i < m; ++i) fnStr = wcln(fns[i], fnStr, td);
-    ch[id] = { c: wcln(fns[m], fnStr, td), e: td };
+    ch[id] = { c: wcln(fn, td), e: td };
   }
   const td = mrg({}, ch[id].e);
   return wk(
@@ -848,16 +798,16 @@ type DeflatePool = {
  * is cloned into a worker once instead of once per file */
 const dfltPool = (): DeflatePool => {
   let ws: PoolWorker[] = [];
-  let dead = false;
   return {
+    // WARN: run() is never called after free(): free() happens only when an entry fails and zip() stops
+    // the loop at once, or when the caller terminates - and then there is nothing left to run
     run: (dat, opts, cb) => {
-      if (dead) return;
       // least busy worker; a new one is spawned until the pool is full
       let pw = ws.reduce((a, b) => (b.q.length < a.q.length ? b : a), ws[0]);
       if ((!pw || pw.q.length) && ws.length < wkMax) {
         const q: ZipCallback[] = [];
         const w = wrkr<[Uint8Array, AsyncDeflateOptions], Uint8Array>(
-          [bDflt],
+          bDflt,
           (ev) => pbf(deflateSync(ev.data[0], ev.data[1])),
           0,
           (werr, wdat) => q.shift()!(werr, wdat)
@@ -869,7 +819,6 @@ const dfltPool = (): DeflatePool => {
       pw.w.postMessage([dat, opts], opts.consume ? [dat.buffer as ArrayBuffer] : []);
     },
     free: () => {
-      dead = true;
       ws.forEach((v) => v.w.terminate());
       ws = [];
     },
@@ -888,8 +837,8 @@ const wbytes = (d: Uint8Array, b: number, v: number): void => {
  * @param data The data to compress
  * @param opts The compression options
  * @returns The deflated version of the data */
-function deflateSync(data: Uint8Array, opts?: DeflateOptions): Uint8Array {
-  return dopt(data, opts || {});
+function deflateSync(data: Uint8Array, opts: DeflateOptions): Uint8Array {
+  return dopt(data, opts);
 }
 
 /** Attributes for files added to a ZIP archive object */
@@ -1063,7 +1012,7 @@ const wzh = (
   }
   d[b] = 20;
   b += 2; // spec compliance? what's that?
-  d[b++] = (f.flag! << 1) | (c < 0 ? 8 : 0);
+  d[b++] = f.flag! << 1;
   d[b++] = u ? 8 : 0;
   d[b++] = f.compression & 255;
   d[b++] = f.compression >> 8;
@@ -1081,11 +1030,9 @@ const wzh = (
       (dt.getSeconds() >> 1)
   );
   b += 4;
-  if (c !== -1) {
-    wbytes(d, b, f.crc);
-    wbytes(d, b + 4, c < 0 ? -c - 2 : c);
-    wbytes(d, b + 8, f.size);
-  }
+  wbytes(d, b, f.crc);
+  wbytes(d, b + 4, c);
+  wbytes(d, b + 8, f.size);
   wbytes(d, b + 12, fl);
   wbytes(d, b + 14, exl);
   b += 16;
@@ -1174,6 +1121,15 @@ export default function zip(
   mt(() => {
     cbd = cb;
   });
+  // once an entry fails the callback is called exactly once: further entries can fail too (and workers can
+  // still report), but the result is already reported
+  let dead = false;
+  const fail = (e: Error): void => {
+    if (dead) return;
+    dead = true;
+    tAll();
+    cbd(e, null);
+  };
   const cbf = (): void => {
     const out = new U8(tot + 22);
     const oe = o;
@@ -1191,7 +1147,7 @@ export default function zip(
         o += 16 + badd + (f.m ? f.m.length : 0);
         tot = loc + l;
       } catch (e) {
-        cbd(e as Error, null);
+        fail(e as Error);
         return;
       }
     }
@@ -1201,6 +1157,7 @@ export default function zip(
   if (!lft) cbf();
   // Cannot use lft because it can decrease
   for (let i = 0; i < slft; ++i) {
+    if (dead) break; // a previous entry failed synchronously: no reason to compress the rest
     const fn = k[i];
     const [file, p] = r[fn];
     const c = crc();
@@ -1216,9 +1173,8 @@ export default function zip(
     // eslint-disable-next-line no-loop-func -- callback intentionally updates shared counters
     const cbl = (e: Error | null, d: Uint8Array | null): void => {
       if (e) {
-        tAll();
-        cbd(e, null);
-      } else {
+        fail(e);
+      } else if (!dead) {
         const l = d!.length;
         files[i] = mrg(p, {
           size,
@@ -1235,9 +1191,9 @@ export default function zip(
       }
     };
     if (s > 65535) {
-      // filename too long: report and skip this entry to avoid a 2nd callback + corrupt archive
+      // filename too long: report and stop, otherwise the archive would be corrupted
       cbl(err(ErrMsg.filenameTooLong, 1), null);
-      continue;
+      break;
     }
     if (!compression) cbl(null, file);
     else if (wkSupported && size >= wkMinSize) pool.run(file, p, cbl);

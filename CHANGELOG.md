@@ -2,6 +2,14 @@
 
 # Changelog
 
+## 1.2.8 (___)
+
+### New Features
+
+- helper [zip](src/helpers/zip.ts)
+
+---
+
 ## 1.2.7 (Aug 25, 2026)
 
 ### Fixes & Improvements
