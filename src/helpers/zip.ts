@@ -69,20 +69,18 @@ const freb = (eb: Uint8Array, start: number): { b: Uint16Array; r: Int32Array } 
   return { b, r };
 };
 
-const { r: revfl } = freb(fleb, 2);
-// we can ignore the fact that the other numbers are wrong; they never happen anyway
-revfl[258] = 28;
-const { r: revfd } = freb(fdeb, 0);
-
+// lookup tables: ~200KB and ~66k iterations, so built on demand by initTables() instead of on import
+// reverse index maps for length & distance extra bits
+let revfl: Int32Array;
+let revfd: Int32Array;
 // map of value to reverse (assuming 16 bits)
-const rev = new U16(32768);
-for (let i = 0; i < 32768; ++i) {
-  // reverse table algorithm from SO
-  let x = ((i & 0xaaaa) >> 1) | ((i & 0x5555) << 1);
-  x = ((x & 0xcccc) >> 2) | ((x & 0x3333) << 2);
-  x = ((x & 0xf0f0) >> 4) | ((x & 0x0f0f) << 4);
-  rev[i] = (((x & 0xff00) >> 8) | ((x & 0x00ff) << 8)) >> 1;
-}
+let rev: Uint16Array;
+// fixed length tree & map
+let flt: Uint8Array;
+let flm: Uint16Array;
+// fixed distance tree & map
+let fdt: Uint8Array;
+let fdm: Uint16Array;
 
 // create huffman tree from U8 "map": index -> code length for code index
 // mb (max bits) must be at most 15
@@ -134,19 +132,34 @@ const hMap = (cd: Uint8Array, mb: number, r: 0 | 1): Uint16Array => {
   return co;
 };
 
-// fixed length tree
-const flt = new U8(288);
-for (let i = 0; i < 144; ++i) flt[i] = 8;
-for (let i = 144; i < 256; ++i) flt[i] = 9;
-for (let i = 256; i < 280; ++i) flt[i] = 7;
-for (let i = 280; i < 288; ++i) flt[i] = 8;
-// fixed distance tree
-const fdt = new U8(32);
-for (let i = 0; i < 32; ++i) fdt[i] = 5;
-// fixed length map
-const flm = /* #__PURE__ */ hMap(flt, 9, 0);
-// fixed distance map
-const fdm = /* #__PURE__ */ hMap(fdt, 5, 0);
+/** Builds the lookup tables above; called by the public entry points before any compression happens.
+ * Must NOT be called from code cloned into a worker - there the tables arrive as globals instead */
+const initTables = (): void => {
+  if (rev) return;
+  revfl = freb(fleb, 2).r;
+  // we can ignore the fact that the other numbers are wrong; they never happen anyway
+  revfl[258] = 28;
+  revfd = freb(fdeb, 0).r;
+
+  rev = new U16(32768);
+  for (let i = 0; i < 32768; ++i) {
+    // reverse table algorithm from SO
+    let x = ((i & 0xaaaa) >> 1) | ((i & 0x5555) << 1);
+    x = ((x & 0xcccc) >> 2) | ((x & 0x3333) << 2);
+    x = ((x & 0xf0f0) >> 4) | ((x & 0x0f0f) << 4);
+    rev[i] = (((x & 0xff00) >> 8) | ((x & 0x00ff) << 8)) >> 1;
+  }
+
+  flt = new U8(288);
+  for (let i = 0; i < 144; ++i) flt[i] = 8;
+  for (let i = 144; i < 256; ++i) flt[i] = 9;
+  for (let i = 256; i < 280; ++i) flt[i] = 7;
+  for (let i = 280; i < 288; ++i) flt[i] = 8;
+  fdt = new U8(32);
+  for (let i = 0; i < 32; ++i) fdt[i] = 5;
+  flm = hMap(flt, 9, 0);
+  fdm = hMap(fdt, 5, 0);
+};
 
 // get end of byte
 const shft = (p: number): number => ((p + 7) / 8) | 0;
@@ -859,6 +872,7 @@ function deflate(data: Uint8Array, opts: AsyncDeflateOptions | ZipCallback, cb?:
     opts = {};
   }
   if (typeof cb !== "function") err(7);
+  initTables();
   return cbify(data, opts as AsyncDeflateOptions, [bDflt], (ev) => pbf(deflateSync(ev.data[0], ev.data[1])), 0, cb);
 }
 
@@ -1126,6 +1140,7 @@ export function zip(data: AsyncZippable, opts: AsyncZipOptions | ZipCallback, cb
     opts = {};
   }
   if (typeof cb !== "function") err(7);
+  initTables();
   const r: FlatZippable<true> = {};
   fltn(data, "", r, opts as AsyncZipOptions);
   const k = Object.keys(r);
