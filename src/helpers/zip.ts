@@ -829,22 +829,56 @@ const bDflt = (): unknown[] => [
 // post buf
 const pbf = (msg: Uint8Array): void => (postMessage as Worker["postMessage"])(msg, [msg.buffer]);
 
-// async helper
-const cbify = <T extends AsyncOptions>(
-  dat: Uint8Array,
-  opts: T,
-  fns: (() => unknown[])[],
-  init: (ev: MessageEvent<[Uint8Array, T]>) => void,
-  id: number,
-  cb: ZipCallback
-): AsyncTerminable => {
-  const w = wrkr<[Uint8Array, T], Uint8Array>(fns, init, id, (werr, wdat) => {
-    w.terminate();
-    cb(werr, wdat);
-  });
-  w.postMessage([dat, opts], opts.consume ? [dat.buffer as ArrayBuffer] : []);
-  return () => {
-    w.terminate();
+// max count of deflate-workers running in parallel
+const wkMax = 4;
+// entries smaller than this are deflated inline: the worker round-trip costs more than the work itself
+const wkMinSize = 16384;
+// workers are supported only in browsers (missing in jsdom/NodeJS)
+const wkSupported = typeof Worker !== "undefined" && typeof Blob !== "undefined" && typeof URL !== "undefined";
+
+type PoolWorker = {
+  // worker
+  w: Worker;
+  // callbacks waiting for a result in post-order (worker answers messages one by one)
+  q: ZipCallback[];
+};
+
+type DeflatePool = {
+  /** deflate data in a background worker */
+  run: (dat: Uint8Array, opts: AsyncDeflateOptions, cb: ZipCallback) => void;
+  /** terminate every worker of the pool */
+  free: () => void;
+};
+
+/** Pool of deflate-workers shared by all files of a single zip() call: the ~200KB of lookup tables
+ * is cloned into a worker once instead of once per file */
+const dfltPool = (): DeflatePool => {
+  let ws: PoolWorker[] = [];
+  let dead = false;
+  return {
+    run: (dat, opts, cb) => {
+      if (dead) return;
+      // least busy worker; a new one is spawned until the pool is full
+      let pw = ws.reduce((a, b) => (b.q.length < a.q.length ? b : a), ws[0]);
+      if ((!pw || pw.q.length) && ws.length < wkMax) {
+        const q: ZipCallback[] = [];
+        const w = wrkr<[Uint8Array, AsyncDeflateOptions], Uint8Array>(
+          [bDflt],
+          (ev) => pbf(deflateSync(ev.data[0], ev.data[1])),
+          0,
+          (werr, wdat) => q.shift()!(werr, wdat)
+        );
+        pw = { w, q };
+        ws.push(pw);
+      }
+      pw.q.push(cb);
+      pw.w.postMessage([dat, opts], opts.consume ? [dat.buffer as ArrayBuffer] : []);
+    },
+    free: () => {
+      dead = true;
+      ws.forEach((v) => v.w.terminate());
+      ws = [];
+    },
   };
 };
 
@@ -855,26 +889,6 @@ const wbytes = (d: Uint8Array, b: number, v: number): void => {
     v >>>= 8;
   }
 };
-
-/** Asynchronously compresses data with DEFLATE without any wrapper
- * @param data The data to compress
- * @param opts The compression options
- * @param cb The function to be called upon compression completion
- * @returns A function that can be used to immediately terminate the compression */
-function deflate(data: Uint8Array, opts: AsyncDeflateOptions, cb: ZipCallback): AsyncTerminable;
-/** Asynchronously compresses data with DEFLATE without any wrapper
- * @param data The data to compress
- * @param cb The function to be called upon compression completion */
-function deflate(data: Uint8Array, cb: ZipCallback): AsyncTerminable;
-function deflate(data: Uint8Array, opts: AsyncDeflateOptions | ZipCallback, cb?: ZipCallback): AsyncTerminable {
-  if (!cb) {
-    cb = opts as ZipCallback;
-    opts = {};
-  }
-  if (typeof cb !== "function") err(7);
-  initTables();
-  return cbify(data, opts as AsyncDeflateOptions, [bDflt], (ev) => pbf(deflateSync(ev.data[0], ev.data[1])), 0, cb);
-}
 
 /** Compresses data with DEFLATE without any wrapper
  * @param data The data to compress
@@ -1149,10 +1163,8 @@ export function zip(data: AsyncZippable, opts: AsyncZipOptions | ZipCallback, cb
   let tot = 0;
   const slft = lft;
   const files = new Array<AsyncZipDat>(lft);
-  const term: AsyncTerminable[] = [];
-  const tAll = (): void => {
-    for (let i = 0; i < term.length; ++i) term[i]();
-  };
+  const pool = dfltPool();
+  const tAll: AsyncTerminable = () => pool.free();
   let cbd: ZipCallback = (a, b) => {
     mt(() => {
       cb(a, b);
@@ -1227,13 +1239,14 @@ export function zip(data: AsyncZippable, opts: AsyncZipOptions | ZipCallback, cb
       continue;
     }
     if (!compression) cbl(null, file);
-    else if (size < 160000) {
+    else if (wkSupported && size >= wkMinSize) pool.run(file, p, cbl);
+    else {
       try {
         cbl(null, deflateSync(file, p));
       } catch (e) {
         cbl(e as Error, null);
       }
-    } else term.push(deflate(file, p, cbl));
+    }
   }
   return tAll;
 }
