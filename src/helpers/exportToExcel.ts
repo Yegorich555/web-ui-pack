@@ -58,10 +58,10 @@ export interface IExcelSheet<T = any> {
 /** Font with the options that are required by the file-format (so it's always ready to be rendered) */
 type IExcelFontFull = IExcelFont & Required<Pick<IExcelFont, "size" | "family">>;
 
-/** Rendered xml-parts of a sheet: the data is never stored cell-by-cell, only the ready-to-use strings */
+/** Rendered xml-parts of a sheet: the data is never stored cell-by-cell, only the ready-to-use content */
 interface ISheetParts {
-  /** Content of `<sheetData>`: the header-row + every data-row */
-  sheetDataXml: string;
+  /** Content of `<sheetData>` (the header-row + every data-row) already encoded into UTF-8 chunks */
+  rows: IUtf8Writer;
   /** Content of `<cols>`: the resolved width of every column */
   colsXml: string;
   /** Header texts of the columns: required by the table-part */
@@ -116,6 +116,73 @@ const escapeChar = (m: string): string => escapeMap[m as keyof typeof escapeMap]
 
 /** Escapes the chars that aren't allowed in the xml-content; called for every single cell, so it's a hot path */
 const escape = (str: string): string => (escapeTestRE.test(str) ? str.replace(escapeRE, escapeChar) : str);
+
+// created lazily: some environments (jsdom in the tests) get the global only after this module is imported
+let textEncoder: TextEncoder | undefined;
+
+/** Encodes the string into the UTF-8 bytes that the archive is built from */
+function encodeUtf8(str: string): Uint8Array {
+  textEncoder ??= new TextEncoder();
+  return textEncoder.encode(str);
+}
+
+/** Size of the pending string that triggers the encoding; a bigger one saves a few `encode()` calls but keeps
+ * a bigger temporary string alive - and the whole point of the writer is to never grow such a string */
+const chunkChars = 64 * 1024;
+
+/** Collector of a big xml: the pieces are encoded chunk by chunk, so the document never exists as a single huge
+ * JS string. `encode()` of a 30MB string first flattens it (a full copy of the text) and only then allocates the
+ * bytes - here the temporary string never exceeds {@link chunkChars} & only the final buffer is allocated at once */
+interface IUtf8Writer {
+  /** Appends a complete piece of the xml (never a half of it - see the note in {@link createUtf8Writer}) */
+  add(str: string): void;
+  /** Encodes the rest & joins everything into a single buffer wrapped by the pointed xml-parts.
+   * WARN: it can be called only once - the collected chunks are released while they are being copied */
+  toBytes(prefix: string, suffix: string): Uint8Array;
+}
+
+const emptyBytes = new Uint8Array(0);
+
+function createUtf8Writer(): IUtf8Writer {
+  const chunks: Array<Uint8Array> = [];
+  let total = 0;
+  let pending = "";
+
+  /** WARN: the whole `pending` is encoded at once, so a chunk always ends on an `add()` boundary - splitting it
+   * by a fixed length instead could cut a surrogate pair in half & turn an emoji into a pair of `U+FFFD` */
+  const flush = (): void => {
+    if (!pending) return;
+    const bytes = encodeUtf8(pending);
+    chunks.push(bytes);
+    total += bytes.length;
+    pending = "";
+  };
+
+  return {
+    add(str: string): void {
+      pending += str;
+      if (pending.length >= chunkChars) flush();
+    },
+    toBytes(prefix: string, suffix: string): Uint8Array {
+      flush();
+      const pre = prefix ? encodeUtf8(prefix) : emptyBytes;
+      const post = suffix ? encodeUtf8(suffix) : emptyBytes;
+      const result = new Uint8Array(pre.length + total + post.length);
+      result.set(pre, 0);
+      let offset = pre.length;
+      for (let i = 0; i < chunks.length; ++i) {
+        const chunk = chunks[i];
+        result.set(chunk, offset);
+        offset += chunk.length;
+        chunks[i] = emptyBytes; // let the chunk be collected while the rest is still being copied
+      }
+      result.set(post, offset);
+      chunks.length = 0;
+      total = 0;
+      return result;
+    },
+  };
+}
 
 /** Line-separator inside a cell (array values are joined by it) */
 const newLineCode = 10;
@@ -370,8 +437,8 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   }
 
   const { data } = sheet;
-  // a single growing string instead of an array of the rows: V8 appends to it in O(1) & flattens it only once
-  let sheetDataXml = `<row r="1">${headerCells}</row>`;
+  const rows = createUtf8Writer();
+  rows.add(`<row r="1">${headerCells}</row>`);
 
   for (let r = 0; r < data.length; ++r) {
     const item = data[r];
@@ -395,7 +462,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
         value
       )}</t></is></c>`;
     }
-    sheetDataXml += `<row r="${rowNum}">${cells}</row>`;
+    rows.add(`<row r="${rowNum}">${cells}</row>`);
   }
 
   let colsXml = "";
@@ -408,7 +475,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     colsXml += `<col min="${c + 1}" max="${c + 1}" width="${w}" bestFit="1" customWidth="1"/>`;
   }
 
-  return { sheetDataXml, colsXml, headers, lastLetter: letters[colCount - 1], rowsCount: data.length };
+  return { rows, colsXml, headers, lastLetter: letters[colCount - 1], rowsCount: data.length };
 }
 
 /* --------------------------------- Xml generation ----------------------------------- */
@@ -466,11 +533,13 @@ function getContentTypesXml(sheets: Array<IExportSheet>): string {
   return `${contentTypesHead}${items}${contentTypesTail}`;
 }
 
-/** `xl/worksheets/sheet{num}.xml`: the widths of the columns + the header-row & the data-rows */
-function getWorkSheetXml({ parts, hasTable }: IExportSheet): string {
-  return (
-    `${worksheetHead}<cols>${parts.colsXml}</cols><sheetData>${parts.sheetDataXml}</sheetData>` +
-    `${hasTable ? `<tableParts count="1"><tablePart r:id="rId1"/></tableParts>` : ""}</worksheet>`
+/** `xl/worksheets/sheet{num}.xml`: the widths of the columns + the header-row & the data-rows.
+ * The rows are already encoded, so the head & the tail are only wrapped around them - the biggest file of the
+ * document is never built as a string. `<cols>` has to go first, that's why the widths are resolved before it */
+function getWorkSheetBytes({ parts, hasTable }: IExportSheet): Uint8Array {
+  return parts.rows.toBytes(
+    `${worksheetHead}<cols>${parts.colsXml}</cols><sheetData>`,
+    `</sheetData>${hasTable ? `<tableParts count="1"><tablePart r:id="rId1"/></tableParts>` : ""}</worksheet>`
   );
 }
 
@@ -525,26 +594,25 @@ export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>
 
   // Flat file structure for zip(). It accepts the UTF-8 bytes as-is, so every part is encoded right here instead
   // of inside zip(): that way an xml-string becomes garbage as soon as it's converted & the whole document never
-  // exists as strings and as bytes at the same time (that's a ~2x peak on a big sheet)
-  const encoder = new TextEncoder();
+  // exists as strings and as bytes at the same time. The small parts are tiny enough to be built as a string
   const files: Record<string, Uint8Array> = {
-    "xl/workbook.xml": encoder.encode(getWorkbookXml(sheets)),
-    "xl/_rels/workbook.xml.rels": encoder.encode(getWorkbookRelsXml(sheets)),
-    "_rels/.rels": encoder.encode(relsXml),
-    "[Content_Types].xml": encoder.encode(getContentTypesXml(sheets)),
+    "xl/workbook.xml": encodeUtf8(getWorkbookXml(sheets)),
+    "xl/_rels/workbook.xml.rels": encodeUtf8(getWorkbookRelsXml(sheets)),
+    "_rels/.rels": encodeUtf8(relsXml),
+    "[Content_Types].xml": encodeUtf8(getContentTypesXml(sheets)),
   };
 
   sheets.forEach((s) => {
-    files[`xl/worksheets/sheet${s.num}.xml`] = encoder.encode(getWorkSheetXml(s));
+    files[`xl/worksheets/sheet${s.num}.xml`] = getWorkSheetBytes(s);
     if (s.hasTable) {
-      files[`xl/tables/table${s.num}.xml`] = encoder.encode(getTableXml(s));
-      files[`xl/worksheets/_rels/sheet${s.num}.xml.rels`] = encoder.encode(getTableRelsXml(s.num));
+      files[`xl/tables/table${s.num}.xml`] = encodeUtf8(getTableXml(s));
+      files[`xl/worksheets/_rels/sheet${s.num}.xml.rels`] = encodeUtf8(getTableRelsXml(s.num));
     }
     // the rendered xml is the biggest allocation of the export: drop it as soon as it's encoded
     s.parts = null!;
   });
   // styles are collected during the generation above, so the file is added at the very end
-  files["xl/styles.xml"] = encoder.encode(ctx.styles.toXml());
+  files["xl/styles.xml"] = encodeUtf8(ctx.styles.toXml());
 
   const zipped = await new Promise<Uint8Array>((resolve, reject) => {
     zip(files, (err, res) => {

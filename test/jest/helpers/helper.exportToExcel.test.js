@@ -161,6 +161,30 @@ describe("helper.exportToExcel", () => {
     expect(files["xl/tables/table1.xml"]).toContain(`ref="A1:AB2"`);
   });
 
+  test("big sheet: the rows are encoded chunk by chunk", async () => {
+    // the writer flushes every 64Kb, so the xml below is joined from several chunks - this checks that they are
+    // encoded & copied back in the right order. The values are packed with multi-byte chars (a cyrillic one &
+    // an emoji, that is a surrogate pair) so that the chunk boundaries fall inside such a text all the time
+    const data = [];
+    for (let i = 0; i < 3000; ++i) data.push({ v: `${i}-\u0424-${"\u{1F642}".repeat(30)}-${"x".repeat(i % 40)}` });
+    await exportToExcel([{ name: "Big", data, mapping: [{ propName: "v" }] }]);
+
+    const xml = files["xl/worksheets/sheet1.xml"];
+    expect(xml.length).toBeGreaterThan(200000); // otherwise a single chunk is enough & nothing is really checked
+
+    // the whole <sheetData> must be exactly the same as if it was built as a single string
+    let expected = "";
+    data.forEach((item, i) => {
+      expected += `<row r="${i + 2}"><c r="A${i + 2}" t="inlineStr"><is><t>${item.v}</t></is></c></row>`;
+    });
+    const body = xml.slice(xml.indexOf("</row>") + "</row>".length, xml.indexOf("</sheetData>"));
+    expect(body).toBe(expected);
+    // a surrogate pair cut in half would be decoded into it (flush() always encodes whole add()-ed pieces)
+    expect(xml).not.toContain("\uFFFD");
+    expect(xml.endsWith("</worksheet>")).toBe(true);
+    expect(files["xl/tables/table1.xml"]).toContain(`ref="A1:A3001"`);
+  });
+
   test("fonts: per-sheet, per-column & dedup of the styles", async () => {
     // an explicitly undefined option is skipped by the merge (so the inherited one wins)
     const font = { size: 14, family: "Arial", color: "#00ff00", backgroundColor: "#ff0000", style: undefined };
