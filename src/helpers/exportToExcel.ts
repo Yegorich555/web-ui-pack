@@ -3,10 +3,15 @@ import { stringPrettify } from "./string";
 import dateToString from "./dateToString";
 import localeInfo from "../objects/localeInfo";
 
-/** Main concepts: max performance and min memory consumption on excel sheet generation
- * If IExcelSheet doesn't contain .font or mapping[i].headerFont defined by user then we must apply font and styles globally for the whole excel file based on exportToExcel.$defaults.font
+/** Main concepts: max performance and min memory consumption on excel sheet generation.
  *
- */
+ * The module is split by the lifetime of the parts:
+ * - pure helpers & static xml-parts are defined on the module-level: allocated once instead of on every export;
+ * - {@link createStyles} is the only stateful collector: Excel stores every font/fill once & a cell refers to it;
+ * - {@link renderSheet} is a single pass over the data: a value is measured & rendered at once, so nothing
+ *   per-cell is kept in memory (see the comment there);
+ * - {@link exportToExcel} is an orchestrator: builds the per-export {@link IExportContext} & zips the result. */
+
 export interface IExcelFont {
   /** Size of the font in points
    * @defaultValue 11 */
@@ -53,15 +58,46 @@ export interface IExcelSheet<T = any> {
 /** Font with the options that are required by the file-format (so it's always ready to be rendered) */
 type IExcelFontFull = IExcelFont & Required<Pick<IExcelFont, "size" | "family">>;
 
-interface IExcelCell {
-  value: string;
-  style: string;
+/** Rendered xml-parts of a sheet: the data is never stored cell-by-cell, only the ready-to-use strings */
+interface ISheetParts {
+  /** Content of `<sheetData>`: the header-row + every data-row */
+  sheetDataXml: string;
+  /** Content of `<cols>`: the resolved width of every column */
+  colsXml: string;
+  /** Header texts of the columns: required by the table-part */
+  headers: Array<string>;
+  /** Excel-name of the last column: required by the table-ref */
+  lastLetter: string;
+  /** Count of the data-rows (without the header-row) */
+  rowsCount: number;
 }
 
-interface IExportConfig {
-  mappedColumns: Array<IExcelCell & { width: number }>;
-  mappedRows: Array<Array<IExcelCell>>;
+/** Sheet ready to be rendered into the file-parts */
+interface IExportSheet {
+  /** Number of the sheet: Excel enumerates the files & the ids from 1 */
+  num: number;
+  /** Escaped name of the excel-tab */
+  name: string;
+  parts: ISheetParts;
+  /** An empty table (a header row without data) is treated by Excel as a broken content, so it's skipped at all */
+  hasTable: boolean;
 }
+
+/** Options that are the same for every sheet of the export: created once per {@link exportToExcel} call */
+interface IExportContext {
+  /** Collector of the document styles */
+  styles: IStyles;
+  /** Font of the document: {@link exportToExcel.$defaults.font} merged into the format-required base */
+  font: IExcelFontFull;
+  /** Font of the header-row: {@link exportToExcel.$defaults.fontHeader} */
+  fontHeader: IExcelFont | undefined;
+  /** Width in px of a single Excel-unit of the column width */
+  unitPx: number;
+  /** @see {@link exportToExcel.$defaults.getCellValue} */
+  getCellValue: <T>(headerKey: IExcelColumnMap<T>, v: T[keyof T]) => string;
+}
+
+/* ---------------------------------- Shared helpers ---------------------------------- */
 
 const escapeMap = {
   "&": "&amp;",
@@ -72,11 +108,18 @@ const escapeMap = {
   "`": "&#96;",
 };
 
-const escape = (str: string): string => str.replace(/[&<>"'`]/g, (m) => escapeMap[m as keyof typeof escapeMap]);
+const escapeRE = /[&<>"'`]/g;
+/** Non-global twin of {@link escapeRE} - `test()` takes the fast regexp-path, while `replace()` with a callback
+ * takes the generic one even if nothing matches. Almost no cell needs escaping, so the pre-check is ~3x cheaper */
+const escapeTestRE = /[&<>"'`]/;
+const escapeChar = (m: string): string => escapeMap[m as keyof typeof escapeMap];
+
+/** Escapes the chars that aren't allowed in the xml-content; called for every single cell, so it's a hot path */
+const escape = (str: string): string => (escapeTestRE.test(str) ? str.replace(escapeRE, escapeChar) : str);
 
 /** Line-separator inside a cell (array values are joined by it) */
-const newLine = String.fromCharCode(10);
 const newLineCode = 10;
+const newLine = String.fromCharCode(newLineCode);
 
 /** `BCKPRXbdehnopqu` & non-latin (cyrillic etc.) chars are 8px wide */
 const defaultCharPx = 8;
@@ -100,6 +143,8 @@ const autoWidth = {
    * itself (TextRenderer.MeasureText of a char repeated 100 times / 100):
    * Excel renders a cell text via GDI, where every glyph advance is rounded to a whole pixel - so summing
    * fractional font-metrics instead under-estimates a long text by ~7% and cuts it off.
+   * It's built eagerly on purpose: 128 bytes + ~65µs once on the import, against a lazy-init check that would
+   * land on the hottest loop of the whole export (getTextPx runs it per char of every cell).
    * WARN: re-measure these values if {@link exportToExcel.$defaults.font} is changed */
   charPx: ((): Uint8Array => {
     const groups: Array<[number, string]> = [
@@ -125,8 +170,9 @@ const autoWidth = {
   getScale(font: IExcelFontFull): number {
     return (font.size / autoWidth.basePt) * (font.style === "bold" ? autoWidth.boldRatio : 1);
   },
-  /** Width in px of the longest line of the text */
+  /** Width in px of the longest line of the text; called for every single cell, so it's a hot path */
   getTextPx(text: string): number {
+    const { charPx } = autoWidth; // a local is cheaper than a property-load on every char
     let max = 0;
     let line = 0;
     for (let i = 0; i < text.length; ++i) {
@@ -134,24 +180,9 @@ const autoWidth = {
       if (code === newLineCode) {
         if (line > max) max = line;
         line = 0;
-      } else line += code < 128 ? autoWidth.charPx[code] : defaultCharPx;
+      } else line += code < 128 ? charPx[code] : defaultCharPx;
     }
     return line > max ? line : max;
-  },
-  /** Width in px of the widest content of the column (a header & rows are scaled by their own fonts) */
-  getColumnPx(
-    rows: IExportConfig["mappedRows"],
-    i: number,
-    headerText: string,
-    rowScale: number,
-    headerScale: number
-  ): number {
-    let max = autoWidth.getTextPx(headerText) * headerScale + autoWidth.filterButtonPx;
-    for (let r = 0; r < rows.length; ++r) {
-      const px = autoWidth.getTextPx(rows[r][i].value) * rowScale;
-      if (px > max) max = px;
-    }
-    return max + autoWidth.cellPaddingPx;
   },
   /** Converts px into Excel-units (rounded to 1/100 to keep the xml small) */
   toUnits(px: number, unitPx: number): number {
@@ -194,12 +225,21 @@ function mergeFont(base: IExcelFontFull, ...fonts: Array<IExcelFont | undefined>
   return result;
 }
 
-/** Static parts of the document: defined once to avoid re-allocating on every export */
-const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
+/** Excel-name of the column by its index: `A`, `B`, ... `Z`, `AA`, `AB` etc. */
+function getColumnLetter(colIndex: number): string {
+  let name = "";
+  for (let i = colIndex; i >= 0; i = Math.floor(i / 26) - 1) {
+    name = String.fromCharCode(65 + (i % 26)) + name;
+  }
+  return name;
+}
 
-const styleSheetHead = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac">`;
+/** Text of the header-cell: an explicit one or prettified propName */
+function getHeaderText(header: IExcelColumnMap): string {
+  return header.headerText !== undefined ? header.headerText : stringPrettify(header.propName as string);
+}
 
-const styleSheetTail = `<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles><dxfs count="0"/><tableStyles defaultTableStyle="TableStyleMedium2" defaultPivotStyle="PivotStyleLight16"/><extLst><ext uri="{EB79DEF2-80B8-43e5-95BD-54CBDDF9020C}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:slicerStyles defaultSlicerStyle="SlicerStyleLight1"/></ext><ext uri="{9260A510-F301-46a8-8635-F512D64BE5F5}" xmlns:x15="http://schemas.microsoft.com/office/spreadsheetml/2010/11/main"><x15:timelineStyles defaultTimelineStyle="TimeSlicerStyleLight1"/></ext></extLst></styleSheet>`;
+/* ------------------------------------- Styles --------------------------------------- */
 
 /** Storage of unique xml-parts of `styles.xml` */
 interface IStylesCollection {
@@ -217,37 +257,42 @@ interface IStyles {
   toXml(): string;
 }
 
+const styleSheetHead = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac">`;
+
+const styleSheetTail = `<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles><dxfs count="0"/><tableStyles defaultTableStyle="TableStyleMedium2" defaultPivotStyle="PivotStyleLight16"/><extLst><ext uri="{EB79DEF2-80B8-43e5-95BD-54CBDDF9020C}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:slicerStyles defaultSlicerStyle="SlicerStyleLight1"/></ext><ext uri="{9260A510-F301-46a8-8635-F512D64BE5F5}" xmlns:x15="http://schemas.microsoft.com/office/spreadsheetml/2010/11/main"><x15:timelineStyles defaultTimelineStyle="TimeSlicerStyleLight1"/></ext></extLst></styleSheet>`;
+
+/** Creates a storage of the unique xml-parts; `startIndex` is the 1st index that a custom part can take */
+function createStylesCollection(startIndex = 0): IStylesCollection {
+  const items: Array<string> = [];
+  const indexes = new Map<string, number>();
+  return {
+    items,
+    indexOf(xml: string): number {
+      let i = indexes.get(xml);
+      if (i === undefined) {
+        i = items.length + startIndex;
+        indexes.set(xml, i);
+        items.push(xml);
+      }
+      return i;
+    },
+  };
+}
+
+function getFontXml(f: IExcelFontFull): string {
+  const color = toARGB(f.color);
+  return (
+    `<font>${f.style ? fontStyleXml[f.style] : ""}<sz val="${f.size}"/>` +
+    `${color ? `<color rgb="${color}"/>` : ""}<name val="${escape(f.family)}"/><family val="2"/></font>`
+  );
+}
+
 /** Collector of the document styles: Excel stores every font/fill/cell-format once & a cell refers to it by index */
 function createStyles(defaultFont: IExcelFontFull): IStyles {
-  const collection = (startIndex = 0): IStylesCollection => {
-    const items: Array<string> = [];
-    const indexes = new Map<string, number>();
-    return {
-      items,
-      indexOf(xml: string): number {
-        let i = indexes.get(xml);
-        if (i === undefined) {
-          i = items.length + startIndex;
-          indexes.set(xml, i);
-          items.push(xml);
-        }
-        return i;
-      },
-    };
-  };
-
-  const fonts = collection();
+  const fonts = createStylesCollection();
   /** Excel reserves the first 2 fills for itself (`none` & `gray125`), so a custom one starts from the index 2 */
-  const fills = collection(2);
-  const cellXfs = collection();
-
-  const getFontXml = (f: IExcelFontFull): string => {
-    const color = toARGB(f.color);
-    return (
-      `<font>${f.style ? fontStyleXml[f.style] : ""}<sz val="${f.size}"/>` +
-      `${color ? `<color rgb="${color}"/>` : ""}<name val="${escape(f.family)}"/><family val="2"/></font>`
-    );
-  };
+  const fills = createStylesCollection(2);
+  const cellXfs = createStylesCollection();
 
   const styles: IStyles = {
     getCellStyle(font: IExcelFontFull, isWrapText: boolean): string {
@@ -283,184 +328,223 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
   return styles;
 }
 
+/* ----------------------------------- Sheet render ----------------------------------- */
+
+/** Maps the data of the sheet & renders it into the xml-parts.
+ *
+ * A single pass over the data: a cell value is measured for the auto-width & appended to the xml at once, so
+ * nothing is stored per cell. Keeping the mapped values instead (as `Array<Array<{value, style}>>`) costs an array
+ * per row + an object & a retained string per cell and forces 2 extra passes over the whole dataset. */
+function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
+  const { styles, getCellValue } = ctx;
+  const columns = sheet.mapping;
+  const colCount = columns.length;
+  const font = mergeFont(ctx.font, sheet.font);
+  // a font is the same for every cell of the sheet, so the styles are defined once & re-used by all the rows
+  const cellStyle = styles.getCellStyle(font, false);
+  const cellStyleWrap = styles.getCellStyle(font, true);
+  const rowScale = autoWidth.getScale(font);
+  // the same for the header-row: a column re-merges it only if it has an own font
+  const sheetHeaderFont = mergeFont(font, ctx.fontHeader);
+
+  /** Excel-names of the columns: `A`, `B`, ... `AA`; cached because every single cell refers to it */
+  const letters: Array<string> = [];
+  const headers: Array<string> = [];
+  /** Widest content of the column in px; `-1` marks a column with an explicit width (nothing to measure) */
+  const maxPx = new Float64Array(colCount);
+  let headerCells = "";
+
+  for (let c = 0; c < colCount; ++c) {
+    const h = columns[c];
+    const text = getHeaderText(h);
+    const headerFont = h.headerFont ? mergeFont(sheetHeaderFont, h.headerFont) : sheetHeaderFont;
+    const letter = getColumnLetter(c);
+    letters.push(letter);
+    headers.push(text);
+    maxPx[c] =
+      h.width !== undefined
+        ? -1
+        : autoWidth.getTextPx(text) * autoWidth.getScale(headerFont) + autoWidth.filterButtonPx;
+    const style = styles.getCellStyle(headerFont, false);
+    headerCells += `<c r="${letter}1" ${style}t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
+  }
+
+  const { data } = sheet;
+  // a single growing string instead of an array of the rows: V8 appends to it in O(1) & flattens it only once
+  let sheetDataXml = `<row r="1">${headerCells}</row>`;
+
+  for (let r = 0; r < data.length; ++r) {
+    const item = data[r];
+    // +1 to make it 1-based as Excel enumerates the rows & +1 for the header-row; stringified once per row
+    const rowNum = `${r + 2}`;
+    let cells = "";
+    for (let c = 0; c < colCount; ++c) {
+      const h = columns[c];
+      const v = getCellValue(h, item[h.propName]);
+      // an array is joined by the new-line, so such a cell must be wrapped
+      const isArray = Array.isArray(v);
+      let value = "";
+      if (isArray) value = v.join(newLine);
+      else if (v != null) value = v.toString();
+      const px = maxPx[c];
+      if (px >= 0) {
+        const w = autoWidth.getTextPx(value) * rowScale;
+        if (w > px) maxPx[c] = w;
+      }
+      cells += `<c r="${letters[c]}${rowNum}" ${isArray ? cellStyleWrap : cellStyle}t="inlineStr"><is><t>${escape(
+        value
+      )}</t></is></c>`;
+    }
+    sheetDataXml += `<row r="${rowNum}">${cells}</row>`;
+  }
+
+  let colsXml = "";
+  for (let c = 0; c < colCount; ++c) {
+    const { width, maxWidth } = columns[c];
+    // an explicit width wins; otherwise it's defined by the longest content measured above
+    const w =
+      width ??
+      Math.min(autoWidth.toUnits(maxPx[c] + autoWidth.cellPaddingPx, ctx.unitPx), maxWidth ?? Number.MAX_SAFE_INTEGER);
+    colsXml += `<col min="${c + 1}" max="${c + 1}" width="${w}" bestFit="1" customWidth="1"/>`;
+  }
+
+  return { sheetDataXml, colsXml, headers, lastLetter: letters[colCount - 1], rowsCount: data.length };
+}
+
+/* --------------------------------- Xml generation ----------------------------------- */
+
+const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
+
+const workbookHead = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mx="http://schemas.microsoft.com/office/mac/excel/2008/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main"><workbookPr/><sheets>`;
+
+const workbookRelsHead = `<?xml version="1.0" ?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`;
+
+const workbookRelsTail = `<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+
+const contentTypesHead = `<?xml version="1.0" ?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default ContentType="application/xml" Extension="xml"/><Default ContentType="application/vnd.openxmlformats-package.relationships+xml" Extension="rels"/>`;
+
+const contentTypesTail = `<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" PartName="/xl/workbook.xml"/><Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml" PartName="/xl/styles.xml"/></Types>`;
+
+const worksheetHead = `<?xml version="1.0" ?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:mx="http://schemas.microsoft.com/office/mac/excel/2008/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">`;
+
+/** `xl/workbook.xml`: the list of the tabs of the document */
+function getWorkbookXml(sheets: Array<IExportSheet>): string {
+  let items = "";
+  for (let i = 0; i < sheets.length; ++i) {
+    const s = sheets[i];
+    items += `<sheet state="visible" name="${s.name}" sheetId="${s.num}" r:id="rId${s.num + 2}"/>`;
+  }
+  return `${workbookHead}${items}</sheets><definedNames/><calcPr/></workbook>`;
+}
+
+/** `xl/_rels/workbook.xml.rels`: links from the workbook to the sheet-files & to the styles */
+function getWorkbookRelsXml(sheets: Array<IExportSheet>): string {
+  let items = "";
+  for (let i = 0; i < sheets.length; ++i) {
+    const { num } = sheets[i];
+    items +=
+      `<Relationship Id="rId${num + 2}" Target="worksheets/sheet${num}.xml" ` +
+      `Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"/>`;
+  }
+  return `${workbookRelsHead}${items}${workbookRelsTail}`;
+}
+
+/** `[Content_Types].xml`: the mime-type of every file inside the archive */
+function getContentTypesXml(sheets: Array<IExportSheet>): string {
+  let items = "";
+  for (let i = 0; i < sheets.length; ++i) {
+    const { num, hasTable } = sheets[i];
+    items +=
+      `<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" ` +
+      `PartName="/xl/worksheets/sheet${num}.xml"/>`;
+    if (hasTable) {
+      items +=
+        `<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml" ` +
+        `PartName="/xl/tables/table${num}.xml"/>`;
+    }
+  }
+  return `${contentTypesHead}${items}${contentTypesTail}`;
+}
+
+/** `xl/worksheets/sheet{num}.xml`: the widths of the columns + the header-row & the data-rows */
+function getWorkSheetXml({ parts, hasTable }: IExportSheet): string {
+  return (
+    `${worksheetHead}<cols>${parts.colsXml}</cols><sheetData>${parts.sheetDataXml}</sheetData>` +
+    `${hasTable ? `<tableParts count="1"><tablePart r:id="rId1"/></tableParts>` : ""}</worksheet>`
+  );
+}
+
+/** `xl/tables/table{num}.xml`: the table over the data - it provides the autoFilter & the row-striping */
+function getTableXml({ num, parts }: IExportSheet): string {
+  const { headers } = parts;
+  const ref = `A1:${parts.lastLetter}${parts.rowsCount + 1}`;
+
+  let cols = "";
+  for (let i = 0; i < headers.length; ++i) {
+    cols += `<tableColumn id="${i + 1}" name="${escape(headers[i])}"/>`;
+  }
+
+  return (
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ` +
+    `id="${num}" name="Table${num}" displayName="Table${num}" ref="${ref}" insertRow="1" totalsRowShown="0">` +
+    `<autoFilter ref="${ref}"/><tableColumns count="${headers.length}">${cols}</tableColumns>` +
+    `<tableStyleInfo name="TableStyleLight16" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>`
+  );
+}
+
+/** `xl/worksheets/_rels/sheet{num}.xml.rels`: the link from the sheet to its table-file */
+function getTableRelsXml(num: number): string {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/table" Target="../tables/table${num}.xml"/></Relationships>`;
+}
+
+/* ----------------------------------- Orchestrator ----------------------------------- */
+
 /** Export pointed data into excel-file according to provided mapping */
 export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>): Promise<Blob> {
-  const { getCellValue, font: defFont, fontHeader: defFontHeader } = exportToExcel.$defaults;
-  const defaultFont = mergeFont(baseFont, defFont);
-  const styles = createStyles(defaultFont);
-  /** Width in px of a single Excel-unit of the column width */
-  const unitPx = autoWidth.maxDigitPx * (defaultFont.size / autoWidth.basePt);
-
-  const getHeaderText = (header: IExcelColumnMap): string => {
-    if (header.headerText !== undefined) {
-      return header.headerText as string;
-    }
-
-    return stringPrettify(header.propName as string);
+  const { getCellValue, font, fontHeader } = exportToExcel.$defaults;
+  const documentFont = mergeFont(baseFont, font);
+  const ctx: IExportContext = {
+    styles: createStyles(documentFont),
+    font: documentFont,
+    fontHeader,
+    getCellValue,
+    unitPx: autoWidth.maxDigitPx * (documentFont.size / autoWidth.basePt),
   };
 
-  const getSheetConfig = (sheet: IExcelSheet): IExportConfig => {
-    const headerKeys = sheet.mapping;
-    const font = mergeFont(defaultFont, sheet.font);
-    // a font is the same for every cell of the sheet, so the styles are defined once & re-used by all the rows
-    const cellStyle = styles.getCellStyle(font, false);
-    const cellStyleWrap = styles.getCellStyle(font, true);
-    const rowScale = autoWidth.getScale(font);
-    // the same for the header-row: a column re-merges it only if it has an own font
-    const sheetHeaderFont = mergeFont(font, defFontHeader);
-
-    // a single pass over the data: a value & a style of the cell are defined at once
-    const mappedRows: IExportConfig["mappedRows"] = sheet.data.map((item) =>
-      headerKeys.map((h) => {
-        const v = getCellValue(h, item[h.propName]);
-        // an array is joined by the new-line, so such a cell must be wrapped
-        if (Array.isArray(v)) return { value: v.join(newLine), style: cellStyleWrap };
-        return { value: v == null ? "" : v.toString(), style: cellStyle };
-      })
-    );
-
-    const mappedColumns: IExportConfig["mappedColumns"] = headerKeys.map((h, i) => {
-      const value = getHeaderText(h);
-      const headerFont = h.headerFont ? mergeFont(sheetHeaderFont, h.headerFont) : sheetHeaderFont;
-      const { width, maxWidth } = h;
-      return {
-        value,
-        style: styles.getCellStyle(headerFont, false),
-        // an explicit width wins & skips scanning of the rows; otherwise it's defined by the longest content
-        width:
-          width ??
-          Math.min(
-            autoWidth.toUnits(
-              autoWidth.getColumnPx(mappedRows, i, value, rowScale, autoWidth.getScale(headerFont)),
-              unitPx
-            ),
-            maxWidth ?? Number.MAX_SAFE_INTEGER
-          ),
-      };
-    });
-
-    return { mappedColumns, mappedRows };
-  };
-
-  const generateColumnLetter = (colIndex: number): string => {
-    const prefix = Math.floor(colIndex / 26);
-    const letter = String.fromCharCode(97 + (colIndex % 26)).toUpperCase();
-    if (prefix === 0) {
-      return letter;
-    }
-    return generateColumnLetter(prefix - 1) + letter;
-  };
-
-  const sheets = sheetsData.map((sheet, i) => {
+  const sheets: Array<IExportSheet> = sheetsData.map((sheet, i) => {
     const num = i + 1;
-    const config = getSheetConfig(sheet);
+    const parts = renderSheet(sheet, ctx);
     return {
       num,
-      config,
+      parts,
       /** Excel doesn't allow []:*?/\ in a tab name and cuts it by 31 chars */
       name: escape((sheet.name || `Sheet${num}`).replace(/[[\]:*?/\\]/g, " ").substring(0, 31)),
-      // an empty table (a header row without data) is treated by Excel as a broken content, so skip it at all
-      hasTable: config.mappedRows.length > 0,
+      hasTable: parts.rowsCount > 0,
     };
   });
 
-  const formatRow = (row: Array<IExcelCell>, index: number): string => {
-    // To ensure the row number starts as in excel.
-    const rowIndex = index + 1;
-    let rowCells = "";
-    for (let i = 0; i < row.length; ++i) {
-      const cell = row[i];
-      rowCells += `<c r="${generateColumnLetter(i)}${rowIndex}" ${cell.style}t="inlineStr"><is><t>${escape(
-        cell.value
-      )}</t></is></c>`;
+  // Flat file structure for zip(). It accepts the UTF-8 bytes as-is, so every part is encoded right here instead
+  // of inside zip(): that way an xml-string becomes garbage as soon as it's converted & the whole document never
+  // exists as strings and as bytes at the same time (that's a ~2x peak on a big sheet)
+  const encoder = new TextEncoder();
+  const files: Record<string, Uint8Array> = {
+    "xl/workbook.xml": encoder.encode(getWorkbookXml(sheets)),
+    "xl/_rels/workbook.xml.rels": encoder.encode(getWorkbookRelsXml(sheets)),
+    "_rels/.rels": encoder.encode(relsXml),
+    "[Content_Types].xml": encoder.encode(getContentTypesXml(sheets)),
+  };
+
+  sheets.forEach((s) => {
+    files[`xl/worksheets/sheet${s.num}.xml`] = encoder.encode(getWorkSheetXml(s));
+    if (s.hasTable) {
+      files[`xl/tables/table${s.num}.xml`] = encoder.encode(getTableXml(s));
+      files[`xl/worksheets/_rels/sheet${s.num}.xml.rels`] = encoder.encode(getTableRelsXml(s.num));
     }
-    return `<row r="${rowIndex}">${rowCells}</row>`;
-  };
-
-  const workbookXML =
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mx="http://schemas.microsoft.com/office/mac/excel/2008/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main"><workbookPr/><sheets>` +
-    `${sheets
-      .map((s) => `<sheet state="visible" name="${s.name}" sheetId="${s.num}" r:id="rId${s.num + 2}"/>`)
-      .join("")}</sheets><definedNames/><calcPr/></workbook>`;
-
-  const workbookXMLRels =
-    `<?xml version="1.0" ?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
-    `${sheets
-      .map(
-        (s) =>
-          `<Relationship Id="rId${s.num + 2}" Target="worksheets/sheet${
-            s.num
-          }.xml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"/>`
-      )
-      .join(
-        ""
-      )}<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
-
-  const contentTypes =
-    `<?xml version="1.0" ?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default ContentType="application/xml" Extension="xml"/><Default ContentType="application/vnd.openxmlformats-package.relationships+xml" Extension="rels"/>` +
-    `${sheets
-      .map(
-        (s) =>
-          `<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" PartName="/xl/worksheets/sheet${
-            s.num
-          }.xml"/>${
-            s.hasTable
-              ? `<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml" PartName="/xl/tables/table${s.num}.xml"/>`
-              : ""
-          }`
-      )
-      .join(
-        ""
-      )}<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" PartName="/xl/workbook.xml"/><Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml" PartName="/xl/styles.xml"/></Types>`;
-
-  const getWorkSheet = (
-    columns: IExportConfig["mappedColumns"],
-    rows: IExportConfig["mappedRows"],
-    hasTable: boolean
-  ): string =>
-    `<?xml version="1.0" ?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:mx="http://schemas.microsoft.com/office/mac/excel/2008/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main"><cols>` +
-    `${columns
-      .map((col, i) => `<col min="${i + 1}" max="${i + 1}" width="${col.width}" bestFit="1" customWidth="1"/>`)
-      .join("")}</cols><sheetData>${
-      formatRow(columns, 0) + rows.map((row, index) => formatRow(row, index + 1)).join("")
-    }</sheetData>${hasTable ? `<tableParts count="1"><tablePart r:id="rId1"/></tableParts>` : ""}</worksheet>`;
-
-  const getTableTemplate = (
-    columns: IExportConfig["mappedColumns"],
-    rows: IExportConfig["mappedRows"],
-    num: number
-  ): string => {
-    const lastNum = generateColumnLetter(columns.length - 1) + (rows.length + 1);
-    return (
-      `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="${num}" name="Table${num}" displayName="Table${num}" ref="A1:${lastNum}" insertRow="1" totalsRowShown="0"><autoFilter ref="A1:${lastNum}"/><tableColumns count="${columns.length}">` +
-      `${columns
-        .map((item, i) => `<tableColumn id="${i + 1}" name="${escape(item.value)}"/>`)
-        .join(
-          ""
-        )}</tableColumns><tableStyleInfo name="TableStyleLight16" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>`
-    );
-  };
-
-  const getTableRelationShip = (num: number): string =>
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/table" Target="../tables/table${num}.xml"/></Relationships>`;
-
-  // Create a flat file structure for zip: strings are encoded to UTF-8 binary by zip() itself
-  const files: Record<string, string> = {
-    "xl/workbook.xml": workbookXML,
-    "xl/_rels/workbook.xml.rels": workbookXMLRels,
-    "_rels/.rels": rels,
-    "[Content_Types].xml": contentTypes,
-  };
-
-  sheets.forEach(({ num, config, hasTable }) => {
-    files[`xl/worksheets/sheet${num}.xml`] = getWorkSheet(config.mappedColumns, config.mappedRows, hasTable);
-    if (hasTable) {
-      files[`xl/tables/table${num}.xml`] = getTableTemplate(config.mappedColumns, config.mappedRows, num);
-      files[`xl/worksheets/_rels/sheet${num}.xml.rels`] = getTableRelationShip(num);
-    }
+    // the rendered xml is the biggest allocation of the export: drop it as soon as it's encoded
+    s.parts = null!;
   });
   // styles are collected during the generation above, so the file is added at the very end
-  files["xl/styles.xml"] = styles.toXml();
+  files["xl/styles.xml"] = encoder.encode(ctx.styles.toXml());
 
   const zipped = await new Promise<Uint8Array>((resolve, reject) => {
     zip(files, (err, res) => {
@@ -469,7 +553,9 @@ export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>
     });
   });
 
-  return new Blob([new Uint8Array(zipped)], {
+  // `zipped` is passed as-is: wrapping it into a new Uint8Array would copy the whole file one more time.
+  // The cast is only about the lib-typing (`Uint8Array<ArrayBufferLike>`): zip() never returns a SharedArrayBuffer
+  return new Blob([zipped as BlobPart], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 }
@@ -479,13 +565,17 @@ exportToExcel.$defaults = {
   getCellValue: function getCellValue<T>(headerKey: IExcelColumnMap<T>, v: T[keyof T]): string {
     if (v == null) return "";
     if (v instanceof Date) return dateToString(v, localeInfo.dateTime);
-    if (typeof v === "boolean") return v ? "true" : "false";
-    if (typeof v === "number") return v.toString();
+    const t = typeof v;
+    if (t === "string") return v as string;
+    if (t === "boolean") return v ? "true" : "false";
+    if (t === "number") return v.toString();
     return v as string;
   },
+
   /** Font of every cell of the document; a missed option is replaced with `{ size: 11, family: "Calibri" }`
    * @see {@link IExcelSheet.font} to override it per sheet */
   font: { size: 11, family: "Calibri" } as IExcelFont,
+
   /** Font of the header-row; missed options are inherited from {@link exportToExcel.$defaults.font}
    * @see {@link IExcelColumnMap.headerFont} to override it per column */
   fontHeader: { style: "bold" } as IExcelFont,

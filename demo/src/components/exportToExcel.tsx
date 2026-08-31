@@ -217,7 +217,7 @@ export default function ExportToExcelView() {
       header="exportToExcel"
       link="src/helpers/exportToExcel.ts"
       features={[
-        "Creates a valid *.xlsx (OpenXML) document without heavy dependencies (only fflate for zipping)",
+        "Creates a valid *.xlsx (OpenXML) document without any heavy dependencies",
         "Several sheets (tabs) per document; every sheet has own columns mapping",
         "Auto-detects column width, applies autoFilter & table styling",
         "Custom font per sheet & per header-column: size, family, style, color, backgroundColor",

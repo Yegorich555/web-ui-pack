@@ -1,12 +1,13 @@
-import { TextEncoder } from "util";
+import { TextEncoder, TextDecoder } from "util";
 import exportToExcel from "web-ui-pack/helpers/exportToExcel";
 import zip from "web-ui-pack/helpers/zip";
 
 // zip() is mocked: it returns the prepared files as-is, so every xml is checked directly & without unzipping
 jest.mock("web-ui-pack/helpers/zip");
 
-// jsdom (jest 29) has no TextEncoder but the real zip() requires it
+// jsdom (jest 29) has neither of them, but exportToExcel & the real zip() require them
 global.TextEncoder ??= TextEncoder;
+global.TextDecoder ??= TextDecoder;
 
 const blobType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
@@ -18,7 +19,12 @@ describe("helper.exportToExcel", () => {
     jest.restoreAllMocks(); // Date.now is faked by the last test
     files = {};
     zip.mockImplementation((f, cb) => {
-      files = f;
+      // exportToExcel hands over the UTF-8 bytes (zip() takes them as-is): decode back to assert on the xml
+      const decoder = new TextDecoder();
+      files = {};
+      Object.keys(f).forEach((k) => {
+        files[k] = decoder.decode(f[k]);
+      });
       cb(null, new Uint8Array([1, 2, 3]));
     });
   });
