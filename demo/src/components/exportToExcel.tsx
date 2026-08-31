@@ -83,10 +83,10 @@ const users: IUser[] = [
 
 const userColumns: IExcelSheet<IUser>["mapping"] = [
   { propName: "name" },
-  { propName: "email", text: "E-mail" },
+  { propName: "email", headerText: "E-mail" },
   { propName: "age" },
-  { propName: "isActive", text: "Active" },
-  { propName: "registeredAt", text: "Registered at" },
+  { propName: "isActive", headerText: "Active" },
+  { propName: "registeredAt", headerText: "Registered at" },
   { propName: "roles" },
   { propName: "notes", maxWidth: 30 },
 ];
@@ -104,7 +104,7 @@ const departments: IDepartment[] = [
 ];
 
 const departmentColumns: IExcelSheet<IDepartment>["mapping"] = [
-  { propName: "title", text: "Department" },
+  { propName: "title", headerText: "Department" },
   { propName: "headCount" },
   { propName: "budget", maxWidth: 20 },
 ];
@@ -243,7 +243,7 @@ export default function ExportToExcelView() {
             <thead>
               <tr>
                 {userColumns.map((c) => (
-                  <th key={c.propName as string}>{c.text ?? stringPrettify(c.propName as string)}</th>
+                  <th key={c.propName as string}>{c.headerText ?? stringPrettify(c.propName as string)}</th>
                 ))}
               </tr>
             </thead>
