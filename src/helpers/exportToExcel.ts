@@ -46,16 +46,7 @@ const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationsh
 
 const styleSheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"><fonts><font></font></fonts><fills><fill></fill></fills><borders><border></border></borders><cellStyleXfs><xf/></cellStyleXfs><cellXfs><xf><alignment vertical="top"/></xf><xf><alignment wrapText="1" vertical="top"/></xf></cellXfs><cellStyles><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles><dxfs/><tableStyles defaultTableStyle="TableStyleMedium2" defaultPivotStyle="PivotStyleLight16"/><extLst><ext uri="{EB79DEF2-80B8-43e5-95BD-54CBDDF9020C}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:slicerStyles defaultSlicerStyle="SlicerStyleLight1"/></ext><ext uri="{9260A510-F301-46a8-8635-F512D64BE5F5}" xmlns:x15="http://schemas.microsoft.com/office/spreadsheetml/2010/11/main"><x15:timelineStyles defaultTimelineStyle="TimeSlicerStyleLight1"/></ext></extLst></styleSheet>`;
 
-function getCellValue<T>(_headerKey: IExcelColumnMap<T>, v: T[keyof T]): string {
-  if (v == null) return "";
-  // Not used anymore if (headerKey.type === "email") return <a href={`mailto:${value}`}>{value}</a>;
-  if (v instanceof Date) return dateToString(v, localeInfo.dateTime);
-  if (typeof v === "boolean") return v ? "true" : "false";
-  if (typeof v === "number") return v.toString();
-  return v as string;
-}
-
-export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>>): Promise<Blob> {
+export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>): Promise<Blob> {
   const newLine = String.fromCharCode(10);
   const styles = {
     default: 's="0" ',
@@ -100,7 +91,7 @@ export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>
 
   /** Width by the longest content of the column (+1 char as a gap before the column border) */
   const getAutoWidth = (rows: IExportConfig["mappedRows"], i: number, headerText: string): number =>
-    Math.max(arrayMax(rows.map((row) => getCellLength(row[i]))), headerText.length + 4) + 1;
+    Math.max(arrayMax(rows.map((row) => getCellLength(row[i]))), headerText.length + 4) + 1; // todo probably it's wrong since cell length depends on chars and font. Maybe in excel exists autoWidth?
 
   const getSheetConfig = (sheet: IExcelSheet): IExportConfig => {
     const headerKeys = sheet.mapping;
@@ -109,7 +100,7 @@ export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>
       columns: headerKeys.map((h) => getHeaderText(h)),
       mappedRows: [],
       mappedColumns: [],
-      rows: sheet.data.map((item) => headerKeys.map((h) => getCellValue(h, item[h.propName]))),
+      rows: sheet.data.map((item) => headerKeys.map((h) => exportToExcel.$defaults.getCellValue(h, item[h.propName]))),
     };
 
     config.mappedRows = config.rows.map((row) =>
@@ -259,3 +250,14 @@ export default async function createExcelDoc<T>(sheetsData: Array<IExcelSheet<T>
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 }
+
+exportToExcel.$defaults = {
+  /** Returns string value for cell based on value type */
+  getCellValue: function getCellValue<T>(headerKey: IExcelColumnMap<T>, v: T[keyof T]): string {
+    if (v == null) return "";
+    if (v instanceof Date) return dateToString(v, localeInfo.dateTime);
+    if (typeof v === "boolean") return v ? "true" : "false";
+    if (typeof v === "number") return v.toString();
+    return v as string;
+  },
+};
