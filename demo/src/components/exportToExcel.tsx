@@ -1,8 +1,8 @@
 import { useState } from "react";
 import Page from "src/elements/page";
 import Code from "src/elements/code";
-import createExcelDoc, { IExcelSheet } from "web-ui-pack/helpers/exportToExcel";
-import { stringPrettify } from "web-ui-pack/helpers/string";
+import exportToExcel, { IExcelSheet } from "web-ui-pack/helpers/exportToExcel";
+import { stringPrettify } from "web-ui-pack/indexHelpers";
 import styles from "./exportToExcel.scss";
 
 /** Saves Blob into file via hidden <a download> */
@@ -81,7 +81,7 @@ const users: IUser[] = [
   },
 ];
 
-const userColumns: IExcelSheet<IUser>["columns"] = [
+const userColumns: IExcelSheet<IUser>["mapping"] = [
   { propName: "name" },
   { propName: "email", text: "E-mail" },
   { propName: "age" },
@@ -103,7 +103,7 @@ const departments: IDepartment[] = [
   { title: "Support", headCount: 13, budget: 210000 },
 ];
 
-const departmentColumns: IExcelSheet<IDepartment>["columns"] = [
+const departmentColumns: IExcelSheet<IDepartment>["mapping"] = [
   { propName: "title", text: "Department" },
   { propName: "headCount" },
   { propName: "budget", maxWidth: 20 },
@@ -131,15 +131,15 @@ const examples: IExample[] = [
     label: "Single sheet",
     fileName: "users.xlsx",
     details: "Prepared data below: strings, numbers, boolean, Date, string[], null & escaped symbols",
-    getSheets: () => [{ data: users, columns: userColumns, sheetName: "Users" }],
+    getSheets: () => [{ data: users, mapping: userColumns, sheetName: "Users" }],
   },
   {
     label: "Several sheets",
     fileName: "users-and-departments.xlsx",
     details: "Every item of the array is a separate Excel tab (with its own columns mapping)",
     getSheets: () => [
-      { data: users, columns: userColumns, sheetName: "Users" },
-      { data: departments, columns: departmentColumns, sheetName: "Departments" },
+      { data: users, mapping: userColumns, sheetName: "Users" },
+      { data: departments, mapping: departmentColumns, sheetName: "Departments" },
     ],
   },
   {
@@ -147,21 +147,21 @@ const examples: IExample[] = [
     fileName: "default-names.xlsx",
     details: "Tabs are named Sheet1, Sheet2... Forbidden chars []:*?/\\ are replaced & name is cut by 31 chars",
     getSheets: () => [
-      { data: departments, columns: departmentColumns },
-      { data: departments, columns: departmentColumns, sheetName: "Bad[name]:with*forbidden?chars/and\\too long" },
+      { data: departments, mapping: departmentColumns },
+      { data: departments, mapping: departmentColumns, sheetName: "Bad[name]:with*forbidden?chars/and\\too long" },
     ],
   },
   {
     label: "Empty data",
     fileName: "empty.xlsx",
     details: "Only header-row is exported: Excel treats an empty table as a broken content, so table-part is skipped",
-    getSheets: () => [{ data: [], columns: userColumns, sheetName: "No rows" }],
+    getSheets: () => [{ data: [], mapping: userColumns, sheetName: "No rows" }],
   },
   {
     label: "10 000 rows",
     fileName: "big.xlsx",
     details: "Performance check: elapsed time is shown below",
-    getSheets: () => [{ data: generateUsers(10000), columns: userColumns, sheetName: "Users" }],
+    getSheets: () => [{ data: generateUsers(10000), mapping: userColumns, sheetName: "Users" }],
   },
 ];
 
@@ -183,7 +183,7 @@ export default function ExportToExcelView() {
     try {
       const start = performance.now();
       const sheets = e.getSheets();
-      const blob = await createExcelDoc(sheets);
+      const blob = await exportToExcel(sheets);
       const ms = Math.round(performance.now() - start);
       await saveAs(blob, e.fileName);
       setStatus({ text: `Saved '${e.fileName}': ${(blob.size / 1024).toFixed(1)}Kb, generated in ${ms}ms` });
