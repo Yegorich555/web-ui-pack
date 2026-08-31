@@ -23,11 +23,17 @@ export interface IExcelSheet<T = any> {
   name?: string;
 }
 
+/** Prepared cell of the sheet */
+interface IExcelCell {
+  value: string;
+  style: string;
+}
+
 interface IExportConfig {
   columns: Array<string>;
-  mappedColumns: Array<{ value: string; style: string; width: number }>;
+  mappedColumns: Array<IExcelCell & { width: number }>;
   rows: Array<Array<string>>;
-  mappedRows: Array<Array<{ value: string; style: string }>>;
+  mappedRows: Array<Array<IExcelCell>>;
 }
 
 const escapeMap = {
@@ -41,43 +47,71 @@ const escapeMap = {
 
 const escape = (str: string): string => str.replace(/[&<>"'`]/g, (m) => escapeMap[m as keyof typeof escapeMap]);
 
-/** Char width in pixels of the default font (Calibri 11, see `styleSheet` below).
- * Excel renders a cell text via GDI: every glyph advance is rounded to a whole pixel, so the width must be
- * summed in pixels as well - summing fractional font-metrics under-estimates a long text by ~7% & cuts it off.
- * Values are measured via GDI itself (TextRenderer.MeasureText of a char repeated 100 times / 100).
- * The file-format has no auto-width at all: `bestFit` is only a marker and Excel never re-measures such a column */
-const charPx: Record<string, number> = {};
-const charPxGroups: Array<[number, string]> = [
-  [3, " '"],
-  [4, ",.:;Iijl`"],
-  [5, "!()-J[]frt{}"],
-  [6, '"/Lcsz\\'],
-  [7, "0123456789#$*+<=>?EFSTYZ^_agkvxy|~"],
-  [9, "ADGHUV"],
-  [10, "NOQ&"],
-  [11, "%w"],
-  [12, "Mm"],
-  [13, "@W"],
-];
-charPxGroups.forEach(([px, chars]) => chars.split("").forEach((c) => (charPx[c] = px)));
+/** Line-separator inside a cell (array values are joined by it) */
+const newLine = String.fromCharCode(10);
 
-/** `BCKPRXbdehnopqu` & non-latin (cyrillic etc.) chars are 8px wide */
-const defaultCharPx = 8;
+/** Auto-width of a column: the file-format has no auto-width at all - `bestFit` is only a marker & Excel never
+ * re-measures such a column, so the width must be estimated here.
+ * Everything is calculated in pixels of the default font (Calibri 11, see `styleSheet` below) and converted
+ * into Excel-units (the widest digit of that font) at the very end */
+const autoWidth = {
+  /** Excel's unit of the column width: the widest digit of the default font */
+  maxDigitPx: 7,
+  /** Excel reserves 5px inside a cell (2px padding on both sides + 1px for the border) + 2px as a gap */
+  cellPaddingPx: 7,
+  /** Space for the autoFilter dropdown button in a header cell */
+  filterButtonPx: 18,
+  /** `BCKPRXbdehnopqu` & non-latin (cyrillic etc.) chars are 8px wide */
+  defaultCharPx: 8,
+  /** Char width in px, measured via GDI itself (TextRenderer.MeasureText of a char repeated 100 times / 100):
+   * Excel renders a cell text via GDI, where every glyph advance is rounded to a whole pixel - so summing
+   * fractional font-metrics instead under-estimates a long text by ~7% and cuts it off.
+   * WARN: re-measure these values if the font in `styleSheet` is changed */
+  charPx: ((): Record<string, number> => {
+    const groups: Array<[number, string]> = [
+      [3, " '"],
+      [4, ",.:;Iijl`"],
+      [5, "!()-J[]frt{}"],
+      [6, '"/Lcsz\\'],
+      [7, "0123456789#$*+<=>?EFSTYZ^_agkvxy|~"],
+      [9, "ADGHUV"],
+      [10, "NOQ&"],
+      [11, "%w"],
+      [12, "Mm"],
+      [13, "@W"],
+    ];
+    const result: Record<string, number> = {};
+    groups.forEach(([px, chars]) => chars.split("").forEach((c) => (result[c] = px)));
+    return result;
+  })(),
 
-/** Excel's unit of the column width: the widest digit of the default font */
-const maxDigitPx = 7;
-/** Excel reserves 5px inside a cell (2px padding on both sides + 1px for the border) + 2px as a gap */
-const cellPaddingPx = 7;
-/** Space for the autoFilter dropdown button in a header cell */
-const filterButtonPx = 18;
-
-/** Width of the text in pixels */
-const getTextPx = (text: string): number => {
-  let px = 0;
-  for (let i = 0; i < text.length; ++i) {
-    px += charPx[text[i]] ?? defaultCharPx;
-  }
-  return px;
+  /** The biggest number of the array */
+  max(array: number[]): number {
+    let result = 0;
+    array.forEach((v) => {
+      if (v > result) result = v;
+    });
+    return result;
+  },
+  /** Width of the text in px */
+  getTextPx(text: string): number {
+    let px = 0;
+    for (let i = 0; i < text.length; ++i) {
+      px += autoWidth.charPx[text[i]] ?? autoWidth.defaultCharPx;
+    }
+    return px;
+  },
+  /** Width in px of the longest line of the cell */
+  getCellPx(cell: IExcelCell): number {
+    if (!cell.value) return 0;
+    return autoWidth.max(cell.value.split(newLine).map((line) => autoWidth.getTextPx(line)));
+  },
+  /** Width in Excel-units by the longest content of the column (rounded to 1/100 to keep the xml small) */
+  get(rows: IExportConfig["mappedRows"], i: number, headerText: string): number {
+    const contentPx = autoWidth.max(rows.map((row) => autoWidth.getCellPx(row[i])));
+    const headerPx = autoWidth.getTextPx(headerText) + autoWidth.filterButtonPx;
+    return Math.ceil(((Math.max(contentPx, headerPx) + autoWidth.cellPaddingPx) / autoWidth.maxDigitPx) * 100) / 100;
+  },
 };
 
 /** Static parts of the document: defined once to avoid re-allocating on every export */
@@ -87,7 +121,6 @@ const styleSheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styl
 
 /** Export pointed data into excel-file according to provided mapping */
 export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>): Promise<Blob> {
-  const newLine = String.fromCharCode(10);
   const styles = {
     default: 's="0" ',
     array: 's="1" ',
@@ -106,33 +139,12 @@ export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>
     return v.toString();
   };
 
-  const arrayMax = (array: number[]): number => {
-    let result = 0;
-    array.forEach((v) => {
-      if (v > result) result = v;
-    });
-    return result;
-  };
-
-  /** Width in pixels of the longest line of the cell */
-  const getCellPx = (cell: { value: string; style: string }): number => {
-    if (!cell.value) return 0;
-    return arrayMax(cell.value.split(newLine).map((line) => getTextPx(line)));
-  };
-
   const getHeaderText = (header: IExcelColumnMap): string => {
     if (header.text !== undefined) {
       return header.text as string;
     }
 
     return stringPrettify(header.propName as string);
-  };
-
-  /** Width in Excel-units by the longest content of the column (rounded to 1/100 to keep the xml small) */
-  const getAutoWidth = (rows: IExportConfig["mappedRows"], i: number, headerText: string): number => {
-    const contentPx = arrayMax(rows.map((row) => getCellPx(row[i])));
-    const headerPx = getTextPx(headerText) + filterButtonPx;
-    return Math.ceil(((Math.max(contentPx, headerPx) + cellPaddingPx) / maxDigitPx) * 100) / 100;
   };
 
   const getSheetConfig = (sheet: IExcelSheet): IExportConfig => {
@@ -155,7 +167,7 @@ export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>
         value,
         style: styles.default,
         // an explicit width wins & skips scanning of the rows; otherwise it's defined by the longest content
-        width: width ?? Math.min(getAutoWidth(config.mappedRows, i, value), maxWidth ?? Number.MAX_SAFE_INTEGER),
+        width: width ?? Math.min(autoWidth.get(config.mappedRows, i, value), maxWidth ?? Number.MAX_SAFE_INTEGER),
       };
     });
 
@@ -184,7 +196,7 @@ export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>
     };
   });
 
-  const formatRow = (row: Array<{ value: string; style: string }>, index: number): string => {
+  const formatRow = (row: Array<IExcelCell>, index: number): string => {
     // To ensure the row number starts as in excel.
     const rowIndex = index + 1;
     let rowCells = "";
