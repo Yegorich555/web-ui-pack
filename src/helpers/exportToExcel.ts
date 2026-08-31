@@ -41,40 +41,49 @@ const escapeMap = {
 
 const escape = (str: string): string => str.replace(/[&<>"'`]/g, (m) => escapeMap[m as keyof typeof escapeMap]);
 
-/** Approximate width of a char in Excel width-units (1 unit == the widest digit of the default font ~ Calibri 11).
- * The file-format has no real auto-width: `bestFit` is only a marker and Excel never re-measures such a column,
- * so the width must be estimated here by the char shapes instead of by the plain chars count */
-const charWidths: Record<string, number> = {};
-const charWidthGroups: Array<[number, string]> = [
-  [0.35, "il|!.,:;'`"],
-  [0.55, `ftjrI()[]{}-/ ${String.fromCharCode(92)}`],
-  [0.85, "abcdeghknopqsuvxyzJL"],
-  [1.15, "mw"],
-  [1.4, "WM@%"],
+/** Char width in pixels of the default font (Calibri 11, see `styleSheet` below).
+ * Excel renders a cell text via GDI: every glyph advance is rounded to a whole pixel, so the width must be
+ * summed in pixels as well - summing fractional font-metrics under-estimates a long text by ~7% & cuts it off.
+ * Values are measured via GDI itself (TextRenderer.MeasureText of a char repeated 100 times / 100).
+ * The file-format has no auto-width at all: `bestFit` is only a marker and Excel never re-measures such a column */
+const charPx: Record<string, number> = {};
+const charPxGroups: Array<[number, string]> = [
+  [3, " '"],
+  [4, ",.:;Iijl`"],
+  [5, "!()-J[]frt{}"],
+  [6, '"/Lcsz\\'],
+  [7, "0123456789#$*+<=>?EFSTYZ^_agkvxy|~"],
+  [9, "ADGHUV"],
+  [10, "NOQ&"],
+  [11, "%w"],
+  [12, "Mm"],
+  [13, "@W"],
 ];
-charWidthGroups.forEach(([w, chars]) => chars.split("").forEach((c) => (charWidths[c] = w)));
+charPxGroups.forEach(([px, chars]) => chars.split("").forEach((c) => (charPx[c] = px)));
 
-/** Digits, most of uppercase & unknown (unicode) chars are about a single width-unit */
-const defaultCharWidth = 1;
+/** `BCKPRXbdehnopqu` & non-latin (cyrillic etc.) chars are 8px wide */
+const defaultCharPx = 8;
 
-/** Width of the text in Excel width-units */
-const getTextWidth = (text: string): number => {
-  let w = 0;
+/** Excel's unit of the column width: the widest digit of the default font */
+const maxDigitPx = 7;
+/** Excel reserves 5px inside a cell (2px padding on both sides + 1px for the border) + 2px as a gap */
+const cellPaddingPx = 7;
+/** Space for the autoFilter dropdown button in a header cell */
+const filterButtonPx = 18;
+
+/** Width of the text in pixels */
+const getTextPx = (text: string): number => {
+  let px = 0;
   for (let i = 0; i < text.length; ++i) {
-    w += charWidths[text[i]] ?? defaultCharWidth;
+    px += charPx[text[i]] ?? defaultCharPx;
   }
-  return w;
+  return px;
 };
-
-/** Space that Excel itself reserves inside a cell: 5px against the default 7px digit width */
-const cellPadding = 5 / 7;
-/** Space reserved in a header cell for the autoFilter dropdown button */
-const filterButtonWidth = 3;
 
 /** Static parts of the document: defined once to avoid re-allocating on every export */
 const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
 
-const styleSheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"><fonts><font></font></fonts><fills><fill></fill></fills><borders><border></border></borders><cellStyleXfs><xf/></cellStyleXfs><cellXfs><xf><alignment vertical="top"/></xf><xf><alignment wrapText="1" vertical="top"/></xf></cellXfs><cellStyles><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles><dxfs/><tableStyles defaultTableStyle="TableStyleMedium2" defaultPivotStyle="PivotStyleLight16"/><extLst><ext uri="{EB79DEF2-80B8-43e5-95BD-54CBDDF9020C}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:slicerStyles defaultSlicerStyle="SlicerStyleLight1"/></ext><ext uri="{9260A510-F301-46a8-8635-F512D64BE5F5}" xmlns:x15="http://schemas.microsoft.com/office/spreadsheetml/2010/11/main"><x15:timelineStyles defaultTimelineStyle="TimeSlicerStyleLight1"/></ext></extLst></styleSheet>`;
+const styleSheet = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"><fonts count="1"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font></fonts><fills><fill></fill></fills><borders><border></border></borders><cellStyleXfs><xf/></cellStyleXfs><cellXfs><xf><alignment vertical="top"/></xf><xf><alignment wrapText="1" vertical="top"/></xf></cellXfs><cellStyles><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles><dxfs/><tableStyles defaultTableStyle="TableStyleMedium2" defaultPivotStyle="PivotStyleLight16"/><extLst><ext uri="{EB79DEF2-80B8-43e5-95BD-54CBDDF9020C}" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main"><x14:slicerStyles defaultSlicerStyle="SlicerStyleLight1"/></ext><ext uri="{9260A510-F301-46a8-8635-F512D64BE5F5}" xmlns:x15="http://schemas.microsoft.com/office/spreadsheetml/2010/11/main"><x15:timelineStyles defaultTimelineStyle="TimeSlicerStyleLight1"/></ext></extLst></styleSheet>`;
 
 /** Export pointed data into excel-file according to provided mapping */
 export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>): Promise<Blob> {
@@ -105,10 +114,10 @@ export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>
     return result;
   };
 
-  /** Width of the longest line of the cell */
-  const getCellWidth = (cell: { value: string; style: string }): number => {
+  /** Width in pixels of the longest line of the cell */
+  const getCellPx = (cell: { value: string; style: string }): number => {
     if (!cell.value) return 0;
-    return arrayMax(cell.value.split(newLine).map((line) => getTextWidth(line)));
+    return arrayMax(cell.value.split(newLine).map((line) => getTextPx(line)));
   };
 
   const getHeaderText = (header: IExcelColumnMap): string => {
@@ -119,11 +128,11 @@ export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>
     return stringPrettify(header.propName as string);
   };
 
-  /** Width by the longest content of the column (rounded to 1/100 to keep the xml small) */
+  /** Width in Excel-units by the longest content of the column (rounded to 1/100 to keep the xml small) */
   const getAutoWidth = (rows: IExportConfig["mappedRows"], i: number, headerText: string): number => {
-    const content = arrayMax(rows.map((row) => getCellWidth(row[i])));
-    const header = getTextWidth(headerText) + filterButtonWidth;
-    return Math.ceil((Math.max(content, header) + cellPadding) * 100) / 100;
+    const contentPx = arrayMax(rows.map((row) => getCellPx(row[i])));
+    const headerPx = getTextPx(headerText) + filterButtonPx;
+    return Math.ceil(((Math.max(contentPx, headerPx) + cellPaddingPx) / maxDigitPx) * 100) / 100;
   };
 
   const getSheetConfig = (sheet: IExcelSheet): IExportConfig => {
