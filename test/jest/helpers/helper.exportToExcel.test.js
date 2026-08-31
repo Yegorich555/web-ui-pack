@@ -23,6 +23,9 @@ describe("helper.exportToExcel", () => {
     });
   });
 
+  /** WARN: the order of the files inside the archive isn't a part of the format, so only the set is checked */
+  const expectFiles = (names) => expect(Object.keys(files).sort()).toEqual([...names].sort());
+
   test("single sheet: every value type & the whole file-structure", async () => {
     const blob = await exportToExcel([
       {
@@ -44,7 +47,7 @@ describe("helper.exportToExcel", () => {
       },
     ]);
     expect(blob.type).toBe(blobType);
-    expect(Object.keys(files)).toEqual([
+    expectFiles([
       "xl/workbook.xml",
       "xl/_rels/workbook.xml.rels",
       "xl/styles.xml",
@@ -68,7 +71,7 @@ describe("helper.exportToExcel", () => {
       // 4th: xml-escaping of the tab-name
       { name: "Q&A <\"'>", data: [{ v: 4 }], mapping: [{ propName: "v" }] },
     ]);
-    expect(Object.keys(files)).toEqual([
+    expectFiles([
       "xl/workbook.xml",
       "xl/_rels/workbook.xml.rels",
       "xl/styles.xml",
@@ -96,7 +99,7 @@ describe("helper.exportToExcel", () => {
 
   test("no sheets at all", async () => {
     await exportToExcel([]);
-    expect(Object.keys(files)).toEqual([
+    expectFiles([
       "xl/workbook.xml",
       "xl/_rels/workbook.xml.rels",
       "xl/styles.xml",
@@ -121,7 +124,7 @@ describe("helper.exportToExcel", () => {
           { propName: "fix", width: 12.5 }, // an explicit width wins & skips scanning of the rows
           { propName: "auto" }, // by the widest content
           { propName: "cut", maxWidth: 15 }, // content is wider than maxWidth
-          { propName: "byHeader", text: "A very long header text of the column" }, // header + filter-button wins
+          { propName: "byHeader", headerText: "A very long header text of the column" }, // header + filter-button wins
         ],
       },
     ]);
@@ -134,7 +137,7 @@ describe("helper.exportToExcel", () => {
       {
         name: "Escape",
         data: [{ v: "<b>&\"'`</b>" }, { v: ["a&b", "c<d"] }],
-        mapping: [{ propName: "v", text: "Q&A: <\"'`>" }],
+        mapping: [{ propName: "v", headerText: "Q&A: <\"'`>" }],
       },
     ]);
     expect(files["xl/worksheets/sheet1.xml"]).toMatchSnapshot("xl/worksheets/sheet1.xml");
@@ -142,13 +145,87 @@ describe("helper.exportToExcel", () => {
   });
 
   test("column letters: A..Z, AA, AB", async () => {
-    const mapping = Array.from({ length: 28 }, (_v, i) => ({ propName: `c${i}`, text: `${i}`, width: 3 }));
+    const mapping = Array.from({ length: 28 }, (_v, i) => ({ propName: `c${i}`, headerText: `${i}`, width: 3 }));
     await exportToExcel([{ name: "Letters", data: [{ c25: "z", c26: "aa", c27: "ab" }], mapping }]);
     // WARN: no snapshot here: 28 columns produce a huge & useless xml
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="Z2" s="0" t="inlineStr"><is><t>z</t></is></c>`);
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AA2" s="0" t="inlineStr"><is><t>aa</t></is></c>`);
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AB2" s="0" t="inlineStr"><is><t>ab</t></is></c>`);
+    // NiceToKnow: a cell of the default format has no `s` at all (see the 'fonts' tests below)
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="Z2" t="inlineStr"><is><t>z</t></is></c>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AA2" t="inlineStr"><is><t>aa</t></is></c>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AB2" t="inlineStr"><is><t>ab</t></is></c>`);
     expect(files["xl/tables/table1.xml"]).toContain(`ref="A1:AB2"`);
+  });
+
+  test("fonts: per-sheet, per-column & dedup of the styles", async () => {
+    // an explicitly undefined option is skipped by the merge (so the inherited one wins)
+    const font = { size: 14, family: "Arial", color: "#00ff00", backgroundColor: "#ff0000", style: undefined };
+    await exportToExcel([
+      {
+        name: "Fonts",
+        // the sheet-font is inherited by every cell & by the header (that adds 'bold' from $defaults.fontHeader)
+        font,
+        data: [{ v: "a", arr: ["a", "b"], custom: "c", bad: "d" }],
+        mapping: [
+          { propName: "v" },
+          { propName: "arr" }, // an array-cell has the same font but with wrapText => an own cell-format
+          { propName: "custom", headerFont: { style: "italic", family: "A&B", backgroundColor: "#0000ff" } },
+          // 'red' & '#f00' aren't parsable => ignored, so the header keeps the colors of the sheet-font
+          { propName: "bad", headerFont: { color: "red", backgroundColor: "#f00" } },
+        ],
+      },
+      // the 2nd sheet has the same font => no new records in styles.xml
+      { name: "Fonts2", font: { ...font }, data: [{ v: "b" }], mapping: [{ propName: "v" }] },
+    ]);
+    // 4 fonts: the default one (never used here), the sheet-font, the bold header & the italic header
+    expect(files["xl/styles.xml"]).toContain(`<fonts count="4">`);
+    expect(files["xl/styles.xml"]).toContain(`<fills count="4">`); // 2 reserved by Excel + red + blue
+    expect(files["xl/styles.xml"]).toMatchSnapshot("xl/styles.xml");
+    expect(files["xl/worksheets/sheet1.xml"]).toMatchSnapshot("xl/worksheets/sheet1.xml");
+    // the unparsable colors of 'bad' are ignored => its header re-uses the style of the ordinary headers
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="D1" s="3" t="inlineStr"><is><t>Bad</t></is></c>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="A1" s="3" t="inlineStr"><is><t>V</t></is></c>`);
+    // the 2nd sheet re-uses the styles of the 1st one
+    expect(files["xl/worksheets/sheet2.xml"]).toContain(`<c r="A1" s="3" t="inlineStr"><is><t>V</t></is></c>`);
+    expect(files["xl/worksheets/sheet2.xml"]).toContain(`<c r="A2" s="1" t="inlineStr"><is><t>b</t></is></c>`);
+  });
+
+  test("fonts: $defaults.font & $defaults.fontHeader can be overridden", async () => {
+    const { font, fontHeader } = exportToExcel.$defaults;
+    exportToExcel.$defaults.font = { size: 12, family: "Times New Roman", style: "italic" };
+    exportToExcel.$defaults.fontHeader = { style: "underline", color: "#123456" };
+    try {
+      await exportToExcel([{ name: "Def", data: [{ v: 1 }], mapping: [{ propName: "v" }] }]);
+      // the document-font must be the 1st: Excel measures a column width in the widest digit of the font[0]
+      expect(files["xl/styles.xml"]).toContain(
+        `<fonts count="2"><font><i/><sz val="12"/><name val="Times New Roman"/><family val="2"/></font>`
+      );
+      expect(files["xl/styles.xml"]).toMatchSnapshot("xl/styles.xml");
+    } finally {
+      exportToExcel.$defaults.font = font;
+      exportToExcel.$defaults.fontHeader = fontHeader;
+    }
+    // defaults are restored
+    await exportToExcel([{ name: "Def", data: [{ v: 1 }], mapping: [{ propName: "v" }] }]);
+    expect(files["xl/styles.xml"]).toContain(`<sz val="11"/><name val="Calibri"/>`);
+  });
+
+  test("auto-width: font-scale, non-latin chars & multiline", async () => {
+    const colWidth = () => +files["xl/worksheets/sheet1.xml"].match(/<col [^>]*width="([\d.]+)"/)[1];
+    // 'Ж' isn't latin => 8px per char (as the default one); the longest line of a multiline value wins
+    const sheet = (font) => ({
+      name: "W",
+      font,
+      data: [{ v: ["ЖЖЖЖЖЖЖЖЖЖ", "i", "ii"] }],
+      mapping: [{ propName: "v" }],
+    });
+
+    await exportToExcel([sheet()]);
+    // 10 chars * 8px + 7px of the cell-padding, converted into the Excel-units (7px each)
+    expect(colWidth()).toBe(12.43);
+
+    await exportToExcel([sheet({ size: 22 })]);
+    // the double font-size makes the content ~2x wider (the constant cell-padding isn't scaled)
+    expect(colWidth()).toBeGreaterThan(12.43 * 1.85);
+    expect(colWidth()).toBeLessThan(12.43 * 2);
   });
 
   test("$defaults.getCellValue can be overridden", async () => {

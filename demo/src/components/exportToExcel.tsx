@@ -109,6 +109,12 @@ const departmentColumns: IExcelSheet<IDepartment>["mapping"] = [
   { propName: "budget", maxWidth: 20 },
 ];
 
+/** The same columns but with a custom header-font per column */
+const styledColumns: IExcelSheet<IUser>["mapping"] = userColumns.map((c, i) => ({
+  ...c,
+  headerFont: i % 2 ? { color: "#ffffff", backgroundColor: "#4472c4" } : { color: "#4472c4", style: "underline" },
+}));
+
 /** Generates a huge dataset to check performance & memory */
 function generateUsers(cnt: number): IUser[] {
   const result: IUser[] = new Array(cnt);
@@ -131,37 +137,48 @@ const examples: IExample[] = [
     label: "Single sheet",
     fileName: "users.xlsx",
     details: "Prepared data below: strings, numbers, boolean, Date, string[], null & escaped symbols",
-    getSheets: () => [{ data: users, mapping: userColumns, sheetName: "Users" }],
+    getSheets: () => [{ data: users, mapping: userColumns, name: "Users" }],
   },
   {
     label: "Several sheets",
     fileName: "users-and-departments.xlsx",
     details: "Every item of the array is a separate Excel tab (with its own columns mapping)",
     getSheets: () => [
-      { data: users, mapping: userColumns, sheetName: "Users" },
-      { data: departments, mapping: departmentColumns, sheetName: "Departments" },
+      { data: users, mapping: userColumns, name: "Users" },
+      { data: departments, mapping: departmentColumns, name: "Departments" },
     ],
   },
   {
-    label: "Without sheetName",
+    label: "Without name",
     fileName: "default-names.xlsx",
     details: "Tabs are named Sheet1, Sheet2... Forbidden chars []:*?/\\ are replaced & name is cut by 31 chars",
     getSheets: () => [
       { data: departments, mapping: departmentColumns },
-      { data: departments, mapping: departmentColumns, sheetName: "Bad[name]:with*forbidden?chars/and\\too long" },
+      { data: departments, mapping: departmentColumns, name: "Bad[name]:with*forbidden?chars/and\\too long" },
+    ],
+  },
+  {
+    label: "Custom fonts",
+    fileName: "fonts.xlsx",
+    details:
+      "Font per sheet (size, family, color) & per header-column (style, color, backgroundColor); " +
+      "missed options are inherited from the sheet-font & $defaults; column width is scaled by the font-size",
+    getSheets: () => [
+      { data: users, mapping: styledColumns, name: "Styled", font: { size: 14, family: "Segoe UI", color: "#333333" } },
+      { data: departments, mapping: departmentColumns, name: "Defaults" },
     ],
   },
   {
     label: "Empty data",
     fileName: "empty.xlsx",
     details: "Only header-row is exported: Excel treats an empty table as a broken content, so table-part is skipped",
-    getSheets: () => [{ data: [], mapping: userColumns, sheetName: "No rows" }],
+    getSheets: () => [{ data: [], mapping: userColumns, name: "No rows" }],
   },
   {
     label: "10 000 rows",
     fileName: "big.xlsx",
     details: "Performance check: elapsed time is shown below",
-    getSheets: () => [{ data: generateUsers(10000), mapping: userColumns, sheetName: "Users" }],
+    getSheets: () => [{ data: generateUsers(10000), mapping: userColumns, name: "Users" }],
   },
 ];
 
@@ -203,6 +220,7 @@ export default function ExportToExcelView() {
         "Creates a valid *.xlsx (OpenXML) document without heavy dependencies (only fflate for zipping)",
         "Several sheets (tabs) per document; every sheet has own columns mapping",
         "Auto-detects column width, applies autoFilter & table styling",
+        "Custom font per sheet & per header-column: size, family, style, color, backgroundColor",
         "Formats values by type: Date via localeInfo, boolean, number, string[] (joined by new-line + wrapText)",
         "Escapes XML-specific symbols & sanitizes a sheet-name according to Excel rules",
         "Returns Blob: save it to a file, upload to a server or attach to an email",
@@ -278,12 +296,15 @@ const users = [
 
 const blob = await createExcelDoc([
   {
-    sheetName: "Users", // optional; default is 'Sheet{number}'
+    name: "Users", // optional; default is 'Sheet{number}'
     data: users,
-    columns: [
+    font: { size: 12, family: "Segoe UI", color: "#333333" }, // optional; default is { size: 11, family: "Calibri" }
+    mapping: [
       { propName: "name" }, // header text is prettified propName: 'Name'
-      { propName: "registeredAt", text: "Registered at" }, // custom header text
+      { propName: "registeredAt", headerText: "Registered at" }, // custom header text
       { propName: "roles", maxWidth: 30 }, // limit column width
+      // header is bold by default; missed options are inherited from the sheet-font
+      { propName: "notes", headerFont: { color: "#ffffff", backgroundColor: "#4472c4" } },
     ],
   },
   // ...next sheet here
