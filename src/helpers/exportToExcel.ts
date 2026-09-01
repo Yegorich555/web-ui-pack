@@ -42,69 +42,79 @@ export interface IExcelFont {
   /** Style of the text; only a single one is applicable at once */
   style?: "bold" | "italic" | "underline"; // todo support several styles via bitmask  const enum: ExcelFontStyle.Bold | ExcelFontStyle.Bold | ExcelFontStyle.Underline
 
-  // todo add horizontal and vertical alignment
-
   /** Color of the text in hex-format `#rrggbb`, ex. `#ff0000`;
    * an unparsable value is ignored (so the inherited color stays applied) */
   color?: string;
   /** Background color of the cell
    * @see {@link IExcelFont.color} for the supported format */
   backgroundColor?: string;
+
+  // todo add horizontal and vertical alignment
 }
 
-export interface IExcelColumnMap<T = any> {
-  /** Item property name to map on excel cell per column */
-  propName: keyof T;
-  /** Text of header, if `undefined` then extacted from propName via stringPrettify() */
-  headerText?: string;
-  /** Font for every data-cell of the column; missed options are inherited from the font of the sheet
+export interface IExcelSettings {
+  /** Font for every data-cell of the sheet/column; missed options are inherited from the upper level
    * ({@link IExcelSheet.font} + {@link exportToExcel.$defaults.font}). It's the base of the header-cell either,
    * so a column keeps its own family/size in the header-row as well
    * @defaultValue {@link IExcelSheet.font} => the font of the sheet */
   font?: IExcelFont;
+
   /** Font for the header cell of the column; missed options are inherited from the header-font of the sheet
-   * ({@link IExcelSheet.fontHeader} + {@link exportToExcel.$defaults.fontHeader} + the font of the sheet)
-   * @defaultValue {@link exportToExcel.$defaults.fontHeader} + {@link exportToExcel.$defaults.font} => `{ size: 11, family: "Calibri", style: 'bold' }` */
+   * ({@link IExcelSheet.headerFont} + {@link exportToExcel.$defaults.headerFont} + the font of the sheet)
+   * @defaultValue {@link exportToExcel.$defaults.headerFont} + {@link exportToExcel.$defaults.font} => `{ size: 11, family: "Calibri", style: 'bold' }` */
   headerFont?: IExcelFont;
+
+  /** Format that a date-cell is rendered by; it's a {@link dateToString} format (`yyyy-MM-dd hh:mm:ss A`)
+   * that is converted into the number-format of Excel (`yyyy-mm-dd hh:mm:ss AM/PM`)
+   *
+   * WARN: Excel has no timezone at all, so a date is stored as the local wall-clock time; the `Z`-suffix
+   * (the UTC-flag of {@link dateToString}) is ignored
+   * @defaultValue {@link exportToExcel.$defaults.dateTimeFormat}
+   * @defaultValue {@link localeInfo.dateTime} */
+  dateTimeFormat?: string;
+}
+
+export interface IExcelColumnMap<T = any> extends IExcelSettings {
+  /** Item property name to map on excel cell per column */
+  propName: keyof T;
+  /** Text of header, if `undefined` then extacted from propName via stringPrettify() */
+  headerText?: string;
   /** Width for column; by default it's auto-defined by the longest content */
   width?: number;
   /** Limit max width for column */
   maxWidth?: number;
 }
 
-export interface IExcelSheet<T = any> {
+export interface IExcelSheet<T = any> extends IExcelSettings {
   /** Items to paste into excel according to mapping in columns */
   data: Array<T>;
   /** Mapping config */
   mapping: IExcelColumnMap<T>[];
   /** Name of the Excel tab; default is `Sheet{number}` */
   name?: string;
-  /** Font for excelSheet; missed options are inherited from {@link exportToExcel.$defaults.font}
-   * @defaultValue {@link exportToExcel.$defaults.font} => `{ size: 11, family: "Calibri" }` */
-  font?: IExcelFont;
-  /** Font for the header-row of the sheet; missed options are inherited from {@link exportToExcel.$defaults.fontHeader}
-   * and then from {@link IExcelSheet.font} - so it usually points only the difference (`style`, `color` etc.)
-   * and keeps the family/size of the sheet
-   * @defaultValue {@link exportToExcel.$defaults.fontHeader} => `{ style: 'bold' }`
-   * @see {@link IExcelColumnMap.headerFont} to override it per column */
-  fontHeader?: IExcelFont;
 }
 
 /** Way that Excel stores & parses the content of a cell (see {@link IExcelCellValue.type}) */
 export const enum ExcelCellTypes {
-  /** An ordinary text: stored as an inline string (`t="inlineStr"`) */
+  /** An ordinary text */
   text,
-  /** A number: stored as a real number so Excel sums/sorts/filters */
-  number,
-  /** A multiline text */
+  /** Multiline text */
   textWrap,
+  /** Store as a real number so Excel sums/sorts/filters */
+  number,
+  /** Store as date so Excel sorts/filters: the value is a date-serial (see {@link IExcelCellValue.stringVal})
+   * & the cell is rendered by {@link IExcelSettings.dateTimeFormat} */
+  date,
 }
 
 /** Content of a single cell: {@link exportToExcel.$defaults.getCellValue} maps an item-property into it */
 export interface IExcelCellValue {
   /** Way that Excel stores the {@link IExcelCellValue.stringVal} */
   type: ExcelCellTypes;
-  /** Content of the cell; it's always a string - the xml is a text by itself */
+  /** Content of the cell; it's always a string - the xml is a text by itself.
+   *
+   * For {@link ExcelCellTypes.date} it's a number of days since the Excel-epoch (see the note
+   * in {@link exportToExcel.$defaults.getCellValue}) - the only way that Excel stores a date */
   stringVal: string;
 }
 
@@ -142,12 +152,14 @@ interface IExportContext {
   styles: IStyles;
   /** Font of the document: {@link exportToExcel.$defaults.font} merged into the format-required base */
   font: IExcelFontFull;
-  /** Font of the header-row: {@link exportToExcel.$defaults.fontHeader} */
+  /** Font of the header-row: {@link exportToExcel.$defaults.headerFont} */
   fontHeader: IExcelFont | undefined;
   /** Width in px of a single Excel-unit of the column width */
   unitPx: number;
   /** @see {@link exportToExcel.$defaults.getCellValue} */
   getCellValue: <T = any>(v: T[keyof T]) => IExcelCellValue;
+  /** Format of a date-cell: {@link exportToExcel.$defaults.dateTimeFormat} or {@link localeInfo.dateTime} */
+  dateTimeFormat: string;
 }
 
 /* ---------------------------------- Shared helpers ---------------------------------- */
@@ -244,6 +256,15 @@ const newLine = String.fromCharCode(newLineCode);
 /** Empty cell: the fallback for a {@link exportToExcel.$defaults.getCellValue} that returns nothing at all.
  * WARN: it's read-only by the contract - the render never writes into a mapped cell */
 const emptyCell: IExcelCellValue = { type: ExcelCellTypes.text, stringVal: "" };
+
+/** Days between the Excel-epoch (`1899-12-30`: the year-1900 leap-bug of Lotus is a part of the format)
+ * and `1970-01-01` of the JS-epoch */
+const excelEpochDays = 25569;
+const msPerDay = 86400000;
+
+/** The widest date that a date-column is measured by: a 4-digit year & 2-digit month/day/hours/minutes/seconds
+ * (the supported fonts render every digit by the same width, so the exact digits don't matter) */
+const widestDate = new Date(2222, 11, 28, 22, 58, 58, 888);
 
 /** Count of the ASCII chars (`32..126`) that {@link autoWidth.familyPx} holds the measured width of */
 const asciiCount = 95;
@@ -428,7 +449,10 @@ interface IStylesCollection {
 interface IStyles {
   /** Returns the index of the cell-format in `cellXfs` according to the pointed font; `0` is the default format
    * that Excel applies by itself (to a cell without the own `s` & without an inherited one) */
-  getCellStyle(font: IExcelFontFull, isWrapText: boolean): number;
+  getCellStyle(font: IExcelFontFull, isWrapText: boolean, numFmtId?: number): number;
+  /** Returns the id of the number-format that renders the pointed {@link IExcelSettings.dateTimeFormat}
+   * & registers the format if it's not registered yet */
+  getNumFmtId(dateTimeFormat: string): number;
   /** Content of `xl/styles.xml`: call it when all the sheets are generated */
   toXml(): string;
 }
@@ -455,6 +479,46 @@ function createStylesCollection(startIndex = 0): IStylesCollection {
   };
 }
 
+/** Excel reserves the ids `0..163` for its built-in number-formats, so a custom one starts from 164 */
+const numFmtStartId = 164;
+
+/** Chars that Excel understands as a literal of a date-format as-is; any other one is escaped with a backslash
+ * (`/` is the locale date-separator of Excel & a letter is a token, so both must be escaped) */
+const dateLiteralRE = /[-.,: ]/;
+
+/** Runs of the same char: a token of a date-format is such a run in both {@link dateToString} & Excel */
+const dateRunRE = /(.)\1*/g;
+
+/** Tokens of {@link dateToString} that Excel understands as the very same but lower-cased ones */
+const dateTokenRE = /[yYMdDhHmsS]/;
+
+/** Converts a {@link dateToString} format into the number-format of Excel:
+ * `YYYY-MM-DD hh:mm:ss A` => `yyyy-mm-dd hh:mm:ss AM/PM` */
+function toExcelDateFormat(format: string): string {
+  // the suffixes of dateToString: `Z` - the UTC-flag (Excel has no timezone, so it's just dropped),
+  // `a`/`A` - the 12-hour format (Excel defines it by the AM/PM-token at the end)
+  let f = format.endsWith("Z") || format.endsWith("z") ? format.substring(0, format.length - 1) : format;
+  const h12 = f.endsWith("a") || f.endsWith("A");
+  f = h12 ? f.substring(0, f.length - 1) : f;
+
+  // a token is a run of the same char in both formats & means the very same in Excel but lower-cased
+  // ('MMM' is the short name of the month either), so only the fractions & the literals are really mapped
+  f = f.replace(dateRunRE, (run: string, char: string) => {
+    if (!dateTokenRE.test(char)) {
+      // 'ss.fff' => 'ss.000' - the fractions of a second; a literal that Excel can read as a token of its own
+      // is escaped (`\/` etc.), the rest is kept as it is
+      if (char === "f" || char === "F") return "0".repeat(run.length);
+      return dateLiteralRE.test(char) ? run : `\\${char}`.repeat(run.length);
+    }
+    if (char === "y" || char === "Y") return run.length > 2 ? "yyyy" : "yy"; // Excel has no 'yyy' at all
+    // WARN: the run is cut by 2 ('MMM' - by 3): 'mmmm'/'dddd' mean the name of a month/week-day in Excel
+    // & not a zero-padded number as in dateToString
+    return run.substring(0, char === "M" && run.length === 3 ? 3 : 2).toLowerCase();
+  });
+
+  return h12 ? `${f}AM/PM` : f;
+}
+
 function getFontXml(f: IExcelFontFull): string {
   const color = toARGB(f.color);
   return (
@@ -469,9 +533,21 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
   /** Excel reserves the first 2 fills for itself (`none` & `gray125`), so a custom one starts from the index 2 */
   const fills = createStylesCollection(2);
   const cellXfs = createStylesCollection();
+  const numFmts = createStylesCollection(numFmtStartId);
+  /** Id of the number-format per pointed {@link IExcelSettings.dateTimeFormat}: a format is converted only once
+   * (every sheet/column re-asks for it, but the whole document usually has a single one) */
+  const numFmtIds = new Map<string, number>();
 
   const styles: IStyles = {
-    getCellStyle(font: IExcelFontFull, isWrapText: boolean): number {
+    getNumFmtId(dateTimeFormat: string): number {
+      let id = numFmtIds.get(dateTimeFormat);
+      if (id === undefined) {
+        id = numFmts.indexOf(escape(toExcelDateFormat(dateTimeFormat)));
+        numFmtIds.set(dateTimeFormat, id);
+      }
+      return id;
+    },
+    getCellStyle(font: IExcelFontFull, isWrapText: boolean, numFmtId = 0): number {
       const fontId = fonts.indexOf(getFontXml(font));
       const bgColor = toARGB(font.backgroundColor);
       const fillId = bgColor
@@ -480,14 +556,20 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
           )
         : 0;
       return cellXfs.indexOf(
-        `<xf numFmtId="0" fontId="${fontId}" fillId="${fillId}" borderId="0" xfId="0" applyFont="1"` +
-          `${fillId ? ` applyFill="1"` : ""} applyAlignment="1">` +
+        `<xf numFmtId="${numFmtId}" fontId="${fontId}" fillId="${fillId}" borderId="0" xfId="0" applyFont="1"` +
+          `${numFmtId ? ` applyNumberFormat="1"` : ""}${fillId ? ` applyFill="1"` : ""} applyAlignment="1">` +
           `<alignment vertical="top"${isWrapText ? ` wrapText="1"` : ""}/></xf>`
       );
     },
     toXml(): string {
+      // `numFmts` is the very 1st part of the styleSheet by the schema & is skipped at all if nothing is registered
+      let numFmtsXml = "";
+      for (let i = 0; i < numFmts.items.length; ++i) {
+        numFmtsXml += `<numFmt numFmtId="${numFmtStartId + i}" formatCode="${numFmts.items[i]}"/>`;
+      }
       return (
-        `${styleSheetHead}<fonts count="${fonts.items.length}">${fonts.items.join("")}</fonts>` +
+        `${styleSheetHead}${numFmtsXml ? `<numFmts count="${numFmts.items.length}">${numFmtsXml}</numFmts>` : ""}` +
+        `<fonts count="${fonts.items.length}">${fonts.items.join("")}</fonts>` +
         `<fills count="${fills.items.length + 2}"><fill><patternFill patternType="none"/></fill>` +
         `<fill><patternFill patternType="gray125"/></fill>${fills.items.join("")}</fills>` +
         `<borders count="1"><border/></borders>` +
@@ -520,7 +602,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   const sheetColStyleXml = sheetStyle ? ` style="${sheetStyle}"` : "";
   // the header-row is the sheet-font + the header-options of the document & of the sheet (so a header keeps
   // the family/size of the sheet & points only the difference); a column re-merges it only if it has an own font
-  const sheetHeaderFont = mergeFont(font, ctx.fontHeader, sheet.fontHeader);
+  const sheetHeaderFont = mergeFont(font, ctx.fontHeader, sheet.headerFont);
 
   /** Excel-names of the columns: `A`, `B`, ... `AA`; cached because every single cell refers to it */
   const letters: Array<string> = [];
@@ -536,6 +618,8 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   const cellStyleXml: Array<string> = [];
   /** `s="N" ` of a wrapped (array) cell of the column */
   const cellStyleWrapXml: Array<string> = [];
+  /** `s="N" ` of a date-cell of the column: resolved by {@link getDateStyleXml} on the 1st date of the column */
+  const cellStyleDateXml: Array<string | undefined> = [];
   /** ` style="N"` of the `<col>` of the column */
   const colStyleXml: Array<string> = [];
   /** Metrics of the column-font: the auto-width measures the header & every cell of the column by them */
@@ -550,7 +634,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     // an own font of the column is merged into the sheet-font & becomes the base of its header either;
     // a column without it re-uses the ready fonts/styles of the sheet, so nothing is allocated per column
     const colFont = h.font ? mergeFont(font, h.font) : font;
-    const hBase = h.font ? mergeFont(colFont, ctx.fontHeader, sheet.fontHeader) : sheetHeaderFont;
+    const hBase = h.font ? mergeFont(colFont, ctx.fontHeader, sheet.headerFont) : sheetHeaderFont;
     const hFont = h.headerFont ? mergeFont(hBase, h.headerFont) : hBase;
     const letter = getColumnLetter(c);
     letters.push(letter);
@@ -580,6 +664,27 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     headerCells += `<c r="${letter}1" ${style}t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
   }
 
+  /** Returns `s="N" ` of a date-cell of the column & caches it.
+   *
+   * It's called only when such a cell really occurs, so a column without a date registers no number-format at all.
+   * The auto-width is resolved here either: a date-cell stores a number, but Excel renders it by the format - so
+   * every date of the column takes the very same width & measuring it once per column is enough */
+  function getDateStyleXml(c: number): string {
+    const h = cols[c];
+    const format = h.dateTimeFormat || sheet.dateTimeFormat || ctx.dateTimeFormat;
+    const colFont = h.font ? mergeFont(font, h.font) : font;
+    const dateStyle = styles.getCellStyle(colFont, false, styles.getNumFmtId(format));
+    const px = maxPx[c];
+    if (px >= 0) {
+      const m = cellMetrics[c];
+      const w = autoWidth.getTextPx(dateToString(widestDate, format), m.charPx, m.defaultPx) * cellScale[c];
+      if (w > px) maxPx[c] = w;
+    }
+    const xml = dateStyle ? `s="${dateStyle}" ` : "";
+    cellStyleDateXml[c] = xml;
+    return xml;
+  }
+
   const { data } = sheet;
   const rows = createUtf8Writer();
   rows.add(`<row r="1">${headerCells}</row>`);
@@ -599,17 +704,22 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
       // a `null` isn't expected here, but it must not produce a 'null' in a cell
       const value = cObjVal.stringVal || "";
       const px = maxPx[c];
-      if (px >= 0) {
+      // a date is excluded here: the stored value has nothing to do with the rendered text, so such a column
+      // is measured once by its format - see getDateStyleXml()
+      if (px >= 0 && type < ExcelCellTypes.date) {
         const m = cellMetrics[c];
         // WARN: a number is measured by its JS-representation - the `General` format that Excel really renders
         // it by is close enough & can only be narrower (Excel rounds a long fraction to fit the column)
         const w = autoWidth.getTextPx(value, m.charPx, m.defaultPx) * cellScale[c];
         if (w > px) maxPx[c] = w;
       }
-      // a number is never escaped & needs no `<is>`-wrapper, so it's a separate & much shorter template
+      // a number (a date is stored as one either) is never escaped & needs no `<is>`-wrapper, so it's a separate
+      // & much shorter template; the numeric types are the last ones in the enum, so it's a single comparison
       cells +=
-        type === ExcelCellTypes.number
-          ? `<c r="${letters[c]}${rowNum}" ${cellStyleXml[c]}t="n"><v>${value}</v></c>`
+        type >= ExcelCellTypes.number
+          ? `<c r="${letters[c]}${rowNum}" ${
+              type === ExcelCellTypes.number ? cellStyleXml[c] : cellStyleDateXml[c] || getDateStyleXml(c)
+            }t="n"><v>${value}</v></c>`
           : `<c r="${letters[c]}${rowNum}" ${
               type === ExcelCellTypes.textWrap ? cellStyleWrapXml[c] : cellStyleXml[c]
             }t="inlineStr"><is><t>${escape(value)}</t></is></c>`;
@@ -734,13 +844,15 @@ export default async function exportToExcel<T>(
 ): Promise<Blob> {
   // todo change Blob to ISavedBlob that contains .saveAs that reuse saveAs helper
 
-  const { getCellValue, font, fontHeader } = exportToExcel.$defaults;
+  const { getCellValue, font, headerFont, dateTimeFormat } = exportToExcel.$defaults;
   const documentFont = mergeFont(baseFont, font);
   const ctx: IExportContext = {
     styles: createStyles(documentFont),
     font: documentFont,
-    fontHeader,
+    fontHeader: headerFont,
     getCellValue,
+    // the locale can be refreshed after this module is imported, so the default is resolved here & not on $defaults
+    dateTimeFormat: dateTimeFormat || localeInfo.dateTime,
     unitPx: autoWidth.getUnitPx(documentFont),
   };
 
@@ -793,23 +905,28 @@ export default async function exportToExcel<T>(
 }
 
 exportToExcel.$defaults = {
-  /** Maps an item-property into the content of a cell: how Excel must store it + the already stringified value
-   * (a finite number becomes {@link ExcelCellTypes.number}, an array - a multiline {@link ExcelCellTypes.textWrap},
-   * everything else - a plain {@link ExcelCellTypes.text}).
-   *
-   * Override it to change the format of a value or to force a type, ex. to store an amount as a number:
-   * `getCellValue: (h, v) => ({ type: ExcelCellTypes.number, value: (+v).toFixed(2) })`.
-   *
-   * WARN: it's called for every single cell (the hottest path of the export), so it must stay small & must
-   * never allocate anything besides the returned cell - the render reads the cell right away & drops it */
-  getCellValue: function getCellValue<T = any>(v: T[keyof T]): IExcelCellValue {
+  dateTimeFormat: "",
+
+  getCellValue: function getCellValue(v) {
     const t = typeof v;
+    if (t === "string") return { type: ExcelCellTypes.text, stringVal: v as string };
 
     if (v == null) return { type: ExcelCellTypes.text, stringVal: "" };
-    if (v instanceof Date) return { type: ExcelCellTypes.text, stringVal: dateToString(v, localeInfo.dateTime) };
+
+    if (v instanceof Date) {
+      const ms = v.valueOf();
+      // an `Invalid Date` has no numeric representation at all (Excel reports such a file as corrupted)
+      if (Number.isNaN(ms)) return { type: ExcelCellTypes.text, stringVal: "Invalid date" };
+      // Excel stores a date as a number of days since its epoch & renders it by the format of the cell; the format
+      // has no timezone, so the local wall-clock time is stored - the very same date that a user sees in the app
+      return {
+        type: ExcelCellTypes.date,
+        stringVal: `${(ms - v.getTimezoneOffset() * 60000) / msPerDay + excelEpochDays}`,
+      };
+    }
+
     if (Array.isArray(v)) return { type: ExcelCellTypes.textWrap, stringVal: v.join(newLine) };
 
-    if (t === "string") return { type: ExcelCellTypes.text, stringVal: v as string };
     if (t === "boolean") return { type: ExcelCellTypes.text, stringVal: v ? "true" : "false" };
     if (t === "number") {
       if (Number.isFinite(v)) {
@@ -822,14 +939,19 @@ exportToExcel.$defaults = {
     return { type: ExcelCellTypes.text, stringVal: (v as any).toString() };
   },
 
-  /** Font of every cell of the document; a missed option is replaced with `{ size: 11, family: "Calibri" }`
-   * @see {@link IExcelSheet.font} to override it per sheet */
-  font: { size: 11, family: "Calibri" } as IExcelFont,
+  font: { size: 11, family: "Calibri" },
+  headerFont: { style: "bold" },
+} as IExcelDefaults;
 
-  /** Font of the header-row of every sheet; missed options are inherited from the font of the sheet
-   * ({@link IExcelSheet.font} merged into {@link exportToExcel.$defaults.font}) - so it usually points only
-   * the difference (`style`, `color` etc.) and keeps the family/size of the sheet
-   * @see {@link IExcelSheet.fontHeader} to override it per sheet
-   * @see {@link IExcelColumnMap.headerFont} to override it per column */
-  fontHeader: { style: "bold" } as IExcelFont,
-};
+interface IExcelDefaults extends IExcelSettings {
+  /** Maps an item-property into the content of a cell: how Excel must store it + the already stringified value
+   * (a finite number becomes {@link ExcelCellTypes.number}, a Date - a real {@link ExcelCellTypes.date},
+   * an array - a multiline {@link ExcelCellTypes.textWrap}, everything else - a plain {@link ExcelCellTypes.text}).
+   *
+   * Override it to change the format of a value or to force a type, ex. to store an amount as a number:
+   * `getCellValue: (h, v) => ({ type: ExcelCellTypes.number, value: (+v).toFixed(2) })`.
+   *
+   * WARN: it's called for every single cell (the hottest path of the export), so it must stay small & must
+   * never allocate anything besides the returned cell - the render reads the cell right away & drops it */
+  getCellValue: <T = any>(v: T[keyof T]) => IExcelCellValue;
+}

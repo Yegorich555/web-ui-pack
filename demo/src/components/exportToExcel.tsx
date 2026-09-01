@@ -221,7 +221,8 @@ export default function ExportToExcelView() {
         "Several sheets (tabs) per document; every sheet has own columns mapping",
         "Auto-detects column width, applies autoFilter & table styling",
         "Custom font per sheet & per header-column: size, family, style, color, backgroundColor",
-        "Formats values by type: Date via localeInfo, boolean, number, string[] (joined by new-line + wrapText)",
+        "Formats values by type: a number & a Date are stored as the real ones, so Excel sorts/filters/sums them",
+        "Date-format per document/sheet/column (localeInfo by default); string[] is joined by new-line + wrapText",
         "Escapes XML-specific symbols & sanitizes a sheet-name according to Excel rules",
         "Returns Blob: save it to a file, upload to a server or attach to an email",
       ]}

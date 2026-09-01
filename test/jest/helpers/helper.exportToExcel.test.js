@@ -191,7 +191,7 @@ describe("helper.exportToExcel", () => {
     await exportToExcel([
       {
         name: "Fonts",
-        // the sheet-font is inherited by every cell & by the header (that adds 'bold' from $defaults.fontHeader)
+        // the sheet-font is inherited by every cell & by the header (that adds 'bold' from $defaults.headerFont)
         font,
         data: [{ v: "a", arr: ["a", "b"], custom: "c", bad: "d" }],
         mapping: [
@@ -240,9 +240,9 @@ describe("helper.exportToExcel", () => {
       const fontId = [...xfs.matchAll(/<xf numFmtId="0" fontId="(\d+)"/g)].map((m) => +m[1])[styleId];
       return [...files["xl/styles.xml"].matchAll(/<font>(.*?)<\/font>/g)][fontId][1];
     };
-    const { font, fontHeader } = exportToExcel.$defaults;
+    const { font, headerFont } = exportToExcel.$defaults;
     exportToExcel.$defaults.font = { size: 12, family: "Georgia" };
-    exportToExcel.$defaults.fontHeader = { style: "bold", color: "#ff0000" };
+    exportToExcel.$defaults.headerFont = { style: "bold", color: "#ff0000" };
     try {
       await exportToExcel([
         // no own font at all => the document-font everywhere
@@ -252,8 +252,8 @@ describe("helper.exportToExcel", () => {
         {
           name: "S3",
           font: { family: "Verdana" },
-          // the header-font of the sheet wins over $defaults.fontHeader, but keeps its missed options
-          fontHeader: { style: "italic" },
+          // the header-font of the sheet wins over $defaults.headerFont, but keeps its missed options
+          headerFont: { style: "italic" },
           // ...and the column wins over the sheet
           data: [{ v: "a", v2: "b" }],
           mapping: [{ propName: "v" }, { propName: "v2", headerFont: { color: "#0000ff" } }],
@@ -268,14 +268,14 @@ describe("helper.exportToExcel", () => {
       expect(fontOf(2, "A2")).toBe(verdana);
       // ...and the header of the sheet is built on top of the sheet-font, not of the document-font
       expect(fontOf(2, "A1")).toBe(`<b/><sz val="12"/><color rgb="FFFF0000"/><name val="Verdana"/><family val="2"/>`);
-      // IExcelSheet.fontHeader replaces the style of $defaults.fontHeader & keeps its color
+      // IExcelSheet.headerFont replaces the style of $defaults.headerFont & keeps its color
       expect(fontOf(3, "A2")).toBe(verdana);
       expect(fontOf(3, "A1")).toBe(`<i/><sz val="12"/><color rgb="FFFF0000"/><name val="Verdana"/><family val="2"/>`);
       // IExcelColumnMap.headerFont is the last one: it re-colors the header but keeps everything else
       expect(fontOf(3, "B1")).toBe(`<i/><sz val="12"/><color rgb="FF0000FF"/><name val="Verdana"/><family val="2"/>`);
     } finally {
       exportToExcel.$defaults.font = font;
-      exportToExcel.$defaults.fontHeader = fontHeader;
+      exportToExcel.$defaults.headerFont = headerFont;
     }
   });
 
@@ -325,10 +325,10 @@ describe("helper.exportToExcel", () => {
     expect(+colOf(2)[1]).toBeGreaterThan(+colOf(1)[1]);
   });
 
-  test("fonts: $defaults.font & $defaults.fontHeader can be overridden", async () => {
-    const { font, fontHeader } = exportToExcel.$defaults;
+  test("fonts: $defaults.font & $defaults.headerFont can be overridden", async () => {
+    const { font, headerFont } = exportToExcel.$defaults;
     exportToExcel.$defaults.font = { size: 12, family: "Times New Roman", style: "italic" };
-    exportToExcel.$defaults.fontHeader = { style: "underline", color: "#123456" };
+    exportToExcel.$defaults.headerFont = { style: "underline", color: "#123456" };
     try {
       await exportToExcel([{ name: "Def", data: [{ v: 1 }], mapping: [{ propName: "v" }] }]);
       // the document-font must be the 1st: Excel measures a column width in the widest digit of the font[0]
@@ -338,7 +338,7 @@ describe("helper.exportToExcel", () => {
       expect(files["xl/styles.xml"]).toMatchSnapshot("xl/styles.xml");
     } finally {
       exportToExcel.$defaults.font = font;
-      exportToExcel.$defaults.fontHeader = fontHeader;
+      exportToExcel.$defaults.headerFont = headerFont;
     }
     // defaults are restored
     await exportToExcel([{ name: "Def", data: [{ v: 1 }], mapping: [{ propName: "v" }] }]);
@@ -417,8 +417,7 @@ describe("helper.exportToExcel", () => {
   test("$defaults.getCellValue can be overridden", async () => {
     const orig = exportToExcel.$defaults.getCellValue;
     // null isn't expected from getCellValue but it must not produce 'null' in a cell
-    exportToExcel.$defaults.getCellValue = (headerKey, v) =>
-      v === 2 ? null : { type: ExcelCellTypes.text, value: `${headerKey.propName}:${v}` };
+    exportToExcel.$defaults.getCellValue = (v) => (v === 2 ? null : { type: ExcelCellTypes.text, stringVal: `v:${v}` });
     try {
       await exportToExcel([{ name: "Custom", data: [{ v: 1 }, { v: 2 }], mapping: [{ propName: "v" }] }]);
       expect(files["xl/worksheets/sheet1.xml"]).toMatchSnapshot("xl/worksheets/sheet1.xml");
@@ -461,23 +460,101 @@ describe("helper.exportToExcel", () => {
     expect(xml).toContain(`<c r="E2" t="inlineStr"><is><t>123</t></is></c>`);
     expect(xml).toContain(`<c r="E3" t="inlineStr"><is><t>0012</t></is></c>`);
     // NaN & Infinity have no representation in the format (Excel reports such a file as corrupted)
-    expect(xml).toContain(`<c r="F2" t="inlineStr"><is><t>NaN</t></is></c>`);
-    expect(xml).toContain(`<c r="F3" t="inlineStr"><is><t>Infinity</t></is></c>`);
+    expect(xml).toContain(`<c r="F2" t="inlineStr"><is><t>Invalid number</t></is></c>`);
+    expect(xml).toContain(`<c r="F3" t="inlineStr"><is><t>Invalid number</t></is></c>`);
     // the auto-width follows the number as it's rendered: 7 chars of '1234.56' are wider than 2 of 'Int'
     const widthOf = (n) => +xml.match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"`))[1];
     expect(widthOf(2)).toBeGreaterThan(widthOf(1));
     expect(xml).toMatchSnapshot("xl/worksheets/sheet1.xml");
   });
 
+  test("dates: stored as a date-serial + a number-format", async () => {
+    await exportToExcel([
+      {
+        name: "Dates",
+        // WARN: Excel has no timezone, so a date is stored as the local time & must be created as a local one
+        data: [{ dt: new Date(2024, 2, 5, 13, 45, 30), day: new Date(2024, 2, 5), bad: new Date("wrong") }],
+        mapping: [
+          { propName: "dt" }, // the default format: localeInfo.dateTime
+          { propName: "day", dateTimeFormat: "dd/MM/yyyy" }, // an own format of the column
+          { propName: "bad" },
+        ],
+      },
+    ]);
+    const xml = files["xl/worksheets/sheet1.xml"];
+    // `t="n"` + `s` that points to a date-format: only such a cell is sorted/filtered by Excel as a date.
+    // 45356 = days between 1899-12-30 (the epoch of Excel) & 2024-03-05; .5732 = 13:45:30
+    expect(xml).toContain(`<c r="A2" s="3" t="n"><v>45356.57326388889</v></c>`);
+    expect(xml).toContain(`<c r="B2" s="4" t="n"><v>45356</v></c>`);
+    // an Invalid Date has no numeric representation at all, so it stays a text
+    expect(xml).toContain(`<c r="C2" t="inlineStr"><is><t>Invalid date</t></is></c>`);
+    // the format is registered once per pointed one & only if a date-cell really occurs (so 'bad' adds nothing)
+    expect(files["xl/styles.xml"]).toContain(
+      `<numFmts count="2"><numFmt numFmtId="164" formatCode="yyyy-mm-dd hh:mm:ss AM/PM"/>` +
+        `<numFmt numFmtId="165" formatCode="dd\\/mm\\/yyyy"/></numFmts>`
+    );
+    // the auto-width of a date-column is defined by the format & not by the stored number
+    const widthOf = (n) => +xml.match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"`))[1];
+    expect(widthOf(1)).toBeGreaterThan(widthOf(2));
+    expect(xml).toMatchSnapshot("xl/worksheets/sheet1.xml");
+    expect(files["xl/styles.xml"]).toMatchSnapshot("xl/styles.xml");
+  });
+
+  test("dates: the format of the sheet & of $defaults", async () => {
+    const orig = exportToExcel.$defaults.dateTimeFormat;
+    exportToExcel.$defaults.dateTimeFormat = "yyyy/M/d";
+    try {
+      await exportToExcel([
+        { name: "S1", data: [{ v: new Date(2024, 2, 5) }], mapping: [{ propName: "v" }] },
+        // the format of the sheet wins over $defaults & is inherited by every column of it
+        { name: "S2", data: [{ v: new Date(2024, 2, 5) }], mapping: [{ propName: "v" }], dateTimeFormat: "MMM d, yy" },
+      ]);
+    } finally {
+      exportToExcel.$defaults.dateTimeFormat = orig;
+    }
+    expect(files["xl/styles.xml"]).toContain(
+      `<numFmts count="2"><numFmt numFmtId="164" formatCode="yyyy\\/m\\/d"/>` +
+        `<numFmt numFmtId="165" formatCode="mmm d, yy"/></numFmts>`
+    );
+  });
+
+  test("dates: the format-tokens of dateToString are converted into the Excel ones", async () => {
+    // the formats that localeInfo.getDateFormat() returns for the real locales + all the supported tokens
+    const formats = [
+      "YYYY-MM-DD hh:mm:ss A", // localeInfo default
+      "M/D/YYYY, h:mm:ss A", // en-US
+      "DD.MM.YYYY, hh:mm:ss", // de-DE, ru-RU
+      "YYYY/M/D h:mm:ss", // ja-JP
+      "MMM d, yy hh:mm:ss.fff Z", // the short name of the month + the fractions + the UTC-flag
+      "dddd", // WARN: 'ddd'+ is the name of the week-day in Excel, so it's cut by 2
+    ];
+    await exportToExcel([
+      {
+        data: [{ v: new Date(2024, 2, 5) }],
+        mapping: formats.map((dateTimeFormat) => ({ propName: "v", dateTimeFormat })),
+      },
+    ]);
+    // WARN: a slash is the locale date-separator of Excel & must be escaped to stay a literal one
+    expect(files["xl/styles.xml"]).toContain(
+      `<numFmts count="6">` +
+        `<numFmt numFmtId="164" formatCode="yyyy-mm-dd hh:mm:ss AM/PM"/>` +
+        `<numFmt numFmtId="165" formatCode="m\\/d\\/yyyy, h:mm:ss AM/PM"/>` +
+        `<numFmt numFmtId="166" formatCode="dd.mm.yyyy, hh:mm:ss"/>` +
+        `<numFmt numFmtId="167" formatCode="yyyy\\/m\\/d h:mm:ss"/>` +
+        `<numFmt numFmtId="168" formatCode="mmm d, yy hh:mm:ss.000 "/>` + // the space of the dropped Z stays
+        `<numFmt numFmtId="169" formatCode="dd"/>` +
+        `</numFmts>`
+    );
+  });
+
   test("getCellValue: the type of a cell is defined by the mapper & not by the value", async () => {
     const orig = exportToExcel.$defaults.getCellValue;
     // the mapper owns both parts of a cell: a stringified number can be forced into a number-cell, a real
     // number - into a text & any value - into a wrapped (multiline) one
-    exportToExcel.$defaults.getCellValue = (headerKey, v) => {
-      const p = headerKey.propName;
-      if (p === "asNum") return { type: ExcelCellTypes.number, value: (+v).toFixed(2) }; // + an own format
-      if (p === "asWrap") return { type: ExcelCellTypes.textWrap, value: `${v}\nsecond line` };
-      return { type: ExcelCellTypes.text, value: `${v}` };
+    exportToExcel.$defaults.getCellValue = (v) => {
+      if (v === "12.5") return { type: ExcelCellTypes.number, stringVal: (+v).toFixed(2) }; // + an own format
+      if (v === "a") return { type: ExcelCellTypes.textWrap, stringVal: `${v}\nsecond line` };
+      return { type: ExcelCellTypes.text, stringVal: `${v}` };
     };
     try {
       await exportToExcel([
