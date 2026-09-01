@@ -40,7 +40,10 @@ export interface IExcelFont {
     | "Segoe UI"
     | (string & {});
   /** Style of the text; only a single one is applicable at once */
-  style?: "bold" | "italic" | "underline";
+  style?: "bold" | "italic" | "underline"; // todo support several styles via bitmask  const enum: ExcelFontStyle.Bold | ExcelFontStyle.Bold | ExcelFontStyle.Underline
+
+  // todo add horizontal and vertical alignment
+
   /** Color of the text in hex-format `#rrggbb`, ex. `#ff0000`;
    * an unparsable value is ignored (so the inherited color stays applied) */
   color?: string;
@@ -144,7 +147,7 @@ interface IExportContext {
   /** Width in px of a single Excel-unit of the column width */
   unitPx: number;
   /** @see {@link exportToExcel.$defaults.getCellValue} */
-  getCellValue: <T>(v: T[keyof T]) => IExcelCellValue;
+  getCellValue: <T = any>(v: T[keyof T]) => IExcelCellValue;
 }
 
 /* ---------------------------------- Shared helpers ---------------------------------- */
@@ -591,7 +594,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
       // the mapped cell is consumed right here & never stored, so the object that it comes in dies immediately:
       // V8 allocates such a short-living object by a pointer-bump & the scavenger costs nothing for it (it walks
       // the survivors only) - measured as ~1% against a mutable holder that is re-used for every cell
-      const cObjVal = getCellValue(item[h.propName]) || emptyCell;
+      const cObjVal = getCellValue<any>(item[h.propName]) || emptyCell;
       const { type } = cObjVal;
       // a `null` isn't expected here, but it must not produce a 'null' in a cell
       const value = cObjVal.stringVal || "";
@@ -727,8 +730,10 @@ function getTableRelsXml(num: number): string {
 
 /** Export pointed data into excel-file according to provided mapping */
 export default async function exportToExcel<T>(
-  sheetsData: Array<IExcelSheet<T>> /* , setCellCallback:()=>  */
+  sheetsData: Array<IExcelSheet<T>> /* todo add setCellCallback:()=> so user can format and set custom value */
 ): Promise<Blob> {
+  // todo change Blob to ISavedBlob that contains .saveAs that reuse saveAs helper
+
   const { getCellValue, font, fontHeader } = exportToExcel.$defaults;
   const documentFont = mergeFont(baseFont, font);
   const ctx: IExportContext = {
