@@ -1,5 +1,5 @@
 import { TextEncoder, TextDecoder } from "util";
-import exportToExcel from "web-ui-pack/helpers/exportToExcel";
+import exportToExcel, { ExcelCellTypes } from "web-ui-pack/helpers/exportToExcel";
 import zip from "web-ui-pack/helpers/zip";
 
 // zip() is mocked: it returns the prepared files as-is, so every xml is checked directly & without unzipping
@@ -417,16 +417,84 @@ describe("helper.exportToExcel", () => {
   test("$defaults.getCellValue can be overridden", async () => {
     const orig = exportToExcel.$defaults.getCellValue;
     // null isn't expected from getCellValue but it must not produce 'null' in a cell
-    exportToExcel.$defaults.getCellValue = (headerKey, v) => (v === 2 ? null : `${headerKey.propName}:${v}`);
+    exportToExcel.$defaults.getCellValue = (headerKey, v) =>
+      v === 2 ? null : { type: ExcelCellTypes.text, value: `${headerKey.propName}:${v}` };
     try {
       await exportToExcel([{ name: "Custom", data: [{ v: 1 }, { v: 2 }], mapping: [{ propName: "v" }] }]);
       expect(files["xl/worksheets/sheet1.xml"]).toMatchSnapshot("xl/worksheets/sheet1.xml");
     } finally {
       exportToExcel.$defaults.getCellValue = orig;
     }
-    // default is restored
+    // default is restored: a number is stored as a number again
     await exportToExcel([{ name: "Custom", data: [{ v: 1 }], mapping: [{ propName: "v" }] }]);
-    expect(files["xl/worksheets/sheet1.xml"]).toContain("<is><t>1</t></is>");
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="A2" t="n"><v>1</v></c>`);
+  });
+
+  test("numbers: stored as numbers & not as a text", async () => {
+    await exportToExcel([
+      {
+        name: "Numbers",
+        data: [
+          { int: 30, float: 1234.56, negative: -7, zero: 0, str: "123", special: Number.NaN },
+          { int: -0, float: 1e21, negative: -0.5, zero: 0.1, str: "0012", special: Number.POSITIVE_INFINITY },
+        ],
+        mapping: [
+          { propName: "int" },
+          { propName: "float" },
+          { propName: "negative" },
+          { propName: "zero" },
+          { propName: "str" }, // a numeric string stays a text: a leading zero etc. must not be lost
+          { propName: "special" }, // NaN/Infinity can't be stored as a number => a text
+        ],
+      },
+    ]);
+    const xml = files["xl/worksheets/sheet1.xml"];
+    // `t="n"` + a raw <v>: only such a cell is summed/sorted/filtered by Excel as a number
+    expect(xml).toContain(`<c r="A2" t="n"><v>30</v></c>`);
+    expect(xml).toContain(`<c r="B2" t="n"><v>1234.56</v></c>`);
+    expect(xml).toContain(`<c r="C2" t="n"><v>-7</v></c>`);
+    expect(xml).toContain(`<c r="D2" t="n"><v>0</v></c>`);
+    expect(xml).toContain(`<c r="A3" t="n"><v>0</v></c>`); // -0 is stringified as '0'
+    expect(xml).toContain(`<c r="B3" t="n"><v>1e+21</v></c>`); // the exponent-form is a valid xsd:double
+    expect(xml).toContain(`<c r="C3" t="n"><v>-0.5</v></c>`);
+    // a string is never converted into a number, so '0012' keeps its leading zeros
+    expect(xml).toContain(`<c r="E2" t="inlineStr"><is><t>123</t></is></c>`);
+    expect(xml).toContain(`<c r="E3" t="inlineStr"><is><t>0012</t></is></c>`);
+    // NaN & Infinity have no representation in the format (Excel reports such a file as corrupted)
+    expect(xml).toContain(`<c r="F2" t="inlineStr"><is><t>NaN</t></is></c>`);
+    expect(xml).toContain(`<c r="F3" t="inlineStr"><is><t>Infinity</t></is></c>`);
+    // the auto-width follows the number as it's rendered: 7 chars of '1234.56' are wider than 2 of 'Int'
+    const widthOf = (n) => +xml.match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"`))[1];
+    expect(widthOf(2)).toBeGreaterThan(widthOf(1));
+    expect(xml).toMatchSnapshot("xl/worksheets/sheet1.xml");
+  });
+
+  test("getCellValue: the type of a cell is defined by the mapper & not by the value", async () => {
+    const orig = exportToExcel.$defaults.getCellValue;
+    // the mapper owns both parts of a cell: a stringified number can be forced into a number-cell, a real
+    // number - into a text & any value - into a wrapped (multiline) one
+    exportToExcel.$defaults.getCellValue = (headerKey, v) => {
+      const p = headerKey.propName;
+      if (p === "asNum") return { type: ExcelCellTypes.number, value: (+v).toFixed(2) }; // + an own format
+      if (p === "asWrap") return { type: ExcelCellTypes.textWrap, value: `${v}\nsecond line` };
+      return { type: ExcelCellTypes.text, value: `${v}` };
+    };
+    try {
+      await exportToExcel([
+        {
+          name: "Custom",
+          data: [{ asNum: "12.5", asText: 3, asWrap: "a" }],
+          mapping: [{ propName: "asNum" }, { propName: "asText" }, { propName: "asWrap" }],
+        },
+      ]);
+      const xml = files["xl/worksheets/sheet1.xml"];
+      expect(xml).toContain(`<c r="A2" t="n"><v>12.50</v></c>`);
+      expect(xml).toContain(`<c r="B2" t="inlineStr"><is><t>3</t></is></c>`);
+      // ...a wrapped cell gets an own cell-format (with wrapText) even if the value isn't an array at all
+      expect(xml).toContain(`<c r="C2" s="1" t="inlineStr"><is><t>a\nsecond line</t></is></c>`);
+    } finally {
+      exportToExcel.$defaults.getCellValue = orig;
+    }
   });
 
   test("rejects when zipping is failed", async () => {

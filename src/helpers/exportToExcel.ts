@@ -87,6 +87,24 @@ export interface IExcelSheet<T = any> {
   fontHeader?: IExcelFont;
 }
 
+/** Way that Excel stores & parses the content of a cell (see {@link IExcelCellValue.type}) */
+export const enum ExcelCellTypes {
+  /** An ordinary text: stored as an inline string (`t="inlineStr"`) */
+  text,
+  /** A number: stored as a real number so Excel sums/sorts/filters */
+  number,
+  /** A multiline text */
+  textWrap,
+}
+
+/** Content of a single cell: {@link exportToExcel.$defaults.getCellValue} maps an item-property into it */
+export interface IExcelCellValue {
+  /** Way that Excel stores the {@link IExcelCellValue.stringVal} */
+  type: ExcelCellTypes;
+  /** Content of the cell; it's always a string - the xml is a text by itself */
+  stringVal: string;
+}
+
 /** Font with the options that are required by the file-format (so it's always ready to be rendered) */
 type IExcelFontFull = IExcelFont & Required<Pick<IExcelFont, "size" | "family">>;
 
@@ -126,7 +144,7 @@ interface IExportContext {
   /** Width in px of a single Excel-unit of the column width */
   unitPx: number;
   /** @see {@link exportToExcel.$defaults.getCellValue} */
-  getCellValue: <T>(headerKey: IExcelColumnMap<T>, v: T[keyof T]) => string;
+  getCellValue: <T>(v: T[keyof T]) => IExcelCellValue;
 }
 
 /* ---------------------------------- Shared helpers ---------------------------------- */
@@ -219,6 +237,10 @@ function createUtf8Writer(): IUtf8Writer {
 /** Line-separator inside a cell (array values are joined by it) */
 const newLineCode = 10;
 const newLine = String.fromCharCode(newLineCode);
+
+/** Empty cell: the fallback for a {@link exportToExcel.$defaults.getCellValue} that returns nothing at all.
+ * WARN: it's read-only by the contract - the render never writes into a mapped cell */
+const emptyCell: IExcelCellValue = { type: ExcelCellTypes.text, stringVal: "" };
 
 /** Count of the ASCII chars (`32..126`) that {@link autoWidth.familyPx} holds the measured width of */
 const asciiCount = 95;
@@ -486,8 +508,8 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
  * per row + an object & a retained string per cell and forces 2 extra passes over the whole dataset. */
 function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   const { styles, getCellValue } = ctx;
-  const columns = sheet.mapping;
-  const colCount = columns.length;
+  const cols = sheet.mapping;
+  const colCount = cols.length;
   const font = mergeFont(ctx.font, sheet.font);
   // the font of the sheet is the one of every column that doesn't override it & of the cells around the data,
   // so its style is resolved once & re-used below instead of being re-registered per column
@@ -520,13 +542,13 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   let headerCells = "";
 
   for (let c = 0; c < colCount; ++c) {
-    const h = columns[c];
+    const h = cols[c];
     const text = getHeaderText(h);
     // an own font of the column is merged into the sheet-font & becomes the base of its header either;
     // a column without it re-uses the ready fonts/styles of the sheet, so nothing is allocated per column
     const colFont = h.font ? mergeFont(font, h.font) : font;
-    const headerBase = h.font ? mergeFont(colFont, ctx.fontHeader, sheet.fontHeader) : sheetHeaderFont;
-    const headerFont = h.headerFont ? mergeFont(headerBase, h.headerFont) : headerBase;
+    const hBase = h.font ? mergeFont(colFont, ctx.fontHeader, sheet.fontHeader) : sheetHeaderFont;
+    const hFont = h.headerFont ? mergeFont(hBase, h.headerFont) : hBase;
     const letter = getColumnLetter(c);
     letters.push(letter);
     headers.push(text);
@@ -544,14 +566,13 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     const m = autoWidth.getMetrics(colFont);
     cellMetrics.push(m);
     cellScale[c] = autoWidth.getScale(colFont);
-    const hm = autoWidth.getMetrics(headerFont);
+    const hm = autoWidth.getMetrics(hFont);
     maxPx[c] =
       h.width !== undefined
         ? -1
-        : autoWidth.getTextPx(text, hm.charPx, hm.defaultPx) * autoWidth.getScale(headerFont) +
-          autoWidth.filterButtonPx;
+        : autoWidth.getTextPx(text, hm.charPx, hm.defaultPx) * autoWidth.getScale(hFont) + autoWidth.filterButtonPx;
 
-    const headerStyle = styles.getCellStyle(headerFont, false);
+    const headerStyle = styles.getCellStyle(hFont, false);
     const style = headerStyle ? `s="${headerStyle}" ` : "";
     headerCells += `<c r="${letter}1" ${style}t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
   }
@@ -566,29 +587,36 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     const rowNum = `${r + 2}`;
     let cells = "";
     for (let c = 0; c < colCount; ++c) {
-      const h = columns[c];
-      const v = getCellValue(h, item[h.propName]);
-      // an array is joined by the new-line, so such a cell must be wrapped
-      const isArray = Array.isArray(v);
-      let value = "";
-      if (isArray) value = v.join(newLine);
-      else if (v != null) value = v.toString();
+      const h = cols[c];
+      // the mapped cell is consumed right here & never stored, so the object that it comes in dies immediately:
+      // V8 allocates such a short-living object by a pointer-bump & the scavenger costs nothing for it (it walks
+      // the survivors only) - measured as ~1% against a mutable holder that is re-used for every cell
+      const cObjVal = getCellValue(item[h.propName]) || emptyCell;
+      const { type } = cObjVal;
+      // a `null` isn't expected here, but it must not produce a 'null' in a cell
+      const value = cObjVal.stringVal || "";
       const px = maxPx[c];
       if (px >= 0) {
         const m = cellMetrics[c];
+        // WARN: a number is measured by its JS-representation - the `General` format that Excel really renders
+        // it by is close enough & can only be narrower (Excel rounds a long fraction to fit the column)
         const w = autoWidth.getTextPx(value, m.charPx, m.defaultPx) * cellScale[c];
         if (w > px) maxPx[c] = w;
       }
-      cells += `<c r="${letters[c]}${rowNum}" ${
-        isArray ? cellStyleWrapXml[c] : cellStyleXml[c]
-      }t="inlineStr"><is><t>${escape(value)}</t></is></c>`;
+      // a number is never escaped & needs no `<is>`-wrapper, so it's a separate & much shorter template
+      cells +=
+        type === ExcelCellTypes.number
+          ? `<c r="${letters[c]}${rowNum}" ${cellStyleXml[c]}t="n"><v>${value}</v></c>`
+          : `<c r="${letters[c]}${rowNum}" ${
+              type === ExcelCellTypes.textWrap ? cellStyleWrapXml[c] : cellStyleXml[c]
+            }t="inlineStr"><is><t>${escape(value)}</t></is></c>`;
     }
     rows.add(`<row r="${rowNum}">${cells}</row>`);
   }
 
   let colsXml = "";
   for (let c = 0; c < colCount; ++c) {
-    const { width, maxWidth } = columns[c];
+    const { width, maxWidth } = cols[c];
     // an explicit width wins; otherwise it's defined by the longest content measured above
     const w =
       width ??
@@ -760,15 +788,33 @@ export default async function exportToExcel<T>(
 }
 
 exportToExcel.$defaults = {
-  /** Returns string value for cell based on value type */
-  getCellValue: function getCellValue<T>(headerKey: IExcelColumnMap<T>, v: T[keyof T]): string {
-    if (v == null) return "";
-    if (v instanceof Date) return dateToString(v, localeInfo.dateTime);
+  /** Maps an item-property into the content of a cell: how Excel must store it + the already stringified value
+   * (a finite number becomes {@link ExcelCellTypes.number}, an array - a multiline {@link ExcelCellTypes.textWrap},
+   * everything else - a plain {@link ExcelCellTypes.text}).
+   *
+   * Override it to change the format of a value or to force a type, ex. to store an amount as a number:
+   * `getCellValue: (h, v) => ({ type: ExcelCellTypes.number, value: (+v).toFixed(2) })`.
+   *
+   * WARN: it's called for every single cell (the hottest path of the export), so it must stay small & must
+   * never allocate anything besides the returned cell - the render reads the cell right away & drops it */
+  getCellValue: function getCellValue<T = any>(v: T[keyof T]): IExcelCellValue {
     const t = typeof v;
-    if (t === "string") return v as string;
-    if (t === "boolean") return v ? "true" : "false";
-    if (t === "number") return v.toString();
-    return v as string;
+
+    if (v == null) return { type: ExcelCellTypes.text, stringVal: "" };
+    if (v instanceof Date) return { type: ExcelCellTypes.text, stringVal: dateToString(v, localeInfo.dateTime) };
+    if (Array.isArray(v)) return { type: ExcelCellTypes.textWrap, stringVal: v.join(newLine) };
+
+    if (t === "string") return { type: ExcelCellTypes.text, stringVal: v as string };
+    if (t === "boolean") return { type: ExcelCellTypes.text, stringVal: v ? "true" : "false" };
+    if (t === "number") {
+      if (Number.isFinite(v)) {
+        // NaN & Infinity have no representation in the format at all (Excel reports such a file as corrupted)
+        return { type: ExcelCellTypes.number, stringVal: (v as number).toString() };
+      }
+      return { type: ExcelCellTypes.text, stringVal: "Invalid number" };
+    }
+
+    return { type: ExcelCellTypes.text, stringVal: (v as any).toString() };
   },
 
   /** Font of every cell of the document; a missed option is replaced with `{ size: 11, family: "Calibri" }`
