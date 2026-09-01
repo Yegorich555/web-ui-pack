@@ -667,14 +667,6 @@ const dopt = (dat: Uint8Array, opt: DeflateOptions): Uint8Array => {
 const mrg = <A, B>(a: A, b: B): A & B => ({ ...a, ...b } as A & B);
 
 // worker clone
-
-// This is possibly the craziest part of the entire codebase, despite how simple it may seem.
-// The only parameter to this function is a closure that returns an array of variables outside of the function scope.
-// We're going to try to figure out the variable names used in the closure as strings because that is crucial for workerization.
-// We will return an object mapping of true variable name to value (basically, the current scope as a JS object).
-// The reason we can't just use the original variable names is minifiers mangling the toplevel scope.
-
-// This took me three weeks to figure out how to do.
 const wcln = (fn: () => unknown[], td: Record<string, unknown>): string => {
   let fnStr = "";
   const dt = fn();
@@ -713,8 +705,9 @@ const ch: CachedWorker[] = [];
 const cbfs = (v: Record<string, unknown>): ArrayBuffer[] =>
   Object.keys(v).map((k) => {
     const a = v[k] as Uint8Array;
-    v[k] = new (a.constructor as typeof U8)(a);
-    return (v[k] as Uint8Array).buffer;
+    const cln = new (a.constructor as typeof U8)(a);
+    v[k] = cln;
+    return cln.buffer as ArrayBuffer;
   });
 
 // use a worker to execute code
@@ -738,38 +731,8 @@ const wrkr = <T, R>(
   );
 };
 
-const bDflt = (): unknown[] => [
-  U8,
-  U16,
-  I32,
-  fleb,
-  fdeb,
-  clim,
-  revfl,
-  revfd,
-  flm,
-  flt,
-  fdm,
-  fdt,
-  rev,
-  deo,
-  et,
-  hMap,
-  wbits,
-  wbits16,
-  hTree,
-  ln,
-  lc,
-  clen,
-  wfblk,
-  wblk,
-  shft,
-  slc,
-  dflt,
-  dopt,
-  deflateSync,
-  pbf,
-];
+// eslint-disable-next-line max-len
+const bDflt = (): unknown[] => [U8,U16,I32,fleb,fdeb,clim,revfl,revfd,flm,flt,fdm,fdt,rev,deo,et,hMap,wbits,wbits16,hTree,ln,lc,clen,wfblk,wblk,shft,slc,dflt,dopt,deflateSync,pbf]; // prettier-ignore
 // post buf
 const pbf = (msg: Uint8Array): void => (postMessage as Worker["postMessage"])(msg, [msg.buffer]);
 
