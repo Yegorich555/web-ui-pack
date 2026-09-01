@@ -10,15 +10,34 @@ import localeInfo from "../objects/localeInfo";
  * - {@link createStyles} is the only stateful collector: Excel stores every font/fill once & a cell refers to it;
  * - {@link renderSheet} is a single pass over the data: a value is measured & rendered at once, so nothing
  *   per-cell is kept in memory (see the comment there);
- * - {@link exportToExcel} is an orchestrator: builds the per-export {@link IExportContext} & zips the result. */
-
+ * - {@link exportToExcel} is an orchestrator: builds the per-export {@link IExportContext} & zips the result.
+ *  */
 export interface IExcelFont {
   /** Size of the font in points
    * @defaultValue 11 */
   size?: number;
-  /** Name of the font; must be installed on the machine where the document is opened
+  /** Name of the font;
+   *
+   * WARN: the auto-width of a column is measured for `Calibri` so point {@link IExcelColumnMap.width} for such a case
    * @defaultValue "Calibri" */
-  family?: string; // todo OR explicit known strings ???
+  family?: /** Default of Excel 2007-2021; on Linux it's substituted by the metric-compatible `Carlito` */
+  | "Calibri" // Fonts that are shipped with Excel on both Windows & macOS, so a document keeps the same look everywhere
+    // core web fonts: pre-installed on Windows & macOS regardless of the Office version
+    | "Arial"
+    | "Courier New"
+    | "Georgia"
+    | "Tahoma"
+    | "Times New Roman"
+    | "Trebuchet MS"
+    | "Verdana"
+    // ClearType collection: shipped with Office 2007+
+    | "Cambria"
+    | "Candara"
+    | "Consolas"
+    | "Constantia"
+    | "Corbel"
+    | "Segoe UI"
+    | (string & {});
   /** Style of the text; only a single one is applicable at once */
   style?: "bold" | "italic" | "underline";
   /** Color of the text in hex-format `#rrggbb`, ex. `#ff0000`;
