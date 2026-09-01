@@ -213,9 +213,116 @@ describe("helper.exportToExcel", () => {
     // the unparsable colors of 'bad' are ignored => its header re-uses the style of the ordinary headers
     expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="D1" s="3" t="inlineStr"><is><t>Bad</t></is></c>`);
     expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="A1" s="3" t="inlineStr"><is><t>V</t></is></c>`);
+    // WARN: a stored cell MUST carry an own `s` - Excel applies the format of `<col>` only to a cell that isn't
+    // stored in the sheet at all (checked against the real Excel), so the sheet-font is repeated per cell
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="A2" s="1" t="inlineStr"><is><t>a</t></is></c>`);
+    // ...an array-cell has the same font but with wrapText => an own cell-format
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="B2" s="2" t="inlineStr"><is><t>a\nb</t></is></c>`);
+    // the same style is set on every column & on the range of the columns that the mapping doesn't cover:
+    // that's the only way to apply the sheet-font to a cell around the data (the one a user types in later).
+    // WARN: `width` must be pointed there - a `<col>` without it collapses the columns & Excel hides them
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<col min="1" max="1" width="5.21" style="1"`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<col min="5" max="16384" width="9.15" style="1"/>`);
     // the 2nd sheet re-uses the styles of the 1st one
+    expect(files["xl/worksheets/sheet2.xml"]).toContain(`<col min="2" max="16384" width="9.15" style="1"/>`);
     expect(files["xl/worksheets/sheet2.xml"]).toContain(`<c r="A1" s="3" t="inlineStr"><is><t>V</t></is></c>`);
     expect(files["xl/worksheets/sheet2.xml"]).toContain(`<c r="A2" s="1" t="inlineStr"><is><t>b</t></is></c>`);
+  });
+
+  test("fonts: the inheritance chain of the document, the sheet & the column", async () => {
+    /** font-xml that the pointed cell is really rendered by (resolved through `s` / the format of its `<col>`) */
+    const fontOf = (sheetNum, cellRef) => {
+      const xml = files[`xl/worksheets/sheet${sheetNum}.xml`];
+      const cell = xml.match(new RegExp(`<c r="${cellRef}"( s="(\\d+)")? `));
+      const col = xml.match(/<col min="1"[^>]* style="(\d+)"/);
+      const styleId = cell[2] !== undefined ? +cell[2] : (col && +col[1]) || 0;
+      const xfs = files["xl/styles.xml"].match(/<cellXfs count="\d+">(.*)<\/cellXfs>/)[1];
+      const fontId = [...xfs.matchAll(/<xf numFmtId="0" fontId="(\d+)"/g)].map((m) => +m[1])[styleId];
+      return [...files["xl/styles.xml"].matchAll(/<font>(.*?)<\/font>/g)][fontId][1];
+    };
+    const { font, fontHeader } = exportToExcel.$defaults;
+    exportToExcel.$defaults.font = { size: 12, family: "Georgia" };
+    exportToExcel.$defaults.fontHeader = { style: "bold", color: "#ff0000" };
+    try {
+      await exportToExcel([
+        // no own font at all => the document-font everywhere
+        { name: "S1", data: [{ v: "a" }], mapping: [{ propName: "v" }] },
+        // an own font: the missed size is inherited from the document-font & the header follows the sheet-family
+        { name: "S2", font: { family: "Verdana" }, data: [{ v: "a" }], mapping: [{ propName: "v" }] },
+        {
+          name: "S3",
+          font: { family: "Verdana" },
+          // the header-font of the sheet wins over $defaults.fontHeader, but keeps its missed options
+          fontHeader: { style: "italic" },
+          // ...and the column wins over the sheet
+          data: [{ v: "a", v2: "b" }],
+          mapping: [{ propName: "v" }, { propName: "v2", headerFont: { color: "#0000ff" } }],
+        },
+      ]);
+      const georgia = `<sz val="12"/><name val="Georgia"/><family val="2"/>`;
+      const verdana = `<sz val="12"/><name val="Verdana"/><family val="2"/>`;
+      // the document-font is applied to a sheet that has no own one
+      expect(fontOf(1, "A2")).toBe(georgia);
+      expect(fontOf(1, "A1")).toBe(`<b/><sz val="12"/><color rgb="FFFF0000"/><name val="Georgia"/><family val="2"/>`);
+      // the sheet-font overrides only the pointed options (the size is still inherited from the document-font)
+      expect(fontOf(2, "A2")).toBe(verdana);
+      // ...and the header of the sheet is built on top of the sheet-font, not of the document-font
+      expect(fontOf(2, "A1")).toBe(`<b/><sz val="12"/><color rgb="FFFF0000"/><name val="Verdana"/><family val="2"/>`);
+      // IExcelSheet.fontHeader replaces the style of $defaults.fontHeader & keeps its color
+      expect(fontOf(3, "A2")).toBe(verdana);
+      expect(fontOf(3, "A1")).toBe(`<i/><sz val="12"/><color rgb="FFFF0000"/><name val="Verdana"/><family val="2"/>`);
+      // IExcelColumnMap.headerFont is the last one: it re-colors the header but keeps everything else
+      expect(fontOf(3, "B1")).toBe(`<i/><sz val="12"/><color rgb="FF0000FF"/><name val="Verdana"/><family val="2"/>`);
+    } finally {
+      exportToExcel.$defaults.font = font;
+      exportToExcel.$defaults.fontHeader = fontHeader;
+    }
+  });
+
+  test("fonts: per-column font & the auto-width that follows it", async () => {
+    const sheetXml = () => files["xl/worksheets/sheet1.xml"];
+    const colOf = (n) => sheetXml().match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"( style="(\\d+)")?`));
+    const styleOfCell = (ref) => sheetXml().match(new RegExp(`<c r="${ref}"( s="(\\d+)")? `))[2];
+
+    await exportToExcel([
+      {
+        name: "PerColumn",
+        font: { family: "Arial" },
+        data: [{ a: "wwwwwwwwww", b: "wwwwwwwwww", c: ["x", "y"] }],
+        mapping: [
+          { propName: "a", headerText: "A" }, // the sheet-font
+          { propName: "b", headerText: "B", font: { family: "Verdana" } }, // an own font
+          { propName: "c", headerText: "C", font: { family: "Verdana" } }, // + a wrapped (array) cell
+        ],
+      },
+    ]);
+    const [, widthA, , styleA] = colOf(1);
+    const [, widthB, , styleB] = colOf(2);
+    // the column-font is a separate cell-format: it's set on the `<col>` & on every cell of the column
+    expect(styleA).not.toBe(styleB);
+    expect(styleOfCell("A2")).toBe(styleA);
+    expect(styleOfCell("B2")).toBe(styleB);
+    // ...an array-cell of the column keeps the same font but adds wrapText => an own format again
+    expect(styleOfCell("C2")).not.toBe(styleB);
+    // the auto-width is measured by the font of the column, so the same text is wider in the Verdana one
+    expect(+widthB).toBeGreaterThan(+widthA * 1.1);
+    // the columns that the mapping doesn't cover belong to the sheet, so they keep the sheet-font & never
+    // inherit the font of the last mapped column
+    expect(sheetXml()).toContain(`<col min="4" max="16384" width="9.15" style="${styleA}"/>`);
+
+    // a column-font is inherited by the header of the column either
+    await exportToExcel([
+      {
+        name: "H",
+        font: { family: "Calibri" },
+        data: [{ a: "x", b: "x" }],
+        mapping: [
+          { propName: "a", headerText: "Wide header" },
+          { propName: "b", headerText: "Wide header", font: { family: "Verdana" } },
+        ],
+      },
+    ]);
+    expect(+colOf(2)[1]).toBeGreaterThan(+colOf(1)[1]);
   });
 
   test("fonts: $defaults.font & $defaults.fontHeader can be overridden", async () => {
@@ -240,7 +347,7 @@ describe("helper.exportToExcel", () => {
 
   test("auto-width: font-scale, non-latin chars & multiline", async () => {
     const colWidth = () => +files["xl/worksheets/sheet1.xml"].match(/<col [^>]*width="([\d.]+)"/)[1];
-    // 'Ж' isn't latin => 8px per char (as the default one); the longest line of a multiline value wins
+    // 'Ж' isn't latin => the averaged non-latin width of the font (9px for Calibri); the longest line wins
     const sheet = (font) => ({
       name: "W",
       font,
@@ -249,13 +356,62 @@ describe("helper.exportToExcel", () => {
     });
 
     await exportToExcel([sheet()]);
-    // 10 chars * 8px + 7px of the cell-padding, converted into the Excel-units (7px each)
-    expect(colWidth()).toBe(12.43);
+    // 10 chars * 9px + 7px of the cell-padding, converted into the Excel-units (7px each)
+    expect(colWidth()).toBe(13.86);
 
     await exportToExcel([sheet({ size: 22 })]);
     // the double font-size makes the content ~2x wider (the constant cell-padding isn't scaled)
-    expect(colWidth()).toBeGreaterThan(12.43 * 1.85);
-    expect(colWidth()).toBeLessThan(12.43 * 2);
+    expect(colWidth()).toBeGreaterThan(13.86 * 1.85);
+    expect(colWidth()).toBeLessThan(13.86 * 2);
+  });
+
+  test("auto-width: per-family & per-face char metrics", async () => {
+    const colWidth = () => +files["xl/worksheets/sheet1.xml"].match(/<col [^>]*width="([\d.]+)"/)[1];
+    const sheet = (font, v = "wwwwwwwwww") => ({ name: "W", font, data: [{ v }], mapping: [{ propName: "v" }] });
+    const widthOf = async (font, v) => {
+      await exportToExcel([sheet(font, v)]);
+      return colWidth();
+    };
+
+    // Calibri: the font that every other one is compared to here
+    const baseW = await widthOf(undefined, "wwwwwwwwww");
+    const baseDigits = await widthOf(undefined, "0123456789");
+
+    // the document-font stays Calibri, so the Excel-unit isn't changed & only the wider text is applied
+    expect(await widthOf({ family: "Verdana" }, "wwwwwwwwww")).toBeGreaterThan(baseW * 1.1);
+    // WARN: a single per-family ratio can't describe a font - the glyphs aren't scaled proportionally.
+    // `Arial` is the case that the ratio used to get wrong: its `w` is exactly as wide as the Calibri one,
+    // while its digits are ~13% wider (so a date/number column was measured too narrow & got cut off)
+    expect(await widthOf({ family: "Arial" }, "wwwwwwwwww")).toBe(baseW);
+    expect(await widthOf({ family: "Arial" }, "0123456789")).toBeGreaterThan(baseDigits * 1.1);
+    // a monospace font measures every char the same
+    expect(await widthOf({ family: "Courier New" }, "0123456789")).toBe(
+      await widthOf({ family: "Courier New" }, "wwwwwwwwww")
+    );
+    // an unknown font is measured as Calibri; a name is case-insensitive
+    expect(await widthOf({ family: "SomeUnknownFont" }, "wwwwwwwwww")).toBe(baseW);
+    expect(await widthOf({ family: "vErDaNa" }, "wwwwwwwwww")).toBeGreaterThan(baseW * 1.1);
+
+    // `bold` is measured by the own face of the family & isn't a ratio either: it doesn't widen Calibri at all,
+    // while the same text of Tahoma gets ~17% wider
+    expect(await widthOf({ style: "bold" }, "Active")).toBe(await widthOf(undefined, "Active"));
+    expect(await widthOf({ family: "Tahoma", style: "bold" }, "Active")).toBeGreaterThan(
+      await widthOf({ family: "Tahoma" }, "Active")
+    );
+    // `italic` & `underline` don't change the advances, so they share the regular face
+    expect(await widthOf({ style: "italic" }, "Active")).toBe(await widthOf(undefined, "Active"));
+
+    // the document-font defines the Excel-unit: the same font on the both sides almost cancels the scale out
+    const { font } = exportToExcel.$defaults;
+    exportToExcel.$defaults.font = { size: 11, family: "Verdana" };
+    try {
+      // ~18% narrower than Calibri: Verdana digits (the unit) are wider than its letters
+      const w = await widthOf({ family: "Verdana" }, "wwwwwwwwww");
+      expect(w).toBeLessThan(baseW);
+      expect(w).toBeGreaterThan(baseW * 0.75);
+    } finally {
+      exportToExcel.$defaults.font = font;
+    }
   });
 
   test("$defaults.getCellValue can be overridden", async () => {

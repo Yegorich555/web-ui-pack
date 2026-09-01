@@ -18,7 +18,8 @@ export interface IExcelFont {
   size?: number;
   /** Name of the font;
    *
-   * WARN: the auto-width of a column is measured for `Calibri` so point {@link IExcelColumnMap.width} for such a case
+   * WARN: the auto-width of a column is measured only for the listed fonts (see {@link autoWidth.familyPx});
+   * any other font is measured as `Calibri`, so point {@link IExcelColumnMap.width} for such a case
    * @defaultValue "Calibri" */
   family?: /** Default of Excel 2007-2021; on Linux it's substituted by the metric-compatible `Carlito` */
   | "Calibri" // Fonts that are shipped with Excel on both Windows & macOS, so a document keeps the same look everywhere
@@ -53,7 +54,13 @@ export interface IExcelColumnMap<T = any> {
   propName: keyof T;
   /** Text of header, if `undefined` then extacted from propName via stringPrettify() */
   headerText?: string;
-  /** Font for the header cell of the column; missed options are inherited from the sheet-font
+  /** Font for every data-cell of the column; missed options are inherited from the font of the sheet
+   * ({@link IExcelSheet.font} + {@link exportToExcel.$defaults.font}). It's the base of the header-cell either,
+   * so a column keeps its own family/size in the header-row as well
+   * @defaultValue {@link IExcelSheet.font} => the font of the sheet */
+  font?: IExcelFont;
+  /** Font for the header cell of the column; missed options are inherited from the header-font of the sheet
+   * ({@link IExcelSheet.fontHeader} + {@link exportToExcel.$defaults.fontHeader} + the font of the sheet)
    * @defaultValue {@link exportToExcel.$defaults.fontHeader} + {@link exportToExcel.$defaults.font} => `{ size: 11, family: "Calibri", style: 'bold' }` */
   headerFont?: IExcelFont;
   /** Width for column; by default it's auto-defined by the longest content */
@@ -69,9 +76,15 @@ export interface IExcelSheet<T = any> {
   mapping: IExcelColumnMap<T>[];
   /** Name of the Excel tab; default is `Sheet{number}` */
   name?: string;
-  /** Font for excelSheet
+  /** Font for excelSheet; missed options are inherited from {@link exportToExcel.$defaults.font}
    * @defaultValue {@link exportToExcel.$defaults.font} => `{ size: 11, family: "Calibri" }` */
   font?: IExcelFont;
+  /** Font for the header-row of the sheet; missed options are inherited from {@link exportToExcel.$defaults.fontHeader}
+   * and then from {@link IExcelSheet.font} - so it usually points only the difference (`style`, `color` etc.)
+   * and keeps the family/size of the sheet
+   * @defaultValue {@link exportToExcel.$defaults.fontHeader} => `{ style: 'bold' }`
+   * @see {@link IExcelColumnMap.headerFont} to override it per column */
+  fontHeader?: IExcelFont;
 }
 
 /** Font with the options that are required by the file-format (so it's always ready to be rendered) */
@@ -207,58 +220,100 @@ function createUtf8Writer(): IUtf8Writer {
 const newLineCode = 10;
 const newLine = String.fromCharCode(newLineCode);
 
-/** `BCKPRXbdehnopqu` & non-latin (cyrillic etc.) chars are 8px wide */
-const defaultCharPx = 8;
+/** Count of the ASCII chars (`32..126`) that {@link autoWidth.familyPx} holds the measured width of */
+const asciiCount = 95;
+
+/** Everything that the auto-width needs to know about a face of a font: decoded from {@link autoWidth.familyPx} */
+interface IFontMetrics {
+  /** Width in px of an ASCII char indexed by the char-code; a code out of `32..126` holds `defaultPx` */
+  charPx: Uint8Array;
+  /** Width in px of a non-ASCII (cyrillic etc.) char */
+  defaultPx: number;
+  /** Width in px of the widest digit: Excel's unit of the column width */
+  maxDigitPx: number;
+}
 
 /** Auto-width of a column: the file-format has no auto-width at all - `bestFit` is only a marker & Excel never
  * re-measures such a column, so the width must be estimated here.
- * Everything is calculated in pixels of the default font (Calibri 11, see {@link exportToExcel.$defaults.font}),
- * scaled to the really applied font & converted into Excel-units (the widest digit of the document font) at the end */
+ * Everything is calculated in pixels of the really applied font & converted into Excel-units (the widest digit
+ * of the document font, see {@link exportToExcel.$defaults.font}) at the end */
 const autoWidth = {
-  /** Excel's unit of the column width: the widest digit of the document font */
-  maxDigitPx: 7,
-  /** Font-size (in points) that `charPx` & `maxDigitPx` are measured for */
+  /** Font-size (in points) that {@link autoWidth.familyPx} is measured for */
   basePt: 11,
-  /** A bold text is ~6% wider than the regular one */
-  boldRatio: 1.06,
   /** Excel reserves 5px inside a cell (2px padding on both sides + 1px for the border) + 2px as a gap */
   cellPaddingPx: 7,
   /** Space for the autoFilter dropdown button in a header cell */
   filterButtonPx: 18,
-  /** Char width in px indexed by the char-code (only ASCII: every other char is `defaultCharPx`), measured via GDI
-   * itself (TextRenderer.MeasureText of a char repeated 100 times / 100):
-   * Excel renders a cell text via GDI, where every glyph advance is rounded to a whole pixel - so summing
-   * fractional font-metrics instead under-estimates a long text by ~7% and cuts it off.
-   * It's built eagerly on purpose: 128 bytes + ~65µs once on the import, against a lazy-init check that would
-   * land on the hottest loop of the whole export (getTextPx runs it per char of every cell).
-   * WARN: re-measure these values if {@link exportToExcel.$defaults.font} is changed */
-  charPx: ((): Uint8Array => {
-    const groups: Array<[number, string]> = [
-      [3, " '"],
-      [4, ",.:;Iijl`"],
-      [5, "!()-J[]frt{}"],
-      [6, '"/Lcsz\\'],
-      [7, "0123456789#$*+<=>?EFSTYZ^_agkvxy|~"],
-      [9, "ADGHUV"],
-      [10, "NOQ&"],
-      [11, "%w"],
-      [12, "Mm"],
-      [13, "@W"],
-    ];
-    const result = new Uint8Array(128).fill(defaultCharPx);
-    groups.forEach(([px, chars]) => {
-      for (let i = 0; i < chars.length; ++i) result[chars.charCodeAt(i)] = px;
-    });
-    return result;
-  })(),
-
-  /** Ratio between the pointed font & the one that `charPx` is measured for */
-  getScale(font: IExcelFontFull): number {
-    return (font.size / autoWidth.basePt) * (font.style === "bold" ? autoWidth.boldRatio : 1);
+  /** Char widths of a family as `[regular, bold]`, measured at {@link autoWidth.basePt} via GDI itself
+   * (`GetCharWidth32W` of the font selected into a DC):
+   * Excel renders a cell text via GDI, where every glyph advance is hinted to a whole pixel - so summing
+   * the fractional font-metrics instead under-estimates a long text by ~7% and cuts it off. A per-family (or
+   * a per-face) ratio doesn't work either, because that hinting isn't proportional: a digits-only text of
+   * `Arial` is ~11% wider than the same one of `Calibri` while its lowercase text is only ~6% wider, and
+   * `Arial Bold` ranges from +1% to +13% over `Arial` depending on the chars - so every face is measured
+   * on its own & only the font-size is applied as a ratio (see {@link autoWidth.getScale}).
+   * A face holds the chars `32..126` packed one per char as `px + 48` (so the char `0` means 0px) plus
+   * the 96th char - the width of a non-latin (cyrillic etc.) char, averaged over `А..я` of the face.
+   * WARN: measure the advances themselves & never a rendered string: GDI kerns a pair (`11` of `Arial` is 1px
+   * narrower than 2 `1`), while Excel doesn't kern a cell at all - so a measured run under-estimates the width.
+   * WARN: the keys are lower-cased (Excel treats a font-name case-insensitively); a font that isn't listed here
+   * is measured as `Calibri` - a substituted font can't be predicted anyway */
+  familyPx: new Map<string, readonly [string, string]>([
+    ["calibri", ["35677;:3557745467777777777447777=988977994586<::8:87799=877565774786885784474<888856587;77657579", "35777;;4557745467777777777447777=988977:94586=::8:877:9>887565775786885784474<888856587;77657579"]], // prettier-ignore
+    ["arial", ["45588=:3556945448888888888449998?9:;;:9;:37:8;:<:<;:9:9?998444585888884883373=888858487;7785359:", "44788=;4556945448888888888449999?9;;;:9<;48;9=;<:<;::;9=::8545985898995994484<999968599;8786469:"]], // prettier-ignore
+    ["cambria", ["34698=:4666835378888888888448886=998:989:5598<::9:979:9>998575864787875784484<888866588<787656;9", "35698?;4667935389999999999449997>::9;98:;55:8=::9::8:::>998686964897985895595=999977598<8876569:"]], // prettier-ignore
+    ["candara", ["347878:4558844448577878788448885?998:879:4697=::8:988:8=888545884787885883373<888856587;87754589", "347878:4558844448577878788448885?998:879:4697=::8:988:9>988545884787885884484<888866587<87754589"]], // prettier-ignore
+    ["consolas", ["888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888", "888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888"]], // prettier-ignore
+    ["constantia", ["44587<:3667845468577878788448887=:9:;98;<55:8>;<9<989;:?:99565886787975894484=988866597;7775558:", "45587<;3667845469577878788448887=:::<98;<65;9>;<:<;89<:?:995658868979858:5595>:99977698;8885558;"]], // prettier-ignore
+    ["corbel", ["345:8<:3558845448787878688448886?:99:88::4698<:;9;988:9=999545875787875883473<888856587;77753589", "346:8<:3558855448777878788458887?:99:98::4698<;;9;999;:>::9545876887885884484=888856687;88754589"]], // prettier-ignore
+    ["courier new", ["999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999", "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"]], // prettier-ignore
+    ["georgia", ["456:9<;3667:4647978898888855:::7>:::;:9<<78:9><<9<;89<:?;;9676::8887875894484>988866598<887666::", "458;:=<4777;5657:89999:9::66;;;8?;;;<;:<>89<;?=<;<<:;=;A<<:777;;89:8:868:5595?:9::876:9=998868;<"]], // prettier-ignore
+    ["segoe ui", ["44698<<3556:3636888888888833:::7>:99;87:;4597=;;8;988:9>989565:64897985984474=899956587;777545::", "45799==4667;4647999999999944;;;7>;:9;88;;57:8><;9;:89;:?:99676;65897986994484>999967698<887656;:"]], // prettier-ignore
+    ["tahoma", ["546;8?:3668;5556888888888855;;;7>999:88::6697<:;8;98::9>9:8666;88887885882472=888857588:887767;9", "457<:B<477:<5659::::::::::55<<<9>:::;99;;78:9=<<:<;:9;:?:;9797<:8998996995595=999978699=9989:9<;"]], // prettier-ignore
+    ["times new roman", ["45587=<3557835447777777777348887>;::;98:;56;9=;;9;:89;;>:;9545684777775773373;777756477;77673789", "45888?=4558945448888888888559998>;;;;:9;<68<:?;<9<;8:;:>::9545985787884884494<888867588:8766368:"]], // prettier-ignore
+    ["trebuchet ms", ["565889;2666866688888888888668886<989988::4798;::8:979:9=898656888887886884683=888866687;87768689", "56699:;3666966669999999999669997<:99:99::4898<:;9;989:9=998656999898996894684=989966699<8887979:"]], // prettier-ignore
+    ["verdana", ["567<:@;477:<5757::::::::::77<<<8?::;;99<;57:8=;<9<::9;:?:9:777<::998995993593?9:9968699=999:7:<:", "569=;C=588;=575:;;;;;;;;;;66===9><;;<::<<88<:><=;=<;:<;@;;:8:8=;;::8::6::46:4@::::797::>::9;8;=<"]], // prettier-ignore
+  ]),
+  /** Decoded {@link autoWidth.familyPx} indexed by `family` + the face: only the faces that an export really
+   * uses are unpacked & they are kept forever - a document has a couple of them & a table is 128 bytes */
+  metrics: new Map<string, IFontMetrics>(),
+  /** Metrics of the face that the pointed font is rendered by (`italic` & `underline` don't change the advances,
+   * so they share the regular one); called once per sheet & per column (not per cell), so the lower-casing of
+   * the font-name & the lazy decoding are affordable here */
+  getMetrics(font: IExcelFontFull): IFontMetrics {
+    const isBold = font.style === "bold";
+    const family = font.family.toLowerCase();
+    const key = isBold ? `${family} bold` : family;
+    let m = autoWidth.metrics.get(key);
+    if (m) return m;
+    const faces = autoWidth.familyPx.get(family) ?? autoWidth.familyPx.get("calibri")!;
+    const widths = faces[isBold ? 1 : 0];
+    // the last packed char is the non-latin one: it fills the whole table, so a code that isn't measured
+    // (a control char included) falls back to it without any extra check on the hot path
+    const defaultPx = widths.charCodeAt(asciiCount) - 48;
+    const charPx = new Uint8Array(128).fill(defaultPx);
+    let maxDigitPx = 0;
+    for (let i = 0; i < asciiCount; ++i) {
+      const px = widths.charCodeAt(i) - 48;
+      charPx[i + 32] = px;
+      // the chars 48..57 (`0`..`9`) are the items 16..25 of the packed string
+      if (i > 15 && i < 26 && px > maxDigitPx) maxDigitPx = px;
+    }
+    m = { charPx, defaultPx, maxDigitPx };
+    autoWidth.metrics.set(key, m);
+    return m;
   },
-  /** Width in px of the longest line of the text; called for every single cell, so it's a hot path */
-  getTextPx(text: string): number {
-    const { charPx } = autoWidth; // a local is cheaper than a property-load on every char
+  /** Ratio between the pointed font-size & the measured {@link autoWidth.basePt} one */
+  getScale(font: IExcelFontFull): number {
+    return font.size / autoWidth.basePt;
+  },
+  /** Width in px of a single Excel-unit of the column width: the widest digit of the pointed document-font */
+  getUnitPx(font: IExcelFontFull): number {
+    return autoWidth.getMetrics(font).maxDigitPx * autoWidth.getScale(font);
+  },
+  /** Width in px of the longest line of the text; called for every single cell, so it's a hot path: the metrics
+   * are resolved by the caller (once per column) & unpacked into locals - cheaper than a property-load per char */
+  getTextPx(text: string, charPx: Uint8Array, defaultPx: number): number {
     let max = 0;
     let line = 0;
     for (let i = 0; i < text.length; ++i) {
@@ -266,9 +321,16 @@ const autoWidth = {
       if (code === newLineCode) {
         if (line > max) max = line;
         line = 0;
-      } else line += code < 128 ? charPx[code] : defaultCharPx;
+      } else line += code < 128 ? charPx[code] : defaultPx;
     }
     return line > max ? line : max;
+  },
+  /** Excel-units of a column that a user has never resized: the standard `8.43` chars of the document-font
+   * (the usual 64px of `Calibri 11`). WARN: such a width must be pointed explicitly - a `<col>` without
+   * the `width` collapses the column to 0 & Excel shows it as a hidden one */
+  getDefaultWidth(unitPx: number): number {
+    // 5px is what Excel reserves inside a cell: `cellPaddingPx` without the 2px gap that only the auto-width adds
+    return autoWidth.toUnits(8.43 * unitPx + 5, unitPx);
   },
   /** Converts px into Excel-units (rounded to 1/100 to keep the xml small) */
   toUnits(px: number, unitPx: number): number {
@@ -311,6 +373,9 @@ function mergeFont(base: IExcelFontFull, ...fonts: Array<IExcelFont | undefined>
   return result;
 }
 
+/** Count of the columns that a sheet has (`A`..`XFD`): the file-format doesn't allow more */
+const maxColumns = 16384;
+
 /** Excel-name of the column by its index: `A`, `B`, ... `Z`, `AA`, `AB` etc. */
 function getColumnLetter(colIndex: number): string {
   let name = "";
@@ -336,9 +401,9 @@ interface IStylesCollection {
 }
 
 interface IStyles {
-  /** Returns the ready-to-use style-attribute of a cell (`s="1" `) according to the pointed font;
-   * an empty string for the default format - it's applied by Excel itself & mustn't be set per cell */
-  getCellStyle(font: IExcelFontFull, isWrapText: boolean): string;
+  /** Returns the index of the cell-format in `cellXfs` according to the pointed font; `0` is the default format
+   * that Excel applies by itself (to a cell without the own `s` & without an inherited one) */
+  getCellStyle(font: IExcelFontFull, isWrapText: boolean): number;
   /** Content of `xl/styles.xml`: call it when all the sheets are generated */
   toXml(): string;
 }
@@ -381,7 +446,7 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
   const cellXfs = createStylesCollection();
 
   const styles: IStyles = {
-    getCellStyle(font: IExcelFontFull, isWrapText: boolean): string {
+    getCellStyle(font: IExcelFontFull, isWrapText: boolean): number {
       const fontId = fonts.indexOf(getFontXml(font));
       const bgColor = toARGB(font.backgroundColor);
       const fillId = bgColor
@@ -389,13 +454,11 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
             `<fill><patternFill patternType="solid"><fgColor rgb="${bgColor}"/><bgColor indexed="64"/></patternFill></fill>`
           )
         : 0;
-      const id = cellXfs.indexOf(
+      return cellXfs.indexOf(
         `<xf numFmtId="0" fontId="${fontId}" fillId="${fillId}" borderId="0" xfId="0" applyFont="1"` +
           `${fillId ? ` applyFill="1"` : ""} applyAlignment="1">` +
           `<alignment vertical="top"${isWrapText ? ` wrapText="1"` : ""}/></xf>`
       );
-      // Excel applies cellXfs[0] to a cell without the `s` attribute: so the default format costs nothing in the xml
-      return id === 0 ? "" : `s="${id}" `;
     },
     toXml(): string {
       return (
@@ -426,32 +489,70 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   const columns = sheet.mapping;
   const colCount = columns.length;
   const font = mergeFont(ctx.font, sheet.font);
-  // a font is the same for every cell of the sheet, so the styles are defined once & re-used by all the rows
-  const cellStyle = styles.getCellStyle(font, false);
-  const cellStyleWrap = styles.getCellStyle(font, true);
-  const rowScale = autoWidth.getScale(font);
-  // the same for the header-row: a column re-merges it only if it has an own font
-  const sheetHeaderFont = mergeFont(font, ctx.fontHeader);
+  // the font of the sheet is the one of every column that doesn't override it & of the cells around the data,
+  // so its style is resolved once & re-used below instead of being re-registered per column
+  const sheetStyle = styles.getCellStyle(font, false);
+  const sheetColStyleXml = sheetStyle ? ` style="${sheetStyle}"` : "";
+  // the header-row is the sheet-font + the header-options of the document & of the sheet (so a header keeps
+  // the family/size of the sheet & points only the difference); a column re-merges it only if it has an own font
+  const sheetHeaderFont = mergeFont(font, ctx.fontHeader, sheet.fontHeader);
 
   /** Excel-names of the columns: `A`, `B`, ... `AA`; cached because every single cell refers to it */
   const letters: Array<string> = [];
   const headers: Array<string> = [];
   /** Widest content of the column in px; `-1` marks a column with an explicit width (nothing to measure) */
   const maxPx = new Float64Array(colCount);
+  // The font can differ per column, so everything that a cell of it needs is resolved once here & indexed
+  // by the column in the loops below.
+  // WARN: every single cell must carry an own `s` - the format of `<col>`/`<row>` is applied by Excel ONLY to
+  // a cell that isn't stored in the sheet at all; a stored `<c>` without `s` always falls back to cellXfs[0]
+  // (checked against the real Excel). `<col>` is still required for the cells around the data - see below
+  /** `s="N" ` of an ordinary cell of the column */
+  const cellStyleXml: Array<string> = [];
+  /** `s="N" ` of a wrapped (array) cell of the column */
+  const cellStyleWrapXml: Array<string> = [];
+  /** ` style="N"` of the `<col>` of the column */
+  const colStyleXml: Array<string> = [];
+  /** Metrics of the column-font: the auto-width measures the header & every cell of the column by them */
+  const cellMetrics: Array<IFontMetrics> = [];
+  /** Ratio of the font-size of the column to the measured one */
+  const cellScale = new Float64Array(colCount);
   let headerCells = "";
 
   for (let c = 0; c < colCount; ++c) {
     const h = columns[c];
     const text = getHeaderText(h);
-    const headerFont = h.headerFont ? mergeFont(sheetHeaderFont, h.headerFont) : sheetHeaderFont;
+    // an own font of the column is merged into the sheet-font & becomes the base of its header either;
+    // a column without it re-uses the ready fonts/styles of the sheet, so nothing is allocated per column
+    const colFont = h.font ? mergeFont(font, h.font) : font;
+    const headerBase = h.font ? mergeFont(colFont, ctx.fontHeader, sheet.fontHeader) : sheetHeaderFont;
+    const headerFont = h.headerFont ? mergeFont(headerBase, h.headerFont) : headerBase;
     const letter = getColumnLetter(c);
     letters.push(letter);
     headers.push(text);
+
+    const colStyle = h.font ? styles.getCellStyle(colFont, false) : sheetStyle;
+    const wrapStyle = styles.getCellStyle(colFont, true);
+    cellStyleXml.push(colStyle ? `s="${colStyle}" ` : "");
+    cellStyleWrapXml.push(wrapStyle ? `s="${wrapStyle}" ` : "");
+    colStyleXml.push(colStyle ? ` style="${colStyle}"` : sheetColStyleXml);
+
+    // the column defines the auto-width by its own font: the data-cells are measured by it & the header-cell
+    // by the header-font on top of it.
+    // WARN: the header-font can't be skipped here - it's `bold` by default & a bold text is up to 16% wider
+    // (`Tahoma`, `Georgia`), so a column that is defined by its header would be cut off
+    const m = autoWidth.getMetrics(colFont);
+    cellMetrics.push(m);
+    cellScale[c] = autoWidth.getScale(colFont);
+    const hm = autoWidth.getMetrics(headerFont);
     maxPx[c] =
       h.width !== undefined
         ? -1
-        : autoWidth.getTextPx(text) * autoWidth.getScale(headerFont) + autoWidth.filterButtonPx;
-    const style = styles.getCellStyle(headerFont, false);
+        : autoWidth.getTextPx(text, hm.charPx, hm.defaultPx) * autoWidth.getScale(headerFont) +
+          autoWidth.filterButtonPx;
+
+    const headerStyle = styles.getCellStyle(headerFont, false);
+    const style = headerStyle ? `s="${headerStyle}" ` : "";
     headerCells += `<c r="${letter}1" ${style}t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
   }
 
@@ -474,12 +575,13 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
       else if (v != null) value = v.toString();
       const px = maxPx[c];
       if (px >= 0) {
-        const w = autoWidth.getTextPx(value) * rowScale;
+        const m = cellMetrics[c];
+        const w = autoWidth.getTextPx(value, m.charPx, m.defaultPx) * cellScale[c];
         if (w > px) maxPx[c] = w;
       }
-      cells += `<c r="${letters[c]}${rowNum}" ${isArray ? cellStyleWrap : cellStyle}t="inlineStr"><is><t>${escape(
-        value
-      )}</t></is></c>`;
+      cells += `<c r="${letters[c]}${rowNum}" ${
+        isArray ? cellStyleWrapXml[c] : cellStyleXml[c]
+      }t="inlineStr"><is><t>${escape(value)}</t></is></c>`;
     }
     rows.add(`<row r="${rowNum}">${cells}</row>`);
   }
@@ -491,7 +593,15 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     const w =
       width ??
       Math.min(autoWidth.toUnits(maxPx[c] + autoWidth.cellPaddingPx, ctx.unitPx), maxWidth ?? Number.MAX_SAFE_INTEGER);
-    colsXml += `<col min="${c + 1}" max="${c + 1}" width="${w}" bestFit="1" customWidth="1"/>`;
+    colsXml += `<col min="${c + 1}" max="${c + 1}" width="${w}"${colStyleXml[c]} bestFit="1" customWidth="1"/>`;
+  }
+  // the sheet-font belongs to the whole sheet & not only to the mapped columns, but Excel stores a format per
+  // column - so the rest of them takes the same style with the standard width (`customWidth` isn't set: they
+  // aren't resized, only formatted). It covers a cell that isn't stored in the sheet at all - the one that
+  // a user types in after the export
+  if (sheetColStyleXml && colCount < maxColumns) {
+    const w = autoWidth.getDefaultWidth(ctx.unitPx);
+    colsXml += `<col min="${colCount + 1}" max="${maxColumns}" width="${w}"${sheetColStyleXml}/>`;
   }
 
   return { rows, colsXml, headers, lastLetter: letters[colCount - 1], rowsCount: data.length };
@@ -588,7 +698,9 @@ function getTableRelsXml(num: number): string {
 /* ----------------------------------- Orchestrator ----------------------------------- */
 
 /** Export pointed data into excel-file according to provided mapping */
-export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>): Promise<Blob> {
+export default async function exportToExcel<T>(
+  sheetsData: Array<IExcelSheet<T>> /* , setCellCallback:()=>  */
+): Promise<Blob> {
   const { getCellValue, font, fontHeader } = exportToExcel.$defaults;
   const documentFont = mergeFont(baseFont, font);
   const ctx: IExportContext = {
@@ -596,7 +708,7 @@ export default async function exportToExcel<T>(sheetsData: Array<IExcelSheet<T>>
     font: documentFont,
     fontHeader,
     getCellValue,
-    unitPx: autoWidth.maxDigitPx * (documentFont.size / autoWidth.basePt),
+    unitPx: autoWidth.getUnitPx(documentFont),
   };
 
   const sheets: Array<IExportSheet> = sheetsData.map((sheet, i) => {
@@ -663,7 +775,10 @@ exportToExcel.$defaults = {
    * @see {@link IExcelSheet.font} to override it per sheet */
   font: { size: 11, family: "Calibri" } as IExcelFont,
 
-  /** Font of the header-row; missed options are inherited from {@link exportToExcel.$defaults.font}
+  /** Font of the header-row of every sheet; missed options are inherited from the font of the sheet
+   * ({@link IExcelSheet.font} merged into {@link exportToExcel.$defaults.font}) - so it usually points only
+   * the difference (`style`, `color` etc.) and keeps the family/size of the sheet
+   * @see {@link IExcelSheet.fontHeader} to override it per sheet
    * @see {@link IExcelColumnMap.headerFont} to override it per column */
   fontHeader: { style: "bold" } as IExcelFont,
 };

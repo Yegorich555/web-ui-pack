@@ -228,10 +228,6 @@ export default function ExportToExcelView() {
     >
       <section>
         <h3>Usage</h3>
-        <small>
-          Import directly from <b>web-ui-pack/helpers/exportToExcel</b> to avoid pulling <b>fflate</b> into a bundle
-          that doesn&apos;t need it (or use <b>WUPHelpers.exportToExcel</b>)
-        </small>
         <Code code={codeJS} />
       </section>
       <section>
@@ -299,6 +295,7 @@ const blob = await createExcelDoc([
     name: "Users", // optional; default is 'Sheet{number}'
     data: users,
     font: { size: 12, family: "Segoe UI", color: "#333333" }, // optional; default is { size: 11, family: "Calibri" }
+    fontHeader: { style: "bold", color: "#4472c4" }, // optional; missed options are inherited from the sheet-font
     mapping: [
       { propName: "name" }, // header text is prettified propName: 'Name'
       { propName: "registeredAt", headerText: "Registered at" }, // custom header text
