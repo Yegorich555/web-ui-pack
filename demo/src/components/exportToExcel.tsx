@@ -4,7 +4,7 @@ import Code from "src/elements/code";
 import exportToExcel, {
   ExcelFontStyles,
   IExcelCellCallback,
-  IExcelFont,
+  IExcelStyle,
   IExcelSheet,
 } from "web-ui-pack/helpers/exportToExcel";
 import { stringPrettify } from "web-ui-pack/indexHelpers";
@@ -114,30 +114,32 @@ const departmentColumns: IExcelSheet<IDepartment>["mapping"] = [
   { propName: "budget", maxWidth: 20 },
 ];
 
-/** The same columns but with a custom header-font per column */
+/** The same columns but with a custom header-style per column */
 const styledColumns: IExcelSheet<IUser>["mapping"] = userColumns.map((c, i) => ({
   ...c,
-  headerFont:
-    i % 2 ? { color: "#ffffff", backgroundColor: "#4472c4" } : { color: "#4472c4", style: ExcelFontStyles.underline },
+  headerStyle:
+    i % 2
+      ? { color: "#ffffff", backgroundColor: "#4472c4" }
+      : { color: "#4472c4", fontStyle: ExcelFontStyles.underline },
 }));
 
-/** Fonts of a highlighted cell.
- * WARN: such a font must be a shared object - it's merged & measured once per (font-object, column) pair,
+/** Styles of a highlighted cell.
+ * WARN: such a style must be a shared object - it's merged & measured once per (style-object, column) pair,
  * while an object-literal that is built inside the callback is re-resolved for every single cell */
-const fontInactive: IExcelFont = { color: "#c00000", style: ExcelFontStyles.italic };
-const fontYoung: IExcelFont = { backgroundColor: "#ffe699", style: ExcelFontStyles.bold };
+const styleInactive: IExcelStyle = { color: "#c00000", fontStyle: ExcelFontStyles.italic };
+const styleYoung: IExcelStyle = { backgroundColor: "#ffe699", fontStyle: ExcelFontStyles.bold };
 
-/** Points an own value &/or font per cell: a row of an inactive user is red-italic, an age below 30 is
+/** Points an own value &/or style per cell: a row of an inactive user is red-italic, an age below 30 is
  * highlighted & a boolean is rendered as Yes/No */
 const userCellCallback: IExcelCellCallback<IUser> = (value, itemIndex, mapping) => {
   const user = users[itemIndex];
-  let font: IExcelFont | undefined;
-  if (!user.isActive) font = fontInactive;
-  else if (mapping.propName === "age" && user.age < 30) font = fontYoung;
+  let style: IExcelStyle | undefined;
+  if (!user.isActive) style = styleInactive;
+  else if (mapping.propName === "age" && user.age < 30) style = styleYoung;
 
-  if (mapping.propName !== "isActive") return font ? { font } : undefined;
+  if (mapping.propName !== "isActive") return style ? { style } : undefined;
   // WARN: never mutate the pointed value - return an own one instead
-  return { font, value: { ...value, stringVal: user.isActive ? "Yes" : "No" } };
+  return { style, value: { ...value, stringVal: user.isActive ? "Yes" : "No" } };
 };
 
 /** Generates a huge dataset to check performance & memory */
@@ -184,13 +186,18 @@ const examples: IExample[] = [
     ],
   },
   {
-    label: "Custom fonts",
+    label: "Custom styles",
     fileName: "fonts.xlsx",
     details:
-      "Font per sheet (size, family, color) & per header-column (style, color, backgroundColor); " +
-      "missed options are inherited from the sheet-font & $defaults; column width is scaled by the font-size",
+      "Style per sheet (fontSize, fontFamily, color) & per header-column (fontStyle, color, backgroundColor); " +
+      "missed options are inherited from the sheet-style & $defaults; column width is scaled by the font-size",
     getSheets: () => [
-      { data: users, mapping: styledColumns, name: "Styled", font: { size: 14, family: "Segoe UI", color: "#333333" } },
+      {
+        data: users,
+        mapping: styledColumns,
+        name: "Styled",
+        style: { fontSize: 14, fontFamily: "Segoe UI", color: "#333333" },
+      },
       { data: departments, mapping: departmentColumns, name: "Defaults" },
     ],
   },
@@ -198,8 +205,8 @@ const examples: IExample[] = [
     label: "Cell styles",
     fileName: "cell-styles.xlsx",
     details:
-      "cellCallback points an own value &/or font per cell: a row of an inactive user is red-italic, " +
-      "an age below 30 is highlighted & a boolean is rendered as Yes/No; column width follows such a font either",
+      "cellCallback points an own value &/or style per cell: a row of an inactive user is red-italic, " +
+      "an age below 30 is highlighted & a boolean is rendered as Yes/No; column width follows such a style either",
     getSheets: () => [{ data: users, mapping: userColumns, name: "Users" }],
     cellCallback: userCellCallback,
   },
@@ -255,8 +262,8 @@ export default function ExportToExcelView() {
         "Creates a valid *.xlsx (OpenXML) document without any heavy dependencies",
         "Several sheets (tabs) per document; every sheet has own columns mapping",
         "Auto-detects column width, applies autoFilter & table styling",
-        "Custom font per sheet & per header-column: size, family, style, color, backgroundColor",
-        "cellCallback: an own value &/or font per single cell (the auto-width follows it as well)",
+        "Custom style per sheet & per header-column: fontSize, fontFamily, fontStyle, color, backgroundColor",
+        "cellCallback: an own value &/or style per single cell (the auto-width follows it as well)",
         "Formats values by type: a number & a Date are stored as the real ones, so Excel sorts/filters/sums them",
         "Date-format per document/sheet/column (localeInfo by default); string[] is joined by new-line + wrapText",
         "Escapes XML-specific symbols & sanitizes a sheet-name according to Excel rules",
@@ -327,30 +334,30 @@ const users = [
   // ...
 ];
 
-/** Font of a highlighted cell: it's merged into the font of the column, so only the difference is pointed */
-const highlight = { backgroundColor: "#ffe699", style: ExcelFontStyles.bold };
+/** Style of a highlighted cell: it's merged into the style of the column, so only the difference is pointed */
+const highlight = { backgroundColor: "#ffe699", fontStyle: ExcelFontStyles.bold };
 
 const blob = await createExcelDoc([
   {
     name: "Users", // optional; default is 'Sheet{number}'
     data: users,
-    font: { size: 12, family: "Segoe UI", color: "#333333" }, // optional; default is { size: 11, family: "Calibri" }
-    headerFont: { style: ExcelFontStyles.bold, color: "#4472c4" }, // optional; missed options are inherited from the sheet-font
+    style: { fontSize: 12, fontFamily: "Segoe UI", color: "#333333" }, // optional; default is { fontSize: 11, fontFamily: "Calibri" }
+    headerStyle: { fontStyle: ExcelFontStyles.bold, color: "#4472c4" }, // optional; missed options are inherited from the sheet-style
     mapping: [
       { propName: "name" }, // header text is prettified propName: 'Name'
       { propName: "registeredAt", headerText: "Registered at" }, // custom header text
       { propName: "roles", maxWidth: 30 }, // limit column width
-      // header is bold by default; missed options are inherited from the sheet-font
-      { propName: "notes", headerFont: { color: "#ffffff", backgroundColor: "#4472c4" } },
+      // header is bold by default; missed options are inherited from the sheet-style
+      { propName: "notes", headerStyle: { color: "#ffffff", backgroundColor: "#4472c4" } },
     ],
   },
   // ...next sheet here
 ],
-// optional callback: point an own value &/or font per single cell (the font is merged into the font of the column)
+// optional callback: point an own value &/or style per single cell (it's merged into the style of the column)
 (value, itemIndex, mapping) => {
-  // WARN: return a shared font-object (as 'highlight' here) - it's merged & measured once per such an object;
+  // WARN: return a shared style-object (as 'highlight' here) - it's merged & measured once per such an object;
   // an object-literal that is built inside the callback is re-resolved for every single cell
-  if (mapping.propName === "age" && users[itemIndex].age < 30) return { font: highlight };
+  if (mapping.propName === "age" && users[itemIndex].age < 30) return { style: highlight };
   // ...an own value: WARN never mutate the pointed one - return a new object instead
   if (mapping.propName === "isActive") return { value: { ...value, stringVal: value.stringVal === "true" ? "Yes" : "No" } };
   return undefined; // nothing is overridden: the cell keeps the value & the style of the column

@@ -909,7 +909,7 @@ const fltn = <A extends boolean, D = A extends true ? AsyncZippable : Zippable>(
 let te: TextEncoder | undefined;
 
 /** Converts a string into a Uint8Array for use with compression methods */
-function strToU8(str: string): Uint8Array {
+export function strToU8(str: string): Uint8Array {
   te ??= new TextEncoder();
   return te.encode(str);
 }

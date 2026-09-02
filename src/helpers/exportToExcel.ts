@@ -1,4 +1,4 @@
-import zip from "./zip";
+import zip, { strToU8 } from "./zip";
 import { stringPrettify } from "./string";
 import dateToString from "./dateToString";
 import localeInfo from "../objects/localeInfo";
@@ -13,17 +13,17 @@ import localeInfo from "../objects/localeInfo";
  * - {@link exportToExcel} is an orchestrator: builds the per-export {@link IExportContext} & zips the result.
  *  */
 
-/** font & styles that applied to cell or globally per sheet/document */
-export interface IExcelFont {
+/** Font & styles that applied to cell or globally per sheet/document */
+export interface IExcelStyle {
   /** Size of the font in points
    * @defaultValue 11 */
-  size?: number;
+  fontSize?: number;
   /** Name of the font;
    *
    * WARN: the auto-width of a column is measured only for the listed fonts (see {@link autoWidth.familyPx});
    * any other font is measured as `Calibri`, so point {@link IExcelColumnMap.width} for such a case
    * @defaultValue "Calibri" */
-  family?: /** Default of Excel 2007-2021; on Linux it's substituted by the metric-compatible `Carlito` */
+  fontFamily?: /** Default of Excel 2007-2021; on Linux it's substituted by the metric-compatible `Carlito` */
   | "Calibri" // Fonts that are shipped with Excel on both Windows & macOS, so a document keeps the same look everywhere
     // core web fonts: pre-installed on Windows & macOS regardless of the Office version
     | "Arial"
@@ -42,13 +42,13 @@ export interface IExcelFont {
     | "Segoe UI"
     | (string & {});
   /** Style of the text; point several styles for example:`ExcelFontStyles.bold | ExcelFontStyles.underline` */
-  style?: ExcelFontStyles;
+  fontStyle?: ExcelFontStyles;
 
   /** Color of the text in hex-format `#rrggbb`, ex. `#ff0000`;
    * an unparsable value is ignored (so the inherited color stays applied) */
   color?: string;
   /** Background color of the cell
-   * @see {@link IExcelFont.color} for the supported format */
+   * @see {@link IExcelStyle.color} for the supported format */
   backgroundColor?: string;
 
   /** Horizontal alignment of the content of the cell
@@ -67,16 +67,16 @@ export const enum ExcelFontStyles {
 }
 
 export interface IExcelSettings {
-  /** Font for every data-cell of the sheet/column; missed options are inherited from the upper level
-   * ({@link IExcelSheet.font} + {@link exportToExcel.$defaults.font}). It's the base of the header-cell either,
-   * so a column keeps its own family/size in the header-row as well
-   * @defaultValue {@link IExcelSheet.font} => the font of the sheet */
-  font?: IExcelFont;
+  /** Style for every data-cell of the sheet/column; missed options are inherited from the upper level
+   * ({@link IExcelSheet.style} + {@link exportToExcel.$defaults.style}). It's the base of the header-cell either,
+   * so a column keeps its own fontFamily/fontSize in the header-row as well
+   * @defaultValue {@link IExcelSheet.style} => the style of the sheet */
+  style?: IExcelStyle;
 
-  /** Font for the header cell of the column; missed options are inherited from the header-font of the sheet
-   * ({@link IExcelSheet.headerFont} + {@link exportToExcel.$defaults.headerFont} + the font of the sheet)
-   * @defaultValue {@link exportToExcel.$defaults.headerFont} + {@link exportToExcel.$defaults.font} => `{ size: 11, family: "Calibri", style: ExcelFontStyles.bold }` */
-  headerFont?: IExcelFont;
+  /** Style for the header cell of the column; missed options are inherited from the header-style of the sheet
+   * ({@link IExcelSheet.headerStyle} + {@link exportToExcel.$defaults.headerStyle} + the style of the sheet)
+   * @defaultValue {@link exportToExcel.$defaults.headerStyle} + {@link exportToExcel.$defaults.style} => `{ fontSize: 11, fontFamily: "Calibri", fontStyle: ExcelFontStyles.bold }` */
+  headerStyle?: IExcelStyle;
 
   /** Format that a date-cell is rendered by; it's a {@link dateToString} format (`yyyy-MM-dd hh:mm:ss A`)
    * that is converted into the number-format of Excel (`yyyy-mm-dd hh:mm:ss AM/PM`)
@@ -132,7 +132,7 @@ export interface IExcelCellValue {
   stringVal: string;
 }
 
-/** Hook that overrides the content &/or the font of a single cell: see the `cellCallback` argument
+/** Hook that overrides the content &/or the style of a single cell: see the `cellCallback` argument
  * of {@link exportToExcel} */
 export type IExcelCellCallback<T = any> = (
   /** Cell that {@link exportToExcel.$defaults.getCellValue} has mapped the item-property into.
@@ -142,21 +142,21 @@ export type IExcelCellCallback<T = any> = (
   itemIndex: number,
   /** Column that the cell belongs to */
   mapping: IExcelColumnMap<T>
-) => { value?: IExcelCellValue; font?: IExcelFont } | undefined | null;
+) => { value?: IExcelCellValue; style?: IExcelStyle } | undefined | null;
 
 /** Font with the options that are required by the file-format (so it's always ready to be rendered) */
-type IExcelFontFull = IExcelFont & Required<Pick<IExcelFont, "size" | "family">>;
+type IExcelStyleFull = IExcelStyle & Required<Pick<IExcelStyle, "fontSize" | "fontFamily">>;
 
 /** Own font of a cell resolved into everything that the render & the auto-width need: it depends only on the
  * font-object that {@link IExcelCellCallback} returns & on the column, so it's cached per such a pair */
 interface ICellOverride {
   /** The pointed font merged into the font of the column */
-  font: IExcelFontFull;
+  style: IExcelStyleFull;
   /** `s="N" ` of the cell indexed by {@link ExcelCellTypes}: a wrapped & a date-cell need an own cell-format */
   styleXml: Array<string | undefined>;
-  /** Metrics of {@link ICellOverride.font}: the auto-width measures such a cell by them */
+  /** Metrics of {@link ICellOverride.style}: the auto-width measures such a cell by them */
   metrics: IFontMetrics;
-  /** Ratio of the font-size of {@link ICellOverride.font} to the measured one */
+  /** Ratio of the font-size of {@link ICellOverride.style} to the measured one */
   scale: number;
   /** Width in px of a date-cell of this font (`-1` - not measured yet): a date is rendered by the format,
    * so every date of the pair takes the very same width - see {@link renderSheet} */
@@ -191,18 +191,13 @@ interface IExportSheet {
 /** Options that are the same for every sheet of the export: created once per {@link exportToExcel} call */
 interface IExportContext {
   /** Collector of the document styles */
-  styles: IStyles;
-  /** Font of the document: {@link exportToExcel.$defaults.font} merged into the format-required base */
-  font: IExcelFontFull;
-  /** Font of the header-row: {@link exportToExcel.$defaults.headerFont} */
-  fontHeader: IExcelFont | undefined;
+  allStyles: IStyles;
+  style: IExcelStyleFull;
+  headerStyle: IExcelStyle | undefined;
   /** Width in px of a single Excel-unit of the column width */
   unitPx: number;
-  /** @see {@link exportToExcel.$defaults.getCellValue} */
   getCellValue: <T = any>(v: T[keyof T]) => IExcelCellValue;
-  /** @see the `cellCallback` argument of {@link exportToExcel} */
   cellCallback: IExcelCellCallback | undefined;
-  /** Format of a date-cell: {@link exportToExcel.$defaults.dateTimeFormat} or {@link localeInfo.dateTime} */
   dateTimeFormat: string;
 }
 
@@ -225,15 +220,6 @@ const escapeChar = (m: string): string => escapeMap[m as keyof typeof escapeMap]
 
 /** Escapes the chars that aren't allowed in the xml-content; called for every single cell, so it's a hot path */
 const escape = (str: string): string => (escapeTestRE.test(str) ? str.replace(escapeRE, escapeChar) : str);
-
-// created lazily: some environments (jsdom in the tests) get the global only after this module is imported
-let textEncoder: TextEncoder | undefined;
-
-/** Encodes the string into the UTF-8 bytes that the archive is built from */
-function encodeUtf8(str: string): Uint8Array {
-  textEncoder ??= new TextEncoder();
-  return textEncoder.encode(str);
-}
 
 /** Size of the pending string that triggers the encoding; a bigger one saves a few `encode()` calls but keeps
  * a bigger temporary string alive - and the whole point of the writer is to never grow such a string */
@@ -261,7 +247,7 @@ function createUtf8Writer(): IUtf8Writer {
    * by a fixed length instead could cut a surrogate pair in half & turn an emoji into a pair of `U+FFFD` */
   const flush = (): void => {
     if (!pending) return;
-    const bytes = encodeUtf8(pending);
+    const bytes = strToU8(pending);
     chunks.push(bytes);
     total += bytes.length;
     pending = "";
@@ -274,8 +260,8 @@ function createUtf8Writer(): IUtf8Writer {
     },
     toBytes(prefix: string, suffix: string): Uint8Array {
       flush();
-      const pre = prefix ? encodeUtf8(prefix) : emptyBytes;
-      const post = suffix ? encodeUtf8(suffix) : emptyBytes;
+      const pre = prefix ? strToU8(prefix) : emptyBytes;
+      const post = suffix ? strToU8(suffix) : emptyBytes;
       const result = new Uint8Array(pre.length + total + post.length);
       result.set(pre, 0);
       let offset = pre.length;
@@ -326,7 +312,7 @@ interface IFontMetrics {
 /** Auto-width of a column: the file-format has no auto-width at all - `bestFit` is only a marker & Excel never
  * re-measures such a column, so the width must be estimated here.
  * Everything is calculated in pixels of the really applied font & converted into Excel-units (the widest digit
- * of the document font, see {@link exportToExcel.$defaults.font}) at the end */
+ * of the document font, see {@link exportToExcel.$defaults.style}) at the end */
 const autoWidth = {
   /** Font-size (in points) that {@link autoWidth.familyPx} is measured for */
   basePt: 11,
@@ -370,9 +356,9 @@ const autoWidth = {
   /** Metrics of the face that the pointed font is rendered by (`italic` & `underline` don't change the advances,
    * so they share the regular one); called once per sheet & per column (not per cell), so the lower-casing of
    * the font-name & the lazy decoding are affordable here */
-  getMetrics(font: IExcelFontFull): IFontMetrics {
-    const isBold = font.style !== undefined && (font.style & ExcelFontStyles.bold) !== 0;
-    const family = font.family.toLowerCase();
+  getMetrics(style: IExcelStyleFull): IFontMetrics {
+    const isBold = style.fontStyle !== undefined && (style.fontStyle & ExcelFontStyles.bold) !== 0;
+    const family = style.fontFamily.toLowerCase();
     const key = isBold ? `${family} bold` : family;
     let m = autoWidth.metrics.get(key);
     if (m) return m;
@@ -394,12 +380,12 @@ const autoWidth = {
     return m;
   },
   /** Ratio between the pointed font-size & the measured {@link autoWidth.basePt} one */
-  getScale(font: IExcelFontFull): number {
-    return font.size / autoWidth.basePt;
+  getScale(style: IExcelStyleFull): number {
+    return style.fontSize / autoWidth.basePt;
   },
   /** Width in px of a single Excel-unit of the column width: the widest digit of the pointed document-font */
-  getUnitPx(font: IExcelFontFull): number {
-    return autoWidth.getMetrics(font).maxDigitPx * autoWidth.getScale(font);
+  getUnitPx(style: IExcelStyleFull): number {
+    return autoWidth.getMetrics(style).maxDigitPx * autoWidth.getScale(style);
   },
   /** Width in px of the longest line of the text; called for every single cell, so it's a hot path: the metrics
    * are resolved by the caller (once per column) & unpacked into locals - cheaper than a property-load per char */
@@ -435,13 +421,13 @@ function toARGB(color: string | undefined): string | undefined {
   return hex && /^[\da-f]{6}$/i.test(hex) ? `FF${hex.toUpperCase()}` : undefined;
 }
 
-/** Base font of the document: the file-format requires size & family to be always defined */
-const baseFont: IExcelFontFull = { size: 11, family: "Calibri" };
+/** Base font of the document: the file-format requires fontSize & fontFamily to be always defined */
+const baseFont: IExcelStyleFull = { fontSize: 11, fontFamily: "Calibri" };
 
 /** Every bit that {@link ExcelFontStyles} defines: an unknown bit of a user-value is ignored by the render */
 const fontStyleMask = ExcelFontStyles.bold | ExcelFontStyles.italic | ExcelFontStyles.underline;
 
-/** Xml-part of `styles.xml` per {@link IExcelFont.style} (the index is the bitmask itself): the file-format
+/** Xml-part of `styles.xml` per {@link IExcelStyle.fontStyle} (the index is the bitmask itself): the file-format
  * requires the tags to be ordered, so all the combinations are built once instead of per font */
 const fontStyleXml: string[] = [];
 // the index 0 (no style at all) holds an empty part, so a font without a style needs no branch either
@@ -453,15 +439,15 @@ for (let i = 0; i <= fontStyleMask; ++i) {
 
 /** Merges fonts from left to right; only defined options are taken (so a user can skip any of them);
  * an unparsable color is skipped either - so the inherited one isn't lost because of a typo */
-function mergeFont(base: IExcelFontFull, ...fonts: Array<IExcelFont | undefined>): IExcelFontFull {
-  const result: IExcelFontFull = { ...base };
-  for (let i = 0; i < fonts.length; ++i) {
-    const font = fonts[i];
-    if (!font) continue;
-    const keys = Object.keys(font) as Array<keyof IExcelFont>;
+function mergeStyle(base: IExcelStyleFull, ...styles: Array<IExcelStyle | undefined>): IExcelStyleFull {
+  const result: IExcelStyleFull = { ...base };
+  for (let i = 0; i < styles.length; ++i) {
+    const s = styles[i];
+    if (!s) continue;
+    const keys = Object.keys(s) as Array<keyof IExcelStyle>;
     for (let k = 0; k < keys.length; ++k) {
       const key = keys[k];
-      const value = font[key];
+      const value = s[key];
       if (value === undefined) continue;
       if ((key === "color" || key === "backgroundColor") && !toARGB(value as string)) continue;
       (result[key] as unknown) = value;
@@ -500,7 +486,7 @@ interface IStylesCollection {
 interface IStyles {
   /** Returns the index of the cell-format in `cellXfs` according to the pointed font; it's never `0` -
    * that index is reserved (see the note in {@link createStyles}) */
-  getCellStyle(font: IExcelFontFull, isWrapText: boolean, numFmtId?: number): number;
+  getCellStyle(style: IExcelStyleFull, isWrapText: boolean, numFmtId?: number): number;
   /** Returns the id of the number-format that renders the pointed {@link IExcelSettings.dateTimeFormat}
    * & registers the format if it's not registered yet */
   getNumFmtId(dateTimeFormat: string): number;
@@ -570,16 +556,16 @@ function toExcelDateFormat(format: string): string {
   return h12 ? `${f}AM/PM` : f;
 }
 
-function getFontXml(f: IExcelFontFull): string {
+function getFontXml(f: IExcelStyleFull): string {
   const color = toARGB(f.color);
   return (
-    `<font>${f.style ? fontStyleXml[f.style & fontStyleMask] : ""}<sz val="${f.size}"/>` +
-    `${color ? `<color rgb="${color}"/>` : ""}<name val="${escape(f.family)}"/><family val="2"/></font>`
+    `<font>${f.fontStyle ? fontStyleXml[f.fontStyle & fontStyleMask] : ""}<sz val="${f.fontSize}"/>` +
+    `${color ? `<color rgb="${color}"/>` : ""}<name val="${escape(f.fontFamily)}"/><family val="2"/></font>`
   );
 }
 
 /** Collector of the document styles: Excel stores every font/fill/cell-format once & a cell refers to it by index */
-function createStyles(defaultFont: IExcelFontFull): IStyles {
+function createStyles(defaultStyle: IExcelStyleFull): IStyles {
   const fonts = createStylesCollection();
   /** Excel reserves the first 2 fills for itself (`none` & `gray125`), so a custom one starts from the index 2 */
   const fills = createStylesCollection(2);
@@ -598,9 +584,9 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
       }
       return id;
     },
-    getCellStyle(font: IExcelFontFull, isWrapText: boolean, numFmtId = 0): number {
-      const fontId = fonts.indexOf(getFontXml(font));
-      const bgColor = toARGB(font.backgroundColor);
+    getCellStyle(style: IExcelStyleFull, isWrapText: boolean, numFmtId = 0): number {
+      const fontId = fonts.indexOf(getFontXml(style));
+      const bgColor = toARGB(style.backgroundColor);
       const fillId = bgColor
         ? fills.indexOf(
             `<fill><patternFill patternType="solid"><fgColor rgb="${bgColor}"/><bgColor indexed="64"/></patternFill></fill>`
@@ -609,8 +595,8 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
       return cellXfs.indexOf(
         `<xf numFmtId="${numFmtId}" fontId="${fontId}" fillId="${fillId}" borderId="0" xfId="0" applyFont="1"` +
           `${numFmtId ? ` applyNumberFormat="1"` : ""}${fillId ? ` applyFill="1"` : ""} applyAlignment="1">` +
-          `<alignment${font.horizontalAlign ? ` horizontal="${font.horizontalAlign}"` : ""} ` +
-          `vertical="${font.verticalAlign || "top"}"${isWrapText ? ` wrapText="1"` : ""}/></xf>`
+          `<alignment${style.horizontalAlign ? ` horizontal="${style.horizontalAlign}"` : ""} ` +
+          `vertical="${style.verticalAlign || "top"}"${isWrapText ? ` wrapText="1"` : ""}/></xf>`
       );
     },
     toXml(): string {
@@ -637,7 +623,7 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
   // Excel writes itself, every real format starts from 1 & a cell always refers to its own one - see renderSheet()
   cellXfs.items.push(`<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>`);
   // the default font must be registered the 1st: Excel measures a column width in the widest digit of the font[0]
-  styles.getCellStyle(defaultFont, false);
+  styles.getCellStyle(defaultStyle, false);
   return styles;
 }
 
@@ -649,17 +635,17 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
  * nothing is stored per cell. Keeping the mapped values instead (as `Array<Array<{value, style}>>`) costs an array
  * per row + an object & a retained string per cell and forces 2 extra passes over the whole dataset. */
 function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
-  const { styles, getCellValue, cellCallback } = ctx;
+  const { allStyles: styles, getCellValue, cellCallback } = ctx;
   const cols = sheet.mapping;
   const colCount = cols.length;
-  const font = mergeFont(ctx.font, sheet.font);
+  const font = mergeStyle(ctx.style, sheet.style);
   // the font of the sheet is the one of every column that doesn't override it & of the cells around the data,
   // so its style is resolved once & re-used below instead of being re-registered per column
   const sheetStyle = styles.getCellStyle(font, false);
   const sheetColStyleXml = ` style="${sheetStyle}"`;
   // the header-row is the sheet-font + the header-options of the document & of the sheet (so a header keeps
   // the family/size of the sheet & points only the difference); a column re-merges it only if it has an own font
-  const sheetHeaderFont = mergeFont(font, ctx.fontHeader, sheet.headerFont);
+  const sheetHeaderFont = mergeStyle(font, ctx.headerStyle, sheet.headerStyle);
 
   /** Excel-names of the columns: `A`, `B`, ... `AA`; cached because every single cell refers to it */
   const letters: Array<string> = [];
@@ -682,7 +668,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   /** Metrics of the column-font: the auto-width measures the header & every cell of the column by them */
   const cellMetrics: Array<IFontMetrics> = [];
   /** Font of the column (the sheet-font + an own one of the column): the base of a cell with an own font */
-  const colFonts: Array<IExcelFontFull> = [];
+  const colFonts: Array<IExcelStyleFull> = [];
   /** Ratio of the font-size of the column to the measured one */
   const cellScale = new Float64Array(colCount);
   let headerCells = "";
@@ -692,15 +678,15 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     const text = getHeaderText(h);
     // an own font of the column is merged into the sheet-font & becomes the base of its header either;
     // a column without it re-uses the ready fonts/styles of the sheet, so nothing is allocated per column
-    const colFont = h.font ? mergeFont(font, h.font) : font;
+    const colFont = h.style ? mergeStyle(font, h.style) : font;
     colFonts.push(colFont);
-    const hBase = h.font ? mergeFont(colFont, ctx.fontHeader, sheet.headerFont) : sheetHeaderFont;
-    const hFont = h.headerFont ? mergeFont(hBase, h.headerFont) : hBase;
+    const hBase = h.style ? mergeStyle(colFont, ctx.headerStyle, sheet.headerStyle) : sheetHeaderFont;
+    const hFont = h.headerStyle ? mergeStyle(hBase, h.headerStyle) : hBase;
     const letter = getColumnLetter(c);
     letters.push(letter);
     headers.push(text);
 
-    const colStyle = h.font ? styles.getCellStyle(colFont, false) : sheetStyle;
+    const colStyle = h.style ? styles.getCellStyle(colFont, false) : sheetStyle;
     const wrapStyle = styles.getCellStyle(colFont, true);
     cellStyleXml.push(`s="${colStyle}" `);
     cellStyleWrapXml.push(`s="${wrapStyle}" `);
@@ -755,22 +741,22 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
 
   /** Resolved options per own font of a cell & per column - see {@link getCellOverride}; it's weak, so nothing
    * is retained after the export & a font that the callback allocates per cell dies with its cell */
-  const overrides = new WeakMap<IExcelFont, Array<ICellOverride | undefined>>();
+  const overrides = new WeakMap<IExcelStyle, Array<ICellOverride | undefined>>();
 
   /** Everything that a cell with an own font needs, resolved once per (font-object, column) pair: a callback
    * usually returns a couple of shared font-objects (`red`, `bold` etc.), so nothing is re-merged & no metrics
    * are re-resolved per cell. A font-object that is allocated by the callback itself simply misses the cache */
-  function getCellOverride(c: number, cellFont: IExcelFont): ICellOverride {
-    let byCol = overrides.get(cellFont);
+  function getCellOverride(c: number, cellStyle: IExcelStyle): ICellOverride {
+    let byCol = overrides.get(cellStyle);
     if (byCol === undefined) {
       byCol = [];
-      overrides.set(cellFont, byCol);
+      overrides.set(cellStyle, byCol);
     }
     let ov = byCol[c];
     if (ov === undefined) {
       // an own font of the cell is merged into the font of the column: only the difference has to be pointed
-      const f = mergeFont(colFonts[c], cellFont);
-      ov = { font: f, styleXml: [], metrics: autoWidth.getMetrics(f), scale: autoWidth.getScale(f), datePx: -1 };
+      const s = mergeStyle(colFonts[c], cellStyle);
+      ov = { style: s, styleXml: [], metrics: autoWidth.getMetrics(s), scale: autoWidth.getScale(s), datePx: -1 };
       byCol[c] = ov;
     }
     return ov;
@@ -782,7 +768,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     let xml = ov.styleXml[type];
     if (xml === undefined) {
       const numFmtId = type === ExcelCellTypes.date ? styles.getNumFmtId(getDateFormat(c)) : 0;
-      xml = `s="${styles.getCellStyle(ov.font, type === ExcelCellTypes.textWrap, numFmtId)}" `;
+      xml = `s="${styles.getCellStyle(ov.style, type === ExcelCellTypes.textWrap, numFmtId)}" `;
       ov.styleXml[type] = xml;
     }
     return xml;
@@ -811,7 +797,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
         // a callback that only styles a cell returns no value at all, so the mapped one stays applied
         if (res != null) {
           if (res.value) cObjVal = res.value;
-          if (res.font) ov = getCellOverride(c, res.font);
+          if (res.style) ov = getCellOverride(c, res.style);
         }
       }
       const { type } = cObjVal;
@@ -966,7 +952,7 @@ export default async function exportToExcel<T>(
   sheetsData: Array<IExcelSheet<T>>,
   /** Called for every single data-cell of every sheet right after the value is mapped by
    * {@link exportToExcel.$defaults.getCellValue}: return an own `value` &/or `font` to override the cell, ex.
-   * `(v) => (v.stringVal[0] === "-" ? { font: redFont } : undefined)`.
+   * `(v) => (v.stringVal[0] === "-" ? { style: redFont } : undefined)`.
    *
    * The `font` is merged into the font of the column, so only the difference has to be pointed, and the
    * auto-width of the column follows such a cell as well (a wider/bolder font included).
@@ -980,12 +966,12 @@ export default async function exportToExcel<T>(
 ): Promise<Blob> {
   // todo change Blob to ISavedBlob that contains .saveAs that reuse saveAs helper
 
-  const { getCellValue, font, headerFont, dateTimeFormat } = exportToExcel.$defaults;
-  const documentFont = mergeFont(baseFont, font);
+  const { getCellValue, style, headerStyle, dateTimeFormat } = exportToExcel.$defaults;
+  const documentFont = mergeStyle(baseFont, style);
   const ctx: IExportContext = {
-    styles: createStyles(documentFont),
-    font: documentFont,
-    fontHeader: headerFont,
+    allStyles: createStyles(documentFont),
+    style: documentFont,
+    headerStyle,
     getCellValue,
     cellCallback,
     // the locale can be refreshed after this module is imported, so the default is resolved here & not on $defaults
@@ -1009,23 +995,23 @@ export default async function exportToExcel<T>(
   // of inside zip(): that way an xml-string becomes garbage as soon as it's converted & the whole document never
   // exists as strings and as bytes at the same time. The small parts are tiny enough to be built as a string
   const files: Record<string, Uint8Array> = {
-    "xl/workbook.xml": encodeUtf8(getWorkbookXml(sheets)),
-    "xl/_rels/workbook.xml.rels": encodeUtf8(getWorkbookRelsXml(sheets)),
-    "_rels/.rels": encodeUtf8(relsXml),
-    "[Content_Types].xml": encodeUtf8(getContentTypesXml(sheets)),
+    "xl/workbook.xml": strToU8(getWorkbookXml(sheets)),
+    "xl/_rels/workbook.xml.rels": strToU8(getWorkbookRelsXml(sheets)),
+    "_rels/.rels": strToU8(relsXml),
+    "[Content_Types].xml": strToU8(getContentTypesXml(sheets)),
   };
 
   sheets.forEach((s) => {
     files[`xl/worksheets/sheet${s.num}.xml`] = getWorkSheetBytes(s);
     if (s.hasTable) {
-      files[`xl/tables/table${s.num}.xml`] = encodeUtf8(getTableXml(s));
-      files[`xl/worksheets/_rels/sheet${s.num}.xml.rels`] = encodeUtf8(getTableRelsXml(s.num));
+      files[`xl/tables/table${s.num}.xml`] = strToU8(getTableXml(s));
+      files[`xl/worksheets/_rels/sheet${s.num}.xml.rels`] = strToU8(getTableRelsXml(s.num));
     }
     // the rendered xml is the biggest allocation of the export: drop it as soon as it's encoded
     s.parts = null!;
   });
   // styles are collected during the generation above, so the file is added at the very end
-  files["xl/styles.xml"] = encodeUtf8(ctx.styles.toXml());
+  files["xl/styles.xml"] = strToU8(ctx.allStyles.toXml());
 
   const zipped = await new Promise<Uint8Array>((resolve, reject) => {
     zip(files, (err, res) => {
@@ -1072,8 +1058,8 @@ exportToExcel.$defaults = {
     return { type: ExcelCellTypes.text, stringVal: (v as any).toString() };
   },
 
-  font: { size: 11, family: "Calibri", verticalAlign: "center" },
-  headerFont: { style: ExcelFontStyles.bold },
+  style: { fontSize: 11, fontFamily: "Calibri", verticalAlign: "center" },
+  headerStyle: { fontStyle: ExcelFontStyles.bold },
 } as IExcelDefaults;
 
 interface IExcelDefaults extends IExcelSettings {
