@@ -1,7 +1,12 @@
 import { useState } from "react";
 import Page from "src/elements/page";
 import Code from "src/elements/code";
-import exportToExcel, { ExcelFontStyles, IExcelSheet } from "web-ui-pack/helpers/exportToExcel";
+import exportToExcel, {
+  ExcelFontStyles,
+  IExcelCellCallback,
+  IExcelFont,
+  IExcelSheet,
+} from "web-ui-pack/helpers/exportToExcel";
 import { stringPrettify } from "web-ui-pack/indexHelpers";
 import styles from "./exportToExcel.scss";
 
@@ -116,6 +121,25 @@ const styledColumns: IExcelSheet<IUser>["mapping"] = userColumns.map((c, i) => (
     i % 2 ? { color: "#ffffff", backgroundColor: "#4472c4" } : { color: "#4472c4", style: ExcelFontStyles.underline },
 }));
 
+/** Fonts of a highlighted cell.
+ * WARN: such a font must be a shared object - it's merged & measured once per (font-object, column) pair,
+ * while an object-literal that is built inside the callback is re-resolved for every single cell */
+const fontInactive: IExcelFont = { color: "#c00000", style: ExcelFontStyles.italic };
+const fontYoung: IExcelFont = { backgroundColor: "#ffe699", style: ExcelFontStyles.bold };
+
+/** Points an own value &/or font per cell: a row of an inactive user is red-italic, an age below 30 is
+ * highlighted & a boolean is rendered as Yes/No */
+const userCellCallback: IExcelCellCallback<IUser> = (value, itemIndex, mapping) => {
+  const user = users[itemIndex];
+  let font: IExcelFont | undefined;
+  if (!user.isActive) font = fontInactive;
+  else if (mapping.propName === "age" && user.age < 30) font = fontYoung;
+
+  if (mapping.propName !== "isActive") return font ? { font } : undefined;
+  // WARN: never mutate the pointed value - return an own one instead
+  return { font, value: { ...value, stringVal: user.isActive ? "Yes" : "No" } };
+};
+
 /** Generates a huge dataset to check performance & memory */
 function generateUsers(cnt: number): IUser[] {
   const result: IUser[] = new Array(cnt);
@@ -131,6 +155,7 @@ interface IExample {
   fileName: string;
   details: string;
   getSheets: () => Array<IExcelSheet<any>>;
+  cellCallback?: IExcelCellCallback<any>;
 }
 
 const examples: IExample[] = [
@@ -170,6 +195,15 @@ const examples: IExample[] = [
     ],
   },
   {
+    label: "Cell styles",
+    fileName: "cell-styles.xlsx",
+    details:
+      "cellCallback points an own value &/or font per cell: a row of an inactive user is red-italic, " +
+      "an age below 30 is highlighted & a boolean is rendered as Yes/No; column width follows such a font either",
+    getSheets: () => [{ data: users, mapping: userColumns, name: "Users" }],
+    cellCallback: userCellCallback,
+  },
+  {
     label: "Empty data",
     fileName: "empty.xlsx",
     details: "Only header-row is exported: Excel treats an empty table as a broken content, so table-part is skipped",
@@ -201,7 +235,7 @@ export default function ExportToExcelView() {
     try {
       const start = performance.now();
       const sheets = e.getSheets();
-      const blob = await exportToExcel(sheets);
+      const blob = await exportToExcel(sheets, e.cellCallback);
       const ms = Math.round(performance.now() - start);
       await saveAs(blob, e.fileName);
       setStatus({ text: `Saved '${e.fileName}': ${(blob.size / 1024).toFixed(1)}Kb, generated in ${ms}ms` });
@@ -222,6 +256,7 @@ export default function ExportToExcelView() {
         "Several sheets (tabs) per document; every sheet has own columns mapping",
         "Auto-detects column width, applies autoFilter & table styling",
         "Custom font per sheet & per header-column: size, family, style, color, backgroundColor",
+        "cellCallback: an own value &/or font per single cell (the auto-width follows it as well)",
         "Formats values by type: a number & a Date are stored as the real ones, so Excel sorts/filters/sums them",
         "Date-format per document/sheet/column (localeInfo by default); string[] is joined by new-line + wrapText",
         "Escapes XML-specific symbols & sanitizes a sheet-name according to Excel rules",
@@ -292,6 +327,9 @@ const users = [
   // ...
 ];
 
+/** Font of a highlighted cell: it's merged into the font of the column, so only the difference is pointed */
+const highlight = { backgroundColor: "#ffe699", style: ExcelFontStyles.bold };
+
 const blob = await createExcelDoc([
   {
     name: "Users", // optional; default is 'Sheet{number}'
@@ -307,7 +345,16 @@ const blob = await createExcelDoc([
     ],
   },
   // ...next sheet here
-]);
+],
+// optional callback: point an own value &/or font per single cell (the font is merged into the font of the column)
+(value, itemIndex, mapping) => {
+  // WARN: return a shared font-object (as 'highlight' here) - it's merged & measured once per such an object;
+  // an object-literal that is built inside the callback is re-resolved for every single cell
+  if (mapping.propName === "age" && users[itemIndex].age < 30) return { font: highlight };
+  // ...an own value: WARN never mutate the pointed one - return a new object instead
+  if (mapping.propName === "isActive") return { value: { ...value, stringVal: value.stringVal === "true" ? "Yes" : "No" } };
+  return undefined; // nothing is overridden: the cell keeps the value & the style of the column
+});
 
 saveAs(blob, "users.xlsx");
 

@@ -32,6 +32,18 @@ describe("helper.exportToExcel", () => {
   /** WARN: the order of the files inside the archive isn't a part of the format, so only the set is checked */
   const expectFiles = (names) => expect(Object.keys(files).sort()).toEqual([...names].sort());
 
+  /** `s` of the pointed cell: the index of its cell-format in cellXfs */
+  const cellStyleId = (ref, sheetNum = 1) =>
+    files[`xl/worksheets/sheet${sheetNum}.xml`].match(new RegExp(`<c r="${ref}" s="(\\d+)"`))[1];
+  /** xf-xml of the pointed cell-format */
+  const xfById = (styleId) => {
+    const xfs = files["xl/styles.xml"].match(/<cellXfs count="\d+">(.*)<\/cellXfs>/)[1];
+    return [...xfs.matchAll(/<xf [^>]*\/>|<xf .*?<\/xf>/g)].map((m) => m[0])[+styleId];
+  };
+  /** font-xml that the pointed cell-format is rendered by */
+  const fontById = (styleId) =>
+    [...files["xl/styles.xml"].matchAll(/<font>(.*?)<\/font>/g)][+xfById(styleId).match(/fontId="(\d+)"/)[1]][1];
+
   test("single sheet: every value type & the whole file-structure", async () => {
     const blob = await exportToExcel([
       {
@@ -628,6 +640,126 @@ describe("helper.exportToExcel", () => {
     } finally {
       exportToExcel.$defaults.getCellValue = orig;
     }
+  });
+
+  test("cellCallback: an own value & font of a cell", async () => {
+    // WARN: a shared font-object is resolved once per column, an object-literal per cell - every time
+    const red = { color: "#ff0000" };
+    const calls = [];
+    await exportToExcel(
+      [
+        {
+          name: "Cb",
+          data: [
+            { v: 1, s: "a" },
+            { v: -2, s: "b" },
+            { v: -3, s: "c" },
+          ],
+          mapping: [{ propName: "v" }, { propName: "s" }],
+        },
+      ],
+      (value, itemIndex, mapping) => {
+        calls.push(`${mapping.propName}${itemIndex}:${value.stringVal}`);
+        // an own value only: the style of the column is kept
+        if (mapping.propName === "s") {
+          return itemIndex === 0 ? { value: { type: ExcelCellTypes.text, stringVal: "first" } } : undefined;
+        }
+        // an own font only: the mapped value is kept
+        return value.stringVal.startsWith("-") ? { font: red } : undefined;
+      }
+    );
+    // it's called for every data-cell (& never for a header) with the value that getCellValue has mapped
+    expect(calls).toEqual(["v0:1", "s0:a", "v1:-2", "s1:b", "v2:-3", "s2:c"]);
+    const xml = files["xl/worksheets/sheet1.xml"];
+    // the pointed value replaces the mapped one & keeps the style of the column
+    expect(xml).toContain(`<c r="B2" s="${cellStyleId("A2")}" t="inlineStr"><is><t>first</t></is></c>`);
+    expect(xml).toContain(`<c r="B3" s="${cellStyleId("A2")}" t="inlineStr"><is><t>b</t></is></c>`);
+    // ...a cell with an own font gets an own cell-format, but the mapped value stays applied
+    expect(xml).toContain(`<c r="A3" s="${cellStyleId("A3")}" t="n"><v>-2</v></c>`);
+    expect(cellStyleId("A3")).not.toBe(cellStyleId("A2"));
+    // the very same font-object is resolved once per column => a single cell-format & a single font
+    expect(cellStyleId("A4")).toBe(cellStyleId("A3"));
+    expect(files["xl/styles.xml"]).toContain(`<fonts count="3">`); // the document one + the bold header + the red
+    // ...the pointed font is merged into the font of the column: only the color differs
+    expect(fontById(cellStyleId("A3"))).toBe(
+      `<sz val="11"/><color rgb="FFFF0000"/><name val="Calibri"/><family val="2"/>`
+    );
+    expect(fontById(cellStyleId("A2"))).toBe(`<sz val="11"/><name val="Calibri"/><family val="2"/>`);
+    // the `<col>` belongs to the column & is never affected by a cell
+    expect(xml).toMatch(new RegExp(`<col min="1" max="1" width="[\\d.]+" style="${cellStyleId("A2")}"`));
+
+    // a callback that returns nothing at all changes nothing
+    const noCb = () => files["xl/worksheets/sheet1.xml"];
+    const sheets = [{ name: "Cb2", data: [{ v: 1 }], mapping: [{ propName: "v" }] }];
+    await exportToExcel(sheets);
+    const expected = noCb();
+    await exportToExcel(sheets, () => undefined);
+    expect(noCb()).toBe(expected);
+  });
+
+  test("cellCallback: the auto-width follows the font of a cell", async () => {
+    const widthOf = (n) =>
+      +files["xl/worksheets/sheet1.xml"].match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"`))[1];
+    const bold = { style: ExcelFontStyles.bold };
+    const run = (cb) =>
+      exportToExcel(
+        [
+          {
+            name: "W",
+            font: { family: "Tahoma" },
+            data: [{ v: "Active", fix: "Active" }],
+            mapping: [
+              { propName: "v", headerText: "V" },
+              { propName: "fix", headerText: "F", width: 5 },
+            ],
+          },
+        ],
+        cb
+      );
+
+    await run();
+    const base = widthOf(1);
+    // the bold face of Tahoma is ~17% wider, so such a cell widens the column
+    await run(() => ({ font: bold }));
+    expect(widthOf(1)).toBeGreaterThan(base * 1.1);
+    // ...an explicit width still wins: such a column isn't measured at all
+    expect(widthOf(2)).toBe(5);
+  });
+
+  test("cellCallback: a wrapped & a date cell of an own font", async () => {
+    const big = { size: 22 };
+    const sheets = [
+      {
+        name: "DW",
+        // WARN: the content must be long enough - otherwise the header defines the width & nothing is checked
+        data: [
+          { d: new Date(2024, 2, 5, 13, 45, 30), arr: ["wwwwwwwwww", "b"] },
+          { d: new Date(2024, 2, 6, 1, 2, 3), arr: ["wwwwwwwwww", "d"] },
+        ],
+        mapping: [{ propName: "d" }, { propName: "arr" }],
+      },
+    ];
+    const widthOf = (n) =>
+      +files["xl/worksheets/sheet1.xml"].match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"`))[1];
+
+    await exportToExcel(sheets);
+    const [baseDate, baseWrap] = [widthOf(1), widthOf(2)];
+
+    await exportToExcel(sheets, (_v, itemIndex) => (itemIndex === 0 ? { font: big } : undefined));
+    // a date-cell keeps the number-format of the column & a wrapped one - its wrapText, both with the own font
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164"`);
+    expect(fontById(cellStyleId("A2"))).toContain(`<sz val="22"/>`);
+    expect(xfById(cellStyleId("B2"))).toContain(`wrapText="1"`);
+    expect(fontById(cellStyleId("B2"))).toContain(`<sz val="22"/>`);
+    // ...the 2nd row has no own font => the ordinary styles of the columns
+    expect(xfById(cellStyleId("A3"))).toContain(`numFmtId="164"`);
+    expect(fontById(cellStyleId("A3"))).toContain(`<sz val="11"/>`);
+    expect(cellStyleId("B3")).not.toBe(cellStyleId("B2"));
+    // the number-format is registered once even though both fonts refer to it
+    expect(files["xl/styles.xml"]).toContain(`<numFmts count="1">`);
+    // a date is measured by its format & not by the stored number, so the doubled font widens the column ~2x
+    expect(widthOf(1)).toBeGreaterThan(baseDate * 1.85);
+    expect(widthOf(2)).toBeGreaterThan(baseWrap * 1.85);
   });
 
   test("rejects when zipping is failed", async () => {

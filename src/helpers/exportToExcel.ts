@@ -132,8 +132,36 @@ export interface IExcelCellValue {
   stringVal: string;
 }
 
+/** Hook that overrides the content &/or the font of a single cell: see the `cellCallback` argument
+ * of {@link exportToExcel} */
+export type IExcelCellCallback<T = any> = (
+  /** Cell that {@link exportToExcel.$defaults.getCellValue} has mapped the item-property into.
+   * WARN: never mutate it - an empty cell is a shared read-only object; return an own one instead */
+  value: IExcelCellValue,
+  /** Index of the item in {@link IExcelSheet.data} */
+  itemIndex: number,
+  /** Column that the cell belongs to */
+  mapping: IExcelColumnMap<T>
+) => { value?: IExcelCellValue; font?: IExcelFont } | undefined | null;
+
 /** Font with the options that are required by the file-format (so it's always ready to be rendered) */
 type IExcelFontFull = IExcelFont & Required<Pick<IExcelFont, "size" | "family">>;
+
+/** Own font of a cell resolved into everything that the render & the auto-width need: it depends only on the
+ * font-object that {@link IExcelCellCallback} returns & on the column, so it's cached per such a pair */
+interface ICellOverride {
+  /** The pointed font merged into the font of the column */
+  font: IExcelFontFull;
+  /** `s="N" ` of the cell indexed by {@link ExcelCellTypes}: a wrapped & a date-cell need an own cell-format */
+  styleXml: Array<string | undefined>;
+  /** Metrics of {@link ICellOverride.font}: the auto-width measures such a cell by them */
+  metrics: IFontMetrics;
+  /** Ratio of the font-size of {@link ICellOverride.font} to the measured one */
+  scale: number;
+  /** Width in px of a date-cell of this font (`-1` - not measured yet): a date is rendered by the format,
+   * so every date of the pair takes the very same width - see {@link renderSheet} */
+  datePx: number;
+}
 
 /** Rendered xml-parts of a sheet: the data is never stored cell-by-cell, only the ready-to-use content */
 interface ISheetParts {
@@ -172,6 +200,8 @@ interface IExportContext {
   unitPx: number;
   /** @see {@link exportToExcel.$defaults.getCellValue} */
   getCellValue: <T = any>(v: T[keyof T]) => IExcelCellValue;
+  /** @see the `cellCallback` argument of {@link exportToExcel} */
+  cellCallback: IExcelCellCallback | undefined;
   /** Format of a date-cell: {@link exportToExcel.$defaults.dateTimeFormat} or {@link localeInfo.dateTime} */
   dateTimeFormat: string;
 }
@@ -619,7 +649,7 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
  * nothing is stored per cell. Keeping the mapped values instead (as `Array<Array<{value, style}>>`) costs an array
  * per row + an object & a retained string per cell and forces 2 extra passes over the whole dataset. */
 function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
-  const { styles, getCellValue } = ctx;
+  const { styles, getCellValue, cellCallback } = ctx;
   const cols = sheet.mapping;
   const colCount = cols.length;
   const font = mergeFont(ctx.font, sheet.font);
@@ -651,6 +681,8 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   const colStyleXml: Array<string> = [];
   /** Metrics of the column-font: the auto-width measures the header & every cell of the column by them */
   const cellMetrics: Array<IFontMetrics> = [];
+  /** Font of the column (the sheet-font + an own one of the column): the base of a cell with an own font */
+  const colFonts: Array<IExcelFontFull> = [];
   /** Ratio of the font-size of the column to the measured one */
   const cellScale = new Float64Array(colCount);
   let headerCells = "";
@@ -661,6 +693,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     // an own font of the column is merged into the sheet-font & becomes the base of its header either;
     // a column without it re-uses the ready fonts/styles of the sheet, so nothing is allocated per column
     const colFont = h.font ? mergeFont(font, h.font) : font;
+    colFonts.push(colFont);
     const hBase = h.font ? mergeFont(colFont, ctx.fontHeader, sheet.headerFont) : sheetHeaderFont;
     const hFont = h.headerFont ? mergeFont(hBase, h.headerFont) : hBase;
     const letter = getColumnLetter(c);
@@ -690,20 +723,29 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     headerCells += `<c r="${letter}1" s="${headerStyle}" t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
   }
 
+  /** Format that a date-cell of the column is rendered by: an own one of the column wins over the sheet
+   * & over the document */
+  function getDateFormat(c: number): string {
+    return cols[c].dateTimeFormat || sheet.dateTimeFormat || ctx.dateTimeFormat;
+  }
+
+  /** Width in px of the widest date of the pointed format rendered by the pointed font: a date-cell stores
+   * a number that has nothing to do with the rendered text, so it's measured by the format instead */
+  function getDatePx(format: string, m: IFontMetrics, scale: number): number {
+    return autoWidth.getTextPx(dateToString(widestDate, format), m.charPx, m.defaultPx) * scale;
+  }
+
   /** Returns `s="N" ` of a date-cell of the column & caches it.
    *
    * It's called only when such a cell really occurs, so a column without a date registers no number-format at all.
-   * The auto-width is resolved here either: a date-cell stores a number, but Excel renders it by the format - so
-   * every date of the column takes the very same width & measuring it once per column is enough */
+   * The auto-width is resolved here either: every date of the column takes the very same width (see
+   * {@link getDatePx}), so measuring it once per column is enough */
   function getDateStyleXml(c: number): string {
-    const h = cols[c];
-    const format = h.dateTimeFormat || sheet.dateTimeFormat || ctx.dateTimeFormat;
-    const colFont = h.font ? mergeFont(font, h.font) : font;
-    const dateStyle = styles.getCellStyle(colFont, false, styles.getNumFmtId(format));
+    const format = getDateFormat(c);
+    const dateStyle = styles.getCellStyle(colFonts[c], false, styles.getNumFmtId(format));
     const px = maxPx[c];
     if (px >= 0) {
-      const m = cellMetrics[c];
-      const w = autoWidth.getTextPx(dateToString(widestDate, format), m.charPx, m.defaultPx) * cellScale[c];
+      const w = getDatePx(format, cellMetrics[c], cellScale[c]);
       if (w > px) maxPx[c] = w;
     }
     const xml = `s="${dateStyle}" `;
@@ -711,44 +753,99 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     return xml;
   }
 
+  /** Resolved options per own font of a cell & per column - see {@link getCellOverride}; it's weak, so nothing
+   * is retained after the export & a font that the callback allocates per cell dies with its cell */
+  const overrides = new WeakMap<IExcelFont, Array<ICellOverride | undefined>>();
+
+  /** Everything that a cell with an own font needs, resolved once per (font-object, column) pair: a callback
+   * usually returns a couple of shared font-objects (`red`, `bold` etc.), so nothing is re-merged & no metrics
+   * are re-resolved per cell. A font-object that is allocated by the callback itself simply misses the cache */
+  function getCellOverride(c: number, cellFont: IExcelFont): ICellOverride {
+    let byCol = overrides.get(cellFont);
+    if (byCol === undefined) {
+      byCol = [];
+      overrides.set(cellFont, byCol);
+    }
+    let ov = byCol[c];
+    if (ov === undefined) {
+      // an own font of the cell is merged into the font of the column: only the difference has to be pointed
+      const f = mergeFont(colFonts[c], cellFont);
+      ov = { font: f, styleXml: [], metrics: autoWidth.getMetrics(f), scale: autoWidth.getScale(f), datePx: -1 };
+      byCol[c] = ov;
+    }
+    return ov;
+  }
+
+  /** Returns `s="N" ` of a cell with an own font & caches it: a wrapped & a date-cell need an own cell-format
+   * exactly as an ordinary cell of the column does */
+  function getOverrideStyleXml(c: number, ov: ICellOverride, type: ExcelCellTypes): string {
+    let xml = ov.styleXml[type];
+    if (xml === undefined) {
+      const numFmtId = type === ExcelCellTypes.date ? styles.getNumFmtId(getDateFormat(c)) : 0;
+      xml = `s="${styles.getCellStyle(ov.font, type === ExcelCellTypes.textWrap, numFmtId)}" `;
+      ov.styleXml[type] = xml;
+    }
+    return xml;
+  }
+
   const { data } = sheet;
   const rows = createUtf8Writer();
   rows.add(`<row r="1">${headerCells}</row>`);
 
-  for (let r = 0; r < data.length; ++r) {
-    const item = data[r];
+  for (let ri = 0; ri < data.length; ++ri) {
+    const item = data[ri];
     // +1 to make it 1-based as Excel enumerates the rows & +1 for the header-row; stringified once per row
-    const rowNum = `${r + 2}`;
+    const rowNum = `${ri + 2}`;
     let cells = "";
     for (let c = 0; c < colCount; ++c) {
       const h = cols[c];
       // the mapped cell is consumed right here & never stored, so the object that it comes in dies immediately:
       // V8 allocates such a short-living object by a pointer-bump & the scavenger costs nothing for it (it walks
       // the survivors only) - measured as ~1% against a mutable holder that is re-used for every cell
-      const cObjVal = getCellValue<any>(item[h.propName]) || emptyCell;
+      let cObjVal = getCellValue<any>(item[h.propName]) || emptyCell;
+      /** Options of a cell that points an own font; `undefined` - the cell keeps the style of the column.
+       * The callback is asked once per cell & the branch is predictable, so an export without it pays nothing */
+      let ov: ICellOverride | undefined;
+      if (cellCallback) {
+        const res = cellCallback(cObjVal, ri, h);
+        // a callback that only styles a cell returns no value at all, so the mapped one stays applied
+        if (res != null) {
+          if (res.value) cObjVal = res.value;
+          if (res.font) ov = getCellOverride(c, res.font);
+        }
+      }
       const { type } = cObjVal;
       // a `null` isn't expected here, but it must not produce a 'null' in a cell
       const value = cObjVal.stringVal || "";
       const px = maxPx[c];
-      // a date is excluded here: the stored value has nothing to do with the rendered text, so such a column
-      // is measured once by its format - see getDateStyleXml()
-      if (px >= 0 && type < ExcelCellTypes.date) {
-        const m = cellMetrics[c];
-        // WARN: a number is measured by its JS-representation - the `General` format that Excel really renders
-        // it by is close enough & can only be narrower (Excel rounds a long fraction to fit the column)
-        const w = autoWidth.getTextPx(value, m.charPx, m.defaultPx) * cellScale[c];
-        if (w > px) maxPx[c] = w;
+      if (px >= 0) {
+        // a date is excluded here: the stored value has nothing to do with the rendered text, so such a column
+        // is measured once by its format - see getDateStyleXml()
+        if (type < ExcelCellTypes.date) {
+          const m = ov ? ov.metrics : cellMetrics[c];
+          // WARN: a number is measured by its JS-representation - the `General` format that Excel really renders
+          // it by is close enough & can only be narrower (Excel rounds a long fraction to fit the column)
+          const w = autoWidth.getTextPx(value, m.charPx, m.defaultPx) * (ov ? ov.scale : cellScale[c]);
+          if (w > px) maxPx[c] = w;
+        } else if (ov) {
+          // an own font renders the very same date wider/narrower, so it's measured once per (font, column)
+          // pair either - getDateStyleXml() covers only the cells that keep the font of the column
+          if (ov.datePx < 0) ov.datePx = getDatePx(getDateFormat(c), ov.metrics, ov.scale);
+          if (ov.datePx > px) maxPx[c] = ov.datePx;
+        }
       }
+      /** `s="N" ` of the cell: an own font of the cell wins over the style of the column */
+      let styleXml: string;
+      if (ov) styleXml = getOverrideStyleXml(c, ov, type);
+      else if (type === ExcelCellTypes.date) styleXml = cellStyleDateXml[c] || getDateStyleXml(c);
+      else if (type === ExcelCellTypes.textWrap) styleXml = cellStyleWrapXml[c];
+      else styleXml = cellStyleXml[c];
       // a number (a date is stored as one either) is never escaped & needs no `<is>`-wrapper, so it's a separate
       // & much shorter template; the numeric types are the last ones in the enum, so it's a single comparison
       cells +=
         type >= ExcelCellTypes.number
-          ? `<c r="${letters[c]}${rowNum}" ${
-              type === ExcelCellTypes.number ? cellStyleXml[c] : cellStyleDateXml[c] || getDateStyleXml(c)
-            }t="n"><v>${value}</v></c>`
-          : `<c r="${letters[c]}${rowNum}" ${
-              type === ExcelCellTypes.textWrap ? cellStyleWrapXml[c] : cellStyleXml[c]
-            }t="inlineStr"><is><t>${escape(value)}</t></is></c>`;
+          ? `<c r="${letters[c]}${rowNum}" ${styleXml}t="n"><v>${value}</v></c>`
+          : `<c r="${letters[c]}${rowNum}" ${styleXml}t="inlineStr"><is><t>${escape(value)}</t></is></c>`;
     }
     rows.add(`<row r="${rowNum}">${cells}</row>`);
   }
@@ -866,7 +963,20 @@ function getTableRelsXml(num: number): string {
 
 /** Export pointed data into excel-file according to provided mapping */
 export default async function exportToExcel<T>(
-  sheetsData: Array<IExcelSheet<T>> /* todo add setCellCallback:()=> so user can format and set custom value */
+  sheetsData: Array<IExcelSheet<T>>,
+  /** Called for every single data-cell of every sheet right after the value is mapped by
+   * {@link exportToExcel.$defaults.getCellValue}: return an own `value` &/or `font` to override the cell, ex.
+   * `(v) => (v.stringVal[0] === "-" ? { font: redFont } : undefined)`.
+   *
+   * The `font` is merged into the font of the column, so only the difference has to be pointed, and the
+   * auto-width of the column follows such a cell as well (a wider/bolder font included).
+   *
+   * WARN: it's called for every single cell (the hottest path of the export together with `getCellValue`):
+   * - return the very same font-object for the cells that share the style (a `const` outside of the callback):
+   * an own font is merged & measured once per such an object & column, while an object-literal that is built
+   * per cell misses that cache & is re-resolved every time;
+   * - never mutate the pointed `value` - an empty cell is a shared read-only object; return an own one instead */
+  cellCallback?: IExcelCellCallback<T>
 ): Promise<Blob> {
   // todo change Blob to ISavedBlob that contains .saveAs that reuse saveAs helper
 
@@ -877,6 +987,7 @@ export default async function exportToExcel<T>(
     font: documentFont,
     fontHeader: headerFont,
     getCellValue,
+    cellCallback,
     // the locale can be refreshed after this module is imported, so the default is resolved here & not on $defaults
     dateTimeFormat: dateTimeFormat || localeInfo.dateTime,
     unitPx: autoWidth.getUnitPx(documentFont),
