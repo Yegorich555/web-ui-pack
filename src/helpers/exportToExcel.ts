@@ -39,8 +39,7 @@ export interface IExcelFont {
     | "Corbel"
     | "Segoe UI"
     | (string & {});
-  /** Style of the text; point several styles for example:`ExcelFontStyles.bold | ExcelFontStyles.underline`
-   * @defaultValue {@link ExcelFontStyles.none} */
+  /** Style of the text; point several styles for example:`ExcelFontStyles.bold | ExcelFontStyles.underline` */
   style?: ExcelFontStyles;
 
   /** Color of the text in hex-format `#rrggbb`, ex. `#ff0000`;
@@ -408,7 +407,8 @@ const fontStyleMask = ExcelFontStyles.bold | ExcelFontStyles.italic | ExcelFontS
 /** Xml-part of `styles.xml` per {@link IExcelFont.style} (the index is the bitmask itself): the file-format
  * requires the tags to be ordered, so all the combinations are built once instead of per font */
 const fontStyleXml: string[] = [];
-for (let i = ExcelFontStyles.none; i <= fontStyleMask; ++i) {
+// the index 0 (no style at all) holds an empty part, so a font without a style needs no branch either
+for (let i = 0; i <= fontStyleMask; ++i) {
   fontStyleXml[i] =
     `${i & ExcelFontStyles.bold ? "<b/>" : ""}${i & ExcelFontStyles.italic ? "<i/>" : ""}` +
     `${i & ExcelFontStyles.underline ? "<u/>" : ""}`;
@@ -929,7 +929,6 @@ exportToExcel.$defaults = {
 
     if (v instanceof Date) {
       const ms = v.valueOf();
-      // an `Invalid Date` has no numeric representation at all (Excel reports such a file as corrupted)
       if (Number.isNaN(ms)) return { type: ExcelCellTypes.text, stringVal: "Invalid date" };
       // Excel stores a date as a number of days since its epoch & renders it by the format of the cell; the format
       // has no timezone, so the local wall-clock time is stored - the very same date that a user sees in the app
@@ -943,11 +942,8 @@ exportToExcel.$defaults = {
 
     if (t === "boolean") return { type: ExcelCellTypes.text, stringVal: v ? "true" : "false" };
     if (t === "number") {
-      if (Number.isFinite(v)) {
-        // NaN & Infinity have no representation in the format at all (Excel reports such a file as corrupted)
+      if (!Number.isFinite(v)) return { type: ExcelCellTypes.text, stringVal: "Invalid number" }; // NaN & Infinity have no representation in the format at all (Excel reports such file as corrupted)
         return { type: ExcelCellTypes.number, stringVal: (v as number).toString() };
-      }
-      return { type: ExcelCellTypes.text, stringVal: "Invalid number" };
     }
 
     return { type: ExcelCellTypes.text, stringVal: (v as any).toString() };
