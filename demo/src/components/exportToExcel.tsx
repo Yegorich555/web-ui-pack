@@ -6,26 +6,10 @@ import exportToExcel, {
   IExcelCellCallback,
   IExcelStyle,
   IExcelSheet,
-} from "web-ui-pack/helpers/exportToExcel";
+} from "web-ui-pack/helpers/files/exportToExcel";
+import saveAsFile from "web-ui-pack/helpers/files/saveAsFile";
 import { stringPrettify } from "web-ui-pack/indexHelpers";
 import styles from "./exportToExcel.scss";
-
-/** Saves Blob into file via hidden <a download> */
-function saveAs(blob: Blob, fileName: string): Promise<void> {
-  const href = window.URL.createObjectURL(blob);
-  const el = document.createElement("a");
-  el.setAttribute("href", href);
-  el.setAttribute("download", fileName || "downloadedFile");
-  el.click();
-
-  return new Promise<void>((resolve) => {
-    setTimeout(() => {
-      el.remove();
-      window.URL.revokeObjectURL(href);
-      resolve();
-    }, 100);
-  });
-}
 
 interface IUser {
   name: string;
@@ -242,9 +226,9 @@ export default function ExportToExcelView() {
     try {
       const start = performance.now();
       const sheets = e.getSheets();
-      const blob = await exportToExcel(sheets, e.cellCallback);
+      const blob = await exportToExcel(sheets, null, e.cellCallback);
       const ms = Math.round(performance.now() - start);
-      await saveAs(blob, e.fileName);
+      saveAsFile(blob, e.fileName);
       setStatus({ text: `Saved '${e.fileName}': ${(blob.size / 1024).toFixed(1)}Kb, generated in ${ms}ms` });
     } catch (err) {
       console.error(err);
@@ -257,7 +241,7 @@ export default function ExportToExcelView() {
   return (
     <Page //
       header="exportToExcel"
-      link="src/helpers/exportToExcel.ts"
+      link="src/helpers/files/exportToExcel.ts"
       features={[
         "Creates a valid *.xlsx (OpenXML) document without any heavy dependencies",
         "Several sheets (tabs) per document; every sheet has own columns mapping",
@@ -267,7 +251,7 @@ export default function ExportToExcelView() {
         "Formats values by type: a number & a Date are stored as the real ones, so Excel sorts/filters/sums them",
         "Date-format per document/sheet/column (localeInfo by default); string[] is joined by new-line + wrapText",
         "Escapes XML-specific symbols & sanitizes a sheet-name according to Excel rules",
-        "Returns Blob: save it to a file, upload to a server or attach to an email",
+        "Saves the result into a file at once or returns Blob: save it later, upload to a server or attach to an email",
       ]}
     >
       <section>
@@ -327,7 +311,8 @@ export default function ExportToExcelView() {
 }
 
 const codeJS = `js
-import createExcelDoc, { ExcelFontStyles } from "web-ui-pack/helpers/exportToExcel";
+import createExcelDoc, { ExcelFontStyles } from "web-ui-pack/helpers/files/exportToExcel";
+import saveAsFile from "web-ui-pack/helpers/files/saveAsFile";
 
 const users = [
   { name: "John Doe", age: 32, isActive: true, registeredAt: new Date(), roles: ["Admin", "Developer"] },
@@ -353,6 +338,8 @@ const blob = await createExcelDoc([
   },
   // ...next sheet here
 ],
+// optional: point a filename to save the result at once (or call saveAsFile(blob, "users.xlsx") later)
+"users.xlsx",
 // optional callback: point an own value &/or style per single cell (it's merged into the style of the column)
 (value, itemIndex, mapping) => {
   // WARN: return a shared style-object (as 'highlight' here) - it's merged & measured once per such an object;
@@ -361,23 +348,4 @@ const blob = await createExcelDoc([
   // ...an own value: WARN never mutate the pointed one - return a new object instead
   if (mapping.propName === "isActive") return { value: { ...value, stringVal: value.stringVal === "true" ? "Yes" : "No" } };
   return undefined; // nothing is overridden: the cell keeps the value & the style of the column
-});
-
-saveAs(blob, "users.xlsx");
-
-/** Saves Blob into file via hidden <a download> */
-function saveAs(blob, fileName) {
-  const href = window.URL.createObjectURL(blob);
-  const el = document.createElement("a");
-  el.setAttribute("href", href);
-  el.setAttribute("download", fileName || "downloadedFile");
-  el.click();
-
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      el.remove();
-      window.URL.revokeObjectURL(href);
-      resolve();
-    }, 100);
-  });
-}`;
+});`;

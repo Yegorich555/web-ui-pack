@@ -3,7 +3,7 @@
 /* eslint-disable no-plusplus */
 import zlib from "zlib";
 import { TextEncoder, TextDecoder } from "util";
-import zip from "web-ui-pack/helpers/zip";
+import zip from "web-ui-pack/helpers/files/zip";
 
 // jsdom (jest 29) has no TextEncoder/TextDecoder
 global.TextEncoder ??= TextEncoder;
@@ -496,7 +496,7 @@ describe("helper.zip (WebWorker)", () => {
     // WARN: 'wkSupported' is resolved on import so module must be re-imported after mocks are applied
     jest.isolateModules(() => {
       // eslint-disable-next-line global-require
-      zipW = require("web-ui-pack/helpers/zip").default;
+      zipW = require("web-ui-pack/helpers/files/zip").default;
     });
   });
 
@@ -594,7 +594,7 @@ describe("helper.zip (mt fallbacks)", () => {
     try {
       jest.isolateModules(() => {
         // eslint-disable-next-line global-require
-        z = require("web-ui-pack/helpers/zip").default;
+        z = require("web-ui-pack/helpers/files/zip").default;
       });
     } finally {
       names.forEach((n, i) => {

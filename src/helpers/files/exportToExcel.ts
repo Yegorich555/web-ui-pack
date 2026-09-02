@@ -1,7 +1,8 @@
 import zip, { strToU8 } from "./zip";
-import { stringPrettify } from "./string";
-import dateToString from "./dateToString";
-import localeInfo from "../objects/localeInfo";
+import { stringPrettify } from "../string";
+import dateToString from "../dateToString";
+import localeInfo from "../../objects/localeInfo";
+import utilSaveAsFile from "./saveAsFile";
 
 /* Main concepts: max performance and min memory consumption on excel sheet generation.
  *
@@ -950,6 +951,10 @@ function getTableRelsXml(num: number): string {
 /** Export pointed data into excel-file according to provided mapping */
 export default async function exportToExcel<T>(
   sheetsData: Array<IExcelSheet<T>>,
+  /** Point a filename with extension to save the result into a file at once; otherwise the returned Blob
+   * can be saved later by the very same helper `web-ui-pack/helpers/files/saveAsFile` (or not saved at all)
+   * @example "test-excel.xlsx" */
+  saveAsFile?: string | null | false,
   /** Called for every single data-cell of every sheet right after the value is mapped by
    * {@link exportToExcel.$defaults.getCellValue}: return an own `value` &/or `font` to override the cell, ex.
    * `(v) => (v.stringVal[0] === "-" ? { style: redFont } : undefined)`.
@@ -962,10 +967,8 @@ export default async function exportToExcel<T>(
    * an own font is merged & measured once per such an object & column, while an object-literal that is built
    * per cell misses that cache & is re-resolved every time;
    * - never mutate the pointed `value` - an empty cell is a shared read-only object; return an own one instead */
-  cellCallback?: IExcelCellCallback<T>
+  cellCallback?: IExcelCellCallback<T> // todo add ability to set tooltip per cell
 ): Promise<Blob> {
-  // todo change Blob to ISavedBlob that contains .saveAs that reuse saveAs helper
-
   const { getCellValue, style, headerStyle, dateTimeFormat } = exportToExcel.$defaults;
   const documentFont = mergeStyle(baseFont, style);
   const ctx: IExportContext = {
@@ -1022,9 +1025,15 @@ export default async function exportToExcel<T>(
 
   // `zipped` is passed as-is: wrapping it into a new Uint8Array would copy the whole file one more time.
   // The cast is only about the lib-typing (`Uint8Array<ArrayBufferLike>`): zip() never returns a SharedArrayBuffer
-  return new Blob([zipped as BlobPart], {
+  const b = new Blob([zipped as BlobPart], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
+
+  if (saveAsFile) {
+    utilSaveAsFile(b, saveAsFile);
+  }
+
+  return b;
 }
 
 exportToExcel.$defaults = {

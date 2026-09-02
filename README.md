@@ -291,10 +291,11 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
 - [**localeInfo**](src/objects/localeInfo.ts) ⇒ `Locale-object with definitions related to user-locale`
 - [**TimeObject**](src/objects/timeObject.ts) ⇒ `Plane time object without date`
 
-#### Helpers. Data & Files
+#### Helpers. Files
 
-- [**zip**](src/helpers/zip.ts) ⇒ `compress files into zip archive`
-- [**exportToExcel**](src/helpers/exportToExcel.ts) ⇒ `export data to excel-file`
+- [**zip**](src/helpers/files/zip.ts) ⇒ `compress files into zip archive`
+- [**exportToExcel**](src/helpers/files/exportToExcel.ts) ⇒ `export data to excel-file`
+- [**saveAsFile**](src/helpers/files/saveAsFile.ts) ⇒ `save Blob into file`
 
 ---
 

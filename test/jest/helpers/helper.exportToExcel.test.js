@@ -1,11 +1,11 @@
 import { TextEncoder, TextDecoder } from "util";
-import exportToExcel, { ExcelCellTypes, ExcelFontStyles } from "web-ui-pack/helpers/exportToExcel";
-import zip from "web-ui-pack/helpers/zip";
+import exportToExcel, { ExcelCellTypes, ExcelFontStyles } from "web-ui-pack/helpers/files/exportToExcel";
+import zip from "web-ui-pack/helpers/files/zip";
 
 // zip() is mocked: it returns the prepared files as-is, so every xml is checked directly & without unzipping;
 // WARN: only the default export is mocked - exportToExcel takes strToU8() from the very same module
-jest.mock("web-ui-pack/helpers/zip", () => ({
-  ...jest.requireActual("web-ui-pack/helpers/zip"),
+jest.mock("web-ui-pack/helpers/files/zip", () => ({
+  ...jest.requireActual("web-ui-pack/helpers/files/zip"),
   __esModule: true,
   default: jest.fn(),
 }));
@@ -669,6 +669,7 @@ describe("helper.exportToExcel", () => {
           mapping: [{ propName: "v" }, { propName: "s" }],
         },
       ],
+      null,
       (value, itemIndex, mapping) => {
         calls.push(`${mapping.propName}${itemIndex}:${value.stringVal}`);
         // an own value only: the style of the column is kept
@@ -704,7 +705,7 @@ describe("helper.exportToExcel", () => {
     const sheets = [{ name: "Cb2", data: [{ v: 1 }], mapping: [{ propName: "v" }] }];
     await exportToExcel(sheets);
     const expected = noCb();
-    await exportToExcel(sheets, () => undefined);
+    await exportToExcel(sheets, null, () => undefined);
     expect(noCb()).toBe(expected);
   });
 
@@ -725,6 +726,7 @@ describe("helper.exportToExcel", () => {
             ],
           },
         ],
+        null,
         cb
       );
 
@@ -756,7 +758,7 @@ describe("helper.exportToExcel", () => {
     await exportToExcel(sheets);
     const [baseDate, baseWrap] = [widthOf(1), widthOf(2)];
 
-    await exportToExcel(sheets, (_v, itemIndex) => (itemIndex === 0 ? { style: big } : undefined));
+    await exportToExcel(sheets, null, (_v, itemIndex) => (itemIndex === 0 ? { style: big } : undefined));
     // a date-cell keeps the number-format of the column & a wrapped one - its wrapText, both with the own font
     expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164"`);
     expect(fontById(cellStyleId("A2"))).toContain(`<sz val="22"/>`);
@@ -773,6 +775,40 @@ describe("helper.exportToExcel", () => {
     expect(widthOf(2)).toBeGreaterThan(baseWrap * 1.85);
   });
 
+  test("saveAsFile: the result is saved at once by the 2nd arg", async () => {
+    // jsdom (jest 29) implements neither of them
+    const createObjectURL = jest.fn(() => "blob:test");
+    URL.createObjectURL = createObjectURL;
+    URL.revokeObjectURL = jest.fn();
+    const clicked = [];
+    jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function click() {
+      clicked.push(this.download);
+    });
+    const sheets = [{ name: "Save", data: [{ v: 1 }], mapping: [{ propName: "v" }] }];
+
+    try {
+      // nothing is saved until it's asked
+      const blob = await exportToExcel(sheets);
+      expect(blob.type).toBe(blobType);
+      expect(clicked).toEqual([]);
+      expect(createObjectURL).not.toHaveBeenCalled();
+
+      // the pointed filename saves the result at once
+      const blob2 = await exportToExcel(sheets, "atOnce.xlsx");
+      expect(clicked).toEqual(["atOnce.xlsx"]);
+      expect(createObjectURL).toHaveBeenLastCalledWith(blob2);
+
+      // ...every falsy value is ignored
+      await exportToExcel(sheets, false);
+      await exportToExcel(sheets, "");
+      await exportToExcel(sheets, null);
+      expect(clicked).toHaveLength(1);
+    } finally {
+      delete URL.createObjectURL;
+      delete URL.revokeObjectURL;
+    }
+  });
+
   test("rejects when zipping is failed", async () => {
     const sheets = [{ data: [{ v: 1 }], mapping: [{ propName: "v" }] }];
     zip.mockImplementation((_f, cb) => cb(new Error("test zip"), null));
@@ -784,7 +820,7 @@ describe("helper.exportToExcel", () => {
   });
 
   test("binary result of the real zip", async () => {
-    zip.mockImplementation(jest.requireActual("web-ui-pack/helpers/zip").default);
+    zip.mockImplementation(jest.requireActual("web-ui-pack/helpers/files/zip").default);
     // zip() stamps every entry with the current time, so the clock must be frozen to keep the binary stable
     jest.spyOn(Date, "now").mockReturnValue(new Date(2024, 2, 5, 6, 7, 8).valueOf());
 

@@ -6,8 +6,9 @@
 
 ### New Features
 
-- helper [zip](src/helpers/zip.ts)
-- helper [exportToExcel](src/helpers/exportToExcel.ts)
+- helper [zip](src/helpers/files/zip.ts)
+- helper [exportToExcel](src/helpers/files/exportToExcel.ts)
+- helper [saveAsFile](src/helpers/files/saveAsFile.ts)
 
 ---
 
