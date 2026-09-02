@@ -294,6 +294,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
 #### Helpers. Data & Files
 
 - [**zip**](src/helpers/zip.ts) ⇒ `compress files into zip archive`
+- [**exportToExcel**](src/helpers/exportToExcel.ts) ⇒ `export data to excel-file`
 
 ---
 
