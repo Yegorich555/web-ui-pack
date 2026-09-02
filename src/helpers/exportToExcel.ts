@@ -39,8 +39,9 @@ export interface IExcelFont {
     | "Corbel"
     | "Segoe UI"
     | (string & {});
-  /** Style of the text; only a single one is applicable at once */
-  style?: "bold" | "italic" | "underline"; // todo support several styles via bitmask  const enum: ExcelFontStyle.Bold | ExcelFontStyle.Bold | ExcelFontStyle.Underline
+  /** Style of the text; point several styles for example:`ExcelFontStyles.bold | ExcelFontStyles.underline`
+   * @defaultValue {@link ExcelFontStyles.none} */
+  style?: ExcelFontStyles;
 
   /** Color of the text in hex-format `#rrggbb`, ex. `#ff0000`;
    * an unparsable value is ignored (so the inherited color stays applied) */
@@ -52,6 +53,13 @@ export interface IExcelFont {
   // todo add horizontal and vertical alignment
 }
 
+/** Style of the text of a cell */
+export const enum ExcelFontStyles {
+  bold = 1,
+  italic = 1 << 1,
+  underline = 1 << 2,
+}
+
 export interface IExcelSettings {
   /** Font for every data-cell of the sheet/column; missed options are inherited from the upper level
    * ({@link IExcelSheet.font} + {@link exportToExcel.$defaults.font}). It's the base of the header-cell either,
@@ -61,7 +69,7 @@ export interface IExcelSettings {
 
   /** Font for the header cell of the column; missed options are inherited from the header-font of the sheet
    * ({@link IExcelSheet.headerFont} + {@link exportToExcel.$defaults.headerFont} + the font of the sheet)
-   * @defaultValue {@link exportToExcel.$defaults.headerFont} + {@link exportToExcel.$defaults.font} => `{ size: 11, family: "Calibri", style: 'bold' }` */
+   * @defaultValue {@link exportToExcel.$defaults.headerFont} + {@link exportToExcel.$defaults.font} => `{ size: 11, family: "Calibri", style: ExcelFontStyles.bold }` */
   headerFont?: IExcelFont;
 
   /** Format that a date-cell is rendered by; it's a {@link dateToString} format (`yyyy-MM-dd hh:mm:ss A`)
@@ -327,7 +335,7 @@ const autoWidth = {
    * so they share the regular one); called once per sheet & per column (not per cell), so the lower-casing of
    * the font-name & the lazy decoding are affordable here */
   getMetrics(font: IExcelFontFull): IFontMetrics {
-    const isBold = font.style === "bold";
+    const isBold = font.style !== undefined && (font.style & ExcelFontStyles.bold) !== 0;
     const family = font.family.toLowerCase();
     const key = isBold ? `${family} bold` : family;
     let m = autoWidth.metrics.get(key);
@@ -394,11 +402,17 @@ function toARGB(color: string | undefined): string | undefined {
 /** Base font of the document: the file-format requires size & family to be always defined */
 const baseFont: IExcelFontFull = { size: 11, family: "Calibri" };
 
-const fontStyleXml: Record<Required<IExcelFont>["style"], string> = {
-  bold: "<b/>",
-  italic: "<i/>",
-  underline: "<u/>",
-};
+/** Every bit that {@link ExcelFontStyles} defines: an unknown bit of a user-value is ignored by the render */
+const fontStyleMask = ExcelFontStyles.bold | ExcelFontStyles.italic | ExcelFontStyles.underline;
+
+/** Xml-part of `styles.xml` per {@link IExcelFont.style} (the index is the bitmask itself): the file-format
+ * requires the tags to be ordered, so all the combinations are built once instead of per font */
+const fontStyleXml: string[] = [];
+for (let i = ExcelFontStyles.none; i <= fontStyleMask; ++i) {
+  fontStyleXml[i] =
+    `${i & ExcelFontStyles.bold ? "<b/>" : ""}${i & ExcelFontStyles.italic ? "<i/>" : ""}` +
+    `${i & ExcelFontStyles.underline ? "<u/>" : ""}`;
+}
 
 /** Merges fonts from left to right; only defined options are taken (so a user can skip any of them);
  * an unparsable color is skipped either - so the inherited one isn't lost because of a typo */
@@ -522,7 +536,7 @@ function toExcelDateFormat(format: string): string {
 function getFontXml(f: IExcelFontFull): string {
   const color = toARGB(f.color);
   return (
-    `<font>${f.style ? fontStyleXml[f.style] : ""}<sz val="${f.size}"/>` +
+    `<font>${f.style ? fontStyleXml[f.style & fontStyleMask] : ""}<sz val="${f.size}"/>` +
     `${color ? `<color rgb="${color}"/>` : ""}<name val="${escape(f.family)}"/><family val="2"/></font>`
   );
 }
@@ -940,7 +954,7 @@ exportToExcel.$defaults = {
   },
 
   font: { size: 11, family: "Calibri" },
-  headerFont: { style: "bold" },
+  headerFont: { style: ExcelFontStyles.bold },
 } as IExcelDefaults;
 
 interface IExcelDefaults extends IExcelSettings {

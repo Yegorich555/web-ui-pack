@@ -1,5 +1,5 @@
 import { TextEncoder, TextDecoder } from "util";
-import exportToExcel, { ExcelCellTypes } from "web-ui-pack/helpers/exportToExcel";
+import exportToExcel, { ExcelCellTypes, ExcelFontStyles } from "web-ui-pack/helpers/exportToExcel";
 import zip from "web-ui-pack/helpers/zip";
 
 // zip() is mocked: it returns the prepared files as-is, so every xml is checked directly & without unzipping
@@ -197,7 +197,10 @@ describe("helper.exportToExcel", () => {
         mapping: [
           { propName: "v" },
           { propName: "arr" }, // an array-cell has the same font but with wrapText => an own cell-format
-          { propName: "custom", headerFont: { style: "italic", family: "A&B", backgroundColor: "#0000ff" } },
+          {
+            propName: "custom",
+            headerFont: { style: ExcelFontStyles.italic, family: "A&B", backgroundColor: "#0000ff" },
+          },
           // 'red' & '#f00' aren't parsable => ignored, so the header keeps the colors of the sheet-font
           { propName: "bad", headerFont: { color: "red", backgroundColor: "#f00" } },
         ],
@@ -242,7 +245,7 @@ describe("helper.exportToExcel", () => {
     };
     const { font, headerFont } = exportToExcel.$defaults;
     exportToExcel.$defaults.font = { size: 12, family: "Georgia" };
-    exportToExcel.$defaults.headerFont = { style: "bold", color: "#ff0000" };
+    exportToExcel.$defaults.headerFont = { style: ExcelFontStyles.bold, color: "#ff0000" };
     try {
       await exportToExcel([
         // no own font at all => the document-font everywhere
@@ -253,7 +256,7 @@ describe("helper.exportToExcel", () => {
           name: "S3",
           font: { family: "Verdana" },
           // the header-font of the sheet wins over $defaults.headerFont, but keeps its missed options
-          headerFont: { style: "italic" },
+          headerFont: { style: ExcelFontStyles.italic },
           // ...and the column wins over the sheet
           data: [{ v: "a", v2: "b" }],
           mapping: [{ propName: "v" }, { propName: "v2", headerFont: { color: "#0000ff" } }],
@@ -325,10 +328,42 @@ describe("helper.exportToExcel", () => {
     expect(+colOf(2)[1]).toBeGreaterThan(+colOf(1)[1]);
   });
 
+  test("fonts: several styles at once (the bitmask)", async () => {
+    const fontsOf = () => [...files["xl/styles.xml"].matchAll(/<font>(.*?)<\/font>/g)].map((m) => m[1]);
+    await exportToExcel([
+      {
+        name: "S",
+        font: { style: ExcelFontStyles.italic | ExcelFontStyles.underline },
+        data: [{ v: "a", v2: "b" }],
+        mapping: [
+          { propName: "v" },
+          // the header adds 'bold' of $defaults.headerFont to the styles of the sheet-font
+          { propName: "v2", headerFont: { style: ExcelFontStyles.bold | ExcelFontStyles.underline } },
+        ],
+      },
+    ]);
+    const fonts = fontsOf();
+    // WARN: the order of the tags is required by the file-format & doesn't depend on the order of the bits
+    expect(fonts).toContain(`<i/><u/><sz val="11"/><name val="Calibri"/><family val="2"/>`);
+    expect(fonts).toContain(`<b/><u/><sz val="11"/><name val="Calibri"/><family val="2"/>`);
+
+    // an unknown bit is ignored & 'none' is the same as no style at all
+    await exportToExcel([
+      {
+        name: "S",
+        font: { style: ExcelFontStyles.bold | 8 },
+        data: [{ v: "a", v2: "b" }],
+        mapping: [{ propName: "v" }, { propName: "v2", font: { style: ExcelFontStyles.none } }],
+      },
+    ]);
+    expect(fontsOf()).toContain(`<b/><sz val="11"/><name val="Calibri"/><family val="2"/>`);
+    expect(fontsOf()).toContain(`<sz val="11"/><name val="Calibri"/><family val="2"/>`);
+  });
+
   test("fonts: $defaults.font & $defaults.headerFont can be overridden", async () => {
     const { font, headerFont } = exportToExcel.$defaults;
-    exportToExcel.$defaults.font = { size: 12, family: "Times New Roman", style: "italic" };
-    exportToExcel.$defaults.headerFont = { style: "underline", color: "#123456" };
+    exportToExcel.$defaults.font = { size: 12, family: "Times New Roman", style: ExcelFontStyles.italic };
+    exportToExcel.$defaults.headerFont = { style: ExcelFontStyles.underline, color: "#123456" };
     try {
       await exportToExcel([{ name: "Def", data: [{ v: 1 }], mapping: [{ propName: "v" }] }]);
       // the document-font must be the 1st: Excel measures a column width in the widest digit of the font[0]
@@ -394,12 +429,12 @@ describe("helper.exportToExcel", () => {
 
     // `bold` is measured by the own face of the family & isn't a ratio either: it doesn't widen Calibri at all,
     // while the same text of Tahoma gets ~17% wider
-    expect(await widthOf({ style: "bold" }, "Active")).toBe(await widthOf(undefined, "Active"));
-    expect(await widthOf({ family: "Tahoma", style: "bold" }, "Active")).toBeGreaterThan(
+    expect(await widthOf({ style: ExcelFontStyles.bold }, "Active")).toBe(await widthOf(undefined, "Active"));
+    expect(await widthOf({ family: "Tahoma", style: ExcelFontStyles.bold }, "Active")).toBeGreaterThan(
       await widthOf({ family: "Tahoma" }, "Active")
     );
     // `italic` & `underline` don't change the advances, so they share the regular face
-    expect(await widthOf({ style: "italic" }, "Active")).toBe(await widthOf(undefined, "Active"));
+    expect(await widthOf({ style: ExcelFontStyles.italic }, "Active")).toBe(await widthOf(undefined, "Active"));
 
     // the document-font defines the Excel-unit: the same font on the both sides almost cancels the scale out
     const { font } = exportToExcel.$defaults;

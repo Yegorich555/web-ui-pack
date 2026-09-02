@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Page from "src/elements/page";
 import Code from "src/elements/code";
-import exportToExcel, { IExcelSheet } from "web-ui-pack/helpers/exportToExcel";
+import exportToExcel, { ExcelFontStyles, IExcelSheet } from "web-ui-pack/helpers/exportToExcel";
 import { stringPrettify } from "web-ui-pack/indexHelpers";
 import styles from "./exportToExcel.scss";
 
@@ -112,7 +112,8 @@ const departmentColumns: IExcelSheet<IDepartment>["mapping"] = [
 /** The same columns but with a custom header-font per column */
 const styledColumns: IExcelSheet<IUser>["mapping"] = userColumns.map((c, i) => ({
   ...c,
-  headerFont: i % 2 ? { color: "#ffffff", backgroundColor: "#4472c4" } : { color: "#4472c4", style: "underline" },
+  headerFont:
+    i % 2 ? { color: "#ffffff", backgroundColor: "#4472c4" } : { color: "#4472c4", style: ExcelFontStyles.underline },
 }));
 
 /** Generates a huge dataset to check performance & memory */
@@ -284,7 +285,7 @@ export default function ExportToExcelView() {
 }
 
 const codeJS = `js
-import createExcelDoc from "web-ui-pack/helpers/exportToExcel";
+import createExcelDoc, { ExcelFontStyles } from "web-ui-pack/helpers/exportToExcel";
 
 const users = [
   { name: "John Doe", age: 32, isActive: true, registeredAt: new Date(), roles: ["Admin", "Developer"] },
@@ -296,7 +297,7 @@ const blob = await createExcelDoc([
     name: "Users", // optional; default is 'Sheet{number}'
     data: users,
     font: { size: 12, family: "Segoe UI", color: "#333333" }, // optional; default is { size: 11, family: "Calibri" }
-    fontHeader: { style: "bold", color: "#4472c4" }, // optional; missed options are inherited from the sheet-font
+    headerFont: { style: ExcelFontStyles.bold, color: "#4472c4" }, // optional; missed options are inherited from the sheet-font
     mapping: [
       { propName: "name" }, // header text is prettified propName: 'Name'
       { propName: "registeredAt", headerText: "Registered at" }, // custom header text
