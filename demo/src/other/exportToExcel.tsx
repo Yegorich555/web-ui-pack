@@ -41,15 +41,6 @@ const users: IUser[] = [
     notes: "Checks escaping of & < > \" ' ` symbols",
   },
   {
-    name: "Кирилл Ще́рба",
-    email: "kirill@почта.рф",
-    age: 45,
-    isActive: true,
-    registeredAt: new Date("2019-01-31T00:00:00"),
-    roles: [],
-    notes: null,
-  },
-  {
     name: "Very long name that must be cut by column maxWidth option",
     email: "long@mail.com",
     age: 0,
@@ -161,31 +152,6 @@ const examples: IExample[] = [
     ],
   },
   {
-    label: "Without name",
-    fileName: "default-names.xlsx",
-    details: "Tabs are named Sheet1, Sheet2... Forbidden chars []:*?/\\ are replaced & name is cut by 31 chars",
-    getSheets: () => [
-      { data: departments, mapping: departmentColumns },
-      { data: departments, mapping: departmentColumns, name: "Bad[name]:with*forbidden?chars/and\\too long" },
-    ],
-  },
-  {
-    label: "Custom styles",
-    fileName: "fonts.xlsx",
-    details:
-      "Style per sheet (fontSize, fontFamily, color) & per header-column (fontStyle, color, backgroundColor); " +
-      "missed options are inherited from the sheet-style & $defaults; column width is scaled by the font-size",
-    getSheets: () => [
-      {
-        data: users,
-        mapping: styledColumns,
-        name: "Styled",
-        style: { fontSize: 14, fontFamily: "Segoe UI", color: "#333333" },
-      },
-      { data: departments, mapping: departmentColumns, name: "Defaults" },
-    ],
-  },
-  {
     label: "Cell styles",
     fileName: "cell-styles.xlsx",
     details:
@@ -193,12 +159,6 @@ const examples: IExample[] = [
       "an age below 30 is highlighted & a boolean is rendered as Yes/No; column width follows such a style either",
     getSheets: () => [{ data: users, mapping: userColumns, name: "Users" }],
     cellCallback: userCellCallback,
-  },
-  {
-    label: "Empty data",
-    fileName: "empty.xlsx",
-    details: "Only header-row is exported: Excel treats an empty table as a broken content, so table-part is skipped",
-    getSheets: () => [{ data: [], mapping: userColumns, name: "No rows" }],
   },
   {
     label: "10 000 rows",
@@ -243,14 +203,9 @@ export default function ExportToExcelView() {
       header="exportToExcel"
       link="src/helpers/files/exportToExcel.ts"
       features={[
-        "Creates a valid *.xlsx (OpenXML) document without any heavy dependencies",
-        "Several sheets (tabs) per document; every sheet has own columns mapping",
+        "Creates a valid *.xlsx (OpenXML) document without any dependencies",
         "Auto-detects column width, applies autoFilter & table styling",
-        "Custom style per sheet & per header-column: fontSize, fontFamily, fontStyle, color, backgroundColor",
-        "cellCallback: an own value &/or style per single cell (the auto-width follows it as well)",
-        "Formats values by type: a number & a Date are stored as the real ones, so Excel sorts/filters/sums them",
-        "Date-format per document/sheet/column (localeInfo by default); string[] is joined by new-line + wrapText",
-        "Escapes XML-specific symbols & sanitizes a sheet-name according to Excel rules",
+        "Custom style per sheet/columns/headers/cell: fontSize, fontFamily, fontStyle, color, backgroundColor",
         "Saves the result into a file at once or returns Blob: save it later, upload to a server or attach to an email",
       ]}
     >
@@ -260,7 +215,6 @@ export default function ExportToExcelView() {
       </section>
       <section>
         <h3>Export prepared data</h3>
-        <small>Click a button to generate & download the document</small>
         <div className={styles.examples}>
           {examples.map((e) => (
             <div key={e.label}>
@@ -277,9 +231,6 @@ export default function ExportToExcelView() {
       </section>
       <section>
         <h3>Prepared data</h3>
-        <small>
-          The same values as expected in the exported document (see <b>users</b> in the demo-code)
-        </small>
         <div className={styles.tableWrap}>
           <table className={styles.table}>
             <thead>
@@ -315,19 +266,21 @@ import createExcelDoc, { ExcelFontStyles } from "web-ui-pack/helpers/files/expor
 import saveAsFile from "web-ui-pack/helpers/files/saveAsFile";
 
 const users = [
-  { name: "John Doe", age: 32, isActive: true, registeredAt: new Date(), roles: ["Admin", "Developer"] },
+  { name: "John Doe", age: 32, isActive: true,
+    registeredAt: new Date(), roles: ["Admin", "Developer"] },
   // ...
 ];
 
-/** Style of a highlighted cell: it's merged into the style of the column, so only the difference is pointed */
+/** Style of a highlighted cell:
+ *  it's merged into the style of the column, so only the difference is pointed */
 const highlight = { backgroundColor: "#ffe699", fontStyle: ExcelFontStyles.bold };
+
+createExcelDoc.$defaults.style.fontSize = 12;
 
 const blob = await createExcelDoc([
   {
     name: "Users", // optional; default is 'Sheet{number}'
     data: users,
-    style: { fontSize: 12, fontFamily: "Segoe UI", color: "#333333" }, // optional; default is { fontSize: 11, fontFamily: "Calibri" }
-    headerStyle: { fontStyle: ExcelFontStyles.bold, color: "#4472c4" }, // optional; missed options are inherited from the sheet-style
     mapping: [
       { propName: "name" }, // header text is prettified propName: 'Name'
       { propName: "registeredAt", headerText: "Registered at" }, // custom header text
@@ -335,17 +288,28 @@ const blob = await createExcelDoc([
       // header is bold by default; missed options are inherited from the sheet-style
       { propName: "notes", headerStyle: { color: "#ffffff", backgroundColor: "#4472c4" } },
     ],
+
+    // optional styles
+    style: { fontSize: 12, fontFamily: "Calibri", color: "#333333" },
+
+     // missed font inheritted from 'style'
+    headerStyle: { fontStyle: ExcelFontStyles.bold, color: "#4472c4" },
   },
   // ...next sheet here
 ],
-// optional: point a filename to save the result at once (or call saveAsFile(blob, "users.xlsx") later)
+
+ // optional: filename to save the result at once OR call saveAsFile(blob, "users.xlsx")
 "users.xlsx",
-// optional callback: point an own value &/or style per single cell (it's merged into the style of the column)
+
+// optional callback
 (value, itemIndex, mapping) => {
-  // WARN: return a shared style-object (as 'highlight' here) - it's merged & measured once per such an object;
-  // an object-literal that is built inside the callback is re-resolved for every single cell
-  if (mapping.propName === "age" && users[itemIndex].age < 30) return { style: highlight };
+  // object-literal that is built inside the callback is re-resolved for every single cell
+  if (mapping.propName === "age" && users[itemIndex].age < 30)
+     return { style: highlight };
+
   // ...an own value: WARN never mutate the pointed one - return a new object instead
-  if (mapping.propName === "isActive") return { value: { ...value, stringVal: value.stringVal === "true" ? "Yes" : "No" } };
+  if (mapping.propName === "isActive")
+     return { value: { ...value, stringVal: value.stringVal === "true" ? "Yes" : "No" } };
+
   return undefined; // nothing is overridden: the cell keeps the value & the style of the column
 });`;
