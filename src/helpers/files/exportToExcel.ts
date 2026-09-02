@@ -96,6 +96,8 @@ export interface IExcelColumnMap<T = any> extends IExcelSettings {
   headerText?: string;
   /** Width for column; by default it's auto-defined by the longest content */
   width?: number;
+  /** Point +X or -X to affect on auto-width */
+  widthOffset?: number; // todo implement
   /** Limit max width for column */
   maxWidth?: number;
 }
@@ -107,6 +109,8 @@ export interface IExcelSheet<T = any> extends IExcelSettings {
   mapping: IExcelColumnMap<T>[];
   /** Name of the Excel tab; default is `Sheet{number}` */
   name?: string;
+
+  // todo currently saved excel-sheets formatted in blue-colors: table formatting 16 in my case. - add ability to change it per sheet as it works with fontFamily
 }
 
 /** Way that Excel stores & parses the content of a cell (see {@link IExcelCellValue.type}) */
