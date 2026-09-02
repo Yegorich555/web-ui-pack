@@ -155,9 +155,9 @@ describe("helper.exportToExcel", () => {
     await exportToExcel([{ name: "Letters", data: [{ c25: "z", c26: "aa", c27: "ab" }], mapping }]);
     // WARN: no snapshot here: 28 columns produce a huge & useless xml
     // NiceToKnow: a cell of the default format has no `s` at all (see the 'fonts' tests below)
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="Z2" t="inlineStr"><is><t>z</t></is></c>`);
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AA2" t="inlineStr"><is><t>aa</t></is></c>`);
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AB2" t="inlineStr"><is><t>ab</t></is></c>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="Z2" s="1" t="inlineStr"><is><t>z</t></is></c>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AA2" s="1" t="inlineStr"><is><t>aa</t></is></c>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AB2" s="1" t="inlineStr"><is><t>ab</t></is></c>`);
     expect(files["xl/tables/table1.xml"]).toContain(`ref="A1:AB2"`);
   });
 
@@ -175,7 +175,7 @@ describe("helper.exportToExcel", () => {
     // the whole <sheetData> must be exactly the same as if it was built as a single string
     let expected = "";
     data.forEach((item, i) => {
-      expected += `<row r="${i + 2}"><c r="A${i + 2}" t="inlineStr"><is><t>${item.v}</t></is></c></row>`;
+      expected += `<row r="${i + 2}"><c r="A${i + 2}" s="1" t="inlineStr"><is><t>${item.v}</t></is></c></row>`;
     });
     const body = xml.slice(xml.indexOf("</row>") + "</row>".length, xml.indexOf("</sheetData>"));
     expect(body).toBe(expected);
@@ -214,22 +214,43 @@ describe("helper.exportToExcel", () => {
     expect(files["xl/styles.xml"]).toMatchSnapshot("xl/styles.xml");
     expect(files["xl/worksheets/sheet1.xml"]).toMatchSnapshot("xl/worksheets/sheet1.xml");
     // the unparsable colors of 'bad' are ignored => its header re-uses the style of the ordinary headers
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="D1" s="3" t="inlineStr"><is><t>Bad</t></is></c>`);
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="A1" s="3" t="inlineStr"><is><t>V</t></is></c>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="D1" s="4" t="inlineStr"><is><t>Bad</t></is></c>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="A1" s="4" t="inlineStr"><is><t>V</t></is></c>`);
     // WARN: a stored cell MUST carry an own `s` - Excel applies the format of `<col>` only to a cell that isn't
     // stored in the sheet at all (checked against the real Excel), so the sheet-font is repeated per cell
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="A2" s="1" t="inlineStr"><is><t>a</t></is></c>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="A2" s="2" t="inlineStr"><is><t>a</t></is></c>`);
     // ...an array-cell has the same font but with wrapText => an own cell-format
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="B2" s="2" t="inlineStr"><is><t>a\nb</t></is></c>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="B2" s="3" t="inlineStr"><is><t>a\nb</t></is></c>`);
     // the same style is set on every column & on the range of the columns that the mapping doesn't cover:
     // that's the only way to apply the sheet-font to a cell around the data (the one a user types in later).
     // WARN: `width` must be pointed there - a `<col>` without it collapses the columns & Excel hides them
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<col min="1" max="1" width="5.21" style="1"`);
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<col min="5" max="16384" width="9.15" style="1"/>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<col min="1" max="1" width="5.21" style="2"`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<col min="5" max="16384" width="9.15" style="2"/>`);
     // the 2nd sheet re-uses the styles of the 1st one
-    expect(files["xl/worksheets/sheet2.xml"]).toContain(`<col min="2" max="16384" width="9.15" style="1"/>`);
-    expect(files["xl/worksheets/sheet2.xml"]).toContain(`<c r="A1" s="3" t="inlineStr"><is><t>V</t></is></c>`);
-    expect(files["xl/worksheets/sheet2.xml"]).toContain(`<c r="A2" s="1" t="inlineStr"><is><t>b</t></is></c>`);
+    expect(files["xl/worksheets/sheet2.xml"]).toContain(`<col min="2" max="16384" width="9.15" style="2"/>`);
+    expect(files["xl/worksheets/sheet2.xml"]).toContain(`<c r="A1" s="4" t="inlineStr"><is><t>V</t></is></c>`);
+    expect(files["xl/worksheets/sheet2.xml"]).toContain(`<c r="A2" s="2" t="inlineStr"><is><t>b</t></is></c>`);
+  });
+
+  test("fonts: the alignment of a cell", async () => {
+    await exportToExcel([
+      {
+        name: "Align",
+        font: { horizontalAlign: "right", verticalAlign: "center" },
+        data: [{ v: "a", arr: ["a", "b"] }],
+        // an array-cell keeps the alignment together with its wrapText
+        mapping: [{ propName: "v" }, { propName: "arr" }],
+      },
+    ]);
+    const styles = files["xl/styles.xml"];
+    const sheet = files["xl/worksheets/sheet1.xml"];
+    expect(styles).toContain(`<alignment horizontal="right" vertical="center"/>`);
+    expect(styles).toContain(`<alignment horizontal="right" vertical="center" wrapText="1"/>`);
+    // WARN: cellXfs[0] is bound to the built-in `Normal` style & Excel applies it to no cell at all, so the
+    // index 0 is reserved by the plain xf & EVERY stored cell refers to its own format - a cell without `s`
+    // gets the Excel-defaults instead (the bottom alignment among them) & loses the whole style of the column
+    expect(styles).toContain(`<cellXfs count="5"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>`);
+    expect(sheet.match(/<c r="[^"]*"(?! s=")/g)).toBeNull();
   });
 
   test("fonts: the inheritance chain of the document, the sheet & the column", async () => {
@@ -461,7 +482,7 @@ describe("helper.exportToExcel", () => {
     }
     // default is restored: a number is stored as a number again
     await exportToExcel([{ name: "Custom", data: [{ v: 1 }], mapping: [{ propName: "v" }] }]);
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="A2" t="n"><v>1</v></c>`);
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="A2" s="1" t="n"><v>1</v></c>`);
   });
 
   test("numbers: stored as numbers & not as a text", async () => {
@@ -484,19 +505,19 @@ describe("helper.exportToExcel", () => {
     ]);
     const xml = files["xl/worksheets/sheet1.xml"];
     // `t="n"` + a raw <v>: only such a cell is summed/sorted/filtered by Excel as a number
-    expect(xml).toContain(`<c r="A2" t="n"><v>30</v></c>`);
-    expect(xml).toContain(`<c r="B2" t="n"><v>1234.56</v></c>`);
-    expect(xml).toContain(`<c r="C2" t="n"><v>-7</v></c>`);
-    expect(xml).toContain(`<c r="D2" t="n"><v>0</v></c>`);
-    expect(xml).toContain(`<c r="A3" t="n"><v>0</v></c>`); // -0 is stringified as '0'
-    expect(xml).toContain(`<c r="B3" t="n"><v>1e+21</v></c>`); // the exponent-form is a valid xsd:double
-    expect(xml).toContain(`<c r="C3" t="n"><v>-0.5</v></c>`);
+    expect(xml).toContain(`<c r="A2" s="1" t="n"><v>30</v></c>`);
+    expect(xml).toContain(`<c r="B2" s="1" t="n"><v>1234.56</v></c>`);
+    expect(xml).toContain(`<c r="C2" s="1" t="n"><v>-7</v></c>`);
+    expect(xml).toContain(`<c r="D2" s="1" t="n"><v>0</v></c>`);
+    expect(xml).toContain(`<c r="A3" s="1" t="n"><v>0</v></c>`); // -0 is stringified as '0'
+    expect(xml).toContain(`<c r="B3" s="1" t="n"><v>1e+21</v></c>`); // the exponent-form is a valid xsd:double
+    expect(xml).toContain(`<c r="C3" s="1" t="n"><v>-0.5</v></c>`);
     // a string is never converted into a number, so '0012' keeps its leading zeros
-    expect(xml).toContain(`<c r="E2" t="inlineStr"><is><t>123</t></is></c>`);
-    expect(xml).toContain(`<c r="E3" t="inlineStr"><is><t>0012</t></is></c>`);
+    expect(xml).toContain(`<c r="E2" s="1" t="inlineStr"><is><t>123</t></is></c>`);
+    expect(xml).toContain(`<c r="E3" s="1" t="inlineStr"><is><t>0012</t></is></c>`);
     // NaN & Infinity have no representation in the format (Excel reports such a file as corrupted)
-    expect(xml).toContain(`<c r="F2" t="inlineStr"><is><t>Invalid number</t></is></c>`);
-    expect(xml).toContain(`<c r="F3" t="inlineStr"><is><t>Invalid number</t></is></c>`);
+    expect(xml).toContain(`<c r="F2" s="1" t="inlineStr"><is><t>Invalid number</t></is></c>`);
+    expect(xml).toContain(`<c r="F3" s="1" t="inlineStr"><is><t>Invalid number</t></is></c>`);
     // the auto-width follows the number as it's rendered: 7 chars of '1234.56' are wider than 2 of 'Int'
     const widthOf = (n) => +xml.match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"`))[1];
     expect(widthOf(2)).toBeGreaterThan(widthOf(1));
@@ -519,10 +540,10 @@ describe("helper.exportToExcel", () => {
     const xml = files["xl/worksheets/sheet1.xml"];
     // `t="n"` + `s` that points to a date-format: only such a cell is sorted/filtered by Excel as a date.
     // 45356 = days between 1899-12-30 (the epoch of Excel) & 2024-03-05; .5732 = 13:45:30
-    expect(xml).toContain(`<c r="A2" s="3" t="n"><v>45356.57326388889</v></c>`);
-    expect(xml).toContain(`<c r="B2" s="4" t="n"><v>45356</v></c>`);
+    expect(xml).toContain(`<c r="A2" s="4" t="n"><v>45356.57326388889</v></c>`);
+    expect(xml).toContain(`<c r="B2" s="5" t="n"><v>45356</v></c>`);
     // an Invalid Date has no numeric representation at all, so it stays a text
-    expect(xml).toContain(`<c r="C2" t="inlineStr"><is><t>Invalid date</t></is></c>`);
+    expect(xml).toContain(`<c r="C2" s="1" t="inlineStr"><is><t>Invalid date</t></is></c>`);
     // the format is registered once per pointed one & only if a date-cell really occurs (so 'bad' adds nothing)
     expect(files["xl/styles.xml"]).toContain(
       `<numFmts count="2"><numFmt numFmtId="164" formatCode="yyyy-mm-dd hh:mm:ss AM/PM"/>` +
@@ -600,10 +621,10 @@ describe("helper.exportToExcel", () => {
         },
       ]);
       const xml = files["xl/worksheets/sheet1.xml"];
-      expect(xml).toContain(`<c r="A2" t="n"><v>12.50</v></c>`);
-      expect(xml).toContain(`<c r="B2" t="inlineStr"><is><t>3</t></is></c>`);
+      expect(xml).toContain(`<c r="A2" s="1" t="n"><v>12.50</v></c>`);
+      expect(xml).toContain(`<c r="B2" s="1" t="inlineStr"><is><t>3</t></is></c>`);
       // ...a wrapped cell gets an own cell-format (with wrapText) even if the value isn't an array at all
-      expect(xml).toContain(`<c r="C2" s="1" t="inlineStr"><is><t>a\nsecond line</t></is></c>`);
+      expect(xml).toContain(`<c r="C2" s="2" t="inlineStr"><is><t>a\nsecond line</t></is></c>`);
     } finally {
       exportToExcel.$defaults.getCellValue = orig;
     }

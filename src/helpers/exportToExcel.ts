@@ -3,7 +3,7 @@ import { stringPrettify } from "./string";
 import dateToString from "./dateToString";
 import localeInfo from "../objects/localeInfo";
 
-/** Main concepts: max performance and min memory consumption on excel sheet generation.
+/* Main concepts: max performance and min memory consumption on excel sheet generation.
  *
  * The module is split by the lifetime of the parts:
  * - pure helpers & static xml-parts are defined on the module-level: allocated once instead of on every export;
@@ -12,6 +12,8 @@ import localeInfo from "../objects/localeInfo";
  *   per-cell is kept in memory (see the comment there);
  * - {@link exportToExcel} is an orchestrator: builds the per-export {@link IExportContext} & zips the result.
  *  */
+
+/** font & styles that applied to cell or globally per sheet/document */
 export interface IExcelFont {
   /** Size of the font in points
    * @defaultValue 11 */
@@ -49,7 +51,12 @@ export interface IExcelFont {
    * @see {@link IExcelFont.color} for the supported format */
   backgroundColor?: string;
 
-  // todo add horizontal and vertical alignment
+  /** Horizontal alignment of the content of the cell
+   * @defaultValue `general` of Excel => a text is aligned to the left & a number/date to the right */
+  horizontalAlign?: "left" | "center" | "right";
+  /** Vertical alignment of the content of the cell
+   * @defaultValue "top" */
+  verticalAlign?: "top" | "center" | "bottom";
 }
 
 /** Style of the text of a cell */
@@ -461,8 +468,8 @@ interface IStylesCollection {
 }
 
 interface IStyles {
-  /** Returns the index of the cell-format in `cellXfs` according to the pointed font; `0` is the default format
-   * that Excel applies by itself (to a cell without the own `s` & without an inherited one) */
+  /** Returns the index of the cell-format in `cellXfs` according to the pointed font; it's never `0` -
+   * that index is reserved (see the note in {@link createStyles}) */
   getCellStyle(font: IExcelFontFull, isWrapText: boolean, numFmtId?: number): number;
   /** Returns the id of the number-format that renders the pointed {@link IExcelSettings.dateTimeFormat}
    * & registers the format if it's not registered yet */
@@ -572,7 +579,8 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
       return cellXfs.indexOf(
         `<xf numFmtId="${numFmtId}" fontId="${fontId}" fillId="${fillId}" borderId="0" xfId="0" applyFont="1"` +
           `${numFmtId ? ` applyNumberFormat="1"` : ""}${fillId ? ` applyFill="1"` : ""} applyAlignment="1">` +
-          `<alignment vertical="top"${isWrapText ? ` wrapText="1"` : ""}/></xf>`
+          `<alignment${font.horizontalAlign ? ` horizontal="${font.horizontalAlign}"` : ""} ` +
+          `vertical="${font.verticalAlign || "top"}"${isWrapText ? ` wrapText="1"` : ""}/></xf>`
       );
     },
     toXml(): string {
@@ -593,6 +601,11 @@ function createStyles(defaultFont: IExcelFontFull): IStyles {
     },
   };
 
+  // Excel binds cellXfs[0] to its built-in `Normal` cell-style & applies neither of them to a cell that carries
+  // no own `s`: such a cell keeps the Excel-defaults instead (the BOTTOM vertical alignment among them, so a
+  // custom `<alignment>` of cellXfs[0] is simply lost). So the index 0 is reserved by the very same plain xf that
+  // Excel writes itself, every real format starts from 1 & a cell always refers to its own one - see renderSheet()
+  cellXfs.items.push(`<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>`);
   // the default font must be registered the 1st: Excel measures a column width in the widest digit of the font[0]
   styles.getCellStyle(defaultFont, false);
   return styles;
@@ -613,7 +626,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   // the font of the sheet is the one of every column that doesn't override it & of the cells around the data,
   // so its style is resolved once & re-used below instead of being re-registered per column
   const sheetStyle = styles.getCellStyle(font, false);
-  const sheetColStyleXml = sheetStyle ? ` style="${sheetStyle}"` : "";
+  const sheetColStyleXml = ` style="${sheetStyle}"`;
   // the header-row is the sheet-font + the header-options of the document & of the sheet (so a header keeps
   // the family/size of the sheet & points only the difference); a column re-merges it only if it has an own font
   const sheetHeaderFont = mergeFont(font, ctx.fontHeader, sheet.headerFont);
@@ -626,8 +639,8 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   // The font can differ per column, so everything that a cell of it needs is resolved once here & indexed
   // by the column in the loops below.
   // WARN: every single cell must carry an own `s` - the format of `<col>`/`<row>` is applied by Excel ONLY to
-  // a cell that isn't stored in the sheet at all; a stored `<c>` without `s` always falls back to cellXfs[0]
-  // (checked against the real Excel). `<col>` is still required for the cells around the data - see below
+  // a cell that isn't stored in the sheet at all, and a stored `<c>` without `s` gets no format at all (not even
+  // cellXfs[0] - see createStyles). `<col>` is still required for the cells around the data - see below
   /** `s="N" ` of an ordinary cell of the column */
   const cellStyleXml: Array<string> = [];
   /** `s="N" ` of a wrapped (array) cell of the column */
@@ -656,9 +669,9 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
 
     const colStyle = h.font ? styles.getCellStyle(colFont, false) : sheetStyle;
     const wrapStyle = styles.getCellStyle(colFont, true);
-    cellStyleXml.push(colStyle ? `s="${colStyle}" ` : "");
-    cellStyleWrapXml.push(wrapStyle ? `s="${wrapStyle}" ` : "");
-    colStyleXml.push(colStyle ? ` style="${colStyle}"` : sheetColStyleXml);
+    cellStyleXml.push(`s="${colStyle}" `);
+    cellStyleWrapXml.push(`s="${wrapStyle}" `);
+    colStyleXml.push(` style="${colStyle}"`);
 
     // the column defines the auto-width by its own font: the data-cells are measured by it & the header-cell
     // by the header-font on top of it.
@@ -674,8 +687,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
         : autoWidth.getTextPx(text, hm.charPx, hm.defaultPx) * autoWidth.getScale(hFont) + autoWidth.filterButtonPx;
 
     const headerStyle = styles.getCellStyle(hFont, false);
-    const style = headerStyle ? `s="${headerStyle}" ` : "";
-    headerCells += `<c r="${letter}1" ${style}t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
+    headerCells += `<c r="${letter}1" s="${headerStyle}" t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
   }
 
   /** Returns `s="N" ` of a date-cell of the column & caches it.
@@ -694,7 +706,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
       const w = autoWidth.getTextPx(dateToString(widestDate, format), m.charPx, m.defaultPx) * cellScale[c];
       if (w > px) maxPx[c] = w;
     }
-    const xml = dateStyle ? `s="${dateStyle}" ` : "";
+    const xml = `s="${dateStyle}" `;
     cellStyleDateXml[c] = xml;
     return xml;
   }
@@ -754,7 +766,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   // column - so the rest of them takes the same style with the standard width (`customWidth` isn't set: they
   // aren't resized, only formatted). It covers a cell that isn't stored in the sheet at all - the one that
   // a user types in after the export
-  if (sheetColStyleXml && colCount < maxColumns) {
+  if (colCount < maxColumns) {
     const w = autoWidth.getDefaultWidth(ctx.unitPx);
     colsXml += `<col min="${colCount + 1}" max="${maxColumns}" width="${w}"${sheetColStyleXml}/>`;
   }
@@ -943,13 +955,13 @@ exportToExcel.$defaults = {
     if (t === "boolean") return { type: ExcelCellTypes.text, stringVal: v ? "true" : "false" };
     if (t === "number") {
       if (!Number.isFinite(v)) return { type: ExcelCellTypes.text, stringVal: "Invalid number" }; // NaN & Infinity have no representation in the format at all (Excel reports such file as corrupted)
-        return { type: ExcelCellTypes.number, stringVal: (v as number).toString() };
+      return { type: ExcelCellTypes.number, stringVal: (v as number).toString() };
     }
 
     return { type: ExcelCellTypes.text, stringVal: (v as any).toString() };
   },
 
-  font: { size: 11, family: "Calibri" },
+  font: { size: 11, family: "Calibri", verticalAlign: "center" },
   headerFont: { style: ExcelFontStyles.bold },
 } as IExcelDefaults;
 
