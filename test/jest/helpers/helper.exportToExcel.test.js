@@ -477,8 +477,26 @@ describe("helper.exportToExcel", () => {
     expect(await widthOf({ fontFamily: "Tahoma", fontStyle: ExcelFontStyles.bold }, "Active")).toBeGreaterThan(
       await widthOf({ fontFamily: "Tahoma" }, "Active")
     );
-    // `italic` & `underline` don't change the advances, so they share the regular face
-    expect(await widthOf({ fontStyle: ExcelFontStyles.italic }, "Active")).toBe(await widthOf(undefined, "Active"));
+    // `italic` isn't a slanted regular face either - it has own advances: the Calibri one is narrower for
+    // the lowercase, while its `M` is 1px wider - so a date-time column measured as the regular one got cut off
+    expect(await widthOf({ fontStyle: ExcelFontStyles.italic }, "Active")).toBeLessThan(
+      await widthOf(undefined, "Active")
+    );
+    const dt = "2021-04-13 10:24:00 AM";
+    expect(await widthOf({ fontStyle: ExcelFontStyles.italic }, dt)).toBeGreaterThan(await widthOf(undefined, dt));
+    // ...`bold | italic` is the 4th face & matches neither the bold nor the italic one
+    const boldItalic = ExcelFontStyles.bold | ExcelFontStyles.italic;
+    expect(await widthOf({ fontStyle: boldItalic }, "Active")).not.toBe(
+      await widthOf({ fontStyle: ExcelFontStyles.bold }, "Active")
+    );
+    expect(await widthOf({ fontStyle: boldItalic }, "Active")).not.toBe(
+      await widthOf({ fontStyle: ExcelFontStyles.italic }, "Active")
+    );
+    // `underline` doesn't change the advances, so it shares the face of the same weight & slant
+    expect(await widthOf({ fontStyle: ExcelFontStyles.underline }, "Active")).toBe(await widthOf(undefined, "Active"));
+    expect(await widthOf({ fontStyle: ExcelFontStyles.underline | ExcelFontStyles.italic }, "Active")).toBe(
+      await widthOf({ fontStyle: ExcelFontStyles.italic }, "Active")
+    );
 
     // the document-font defines the Excel-unit: the same font on the both sides almost cancels the scale out
     const { style } = exportToExcel.$defaults;
@@ -773,6 +791,32 @@ describe("helper.exportToExcel", () => {
     // a date is measured by its format & not by the stored number, so the doubled font widens the column ~2x
     expect(widthOf(1)).toBeGreaterThan(baseDate * 1.85);
     expect(widthOf(2)).toBeGreaterThan(baseWrap * 1.85);
+  });
+
+  test("cellCallback: an italic date-cell widens the column (#####)", async () => {
+    // the very case of the demo: an inactive row is red-italic & its date-cell got cut off, because the italic
+    // face was measured as the regular one while Excel renders the `M` of `AM` 1px wider
+    const italic = { color: "#c00000", fontStyle: ExcelFontStyles.italic };
+    const sheets = [
+      {
+        name: "It",
+        dateTimeFormat: "yyyy-MM-dd hh:mm:ss A",
+        data: [{ d: new Date(2021, 3, 13, 10, 24, 0) }, { d: new Date(2023, 10, 2, 18, 3, 45) }],
+        mapping: [{ propName: "d", headerText: "R" }], // a short header: otherwise it defines the width
+      },
+    ];
+    const widthOf = () => +files["xl/worksheets/sheet1.xml"].match(/<col [^>]*width="([\d.]+)"/)[1];
+
+    await exportToExcel(sheets);
+    const base = widthOf();
+    // the italic cell is measured by its own face, so the column follows it
+    await exportToExcel(sheets, null, (_v, itemIndex) => (itemIndex === 1 ? { style: italic } : undefined));
+    expect(widthOf()).toBeGreaterThan(base);
+    // ...the very same date & the very same number-format on the both rows: only the face differs
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164"`);
+    expect(xfById(cellStyleId("A3"))).toContain(`numFmtId="164"`);
+    expect(fontById(cellStyleId("A3"))).toContain("<i/>");
+    expect(fontById(cellStyleId("A2"))).not.toContain("<i/>");
   });
 
   test("saveAsFile: the result is saved at once by the 2nd arg", async () => {
