@@ -158,6 +158,31 @@ describe("helper.exportToExcel", () => {
     expect(files["xl/tables/table1.xml"]).toMatchSnapshot("xl/tables/table1.xml");
   });
 
+  test("columns: autoWidthOffset", async () => {
+    await exportToExcel([
+      {
+        name: "Offset",
+        // the very same content in every column, so only the pointed offset changes the width
+        data: [{ v: "1234567890" }],
+        mapping: [
+          { propName: "v", headerText: "h" }, // the base auto-width
+          { propName: "v", headerText: "h", autoWidthOffset: 2 }, // wider
+          { propName: "v", headerText: "h", autoWidthOffset: -1.5 }, // narrower
+          { propName: "v", headerText: "h", autoWidthOffset: 5, width: 12.5 }, // ignored: the width is explicit
+          { propName: "v", headerText: "h", autoWidthOffset: 5, maxWidth: 10 }, // limited by maxWidth
+          { propName: "v", headerText: "h", autoWidthOffset: -1000 }, // cut to 0 instead of a negative width
+        ],
+      },
+    ]);
+    const base = colWidth(1);
+    expect(base).toBeGreaterThan(2); // the content itself is wider than the pointed offsets
+    expect(colWidth(2)).toBeCloseTo(base + 2);
+    expect(colWidth(3)).toBeCloseTo(base - 1.5);
+    expect(colWidth(4)).toBe(12.5);
+    expect(colWidth(5)).toBe(10);
+    expect(colWidth(6)).toBe(0);
+  });
+
   test("escaping of headers & values", async () => {
     await exportToExcel([
       {

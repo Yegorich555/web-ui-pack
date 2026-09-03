@@ -97,7 +97,7 @@ export interface IExcelColumnMap<T = any> extends IExcelSettings {
   /** Width for column; by default it's auto-defined by the longest content */
   width?: number;
   /** Point +X or -X to affect on auto-width */
-  widthOffset?: number; // todo implement
+  autoWidthOffset?: number;
   /** Limit max width for column */
   maxWidth?: number;
 }
@@ -877,11 +877,19 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
 
   let colsXml = "";
   for (let c = 0; c < colCount; ++c) {
-    const { width, maxWidth } = cols[c];
+    const { width, maxWidth, autoWidthOffset } = cols[c];
     // an explicit width wins; otherwise it's defined by the longest content measured above
-    const w =
-      width ??
-      Math.min(autoWidth.toUnits(maxPx[c] + autoWidth.cellPaddingPx, ctx.unitPx), maxWidth ?? Number.MAX_SAFE_INTEGER);
+    let w = width;
+    if (w === undefined) {
+      w = autoWidth.toUnits(maxPx[c] + autoWidth.cellPaddingPx, ctx.unitPx);
+      // the offset is pointed in the very same Excel-units, so it's simply added to the measured width
+      // (rounded again: a fractional offset brings a float-tail into the xml otherwise)
+      if (autoWidthOffset) w = Math.round((w + autoWidthOffset) * 100) / 100;
+      if (maxWidth !== undefined && w > maxWidth) w = maxWidth;
+      // a too big negative offset can eat the whole width: a negative one is read by Excel as a broken file,
+      // so it's cut to 0 - the very same value that Excel stores for a column that a user has hidden
+      if (w < 0) w = 0;
+    }
     colsXml += `<col min="${c + 1}" max="${c + 1}" width="${w}"${colStyleXml[c]} bestFit="1" customWidth="1"/>`;
   }
   // the sheet-font belongs to the whole sheet & not only to the mapped columns, but Excel stores a format per
