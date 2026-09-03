@@ -84,12 +84,15 @@ declare module "preact/jsx-runtime" {
  * </wup-sort>
  * ``` */
 export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMap> {
-  static get $style(): string {
+  static get $styleRoot(): string {
     return `:root {
         --sort-active-color: #25a1b6;
         --sort-active-shadow: #25a1b6;
-      }
-      :host {
+      }`;
+  }
+
+  static get $style(): string {
+    return `:host {
         display: block;
       }
       :host [item][drag],
