@@ -37,6 +37,16 @@ describe("helper.exportToExcel", () => {
   /** WARN: the order of the files inside the archive isn't a part of the format, so only the set is checked */
   const expectFiles = (names) => expect(Object.keys(files).sort()).toEqual([...names].sort());
 
+  /** Namespace of the relationship-types of the package */
+  const relType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+
+  /** Checks that the pointed file is a well-formed xml (Excel reports the whole document as broken otherwise) */
+  const expectValidXml = (name) => {
+    const doc = new DOMParser().parseFromString(files[name], "text/xml");
+    const err = doc.getElementsByTagName("parsererror")[0];
+    expect(err ? `${name}: ${err.textContent}` : name).toBe(name);
+  };
+
   /** `s` of the pointed cell: the index of its cell-format in cellXfs */
   const cellStyleId = (ref, sheetNum = 1) =>
     files[`xl/worksheets/sheet${sheetNum}.xml`].match(new RegExp(`<c r="${ref}" s="(\\d+)"`))[1];
@@ -863,6 +873,119 @@ describe("helper.exportToExcel", () => {
     expect(xfById(cellStyleId("A3"))).toContain(`numFmtId="164"`);
     expect(fontById(cellStyleId("A3"))).toContain("<i/>");
     expect(fontById(cellStyleId("A2"))).not.toContain("<i/>");
+  });
+
+  test("cellCallback: a tooltip becomes a note of the cell", async () => {
+    const sheets = [
+      {
+        name: "Notes",
+        data: [
+          { v: "a", s: "b" },
+          { v: "c", s: "d" },
+        ],
+        mapping: [{ propName: "v" }, { propName: "s" }],
+      },
+      // the 2nd sheet has no note at all => no extra files & no <legacyDrawing> for it
+      { name: "Plain", data: [{ v: 1 }], mapping: [{ propName: "v" }] },
+    ];
+    await exportToExcel(sheets, null, (_value, itemIndex, mapping) =>
+      // an empty tooltip is the very same as no tooltip at all
+      mapping.propName === "s" ? { tooltip: itemIndex === 0 ? `Q&A <"'\`>` : "" } : undefined
+    );
+    expectFiles([
+      "xl/workbook.xml",
+      "xl/_rels/workbook.xml.rels",
+      "xl/styles.xml",
+      "_rels/.rels",
+      "[Content_Types].xml",
+      "xl/worksheets/sheet1.xml",
+      "xl/tables/table1.xml",
+      "xl/worksheets/_rels/sheet1.xml.rels",
+      "xl/comments1.xml", // the text of the note...
+      "xl/drawings/vmlDrawing1.vml", // ...& the box that Excel draws it in
+      "xl/worksheets/sheet2.xml",
+      "xl/tables/table2.xml",
+      "xl/worksheets/_rels/sheet2.xml.rels",
+    ]);
+    // the note points the cell that the callback was called for & the text is escaped
+    expect(files["xl/comments1.xml"]).toContain(`<comment ref="B2" authorId="0">`);
+    expect(files["xl/comments1.xml"]).toContain(`<t xml:space="preserve">Q&amp;A &lt;&quot;&#39;&#96;&gt;</t>`);
+    expect(files["xl/comments1.xml"].match(/<comment /g)).toHaveLength(1); // the empty tooltip is skipped
+    // ...the box of the note is anchored to the very same cell (0-based, so B2 is the column 1 & the row 1)
+    expect(files["xl/drawings/vmlDrawing1.vml"]).toContain(`<x:Row>1</x:Row><x:Column>1</x:Column>`);
+    expect(files["xl/drawings/vmlDrawing1.vml"]).toContain(`id="_x0000_s1025"`); // Excel enumerates from 1025
+    expect(files["xl/drawings/vmlDrawing1.vml"]).toContain(`visibility:hidden`); // otherwise it's not a tooltip
+
+    // the sheet refers to the drawing; WARN: the order of the tags is required by the schema
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(
+      `</sheetData><legacyDrawing r:id="rId2"/><tableParts count="1">`
+    );
+    expect(files["xl/worksheets/sheet2.xml"]).not.toContain("legacyDrawing");
+    // ...and the rels of the sheet point the both files of the notes (the table keeps its own rId1)
+    const rels = files["xl/worksheets/_rels/sheet1.xml.rels"];
+    expect(rels).toContain(`Id="rId1" Type="${relType}/table" Target="../tables/table1.xml"/>`);
+    expect(rels).toContain(`Id="rId2" Type="${relType}/vmlDrawing" Target="../drawings/vmlDrawing1.vml"/>`);
+    expect(rels).toContain(`Id="rId3" Type="${relType}/comments" Target="../comments1.xml"/>`);
+    expect(files["xl/worksheets/_rels/sheet2.xml.rels"]).not.toContain("rId2");
+
+    // the mime-types: only the sheet with the notes gets an Override & the vml-extension is declared once.
+    // WARN: every `Default` must go before the `Override`s
+    const types = files["[Content_Types].xml"];
+    expect(types).toMatch(/<Default ContentType="[^"]+vmlDrawing" Extension="vml"\/><Override/);
+    expect(types).toContain(`PartName="/xl/comments1.xml"/>`);
+    expect(types).not.toContain(`PartName="/xl/comments2.xml"/>`);
+
+    expect(files["xl/comments1.xml"]).toMatchSnapshot("xl/comments1.xml");
+    expect(files["xl/drawings/vmlDrawing1.vml"]).toMatchSnapshot("xl/drawings/vmlDrawing1.vml");
+    // both files must be a valid xml: Excel reports the whole document as broken otherwise
+    expectValidXml("xl/comments1.xml");
+    expectValidXml("xl/drawings/vmlDrawing1.vml");
+    expectValidXml("xl/worksheets/_rels/sheet1.xml.rels");
+    expectValidXml("xl/worksheets/sheet1.xml");
+
+    // a document without a tooltip has neither the files nor the mime-type of them
+    await exportToExcel(sheets);
+    expect(Object.keys(files).filter((k) => k.includes("comment") || k.includes("vml"))).toEqual([]);
+    expect(files["[Content_Types].xml"]).not.toContain("vml");
+  });
+
+  test("cellCallback: the box of a note follows the text", async () => {
+    /** [width, height] in pt of the box of the note of the pointed (1-based) cell of the 1st sheet */
+    const boxOf = (n = 1) =>
+      files["xl/drawings/vmlDrawing1.vml"]
+        .match(/width:([\d.]+)pt;height:([\d.]+)pt/g)
+        [n - 1].match(/[\d.]+/g)
+        .map(Number);
+    /** rows that the anchor of the note of the pointed (1-based) cell spans over */
+    const anchorRows = (n = 1) => {
+      const a = [...files["xl/drawings/vmlDrawing1.vml"].matchAll(/<x:Anchor>(.+?)<\/x:Anchor>/g)][n - 1][1].split(",");
+      return +a[6] - +a[2];
+    };
+
+    const tooltips = [
+      "short", // the min height: 1 line
+      "a\nb\nc", // the hard line-breaks
+      "w".repeat(200), // ...and a long line is wrapped by the box itself
+      "w".repeat(5000), // a huge text is limited: such a box must not cover the whole screen
+    ];
+    await exportToExcel(
+      [{ name: "N", data: tooltips.map((v) => ({ v })), mapping: [{ propName: "v" }] }],
+      null,
+      (value) => ({ tooltip: value.stringVal })
+    );
+    const [w, h1] = boxOf(1);
+    const [, h2] = boxOf(2);
+    const [, h3] = boxOf(3);
+    const [, h4] = boxOf(4);
+    // the width is always the same (a note is wrapped & never widened), the height follows the lines
+    expect(boxOf(3)[0]).toBe(w);
+    expect(h2).toBeGreaterThan(h1);
+    expect(h3).toBeGreaterThan(h2);
+    // ...the 4th text is 25x longer than the 3rd one, but the height of its box is limited (Excel scrolls it)
+    expect(h4).toBeGreaterThan(h3);
+    expect(h4).toBeLessThan(h3 * 5);
+    // ...and the anchor (the cells that Excel re-calculates the position of the box by) follows the height
+    expect(anchorRows(1)).toBeLessThan(anchorRows(3));
   });
 
   test("saveAsFile: the result is saved at once by the 2nd arg", async () => {

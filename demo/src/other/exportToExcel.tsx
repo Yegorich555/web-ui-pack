@@ -117,6 +117,15 @@ const userCellCallback: IExcelCellCallback<IUser> = (value, itemIndex, mapping) 
   return { style, value: { ...value, stringVal: user.isActive ? "Yes" : "No" } };
 };
 
+/** Points a note (the tooltip of Excel) per cell: the name-cell explains the whole row & an inactive user
+ * gets a warning on top of it */
+const tooltipCellCallback: IExcelCellCallback<IUser> = (_value, itemIndex, mapping) => {
+  if (mapping.propName !== "name") return undefined;
+  const user = users[itemIndex];
+  const tooltip = `${user.name}\nRegistered at ${user.registeredAt.toLocaleString()}\nRoles: ${user.roles.join(", ")}`;
+  return { tooltip: user.isActive ? tooltip : `${tooltip}\n\nWARN: the user is deactivated!` };
+};
+
 /** Generates a huge dataset to check performance & memory */
 function generateUsers(cnt: number): IUser[] {
   const result: IUser[] = new Array(cnt);
@@ -159,6 +168,15 @@ const examples: IExample[] = [
       "an age below 30 is highlighted & a boolean is rendered as Yes/No; column width follows such a style either",
     getSheets: () => [{ data: users, mapping: userColumns, name: "Users" }],
     cellCallback: userCellCallback,
+  },
+  {
+    label: "Cell tooltips",
+    fileName: "cell-tooltips.xlsx",
+    details:
+      "cellCallback points a note per cell (the 'Review > Notes' of Excel): such a cell is marked with a red " +
+      "corner in the 'Name' column & the text pops up while the mouse is over it",
+    getSheets: () => [{ data: users, mapping: userColumns, name: "Users" }],
+    cellCallback: tooltipCellCallback,
   },
   {
     label: "Table styles",
@@ -220,6 +238,7 @@ export default function ExportToExcelView() {
         "Creates a valid *.xlsx (OpenXML) document without any dependencies",
         "Auto-detects column width, applies autoFilter & a built-in table-style of Excel (per sheet)",
         "Custom style per sheet/columns/headers/cell: fontSize, fontFamily, fontStyle, color, backgroundColor",
+        "Note (hover-tooltip) per cell",
         "Saves the result into a file at once or returns Blob: save it later, upload to a server or attach to an email",
       ]}
     >
@@ -327,6 +346,10 @@ const blob = await createExcelDoc([
   // ...an own value: WARN never mutate the pointed one - return a new object instead
   if (mapping.propName === "isActive")
      return { value: { ...value, stringVal: value.stringVal === "true" ? "Yes" : "No" } };
+
+  // ...an own note: the cell gets a red corner & shows the text on hover ('Review > Notes')
+  if (mapping.propName === "name")
+     return { tooltip: \`Registered at \${users[itemIndex].registeredAt.toLocaleString()}\` };
 
   return undefined; // nothing is overridden: the cell keeps the value & the style of the column
 });`;

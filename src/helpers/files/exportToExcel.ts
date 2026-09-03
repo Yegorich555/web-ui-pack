@@ -156,6 +156,23 @@ export interface IExcelCellValue {
   stringVal: string;
 }
 
+/** Everything that {@link IExcelCellCallback} can change in a single cell; a missed option changes nothing,
+ * so a callback that only styles a cell keeps the mapped value & vice versa.
+ * The `value` & the `style` override the mapped ones, while a `tooltip` overrides nothing - it adds
+ * an extra part to the document */
+export interface IExcelCellOverride {
+  /** Own content of the cell instead of the mapped one */
+  value?: IExcelCellValue;
+  /** Own font of the cell: it's merged into the font of the column, so only the difference has to be pointed */
+  style?: IExcelStyle;
+  /** Note of the cell (the `Review > Notes` of Excel): such a cell is marked with a red corner & the text is
+   * shown as a tooltip while the mouse is over it.
+   *
+   * WARN: a note is stored as a drawing over the sheet (~0.7Kb per note & 2 extra files per sheet), so it's
+   * meant for a few cells & not for the whole dataset */
+  tooltip?: string;
+}
+
 /** Hook that overrides the content &/or the style of a single cell: see the `cellCallback` argument
  * of {@link exportToExcel} */
 export type IExcelCellCallback<T = any> = (
@@ -166,7 +183,7 @@ export type IExcelCellCallback<T = any> = (
   itemIndex: number,
   /** Column that the cell belongs to */
   mapping: IExcelColumnMap<T>
-) => { value?: IExcelCellValue; style?: IExcelStyle } | undefined | null;
+) => IExcelCellOverride | undefined | null;
 
 /** Font with the options that are required by the file-format (so it's always ready to be rendered) */
 type IExcelStyleFull = IExcelStyle & Required<Pick<IExcelStyle, "fontSize" | "fontFamily">>;
@@ -199,6 +216,8 @@ interface ISheetParts {
   lastLetter: string;
   /** Count of the data-rows (without the header-row) */
   rowsCount: number;
+  /** Notes (the tooltips) of the cells; `null` - the sheet has no note at all */
+  notes: ISheetNotes | null;
 }
 
 /** Sheet ready to be rendered into the file-parts */
@@ -210,6 +229,8 @@ interface IExportSheet {
   parts: ISheetParts;
   /** An empty table (a header row without data) is treated by Excel as a broken content, so it's skipped at all */
   hasTable: boolean;
+  /** The sheet has at least one note: it costs 2 extra files (see {@link ISheetNotes}) & a `<legacyDrawing>` */
+  hasNotes: boolean;
   /** Full name of the table-style: the resolved {@link IExcelSheet.tableStyle}; `""` - no style at all */
   tableStyleName: string;
 }
@@ -666,6 +687,89 @@ function createStyles(defaultStyle: IExcelStyleFull): IStyles {
   return styles;
 }
 
+/* -------------------------------- Notes (tooltips) ---------------------------------- */
+
+/** Notes of a sheet: a note is stored in 2 files at once - the text goes into `xl/comments{num}.xml` &
+ * the box that Excel draws it in - into `xl/drawings/vmlDrawing{num}.vml` (a note is still kept in the legacy
+ * VML-format, and without such a drawing Excel reports the document as a broken one).
+ * Both are collected cell by cell exactly as the rows are, so nothing is stored per note either */
+interface ISheetNotes {
+  /** Content of `<commentList>` of `xl/comments{num}.xml` */
+  list: IUtf8Writer;
+  /** `<v:shape>` of every note: the content of `xl/drawings/vmlDrawing{num}.vml` */
+  vml: IUtf8Writer;
+  /** Count of the added notes: the shapes of the drawing are enumerated by it */
+  count: number;
+}
+
+/** Font that Excel renders a note by (the very same one that Excel sets itself); the indexed color 81 is
+ * the system tooltip-text color */
+const noteFontXml = `<rPr><sz val="9"/><color indexed="81"/><rFont val="Tahoma"/><family val="2"/></rPr>`;
+
+/** Id that Excel enumerates the shapes of a sheet from: the ids below are reserved by the drawing itself */
+const noteFirstShapeId = 1025;
+
+/** Size of the box of a note in points: the format has no auto-size for it at all (a text that doesn't fit is
+ * simply clipped by the box), so it's estimated by the text - the numbers are the defaults of Excel itself:
+ * a 108pt box fits ~40 chars of the 9pt Tahoma & every line of it takes 13.5pt */
+const noteWidthPt = 108;
+const noteCharsPerLine = 40;
+const noteLinePt = 13.5;
+/** Insets of the box (3pt on both sides) + a spare part of a line, so the last line is never cut in half */
+const notePaddingPt = 9;
+/** Max height of the box: a longer text is scrolled by Excel instead of covering the whole screen */
+const noteMaxLines = 20;
+
+/** Standard height of a row & width of a column of Excel (20px & 64px): the box is anchored to the cells,
+ * so its size is pointed in them either.
+ * WARN: it's the default of Excel on purpose & not the measured {@link autoWidth} of this export - the box is
+ * hidden & re-positioned by Excel itself on hover, so the anchor is only a coarse estimate */
+const rowHeightPt = 15;
+const colWidthPt = 48;
+
+/** Count of the columns that the box of a note spans over */
+const noteAnchorCols = Math.ceil(noteWidthPt / colWidthPt);
+
+/** Count of the lines that the text of a note takes inside the box: the hard line-breaks + the soft wrapping
+ * by {@link noteCharsPerLine} (the box has a fixed width, so a longer line is wrapped by Excel).
+ * `|| 1` is about an empty line - it takes a line either, while `Math.ceil(0 / n)` is `0` */
+function getNoteLines(text: string): number {
+  // such a text takes {@link noteMaxLines} whatever it contains (every char is either wrapped or a break),
+  // and the count is clamped by them anyway - so a huge tooltip is never scanned at all
+  if (text.length >= noteMaxLines * noteCharsPerLine) return noteMaxLines;
+  let lines = 0;
+  let len = 0;
+  for (let i = 0; i < text.length; ++i) {
+    if (text.charCodeAt(i) === newLineCode) {
+      lines += Math.ceil(len / noteCharsPerLine) || 1;
+      len = 0;
+    } else ++len;
+  }
+  return lines + (Math.ceil(len / noteCharsPerLine) || 1);
+}
+
+/** `<v:shape>` of a single note: the box that Excel draws the text of the note in.
+ * `visibility:hidden` is exactly what makes it a tooltip - such a box is shown only while the mouse is over
+ * the cell (`Review > Show Notes` opens all of them at once).
+ * WARN: `margin-left/top` is only the fallback position - `MoveWithCells` makes Excel re-calculate it from
+ * the `<x:Anchor>` (the cells that the box spans over), so the box always pops up next to its own cell */
+function getNoteShapeXml(id: number, colIndex: number, rowIndex: number, lines: number): string {
+  const heightPt = Math.min(lines, noteMaxLines) * noteLinePt + notePaddingPt;
+  const rows = Math.ceil(heightPt / rowHeightPt);
+  // the anchor points the cells & not the pixels, so the last columns of a sheet can't be spanned over
+  const c2 = Math.min(colIndex + 1 + noteAnchorCols, maxColumns - 1);
+  const anchor = `${colIndex + 1}, 15, ${rowIndex}, 2, ${c2}, 15, ${rowIndex + rows}, 16`;
+  return (
+    `<v:shape id="_x0000_s${id}" type="#_x0000_t202" style="position:absolute;margin-left:59.25pt;` +
+    `margin-top:1.5pt;width:${noteWidthPt}pt;height:${heightPt}pt;z-index:${id - noteFirstShapeId + 1};` +
+    `visibility:hidden" fillcolor="#ffffe1" o:insetmode="auto"><v:fill color2="#ffffe1"/>` +
+    `<v:shadow on="t" color="black" obscured="t"/><v:path o:connecttype="none"/>` +
+    `<v:textbox style="mso-direction-alt:auto"><div style="text-align:left"></div></v:textbox>` +
+    `<x:ClientData ObjectType="Note"><x:MoveWithCells/><x:SizeWithCells/><x:Anchor>${anchor}</x:Anchor>` +
+    `<x:AutoFill>False</x:AutoFill><x:Row>${rowIndex}</x:Row><x:Column>${colIndex}</x:Column></x:ClientData></v:shape>`
+  );
+}
+
 /* ----------------------------------- Sheet render ----------------------------------- */
 
 /** Maps the data of the sheet & renders it into the xml-parts.
@@ -813,6 +917,21 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     return xml;
   }
 
+  /** Notes of the sheet: `null` until the very 1st tooltip really occurs - an export without them costs nothing */
+  let notes: ISheetNotes | null = null;
+
+  /** Appends a note of the pointed cell into the both files that Excel stores such a tooltip in:
+   * the `rowIndex` is the one of the data-row (the header-row excluded), exactly as the anchor needs it */
+  function addNote(colIndex: number, rowIndex: number, tooltip: string): void {
+    if (notes === null) notes = { list: createUtf8Writer(), vml: createUtf8Writer(), count: 0 };
+    notes.list.add(
+      `<comment ref="${letters[colIndex]}${rowIndex + 1}" authorId="0"><text><r>${noteFontXml}` +
+        `<t xml:space="preserve">${escape(tooltip)}</t></r></text></comment>`
+    );
+    notes.vml.add(getNoteShapeXml(noteFirstShapeId + notes.count, colIndex, rowIndex, getNoteLines(tooltip)));
+    ++notes.count;
+  }
+
   const { data } = sheet;
   const rows = createUtf8Writer();
   rows.add(`<row r="1">${headerCells}</row>`);
@@ -837,6 +956,8 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
         if (res != null) {
           if (res.value) cObjVal = res.value;
           if (res.style) ov = getCellOverride(c, res.style);
+          // a note is rendered right here either: it's stored per cell & has nothing to do with the row
+          if (res.tooltip) addNote(c, ri + 1, res.tooltip);
         }
       }
       const { type } = cObjVal;
@@ -901,24 +1022,58 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     colsXml += `<col min="${colCount + 1}" max="${maxColumns}" width="${w}"${sheetColStyleXml}/>`;
   }
 
-  return { rows, colsXml, headers, lastLetter: letters[colCount - 1], rowsCount: data.length };
+  return { rows, colsXml, headers, lastLetter: letters[colCount - 1], rowsCount: data.length, notes };
 }
 
 /* --------------------------------- Xml generation ----------------------------------- */
 
-const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
+/** Base of the `Type` of every relationship of the package: the kind of the part is appended to it */
+const relTypes = `http://schemas.openxmlformats.org/officeDocument/2006/relationships`;
+
+/** Envelope of a `.rels`-file; WARN: {@link workbookRelsHead} keeps an own (shorter) xml-declaration */
+const relsHead = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`;
+
+const relsTail = `</Relationships>`;
+
+const relsXml = `${relsHead}<Relationship Id="rId1" Type="${relTypes}/officeDocument" Target="xl/workbook.xml"/>${relsTail}`;
 
 const workbookHead = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mx="http://schemas.microsoft.com/office/mac/excel/2008/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main"><workbookPr/><sheets>`;
 
 const workbookRelsHead = `<?xml version="1.0" ?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`;
 
-const workbookRelsTail = `<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+const workbookRelsTail = `<Relationship Id="rId2" Type="${relTypes}/styles" Target="styles.xml"/>${relsTail}`;
 
 const contentTypesHead = `<?xml version="1.0" ?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default ContentType="application/xml" Extension="xml"/><Default ContentType="application/vnd.openxmlformats-package.relationships+xml" Extension="rels"/>`;
 
 const contentTypesTail = `<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" PartName="/xl/workbook.xml"/><Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml" PartName="/xl/styles.xml"/></Types>`;
 
+/** Type of the vml-drawings of the notes; WARN: it's a `Default` (by the extension) & the schema requires
+ * every `Default` to go before the `Override`s */
+const contentTypesVml = `<Default ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing" Extension="vml"/>`;
+
+const commentsHead = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><comments xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><authors><author/></authors><commentList>`;
+
+const commentsTail = `</commentList></comments>`;
+
+/** The shape-type of the boxes of the notes is declared once per drawing & every `<v:shape>` refers to it */
+const vmlHead = `<xml xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><o:shapelayout v:ext="edit"><o:idmap v:ext="edit" data="1"/></o:shapelayout><v:shapetype id="_x0000_t202" coordsize="21600,21600" o:spt="202" path="m,l,21600r21600,l21600,xe"><v:stroke joinstyle="miter"/><v:path gradientshapeok="t" o:connecttype="rect"/></v:shapetype>`;
+
+const vmlTail = `</xml>`;
+
 const worksheetHead = `<?xml version="1.0" ?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:mx="http://schemas.microsoft.com/office/mac/excel/2008/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">`;
+
+/** Ids that a sheet refers to its own parts by: they are fixed per kind of the part & aren't enumerated,
+ * so the producer ({@link getSheetRelsXml}) & the consumer ({@link getWorkSheetBytes}) share one literal.
+ * A gap is legal for the format: a sheet with the notes but without a table simply has no `rId1` at all */
+const relIdTable = "rId1";
+const relIdVml = "rId2";
+const relIdComments = "rId3";
+
+/** `<legacyDrawing>` of the sheet: the boxes of the notes (see {@link ISheetNotes}) */
+const sheetDrawingXml = `<legacyDrawing r:id="${relIdVml}"/>`;
+
+/** `<tableParts>` of the sheet: the link to its table-file */
+const sheetTablePartsXml = `<tableParts count="1"><tablePart r:id="${relIdTable}"/></tableParts>`;
 
 /** `xl/workbook.xml`: the list of the tabs of the document */
 function getWorkbookXml(sheets: Array<IExportSheet>): string {
@@ -935,9 +1090,7 @@ function getWorkbookRelsXml(sheets: Array<IExportSheet>): string {
   let items = "";
   for (let i = 0; i < sheets.length; ++i) {
     const { num } = sheets[i];
-    items +=
-      `<Relationship Id="rId${num + 2}" Target="worksheets/sheet${num}.xml" ` +
-      `Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"/>`;
+    items += `<Relationship Id="rId${num + 2}" Target="worksheets/sheet${num}.xml" Type="${relTypes}/worksheet"/>`;
   }
   return `${workbookRelsHead}${items}${workbookRelsTail}`;
 }
@@ -945,8 +1098,10 @@ function getWorkbookRelsXml(sheets: Array<IExportSheet>): string {
 /** `[Content_Types].xml`: the mime-type of every file inside the archive */
 function getContentTypesXml(sheets: Array<IExportSheet>): string {
   let items = "";
+  /** The document has at least one note: the vml-extension is declared once for the whole package */
+  let hasVml = false;
   for (let i = 0; i < sheets.length; ++i) {
-    const { num, hasTable } = sheets[i];
+    const { num, hasTable, hasNotes } = sheets[i];
     items +=
       `<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" ` +
       `PartName="/xl/worksheets/sheet${num}.xml"/>`;
@@ -955,17 +1110,25 @@ function getContentTypesXml(sheets: Array<IExportSheet>): string {
         `<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.table+xml" ` +
         `PartName="/xl/tables/table${num}.xml"/>`;
     }
+    if (hasNotes) {
+      hasVml = true;
+      items +=
+        `<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml" ` +
+        `PartName="/xl/comments${num}.xml"/>`;
+    }
   }
-  return `${contentTypesHead}${items}${contentTypesTail}`;
+  return `${contentTypesHead}${hasVml ? contentTypesVml : ""}${items}${contentTypesTail}`;
 }
 
 /** `xl/worksheets/sheet{num}.xml`: the widths of the columns + the header-row & the data-rows.
  * The rows are already encoded, so the head & the tail are only wrapped around them - the biggest file of the
  * document is never built as a string. `<cols>` has to go first, that's why the widths are resolved before it */
-function getWorkSheetBytes({ parts, hasTable }: IExportSheet): Uint8Array {
+function getWorkSheetBytes({ parts, hasTable, hasNotes }: IExportSheet): Uint8Array {
   return parts.rows.toBytes(
     `${worksheetHead}<cols>${parts.colsXml}</cols><sheetData>`,
-    `</sheetData>${hasTable ? `<tableParts count="1"><tablePart r:id="rId1"/></tableParts>` : ""}</worksheet>`
+    // WARN: the order of the tags is required by the schema: `<legacyDrawing>` (the boxes of the notes)
+    // goes before `<tableParts>`
+    `</sheetData>${hasNotes ? sheetDrawingXml : ""}${hasTable ? sheetTablePartsXml : ""}</worksheet>`
   );
 }
 
@@ -999,9 +1162,20 @@ function getTableXml({ num, parts, tableStyleName }: IExportSheet): string {
   );
 }
 
-/** `xl/worksheets/_rels/sheet{num}.xml.rels`: the link from the sheet to its table-file */
-function getTableRelsXml(num: number): string {
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/table" Target="../tables/table${num}.xml"/></Relationships>`;
+/** `xl/worksheets/_rels/sheet{num}.xml.rels`: the links from the sheet to its table-file & to the files of
+ * the notes (the ids are the {@link relIdTable} ones).
+ * `""` - the sheet refers to nothing at all: an empty rels-file is read by Excel as a broken content, so
+ * the file is then skipped - the list of the parts is answered here & never re-derived by the caller */
+function getSheetRelsXml({ num, hasTable, hasNotes }: IExportSheet): string {
+  let items = hasTable
+    ? `<Relationship Id="${relIdTable}" Type="${relTypes}/table" Target="../tables/table${num}.xml"/>`
+    : "";
+  if (hasNotes) {
+    items +=
+      `<Relationship Id="${relIdVml}" Type="${relTypes}/vmlDrawing" Target="../drawings/vmlDrawing${num}.vml"/>` +
+      `<Relationship Id="${relIdComments}" Type="${relTypes}/comments" Target="../comments${num}.xml"/>`;
+  }
+  return items ? `${relsHead}${items}${relsTail}` : "";
 }
 
 /* ----------------------------------- Orchestrator ----------------------------------- */
@@ -1014,18 +1188,22 @@ export default async function exportToExcel<T>(
    * @example "test-excel.xlsx" */
   saveAsFile?: string | null | false,
   /** Called for every single data-cell of every sheet right after the value is mapped by
-   * {@link exportToExcel.$defaults.getCellValue}: return an own `value` &/or `font` to override the cell, ex.
-   * `(v) => (v.stringVal[0] === "-" ? { style: redFont } : undefined)`.
+   * {@link exportToExcel.$defaults.getCellValue}: return an own `value`, `style` &/or `tooltip` to override
+   * the cell, ex. `(v) => (v.stringVal[0] === "-" ? { style: redFont } : undefined)`.
    *
-   * The `font` is merged into the font of the column, so only the difference has to be pointed, and the
+   * The `style` is merged into the font of the column, so only the difference has to be pointed, and the
    * auto-width of the column follows such a cell as well (a wider/bolder font included).
+   *
+   * The `tooltip` becomes a note of the cell (the `Review > Notes` of Excel): the cell is marked with a red
+   * corner & the text pops up while the mouse is over it.
    *
    * WARN: it's called for every single cell (the hottest path of the export together with `getCellValue`):
    * - return the very same font-object for the cells that share the style (a `const` outside of the callback):
    * an own font is merged & measured once per such an object & column, while an object-literal that is built
    * per cell misses that cache & is re-resolved every time;
-   * - never mutate the pointed `value` - an empty cell is a shared read-only object; return an own one instead */
-  cellCallback?: IExcelCellCallback<T> // todo add ability to set tooltip per cell
+   * - never mutate the pointed `value` - an empty cell is a shared read-only object; return an own one instead;
+   * - a `tooltip` is a drawing over the sheet (~0.7Kb per note): point it only for the cells that need it */
+  cellCallback?: IExcelCellCallback<T>
 ): Promise<Blob> {
   const { getCellValue, style, headerStyle, dateTimeFormat, tableStyle } = exportToExcel.$defaults;
   const documentFont = mergeStyle(baseFont, style);
@@ -1049,6 +1227,7 @@ export default async function exportToExcel<T>(
       /** Excel doesn't allow []:*?/\ in a tab name and cuts it by 31 chars */
       name: escape((sheet.name || `Sheet${num}`).replace(/[[\]:*?/\\]/g, " ").substring(0, 31)),
       hasTable: parts.rowsCount > 0,
+      hasNotes: parts.notes !== null,
       // an own style of the sheet wins over the document one
       tableStyleName: getTableStyleName(sheet.tableStyle ?? tableStyle),
     };
@@ -1068,7 +1247,16 @@ export default async function exportToExcel<T>(
     files[`xl/worksheets/sheet${s.num}.xml`] = getWorkSheetBytes(s);
     if (s.hasTable) {
       files[`xl/tables/table${s.num}.xml`] = strToU8(getTableXml(s));
-      files[`xl/worksheets/_rels/sheet${s.num}.xml.rels`] = strToU8(getTableRelsXml(s.num));
+    }
+    const { notes } = s.parts;
+    if (notes) {
+      files[`xl/comments${s.num}.xml`] = notes.list.toBytes(commentsHead, commentsTail);
+      files[`xl/drawings/vmlDrawing${s.num}.vml`] = notes.vml.toBytes(vmlHead, vmlTail);
+    }
+    // whether the sheet refers to anything at all is answered by the rels itself: `""` - no file for it
+    const rels = getSheetRelsXml(s);
+    if (rels) {
+      files[`xl/worksheets/_rels/sheet${s.num}.xml.rels`] = strToU8(rels);
     }
     // the rendered xml is the biggest allocation of the export: drop it as soon as it's encoded
     s.parts = null!;
