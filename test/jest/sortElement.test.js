@@ -382,6 +382,11 @@ describe("sortElement", () => {
     await h.wait(1);
     expect(onChanged).toBeCalledTimes(1);
     expect(onChanged.mock.calls[0][0].detail.value).toStrictEqual([1, 0, 2, 3]);
+
+    // all document-listeners must be removed after the sorting
+    expect(document.dispatchEvent(new MouseEvent("touchmove", { cancelable: true, bubbles: true }))).toBe(true);
+    document.dispatchEvent(new MouseEvent("touchstart", { cancelable: true, bubbles: true }));
+    expect(document.dispatchEvent(new MouseEvent("touchmove", { cancelable: true, bubbles: true }))).toBe(true); // touchstart-listener is removed also
   });
 
   test("_disposeDragdrop", () => {

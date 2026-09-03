@@ -170,12 +170,15 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
       let dr: HTMLElement & { __isDragItem?: boolean };
 
       let isWaitTouch = false; // wait for touch to detect if possible to prevent scrollByTouch (browser can cancel pointer events if swipe)
-      let r0 = onEvent(
+      // WARN: keep removers separate - otherwise touchstart-listener stays forever and every touchstart leaks a non-passive touchmove-listener
+      let rTouchMove: (() => void) | undefined;
+      const r0 = onEvent(
         document,
         "touchstart",
         () => {
           isWaitTouch = true;
-          r0 = onEvent(
+          rTouchMove?.(); // touchstart can be fired several times (multi-touch, next finger) - don't stack listeners
+          rTouchMove = onEvent(
             document,
             "touchmove",
             (ev) => {
@@ -343,6 +346,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
           }
         }
         r0();
+        rTouchMove?.();
         r1();
         r2();
         r3();
