@@ -45,6 +45,9 @@ describe("helper.exportToExcel", () => {
     const xfs = files["xl/styles.xml"].match(/<cellXfs count="\d+">(.*)<\/cellXfs>/)[1];
     return [...xfs.matchAll(/<xf [^>]*\/>|<xf .*?<\/xf>/g)].map((m) => m[0])[+styleId];
   };
+  /** `width` in Excel-units of the pointed (1-based) column of the 1st sheet */
+  const colWidth = (n = 1) =>
+    +files["xl/worksheets/sheet1.xml"].match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"`))[1];
   /** font-xml that the pointed cell-format is rendered by */
   const fontById = (styleId) =>
     [...files["xl/styles.xml"].matchAll(/<font>(.*?)<\/font>/g)][+xfById(styleId).match(/fontId="(\d+)"/)[1]][1];
@@ -165,6 +168,31 @@ describe("helper.exportToExcel", () => {
     ]);
     expect(files["xl/worksheets/sheet1.xml"]).toMatchSnapshot("xl/worksheets/sheet1.xml");
     expect(files["xl/tables/table1.xml"]).toMatchSnapshot("xl/tables/table1.xml");
+  });
+
+  test("table-style: per sheet & $defaults", async () => {
+    // [the pointed style, the expected `name`-attribute of <tableStyleInfo>]
+    const cases = [
+      [undefined, ` name="TableStyleMedium9"`], // only a missed style falls back to $defaults
+      ["Dark11", ` name="TableStyleDark11"`], // an own style of the sheet wins over $defaults
+      ["None", ""], // 'None' points no style at all: the `name` is skipped, but the striping stays enabled
+      ["", ""], // an empty value points no style either
+      ['My "&" Style', ` name="My &quot;&amp;&quot; Style"`], // a custom name is taken as-is & only escaped
+      ["TableStyleLight16", ` name="TableStyleLight16"`], // a full built-in name is already what the format stores
+    ];
+    const orig = exportToExcel.$defaults.tableStyle;
+    exportToExcel.$defaults.tableStyle = "Medium9";
+    try {
+      await exportToExcel(
+        cases.map(([tableStyle], i) => ({ name: `s${i}`, data: [{ v: i }], mapping: [{ propName: "v" }], tableStyle }))
+      );
+    } finally {
+      exportToExcel.$defaults.tableStyle = orig;
+    }
+    /** `<tableStyleInfo>` of the table of the pointed sheet */
+    const styleInfo = (num) => files[`xl/tables/table${num}.xml`].match(/<tableStyleInfo.*?\/>/)[0];
+    const rest = `showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/>`;
+    cases.forEach(([, name], i) => expect(styleInfo(i + 1)).toBe(`<tableStyleInfo${name} ${rest}`));
   });
 
   test("column letters: A..Z, AA, AB", async () => {
@@ -425,7 +453,6 @@ describe("helper.exportToExcel", () => {
   });
 
   test("auto-width: font-scale, non-latin chars & multiline", async () => {
-    const colWidth = () => +files["xl/worksheets/sheet1.xml"].match(/<col [^>]*width="([\d.]+)"/)[1];
     // 'Ж' isn't latin => the averaged non-latin width of the font (9px for Calibri); the longest line wins
     const sheet = (style) => ({
       name: "W",
@@ -445,7 +472,6 @@ describe("helper.exportToExcel", () => {
   });
 
   test("auto-width: per-family & per-face char metrics", async () => {
-    const colWidth = () => +files["xl/worksheets/sheet1.xml"].match(/<col [^>]*width="([\d.]+)"/)[1];
     const sheet = (style, v = "wwwwwwwwww") => ({ name: "W", style, data: [{ v }], mapping: [{ propName: "v" }] });
     const widthOf = async (style, v) => {
       await exportToExcel([sheet(style, v)]);
@@ -471,31 +497,33 @@ describe("helper.exportToExcel", () => {
     expect(await widthOf({ fontFamily: "SomeUnknownFont" }, "wwwwwwwwww")).toBe(baseW);
     expect(await widthOf({ fontFamily: "vErDaNa" }, "wwwwwwwwww")).toBeGreaterThan(baseW * 1.1);
 
-    // `bold` is measured by the own face of the family & isn't a ratio either: it doesn't widen Calibri at all,
-    // while the same text of Tahoma gets ~17% wider
-    expect(await widthOf({ fontStyle: ExcelFontStyles.bold }, "Active")).toBe(await widthOf(undefined, "Active"));
+    // every face of a family has own advances & none of them is a ratio of another (see autoWidth.familyPx)
+    const active = await widthOf(undefined, "Active");
+    const activeBold = await widthOf({ fontStyle: ExcelFontStyles.bold }, "Active");
+    const activeItalic = await widthOf({ fontStyle: ExcelFontStyles.italic }, "Active");
+    const boldItalic = ExcelFontStyles.bold | ExcelFontStyles.italic;
+    const activeBoldItalic = await widthOf({ fontStyle: boldItalic }, "Active");
+    // `bold` doesn't widen Calibri at all, while the same text of Tahoma gets ~17% wider
+    expect(activeBold).toBe(active);
     expect(await widthOf({ fontFamily: "Tahoma", fontStyle: ExcelFontStyles.bold }, "Active")).toBeGreaterThan(
       await widthOf({ fontFamily: "Tahoma" }, "Active")
     );
-    // `italic` isn't a slanted regular face either - it has own advances: the Calibri one is narrower for
-    // the lowercase, while its `M` is 1px wider - so a date-time column measured as the regular one got cut off
-    expect(await widthOf({ fontStyle: ExcelFontStyles.italic }, "Active")).toBeLessThan(
-      await widthOf(undefined, "Active")
-    );
+    // the Calibri italic is narrower for the lowercase, while its `M` is 1px wider - so a date-time column
+    // measured as the regular one got cut off
+    expect(activeItalic).toBeLessThan(active);
     const dt = "2021-04-13 10:24:00 AM";
     expect(await widthOf({ fontStyle: ExcelFontStyles.italic }, dt)).toBeGreaterThan(await widthOf(undefined, dt));
     // ...`bold | italic` is the 4th face & matches neither the bold nor the italic one
-    const boldItalic = ExcelFontStyles.bold | ExcelFontStyles.italic;
-    expect(await widthOf({ fontStyle: boldItalic }, "Active")).not.toBe(
-      await widthOf({ fontStyle: ExcelFontStyles.bold }, "Active")
-    );
-    expect(await widthOf({ fontStyle: boldItalic }, "Active")).not.toBe(
-      await widthOf({ fontStyle: ExcelFontStyles.italic }, "Active")
+    expect(activeBoldItalic).not.toBe(activeBold);
+    expect(activeBoldItalic).not.toBe(activeItalic);
+    // an unlisted family falls back to the whole Calibri family & the face is picked inside it
+    expect(await widthOf({ fontFamily: "SomeUnknownFont", fontStyle: ExcelFontStyles.italic }, "Active")).toBe(
+      activeItalic
     );
     // `underline` doesn't change the advances, so it shares the face of the same weight & slant
-    expect(await widthOf({ fontStyle: ExcelFontStyles.underline }, "Active")).toBe(await widthOf(undefined, "Active"));
+    expect(await widthOf({ fontStyle: ExcelFontStyles.underline }, "Active")).toBe(active);
     expect(await widthOf({ fontStyle: ExcelFontStyles.underline | ExcelFontStyles.italic }, "Active")).toBe(
-      await widthOf({ fontStyle: ExcelFontStyles.italic }, "Active")
+      activeItalic
     );
 
     // the document-font defines the Excel-unit: the same font on the both sides almost cancels the scale out
@@ -560,8 +588,7 @@ describe("helper.exportToExcel", () => {
     expect(xml).toContain(`<c r="F2" s="1" t="inlineStr"><is><t>Invalid number</t></is></c>`);
     expect(xml).toContain(`<c r="F3" s="1" t="inlineStr"><is><t>Invalid number</t></is></c>`);
     // the auto-width follows the number as it's rendered: 7 chars of '1234.56' are wider than 2 of 'Int'
-    const widthOf = (n) => +xml.match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"`))[1];
-    expect(widthOf(2)).toBeGreaterThan(widthOf(1));
+    expect(colWidth(2)).toBeGreaterThan(colWidth(1));
     expect(xml).toMatchSnapshot("xl/worksheets/sheet1.xml");
   });
 
@@ -591,8 +618,7 @@ describe("helper.exportToExcel", () => {
         `<numFmt numFmtId="165" formatCode="dd\\/mm\\/yyyy"/></numFmts>`
     );
     // the auto-width of a date-column is defined by the format & not by the stored number
-    const widthOf = (n) => +xml.match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"`))[1];
-    expect(widthOf(1)).toBeGreaterThan(widthOf(2));
+    expect(colWidth(1)).toBeGreaterThan(colWidth(2));
     expect(xml).toMatchSnapshot("xl/worksheets/sheet1.xml");
     expect(files["xl/styles.xml"]).toMatchSnapshot("xl/styles.xml");
   });
@@ -728,8 +754,6 @@ describe("helper.exportToExcel", () => {
   });
 
   test("cellCallback: the auto-width follows the style of a cell", async () => {
-    const widthOf = (n) =>
-      +files["xl/worksheets/sheet1.xml"].match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"`))[1];
     const bold = { fontStyle: ExcelFontStyles.bold };
     const run = (cb) =>
       exportToExcel(
@@ -749,12 +773,12 @@ describe("helper.exportToExcel", () => {
       );
 
     await run();
-    const base = widthOf(1);
+    const base = colWidth(1);
     // the bold face of Tahoma is ~17% wider, so such a cell widens the column
     await run(() => ({ style: bold }));
-    expect(widthOf(1)).toBeGreaterThan(base * 1.1);
+    expect(colWidth(1)).toBeGreaterThan(base * 1.1);
     // ...an explicit width still wins: such a column isn't measured at all
-    expect(widthOf(2)).toBe(5);
+    expect(colWidth(2)).toBe(5);
   });
 
   test("cellCallback: a wrapped & a date cell of an own style", async () => {
@@ -770,11 +794,9 @@ describe("helper.exportToExcel", () => {
         mapping: [{ propName: "d" }, { propName: "arr" }],
       },
     ];
-    const widthOf = (n) =>
-      +files["xl/worksheets/sheet1.xml"].match(new RegExp(`<col min="${n}" max="${n}" width="([\\d.]+)"`))[1];
 
     await exportToExcel(sheets);
-    const [baseDate, baseWrap] = [widthOf(1), widthOf(2)];
+    const [baseDate, baseWrap] = [colWidth(1), colWidth(2)];
 
     await exportToExcel(sheets, null, (_v, itemIndex) => (itemIndex === 0 ? { style: big } : undefined));
     // a date-cell keeps the number-format of the column & a wrapped one - its wrapText, both with the own font
@@ -789,8 +811,8 @@ describe("helper.exportToExcel", () => {
     // the number-format is registered once even though both fonts refer to it
     expect(files["xl/styles.xml"]).toContain(`<numFmts count="1">`);
     // a date is measured by its format & not by the stored number, so the doubled font widens the column ~2x
-    expect(widthOf(1)).toBeGreaterThan(baseDate * 1.85);
-    expect(widthOf(2)).toBeGreaterThan(baseWrap * 1.85);
+    expect(colWidth(1)).toBeGreaterThan(baseDate * 1.85);
+    expect(colWidth(2)).toBeGreaterThan(baseWrap * 1.85);
   });
 
   test("cellCallback: an italic date-cell widens the column (#####)", async () => {
@@ -805,13 +827,12 @@ describe("helper.exportToExcel", () => {
         mapping: [{ propName: "d", headerText: "R" }], // a short header: otherwise it defines the width
       },
     ];
-    const widthOf = () => +files["xl/worksheets/sheet1.xml"].match(/<col [^>]*width="([\d.]+)"/)[1];
 
     await exportToExcel(sheets);
-    const base = widthOf();
+    const base = colWidth();
     // the italic cell is measured by its own face, so the column follows it
     await exportToExcel(sheets, null, (_v, itemIndex) => (itemIndex === 1 ? { style: italic } : undefined));
-    expect(widthOf()).toBeGreaterThan(base);
+    expect(colWidth()).toBeGreaterThan(base);
     // ...the very same date & the very same number-format on the both rows: only the face differs
     expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164"`);
     expect(xfById(cellStyleId("A3"))).toContain(`numFmtId="164"`);

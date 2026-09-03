@@ -109,9 +109,28 @@ export interface IExcelSheet<T = any> extends IExcelSettings {
   mapping: IExcelColumnMap<T>[];
   /** Name of the Excel tab; default is `Sheet{number}` */
   name?: string;
-
-  // todo currently saved excel-sheets formatted in blue-colors: table formatting 16 in my case. - add ability to change it per sheet as it works with fontFamily
+  /** Built-in table-style of Excel
+   * @defaultValue {@link exportToExcel.$defaults.tableStyle} => "Light16" */
+  tableStyle?: ExcelTableStyle;
 }
+
+/** `1 | 2 | ... | To - 1`: the numbers that {@link ExcelTableStyle} enumerates the styles of a family by */
+type NumsBefore<To extends number, Acc extends number[] = []> = Acc["length"] extends To
+  ? Exclude<Acc[number], 0>
+  : NumsBefore<To, [...Acc, Acc["length"]]>;
+
+/** Short name of a built-in table-style of Excel (see {@link IExcelSheet.tableStyle}): the 3 families are exactly
+ * the rows of the `Format as Table` gallery - `Light` 1..21, `Medium` 1..28 & `Dark` 1..11 (a family is ordered
+ * as the gallery is: the 1st style of a row is a neutral one & the next ones follow the accent-colors of
+ * the theme); such a name is expanded into the `TableStyle{name}` that the file-format stores.
+ * `None` means no style at all; any other string is taken as-is, so a style of a custom theme can be pointed
+ * by its own full name as well */
+export type ExcelTableStyle =
+  | `Light${NumsBefore<22>}`
+  | `Medium${NumsBefore<29>}`
+  | `Dark${NumsBefore<12>}`
+  | "None"
+  | (string & {});
 
 /** Way that Excel stores & parses the content of a cell (see {@link IExcelCellValue.type}) */
 export const enum ExcelCellTypes {
@@ -191,6 +210,8 @@ interface IExportSheet {
   parts: ISheetParts;
   /** An empty table (a header row without data) is treated by Excel as a broken content, so it's skipped at all */
   hasTable: boolean;
+  /** Full name of the table-style: the resolved {@link IExcelSheet.tableStyle}; `""` - no style at all */
+  tableStyleName: string;
 }
 
 /** Options that are the same for every sheet of the export: created once per {@link exportToExcel} call */
@@ -314,6 +335,12 @@ interface IFontMetrics {
   maxDigitPx: number;
 }
 
+/** Bits of {@link IExcelStyle.fontStyle} that index a face inside a family of {@link autoWidth.familyPx} */
+const facePxMask = ExcelFontStyles.bold | ExcelFontStyles.italic;
+
+/** Packed char widths of every face of a family, indexed by the {@link facePxMask} bits of the font-style */
+type IFacePx = readonly [regular: string, bold: string, italic: string, boldItalic: string];
+
 /** Auto-width of a column: the file-format has no auto-width at all - `bestFit` is only a marker & Excel never
  * re-measures such a column, so the width must be estimated here.
  * Everything is calculated in pixels of the really applied font & converted into Excel-units (the widest digit
@@ -325,7 +352,7 @@ const autoWidth = {
   cellPaddingPx: 7,
   /** Space for the autoFilter dropdown button in a header cell */
   filterButtonPx: 18,
-  /** Char widths of a family as `[regular, bold, italic, boldItalic]`, measured at {@link autoWidth.basePt}
+  /** Char widths of every {@link IFacePx} face of a family, measured at {@link autoWidth.basePt}
    * via GDI itself (`GetCharWidth32W` of the font selected into a DC):
    * Excel renders a cell text via GDI, where every glyph advance is hinted to a whole pixel - so summing
    * the fractional font-metrics instead under-estimates a long text by ~7% and cuts it off. A per-family (or
@@ -336,13 +363,16 @@ const autoWidth = {
    * An italic face isn't a slanted regular one either: it's drawn by its own glyphs, so it's wider for some
    * chars (`Calibri Italic M` is 13px against 12px) & narrower for others (the whole `Segoe UI Italic`) -
    * measuring it as the regular one cuts a cell off & Excel shows a date/number column as `#####`.
+   * A family that repeats a face really measures it so & it isn't a copy-paste: a monospace one (`Consolas`,
+   * `Courier New`) advances every char by the same px in all the 4 faces, while `Tahoma` ships no italic face
+   * at all - GDI synthesizes it by shearing the regular glyphs, which keeps the advances untouched.
    * A face holds the chars `32..126` packed one per char as `px + 48` (so the char `0` means 0px) plus
    * the 96th char - the width of a non-latin (cyrillic etc.) char, averaged over `А..я` of the face.
    * WARN: measure the advances themselves & never a rendered string: GDI kerns a pair (`11` of `Arial` is 1px
    * narrower than 2 `1`), while Excel doesn't kern a cell at all - so a measured run under-estimates the width.
    * WARN: the keys are lower-cased (Excel treats a font-name case-insensitively); a font that isn't listed here
    * is measured as `Calibri` - a substituted font can't be predicted anyway */
-  familyPx: new Map<string, readonly [string, string, string, string]>([
+  familyPx: new Map<string, IFacePx>([
     ["calibri", ["35677;:3557745467777777777447777=988977994586<::8:87799=877565774786885784474<888856587;77657579", "35777;;4557745467777777777447777=988977:94586=::8:877:9>887565775786885784474<888856587;77657579", "35677;:3557745467777777777447777=988977994586=::8:877:9=877565774886875883473<888856587;77657579", "35777;;4557745477777777777447777=988977:94586=::8:877:9>887565775886875884474<888856587;77657579"]], // prettier-ignore
     ["arial", ["45588=:3556945448888888888449998?9:;;:9;:37:8;:<:<;:9:9?998444585888884883373=888858487;7785359:", "44788=;4556945448888888888449999?9;;;:9<;48;9=;<:<;::;9=::8545985898995994484<999968599;8786469:", "44588=:3556945448888888888449998?::;;:9<;48:8=;<:<;:9;:?::9444785888884883383=88885848898875459:", "45788=;3556945448888888888559999?;;;;:9<;38;9=;<:<;:9;:>:99544885898985994484>999968598<8876469;"]], // prettier-ignore
     ["cambria", ["34698=:4666835378888888888448886=998:989:5598<::9:979:9>998575864787875784484<888866588<787656;9", "35698?;4667935389999999999449997>::9;98:;55:8=::9::8:::>998686964897985895595=999977598<8876569:", "34697=:4666835378888888888448886=998:989:5498<:98997999=888575864886874884474<888866587;77765689", "35698?;4667935379999999999449997>998:889:55:8<::9:989:9>998575954997975895484=989877598<7876569:"]], // prettier-ignore
@@ -365,17 +395,14 @@ const autoWidth = {
    * shares the face of the same weight & slant); called once per sheet & per column (not per cell), so the
    * lower-casing of the font-name & the lazy decoding are affordable here */
   getMetrics(style: IExcelStyleFull): IFontMetrics {
-    // the faces are packed in the very same order: [regular, bold, italic, boldItalic]
-    const face =
-      style.fontStyle === undefined
-        ? 0
-        : (style.fontStyle & ExcelFontStyles.bold ? 1 : 0) + (style.fontStyle & ExcelFontStyles.italic ? 2 : 0);
-    const family = style.fontFamily.toLowerCase();
-    const key = face ? `${family} ${face}` : family;
+    const face = (style.fontStyle ?? 0) & facePxMask;
+    // the substitution is resolved before the key is built, so every unlisted family shares the Calibri entries
+    const name = style.fontFamily.toLowerCase();
+    const family = autoWidth.familyPx.has(name) ? name : "calibri";
+    const key = `${family} ${face}`;
     let m = autoWidth.metrics.get(key);
     if (m) return m;
-    const faces = autoWidth.familyPx.get(family) ?? autoWidth.familyPx.get("calibri")!;
-    const widths = faces[face];
+    const widths = autoWidth.familyPx.get(family)![face];
     // the last packed char is the non-latin one: it fills the whole table, so a code that isn't measured
     // (a control char included) falls back to it without any extra check on the hot path
     const defaultPx = widths.charCodeAt(asciiCount) - 48;
@@ -934,10 +961,22 @@ function getWorkSheetBytes({ parts, hasTable }: IExportSheet): Uint8Array {
   );
 }
 
+/** Full name of the style that {@link IExcelSheet.tableStyle} points: a short name of a built-in family
+ * (`Light16`, `Medium9`, `Dark2`) is expanded into the `TableStyle{name}` that the file-format stores,
+ * everything else goes as-is (a style of a custom theme).
+ * `None` (or nothing at all) gives `""` - no style: the `name` is then skipped in the table-part, exactly as
+ * Excel itself saves a table that a user has reset to `None`, while the striping stays enabled, so picking
+ * a style in the UI shows the banded rows at once */
+function getTableStyleName(tableStyle: ExcelTableStyle | undefined): string {
+  if (!tableStyle || tableStyle === "None") return "";
+  return /^(?:Light|Medium|Dark)\d+$/.test(tableStyle) ? `TableStyle${tableStyle}` : tableStyle;
+}
+
 /** `xl/tables/table{num}.xml`: the table over the data - it provides the autoFilter & the row-striping */
-function getTableXml({ num, parts }: IExportSheet): string {
+function getTableXml({ num, parts, tableStyleName }: IExportSheet): string {
   const { headers } = parts;
   const ref = `A1:${parts.lastLetter}${parts.rowsCount + 1}`;
+  const styleName = tableStyleName ? ` name="${escape(tableStyleName)}"` : "";
 
   let cols = "";
   for (let i = 0; i < headers.length; ++i) {
@@ -948,7 +987,7 @@ function getTableXml({ num, parts }: IExportSheet): string {
     `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ` +
     `id="${num}" name="Table${num}" displayName="Table${num}" ref="${ref}" insertRow="1" totalsRowShown="0">` +
     `<autoFilter ref="${ref}"/><tableColumns count="${headers.length}">${cols}</tableColumns>` +
-    `<tableStyleInfo name="TableStyleLight16" showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>`
+    `<tableStyleInfo${styleName} showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>`
   );
 }
 
@@ -980,7 +1019,7 @@ export default async function exportToExcel<T>(
    * - never mutate the pointed `value` - an empty cell is a shared read-only object; return an own one instead */
   cellCallback?: IExcelCellCallback<T> // todo add ability to set tooltip per cell
 ): Promise<Blob> {
-  const { getCellValue, style, headerStyle, dateTimeFormat } = exportToExcel.$defaults;
+  const { getCellValue, style, headerStyle, dateTimeFormat, tableStyle } = exportToExcel.$defaults;
   const documentFont = mergeStyle(baseFont, style);
   const ctx: IExportContext = {
     allStyles: createStyles(documentFont),
@@ -1002,6 +1041,8 @@ export default async function exportToExcel<T>(
       /** Excel doesn't allow []:*?/\ in a tab name and cuts it by 31 chars */
       name: escape((sheet.name || `Sheet${num}`).replace(/[[\]:*?/\\]/g, " ").substring(0, 31)),
       hasTable: parts.rowsCount > 0,
+      // an own style of the sheet wins over the document one
+      tableStyleName: getTableStyleName(sheet.tableStyle ?? tableStyle),
     };
   });
 
@@ -1049,6 +1090,7 @@ export default async function exportToExcel<T>(
 
 exportToExcel.$defaults = {
   dateTimeFormat: "",
+  tableStyle: "Light16",
 
   getCellValue: function getCellValue(v) {
     const t = typeof v;
@@ -1083,6 +1125,8 @@ exportToExcel.$defaults = {
 } as IExcelDefaults;
 
 interface IExcelDefaults extends IExcelSettings {
+  /** Built-in table-style for every sheet that doesn't point an own {@link IExcelSheet.tableStyle} */
+  tableStyle: ExcelTableStyle;
   /** Maps an item-property into the content of a cell: how Excel must store it + the already stringified value
    * (a finite number becomes {@link ExcelCellTypes.number}, a Date - a real {@link ExcelCellTypes.date},
    * an array - a multiline {@link ExcelCellTypes.textWrap}, everything else - a plain {@link ExcelCellTypes.text}).

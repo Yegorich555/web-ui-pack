@@ -161,6 +161,20 @@ const examples: IExample[] = [
     cellCallback: userCellCallback,
   },
   {
+    label: "Table styles",
+    fileName: "table-styles.xlsx",
+    details:
+      "tableStyle points a built-in style of Excel per sheet (the gallery 'Home > Format as Table'): " +
+      "'Light'1..21, 'Medium'1..28, 'Dark'1..11 or 'None' for an unstyled range",
+    getSheets: () => [
+      { data: users, mapping: userColumns, name: "Light16 (default)" },
+      { data: users, mapping: userColumns, name: "Medium9", tableStyle: "Medium9" },
+      { data: users, mapping: userColumns, name: "Dark2", tableStyle: "Dark2" },
+      // no style at all: the sheet keeps only the fonts & the colors of its own style
+      { data: users, mapping: styledColumns, name: "None", tableStyle: "None" },
+    ],
+  },
+  {
     label: "10 000 rows",
     fileName: "big.xlsx",
     details: "Performance check: elapsed time is shown below",
@@ -204,7 +218,7 @@ export default function ExportToExcelView() {
       link="src/helpers/files/exportToExcel.ts"
       features={[
         "Creates a valid *.xlsx (OpenXML) document without any dependencies",
-        "Auto-detects column width, applies autoFilter & table styling",
+        "Auto-detects column width, applies autoFilter & a built-in table-style of Excel (per sheet)",
         "Custom style per sheet/columns/headers/cell: fontSize, fontFamily, fontStyle, color, backgroundColor",
         "Saves the result into a file at once or returns Blob: save it later, upload to a server or attach to an email",
       ]}
@@ -294,6 +308,9 @@ const blob = await createExcelDoc([
 
      // missed font inheritted from 'style'
     headerStyle: { fontStyle: ExcelFontStyles.bold, color: "#4472c4" },
+
+    // built-in style of Excel that colors the header & the banded rows; 'None' for an unstyled range
+    tableStyle: "Medium9",
   },
   // ...next sheet here
 ],
