@@ -11,6 +11,7 @@ import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
 import CircleView from "./components/circleView";
 import DropdownView from "./components/dropdownView";
+import SortView from "./components/sortView";
 import ModalView from "./components/modalView";
 
 import TextControlView from "./components/controls/text";
@@ -56,6 +57,7 @@ const routes: IRoute[] = [
     { path: "modal", el: ModalView },
     { path: "modal-alert", label: "Alert", el: ModalAsAlertView },
     { path: "notify", el: NotifyView },
+    { path: "sort", el: SortView },
   ].sort((a, b) => a.path.localeCompare(b.path)),
 
   { path: "controls", label: "Form & Controls", el: ControlsView },

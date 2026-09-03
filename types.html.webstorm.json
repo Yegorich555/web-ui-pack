@@ -990,6 +990,12 @@
 					]
 				},
 				{
+					"name": "wup-sort",
+					"description": "Wrapper to make items/children sortable",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/sort",
+					"attributes": []
+				},
+				{
 					"name": "wup-spin",
 					"description": "Flexible animated element with ability to place over target element without position relative",
 					"doc-url": "https://yegorich555.github.io/web-ui-pack/spin",

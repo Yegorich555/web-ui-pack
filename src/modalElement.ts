@@ -126,6 +126,7 @@ declare module "preact/jsx-runtime" {
  * @example
  * JS/TS
  * ```js
+ * WUPModalElement.$use();
  * WUPModalElement.$defaults.placement = ...;
  *
  * const el = document.createElement('wup-modal');

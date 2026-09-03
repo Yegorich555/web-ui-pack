@@ -61,6 +61,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
 - _HTMLElement_ > _BaseElement_
 
   - [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
+  - [x] [SortElement](src/sortElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/sort)
   - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
   - [x] [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
   - _BaseModal_

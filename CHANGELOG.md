@@ -2,13 +2,14 @@
 
 # Changelog
 
-## 1.2.8 (___)
+## 1.2.8 (\_\_\_)
 
 ### New Features
 
 - helper [zip](src/helpers/files/zip.ts)
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts)
 - helper [saveAsFile](src/helpers/files/saveAsFile.ts)
+- [SortElement](src/sortElement.ts)
 
 ---
 
