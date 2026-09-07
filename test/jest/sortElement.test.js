@@ -595,13 +595,28 @@ describe("sortElement", () => {
     expect(rectCalls()).toBe(prev);
   });
 
-  test("_disposeDragdrop", () => {
-    el._disposeDragdrop();
-    const was = el.innerHTML;
-    const trg = getItems()[0];
+  test("dragdrop is disposed on remove & re-applied on re-connect", () => {
+    // the pointerdown-listener was registered via raw onEvent - so it stayed forever after the element was removed
+    const spyRemove = jest.spyOn(el, "removeEventListener");
+    el.remove();
+    expect(spyRemove).toBeCalledWith("pointerdown", expect.any(Function), expect.anything());
+
+    // ... so the detached element mustn't sort anymore
+    let trg = getItems()[0];
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
-    h.userMouseMove(trg, { x: w * 2, y: 0 });
+    h.userMouseMove(trg, { x: w + w / 2, y: hi / 2 });
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
-    expect(el.innerHTML).toBe(was);
+    expect(el.querySelector("[drag]")).toBeFalsy();
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 1", "Item 2", "Item 3", "Item 4"]);
+
+    // sorting must work again when the element is added back (gotRender is called only once)
+    document.body.appendChild(el);
+    jest.advanceTimersByTime(1); // wait for ready
+    updateLayout();
+    [trg] = getItems();
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: w + w / 2, y: hi / 2 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
   });
 });

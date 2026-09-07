@@ -119,20 +119,19 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
   /** Called on value change */
   $onChange?: (e: WUP.Sort.EventMap["$change"]) => void;
 
-  protected override gotRender(): void {
-    super.gotRender();
+  protected override gotReady(): void {
+    super.gotReady();
+    // WARN: it's here (not in gotRender) because gotRender is called only once - but the listener is removed on every disconnect
     this.applyDragdrop();
   }
 
   /** It prevents menu opening if user tries sorting and focus got after mouseUp */
   // _wasSortAfterClick?: boolean;
 
-  /** Call it to remove dragdrop logic */
-  _disposeDragdrop?: () => void;
-
   /** Called to apply dragdrop logic */
   protected applyDragdrop(): void {
-    this._disposeDragdrop = onEvent(this, "pointerdown", (e) => {
+    // WARN: appendEvent (not onEvent) - otherwise the listener isn't removed when the element is removed from the document
+    this.appendEvent(this, "pointerdown", (e) => {
       if (e.button || e.isPrimary === false) {
         // WARN: `=== false` because the property is missing on synthetic events
         return; // ignore right-click & non-primary pointers (2nd+ finger of the multi-touch)
