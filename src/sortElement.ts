@@ -288,26 +288,15 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
               nearest = i;
             }
           }
-          // define left/right side
+          // move to the new place
           if (eli !== nearest) {
             const trg = $items![nearest];
-            const isLeftOrTop = eli > nearest;
-
-            let nextEli = eli;
-            if (nearest < eli) {
-              nextEli = isLeftOrTop ? nearest : nearest + 1; // shift from right to left
-            } else {
-              // if (nearest > eli) {
-              nextEli = isLeftOrTop ? nearest - 1 : nearest; // shift from left to right
-            }
-            nextEli = nearest;
-            if (nextEli !== eli) {
-              trg.parentElement!.insertBefore(el, isLeftOrTop ? trg : trg.nextElementSibling); // insert before OR after
-              $items!.splice(nextEli, 0, $items!.splice(eli, 1)[0]);
-              eli = nextEli;
-              isThrottle = true;
-              setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
-            }
+            const isLeftOrTop = eli > nearest; // the nearest item is before the dragged one - so it must be replaced by it
+            trg.parentElement!.insertBefore(el, isLeftOrTop ? trg : trg.nextElementSibling); // insert before OR after
+            $items!.splice(nearest, 0, $items!.splice(eli, 1)[0]);
+            eli = nearest;
+            isThrottle = true;
+            setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
           }
         },
         { passive: false }
