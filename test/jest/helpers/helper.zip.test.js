@@ -423,10 +423,10 @@ function mockWorkers() {
       const code = blobs.get(url);
       // istanbul instruments dist-file: worker-code refers to the module-scoped counter - link it back
       const covName = (code.match(/\bcov_[0-9a-zA-Z_$]+/) || [])[0];
-      const covKey = Object.keys(global.__coverage__ || {}).find((k) =>
-        k.replace(/\\/g, "/").endsWith("/dist/helpers/zip.js")
-      );
-      if (covName && covKey) store[covName] = () => global.__coverage__[covKey];
+      const covKey = Object.keys(global.__coverage__ || {}).find((k) => k.replace(/\\/g, "/").endsWith("/zip.js"));
+      // WARN: without the link every worker fails with "cov_... is not a function" (& only with --coverage)
+      if (covName && !covKey) throw new Error("coverage-counter of zip.js is not found");
+      if (covName) store[covName] = () => global.__coverage__[covKey];
       this.store = store;
       // 'with' + Proxy: worker-code assigns implicit globals (U8=..., onmessage=...)
       const scope = new Proxy(store, {

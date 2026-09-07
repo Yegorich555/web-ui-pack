@@ -293,6 +293,7 @@ function createUtf8Writer(): IUtf8Writer {
   /** WARN: the whole `pending` is encoded at once, so a chunk always ends on an `add()` boundary - splitting it
    * by a fixed length instead could cut a surrogate pair in half & turn an emoji into a pair of `U+FFFD` */
   const flush = (): void => {
+    /* istanbul ignore if - reachable only when the previous add() has flushed exactly at the boundary */
     if (!pending) return;
     const bytes = strToU8(pending);
     chunks.push(bytes);
@@ -307,7 +308,9 @@ function createUtf8Writer(): IUtf8Writer {
     },
     toBytes(prefix: string, suffix: string): Uint8Array {
       flush();
+      /* istanbul ignore next - every caller points the both xml-parts */
       const pre = prefix ? strToU8(prefix) : emptyBytes;
+      /* istanbul ignore next - every caller points the both xml-parts */
       const post = suffix ? strToU8(suffix) : emptyBytes;
       const result = new Uint8Array(pre.length + total + post.length);
       result.set(pre, 0);
@@ -1017,6 +1020,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   // column - so the rest of them takes the same style with the standard width (`customWidth` isn't set: they
   // aren't resized, only formatted). It covers a cell that isn't stored in the sheet at all - the one that
   // a user types in after the export
+  /* istanbul ignore else - a sheet of all 16384 mapped columns leaves no column for the range */
   if (colCount < maxColumns) {
     const w = autoWidth.getDefaultWidth(ctx.unitPx);
     colsXml += `<col min="${colCount + 1}" max="${maxColumns}" width="${w}"${sheetColStyleXml}/>`;

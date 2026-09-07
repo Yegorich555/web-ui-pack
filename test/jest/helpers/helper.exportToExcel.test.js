@@ -676,6 +676,21 @@ describe("helper.exportToExcel", () => {
     );
   });
 
+  test("dates: an explicit width skips the measuring of the column", async () => {
+    await exportToExcel([
+      {
+        name: "Dates",
+        data: [{ d: new Date(2024, 2, 5, 13, 45, 30) }],
+        // WARN: much narrower than the date itself - a date-column is measured by its format, so this checks
+        // that an explicit width wins over it & such a column isn't measured at all
+        mapping: [{ propName: "d", headerText: "D", width: 6 }],
+      },
+    ]);
+    expect(colWidth(1)).toBe(6);
+    // ...the cell still gets the date-format of the column
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164"`);
+  });
+
   test("dates: the format-tokens of dateToString are converted into the Excel ones", async () => {
     // the formats that localeInfo.getDateFormat() returns for the real locales + all the supported tokens
     const formats = [
@@ -730,6 +745,26 @@ describe("helper.exportToExcel", () => {
     } finally {
       exportToExcel.$defaults.getCellValue = orig;
     }
+  });
+
+  test("getCellValue: any other type falls back to its own toString()", async () => {
+    await exportToExcel([
+      {
+        name: "Other",
+        data: [
+          { obj: { toString: () => "own text" }, big: 10n },
+          { obj: {}, big: -2n },
+        ],
+        mapping: [{ propName: "obj" }, { propName: "big" }],
+      },
+    ]);
+    const xml = files["xl/worksheets/sheet1.xml"];
+    // an object is stored as a text by its own toString() & never as a '[object Object]' by accident
+    expect(xml).toContain(`<c r="A2" s="1" t="inlineStr"><is><t>own text</t></is></c>`);
+    expect(xml).toContain(`<c r="A3" s="1" t="inlineStr"><is><t>[object Object]</t></is></c>`);
+    // WARN: a BigInt isn't a `number` for typeof, so it stays a text - Excel stores no integer wider than 2^53
+    expect(xml).toContain(`<c r="B2" s="1" t="inlineStr"><is><t>10</t></is></c>`);
+    expect(xml).toContain(`<c r="B3" s="1" t="inlineStr"><is><t>-2</t></is></c>`);
   });
 
   test("cellCallback: an own value & style of a cell", async () => {
@@ -875,6 +910,29 @@ describe("helper.exportToExcel", () => {
     expect(fontById(cellStyleId("A2"))).not.toContain("<i/>");
   });
 
+  test("cellCallback: the width of an own-font date-cell is measured once per column", async () => {
+    const small = { fontSize: 6 };
+    const big = { fontSize: 22 };
+    const sheets = [
+      {
+        name: "D",
+        dateTimeFormat: "yyyy-MM-dd hh:mm:ss A",
+        data: [{ d: new Date(2021, 3, 13, 10, 24, 0) }, { d: new Date(2023, 10, 2, 18, 3, 45) }],
+        mapping: [{ propName: "d", headerText: "R" }], // a short header: otherwise it defines the width
+      },
+    ];
+
+    await exportToExcel(sheets);
+    const base = colWidth();
+    // a smaller font renders the very same date narrower, so it never shrinks the column
+    await exportToExcel(sheets, null, (_v, itemIndex) => (itemIndex === 0 ? { style: small } : undefined));
+    expect(colWidth()).toBe(base);
+    // the very same style-object on the both rows is resolved once => a single cell-format & a single measuring
+    await exportToExcel(sheets, null, () => ({ style: big }));
+    expect(cellStyleId("A2")).toBe(cellStyleId("A3"));
+    expect(colWidth()).toBeGreaterThan(base);
+  });
+
   test("cellCallback: a tooltip becomes a note of the cell", async () => {
     const sheets = [
       {
@@ -986,6 +1044,21 @@ describe("helper.exportToExcel", () => {
     expect(h4).toBeLessThan(h3 * 5);
     // ...and the anchor (the cells that Excel re-calculates the position of the box by) follows the height
     expect(anchorRows(1)).toBeLessThan(anchorRows(3));
+  });
+
+  test("cellCallback: an empty line of a note takes a line of the box either", async () => {
+    /** height in pt of the box of the note of the pointed (1-based) cell of the 1st sheet */
+    const boxHeight = (n) => +files["xl/drawings/vmlDrawing1.vml"].match(/height:[\d.]+pt/g)[n - 1].match(/[\d.]+/)[0];
+
+    // WARN: `Math.ceil(0 / charsPerLine)` is 0, while an empty line is rendered by Excel as a line either
+    const tooltips = ["a\nb", "a\n\nb", "\n"];
+    await exportToExcel(
+      [{ name: "N", data: tooltips.map((v) => ({ v })), mapping: [{ propName: "v" }] }],
+      null,
+      (value) => ({ tooltip: value.stringVal })
+    );
+    expect(boxHeight(2)).toBeGreaterThan(boxHeight(1)); // 3 lines against 2
+    expect(boxHeight(3)).toBe(boxHeight(1)); // '\n' is 2 empty lines, as 'a\nb' is 2 filled ones
   });
 
   test("saveAsFile: the result is saved at once by the 2nd arg", async () => {
