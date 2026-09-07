@@ -1,6 +1,5 @@
 import WUPBaseElement from "./baseElement";
 import onEvent from "./helpers/onEvent";
-import isOverlap from "./helpers/isOverlap";
 import animate from "./helpers/animate";
 import { parseMsTime } from "./helpers/styleHelpers";
 
@@ -198,7 +197,6 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
         { capture: true }
       );
 
-      let isInside = true;
       let isThrottle = false;
       const rect = el.getBoundingClientRect();
       const firstCoord = { x: e.clientX - rect.x, y: e.clientY - rect.y };
@@ -247,13 +245,8 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
           const x = ev.clientX - firstCoord.x; // el.offsetWidth / 2;
           const y = ev.clientY - firstCoord.y; // el.offsetHeight / 2;
           dr.style.transform = `translate(${x}px, ${y}px)`;
+          // WARN: removing the item by dragging outside the control isn't supported - so there is no isOverlap-check here
 
-          // define if element inside control (if outside - remove logic)
-          isInside = true || isOverlap(this.getBoundingClientRect(), dr.getBoundingClientRect()); // WARN we don't support remove
-          this.setAttr.call(dr, "remove", !isInside, true);
-          if (!isInside) {
-            return; // skip new place detection when item outside control
-          }
           if (isThrottle) {
             return;
           }
@@ -330,36 +323,29 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
         if (dr) {
           // setTimeout(() => (this._wasSortAfterClick = false), 1);
           this.removeAttribute("hovered");
-          isInside = true; // remove by outside isn't supported here
-          if (!isInside) {
+          const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-t"));
+          const from = dr.getBoundingClientRect();
+          const to = el.getBoundingClientRect();
+          const diff = { x: to.x - from.x, y: to.y - from.y };
+          // return element back
+          dr.style.pointerEvents = "none";
+          dr.style.touchAction = "none";
+          dr.style.userSelect = "none";
+          el.__isReturning = true;
+          animate(0, 1, animTime, (v) => {
+            dr.style.transform = `translate(${from.x + diff.x * v}px, ${from.y + diff.y * v}px)`;
+          }).finally(() => {
+            delete el.__isReturning;
             el.removeAttribute("drop");
             dr.remove();
-            // this.removeValue(eli);
-          } else {
-            const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-t"));
-            const from = dr.getBoundingClientRect();
-            const to = el.getBoundingClientRect();
-            const diff = { x: to.x - from.x, y: to.y - from.y };
-            // return element back
-            dr.style.pointerEvents = "none";
-            dr.style.touchAction = "none";
-            dr.style.userSelect = "none";
-            el.__isReturning = true;
-            animate(0, 1, animTime, (v) => {
-              dr.style.transform = `translate(${from.x + diff.x * v}px, ${from.y + diff.y * v}px)`;
-            }).finally(() => {
-              delete el.__isReturning;
-              el.removeAttribute("drop");
-              dr.remove();
-            });
+          });
 
-            el._prevIndex !== $items.indexOf(el) &&
-              this.setValue(
-                $items.map((x) => x._prevIndex),
-                $items,
-                "move"
-              );
-          }
+          el._prevIndex !== $items.indexOf(el) &&
+            this.setValue(
+              $items.map((x) => x._prevIndex),
+              $items,
+              "move"
+            );
         }
         r0();
         rTouchMove?.();
