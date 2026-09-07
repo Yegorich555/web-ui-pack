@@ -142,11 +142,6 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
         return; // prevent sort during the editing when user clicks on control and selects text
       }
 
-      if (activeEl) {
-        activeEl._wasDraggable = activeEl.draggable;
-        activeEl.draggable = false; // prevent dragging on image & video: WARN we don't restore this
-      }
-
       // this._wasSortAfterClick = false;
       // if (this.$isReadOnly || this.$isDisabled) {
       //   return;
@@ -168,6 +163,10 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
 
       const el = $items![eli];
       let dr: HTMLElement & { __isDragItem?: boolean };
+
+      // WARN: must be after the `eli === -1` return - otherwise draggability of non-item targets is destroyed forever (`cancel` isn't registered yet)
+      activeEl._wasDraggable = activeEl.draggable;
+      activeEl.draggable = false; // prevent dragging on image & video: restored in `cancel`
 
       let isWaitTouch = false; // wait for touch to detect if possible to prevent scrollByTouch (browser can cancel pointer events if swipe)
       // WARN: keep removers separate - otherwise touchstart-listener stays forever and every touchstart leaks a non-passive touchmove-listener
@@ -311,9 +310,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
       );
 
       const cancel = (): void => {
-        if (activeEl) {
-          activeEl.draggable = activeEl._wasDraggable;
-        }
+        activeEl.draggable = activeEl._wasDraggable;
 
         if (dr) {
           // setTimeout(() => (this._wasSortAfterClick = false), 1);

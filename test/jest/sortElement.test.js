@@ -347,6 +347,22 @@ describe("sortElement", () => {
     expect(el.querySelector("[drag]")).toBeTruthy();
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     expect(img.draggable).toBe(true); // restored after dragging
+
+    // WARN: draggability must be kept when pointerdown isn't on a sortable item - otherwise it's destroyed forever (no restore-path)
+    el.querySelector("[item='false']").innerHTML = `<img alt="test2" />`;
+    const img2 = el.querySelector("[item='false'] img");
+    img2.draggable = true;
+    img2.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    expect(img2.draggable).toBe(true);
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    expect(img2.draggable).toBe(true);
+
+    // the same for the control itself
+    el.draggable = true;
+    el.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    expect(el.draggable).toBe(true);
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    expect(el.draggable).toBe(true);
   });
 
   test("touch events", async () => {
