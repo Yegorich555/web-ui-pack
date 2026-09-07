@@ -550,6 +550,51 @@ describe("sortElement", () => {
     expect(onChanged).toBeCalledTimes(2);
   });
 
+  test("items rects are cached between moves", async () => {
+    const trg = getItems()[0];
+    /** Total getBoundingClientRect calls of all sortable items (mocked by h.setupLayout) */
+    const rectCalls = () => getItems().reduce((sum, a) => sum + a.getBoundingClientRect.mock.calls.length, 0);
+
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 20, y: 12 }); // start dragging: cursor is still on the 1st item - no reorder
+    const dragEl = bindDragEl();
+    let prev = rectCalls();
+    expect(prev).toBeGreaterThanOrEqual(getItems().length); // rects of all items are collected on the 1st move
+
+    // moving without reorder mustn't re-read rects: getBoundingClientRect forces layout on every call
+    h.userMouseMove(dragEl, { x: 25, y: 12 });
+    h.userMouseMove(dragEl, { x: 30, y: 12 });
+    expect(rectCalls()).toBe(prev);
+
+    // reorder re-layouts items - so the cache must be reset
+    h.userMouseMove(dragEl, { x: w + w / 2, y: hi / 2 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
+    await h.wait(); // wait for throttling
+    updateLayout();
+    prev = rectCalls();
+    h.userMouseMove(dragEl, { x: w + w / 2 + 1, y: hi / 2 });
+    expect(rectCalls()).toBeGreaterThan(prev);
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]); // no reorder here
+
+    // ... and cached again
+    prev = rectCalls();
+    h.userMouseMove(dragEl, { x: w + w / 2 + 2, y: hi / 2 });
+    expect(rectCalls()).toBe(prev);
+
+    // scroll shifts viewport-based rects - so the cache must be reset
+    document.dispatchEvent(new Event("scroll"));
+    h.userMouseMove(dragEl, { x: w + w / 2 + 3, y: hi / 2 });
+    expect(rectCalls()).toBeGreaterThan(prev);
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    // scroll-listener must be removed with the others
+    prev = rectCalls();
+    document.dispatchEvent(new Event("scroll"));
+    h.userMouseMove(dragEl, { x: w, y: hi / 2 });
+    expect(rectCalls()).toBe(prev);
+  });
+
   test("_disposeDragdrop", () => {
     el._disposeDragdrop();
     const was = el.innerHTML;

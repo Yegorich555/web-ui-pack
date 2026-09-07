@@ -198,6 +198,9 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
       );
 
       let isThrottle = false;
+      // WARN: getBoundingClientRect forces layout (N calls per pointermove) - so rects are cached and reset only when they really change
+      let rects: DOMRect[] | null = null;
+      const rScroll = onEvent(document, "scroll", () => (rects = null), { capture: true, passive: true }); // scroll shifts viewport-based rects
       const rect = el.getBoundingClientRect();
       const firstCoord = { x: e.clientX - rect.x, y: e.clientY - rect.y };
       const downCoord = { x: e.clientX, y: e.clientY }; // to detect if user moved enough to start dragging (not just clicked)
@@ -254,7 +257,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
           let nearest = eli; // index of nearest item
           let nearestEnd = eli; // index of last item in the nearest line
           let dist = Number.MAX_SAFE_INTEGER; // distance between centers
-          const rects = $items!.map((item) => item.getBoundingClientRect());
+          rects ??= $items!.map((item) => item.getBoundingClientRect());
           // WARN: undefined (not 0) - otherwise the 1st item is treated as a part of the line y=0 (possible when page is scrolled)
           // and nearestEnd goes out of rects-range
           let lineY: number | undefined;
@@ -295,6 +298,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
             trg.parentElement!.insertBefore(el, isLeftOrTop ? trg : trg.nextElementSibling); // insert before OR after
             $items!.splice(nearest, 0, $items!.splice(eli, 1)[0]);
             eli = nearest;
+            rects = null; // the reorder re-layouts items - so cached rects are outdated
             isThrottle = true;
             setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
           }
@@ -338,6 +342,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
         }
         r0();
         rTouchMove?.();
+        rScroll();
         r1();
         r2();
         r3();
