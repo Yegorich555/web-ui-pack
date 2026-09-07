@@ -25,15 +25,17 @@ function updateLayout() {
   h.setupLayout(items[3], { x: 0, y: hi, h: hi, w });
 }
 
+/** Simulate pointermove with the pointed ev.movementX/Y: `undefined` on old WebKit, `0` for touch-pointers in some engines */
+function userPointerMove(trg, { x, y }, movement) {
+  const ev = new MouseEvent("pointermove", { clientX: x, clientY: y, cancelable: false, bubbles: true });
+  Object.defineProperty(ev, "movementX", { get: () => movement });
+  Object.defineProperty(ev, "movementY", { get: () => movement });
+  trg.dispatchEvent(ev);
+}
+
 /** Returns outerHTML of every child of the control */
 function getChildren() {
   return Array.prototype.slice.call(el.children).map((a) => a.outerHTML);
-}
-
-/** Simulate mouse-move: 1st call is ignored by control (threshold to avoid sorting by ordinary click) */
-function userMouseMove(trg, { x, y }) {
-  h.userMouseMove(trg, { x: x + 100, y: y + 100 }); // 1st move is skipped by threshold
-  h.userMouseMove(trg, { x, y });
 }
 
 /** Simulate getBoundingClientRect for the cloned element that follows the cursor */
@@ -89,7 +91,7 @@ describe("sortElement", () => {
     // cloned element that follows cursor must be skipped
     const trg = getItems()[0];
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
-    userMouseMove(trg, { x: w * 2, y: 0 });
+    h.userMouseMove(trg, { x: w * 2, y: 0 });
     expect(el.querySelector("[drag]")).toBeTruthy();
     expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
   });
@@ -118,12 +120,12 @@ describe("sortElement", () => {
 
     // start dragging
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
-    h.userMouseMove(trg, { x: 10, y: 10 }); // 1st move is ignored because of threshold
+    h.userMouseMove(trg, { x: 12, y: 12 }); // moved less than the click-threshold (pointerdown was at 10,10)
     expect(el.querySelector("[drag]")).toBeFalsy(); // no-sorting when user moved cursor a bit
-    h.userMouseMove(trg, { x: 12, y: 12 });
+    h.userMouseMove(trg, { x: 20, y: 12 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<div item="" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(2px, 2px);">Item 1</div>",
+        "<div item="" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(10px, 2px);">Item 1</div>",
         "<div item="" draggable="false" drop="">Item 1</div>",
         "<div item="">Item 2</div>",
         "<div item="">Item 3</div>",
@@ -284,14 +286,14 @@ describe("sortElement", () => {
 
     // right-click
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, button: 2 }));
-    userMouseMove(trg, { x: w * 2, y: 0 });
+    h.userMouseMove(trg, { x: w * 2, y: 0 });
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     expect(el.querySelector("[drag]")).toBeFalsy();
     expect(getItems().map((a) => a.textContent)).toStrictEqual(was);
 
     // click on the control itself (outside items)
     el.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
-    userMouseMove(el, { x: w * 2, y: 0 });
+    h.userMouseMove(el, { x: w * 2, y: 0 });
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     expect(el.querySelector("[drag]")).toBeFalsy();
     expect(getItems().map((a) => a.textContent)).toStrictEqual(was);
@@ -299,7 +301,7 @@ describe("sortElement", () => {
     // click on item that isn't sortable
     const notSortable = el.querySelector("[item='false']");
     notSortable.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
-    userMouseMove(notSortable, { x: w * 2, y: 0 });
+    h.userMouseMove(notSortable, { x: w * 2, y: 0 });
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     expect(el.querySelector("[drag]")).toBeFalsy();
     expect(getItems().map((a) => a.textContent)).toStrictEqual(was);
@@ -308,14 +310,14 @@ describe("sortElement", () => {
     getItems()[0].innerHTML = `<input />`;
     const input = el.querySelector("input");
     input.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
-    userMouseMove(input, { x: w * 2, y: 0 });
+    h.userMouseMove(input, { x: w * 2, y: 0 });
     expect(el.querySelector("[drag]")).toBeFalsy();
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
 
     getItems()[0].innerHTML = `<span contenteditable="true">txt</span>`;
     const span = el.querySelector("span");
     span.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
-    userMouseMove(span, { x: w * 2, y: 0 });
+    h.userMouseMove(span, { x: w * 2, y: 0 });
     expect(el.querySelector("[drag]")).toBeFalsy();
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
 
@@ -327,7 +329,7 @@ describe("sortElement", () => {
     const { nextFrame } = h.useFakeAnimation();
     const trg2 = getItems()[0];
     trg2.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
-    userMouseMove(trg2, { x: 12, y: 12 });
+    h.userMouseMove(trg2, { x: 25, y: 20 }); // enough to start dragging but the nearest item is still the same
     expect(el.querySelector("[drag]")).toBeTruthy();
     bindDragEl();
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
@@ -343,7 +345,7 @@ describe("sortElement", () => {
     img.draggable = true;
     img.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
     expect(img.draggable).toBe(false);
-    userMouseMove(img, { x: w * 2, y: 0 });
+    h.userMouseMove(img, { x: w * 2, y: 0 });
     expect(el.querySelector("[drag]")).toBeTruthy();
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     expect(img.draggable).toBe(true); // restored after dragging
@@ -373,7 +375,7 @@ describe("sortElement", () => {
     let [trg] = getItems();
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
     document.dispatchEvent(new MouseEvent("touchstart", { cancelable: true, bubbles: true }));
-    userMouseMove(trg, { x: w * 2, y: 0 });
+    h.userMouseMove(trg, { x: w * 2, y: 0 });
     expect(el.querySelector("[drag]")).toBeFalsy(); // because browser can scroll instead
     document.dispatchEvent(new MouseEvent("touchmove", { cancelable: false, bubbles: true }));
     document.dispatchEvent(new MouseEvent("pointercancel", { cancelable: false, bubbles: true }));
@@ -389,7 +391,7 @@ describe("sortElement", () => {
     const isPrevented = !document.dispatchEvent(new MouseEvent("touchmove", { cancelable: true, bubbles: true }));
     expect(isPrevented).toBe(true); // to prevent scrolling by touch
     updateLayout();
-    userMouseMove(trg, { x: w + w / 2, y: hi / 2 });
+    h.userMouseMove(trg, { x: w + w / 2, y: hi / 2 });
     expect(el.querySelector("[drag]")).toBeTruthy();
     bindDragEl();
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
@@ -412,9 +414,37 @@ describe("sortElement", () => {
 
     const trg = getItems()[0];
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 0 }));
-    expect(() => userMouseMove(trg, { x: w + w / 2, y: 0 })).not.toThrow(); // was TypeError because nearestEnd went out of items-range
+    expect(() => h.userMouseMove(trg, { x: w + w / 2, y: 0 })).not.toThrow(); // was TypeError because nearestEnd went out of items-range
     expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+  });
+
+  test("click-threshold without ev.movementX/Y", async () => {
+    const onChanged = jest.fn();
+    el.addEventListener("$change", onChanged);
+    const trg = getItems()[0];
+
+    // ordinary click with a tiny move: `undefined` movement was accumulated into NaN and NaN < threshold === false - so the threshold was bypassed
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    userPointerMove(trg, { x: 12, y: 12 }, undefined);
+    userPointerMove(trg, { x: 13, y: 13 }, undefined);
+    expect(el.querySelector("[drag]")).toBeFalsy(); // 3px is less than the threshold - no dragging
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(onChanged).toBeCalledTimes(0);
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 1", "Item 2", "Item 3", "Item 4"]);
+
+    // real dragging must start even when movement is reported as 0 (touch-pointers)
+    const { nextFrame } = h.useFakeAnimation();
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    userPointerMove(trg, { x: w + w / 2, y: hi / 2 }, 0);
+    expect(el.querySelector("[drag]")).toBeTruthy(); // 0-movement was accumulated forever - so dragging never started on mobile
+    bindDragEl();
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(10);
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
+    await h.wait(1);
+    expect(onChanged.mock.calls[0][0].detail.value).toStrictEqual([1, 0, 2, 3]);
   });
 
   test("_disposeDragdrop", () => {
@@ -422,7 +452,7 @@ describe("sortElement", () => {
     const was = el.innerHTML;
     const trg = getItems()[0];
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
-    userMouseMove(trg, { x: w * 2, y: 0 });
+    h.userMouseMove(trg, { x: w * 2, y: 0 });
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     expect(el.innerHTML).toBe(was);
   });

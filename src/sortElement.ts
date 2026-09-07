@@ -194,9 +194,9 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
 
       let isInside = true;
       let isThrottle = false;
-      const totalMove = { x: 0, y: 0 };
       const rect = el.getBoundingClientRect();
       const firstCoord = { x: e.clientX - rect.x, y: e.clientY - rect.y };
+      const downCoord = { x: e.clientX, y: e.clientY }; // to detect if user moved enough to start dragging (not just clicked)
       const r1 = onEvent(
         document,
         "pointermove",
@@ -207,9 +207,13 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
 
           window.getSelection()?.removeAllRanges(); // possible 1..2 chars text-selection
           const clickMoveThrottle = 8; // to fix throttle issue when user clicked with small mouse move
-          if (totalMove.x < clickMoveThrottle && totalMove.y < clickMoveThrottle) {
-            totalMove.x += Math.abs(ev.movementX);
-            totalMove.y += Math.abs(ev.movementY);
+          // WARN: don't use ev.movementX/Y here - it's undefined on old WebKit (NaN bypasses the threshold: ordinary click reorders items)
+          // and always 0 for touch-pointers in some engines (dragging never starts on mobile)
+          if (
+            !dr && // WARN: threshold gates only the start - otherwise moving back to the initial point stops the started dragging
+            Math.abs(ev.clientX - downCoord.x) < clickMoveThrottle &&
+            Math.abs(ev.clientY - downCoord.y) < clickMoveThrottle
+          ) {
             return;
           }
 
