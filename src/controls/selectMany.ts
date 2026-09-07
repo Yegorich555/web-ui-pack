@@ -1,8 +1,8 @@
-import animate, { isAnimEnabled } from "../helpers/animate";
-import isOverlap from "../helpers/isOverlap";
+import { isAnimEnabled } from "../helpers/animate";
 import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
+import WUPSortElement from "../sortElement";
 import { WUPcssIcon, WUPcssScrollSmall } from "../styles";
 import { MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
@@ -18,7 +18,8 @@ declare global {
       /** Hide items in menu that selected
        * @defaultValue false */
       hideSelected: boolean;
-      /** Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position
+      /** Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position;
+       * dragging an item outside the control removes it
        * @defaultValue false */
       sortable: boolean;
     }
@@ -315,198 +316,48 @@ export default class WUPSelectManyControl<
     super.gotChanges(propsChanged);
 
     this._opts.sortable ??= false;
-    if (this._opts.sortable) {
-      !this._disposeDragdrop && this.applyDragdrop();
+  }
+
+  override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options | keyof WUP.BaseCombo.Options> | null): void {
+    super.gotFormChanges(propsChanged);
+    // WARN: it's here (not in gotChanges) - because `readOnly`/`disabled` can be changed by the parent form
+    if (this._opts.sortable && !this.$isReadOnly && !this.$isDisabled) {
+      this._disposeDragdrop ??= this.applyDragdrop();
     } else {
       this._disposeDragdrop?.call(this);
       this._disposeDragdrop = undefined;
     }
   }
 
-  /** It prevents menu opening if user tries sorting and focus got after mouseUp */
-  _wasSortAfterClick?: boolean;
   /** Call it to remove dragdrop logic */
   _disposeDragdrop?: () => void;
-  /** Called to apply dragdrop logic */
-  protected applyDragdrop(): void {
-    this._disposeDragdrop = onEvent(this, "pointerdown", (e) => {
-      this._wasSortAfterClick = false;
-      if (this.$isReadOnly || this.$isDisabled) {
-        return;
-      }
-
-      const t = e.target;
-      let eli = (this.$refItems && this.$refItems.findIndex((item) => t === item || this.includes.call(item, t)))!;
-      if (eli === -1 || eli === undefined) {
-        return;
-      }
-
-      const el = this.$refItems![eli];
-      let dr: HTMLElement;
-
-      let isWaitTouch = false; // wait for touch to detect if possible to prevent scrollByTouch (browser can cancel pointer events if swipe)
-      let r0 = onEvent(
-        document,
-        "touchstart",
-        () => {
-          isWaitTouch = true;
-          r0 = onEvent(
-            document,
-            "touchmove",
-            (ev) => {
-              if (ev.cancelable) {
-                ev.preventDefault(); // prevent scrolling by touch if possible
-                isWaitTouch = false;
-              }
-            },
-            { passive: false, capture: true }
+  /** Called to apply dragdrop logic: sorting items by dragging & removing an item when it's dragged outside the control
+   * @returns detach-function */
+  protected applyDragdrop(): () => void {
+    type Items = Array<HTMLElement & { _wupValue: ValueType }>;
+    return WUPSortElement.$attach(
+      this,
+      (_newOrderedIndexes, items, removedIndex) => {
+        this.$refItems = items as Items; // items are ordered as they are rendered - so the value is built from them
+        if (removedIndex !== -1) {
+          this.removeValue(removedIndex); // WARN: it removes the item from the DOM (with animation) & fires setValue
+        } else {
+          this.setValue(
+            this.$refItems.map((a) => a._wupValue),
+            SetValueReasons.userInput
           );
-        },
-        { capture: true }
-      );
-
-      let isInside = true;
-      let isThrottle = false;
-      const r1 = onEvent(document, "pointermove", (ev) => {
-        if (isWaitTouch) {
-          return;
         }
-        // init
-        if (!dr) {
-          this._wasSortAfterClick = true;
-          // clone draggable element
-          dr = el.cloneNode(true) as HTMLElement;
-          dr.setAttribute("drag", "");
-          dr.style.width = `${el.offsetWidth}px`;
-          dr.style.height = `${el.offsetHeight}px`;
-          el.parentElement!.prepend(dr);
-          el.setAttribute("drop", ""); // mark current element
-          this.setAttribute("hovered", ""); // if pick item and move cursor fast control-focus-frame is blinking because because cursor much faster than js events
-        }
-        // set position
-        const x = ev.clientX - el.offsetWidth / 2;
-        const y = ev.clientY - el.offsetHeight / 2;
-        dr.style.transform = `translate(${x}px, ${y}px)`;
-        // define if element inside control (if outside - remove logic)
-        isInside = isOverlap(this.getBoundingClientRect(), dr.getBoundingClientRect());
-        this.setAttr.call(dr, "remove", !isInside, true);
-        if (!isInside) {
-          return; // skip new place detection when item outside control
-        }
-        if (isThrottle) {
-          return;
-        }
-
-        // find nearest line
-        let nearest = eli; // index of nearest item
-        let nearestEnd = eli; // index of last item in the nearest line
-        let dist = Number.MAX_SAFE_INTEGER; // distance between centers
-        const rects = this.$refItems!.map((item) => item.getBoundingClientRect());
-        let lineY = 0;
-        rects.some((r, i) => {
-          const nextLineY = r.y + r.height / 2;
-          if (Math.abs(nextLineY - lineY) > 3) {
-            // compare with 3px because centers can be not aligned properly
-            lineY = nextLineY; // it's next line
-            const c = Math.abs(ev.clientY - lineY);
-            if (c < dist) {
-              dist = c;
-              nearest = i; // index of 1st item in the nearest line
-              nearestEnd = i;
-            } else {
-              return true; // break search because next line is further then previous
-            }
-          } else {
-            nearestEnd += 1;
-          }
-          return false;
-        });
-        // find nearest item in the nearest line
-        dist = Number.MAX_SAFE_INTEGER;
-        // console.warn(nearest, nearestEnd, lineY);
-        const nearestStart = nearest;
-        for (let i = nearest; i <= nearestEnd; ++i) {
-          const r = rects[i];
-          const dx = ev.clientX - (r.x + r.width / 2);
-          const dy = ev.clientY - (r.y + r.height / 2);
-          const c = Math.sqrt(dx * dx + dy * dy);
-          if (c < dist) {
-            dist = c;
-            nearest = i;
-          }
-        }
-
-        // define left/right side
-        if (eli !== nearest) {
-          const trg = this.$refItems![nearest];
-          const r = rects[nearest];
-          const isYChangeByEdges = nearestStart === nearest || nearestEnd === nearest;
-          const isLeftOrTop = isYChangeByEdges
-            ? eli > nearest
-            : Math.abs(r.x - ev.clientX) < Math.abs(r.x + r.width - ev.clientX);
-
-          let nextEli = eli;
-          if (nearest < eli) {
-            nextEli = isLeftOrTop ? nearest : nearest + 1; // shift from right to left
-          } else {
-            // if (nearest >= eli) {
-            nextEli = /* isLeftOrTop ? nearest - 1 : */ nearest; // shift from left to right
-          }
-
-          if (nextEli !== eli) {
-            if (isLeftOrTop) {
-              trg.parentElement!.insertBefore(el, trg);
-            } else {
-              trg.parentElement!.insertBefore(el, trg.nextElementSibling);
-            }
-            this.$refItems!.splice(nextEli, 0, this.$refItems!.splice(eli, 1)[0]);
-            eli = nextEli;
-            isThrottle = true;
-            setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
-          }
-        }
-      });
-
-      const cancel = (): void => {
-        if (dr) {
-          setTimeout(() => (this._wasSortAfterClick = false), 1);
-          this.removeAttribute("hovered");
-          if (!isInside) {
-            el.removeAttribute("drop");
-            dr.remove();
-            this.removeValue(eli);
-          } else {
-            const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-t"));
-            const from = dr.getBoundingClientRect();
-            const to = el.getBoundingClientRect();
-            const diff = { x: to.x - from.x, y: to.y - from.y };
-            // return element back
-            animate(0, 1, animTime, (v) => {
-              dr.style.transform = `translate(${from.x + diff.x * v}px, ${from.y + diff.y * v}px)`;
-            }).finally(() => {
-              el.removeAttribute("drop");
-              dr.remove();
-            });
-            // change value
-            this.setValue(
-              this.$refItems!.map((a) => a._wupValue),
-              SetValueReasons.userInput
-            );
-          }
-        }
-        r0();
-        r1();
-        r2();
-        r3();
-      };
-
-      const r2 = onEvent(document, "pointerup", cancel, { capture: true });
-      const r3 = onEvent(document, "pointercancel", cancel, { capture: true }); // pointerup not called if touchmove can't be cancelled and browser scrolls
-    });
+      },
+      {
+        selectorName: null, // because styles are defined in $style of this control
+        canRemove: true,
+      }
+    );
   }
 
   override canOpenMenu(openCase: MenuOpenCases, e?: MouseEvent | FocusEvent | KeyboardEvent | null): boolean {
-    return !this._wasSortAfterClick && super.canOpenMenu(openCase, e);
+    // WARN: the drag-clone is removed only when the return-animation is finished (after pointerup) - so it exists when user tries sorting & focus/click got after pointerUp
+    return !this.querySelector("[item][drag]") && super.canOpenMenu(openCase, e);
   }
 
   protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
@@ -622,10 +473,11 @@ export default class WUPSelectManyControl<
       setTimeout(() => (item.style.width = ""));
       ms = parseMsTime(window.getComputedStyle(item).getPropertyValue("--anim-t"));
     }
+    item.setAttribute("item", "false"); // to exclude the item from the sort-logic while the remove-animation is running
     setTimeout(() => item.remove(), ms);
 
-    const v = [...this.$value!];
-    v.splice(index, 1);
+    // WARN: it's based on $refItems (not on $value) - because the order can be changed by dragging before the item is removed
+    const v = this.$refItems!.map((a) => a._wupValue);
     this.setValue(v.length ? v : undefined, SetValueReasons.userInput);
   }
 

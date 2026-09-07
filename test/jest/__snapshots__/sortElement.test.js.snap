@@ -126,6 +126,10 @@ padding:0;}
         text-decoration: none;
         opacity: 0.8;
       }
+      WUP-SORT [item][drag][remove] {
+        text-decoration: line-through;
+        opacity: 0.5;
+      }
       WUP-SORT[hovered] {
         -webkit-user-select: none;
         -moz-user-select: none;

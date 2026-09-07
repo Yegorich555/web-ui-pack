@@ -1,6 +1,7 @@
 import WUPBaseElement from "./baseElement";
 import onEvent from "./helpers/onEvent";
 import animate from "./helpers/animate";
+import isOverlap from "./helpers/isOverlap";
 import { parseMsTime } from "./helpers/styleHelpers";
 
 const tagName = "wup-sort";
@@ -113,6 +114,10 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
         text-decoration: none;
         opacity: 0.8;
       }
+      :host [item][drag][remove] {
+        text-decoration: line-through;
+        opacity: 0.5;
+      }
       :host[hovered] {
         -webkit-user-select: none;
         -moz-user-select: none;
@@ -123,18 +128,25 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
 
   /** Apply sorting on children with attr [item] except attr [item=false] of the pointed element.
    * @param el parent which children
-   * @param onChange called when the order of children is changed (instead of the `$change` event of the custom element)
-   * @param options.selectorName css-selector for applying styles @defaultValue "[wup-sort]"
+   * @param onChange called when the order of children is changed or an item is removed (instead of the `$change` event of the custom element);
+   * `removedIndex` is the index of the item dropped outside the element (`-1` when nothing is removed)
+   * @param options.selectorName css-selector for applying styles; point `null` if styles are defined by yourself @defaultValue "[wup-sort]"
+   * @param options.canRemove enables removing an item when it's dropped outside the element: `onChange` is called with `removedIndex`
+   * (removing the item from the DOM is the responsibility of the callback);
+   * otherwise dragging outside does nothing and the item is returned back @defaultValue false
    * @returns detach-function (removing eventListeners & applied styles)
    * @example
    * ```js
    * const el = document.querySelector("ul");
-   * const detach = WUPSortElement.$attach(el, (newOrderedIndexes, items) => console.warn({ newOrderedIndexes, items }));
+   * const detach = WUPSortElement.$attach(el, (newOrderedIndexes, items, removedIndex) => console.warn({ newOrderedIndexes, items, removedIndex }));
    * ``` */
   static $attach(
     el: HTMLElement,
-    onChange: (value: number[], items: HTMLElement[]) => void,
-    options?: { selectorName?: string /* [wup-sort] by default */ }
+    onChange: (newOrderedIndexes: number[], items: HTMLElement[], removedIndex: number) => void,
+    options?: {
+      selectorName?: string | null /* [wup-sort] by default */;
+      canRemove?: boolean;
+    }
   ): () => void {
     const savedDetach = attachLst.get(el);
     if (savedDetach) {
@@ -144,22 +156,29 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
       savedDetach();
     }
 
-    const selectorName = options?.selectorName ?? `[${tagName}]`;
+    const selectorName = options?.selectorName !== undefined ? options.selectorName : `[${tagName}]`; // WARN: `null` disables styles at all - so `??` isn't suitable here
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    let rSelector = (): void => {};
+    if (selectorName) {
+      if (!addedStyles) {
+        const refStyle = this.$refStyle!;
+        refStyle.append(this.$styleRoot);
+        addedStyles = new Set();
+      }
 
-    if (!addedStyles) {
-      const refStyle = this.$refStyle!;
-      refStyle.append(this.$styleRoot);
-      addedStyles = new Set();
+      if (!addedStyles.has(selectorName)) {
+        addedStyles.add(selectorName);
+        this.$refStyle!.append(this.$style.replace(/:host/g, selectorName)); // :host matches only the custom element itself - so it's replaced with the pointed selector
+      }
+      rSelector = this.applySelector(el, selectorName);
     }
-
-    if (!addedStyles.has(selectorName)) {
-      addedStyles.add(selectorName);
-      this.$refStyle!.append(this.$style.replace(/:host/g, selectorName)); // :host matches only the custom element itself - so it's replaced with the pointed selector
-    }
-    const rSelector = this.applySelector(el, selectorName);
 
     // WARN: async (as the $change event of the custom element) - to be called when the return-animation is started & listeners are removed
-    const rDragdrop = this.applyDragdrop(el, (value, items) => setTimeout(() => onChange.call(el, value, items)));
+    const rDragdrop = this.applyDragdrop(
+      el,
+      (value, items, removedIndex) => setTimeout(() => onChange.call(el, value, items, removedIndex)),
+      options?.canRemove
+    );
 
     const detach = (): void => {
       rDragdrop();
@@ -214,11 +233,16 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
 
   /** Called to apply dragdrop logic on the pointed element
    * @param target element which children (with attr [item]) must be sortable
-   * @param onChange called when the order of items is changed (by the end of dragging)
+   * @param onChange called when the order of items is changed or an item is removed (by the end of dragging);
+   * `removedIndex` is the index of the item dropped outside the target (`-1` when nothing is removed)
+   * @param canRemove enables removing an item when it's dropped outside the target: `onChange` is called with `removedIndex`
+   * (removing the item from the DOM is the responsibility of the callback);
+   * otherwise dragging outside does nothing and the item is returned back
    * @returns remover of eventListeners */
   protected static applyDragdrop(
     target: HTMLElement,
-    onChange: (value: number[], items: HTMLElement[]) => void
+    onChange: (value: number[], items: HTMLElement[], removedIndex: number) => void,
+    canRemove?: boolean
   ): () => void {
     return onEvent(target, "pointerdown", (e) => {
       if (e.button || e.isPrimary === false) {
@@ -250,6 +274,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
         return; // WARN: must be before `activeEl.draggable` - the item can't be grabbed again until its return-animation ends (otherwise the animation removes fresh [drop] & clone)
       }
       let dr: HTMLElement & { __isDragItem?: boolean };
+      let isInside = true; // false when the item is dragged outside the target (to remove it - see canRemove)
       let isEnded = false; // to prevent double-handling: pointerup & pointercancel can be fired both
 
       // WARN: must be after the `eli === -1` return - otherwise draggability of non-item targets is destroyed forever (`cancel` isn't registered yet)
@@ -330,7 +355,14 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
           const x = ev.clientX - firstCoord.x; // el.offsetWidth / 2;
           const y = ev.clientY - firstCoord.y; // el.offsetHeight / 2;
           dr.style.transform = `translate(${x}px, ${y}px)`;
-          // WARN: removing the item by dragging outside the control isn't supported - so there is no isOverlap-check here
+          if (canRemove) {
+            // define if the item is inside the target (if outside - it must be removed)
+            isInside = isOverlap(target.getBoundingClientRect(), dr.getBoundingClientRect());
+            isInside ? dr.removeAttribute("remove") : dr.setAttribute("remove", "");
+            if (!isInside) {
+              return; // skip the new-place detection when the item is outside
+            }
+          }
 
           if (isThrottle) {
             return;
@@ -408,28 +440,40 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
 
         if (dr) {
           target.removeAttribute("hovered");
-          const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-t"));
-          const from = dr.getBoundingClientRect();
-          const to = el.getBoundingClientRect();
-          const diff = { x: to.x - from.x, y: to.y - from.y };
-          // return element back
-          dr.style.pointerEvents = "none";
-          dr.style.touchAction = "none";
-          dr.style.userSelect = "none";
-          el.__isReturning = true;
-          animate(0, 1, animTime, (v) => {
-            dr.style.transform = `translate(${from.x + diff.x * v}px, ${from.y + diff.y * v}px)`;
-          }).finally(() => {
-            delete el.__isReturning;
+          if (!isInside) {
             el.removeAttribute("drop");
-            dr.remove();
-          });
-
-          el._prevIndex !== $items.indexOf(el) &&
+            dr.remove(); // no return-animation: the item is dropped outside & must be removed
+            // WARN: removing the item from the DOM is the responsibility of the callback
             onChange(
               $items.map((x) => x._prevIndex),
-              $items
+              $items,
+              eli
             );
+          } else {
+            const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-t"));
+            const from = dr.getBoundingClientRect();
+            const to = el.getBoundingClientRect();
+            const diff = { x: to.x - from.x, y: to.y - from.y };
+            // return element back
+            dr.style.pointerEvents = "none";
+            dr.style.touchAction = "none";
+            dr.style.userSelect = "none";
+            el.__isReturning = true;
+            animate(0, 1, animTime, (v) => {
+              dr.style.transform = `translate(${from.x + diff.x * v}px, ${from.y + diff.y * v}px)`;
+            }).finally(() => {
+              delete el.__isReturning;
+              el.removeAttribute("drop");
+              dr.remove();
+            });
+
+            el._prevIndex !== $items.indexOf(el) &&
+              onChange(
+                $items.map((x) => x._prevIndex),
+                $items,
+                -1
+              );
+          }
         }
         r0();
         rTouchMove?.();

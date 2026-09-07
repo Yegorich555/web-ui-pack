@@ -11,8 +11,6 @@
 - helper [saveAsFile](src/helpers/files/saveAsFile.ts)
 - [SortElement](src/sortElement.ts)
 
----
-
 ## 1.2.7 (Aug 25, 2026)
 
 ### Fixes & Improvements

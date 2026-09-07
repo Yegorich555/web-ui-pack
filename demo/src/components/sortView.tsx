@@ -81,8 +81,10 @@ el.$onChange = (e) => console.warn({
 // OR without the <wup-sort> wrapper (when it breaks the layout: grid, flex, <ul> etc.)
 const detach = WUPSortElement.$attach(
   document.querySelector("ul"),
-  (newOrderedIndexes, htmlItems) => console.warn({ newOrderedIndexes, htmlItems }),
+  // removedIndex is -1 unless an item is dropped outside the element (requires option canRemove)
+  (newOrderedIndexes, htmlItems, removedIndex) => console.warn({ newOrderedIndexes, htmlItems, removedIndex }),
   // { selectorName: ".my-sort" } // point own selector if styles are overridden
+  // { canRemove: true } // allow to remove an item by dragging outside: remove it from the DOM by yourself
 );
 // $attach applies attribute [wup-sort] to the element: it's used by styles instead of :host
 // detach() is required only if the element is removed via parent.innerHTML="..."

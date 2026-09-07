@@ -1152,6 +1152,7 @@ exports[`control.selectMany sortable: drag&drop 1`] = `
     <span>
       <span
         aria-hidden="true"
+        draggable="false"
         item=""
       >
         Donny
@@ -1209,13 +1210,15 @@ exports[`control.selectMany sortable: drag&drop 3`] = `
       <span
         aria-hidden="true"
         drag=""
+        draggable="false"
         item=""
-        style="width: 60px; height: 30px; transform: translate(0px, 0px);"
+        style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(30px, 15px);"
       >
         Donny
       </span>
       <span
         aria-hidden="true"
+        draggable="false"
         drop=""
         item=""
       >
@@ -1284,6 +1287,7 @@ exports[`control.selectMany sortable: drag&drop 14`] = `
       </span>
       <span
         aria-hidden="true"
+        draggable="false"
         item=""
       >
         Donny
@@ -1333,6 +1337,7 @@ exports[`control.selectMany sortable: drag&drop 16`] = `
       </span>
       <span
         aria-hidden="true"
+        draggable="false"
         item=""
       >
         Donny

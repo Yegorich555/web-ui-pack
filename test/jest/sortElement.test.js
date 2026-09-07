@@ -730,6 +730,7 @@ describe("sortElement", () => {
       "Item 3",
       "Item 4",
     ]); // items in the new order
+    expect(onChanged.mock.calls[0][2]).toBe(-1); // removedIndex: nothing is removed
 
     // detach must remove the applied selector & the listeners
     detach();
@@ -797,5 +798,95 @@ describe("sortElement", () => {
     expect(WUPSortElement.$refStyle.textContent).toContain("ul [item][drag]");
     mockWarn2 = h.wrapConsoleWarn(() => WUPSortElement.$attach(el, onChanged, { selectorName: "ol" })());
     expect(mockWarn2).toBeCalledTimes(1); // user must be notified: such styles are useless
+  });
+
+  test("$attach with options.canRemove", async () => {
+    document.body.innerHTML = `<ul>
+  <li item="">Item 1</li>
+  <li item="">Item 2</li>
+  <li item="">Item 3</li>
+  <li item="">Item 4</li>
+</ul>`;
+    el = document.body.firstElementChild; // to re-use getItems(), getChildren() & updateLayout()
+    const onChanged = jest.fn();
+    const detach = WUPSortElement.$attach(el, onChanged);
+    updateLayout();
+
+    // without canRemove dragging outside does nothing: the item is returned back
+    let trg = getItems()[0];
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 20, y: 12 });
+    let dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: 1000, y: 1000 });
+    expect(el.querySelector("[drag][remove]")).toBeFalsy();
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(getItems().map((a) => a.textContent)).toMatchInlineSnapshot(`
+      [
+        "Item 2",
+        "Item 3",
+        "Item 4",
+        "Item 1",
+      ]
+    `);
+    expect(onChanged).toBeCalledTimes(1);
+    expect(onChanged.mock.calls[0][2]).toBe(-1); // removedIndex: nothing is removed
+    detach();
+
+    // with canRemove the item dropped outside must be reported via removedIndex
+    document.body.innerHTML = `<ul>
+  <li item="">Item 1</li>
+  <li item="">Item 2</li>
+  <li item="">Item 3</li>
+  <li item="">Item 4</li>
+</ul>`;
+    el = document.body.firstElementChild;
+    onChanged.mockClear();
+    const detach2 = WUPSortElement.$attach(el, onChanged, { canRemove: true });
+    updateLayout();
+
+    [trg] = getItems();
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 20, y: 12 });
+    dragEl = bindDragEl();
+    expect(el.querySelector("[drag][remove]")).toBeFalsy(); // because it's inside the element yet
+    h.userMouseMove(dragEl, { x: 1000, y: 1000 });
+    expect(el.querySelector("[drag][remove]")).toBeTruthy(); // to show user that the item will be removed
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(onChanged).toBeCalledTimes(1);
+    expect(onChanged.mock.calls[0][2]).toBe(0); // removedIndex: index of the item dropped outside
+    expect(onChanged.mock.calls[0][1].map((a) => a.textContent)).toMatchInlineSnapshot(`
+      [
+        "Item 1",
+        "Item 2",
+        "Item 3",
+        "Item 4",
+      ]
+    `);
+    expect(el.querySelector("[drag]")).toBeFalsy(); // the clone is removed without the return-animation
+    expect(getItems().map((a) => a.textContent)).toMatchInlineSnapshot(`
+      [
+        "Item 1",
+        "Item 2",
+        "Item 3",
+        "Item 4",
+      ]
+    `); // WARN: removing the item from the DOM is the responsibility of the callback
+
+    // the item returns back when it's dropped inside
+    onChanged.mockClear();
+    updateLayout();
+    [trg] = getItems();
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 20, y: 12 });
+    dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: w + w / 2, y: hi / 2 });
+    expect(el.querySelector("[drag][remove]")).toBeFalsy();
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(onChanged).toBeCalledTimes(1);
+    expect(onChanged.mock.calls[0][2]).toBe(-1);
+    detach2();
   });
 });
