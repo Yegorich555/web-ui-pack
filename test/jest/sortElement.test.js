@@ -25,11 +25,13 @@ function updateLayout() {
   h.setupLayout(items[3], { x: 0, y: hi, h: hi, w });
 }
 
-/** Simulate pointermove with the pointed ev.movementX/Y: `undefined` on old WebKit, `0` for touch-pointers in some engines */
-function userPointerMove(trg, { x, y }, movement) {
-  const ev = new MouseEvent("pointermove", { clientX: x, clientY: y, cancelable: false, bubbles: true });
-  Object.defineProperty(ev, "movementX", { get: () => movement });
-  Object.defineProperty(ev, "movementY", { get: () => movement });
+/** Simulate pointer event: jsdom has no PointerEvent - so pointer-properties must be defined manually.
+ * WARN: every listed key is applied even when its value is `undefined` (to emulate engines without the property) */
+function userPointer(trg, type, opts) {
+  const ev = new MouseEvent(type, { clientX: opts.x, clientY: opts.y, cancelable: true, bubbles: true });
+  ["pointerId", "isPrimary", "movementX", "movementY"].forEach((k) => {
+    k in opts && Object.defineProperty(ev, k, { get: () => opts[k] });
+  });
   trg.dispatchEvent(ev);
 }
 
@@ -426,8 +428,8 @@ describe("sortElement", () => {
 
     // ordinary click with a tiny move: `undefined` movement was accumulated into NaN and NaN < threshold === false - so the threshold was bypassed
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
-    userPointerMove(trg, { x: 12, y: 12 }, undefined);
-    userPointerMove(trg, { x: 13, y: 13 }, undefined);
+    userPointer(trg, "pointermove", { x: 12, y: 12, movementX: undefined, movementY: undefined });
+    userPointer(trg, "pointermove", { x: 13, y: 13, movementX: undefined, movementY: undefined });
     expect(el.querySelector("[drag]")).toBeFalsy(); // 3px is less than the threshold - no dragging
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await h.wait();
@@ -437,13 +439,52 @@ describe("sortElement", () => {
     // real dragging must start even when movement is reported as 0 (touch-pointers)
     const { nextFrame } = h.useFakeAnimation();
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
-    userPointerMove(trg, { x: w + w / 2, y: hi / 2 }, 0);
+    userPointer(trg, "pointermove", { x: w + w / 2, y: hi / 2, movementX: 0, movementY: 0 });
     expect(el.querySelector("[drag]")).toBeTruthy(); // 0-movement was accumulated forever - so dragging never started on mobile
     bindDragEl();
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await nextFrame(10);
     expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
     await h.wait(1);
+    expect(onChanged.mock.calls[0][0].detail.value).toStrictEqual([1, 0, 2, 3]);
+  });
+
+  test("multi-touch: 2nd finger doesn't affect the 1st one", async () => {
+    const onChanged = jest.fn();
+    el.addEventListener("$change", onChanged);
+    const { nextFrame } = h.useFakeAnimation();
+
+    // 1st finger grabs Item 1 & moves it to the 2nd position
+    const trg = getItems()[0];
+    userPointer(trg, "pointerdown", { x: 10, y: 10, pointerId: 1, isPrimary: true });
+    userPointer(trg, "pointermove", { x: w + w / 2, y: hi / 2, pointerId: 1 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
+    const dragEl = el.querySelector("[drag]");
+    expect(dragEl.style.transform).toBe("translate(80px, 5px)");
+
+    // 2nd finger touches another item & moves it: everything must be ignored
+    await h.wait(); // wait for throttling - otherwise the skipped move isn't provable
+    updateLayout();
+    userPointer(getItems()[2], "pointerdown", { x: w * 2 + 5, y: hi / 2, pointerId: 2, isPrimary: false });
+    userPointer(getItems()[2], "pointermove", { x: w * 2 + w / 2, y: hi / 2, pointerId: 2 });
+    expect(el.querySelectorAll("[drag]")).toHaveLength(1); // 2nd finger mustn't start own dragging
+    expect(dragEl.style.transform).toBe("translate(80px, 5px)"); // ... and mustn't move the item of the 1st finger
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
+
+    // 2nd finger is released: the 1st one must continue dragging
+    userPointer(document, "pointercancel", { pointerId: 2 });
+    userPointer(document, "pointerup", { pointerId: 2 });
+    await h.wait();
+    expect(el.querySelector("[drag]")).toBeTruthy();
+    expect(onChanged).toBeCalledTimes(0); // no $change because the 1st finger still holds the item
+
+    // 1st finger is released: sorting is committed
+    bindDragEl();
+    userPointer(document, "pointerup", { pointerId: 1 });
+    await nextFrame(10);
+    expect(el.querySelector("[drag]")).toBeFalsy();
+    await h.wait(1);
+    expect(onChanged).toBeCalledTimes(1);
     expect(onChanged.mock.calls[0][0].detail.value).toStrictEqual([1, 0, 2, 3]);
   });
 

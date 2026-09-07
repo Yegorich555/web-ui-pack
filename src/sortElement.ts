@@ -134,8 +134,9 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
   /** Called to apply dragdrop logic */
   protected applyDragdrop(): void {
     this._disposeDragdrop = onEvent(this, "pointerdown", (e) => {
-      if (e.button) {
-        return; // ignore right-click
+      if (e.button || e.isPrimary === false) {
+        // WARN: `=== false` because the property is missing on synthetic events
+        return; // ignore right-click & non-primary pointers (2nd+ finger of the multi-touch)
       }
       const activeEl = e.target as HTMLElement & { _wasDraggable: boolean };
       if (activeEl && (activeEl.tagName === "INPUT" || activeEl.getAttribute("contenteditable") === "true")) {
@@ -197,11 +198,12 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
       const rect = el.getBoundingClientRect();
       const firstCoord = { x: e.clientX - rect.x, y: e.clientY - rect.y };
       const downCoord = { x: e.clientX, y: e.clientY }; // to detect if user moved enough to start dragging (not just clicked)
+      const { pointerId } = e; // WARN: events of other pointers must be ignored - otherwise another finger moves & drops the item of this one
       const r1 = onEvent(
         document,
         "pointermove",
         (ev) => {
-          if (isWaitTouch) {
+          if (ev.pointerId !== pointerId || isWaitTouch) {
             return;
           }
 
@@ -313,7 +315,10 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
         { passive: false }
       );
 
-      const cancel = (): void => {
+      const cancel = (ev: PointerEvent): void => {
+        if (ev.pointerId !== pointerId) {
+          return; // pointerup/pointercancel of another pointer mustn't drop the item dragged by this one
+        }
         activeEl.draggable = activeEl._wasDraggable;
 
         if (dr) {
