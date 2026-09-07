@@ -292,14 +292,25 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
           }
           // move to the new place
           if (eli !== nearest) {
-            const trg = $items![nearest];
-            const isLeftOrTop = eli > nearest; // the nearest item is before the dragged one - so it must be replaced by it
-            trg.parentElement!.insertBefore(el, isLeftOrTop ? trg : trg.nextElementSibling); // insert before OR after
-            $items!.splice(nearest, 0, $items!.splice(eli, 1)[0]);
-            eli = nearest;
-            rects = null; // the reorder re-layouts items - so cached rects are outdated
-            isThrottle = true;
-            setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
+            const rEl = rects[eli];
+            const rTrg = rects[nearest];
+            const isSameLine = Math.abs(rTrg.y + rTrg.height / 2 - (rEl.y + rEl.height / 2)) <= 3; // 3px because centers can be not aligned properly
+            const half = rTrg.x + rTrg.width / 2;
+            // WARN: inside the line the cursor must cross the middle of the target - otherwise items of different sizes are swapped back & forth:
+            // after the swap the center of the target is shifted by the width of the dragged item, so the opposite condition can't be true anymore
+            // WARN: for another line there is no such check - the nearest line is detected by the closest center already
+            // (otherwise the item is moved only when the cursor reaches the middle of the another line)
+            // WARN: DOM order === visual order - so `nearest > eli` always means the item to the right or below
+            if (!isSameLine || (nearest > eli ? ev.clientX >= half : ev.clientX < half)) {
+              const trg = $items![nearest];
+              const isLeftOrTop = eli > nearest; // the nearest item is before the dragged one - so it must be replaced by it
+              trg.parentElement!.insertBefore(el, isLeftOrTop ? trg : trg.nextElementSibling); // insert before OR after
+              $items!.splice(nearest, 0, $items!.splice(eli, 1)[0]);
+              eli = nearest;
+              rects = null; // the reorder re-layouts items - so cached rects are outdated
+              isThrottle = true;
+              setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
+            }
           }
         },
         { passive: false }

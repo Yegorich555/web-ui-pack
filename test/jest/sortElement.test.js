@@ -595,6 +595,76 @@ describe("sortElement", () => {
     expect(rectCalls()).toBe(prev);
   });
 
+  test("items of different sizes aren't swapped back & forth", async () => {
+    const onChanged = jest.fn();
+    el.addEventListener("$change", onChanged);
+    const { nextFrame } = h.useFakeAnimation();
+
+    /** Assign layout: the 1st line has Item 1 (20px) & Item 2 (200px), the 2nd one has the rest.
+     * WARN: in opposite to updateLayout the size follows the item itself (not the position) - as a real browser does */
+    const layoutBySize = () => {
+      const items = getItems();
+      const small = items.find((a) => a.textContent === "Item 1");
+      const big = items.find((a) => a.textContent === "Item 2");
+      h.setupLayout(el, { x: 0, y: 0, h: hi * 2, w: 220 });
+      h.setupLayout(small, { x: items[0] === small ? 0 : 200, y: 0, h: hi, w: 20 });
+      h.setupLayout(big, { x: items[0] === small ? 20 : 0, y: 0, h: hi, w: 200 });
+      h.setupLayout(items[2], { x: 0, y: hi, h: hi, w: 110 });
+      h.setupLayout(items[3], { x: 110, y: hi, h: hi, w: 110 });
+    };
+    layoutBySize();
+
+    // grab the small item & move it over the big one: the center of the big one is closer to the cursor but isn't crossed yet
+    const trg = getItems()[0];
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: hi / 2 }));
+    h.userMouseMove(trg, { x: 70, y: hi / 2 });
+    expect(el.querySelector("[drag]")).toBeTruthy();
+    const dragEl = bindDragEl();
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 1", "Item 2", "Item 3", "Item 4"]); // no reorder
+
+    // the middle of the big item (x=120) is crossed - reorder is expected
+    h.userMouseMove(dragEl, { x: 130, y: hi / 2 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
+
+    // the swap shifted the big item to x=0..200 (center 100): the cursor is closer to its center again
+    // but it mustn't be swapped back until the cursor crosses the new middle - otherwise items jitter
+    await h.wait(); // wait for throttling
+    layoutBySize();
+    h.userMouseMove(dragEl, { x: 110, y: hi / 2 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]); // no reorder
+    await h.wait();
+    h.userMouseMove(dragEl, { x: 105, y: hi / 2 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]); // still no reorder
+
+    // the new middle is crossed - the previous order is restored
+    h.userMouseMove(dragEl, { x: 90, y: hi / 2 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 1", "Item 2", "Item 3", "Item 4"]);
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(10);
+    await h.wait(1);
+    expect(onChanged).toBeCalledTimes(0); // the order is the same as before dragging
+  });
+
+  test("moving between lines isn't delayed", async () => {
+    // WARN: the nearest line is detected by the closest center - so the item must be moved as soon as the cursor is in the another line
+    // (waiting for the middle of that line means the item is moved only when it's completely there)
+    const trg = getItems()[3]; // the single item of the 2nd line
+    trg.dispatchEvent(
+      new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: hi + hi / 2 })
+    );
+    h.userMouseMove(trg, { x: 20, y: hi + hi / 2 }); // start dragging: the cursor is still in the 2nd line - no reorder
+    const dragEl = bindDragEl();
+    expect(el.querySelector("[drag]")).toBeTruthy();
+
+    // move between the 1st & the 2nd items of the 1st line, but below their centers (y=15)
+    h.userMouseMove(dragEl, { x: w + w / 2, y: hi - 5 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 1", "Item 4", "Item 2", "Item 3"]);
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+  });
+
   test("dragdrop is disposed on remove & re-applied on re-connect", () => {
     // the pointerdown-listener was registered via raw onEvent - so it stayed forever after the element was removed
     const spyRemove = jest.spyOn(el, "removeEventListener");
