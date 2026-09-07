@@ -150,7 +150,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
 
       const $items = (
         Array.prototype.slice.call(this.querySelectorAll("[item='']")) as Array<
-          HTMLElement & { _prevIndex: number; __isDragItem?: boolean }
+          HTMLElement & { _prevIndex: number; __isDragItem?: boolean; __isReturning?: boolean }
         >
       ).filter((x) => !x.__isDragItem); // possible when user moves item + mouseUp + during the animation gets it again
       $items.forEach((x, i) => (x._prevIndex = i));
@@ -163,7 +163,11 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
       }
 
       const el = $items![eli];
+      if (el.__isReturning) {
+        return; // WARN: must be before `activeEl.draggable` - the item can't be grabbed again until its return-animation ends (otherwise the animation removes fresh [drop] & clone)
+      }
       let dr: HTMLElement & { __isDragItem?: boolean };
+      let isEnded = false; // to prevent double-handling: pointerup & pointercancel can be fired both
 
       // WARN: must be after the `eli === -1` return - otherwise draggability of non-item targets is destroyed forever (`cancel` isn't registered yet)
       activeEl._wasDraggable = activeEl.draggable;
@@ -316,9 +320,10 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
       );
 
       const cancel = (ev: PointerEvent): void => {
-        if (ev.pointerId !== pointerId) {
+        if (ev.pointerId !== pointerId || isEnded) {
           return; // pointerup/pointercancel of another pointer mustn't drop the item dragged by this one
         }
+        isEnded = true; // otherwise the 2nd call fires the duplicate $change
         activeEl.draggable = activeEl._wasDraggable;
 
         if (dr) {
@@ -338,9 +343,11 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
             dr.style.pointerEvents = "none";
             dr.style.touchAction = "none";
             dr.style.userSelect = "none";
+            el.__isReturning = true;
             animate(0, 1, animTime, (v) => {
               dr.style.transform = `translate(${from.x + diff.x * v}px, ${from.y + diff.y * v}px)`;
             }).finally(() => {
+              delete el.__isReturning;
               el.removeAttribute("drop");
               dr.remove();
             });

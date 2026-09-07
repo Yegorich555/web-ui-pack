@@ -488,6 +488,52 @@ describe("sortElement", () => {
     expect(onChanged.mock.calls[0][0].detail.value).toStrictEqual([1, 0, 2, 3]);
   });
 
+  test("re-grab the same item during the return-animation", async () => {
+    const onChanged = jest.fn();
+    el.addEventListener("$change", onChanged);
+    const { nextFrame } = h.useFakeAnimation();
+    const trg = getItems()[0];
+    h.setupCssCompute(trg, { getPropertyValue: () => "200ms" }); // --anim-t: otherwise the return-animation is instant in jsdom
+
+    // move Item 1 to the 2nd position & drop it
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: w + w / 2, y: hi / 2 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
+    bindDragEl();
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(2);
+    expect(el.querySelectorAll("[drag]")).toHaveLength(1); // the animation is in progress
+    expect(trg.getAttribute("drop")).toBe("");
+
+    // try to grab the same item again: must be ignored until the animation ends
+    updateLayout();
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: w + 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: w * 2 + w / 2, y: hi / 2 });
+    expect(el.querySelectorAll("[drag]")).toHaveLength(1); // no 2nd clone
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]); // ... and the order isn't changed
+    expect(trg.getAttribute("drop")).toBe(""); // ... and the highlight isn't lost
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+
+    // the animation is finished
+    await nextFrame(20);
+    expect(el.querySelector("[drag]")).toBeFalsy();
+    expect(trg.getAttribute("drop")).toBeNull();
+    await h.wait(1);
+    expect(onChanged).toBeCalledTimes(1); // only the 1st sorting is committed
+
+    // the same item is grabbable again
+    updateLayout();
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: w + 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: w * 2 + w / 2, y: hi / 2 });
+    expect(el.querySelector("[drag]")).toBeTruthy();
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 3", "Item 1", "Item 4"]);
+    bindDragEl();
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(20);
+    await h.wait(1);
+    expect(onChanged).toBeCalledTimes(2);
+  });
+
   test("_disposeDragdrop", () => {
     el._disposeDragdrop();
     const was = el.innerHTML;
