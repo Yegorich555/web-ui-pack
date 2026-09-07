@@ -23,6 +23,10 @@
   margin: 4px 0;
 }
 
+ul.list {
+  list-style: none; // <ul> is used to show $attach on an ordinary element
+}
+
 .grid {
   display: flex;
   flex-wrap: wrap;

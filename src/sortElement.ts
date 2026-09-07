@@ -4,6 +4,10 @@ import animate from "./helpers/animate";
 import { parseMsTime } from "./helpers/styleHelpers";
 
 const tagName = "wup-sort";
+/** Detach-functions of {@link WUPSortElement.$attach} - to prevent double attaching on the same element */
+const attachLst = new WeakMap<HTMLElement, () => void>();
+/** Selectors of {@link WUPSortElement.$attach} with already appended styles */
+let addedStyles: Set<string> | undefined;
 
 declare global {
   namespace WUP.Sort {
@@ -81,7 +85,8 @@ declare module "preact/jsx-runtime" {
  *  <div item>Item 2</div>
  *  <div item="false">Item 3 - not sortable</div>
  * </wup-sort>
- * ``` */
+ * ```
+ * @see {@link WUPSortElement.$attach} - to sort children of an ordinary element (when the extra wrapper breaks the layout) */
 export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMap> {
   static get $styleRoot(): string {
     return `:root {
@@ -116,6 +121,82 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
       }`;
   }
 
+  /** Apply sorting on children with attr [item] except attr [item=false] of the pointed element.
+   * @param el parent which children
+   * @param onChange called when the order of children is changed (instead of the `$change` event of the custom element)
+   * @param options.selectorName css-selector for applying styles @defaultValue "[wup-sort]"
+   * @returns detach-function (removing eventListeners & applied styles)
+   * @example
+   * ```js
+   * const el = document.querySelector("ul");
+   * const detach = WUPSortElement.$attach(el, (newOrderedIndexes, items) => console.warn({ newOrderedIndexes, items }));
+   * ``` */
+  static $attach(
+    el: HTMLElement,
+    onChange: (value: number[], items: HTMLElement[]) => void,
+    options?: { selectorName?: string /* [wup-sort] by default */ }
+  ): () => void {
+    const savedDetach = attachLst.get(el);
+    if (savedDetach) {
+      console.warn(
+        `${tagName.toUpperCase()}. $attach is called again on the same element. Possible memory leak. Use detach() before new attach`
+      );
+      savedDetach();
+    }
+
+    const selectorName = options?.selectorName ?? `[${tagName}]`;
+
+    if (!addedStyles) {
+      const refStyle = this.$refStyle!;
+      refStyle.append(this.$styleRoot);
+      addedStyles = new Set();
+    }
+
+    if (!addedStyles.has(selectorName)) {
+      addedStyles.add(selectorName);
+      this.$refStyle!.append(this.$style.replace(/:host/g, selectorName)); // :host matches only the custom element itself - so it's replaced with the pointed selector
+    }
+    const rSelector = this.applySelector(el, selectorName);
+
+    // WARN: async (as the $change event of the custom element) - to be called when the return-animation is started & listeners are removed
+    const rDragdrop = this.applyDragdrop(el, (value, items) => setTimeout(() => onChange.call(el, value, items)));
+
+    const detach = (): void => {
+      rDragdrop();
+      rSelector();
+      el.removeAttribute("hovered");
+      attachLst.delete(el);
+    };
+    attachLst.set(el, detach);
+
+    return detach;
+  }
+
+  /** Applies the pointed selector to the element (otherwise styles of {@link WUPSortElement.$attach} don't match it)
+   * @returns remover of the applied attribute/class-name */
+  protected static applySelector(el: HTMLElement, selectorName: string): () => void {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    let r = (): void => {}; // nothing to apply for a tag-selector: the element must match it already
+    if (selectorName.startsWith("[")) {
+      const [attr, v] = selectorName.slice(1, -1).split("="); // [wup-sort] or [wup-sort='value']
+      el.setAttribute(attr, v ? v.replace(/^["']|["']$/g, "") : "");
+      r = () => el.removeAttribute(attr);
+    } else if (selectorName.startsWith(".")) {
+      const cn = selectorName.substring(1);
+      el.classList.add(cn);
+      r = () => el.classList.remove(cn);
+    }
+    if (!el.matches(selectorName)) {
+      // possible when a tag/complex selector is pointed - in this case styles are useless
+      console.warn(
+        `${tagName.toUpperCase()}. $attach: the element doesn't match the pointed selector '${selectorName}'`
+      );
+    }
+    return r;
+  }
+
+  #ctr = this.constructor as typeof WUPSortElement;
+
   /** Called on value change */
   $onChange?: (e: WUP.Sort.EventMap["$change"]) => void;
 
@@ -125,13 +206,21 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
     this.applyDragdrop();
   }
 
-  /** It prevents menu opening if user tries sorting and focus got after mouseUp */
-  // _wasSortAfterClick?: boolean;
-
   /** Called to apply dragdrop logic */
   protected applyDragdrop(): void {
-    // WARN: appendEvent (not onEvent) - otherwise the listener isn't removed when the element is removed from the document
-    this.appendEvent(this, "pointerdown", (e) => {
+    // WARN: the remover is stored in disposeLst (the same as appendEvent does) - otherwise the listener isn't removed when the element is removed from the document
+    this.disposeLst.push(this.#ctr.applyDragdrop(this, (value, items) => this.setValue(value, items, "move")));
+  }
+
+  /** Called to apply dragdrop logic on the pointed element
+   * @param target element which children (with attr [item]) must be sortable
+   * @param onChange called when the order of items is changed (by the end of dragging)
+   * @returns remover of eventListeners */
+  protected static applyDragdrop(
+    target: HTMLElement,
+    onChange: (value: number[], items: HTMLElement[]) => void
+  ): () => void {
+    return onEvent(target, "pointerdown", (e) => {
       if (e.button || e.isPrimary === false) {
         // WARN: `=== false` because the property is missing on synthetic events
         return; // ignore right-click & non-primary pointers (2nd+ finger of the multi-touch)
@@ -142,13 +231,8 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
         return; // prevent sort during the editing when user clicks on control and selects text
       }
 
-      // this._wasSortAfterClick = false;
-      // if (this.$isReadOnly || this.$isDisabled) {
-      //   return;
-      // }
-
       const $items = (
-        Array.prototype.slice.call(this.querySelectorAll("[item='']")) as Array<
+        Array.prototype.slice.call(target.querySelectorAll("[item='']")) as Array<
           HTMLElement & { _prevIndex: number; __isDragItem?: boolean; __isReturning?: boolean }
         >
       ).filter((x) => !x.__isDragItem); // possible when user moves item + mouseUp + during the animation gets it again
@@ -156,7 +240,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
 
       const t = e.target;
       // WARN: $items is always an array (result of Array.prototype.slice) - so optional chaining & non-null assertion aren't required here
-      let eli = $items.findIndex((item) => t === item || this.includes.call(item, t));
+      let eli = $items.findIndex((item) => t === item || (t instanceof Node && item.contains(t)));
       if (eli === -1) {
         return;
       }
@@ -228,7 +312,6 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
 
           // init
           if (!dr) {
-            // this._wasSortAfterClick = true;
             // clone draggable element
             dr = el.cloneNode(true) as HTMLElement & { __isDragItem?: boolean };
             dr.setAttribute("drag", "");
@@ -236,7 +319,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
             dr.style.height = `${el.offsetHeight}px`;
             el.parentElement!.prepend(dr);
             el.setAttribute("drop", ""); // mark current element
-            this.setAttribute("hovered", ""); // if pick item and move cursor fast control-focus-frame is blinking because because cursor much faster than js events
+            target.setAttribute("hovered", ""); // if pick item and move cursor fast control-focus-frame is blinking because because cursor much faster than js events
             dr.style.top = "0";
             dr.style.left = "0";
             dr.style.position = "fixed";
@@ -324,8 +407,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
         activeEl.draggable = activeEl._wasDraggable;
 
         if (dr) {
-          // setTimeout(() => (this._wasSortAfterClick = false), 1);
-          this.removeAttribute("hovered");
+          target.removeAttribute("hovered");
           const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-t"));
           const from = dr.getBoundingClientRect();
           const to = el.getBoundingClientRect();
@@ -344,10 +426,9 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
           });
 
           el._prevIndex !== $items.indexOf(el) &&
-            this.setValue(
+            onChange(
               $items.map((x) => x._prevIndex),
-              $items,
-              "move"
+              $items
             );
         }
         r0();

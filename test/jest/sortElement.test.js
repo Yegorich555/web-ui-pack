@@ -689,4 +689,113 @@ describe("sortElement", () => {
     expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
   });
+
+  test("$attach on ordinary element", async () => {
+    // WARN: the pointed element isn't a custom element - so styles & listeners must be applied by $attach itself
+    document.body.innerHTML = `<ul>
+  <li item="">Item 1</li>
+  <li item="">Item 2</li>
+  <li item="">Item 3</li>
+  <li item="">Item 4</li>
+  <li item="false">Not sortable</li>
+</ul>`;
+    el = document.body.firstElementChild; // to re-use getItems(), getChildren() & updateLayout()
+    const onChanged = jest.fn();
+    let detach = WUPSortElement.$attach(el, onChanged);
+    updateLayout();
+
+    expect(el.getAttribute("wup-sort")).toBe(""); // [wup-sort] is the default selector - so the attribute is applied
+    const styles = WUPSortElement.$refStyle.textContent;
+    expect(styles).toContain("--sort-active-color"); // $styleRoot: appended even if no one <wup-sort> is created
+    expect(styles).toContain("[wup-sort] [item][drag]"); // $style: :host is replaced with the pointed selector
+    expect(styles).toContain("[wup-sort][hovered]");
+
+    // sorting must work the same as for <wup-sort>
+    let trg = getItems()[0];
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 20, y: 12 });
+    expect(el.querySelector("[drag]")).toBeTruthy();
+    expect(el.getAttribute("hovered")).toBe(""); // to prevent text-selection during the dragging
+    let dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: w + w / 2, y: hi / 2 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(el.getAttribute("hovered")).toBeNull();
+    expect(onChanged).toBeCalledTimes(1); // the callback is called instead of the $change event
+    expect(onChanged.mock.calls[0][0]).toStrictEqual([1, 0, 2, 3]); // new ordered indexes
+    expect(onChanged.mock.calls[0][1].map((a) => a.textContent)).toStrictEqual([
+      "Item 2",
+      "Item 1",
+      "Item 3",
+      "Item 4",
+    ]); // items in the new order
+
+    // detach must remove the applied selector & the listeners
+    detach();
+    expect(el.getAttribute("wup-sort")).toBeNull();
+    [trg] = getItems();
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: w + w / 2, y: hi / 2 });
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(el.querySelector("[drag]")).toBeFalsy();
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]); // no sorting
+    expect(onChanged).toBeCalledTimes(1);
+
+    // 2nd attach on the same element must re-init the previous one (otherwise every pointerdown is handled twice)
+    WUPSortElement.$attach(el, onChanged);
+    const mockWarn = h.wrapConsoleWarn(() => (detach = WUPSortElement.$attach(el, onChanged)));
+    expect(mockWarn).toBeCalledTimes(1);
+    updateLayout();
+    [trg] = getItems();
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 20, y: 12 });
+    dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: w + w / 2, y: hi / 2 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 1", "Item 2", "Item 3", "Item 4"]);
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(onChanged).toBeCalledTimes(2);
+
+    detach();
+
+    // options.selectorName: styles are bound to the selector - so every new selector must get own styles
+    const detach2 = WUPSortElement.$attach(el, onChanged, { selectorName: ".my-sort" });
+    expect(el.className).toBe("my-sort"); // class-name is applied for a class-selector
+    const styles2 = WUPSortElement.$refStyle.textContent;
+    expect(styles2).toContain(".my-sort [item][drag]");
+    expect(styles2).toContain(".my-sort[hovered]");
+    expect(styles2.length).toBeGreaterThan(styles.length);
+    updateLayout();
+    [trg] = getItems();
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 20, y: 12 });
+    dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: w + w / 2, y: hi / 2 });
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(onChanged).toBeCalledTimes(3);
+
+    // ...but the same selector mustn't append styles again
+    detach2();
+    expect(el.className).toBe(""); // detach must remove the pointed selector (not the default one)
+    WUPSortElement.$attach(el, onChanged, { selectorName: ".my-sort" })();
+    expect(WUPSortElement.$refStyle.textContent).toBe(styles2);
+
+    // attribute-selector with a value
+    const detach3 = WUPSortElement.$attach(el, onChanged, { selectorName: "[sort='my']" });
+    expect(el.getAttribute("sort")).toBe("my");
+    expect(WUPSortElement.$refStyle.textContent).toContain("[sort='my'] [item][drag]");
+    detach3();
+    expect(el.getAttribute("sort")).toBeNull();
+
+    // tag/complex selector can't be applied by $attach itself - the element must match it already
+    let mockWarn2 = h.wrapConsoleWarn(() => WUPSortElement.$attach(el, onChanged, { selectorName: "ul" })());
+    expect(mockWarn2).toBeCalledTimes(0); // <ul> matches - no warning
+    expect(WUPSortElement.$refStyle.textContent).toContain("ul [item][drag]");
+    mockWarn2 = h.wrapConsoleWarn(() => WUPSortElement.$attach(el, onChanged, { selectorName: "ol" })());
+    expect(mockWarn2).toBeCalledTimes(1); // user must be notified: such styles are useless
+  });
 });
