@@ -139,7 +139,8 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
         return; // ignore right-click & non-primary pointers (2nd+ finger of the multi-touch)
       }
       const activeEl = e.target as HTMLElement & { _wasDraggable: boolean };
-      if (activeEl && (activeEl.tagName === "INPUT" || activeEl.getAttribute("contenteditable") === "true")) {
+      // WARN: `closest` is required - the target can be nested inside the editable element (and [contenteditable] can be empty)
+      if (activeEl && activeEl.closest("input,textarea,select,[contenteditable]:not([contenteditable='false'])")) {
         return; // prevent sort during the editing when user clicks on control and selects text
       }
 

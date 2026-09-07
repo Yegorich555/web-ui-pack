@@ -308,20 +308,25 @@ describe("sortElement", () => {
     expect(el.querySelector("[drag]")).toBeFalsy();
     expect(getItems().map((a) => a.textContent)).toStrictEqual(was);
 
-    // editable content inside item
-    getItems()[0].innerHTML = `<input />`;
-    const input = el.querySelector("input");
-    input.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
-    h.userMouseMove(input, { x: w * 2, y: 0 });
-    expect(el.querySelector("[drag]")).toBeFalsy();
-    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
-
-    getItems()[0].innerHTML = `<span contenteditable="true">txt</span>`;
-    const span = el.querySelector("span");
-    span.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
-    h.userMouseMove(span, { x: w * 2, y: 0 });
-    expect(el.querySelector("[drag]")).toBeFalsy();
-    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    // editable content inside item: sorting must be skipped - otherwise text-selection is broken
+    /** Renders html inside the 1st item & tries to drag its deepest child */
+    const tryDragEditable = (html) => {
+      getItems()[0].innerHTML = html;
+      let t2 = getItems()[0];
+      while (t2.firstElementChild) {
+        t2 = t2.firstElementChild; // WARN: the target can be nested inside the editable element
+      }
+      t2.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+      h.userMouseMove(t2, { x: w * 2, y: 0 });
+      expect(el.querySelector("[drag]")).toBeFalsy();
+      document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    };
+    tryDragEditable(`<input />`);
+    tryDragEditable(`<textarea></textarea>`);
+    tryDragEditable(`<select><option>1</option></select>`);
+    tryDragEditable(`<div contenteditable=""><b>nested</b></div>`); // empty attr-value means editable
+    tryDragEditable(`<div contenteditable><b>nested</b></div>`);
+    tryDragEditable(`<span contenteditable="true">txt</span>`);
 
     await h.wait();
     expect(onChanged).toBeCalledTimes(0);
@@ -338,6 +343,17 @@ describe("sortElement", () => {
     await nextFrame(10);
     expect(el.querySelector("[drag]")).toBeFalsy();
     expect(onChanged).toBeCalledTimes(0); // no-event because position isn't changed
+
+    // [contenteditable=false] isn't editable - sorting must work
+    getItems()[0].innerHTML = `<span contenteditable="false">txt</span>`;
+    const span = el.querySelector("span");
+    span.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(span, { x: 25, y: 20 }); // enough to start dragging but the nearest item is still the same
+    expect(el.querySelector("[drag]")).toBeTruthy();
+    bindDragEl();
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await nextFrame(10);
+    expect(onChanged).toBeCalledTimes(0);
   });
 
   test("nested draggable content", () => {
