@@ -389,6 +389,18 @@ describe("sortElement", () => {
     expect(document.dispatchEvent(new MouseEvent("touchmove", { cancelable: true, bubbles: true }))).toBe(true); // touchstart-listener is removed also
   });
 
+  test("items with centers near y=0 (scrolled page)", () => {
+    // all items in a single line with centers exactly at y=0: line-detection must not treat them as a part of the fake line y=0
+    h.setupLayout(el, { x: 0, y: -hi / 2, h: hi, w: w * 4 });
+    getItems().forEach((a, i) => h.setupLayout(a, { x: w * i, y: -hi / 2, h: hi, w }));
+
+    const trg = getItems()[0];
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 0 }));
+    expect(() => userMouseMove(trg, { x: w + w / 2, y: 0 })).not.toThrow(); // was TypeError because nearestEnd went out of items-range
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 1", "Item 3", "Item 4"]);
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+  });
+
   test("_disposeDragdrop", () => {
     el._disposeDragdrop();
     const was = el.innerHTML;

@@ -252,10 +252,12 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
           let nearestEnd = eli; // index of last item in the nearest line
           let dist = Number.MAX_SAFE_INTEGER; // distance between centers
           const rects = $items!.map((item) => item.getBoundingClientRect());
-          let lineY = 0;
+          // WARN: undefined (not 0) - otherwise the 1st item is treated as a part of the line y=0 (possible when page is scrolled)
+          // and nearestEnd goes out of rects-range
+          let lineY: number | undefined;
           rects.some((r, i) => {
             const nextLineY = r.y + r.height / 2;
-            if (Math.abs(nextLineY - lineY) > 3) {
+            if (lineY === undefined || Math.abs(nextLineY - lineY) > 3) {
               // compare with 3px because centers can be not aligned properly
               lineY = nextLineY; // it's next line
               const c = Math.abs(ev.clientY - lineY);
