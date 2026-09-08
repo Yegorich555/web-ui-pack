@@ -130,6 +130,15 @@ padding:0;}
         text-decoration: line-through;
         opacity: 0.5;
       }
+      WUP-SORT [drop-line] {
+        z-index: 9998;
+        position: fixed;
+        left:0; top:0;
+        pointer-events: none;
+        border-radius: 2px;
+        background: var(--sort-active-color);
+        box-shadow: 0 0 2px 0 var(--sort-active-shadow);
+      }
       WUP-SORT[hovered] {
         -webkit-user-select: none;
         -moz-user-select: none;
@@ -139,8 +148,16 @@ padding:0;}
 </style>
 `;
 
-exports[`sortElement common tests snapshot of $defaults 1`] = `{}`;
+exports[`sortElement common tests snapshot of $defaults 1`] = `
+{
+  "dropIndicator": "ghost",
+}
+`;
 
 exports[`sortElement common tests snapshot of $defaults 2`] = `undefined`;
 
-exports[`sortElement common tests snapshot of $defaults 3`] = `[]`;
+exports[`sortElement common tests snapshot of $defaults 3`] = `
+[
+  "w-dropindicator",
+]
+`;

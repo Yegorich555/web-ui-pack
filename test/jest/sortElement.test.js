@@ -25,6 +25,47 @@ function updateLayout() {
   h.setupLayout(items[3], { x: 0, y: hi, h: hi, w });
 }
 
+/** Gap between items of layouts below: to check the position of the line-indicator (dropIndicator: 'line') */
+const gap = 10;
+
+/** Assign layout with gaps between items: 3 items in the 1st line, 1 item in the 2nd line */
+function gapLayoutGrid() {
+  h.setupLayout(el, { x: 0, y: 0, h: hi * 2 + gap, w: (w + gap) * 3 });
+  const items = getItems();
+  // 1st line
+  h.setupLayout(items[0], { x: 0, y: 0, h: hi, w });
+  h.setupLayout(items[1], { x: w + gap, y: 0, h: hi, w });
+  h.setupLayout(items[2], { x: (w + gap) * 2, y: 0, h: hi, w });
+  // 2nd line
+  h.setupLayout(items[3], { x: 0, y: hi + gap, h: hi, w });
+}
+
+/** Assign layout with gaps between items: every item on its own row */
+function gapLayoutColumn() {
+  h.setupLayout(el, { x: 0, y: 0, h: (hi + gap) * 4, w });
+  getItems().forEach((item, i) => h.setupLayout(item, { x: 0, y: (hi + gap) * i, h: hi, w }));
+}
+
+/** Thickness of the line-indicator (see `const w` in sortElement.applyDragdrop) */
+const lw = 1;
+
+/** Returns inline styles of the line-indicator (dropIndicator: 'line') */
+function lineStyle() {
+  return el.querySelector("[drop-line]").style.cssText;
+}
+
+/** Returns expected styles of the vertical line-indicator (multi-line layout):
+ * `x` is the middle of the gap between items, `y` is the top of the line */
+function vLine(x, y = 0) {
+  return `width: ${lw}px; height: ${hi}px; transform: translate(${x - lw / 2}px, ${y}px);`;
+}
+
+/** Returns expected styles of the horizontal line-indicator (single-line layout):
+ * `y` is the middle of the gap between items */
+function hLine(y) {
+  return `width: ${w}px; height: ${lw}px; transform: translate(0px, ${y - lw / 2}px);`;
+}
+
 /** Simulate pointer event: jsdom has no PointerEvent - so pointer-properties must be defined manually.
  * WARN: every listed key is applied even when its value is `undefined` (to emulate engines without the property) */
 function userPointer(trg, type, opts) {
@@ -85,7 +126,9 @@ afterEach(() => {
 });
 
 describe("sortElement", () => {
-  h.baseTestComponent(() => document.createElement("wup-sort"), { attrs: {} });
+  h.baseTestComponent(() => document.createElement("wup-sort"), {
+    attrs: { "w-dropindicator": { value: "line" } },
+  });
 
   test("items detection", () => {
     expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 1", "Item 2", "Item 3", "Item 4"]); // [item='false'] is skipped
@@ -665,6 +708,114 @@ describe("sortElement", () => {
     await h.wait();
   });
 
+  test("dropIndicator: line (multi-line layout)", async () => {
+    // WARN: in opposite to 'ghost' the item isn't moved during the dragging: instead the line is painted between items
+    const onChanged = jest.fn();
+    el.addEventListener("$change", onChanged);
+    el.setAttribute("w-dropindicator", "line");
+    jest.advanceTimersByTime(1); // wait for the attribute is parsed
+    expect(el.$options.dropIndicator).toBe("line");
+    gapLayoutGrid();
+
+    // the 1st item is grabbed & the cursor is in its left half: no previous item - so the gap is mirrored (-10..0)
+    const trg = getItems()[0];
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 20, y: 20 });
+    expect(lineStyle()).toBe(vLine(-5));
+    // WARN: the layout mustn't be shifted at all - so the item stays on its place (only the clone follows the cursor)
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<div drop-line="" style="width: 1px; height: 30px; transform: translate(-5.5px, 0px);"></div>",
+        "<div item="" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(10px, 10px);">Item 1</div>",
+        "<div item="" draggable="false" drop="">Item 1</div>",
+        "<div item="">Item 2</div>",
+        "<div item="">Item 3</div>",
+        "<div item="">Item 4</div>",
+        "<div item="false">Not sortable</div>",
+      ]
+    `);
+
+    const dragEl = bindDragEl();
+    // left half of the 2nd item: 60..70 is the gap between the 1st & the 2nd items - so the middle is 65
+    h.userMouseMove(dragEl, { x: 80, y: 12 });
+    expect(lineStyle()).toBe(vLine(65));
+    // right half of the 2nd item: the gap is 130..140 - so the middle is 135
+    h.userMouseMove(dragEl, { x: 120, y: 12 });
+    expect(lineStyle()).toBe(vLine(135));
+    // right half of the last item in the line: no next item - so the gap is mirrored (200..210)
+    h.userMouseMove(dragEl, { x: 190, y: 12 });
+    expect(lineStyle()).toBe(vLine(205));
+    // the 2nd line has the single item - so there is no gap to detect: the line is painted on the edge of the item
+    h.userMouseMove(dragEl, { x: 50, y: 50 });
+    expect(lineStyle()).toBe(vLine(w, hi + gap));
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 1", "Item 2", "Item 3", "Item 4"]); // no reorder yet
+
+    // the new order is applied by the end of the dragging
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(el.querySelector("[drop-line]")).toBeFalsy();
+    expect(el.querySelector("[drag]")).toBeFalsy();
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 2", "Item 3", "Item 4", "Item 1"]);
+    expect(onChanged).toBeCalledTimes(1);
+    expect(onChanged.mock.calls[0][0].detail.value).toStrictEqual([1, 2, 3, 0]);
+    // WARN: the item must be inserted before non-sortable items ([item=false]) - not appended to the end of the parent
+    expect(getChildren()).toMatchInlineSnapshot(`
+      [
+        "<div item="">Item 2</div>",
+        "<div item="">Item 3</div>",
+        "<div item="">Item 4</div>",
+        "<div item="" draggable="false">Item 1</div>",
+        "<div item="false">Not sortable</div>",
+      ]
+    `);
+  });
+
+  test("dropIndicator: line (single-line layout)", async () => {
+    // WARN: every item is on its own row - so the line must be horizontal (with the width of the item)
+    el.$options.dropIndicator = "line";
+    gapLayoutColumn();
+
+    // the last item is grabbed & the cursor is in its bottom half: no next item - so the gap is mirrored (150..160)
+    const trg = getItems()[3];
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 130 }));
+    h.userMouseMove(trg, { x: 20, y: 140 });
+    expect(lineStyle()).toBe(hLine(155));
+
+    const dragEl = bindDragEl();
+    // bottom half of the 2nd item: the gap is 70..80 - so the middle is 75
+    h.userMouseMove(dragEl, { x: 12, y: 65 });
+    expect(lineStyle()).toBe(hLine(75));
+    // top half of the 2nd item: the gap is 30..40 - so the middle is 35
+    h.userMouseMove(dragEl, { x: 12, y: 45 });
+    expect(lineStyle()).toBe(hLine(35));
+    // top half of the 1st item: no previous item - so the gap is mirrored (-10..0)
+    h.userMouseMove(dragEl, { x: 12, y: 5 });
+    expect(lineStyle()).toBe(hLine(-5));
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 4", "Item 1", "Item 2", "Item 3"]);
+  });
+
+  test("dropIndicator: line - dropped at the same place", async () => {
+    const onChanged = jest.fn();
+    el.addEventListener("$change", onChanged);
+    el.$options.dropIndicator = "line";
+    gapLayoutColumn();
+
+    // the cursor is in the bottom half of the grabbed item - so the new place is the same
+    const trg = getItems()[1];
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 45 }));
+    h.userMouseMove(trg, { x: 20, y: 55 });
+    expect(el.querySelector("[drop-line]")).toBeTruthy();
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(el.querySelector("[drop-line]")).toBeFalsy();
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 1", "Item 2", "Item 3", "Item 4"]);
+    expect(onChanged).toBeCalledTimes(0); // the order is the same as before dragging
+  });
+
   test("dragdrop is disposed on remove & re-applied on re-connect", () => {
     // the pointerdown-listener was registered via raw onEvent - so it stayed forever after the element was removed
     const spyRemove = jest.spyOn(el, "removeEventListener");
@@ -888,5 +1039,45 @@ describe("sortElement", () => {
     expect(onChanged).toBeCalledTimes(1);
     expect(onChanged.mock.calls[0][2]).toBe(-1);
     detach2();
+  });
+
+  test("$attach with options.dropIndicator & canRemove", async () => {
+    document.body.innerHTML = `<ul>
+  <li item="">Item 1</li>
+  <li item="">Item 2</li>
+  <li item="">Item 3</li>
+  <li item="">Item 4</li>
+</ul>`;
+    el = document.body.firstElementChild; // to re-use getItems(), lineStyle() & gapLayoutGrid()
+    const onChanged = jest.fn();
+    const detach = WUPSortElement.$attach(el, onChanged, { canRemove: true, dropIndicator: "line" });
+    gapLayoutGrid();
+
+    const trg = getItems()[0];
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 20, y: 12 });
+    const dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: 80, y: 12 });
+    expect(lineStyle()).toBe(vLine(65));
+
+    // the item is going to be removed - so the new place is meaningless
+    h.userMouseMove(dragEl, { x: 1000, y: 1000 });
+    expect(el.querySelector("[drag][remove]")).toBeTruthy();
+    expect(lineStyle()).toBe(`${vLine(65)} display: none;`);
+
+    // ... and it's shown again when the item is returned back inside
+    h.userMouseMove(dragEl, { x: 120, y: 12 });
+    expect(el.querySelector("[drag][remove]")).toBeFalsy();
+    expect(lineStyle()).toBe(vLine(135));
+
+    // dropped outside: the order mustn't be changed even if the line pointed the new place
+    h.userMouseMove(dragEl, { x: 1000, y: 1000 });
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(el.querySelector("[drop-line]")).toBeFalsy();
+    expect(onChanged).toBeCalledTimes(1);
+    expect(onChanged.mock.calls[0][2]).toBe(0); // removedIndex: index of the item dropped outside
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["Item 1", "Item 2", "Item 3", "Item 4"]);
+    detach();
   });
 });

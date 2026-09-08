@@ -196,9 +196,7 @@ export default class WUPSelectManyControl<
         padding: 0;
         margin-left: 0.5em;
       }
-      :host [item][focused],
-      :host [item][drag],
-      :host [item][drop] {
+      :host [item][focused] {
         color: var(--ctrl-focus-label);
         box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
       }
@@ -241,18 +239,20 @@ export default class WUPSelectManyControl<
           opacity: 0;
         }
       }
+      ${
+        /* dragdrop styles ([drag], [drop], [drop-line], [hovered]) are reused from the sortElement: see $options.sortable
+            WARN: $styleRoot of the sortElement isn't appended (see $attach with selectorName:null) - so its css-vars are defined here */ ""
+      }
+      :host {
+        --sort-active-color: var(--ctrl-focus-label);
+        --sort-active-shadow: var(--ctrl-focus);
+      }
+      ${WUPSortElement.$style}
+      ${/* WARN: after the styles above - the drag-clone must keep colors of an ordinary item */ ""}
       :host [item][drag] {
-        z-index: 9999;
-        position: fixed;
-        left:0; top:0;
-        cursor: grabbing;
-        text-decoration: none;
         --ctrl-icon: var(--ctrl-select-item-del);
         color: var(--ctrl-select-item-text);
         background-color: var(--ctrl-select-item-bg);
-      }
-      :host [item][drop] {
-        opacity: 0.7;
       }`;
   }
 

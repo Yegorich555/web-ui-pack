@@ -22,6 +22,13 @@ declare global {
         items: HTMLElement[];
       }>;
     }
+    interface Options {
+      /** Style of the indicator that shows the new place of the dragged item:
+       * * `ghost` - the item itself is moved between other items (so the layout is shifted during the dragging)
+       * * `line` - a line is painted over the layout between items (the layout isn't shifted; the order is applied on drop)
+       * @defaultValue 'ghost' */
+      dropIndicator: "ghost" | "line";
+    }
   }
 
   interface HTMLElementTagNameMap {
@@ -88,7 +95,7 @@ declare module "preact/jsx-runtime" {
  * </wup-sort>
  * ```
  * @see {@link WUPSortElement.$attach} - to sort children of an ordinary element (when the extra wrapper breaks the layout) */
-export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMap> {
+export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP.Sort.EventMap> {
   static get $styleRoot(): string {
     return `:root {
         --sort-active-color: #25a1b6;
@@ -118,6 +125,15 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
         text-decoration: line-through;
         opacity: 0.5;
       }
+      :host [drop-line] {
+        z-index: 9998;
+        position: fixed;
+        left:0; top:0;
+        pointer-events: none;
+        border-radius: 2px;
+        background: var(--sort-active-color);
+        box-shadow: 0 0 2px 0 var(--sort-active-shadow);
+      }
       :host[hovered] {
         -webkit-user-select: none;
         -moz-user-select: none;
@@ -125,6 +141,10 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
          user-select: none;
       }`;
   }
+
+  static $defaults: WUP.Sort.Options = {
+    dropIndicator: "ghost",
+  };
 
   /** Apply sorting on children with attr [item] except attr [item=false] of the pointed element.
    * @param el parent which children
@@ -134,6 +154,8 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
    * @param options.canRemove enables removing an item when it's dropped outside the element: `onChange` is called with `removedIndex`
    * (removing the item from the DOM is the responsibility of the callback);
    * otherwise dragging outside does nothing and the item is returned back @defaultValue false
+   * @param options.dropIndicator style of the indicator that shows the new place of the dragged item:
+   * `ghost` - the item itself is moved between other items; `line` - a line is painted over the layout between items @defaultValue "ghost"
    * @returns detach-function (removing eventListeners & applied styles)
    * @example
    * ```js
@@ -146,6 +168,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
     options?: {
       selectorName?: string | null /* [wup-sort] by default */;
       canRemove?: boolean;
+      dropIndicator?: "ghost" | "line" /* ghost by default */;
     }
   ): () => void {
     const savedDetach = attachLst.get(el);
@@ -173,11 +196,12 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
       rSelector = this.applySelector(el, selectorName);
     }
 
+    const dropIndicator = options?.dropIndicator ?? this.$defaults.dropIndicator;
     // WARN: async (as the $change event of the custom element) - to be called when the return-animation is started & listeners are removed
     const rDragdrop = this.applyDragdrop(
       el,
       (value, items, removedIndex) => setTimeout(() => onChange.call(el, value, items, removedIndex)),
-      options?.canRemove
+      { canRemove: options?.canRemove, getDropIndicator: () => dropIndicator }
     );
 
     const detach = (): void => {
@@ -228,22 +252,29 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
   /** Called to apply dragdrop logic */
   protected applyDragdrop(): void {
     // WARN: the remover is stored in disposeLst (the same as appendEvent does) - otherwise the listener isn't removed when the element is removed from the document
-    this.disposeLst.push(this.#ctr.applyDragdrop(this, (value, items) => this.setValue(value, items, "move")));
+    this.disposeLst.push(
+      this.#ctr.applyDragdrop(this, (value, items) => this.setValue(value, items, "move"), {
+        getDropIndicator: () => this._opts.dropIndicator, // WARN: getter - because options can be changed after the init
+      })
+    );
   }
 
   /** Called to apply dragdrop logic on the pointed element
    * @param target element which children (with attr [item]) must be sortable
    * @param onChange called when the order of items is changed or an item is removed (by the end of dragging);
    * `removedIndex` is the index of the item dropped outside the target (`-1` when nothing is removed)
-   * @param canRemove enables removing an item when it's dropped outside the target: `onChange` is called with `removedIndex`
+   * @param opts.canRemove enables removing an item when it's dropped outside the target: `onChange` is called with `removedIndex`
    * (removing the item from the DOM is the responsibility of the callback);
    * otherwise dragging outside does nothing and the item is returned back
+   * @param opts.getDropIndicator returns the style of the drop-indicator; it's a getter because options can be changed
+   * after the init (called once per dragging - so the style isn't changed in the middle of it) @defaultValue "ghost"
    * @returns remover of eventListeners */
   protected static applyDragdrop(
     target: HTMLElement,
     onChange: (value: number[], items: HTMLElement[], removedIndex: number) => void,
-    canRemove?: boolean
+    opts?: { canRemove?: boolean; getDropIndicator?: () => WUP.Sort.Options["dropIndicator"] }
   ): () => void {
+    const canRemove = opts?.canRemove;
     return onEvent(target, "pointerdown", (e) => {
       if (e.button || e.isPrimary === false) {
         // WARN: `=== false` because the property is missing on synthetic events
@@ -276,6 +307,10 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
       let dr: HTMLElement & { __isDragItem?: boolean };
       let isInside = true; // false when the item is dragged outside the target (to remove it - see canRemove)
       let isEnded = false; // to prevent double-handling: pointerup & pointercancel can be fired both
+      // WARN: the style is defined once per dragging - otherwise changing options in the middle breaks the started logic
+      const isLine = opts?.getDropIndicator?.() === "line";
+      let dropLine: HTMLElement | undefined; // indicator of the new place (only for dropIndicator: 'line')
+      let dropAt = -1; // index of the item before which the dragged one must be inserted (only for dropIndicator: 'line')
 
       // WARN: must be after the `eli === -1` return - otherwise draggability of non-item targets is destroyed forever (`cancel` isn't registered yet)
       activeEl._wasDraggable = activeEl.draggable;
@@ -308,6 +343,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
       let isThrottle = false;
       // WARN: getBoundingClientRect forces layout (N calls per pointermove) - so rects are cached and reset only when they really change
       let rects: DOMRect[] | null = null;
+      let isRowLayout = false; // true when items are rendered horizontally (or multiline) - see rects below
       const rScroll = onEvent(document, "scroll", () => (rects = null), { capture: true, passive: true }); // scroll shifts viewport-based rects
       const rect = el.getBoundingClientRect();
       const firstCoord = { x: e.clientX - rect.x, y: e.clientY - rect.y };
@@ -360,6 +396,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
             isInside = isOverlap(target.getBoundingClientRect(), dr.getBoundingClientRect());
             isInside ? dr.removeAttribute("remove") : dr.setAttribute("remove", "");
             if (!isInside) {
+              dropLine && (dropLine.style.display = "none"); // the item is going to be removed - so the new place is meaningless
               return; // skip the new-place detection when the item is outside
             }
           }
@@ -371,7 +408,17 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
           let nearest = eli; // index of nearest item
           let nearestEnd = eli; // index of last item in the nearest line
           let dist = Number.MAX_SAFE_INTEGER; // distance between centers
-          rects ??= $items!.map((item) => item.getBoundingClientRect());
+          if (!rects) {
+            const arr = $items!.map((item) => item.getBoundingClientRect());
+            rects = arr;
+            // items are rendered in a row when at least 2 of them are on the same line (a multiline grid is a row-layout too)
+            isRowLayout =
+              isLine &&
+              arr.some((r, i) => {
+                const prev = arr[i - 1];
+                return i > 0 && Math.abs(r.y + r.height / 2 - (prev.y + prev.height / 2)) <= 3; // 3px because centers can be not aligned properly
+              });
+          }
           // WARN: undefined (not 0) - otherwise the 1st item is treated as a part of the line y=0 (possible when page is scrolled)
           // and nearestEnd goes out of rects-range
           let lineY: number | undefined;
@@ -404,6 +451,41 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
               dist = c;
               nearest = i;
             }
+          }
+          // paint the line-indicator instead of moving the item (the layout isn't shifted at all)
+          if (isLine) {
+            const r = rects[nearest];
+            // WARN: for a row the line is vertical (before/after the item), for a column - horizontal (above/below the item)
+            const isBefore = isRowLayout ? ev.clientX < r.x + r.width / 2 : ev.clientY < r.y + r.height / 2;
+            dropAt = isBefore ? nearest : nearest + 1;
+            if (!dropLine) {
+              dropLine = document.createElement("div");
+              dropLine.setAttribute("drop-line", "");
+              el.parentElement!.prepend(dropLine); // WARN: position:fixed - so the parent doesn't affect the layout
+            }
+            // WARN: the line must be painted in the middle of the gap between 2 items (not on the edge of the nearest one)
+            // because user drops the item exactly between them
+            const isNear = (a: DOMRect | undefined): a is DOMRect =>
+              // for a row the neighbor must be on the same line - otherwise the gap is between lines (3px because centers can be not aligned properly)
+              !!a && (!isRowLayout || Math.abs(a.y + a.height / 2 - (r.y + r.height / 2)) <= 3);
+            const other = rects[isBefore ? nearest - 1 : nearest + 1]; // item on the other side of the gap
+            const mirror = rects[isBefore ? nearest + 1 : nearest - 1]; // item on the opposite side of the nearest (see below)
+            const start = isRowLayout ? "x" : "y"; // axis of the gap: horizontal for a row, vertical for a column
+            const end = isRowLayout ? "right" : "bottom";
+            let gap = 0; // 0 when the nearest item has no neighbors at all - so the line is centered on its edge
+            if (isNear(other)) {
+              gap = isBefore ? r[start] - other[end] : other[start] - r[end];
+            } else if (isNear(mirror)) {
+              // the gap is outside the range of items (before the 1st or after the last one) - so mirror the gap of the opposite side
+              gap = isBefore ? mirror[start] - r[end] : r[start] - mirror[end];
+            }
+            const w = 1; // thickness of the line
+            const pos = (isBefore ? r[start] - Math.max(gap, 0) / 2 : r[end] + Math.max(gap, 0) / 2) - w / 2;
+            dropLine.style.display = "";
+            dropLine.style.width = `${isRowLayout ? w : r.width}px`;
+            dropLine.style.height = `${isRowLayout ? r.height : w}px`;
+            dropLine.style.transform = isRowLayout ? `translate(${pos}px, ${r.y}px)` : `translate(${r.x}px, ${pos}px)`;
+            return;
           }
           // move to the new place
           if (eli !== nearest) {
@@ -440,6 +522,7 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
 
         if (dr) {
           target.removeAttribute("hovered");
+          dropLine?.remove();
           if (!isInside) {
             el.removeAttribute("drop");
             dr.remove(); // no return-animation: the item is dropped outside & must be removed
@@ -450,9 +533,21 @@ export default class WUPSortElement extends WUPBaseElement<any, WUP.Sort.EventMa
               eli
             );
           } else {
+            if (dropAt !== -1) {
+              // WARN: only for dropIndicator:'line' - the item isn't moved during the dragging, so the new order is applied here
+              const newIndex = dropAt > eli ? dropAt - 1 : dropAt; // index after removing the item from the previous place
+              if (newIndex !== eli) {
+                const last = $items[$items.length - 1];
+                // WARN: `last.nextElementSibling` (not `null`) - otherwise the item is appended after non-sortable items ([item=false])
+                const next = dropAt < $items.length ? $items[dropAt] : last.nextElementSibling;
+                el.parentElement!.insertBefore(el, next);
+                $items.splice(newIndex, 0, $items.splice(eli, 1)[0]);
+                eli = newIndex;
+              }
+            }
             const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-t"));
             const from = dr.getBoundingClientRect();
-            const to = el.getBoundingClientRect();
+            const to = el.getBoundingClientRect(); // WARN: after the possible re-ordering above - to animate to the real new place
             const diff = { x: to.x - from.x, y: to.y - from.y };
             // return element back
             dr.style.pointerEvents = "none";
