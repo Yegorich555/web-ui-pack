@@ -104,9 +104,6 @@ export function csvFromData<T extends Record<string, any>>(
  * or a new-line always ends the value/row - even inside quotes */
 export function csvToData<T>(csv: string, delimiter?: string): Array<T> {
   delimiter ??= csvDefineDelimiter(csv);
-  if (csv.charCodeAt(0) === 0xfeff) {
-    csv = csv.substring(1); // BOM: Excel & other tools mark an utf8-file by it and it's not a part of the 1st prop
-  }
 
   const props: string[] = []; // the header-row: prop-names for the returned items
   const items: T[] = [];
@@ -115,15 +112,20 @@ export function csvToData<T>(csv: string, delimiter?: string): Array<T> {
   let hasValue = false; // a row without any value at all is skipped: it's just a spare new-line
   let iCol = 0;
   // charCodeAt() + int-compare instead of csv[i] + string-compare: it's the hottest loop of the whole file
-  const dCode = delimiter.charCodeAt(0);
+  const d = delimiter.charCodeAt(0);
   const len = csv.length;
 
-  for (let i = 0; ; ) {
+  let i = 0;
+  if (csv.charCodeAt(0) === 0xfeff) {
+    i = 1; // BOM: Excel & other tools mark an utf8-file by it and it's not a part of the 1st prop
+  }
+
+  for (i; ; ) {
     /* ---------- a single value ---------- */
     const iStart = i;
     while (i < len) {
       const c = csv.charCodeAt(i);
-      if (c === dCode || c === 10 /* \n */ || c === 13 /* \r */) {
+      if (c === d || c === 10 /* \n */ || c === 13 /* \r */) {
         break;
       }
       ++i;
@@ -141,7 +143,7 @@ export function csvToData<T>(csv: string, delimiter?: string): Array<T> {
     ++iCol;
 
     /* ---------- the end of the row ---------- */
-    if (i < len && csv.charCodeAt(i) === dCode) {
+    if (i < len && csv.charCodeAt(i) === d) {
       ++i;
       continue; // the next value of the very same row
     }
