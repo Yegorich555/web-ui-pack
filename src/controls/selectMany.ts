@@ -241,7 +241,7 @@ export default class WUPSelectManyControl<
       }
       ${
         /* dragdrop styles ([drag], [drop], [drop-line], [hovered]) are reused from the sortElement: see $options.sortable
-            WARN: $styleRoot of the sortElement isn't appended (see $attach with selectorName:null) - so its css-vars are defined here */ ""
+            WARN: $styleRoot of the sortElement isn't appended (see $attach with className:null) - so its css-vars are defined here */ ""
       }
       :host {
         --sort-active-color: var(--ctrl-focus-label);
@@ -349,7 +349,7 @@ export default class WUPSelectManyControl<
         }
       },
       {
-        selectorName: null, // because styles are defined in $style of this control
+        className: null, // because styles are defined in $style of this control
         canRemove: true,
       }
     );

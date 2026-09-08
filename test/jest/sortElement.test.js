@@ -855,11 +855,11 @@ describe("sortElement", () => {
     let detach = WUPSortElement.$attach(el, onChanged);
     updateLayout();
 
-    expect(el.getAttribute("wup-sort")).toBe(""); // [wup-sort] is the default selector - so the attribute is applied
+    expect(el.className).toBe("wup-sort"); // "wup-sort" is the default class-name - so it's applied
     const styles = WUPSortElement.$refStyle.textContent;
     expect(styles).toContain("--sort-active-color"); // $styleRoot: appended even if no one <wup-sort> is created
-    expect(styles).toContain("[wup-sort] [item][drag]"); // $style: :host is replaced with the pointed selector
-    expect(styles).toContain("[wup-sort][hovered]");
+    expect(styles).toContain(".wup-sort [item][drag]"); // $style: :host is replaced with the class-selector
+    expect(styles).toContain(".wup-sort[hovered]");
 
     // sorting must work the same as for <wup-sort>
     let trg = getItems()[0];
@@ -883,9 +883,9 @@ describe("sortElement", () => {
     ]); // items in the new order
     expect(onChanged.mock.calls[0][2]).toBe(-1); // removedIndex: nothing is removed
 
-    // detach must remove the applied selector & the listeners
+    // detach must remove the applied class-name & the listeners
     detach();
-    expect(el.getAttribute("wup-sort")).toBeNull();
+    expect(el.className).toBe("");
     [trg] = getItems();
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
     h.userMouseMove(trg, { x: w + w / 2, y: hi / 2 });
@@ -912,9 +912,9 @@ describe("sortElement", () => {
 
     detach();
 
-    // options.selectorName: styles are bound to the selector - so every new selector must get own styles
-    const detach2 = WUPSortElement.$attach(el, onChanged, { selectorName: ".my-sort" });
-    expect(el.className).toBe("my-sort"); // class-name is applied for a class-selector
+    // options.className: styles are bound to the class-name - so every new class-name must get own styles
+    const detach2 = WUPSortElement.$attach(el, onChanged, { className: "my-sort" });
+    expect(el.className).toBe("my-sort");
     const styles2 = WUPSortElement.$refStyle.textContent;
     expect(styles2).toContain(".my-sort [item][drag]");
     expect(styles2).toContain(".my-sort[hovered]");
@@ -930,25 +930,16 @@ describe("sortElement", () => {
     await h.wait();
     expect(onChanged).toBeCalledTimes(3);
 
-    // ...but the same selector mustn't append styles again
+    // ...but the same class-name mustn't append styles again
     detach2();
-    expect(el.className).toBe(""); // detach must remove the pointed selector (not the default one)
-    WUPSortElement.$attach(el, onChanged, { selectorName: ".my-sort" })();
+    expect(el.className).toBe(""); // detach must remove the pointed class-name (not the default one)
+    WUPSortElement.$attach(el, onChanged, { className: "my-sort" })();
     expect(WUPSortElement.$refStyle.textContent).toBe(styles2);
 
-    // attribute-selector with a value
-    const detach3 = WUPSortElement.$attach(el, onChanged, { selectorName: "[sort='my']" });
-    expect(el.getAttribute("sort")).toBe("my");
-    expect(WUPSortElement.$refStyle.textContent).toContain("[sort='my'] [item][drag]");
-    detach3();
-    expect(el.getAttribute("sort")).toBeNull();
-
-    // tag/complex selector can't be applied by $attach itself - the element must match it already
-    let mockWarn2 = h.wrapConsoleWarn(() => WUPSortElement.$attach(el, onChanged, { selectorName: "ul" })());
-    expect(mockWarn2).toBeCalledTimes(0); // <ul> matches - no warning
-    expect(WUPSortElement.$refStyle.textContent).toContain("ul [item][drag]");
-    mockWarn2 = h.wrapConsoleWarn(() => WUPSortElement.$attach(el, onChanged, { selectorName: "ol" })());
-    expect(mockWarn2).toBeCalledTimes(1); // user must be notified: such styles are useless
+    // options.className:null - styles are defined by the user itself
+    WUPSortElement.$attach(el, onChanged, { className: null })();
+    expect(el.className).toBe("");
+    expect(WUPSortElement.$refStyle.textContent).toBe(styles2); // no extra styles are appended
   });
 
   test("$attach with options.canRemove", async () => {

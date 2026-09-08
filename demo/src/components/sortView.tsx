@@ -108,14 +108,14 @@ const detach = WUPSortElement.$attach(
   document.querySelector("ul"),
   // removedIndex is -1 unless an item is dropped outside the element (requires option canRemove)
   (newOrderedIndexes, htmlItems, removedIndex) => console.warn({ newOrderedIndexes, htmlItems, removedIndex }),
-  // { selectorName: ".my-sort" } // point own selector if styles are overridden
+  // { className: "my-sort" } // point own class-name if styles are overridden (null - to disable styles at all)
   // { canRemove: true } // allow to remove an item by dragging outside: remove it from the DOM by yourself
   // { dropIndicator: "line" } // "ghost" (default) moves the item between others; "line" paints a line between items
 );
 
 // the same for the custom element (or globally via WUPSortElement.$defaults.dropIndicator)
 document.querySelector("wup-sort").$options.dropIndicator = "line";
-// $attach applies attribute [wup-sort] to the element: it's used by styles instead of :host
+// $attach applies class-name "wup-sort" to the element: it's used by styles instead of :host
 // detach() is required only if the element is removed via parent.innerHTML="..."
 
 // WARN: element changes position of children itself.

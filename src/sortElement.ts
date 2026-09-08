@@ -7,7 +7,7 @@ import { parseMsTime } from "./helpers/styleHelpers";
 const tagName = "wup-sort";
 /** Detach-functions of {@link WUPSortElement.$attach} - to prevent double attaching on the same element */
 const attachLst = new WeakMap<HTMLElement, () => void>();
-/** Selectors of {@link WUPSortElement.$attach} with already appended styles */
+/** Class-names of {@link WUPSortElement.$attach} with already appended styles */
 let addedStyles: Set<string> | undefined;
 
 declare global {
@@ -150,7 +150,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
    * @param el parent which children
    * @param onChange called when the order of children is changed or an item is removed (instead of the `$change` event of the custom element);
    * `removedIndex` is the index of the item dropped outside the element (`-1` when nothing is removed)
-   * @param options.selectorName css-selector for applying styles; point `null` if styles are defined by yourself @defaultValue "[wup-sort]"
+   * @param options.className css-class-name applied to the element for the built-in styles; point `null` if styles are defined by yourself @defaultValue "wup-sort"
    * @param options.canRemove enables removing an item when it's dropped outside the element: `onChange` is called with `removedIndex`
    * (removing the item from the DOM is the responsibility of the callback);
    * otherwise dragging outside does nothing and the item is returned back @defaultValue false
@@ -166,7 +166,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
     el: HTMLElement,
     onChange: (newOrderedIndexes: number[], items: HTMLElement[], removedIndex: number) => void,
     options?: {
-      selectorName?: string | null /* [wup-sort] by default */;
+      className?: string | null /* wup-sort by default */;
       canRemove?: boolean;
       dropIndicator?: "ghost" | "line" /* ghost by default */;
     }
@@ -179,21 +179,21 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
       savedDetach();
     }
 
-    const selectorName = options?.selectorName !== undefined ? options.selectorName : `[${tagName}]`; // WARN: `null` disables styles at all - so `??` isn't suitable here
+    const className = options?.className !== undefined ? options.className : tagName; // WARN: `null` disables styles at all - so `??` isn't suitable here
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    let rSelector = (): void => {};
-    if (selectorName) {
+    let rClass = (): void => {};
+    if (className) {
       if (!addedStyles) {
-        const refStyle = this.$refStyle!;
-        refStyle.append(this.$styleRoot);
+        this.$refStyle!.append(this.$styleRoot);
         addedStyles = new Set();
       }
 
-      if (!addedStyles.has(selectorName)) {
-        addedStyles.add(selectorName);
-        this.$refStyle!.append(this.$style.replace(/:host/g, selectorName)); // :host matches only the custom element itself - so it's replaced with the pointed selector
+      if (!addedStyles.has(className)) {
+        addedStyles.add(className);
+        this.$refStyle!.append(this.$style.replace(/:host/g, `.${className}`)); // :host matches only the custom element itself - so it's replaced with the class-selector
       }
-      rSelector = this.applySelector(el, selectorName);
+      el.classList.add(className);
+      rClass = (): void => el.classList.remove(className);
     }
 
     const dropIndicator = options?.dropIndicator ?? this.$defaults.dropIndicator;
@@ -206,36 +206,13 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 
     const detach = (): void => {
       rDragdrop();
-      rSelector();
+      rClass();
       el.removeAttribute("hovered");
       attachLst.delete(el);
     };
     attachLst.set(el, detach);
 
     return detach;
-  }
-
-  /** Applies the pointed selector to the element (otherwise styles of {@link WUPSortElement.$attach} don't match it)
-   * @returns remover of the applied attribute/class-name */
-  protected static applySelector(el: HTMLElement, selectorName: string): () => void {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    let r = (): void => {}; // nothing to apply for a tag-selector: the element must match it already
-    if (selectorName.startsWith("[")) {
-      const [attr, v] = selectorName.slice(1, -1).split("="); // [wup-sort] or [wup-sort='value']
-      el.setAttribute(attr, v ? v.replace(/^["']|["']$/g, "") : "");
-      r = () => el.removeAttribute(attr);
-    } else if (selectorName.startsWith(".")) {
-      const cn = selectorName.substring(1);
-      el.classList.add(cn);
-      r = () => el.classList.remove(cn);
-    }
-    if (!el.matches(selectorName)) {
-      // possible when a tag/complex selector is pointed - in this case styles are useless
-      console.warn(
-        `${tagName.toUpperCase()}. $attach: the element doesn't match the pointed selector '${selectorName}'`
-      );
-    }
-    return r;
   }
 
   #ctr = this.constructor as typeof WUPSortElement;
