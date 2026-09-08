@@ -34,3 +34,4 @@ export { stringPrettify, stringLowerCount, stringUpperCount } from "./helpers/st
 export { default as zip } from "./helpers/files/zip";
 export { default as exportToExcel } from "./helpers/files/exportToExcel";
 export { default as saveAsFile } from "./helpers/files/saveAsFile";
+export { csvFromData, csvToData, csvDefineDelimiter } from "./helpers/files/csv";
