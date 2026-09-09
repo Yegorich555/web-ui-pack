@@ -13,7 +13,7 @@ function previewValue(v: IUser[keyof IUser]): string {
 
 export default function Example3() {
   return (
-    <Example header="Prepared data" link="demo/src/other/excel/example3.tsx">
+    <Example header="Prepared data" link="demo/src/components/exportToExcel/example3.tsx">
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>

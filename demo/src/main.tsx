@@ -35,7 +35,7 @@ import styles from "./main.scss";
 import Login from "./components/controls/login";
 import ModalAsAlertView from "./components/modal/modalAsAlertView";
 import NotifyView from "./components/notify/notifyView";
-import ExportToExcelView from "./other/excel/exportToExcel";
+import ExportToExcelView from "./components/exportToExcel/exportToExcel";
 
 (window as any).WUPHelpers = WUPHelpers;
 

@@ -101,7 +101,7 @@ export default function Example2() {
   };
 
   return (
-    <Example header="Export prepared data" link="demo/src/other/excel/example2.tsx">
+    <Example header="Export prepared data" link="demo/src/components/exportToExcel/example2.tsx">
       <div className={styles.examples}>
         {cases.map((e) => (
           <div key={e.label}>

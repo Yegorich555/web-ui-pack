@@ -3,7 +3,7 @@ import Example from "src/elements/example";
 
 export default function Example1() {
   return (
-    <Example header="Usage" link="demo/src/other/excel/example1.tsx">
+    <Example header="Usage" link="demo/src/components/exportToExcel/example1.tsx">
       <Code code={codeJS} />
     </Example>
   );
