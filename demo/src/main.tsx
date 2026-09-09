@@ -11,7 +11,7 @@ import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
 import CircleView from "./components/circleView";
 import DropdownView from "./components/dropdownView";
-import SortView from "./components/sortView";
+import SortView from "./components/sort/sortView";
 import ModalView from "./components/modalView";
 
 import TextControlView from "./components/controls/text";
