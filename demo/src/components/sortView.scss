@@ -42,3 +42,17 @@ ul.list {
   font-size: 14px;
   opacity: 0.8;
 }
+
+.columns {
+  display: flex;
+  gap: 12px;
+
+  > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  ul.list {
+    min-height: 60px; // WARN: otherwise an empty column shrinks & it's impossible to drop an item into it
+  }
+}

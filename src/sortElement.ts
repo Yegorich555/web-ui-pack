@@ -9,6 +9,31 @@ const tagName = "wup-sort";
 const attachLst = new WeakMap<HTMLElement, () => void>();
 /** Class-names of {@link WUPSortElement.$attach} with already appended styles */
 let addedStyles: Set<string> | undefined;
+/** Elements which items are handled by {@link WUPSortElement.applyDragdrop} - to detect the owner of an item (see `ownerOf`) */
+const dragOwners = new WeakSet<HTMLElement>();
+
+/** Returns the nearest element that owns the pointed item: items are searched among all the descendants (not only children -
+ * {@link WUPSelectManyControl} keeps them in `label > span`) - so an item of a nested container must not be stolen by the outer one */
+function ownerOf(item: HTMLElement): HTMLElement | null {
+  for (let p = item.parentElement; p; p = p.parentElement) {
+    if (dragOwners.has(p)) {
+      return p;
+    }
+  }
+  return null;
+}
+
+/** Sortable item with the internal service-properties assigned on the dragging start */
+type SortItem = HTMLElement & {
+  /** Index of the item (among items of all the pointed parents) before the dragging */
+  _prevIndex: number;
+  /** Parent (one of the pointed elements) which held the item before the dragging */
+  _prevTarget: HTMLElement;
+  /** True for the clone that follows the cursor */
+  __isDragItem?: boolean;
+  /** True while the return-animation isn't finished */
+  __isReturning?: boolean;
+};
 
 declare global {
   namespace WUP.Sort {
@@ -29,6 +54,37 @@ declare global {
        * @defaultValue 'ghost' */
       dropIndicator: "ghost" | "line";
     }
+    /** Options of {@link WUPSortElement.$attach} */
+    interface AttachOptions {
+      /** Css-class-name applied to the pointed element(s) for the built-in styles;
+       * point `null` if styles are defined by yourself @defaultValue "wup-sort" */
+      className?: string | null;
+      /** Enables removing an item when it's dropped outside the pointed element(s): `onChange` is called with `removedIndex`
+       * (removing the item from the DOM is the responsibility of the callback);
+       * otherwise dragging outside does nothing and the item is returned back @defaultValue false */
+      canRemove?: boolean;
+      /** Style of the indicator that shows the new place of the dragged item:
+       * `ghost` - the item itself is moved between other items; `line` - a line is painted over the layout between items
+       * @defaultValue "ghost" */
+      dropIndicator?: "ghost" | "line";
+    }
+    /** New state of a single parent - see {@link WUPSortElement.$attach} pointed with several parents */
+    interface AttachChange {
+      /** Parent which items are described here (one of the pointed elements) */
+      parent: HTMLElement;
+      /** New ordered indexes of the items of this parent; for example was [0,1,2] and changed to [2,1,0].
+       * WARN: `-1` marks the item that came from another parent (it has no previous index here) */
+      newOrderedIndexes: number[];
+      /** Items of this parent in the new order */
+      items: HTMLElement[];
+      /** Index in `items` of the item dropped outside all the parents (requires `options.canRemove`);
+       * `-1` when nothing is removed. WARN: removing the item from the DOM is the responsibility of the callback */
+      removedIndex: number;
+    }
+    /** Callback of {@link WUPSortElement.$attach} pointed with the single parent */
+    type AttachOnChange = (newOrderedIndexes: number[], items: HTMLElement[], removedIndex: number) => void;
+    /** Callback of {@link WUPSortElement.$attach} pointed with several parents */
+    type AttachOnChangeMulti = (from: AttachChange, to: AttachChange) => void;
   }
 
   interface HTMLElementTagNameMap {
@@ -147,37 +203,59 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
   };
 
   /** Apply sorting on children with attr [item] except attr [item=false] of the pointed element.
-   * @param el parent which children
+   * @param el parent which children must be sortable
    * @param onChange called when the order of children is changed or an item is removed (instead of the `$change` event of the custom element);
-   * `removedIndex` is the index of the item dropped outside the element (`-1` when nothing is removed)
-   * @param options.className css-class-name applied to the element for the built-in styles; point `null` if styles are defined by yourself @defaultValue "wup-sort"
-   * @param options.canRemove enables removing an item when it's dropped outside the element: `onChange` is called with `removedIndex`
-   * (removing the item from the DOM is the responsibility of the callback);
-   * otherwise dragging outside does nothing and the item is returned back @defaultValue false
-   * @param options.dropIndicator style of the indicator that shows the new place of the dragged item:
-   * `ghost` - the item itself is moved between other items; `line` - a line is painted over the layout between items @defaultValue "ghost"
+   * `newOrderedIndexes[newIndex]` is the previous index of the item; `removedIndex` is the index of the item
+   * dropped outside the element (`-1` when nothing is removed)
+   * @param options see {@link WUP.Sort.AttachOptions}
    * @returns detach-function (removing eventListeners & applied styles)
    * @example
    * ```js
    * const el = document.querySelector("ul");
    * const detach = WUPSortElement.$attach(el, (newOrderedIndexes, items, removedIndex) => console.warn({ newOrderedIndexes, items, removedIndex }));
    * ``` */
+  static $attach(el: HTMLElement, onChange: WUP.Sort.AttachOnChange, options?: WUP.Sort.AttachOptions): () => void;
+
+  /** Apply sorting on children with attr [item] except attr [item=false] of the pointed elements;
+   * an item can be dragged from one parent into another.
+   * @param parents parents which children must be sortable (an item can be moved between them)
+   * @param onChange called when the order of children is changed, an item is moved into another parent or removed;
+   * `from` describes the parent which held the dragged item, `to` - the parent which holds it now
+   * (see {@link WUP.Sort.AttachChange}). WARN: `from === to` (the same object) when the item didn't change the parent
+   * @param options see {@link WUP.Sort.AttachOptions}
+   * @returns detach-function (removing eventListeners & applied styles)
+   * @example
+   * ```js
+   * const detach = WUPSortElement.$attach(
+   *   [document.getElementById("todo"), document.getElementById("done")],
+   *   (from, to) => {
+   *     setTodo(from.newOrderedIndexes.map((i) => ...)); // -1 means the item came from another parent
+   *     from !== to && setDone(to.newOrderedIndexes.map((i) => ...));
+   *   }
+   * );
+   * ``` */
   static $attach(
-    el: HTMLElement,
-    onChange: (newOrderedIndexes: number[], items: HTMLElement[], removedIndex: number) => void,
-    options?: {
-      className?: string | null /* wup-sort by default */;
-      canRemove?: boolean;
-      dropIndicator?: "ghost" | "line" /* ghost by default */;
-    }
+    parents: HTMLElement[],
+    onChange: WUP.Sort.AttachOnChangeMulti,
+    options?: WUP.Sort.AttachOptions
+  ): () => void;
+
+  static $attach(
+    el: HTMLElement | HTMLElement[],
+    onChange: WUP.Sort.AttachOnChange | WUP.Sort.AttachOnChangeMulti,
+    options?: WUP.Sort.AttachOptions
   ): () => void {
-    const savedDetach = attachLst.get(el);
-    if (savedDetach) {
-      console.warn(
-        `${tagName.toUpperCase()}. $attach is called again on the same element. Possible memory leak. Use detach() before new attach`
-      );
-      savedDetach();
-    }
+    const isMulti = Array.isArray(el);
+    const targets = isMulti ? el : [el];
+    targets.forEach((t) => {
+      const savedDetach = attachLst.get(t);
+      if (savedDetach) {
+        console.warn(
+          `${tagName.toUpperCase()}. $attach is called again on the same element. Possible memory leak. Use detach() before new attach`
+        );
+        savedDetach(); // WARN: it removes every element of the previous attach from attachLst - so the next elements aren't warned twice
+      }
+    });
 
     const className = options?.className !== undefined ? options.className : tagName; // WARN: `null` disables styles at all - so `??` isn't suitable here
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -192,25 +270,51 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
         addedStyles.add(className);
         this.$refStyle!.append(this.$style.replace(/:host/g, `.${className}`)); // :host matches only the custom element itself - so it's replaced with the class-selector
       }
-      el.classList.add(className);
-      rClass = (): void => el.classList.remove(className);
+      targets.forEach((t) => t.classList.add(className));
+      rClass = (): void => targets.forEach((t) => t.classList.remove(className));
     }
 
     const dropIndicator = options?.dropIndicator ?? this.$defaults.dropIndicator;
     // WARN: async (as the $change event of the custom element) - to be called when the return-animation is started & listeners are removed
     const rDragdrop = this.applyDragdrop(
-      el,
-      (value, items, removedIndex) => setTimeout(() => onChange.call(el, value, items, removedIndex)),
+      targets,
+      (value, items, removedIndex, trgFrom, trgTo) =>
+        setTimeout(() => {
+          if (!isMulti) {
+            (onChange as WUP.Sort.AttachOnChange).call(el, value, items, removedIndex);
+            return;
+          }
+          // WARN: internally items of all the parents are handled as the single list - so it's split back per parent
+          const prevItems: HTMLElement[] = [];
+          items.forEach((a, i) => (prevItems[value[i]] = a));
+          const removed = removedIndex === -1 ? null : items[removedIndex];
+          const changeOf = (parent: HTMLElement): WUP.Sort.AttachChange => {
+            const wasAt = new Map<HTMLElement, number>(); // previous index (in this parent) of every item that was here
+            prevItems.forEach((a) => (a as SortItem)._prevTarget === parent && wasAt.set(a, wasAt.size));
+            const now = items.filter((a) => parent.contains(a));
+            return {
+              parent,
+              items: now,
+              newOrderedIndexes: now.map((a) => wasAt.get(a) ?? -1), // WARN: `-1` when the item came from another parent
+              removedIndex: removed && parent.contains(removed) ? now.indexOf(removed) : -1,
+            };
+          };
+          const from = changeOf(trgFrom);
+          // WARN: the same object when the parent isn't changed - so `from === to` is the marker of it for the developer
+          (onChange as WUP.Sort.AttachOnChangeMulti).call(el, from, trgTo === trgFrom ? from : changeOf(trgTo));
+        }),
       { canRemove: options?.canRemove, getDropIndicator: () => dropIndicator }
     );
 
     const detach = (): void => {
       rDragdrop();
       rClass();
-      el.removeAttribute("hovered");
-      attachLst.delete(el);
+      targets.forEach((t) => {
+        t.removeAttribute("hovered");
+        attachLst.delete(t);
+      });
     };
-    attachLst.set(el, detach);
+    targets.forEach((t) => attachLst.set(t, detach));
 
     return detach;
   }
@@ -236,10 +340,12 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
     );
   }
 
-  /** Called to apply dragdrop logic on the pointed element
-   * @param target element which children (with attr [item]) must be sortable
+  /** Called to apply dragdrop logic on the pointed element(s)
+   * @param target element which children (with attr [item]) must be sortable; point an array to drag an item
+   * from one target into another (items of all the targets are handled as the single list - so indexes of `onChange` are related to it)
    * @param onChange called when the order of items is changed or an item is removed (by the end of dragging);
-   * `removedIndex` is the index of the item dropped outside the target (`-1` when nothing is removed)
+   * `removedIndex` is the index of the item dropped outside the targets (`-1` when nothing is removed);
+   * `trgFrom` & `trgTo` are the targets which held the dragged item before & after the dragging (the same one when it isn't changed)
    * @param opts.canRemove enables removing an item when it's dropped outside the target: `onChange` is called with `removedIndex`
    * (removing the item from the DOM is the responsibility of the callback);
    * otherwise dragging outside does nothing and the item is returned back
@@ -247,12 +353,19 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
    * after the init (called once per dragging - so the style isn't changed in the middle of it) @defaultValue "ghost"
    * @returns remover of eventListeners */
   protected static applyDragdrop(
-    target: HTMLElement,
-    onChange: (value: number[], items: HTMLElement[], removedIndex: number) => void,
+    target: HTMLElement | HTMLElement[],
+    onChange: (
+      value: number[],
+      items: HTMLElement[],
+      removedIndex: number,
+      trgFrom: HTMLElement,
+      trgTo: HTMLElement
+    ) => void,
     opts?: { canRemove?: boolean; getDropIndicator?: () => WUP.Sort.Options["dropIndicator"] }
   ): () => void {
     const canRemove = opts?.canRemove;
-    return onEvent(target, "pointerdown", (e) => {
+    const targets = Array.isArray(target) ? target : [target];
+    const onDown = (e: PointerEvent & { target: EventTarget }): void => {
       if (e.button || e.isPrimary === false) {
         // WARN: `=== false` because the property is missing on synthetic events
         return; // ignore right-click & non-primary pointers (2nd+ finger of the multi-touch)
@@ -263,31 +376,47 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
         return; // prevent sort during the editing when user clicks on control and selects text
       }
 
-      const $items = (
-        Array.prototype.slice.call(target.querySelectorAll("[item='']")) as Array<
-          HTMLElement & { _prevIndex: number; __isDragItem?: boolean; __isReturning?: boolean }
-        >
-      ).filter((x) => !x.__isDragItem); // possible when user moves item + mouseUp + during the animation gets it again
+      // WARN: items of all the targets are gathered into the single array (in the order of the targets) - so indexes of onChange
+      // are related to it & the reorder-logic below doesn't care whether the new place is in the same target or in another one
+      const $items = targets
+        .reduce((arr, t) => {
+          const lst = (Array.prototype.slice.call(t.querySelectorAll("[item='']")) as SortItem[]) //
+            .filter((x) => ownerOf(x) === t); // skip items of a nested container (a nested <wup-sort> or another attached element)
+          lst.forEach((x) => (x._prevTarget = t)); // to report the previous place of every item (see $attach with several parents)
+          return arr.concat(lst);
+        }, [] as SortItem[])
+        .filter((x) => !x.__isDragItem); // possible when user moves item + mouseUp + during the animation gets it again
       $items.forEach((x, i) => (x._prevIndex = i));
 
       const t = e.target;
-      // WARN: $items is always an array (result of Array.prototype.slice) - so optional chaining & non-null assertion aren't required here
+      // WARN: $items is always an array - so optional chaining & non-null assertion aren't required here
       let eli = $items.findIndex((item) => t === item || (t instanceof Node && item.contains(t)));
       if (eli === -1) {
         return;
       }
 
-      const el = $items![eli];
+      const el = $items[eli];
       if (el.__isReturning) {
         return; // WARN: must be before `activeEl.draggable` - the item can't be grabbed again until its return-animation ends (otherwise the animation removes fresh [drop] & clone)
       }
+      // WARN: the item can be moved into another target without changing its index in the whole set - so the index isn't enough to detect the change
+      const elParent = el.parentElement;
       let dr: HTMLElement & { __isDragItem?: boolean };
       let isInside = true; // false when the item is dragged outside the target (to remove it - see canRemove)
       let isEnded = false; // to prevent double-handling: pointerup & pointercancel can be fired both
       // WARN: the style is defined once per dragging - otherwise changing options in the middle breaks the started logic
       const isLine = opts?.getDropIndicator?.() === "line";
       let dropLine: HTMLElement | undefined; // indicator of the new place (only for dropIndicator: 'line')
-      let dropAt = -1; // index of the item before which the dragged one must be inserted (only for dropIndicator: 'line')
+      // WARN: the DOM-place is stored (not only the index) - the new place can be in another target where the index-math isn't
+      // applicable, and `next` can be a non-item element ([item=false]) - so the index isn't derivable from it
+      let dropTo: { at: number; parent: HTMLElement; next: Node | null } | undefined; // new place (only for dropIndicator: 'line')
+      const lineW = 1; // thickness of the line-indicator
+      // WARN: the new place is searched only among items of the pointed target - otherwise the nearest item is searched over all
+      // the targets where the DOM-order isn't the visual order (2 lists side by side) and lines are detected wrongly
+      const trgFrom = targets.find((a) => a.contains(el))!; // WARN: always found - el is taken from the targets themselves
+      let trgActive = trgFrom;
+      /** Returns the target which holds the dragged item now (it's changed when the item is dragged into another target) */
+      const trgTo = (): HTMLElement => targets.find((a) => a.contains(el))!; // WARN: always found - the item isn't removed from the DOM here
 
       // WARN: must be after the `eli === -1` return - otherwise draggability of non-item targets is destroyed forever (`cancel` isn't registered yet)
       activeEl._wasDraggable = activeEl.draggable;
@@ -320,8 +449,73 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
       let isThrottle = false;
       // WARN: getBoundingClientRect forces layout (N calls per pointermove) - so rects are cached and reset only when they really change
       let rects: DOMRect[] | null = null;
+      let trgRects: DOMRect[] | null = null; // rects of the targets: to detect over which one the cursor is
       let isRowLayout = false; // true when items are rendered horizontally (or multiline) - see rects below
-      const rScroll = onEvent(document, "scroll", () => (rects = null), { capture: true, passive: true }); // scroll shifts viewport-based rects
+      let iFrom = 0; // index in $items of the 1st item of trgActive
+      let iTo = $items.length - 1; // index in $items of the last item of trgActive (`iFrom - 1` when the target has no items at all)
+      let rangeOf: HTMLElement | undefined; // target which iFrom, iTo & isRowLayout are defined for (see updateRange)
+      const resetRects = (): void => {
+        rects = null;
+        trgRects = null;
+      };
+      const rScroll = onEvent(document, "scroll", resetRects, { capture: true, passive: true }); // scroll shifts viewport-based rects
+
+      /** Returns rects of the targets (cached - see the WARN above) */
+      const getTrgRects = (): DOMRect[] => {
+        if (!trgRects) {
+          trgRects = targets.map((a) => a.getBoundingClientRect());
+        }
+        return trgRects;
+      };
+
+      /** Defines iFrom, iTo & isRowLayout: the range in $items that belongs to trgActive */
+      const updateRange = (arr: DOMRect[]): void => {
+        rangeOf = trgActive;
+        iFrom = $items.findIndex((item) => trgActive.contains(item));
+        if (iFrom === -1) {
+          // the target has no items at all (all of them are moved to another target) - so the new one must be placed
+          // between items of the previous & the next targets: WARN: items of a target are always a continuous range in $items
+          const ti = targets.indexOf(trgActive);
+          const iNext = $items.findIndex((item) => targets.some((a, i) => i > ti && a.contains(item)));
+          iFrom = iNext === -1 ? $items.length : iNext;
+          iTo = iFrom - 1; // empty range
+        } else {
+          iTo = iFrom;
+          while (iTo + 1 < $items.length && trgActive.contains($items[iTo + 1])) {
+            ++iTo;
+          }
+        }
+        // items are rendered in a row when at least 2 of them are on the same line (a multiline grid is a row-layout too)
+        isRowLayout = false;
+        for (let i = iFrom + 1; isLine && !isRowLayout && i <= iTo; ++i) {
+          const prev = arr[i - 1];
+          isRowLayout = Math.abs(arr[i].y + arr[i].height / 2 - (prev.y + prev.height / 2)) <= 3; // 3px because centers can be not aligned properly
+        }
+      };
+
+      /** Moves the dragged item into the pointed DOM-place & to the pointed index of $items */
+      const moveItem = (index: number, parent: HTMLElement, next: Node | null): void => {
+        parent.insertBefore(el, next); // WARN: the parent can be another target - so the item is moved between the lists
+        $items.splice(index, 0, $items.splice(eli, 1)[0]);
+        eli = index;
+        resetRects(); // the reorder re-layouts items (& the targets themselves) - so cached rects are outdated
+        isThrottle = true;
+        setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
+      };
+
+      /** Paints the line-indicator at the pointed place (only for dropIndicator: 'line') */
+      const paintLine = (x: number, y: number, w: number, h: number): void => {
+        if (!dropLine) {
+          dropLine = document.createElement("div");
+          dropLine.setAttribute("drop-line", "");
+          el.parentElement!.prepend(dropLine); // WARN: position:fixed - so the parent doesn't affect the layout
+        }
+        dropLine.style.display = "";
+        dropLine.style.width = `${w}px`;
+        dropLine.style.height = `${h}px`;
+        dropLine.style.transform = `translate(${x}px, ${y}px)`;
+      };
+
       const rect = el.getBoundingClientRect();
       const firstCoord = { x: e.clientX - rect.x, y: e.clientY - rect.y };
       const downCoord = { x: e.clientX, y: e.clientY }; // to detect if user moved enough to start dragging (not just clicked)
@@ -357,7 +551,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             dr.style.height = `${el.offsetHeight}px`;
             el.parentElement!.prepend(dr);
             el.setAttribute("drop", ""); // mark current element
-            target.setAttribute("hovered", ""); // if pick item and move cursor fast control-focus-frame is blinking because because cursor much faster than js events
+            // if pick item and move cursor fast control-focus-frame is blinking because because cursor much faster than js events
+            targets.forEach((a) => a.setAttribute("hovered", "")); // WARN: on every target - the item can be dropped into any of them
             dr.style.top = "0";
             dr.style.left = "0";
             dr.style.position = "fixed";
@@ -369,8 +564,9 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
           const y = ev.clientY - firstCoord.y; // el.offsetHeight / 2;
           dr.style.transform = `translate(${x}px, ${y}px)`;
           if (canRemove) {
-            // define if the item is inside the target (if outside - it must be removed)
-            isInside = isOverlap(target.getBoundingClientRect(), dr.getBoundingClientRect());
+            // define if the item is inside the targets (if outside - it must be removed)
+            const rDrag = dr.getBoundingClientRect();
+            isInside = getTrgRects().some((r) => isOverlap(r, rDrag));
             isInside ? dr.removeAttribute("remove") : dr.setAttribute("remove", "");
             if (!isInside) {
               dropLine && (dropLine.style.display = "none"); // the item is going to be removed - so the new place is meaningless
@@ -381,42 +577,56 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
           if (isThrottle) {
             return;
           }
+          // find the target under the cursor: the item is dragged from one target into another
+          const iTrg = getTrgRects().findIndex(
+            (r) => ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom
+          );
+          // WARN: when the cursor is outside all the targets the previous one is kept - otherwise the item jumps back & forth
+          if (iTrg !== -1) {
+            trgActive = targets[iTrg]; // WARN: rects are kept - crossing the cursor doesn't re-layout items (only the range is re-defined below)
+          }
           // find nearest line
           let nearest = eli; // index of nearest item
           let nearestEnd = eli; // index of last item in the nearest line
           let dist = Number.MAX_SAFE_INTEGER; // distance between centers
           if (!rects) {
-            const arr = $items!.map((item) => item.getBoundingClientRect());
-            rects = arr;
-            // items are rendered in a row when at least 2 of them are on the same line (a multiline grid is a row-layout too)
-            isRowLayout =
-              isLine &&
-              arr.some((r, i) => {
-                const prev = arr[i - 1];
-                return i > 0 && Math.abs(r.y + r.height / 2 - (prev.y + prev.height / 2)) <= 3; // 3px because centers can be not aligned properly
-              });
+            rects = $items.map((item) => item.getBoundingClientRect());
+            rangeOf = undefined; // the reorder can move an item into another target - so the range is outdated too
+          }
+          if (rangeOf !== trgActive) {
+            updateRange(rects);
+          }
+          if (iTo < iFrom) {
+            // the active target has no items at all - so the dragged one becomes the 1st there
+            const r = getTrgRects()[targets.indexOf(trgActive)];
+            if (isLine) {
+              dropTo = { at: iFrom, parent: trgActive, next: null };
+              paintLine(r.x, r.y, r.width, lineW); // WARN: on the top edge - there is no gap between items to point
+            } else {
+              // WARN: iFrom is the place BETWEEN items of the neighbor targets - so it's shifted when the item is taken from the left
+              moveItem(iFrom > eli ? iFrom - 1 : iFrom, trgActive, null);
+            }
+            return;
           }
           // WARN: undefined (not 0) - otherwise the 1st item is treated as a part of the line y=0 (possible when page is scrolled)
           // and nearestEnd goes out of rects-range
           let lineY: number | undefined;
-          rects.some((r, i) => {
-            const nextLineY = r.y + r.height / 2;
+          for (let i = iFrom; i <= iTo; ++i) {
+            const nextLineY = rects[i].y + rects[i].height / 2;
             if (lineY === undefined || Math.abs(nextLineY - lineY) > 3) {
               // compare with 3px because centers can be not aligned properly
               lineY = nextLineY; // it's next line
               const c = Math.abs(ev.clientY - lineY);
-              if (c < dist) {
-                dist = c;
-                nearest = i; // index of 1st item in the nearest line
-                nearestEnd = i;
-              } else {
-                return true; // break search because next line is further then previous
+              if (c >= dist) {
+                break; // break search because next line is further then previous
               }
+              dist = c;
+              nearest = i; // index of 1st item in the nearest line
+              nearestEnd = i;
             } else {
               nearestEnd += 1;
             }
-            return false;
-          });
+          }
           // find nearest item in the nearest line
           dist = Number.MAX_SAFE_INTEGER;
           for (let i = nearest; i <= nearestEnd; ++i) {
@@ -429,24 +639,27 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
               nearest = i;
             }
           }
+          // WARN: items of other targets aren't neighbors at all - otherwise the gap is measured between different lists
+          const at = (i: number): DOMRect | undefined => (i >= iFrom && i <= iTo ? rects![i] : undefined);
           // paint the line-indicator instead of moving the item (the layout isn't shifted at all)
           if (isLine) {
             const r = rects[nearest];
             // WARN: for a row the line is vertical (before/after the item), for a column - horizontal (above/below the item)
             const isBefore = isRowLayout ? ev.clientX < r.x + r.width / 2 : ev.clientY < r.y + r.height / 2;
-            dropAt = isBefore ? nearest : nearest + 1;
-            if (!dropLine) {
-              dropLine = document.createElement("div");
-              dropLine.setAttribute("drop-line", "");
-              el.parentElement!.prepend(dropLine); // WARN: position:fixed - so the parent doesn't affect the layout
-            }
+            const nEl = $items[nearest];
+            // WARN: `nEl.nextElementSibling` (not `null`) - otherwise the item is appended after non-sortable items ([item=false])
+            dropTo = {
+              at: isBefore ? nearest : nearest + 1,
+              parent: nEl.parentElement!,
+              next: isBefore ? nEl : nEl.nextElementSibling,
+            };
             // WARN: the line must be painted in the middle of the gap between 2 items (not on the edge of the nearest one)
             // because user drops the item exactly between them
             const isNear = (a: DOMRect | undefined): a is DOMRect =>
               // for a row the neighbor must be on the same line - otherwise the gap is between lines (3px because centers can be not aligned properly)
               !!a && (!isRowLayout || Math.abs(a.y + a.height / 2 - (r.y + r.height / 2)) <= 3);
-            const other = rects[isBefore ? nearest - 1 : nearest + 1]; // item on the other side of the gap
-            const mirror = rects[isBefore ? nearest + 1 : nearest - 1]; // item on the opposite side of the nearest (see below)
+            const other = at(isBefore ? nearest - 1 : nearest + 1); // item on the other side of the gap
+            const mirror = at(isBefore ? nearest + 1 : nearest - 1); // item on the opposite side of the nearest (see below)
             const start = isRowLayout ? "x" : "y"; // axis of the gap: horizontal for a row, vertical for a column
             const end = isRowLayout ? "right" : "bottom";
             let gap = 0; // 0 when the nearest item has no neighbors at all - so the line is centered on its edge
@@ -456,12 +669,9 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
               // the gap is outside the range of items (before the 1st or after the last one) - so mirror the gap of the opposite side
               gap = isBefore ? mirror[start] - r[end] : r[start] - mirror[end];
             }
-            const w = 1; // thickness of the line
-            const pos = (isBefore ? r[start] - Math.max(gap, 0) / 2 : r[end] + Math.max(gap, 0) / 2) - w / 2;
-            dropLine.style.display = "";
-            dropLine.style.width = `${isRowLayout ? w : r.width}px`;
-            dropLine.style.height = `${isRowLayout ? r.height : w}px`;
-            dropLine.style.transform = isRowLayout ? `translate(${pos}px, ${r.y}px)` : `translate(${r.x}px, ${pos}px)`;
+            const pos = (isBefore ? r[start] - Math.max(gap, 0) / 2 : r[end] + Math.max(gap, 0) / 2) - lineW / 2;
+            // WARN: for a row the line is vertical (the height of the item), for a column - horizontal (the width of the item)
+            isRowLayout ? paintLine(pos, r.y, lineW, r.height) : paintLine(r.x, pos, r.width, lineW);
             return;
           }
           // move to the new place
@@ -475,15 +685,13 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             // WARN: for another line there is no such check - the nearest line is detected by the closest center already
             // (otherwise the item is moved only when the cursor reaches the middle of the another line)
             // WARN: DOM order === visual order - so `nearest > eli` always means the item to the right or below
-            if (!isSameLine || (nearest > eli ? ev.clientX >= half : ev.clientX < half)) {
-              const trg = $items![nearest];
+            // WARN: when the cursor is over another target the item is moved immediately - the intention is unambiguous there
+            // (the middle-crossing rule is about neighbors of the same list)
+            const isCross = !trgActive.contains(el);
+            if (isCross || !isSameLine || (nearest > eli ? ev.clientX >= half : ev.clientX < half)) {
+              const trg = $items[nearest];
               const isLeftOrTop = eli > nearest; // the nearest item is before the dragged one - so it must be replaced by it
-              trg.parentElement!.insertBefore(el, isLeftOrTop ? trg : trg.nextElementSibling); // insert before OR after
-              $items!.splice(nearest, 0, $items!.splice(eli, 1)[0]);
-              eli = nearest;
-              rects = null; // the reorder re-layouts items - so cached rects are outdated
-              isThrottle = true;
-              setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
+              moveItem(nearest, trg.parentElement!, isLeftOrTop ? trg : trg.nextElementSibling); // insert before OR after
             }
           }
         },
@@ -498,7 +706,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
         activeEl.draggable = activeEl._wasDraggable;
 
         if (dr) {
-          target.removeAttribute("hovered");
+          targets.forEach((a) => a.removeAttribute("hovered"));
           dropLine?.remove();
           if (!isInside) {
             el.removeAttribute("drop");
@@ -507,19 +715,17 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             onChange(
               $items.map((x) => x._prevIndex),
               $items,
-              eli
+              eli,
+              trgFrom,
+              trgTo() // WARN: the item can be moved into another target and only after that dragged outside
             );
           } else {
-            if (dropAt !== -1) {
+            if (dropTo) {
               // WARN: only for dropIndicator:'line' - the item isn't moved during the dragging, so the new order is applied here
-              const newIndex = dropAt > eli ? dropAt - 1 : dropAt; // index after removing the item from the previous place
-              if (newIndex !== eli) {
-                const last = $items[$items.length - 1];
-                // WARN: `last.nextElementSibling` (not `null`) - otherwise the item is appended after non-sortable items ([item=false])
-                const next = dropAt < $items.length ? $items[dropAt] : last.nextElementSibling;
-                el.parentElement!.insertBefore(el, next);
-                $items.splice(newIndex, 0, $items.splice(eli, 1)[0]);
-                eli = newIndex;
+              const newIndex = dropTo.at > eli ? dropTo.at - 1 : dropTo.at; // index after removing the item from the previous place
+              // WARN: the index can be the same when the item is moved into another target (the neighbor one) - so the parent is checked also
+              if (newIndex !== eli || dropTo.parent !== el.parentElement) {
+                moveItem(newIndex, dropTo.parent, dropTo.next);
               }
             }
             const animTime = parseMsTime(window.getComputedStyle(el).getPropertyValue("--anim-t"));
@@ -539,11 +745,13 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
               dr.remove();
             });
 
-            el._prevIndex !== $items.indexOf(el) &&
+            (el._prevIndex !== $items.indexOf(el) || el.parentElement !== elParent) &&
               onChange(
                 $items.map((x) => x._prevIndex),
                 $items,
-                -1
+                -1,
+                trgFrom,
+                trgTo()
               );
           }
         }
@@ -557,7 +765,15 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 
       const r2 = onEvent(document, "pointerup", cancel, { capture: true });
       const r3 = onEvent(document, "pointercancel", cancel, { capture: true }); // pointerup not called if touchmove can't be cancelled and browser scrolls
-    });
+    };
+
+    // WARN: the listener is registered on every target - but the logic inside is always about all of them (see $items)
+    targets.forEach((t) => dragOwners.add(t));
+    const removers = targets.map((t) => onEvent(t, "pointerdown", onDown));
+    return () => {
+      targets.forEach((t) => dragOwners.delete(t));
+      removers.forEach((rm) => rm());
+    };
   }
 
   protected setValue(value: number[], items: HTMLElement[], reason: "move"): void {

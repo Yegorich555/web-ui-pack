@@ -14,6 +14,8 @@ const gridItems = ["Ferrari", "Bugatti", "Lamborghini", "Porsche", "Aston Martin
 const lineItems = ["Line 1", "Line 2", "Line 3", "Line 4", "Line 5"];
 const lineGridItems = ["Red", "Green", "Blue", "Yellow", "Magenta", "Cyan", "Orange", "Purple"];
 const attachItems = ["Alpha", "Beta", "Gamma", "Delta"];
+const todoItems = ["Task 1", "Task 2", "Task 3"];
+const doneItems = ["Task 4"];
 
 export default function SortView() {
   const [list, setList] = useState(listItems);
@@ -21,6 +23,8 @@ export default function SortView() {
   const [lineList, setLineList] = useState(lineItems);
   const [lineGrid, setLineGrid] = useState(lineGridItems);
   const [attached, setAttached] = useState(attachItems);
+  const [todo, setTodo] = useState(todoItems);
+  const [done, setDone] = useState(doneItems);
 
   /** e.detail.value contains new ordered indexes: value[newIndex] === prevIndex */
   const onListChange = useCallback((el: WUPSortElement | null) => {
@@ -56,6 +60,26 @@ export default function SortView() {
       : undefined;
   }, []);
 
+  /** accepts an array of parents: an item can be dragged from one list into another */
+  const refDetachCross = useRef<(() => void) | undefined>(undefined);
+  const onCrossChange = useCallback((el: HTMLDivElement | null) => {
+    refDetachCross.current?.();
+    const lists = el ? Array.from<HTMLElement>(el.querySelectorAll("ul")) : null;
+    refDetachCross.current = lists
+      ? WUPSortElement.$attach(lists, (from, to) => {
+          const setters = [setTodo, setDone];
+          /** Applies the new state of the pointed list: `-1` marks the item that came from another list -
+           * so its value is taken from the item itself */
+          const apply = (c: WUP.Sort.AttachChange): void =>
+            setters[lists.indexOf(c.parent)]((prev) =>
+              c.newOrderedIndexes.map((i, k) => (i === -1 ? c.items[k].textContent! : prev[i]))
+            );
+          apply(from);
+          from !== to && apply(to); // WARN: `from === to` when the item didn't change the list
+        })
+      : undefined;
+  }, []);
+
   return (
     <Page //
       header="SortElement"
@@ -64,6 +88,9 @@ export default function SortView() {
         "Wrapper: makes sortable any children with attribute [item]",
         <>
           Possible to use without the wrapper: <b>WUPSortElement.$attach(el, onChange)</b>
+        </>,
+        <>
+          Dragging between several parents: <b>WUPSortElement.$attach([el1, el2], onChange)</b>
         </>,
         "Supports mouse & touchscreens (drag & drop)",
         "Supports single & multi-line (grid) layouts",
@@ -89,7 +116,7 @@ export default function SortView() {
   <div item>Item 2</div>
 </wup-sort>`,
           `html
-<!-- OR without the wrapper: see $attach below -->
+<!-- OR without the wrapper: see WUPSortElement.$attach below -->
 <ul>
   <li item>Item 1</li>
   <li item>Item 2</li>
@@ -113,9 +140,21 @@ const detach = WUPSortElement.$attach(
   // { dropIndicator: "line" } // "ghost" (default) moves the item between others; "line" paints a line between items
 );
 
+// OR point several parents: an item can be dragged from one of them into another.
+// In this case onChange gets the new state of both parents: the one which held the item & the one which holds it now
+const detachCross = WUPSortElement.$attach(
+  [document.getElementById("todo"), document.getElementById("done")],
+  (from, to) => {
+    // { parent, newOrderedIndexes, items, removedIndex } for every side
+    console.warn({ from, to });
+    // WARN: from === to (the same object) when the item didn't change the parent
+    // WARN: to.newOrderedIndexes contains -1 for the item that came from another parent
+  }
+);
+
 // the same for the custom element (or globally via WUPSortElement.$defaults.dropIndicator)
 document.querySelector("wup-sort").$options.dropIndicator = "line";
-// $attach applies class-name "wup-sort" to the element: it's used by styles instead of :host
+// WUPSortElement.$attach applies class-name "wup-sort" to the element: it's used by styles instead of :host
 // detach() is required only if the element is removed via parent.innerHTML="..."
 
 // WARN: element changes position of children itself.
@@ -183,6 +222,38 @@ document.querySelector("wup-sort").$options.dropIndicator = "line";
           <li item="false">Not sortable (item=false)</li>
         </ul>
         <div className={styles.result}>Order: {attached.join(", ")}</div>
+      </section>
+
+      <section>
+        <h3>Several lists ($attach)</h3>
+        <small>
+          Point an array of parents - <b>$attach([el1, el2], onChange)</b> - and an item can be dragged from one list
+          into another (items of all the lists are handled as the single list)
+        </small>
+        <div className={styles.columns} ref={onCrossChange}>
+          <div>
+            <b>Todo</b>
+            <ul className={styles.list}>
+              {todoItems.map((txt) => (
+                <li item="" key={txt}>
+                  {txt}
+                </li>
+              ))}
+            </ul>
+            <div className={styles.result}>{todo.join(", ") || "empty"}</div>
+          </div>
+          <div>
+            <b>Done</b>
+            <ul className={styles.list}>
+              {doneItems.map((txt) => (
+                <li item="" key={txt}>
+                  {txt}
+                </li>
+              ))}
+            </ul>
+            <div className={styles.result}>{done.join(", ") || "empty"}</div>
+          </div>
+        </div>
       </section>
     </Page>
   );

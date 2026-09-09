@@ -109,7 +109,8 @@ padding:0;}
         --sort-active-color: #25a1b6;
         --sort-active-shadow: #25a1b6;
       }
-  WUP-SORT {
+  
+      WUP-SORT {
         display: block;
       }
       WUP-SORT [item][drag],
