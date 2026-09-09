@@ -1,5 +1,7 @@
+import Example from "src/elements/example";
+import MyLink from "src/elements/myLink";
 import { WUPRadioControl } from "web-ui-pack";
-import styles from "./radio.customStyles.scss";
+import styles from "./example1.scss";
 
 WUPRadioControl.$use();
 
@@ -12,9 +14,12 @@ const items = [
 
 (window as any).storedRadioItemsStyles = items;
 
-export default function RadioCustomStyles() {
+export default function Example1() {
   return (
-    <>
+    <Example header="Customized via CSS only" link="demo/src/components/controls/radio/example1.tsx">
+      <small>
+        See details in <MyLink href="/demo/src/components/controls/radio/example1.scss">radio/example1.scss</MyLink>
+      </small>
       <wup-radio
         class={styles.custom}
         w-name="customView_1"
@@ -31,6 +36,6 @@ export default function RadioCustomStyles() {
           }
         }}
       />
-    </>
+    </Example>
   );
 }

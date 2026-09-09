@@ -9,10 +9,10 @@ import PopupView from "./components/popup/popupView";
 
 import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
-import CircleView from "./components/circleView";
-import DropdownView from "./components/dropdownView";
+import CircleView from "./components/circle/circleView";
+import DropdownView from "./components/dropdown/dropdownView";
 import SortView from "./components/sort/sortView";
-import ModalView from "./components/modalView";
+import ModalView from "./components/modal/modalView";
 
 import TextControlView from "./components/controls/text";
 import TextareaControlView from "./components/controls/textarea";
@@ -20,7 +20,7 @@ import PasswordControlView from "./components/controls/password";
 import SelectControlView from "./components/controls/select";
 import SwitchControlView from "./components/controls/switch";
 import CheckControlView from "./components/controls/check";
-import RadioControlView from "./components/controls/radio";
+import RadioControlView from "./components/controls/radio/radio";
 import CalendarControlView from "./components/controls/calendar";
 import DateControlView from "./components/controls/date";
 import TimeControlView from "./components/controls/time";
@@ -33,9 +33,9 @@ import MyLink from "./elements/myLink";
 import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
 import Login from "./components/controls/login";
-import ModalAsAlertView from "./components/modalAsAlertView";
-import NotifyView from "./components/notifyView";
-import ExportToExcelView from "./other/exportToExcel";
+import ModalAsAlertView from "./components/modal/modalAsAlertView";
+import NotifyView from "./components/notify/notifyView";
+import ExportToExcelView from "./other/excel/exportToExcel";
 
 (window as any).WUPHelpers = WUPHelpers;
 

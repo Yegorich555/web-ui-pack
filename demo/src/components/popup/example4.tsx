@@ -1,6 +1,7 @@
 //  import { useEffect } from "react";
 import WUPPopupElement from "web-ui-pack/popup/popupElement";
 import { PopupOpenCases } from "web-ui-pack/popup/popupElement.types";
+import Example from "src/elements/example";
 import styles from "./popupView.scss";
 
 export default function Example4() {
@@ -8,8 +9,7 @@ export default function Example4() {
   //   document.querySelector("main")?.scrollTo({ top: 380 });
   // }, []);
   return (
-    <>
-      <h3>Example 4</h3>
+    <Example header="Example 4" link="demo/src/components/popup/example4.tsx">
       <small>
         To avoid such behavior change option <b>toFitElement</b> (<b>document.body</b> by default)
       </small>
@@ -53,6 +53,6 @@ export default function Example4() {
         </wup-popup>
         <div />
       </div>
-    </>
+    </Example>
   );
 }
