@@ -4,6 +4,10 @@
 
 ## 1.2.8 (\_\_\_)
 
+### Fixes & Improvements
+
+- **Global**. Add missed attributes for direct usage in html
+
 ### New Features
 
 - helper [zip](src/helpers/files/zip.ts)

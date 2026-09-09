@@ -74,6 +74,8 @@ declare global {
       "w-autoFocus"?: boolean | "";
       "w-autoClose"?: boolean | "";
       "w-selfRemove"?: boolean | "";
+      "w-replace"?: boolean | "";
+      "w-confirmUnsaved"?: boolean | "";
     }
   }
   interface HTMLElement {

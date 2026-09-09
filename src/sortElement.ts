@@ -54,6 +54,13 @@ declare global {
        * @defaultValue 'ghost' */
       dropIndicator: "ghost" | "line";
     }
+    interface JSXProps extends WUP.Base.OnlyNames<Options> {
+      /** Style of the indicator that shows the new place of the dragged item:
+       * * `ghost` - the item itself is moved between other items (so the layout is shifted during the dragging)
+       * * `line` - a line is painted over the layout between items (the layout isn't shifted; the order is applied on drop)
+       * @defaultValue 'ghost' */
+      "w-dropIndicator"?: Options["dropIndicator"];
+    }
     /** Options of {@link WUPSortElement.$attach} */
     interface AttachOptions {
       /** Css-class-name applied to the pointed element(s) for the built-in styles;
@@ -104,7 +111,7 @@ declare module "react" {
     interface IntrinsicElements {
       /** Element with sort logic
        *  @see {@link WUPSortElement} */
-      [tagName]: WUP.Base.ReactHTML<WUPSortElement>; // add element to tsx/jsx intellisense (react)
+      [tagName]: WUP.Base.ReactHTML<WUPSortElement> & WUP.Sort.JSXProps; // add element to tsx/jsx intellisense (react)
     }
   }
 }
@@ -121,13 +128,13 @@ declare module "preact/jsx-runtime" {
     interface IntrinsicElements {
       /** Element with sort logic
        *  @see {@link WUPSortElement} */
-      [tagName]: HTMLAttributes<WUPSortElement>; // add element to tsx/jsx intellisense (preact)
+      [tagName]: HTMLAttributes<WUPSortElement> & WUP.Sort.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }
 
 /** Wrapper to make items/children sortable
- * @see demo {@link https://yegorich555.github.io/web-ui-pack/sortable}
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/sort}
  * @example
  * JS/TS
  * ```js
