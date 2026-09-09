@@ -784,18 +784,18 @@ describe("helper.exportToExcel", () => {
         },
       ],
       null,
-      (value, itemIndex, mapping) => {
-        calls.push(`${mapping.propName}${itemIndex}:${value.stringVal}`);
+      (value, rowIndex, mapping) => {
+        calls.push(`${mapping.propName}${rowIndex}:${value.stringVal}`);
         // an own value only: the style of the column is kept
         if (mapping.propName === "s") {
-          return itemIndex === 0 ? { value: { type: ExcelCellTypes.text, stringVal: "first" } } : undefined;
+          return rowIndex === 1 ? { value: { type: ExcelCellTypes.text, stringVal: "first" } } : undefined;
         }
         // an own style only: the mapped value is kept
         return value.stringVal.startsWith("-") ? { style: red } : undefined;
       }
     );
-    // it's called for every data-cell (& never for a header) with the value that getCellValue has mapped
-    expect(calls).toEqual(["v0:1", "s0:a", "v1:-2", "s1:b", "v2:-3", "s2:c"]);
+    // it's called for the header-row (the `rowIndex` 0) & then for every data-cell with the mapped value
+    expect(calls).toEqual(["v0:V", "s0:S", "v1:1", "s1:a", "v2:-2", "s2:b", "v3:-3", "s3:c"]);
     const xml = files["xl/worksheets/sheet1.xml"];
     // the pointed value replaces the mapped one & keeps the style of the column
     expect(xml).toContain(`<c r="B2" s="${cellStyleId("A2")}" t="inlineStr"><is><t>first</t></is></c>`);
@@ -821,6 +821,70 @@ describe("helper.exportToExcel", () => {
     const expected = noCb();
     await exportToExcel(sheets, null, () => undefined);
     expect(noCb()).toBe(expected);
+  });
+
+  test("cellCallback: an own value, style & tooltip of a header-cell (rowIndex 0)", async () => {
+    const blue = { color: "#0000ff" };
+    const sheets = [
+      { name: "H", data: [{ v: "a", second: "b" }], mapping: [{ propName: "v" }, { propName: "second" }] },
+    ];
+    const run = (cb) => exportToExcel(sheets, null, cb);
+
+    await run();
+    const base = colWidth(1);
+    const headerFont = fontById(cellStyleId("A1"));
+
+    await run((_value, rowIndex, mapping) =>
+      !rowIndex && mapping.propName === "v"
+        ? { value: { type: ExcelCellTypes.text, stringVal: "Renamed & wiiiiiide" }, style: blue, tooltip: "About" }
+        : undefined
+    );
+    // the pointed text replaces the mapped header in the cell...
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(
+      `<c r="A1" s="${cellStyleId("A1")}" t="inlineStr"><is><t>Renamed &amp; wiiiiiide</t></is></c>`
+    );
+    // ...and in the table-part either: Excel repairs the file if a column-name differs from its header-cell
+    expect(files["xl/tables/table1.xml"]).toContain(`<tableColumn id="1" name="Renamed &amp; wiiiiiide"/>`);
+    expect(files["xl/tables/table1.xml"]).toContain(`<tableColumn id="2" name="Second"/>`); // the 2nd is untouched
+    // the style is merged into the header-font of the column, so the default bold isn't lost
+    expect(fontById(cellStyleId("A1"))).toBe(
+      `<b/><sz val="11"/><color rgb="FF0000FF"/><name val="Calibri"/><family val="2"/>`
+    );
+    // ...the data-cells of the column & the other header keep their own fonts
+    expect(fontById(cellStyleId("A2"))).not.toContain("<b/>");
+    expect(fontById(cellStyleId("B1"))).toBe(headerFont);
+    // the auto-width follows such a header exactly as it follows a data-cell
+    expect(colWidth(1)).toBeGreaterThan(base);
+    // the note is anchored to the header-row (0-based, so A1 is the column 0 & the row 0)
+    expect(files["xl/comments1.xml"]).toContain(`<comment ref="A1" authorId="0">`);
+    expect(files["xl/drawings/vmlDrawing1.vml"]).toContain(`<x:Row>0</x:Row><x:Column>0</x:Column>`);
+    expectValidXml("xl/worksheets/sheet1.xml");
+    expectValidXml("xl/tables/table1.xml");
+    expectValidXml("xl/comments1.xml");
+    expectValidXml("xl/drawings/vmlDrawing1.vml");
+  });
+
+  test("cellCallback: a multiline header-cell & a non-text value of it", async () => {
+    const sheets = [{ name: "HW", data: [{ v: 1 }], mapping: [{ propName: "v" }] }];
+    const headerValue = (value) => exportToExcel(sheets, null, (_v, rowIndex) => (rowIndex ? undefined : { value }));
+
+    // `textWrap` is the only type that affects a header-cell: such a cell is wrapped by Excel
+    await headerValue({ type: ExcelCellTypes.textWrap, stringVal: "Two\nlines" });
+    expect(xfById(cellStyleId("A1"))).toContain(`wrapText="1"`);
+    const wrapped = colWidth();
+
+    // ...and the column is measured by the longest line of it & not by the whole text
+    await headerValue({ type: ExcelCellTypes.text, stringVal: "Two lines" });
+    expect(xfById(cellStyleId("A1"))).not.toContain(`wrapText="1"`);
+    expect(wrapped).toBeLessThan(colWidth());
+
+    // any other type is stored as a text either: the table refers to a column by the very text of its header
+    await headerValue({ type: ExcelCellTypes.number, stringVal: "12" });
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(
+      `<c r="A1" s="${cellStyleId("A1")}" t="inlineStr"><is><t>12</t></is></c>`
+    );
+    expect(files["xl/tables/table1.xml"]).toContain(`<tableColumn id="1" name="12"/>`);
+    expectValidXml("xl/worksheets/sheet1.xml");
   });
 
   test("cellCallback: the auto-width follows the style of a cell", async () => {
@@ -868,7 +932,7 @@ describe("helper.exportToExcel", () => {
     await exportToExcel(sheets);
     const [baseDate, baseWrap] = [colWidth(1), colWidth(2)];
 
-    await exportToExcel(sheets, null, (_v, itemIndex) => (itemIndex === 0 ? { style: big } : undefined));
+    await exportToExcel(sheets, null, (_v, rowIndex) => (rowIndex === 1 ? { style: big } : undefined));
     // a date-cell keeps the number-format of the column & a wrapped one - its wrapText, both with the own font
     expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164"`);
     expect(fontById(cellStyleId("A2"))).toContain(`<sz val="22"/>`);
@@ -901,7 +965,7 @@ describe("helper.exportToExcel", () => {
     await exportToExcel(sheets);
     const base = colWidth();
     // the italic cell is measured by its own face, so the column follows it
-    await exportToExcel(sheets, null, (_v, itemIndex) => (itemIndex === 1 ? { style: italic } : undefined));
+    await exportToExcel(sheets, null, (_v, rowIndex) => (rowIndex === 2 ? { style: italic } : undefined));
     expect(colWidth()).toBeGreaterThan(base);
     // ...the very same date & the very same number-format on the both rows: only the face differs
     expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164"`);
@@ -925,7 +989,7 @@ describe("helper.exportToExcel", () => {
     await exportToExcel(sheets);
     const base = colWidth();
     // a smaller font renders the very same date narrower, so it never shrinks the column
-    await exportToExcel(sheets, null, (_v, itemIndex) => (itemIndex === 0 ? { style: small } : undefined));
+    await exportToExcel(sheets, null, (_v, rowIndex) => (rowIndex === 1 ? { style: small } : undefined));
     expect(colWidth()).toBe(base);
     // the very same style-object on the both rows is resolved once => a single cell-format & a single measuring
     await exportToExcel(sheets, null, () => ({ style: big }));
@@ -946,9 +1010,9 @@ describe("helper.exportToExcel", () => {
       // the 2nd sheet has no note at all => no extra files & no <legacyDrawing> for it
       { name: "Plain", data: [{ v: 1 }], mapping: [{ propName: "v" }] },
     ];
-    await exportToExcel(sheets, null, (_value, itemIndex, mapping) =>
+    await exportToExcel(sheets, null, (_value, rowIndex, mapping) =>
       // an empty tooltip is the very same as no tooltip at all
-      mapping.propName === "s" ? { tooltip: itemIndex === 0 ? `Q&A <"'\`>` : "" } : undefined
+      mapping.propName === "s" ? { tooltip: rowIndex === 1 ? `Q&A <"'\`>` : "" } : undefined
     );
     expectFiles([
       "xl/workbook.xml",
@@ -1029,7 +1093,8 @@ describe("helper.exportToExcel", () => {
     await exportToExcel(
       [{ name: "N", data: tooltips.map((v) => ({ v })), mapping: [{ propName: "v" }] }],
       null,
-      (value) => ({ tooltip: value.stringVal })
+      // the header-row is skipped here: only the boxes of the data-cells are checked below
+      (value, rowIndex) => (rowIndex ? { tooltip: value.stringVal } : undefined)
     );
     const [w, h1] = boxOf(1);
     const [, h2] = boxOf(2);
@@ -1055,7 +1120,7 @@ describe("helper.exportToExcel", () => {
     await exportToExcel(
       [{ name: "N", data: tooltips.map((v) => ({ v })), mapping: [{ propName: "v" }] }],
       null,
-      (value) => ({ tooltip: value.stringVal })
+      (value, rowIndex) => (rowIndex ? { tooltip: value.stringVal } : undefined)
     );
     expect(boxHeight(2)).toBeGreaterThan(boxHeight(1)); // 3 lines against 2
     expect(boxHeight(3)).toBe(boxHeight(1)); // '\n' is 2 empty lines, as 'a\nb' is 2 filled ones

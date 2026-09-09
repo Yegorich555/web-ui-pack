@@ -161,9 +161,14 @@ export interface IExcelCellValue {
  * The `value` & the `style` override the mapped ones, while a `tooltip` overrides nothing - it adds
  * an extra part to the document */
 export interface IExcelCellOverride {
-  /** Own content of the cell instead of the mapped one */
+  /** Own content of the cell instead of the mapped one.
+   *
+   * WARN: a header-cell (the `rowIndex` `0`) is always stored as a text - the table refers to a column
+   * by the very text of its header - so only the {@link IExcelCellValue.stringVal} is taken from it & the `type`
+   * is read as the wrapping-flag only ({@link ExcelCellTypes.textWrap} - a multiline header) */
   value?: IExcelCellValue;
-  /** Own font of the cell: it's merged into the font of the column, so only the difference has to be pointed */
+  /** Own font of the cell: it's merged into the font of the column (of the header-cell - into the header-font
+   * of the column), so only the difference has to be pointed */
   style?: IExcelStyle;
   /** Note of the cell (the `Review > Notes` of Excel): such a cell is marked with a red corner & the text is
    * shown as a tooltip while the mouse is over it.
@@ -176,11 +181,13 @@ export interface IExcelCellOverride {
 /** Hook that overrides the content &/or the style of a single cell: see the `cellCallback` argument
  * of {@link exportToExcel} */
 export type IExcelCellCallback<T = any> = (
-  /** Cell that {@link exportToExcel.$defaults.getCellValue} has mapped the item-property into.
+  /** Cell that {@link exportToExcel.$defaults.getCellValue} has mapped the item-property into (for a header-cell
+   * it's the resolved {@link IExcelColumnMap.headerText} as a {@link ExcelCellTypes.text}).
    * WARN: never mutate it - an empty cell is a shared read-only object; return an own one instead */
   value: IExcelCellValue,
-  /** Index of the item in {@link IExcelSheet.data} */
-  itemIndex: number,
+  /** Index of the row of the sheet: `0` - the header-row, `N` - the item `N - 1` of {@link IExcelSheet.data}
+   * (so it's the row-number of Excel itself minus 1) */
+  rowIndex: number,
   /** Column that the cell belongs to */
   mapping: IExcelColumnMap<T>
 ) => IExcelCellOverride | undefined | null;
@@ -819,17 +826,52 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   const cellScale = new Float64Array(colCount);
   let headerCells = "";
 
+  /** Notes of the sheet: `null` until the very 1st tooltip really occurs - an export without them costs nothing */
+  let notes: ISheetNotes | null = null;
+
+  /** Appends a note of the pointed cell into the both files that Excel stores such a tooltip in:
+   * the `rowIndex` is the one of the row of the sheet (`0` - the header-row), exactly as the anchor needs it */
+  function addNote(colIndex: number, rowIndex: number, tooltip: string): void {
+    if (notes === null) notes = { list: createUtf8Writer(), vml: createUtf8Writer(), count: 0 };
+    notes.list.add(
+      `<comment ref="${letters[colIndex]}${rowIndex + 1}" authorId="0"><text><r>${noteFontXml}` +
+        `<t xml:space="preserve">${escape(tooltip)}</t></r></text></comment>`
+    );
+    notes.vml.add(getNoteShapeXml(noteFirstShapeId + notes.count, colIndex, rowIndex, getNoteLines(tooltip)));
+    ++notes.count;
+  }
+
   for (let c = 0; c < colCount; ++c) {
     const h = cols[c];
-    const text = getHeaderText(h);
     // an own font of the column is merged into the sheet-font & becomes the base of its header either;
     // a column without it re-uses the ready fonts/styles of the sheet, so nothing is allocated per column
     const colFont = h.style ? mergeStyle(font, h.style) : font;
     colFonts.push(colFont);
     const hBase = h.style ? mergeStyle(colFont, ctx.headerStyle, sheet.headerStyle) : sheetHeaderFont;
-    const hFont = h.headerStyle ? mergeStyle(hBase, h.headerStyle) : hBase;
+    let hFont = h.headerStyle ? mergeStyle(hBase, h.headerStyle) : hBase;
     const letter = getColumnLetter(c);
     letters.push(letter);
+
+    /** Content of the header-cell: the callback can override it exactly as it does for a data-cell */
+    let text = getHeaderText(h);
+    /** The pointed content is a multiline one: such a header-cell is wrapped by Excel */
+    let isWrap = false;
+    // the header-row is asked with the `rowIndex` 0: it's a cell of the sheet either & it's the only chance
+    // to override a header (the auto-width & the table-part are resolved by the result right below)
+    if (cellCallback) {
+      const res = cellCallback({ type: ExcelCellTypes.text, stringVal: text }, 0, h);
+      if (res != null) {
+        if (res.value) {
+          // a header is always stored as a text (the table refers to a column by the very text of its header),
+          // so only the wrapping of the pointed type is applied - see IExcelCellOverride.value
+          text = res.value.stringVal || "";
+          isWrap = res.value.type === ExcelCellTypes.textWrap;
+        }
+        // an own font of a header-cell is merged into the header-font of the column & not into the ordinary one
+        if (res.style) hFont = mergeStyle(hFont, res.style);
+        if (res.tooltip) addNote(c, 0, res.tooltip);
+      }
+    }
     headers.push(text);
 
     const colStyle = h.style ? styles.getCellStyle(colFont, false) : sheetStyle;
@@ -839,7 +881,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     colStyleXml.push(` style="${colStyle}"`);
 
     // the column defines the auto-width by its own font: the data-cells are measured by it & the header-cell
-    // by the header-font on top of it.
+    // by the header-font on top of it (an own font of the header that the callback points is already merged in).
     // WARN: the header-font can't be skipped here - it's `bold` by default & a bold text is up to 16% wider
     // (`Tahoma`, `Georgia`), so a column that is defined by its header would be cut off
     const m = autoWidth.getMetrics(colFont);
@@ -851,7 +893,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
         ? -1
         : autoWidth.getTextPx(text, hm.charPx, hm.defaultPx) * autoWidth.getScale(hFont) + autoWidth.filterButtonPx;
 
-    const headerStyle = styles.getCellStyle(hFont, false);
+    const headerStyle = styles.getCellStyle(hFont, isWrap);
     headerCells += `<c r="${letter}1" s="${headerStyle}" t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
   }
 
@@ -920,29 +962,16 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     return xml;
   }
 
-  /** Notes of the sheet: `null` until the very 1st tooltip really occurs - an export without them costs nothing */
-  let notes: ISheetNotes | null = null;
-
-  /** Appends a note of the pointed cell into the both files that Excel stores such a tooltip in:
-   * the `rowIndex` is the one of the data-row (the header-row excluded), exactly as the anchor needs it */
-  function addNote(colIndex: number, rowIndex: number, tooltip: string): void {
-    if (notes === null) notes = { list: createUtf8Writer(), vml: createUtf8Writer(), count: 0 };
-    notes.list.add(
-      `<comment ref="${letters[colIndex]}${rowIndex + 1}" authorId="0"><text><r>${noteFontXml}` +
-        `<t xml:space="preserve">${escape(tooltip)}</t></r></text></comment>`
-    );
-    notes.vml.add(getNoteShapeXml(noteFirstShapeId + notes.count, colIndex, rowIndex, getNoteLines(tooltip)));
-    ++notes.count;
-  }
-
   const { data } = sheet;
   const rows = createUtf8Writer();
   rows.add(`<row r="1">${headerCells}</row>`);
 
   for (let ri = 0; ri < data.length; ++ri) {
     const item = data[ri];
-    // +1 to make it 1-based as Excel enumerates the rows & +1 for the header-row; stringified once per row
-    const rowNum = `${ri + 2}`;
+    // the header-row is the row 0 of the sheet, so an item is shifted by it; resolved once per row
+    const rowIndex = ri + 1;
+    // +1 to make it 1-based as Excel enumerates the rows; stringified once per row
+    const rowNum = `${rowIndex + 1}`;
     let cells = "";
     for (let c = 0; c < colCount; ++c) {
       const h = cols[c];
@@ -954,13 +983,13 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
        * The callback is asked once per cell & the branch is predictable, so an export without it pays nothing */
       let ov: ICellOverride | undefined;
       if (cellCallback) {
-        const res = cellCallback(cObjVal, ri, h);
+        const res = cellCallback(cObjVal, rowIndex, h);
         // a callback that only styles a cell returns no value at all, so the mapped one stays applied
         if (res != null) {
           if (res.value) cObjVal = res.value;
           if (res.style) ov = getCellOverride(c, res.style);
           // a note is rendered right here either: it's stored per cell & has nothing to do with the row
-          if (res.tooltip) addNote(c, ri + 1, res.tooltip);
+          if (res.tooltip) addNote(c, rowIndex, res.tooltip);
         }
       }
       const { type } = cObjVal;
@@ -1191,9 +1220,15 @@ export default async function exportToExcel<T>(
    * can be saved later by the very same helper `web-ui-pack/helpers/files/saveAsFile` (or not saved at all)
    * @example "test-excel.xlsx" */
   saveAsFile?: string | null | false,
-  /** Called for every single data-cell of every sheet right after the value is mapped by
+  /** Called for every single cell of every sheet right after the value is mapped by
    * {@link exportToExcel.$defaults.getCellValue}: return an own `value`, `style` &/or `tooltip` to override
    * the cell, ex. `(v) => (v.stringVal[0] === "-" ? { style: redFont } : undefined)`.
+   *
+   * A header-cell is asked either - once per column, before the data & with the `rowIndex` `0` (an item of
+   * {@link IExcelSheet.data} starts from the `1`), so a callback that is about the items must skip such a cell:
+   * `(v, i) => (i ? ... : undefined)`. Its `value` is the resolved {@link IExcelColumnMap.headerText} &
+   * the pointed one renames the column of the table together with the cell (only the `stringVal` is taken -
+   * see {@link IExcelCellOverride.value}), while the `style` is merged into the header-font of the column.
    *
    * The `style` is merged into the font of the column, so only the difference has to be pointed, and the
    * auto-width of the column follows such a cell as well (a wider/bolder font included).
