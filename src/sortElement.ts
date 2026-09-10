@@ -455,18 +455,22 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 
       let isThrottle = false;
       // WARN: getBoundingClientRect forces layout (N calls per pointermove) - so rects are cached and reset only when they really change
-      let rects: DOMRect[] | null = null;
+      // WARN: the cache is sparse (filled per index by `rectOf`) - only items of the active target are really read
+      let rects: Array<DOMRect | undefined> = [];
       let trgRects: DOMRect[] | null = null; // rects of the targets: to detect over which one the cursor is
       let isRowLayout = false; // true when items are rendered horizontally (or multiline) - see rects below
       let iFrom = 0; // index in $items of the 1st item of trgActive
       let iTo = $items.length - 1; // index in $items of the last item of trgActive (`iFrom - 1` when the target has no items at all)
       let rangeOf: HTMLElement | undefined; // target which iFrom, iTo & isRowLayout are defined for (see updateRange)
       const resetRects = (): void => {
-        rects = null;
+        rects = [];
         trgRects = null;
         rangeOf = undefined; // WARN: the range is based on rects (& the reorder can move an item into another target) - so it's outdated too
       };
       const rScroll = onEvent(document, "scroll", resetRects, { capture: true, passive: true }); // scroll shifts viewport-based rects
+
+      /** Returns the rect of the pointed item (cached - see the WARN above) */
+      const rectOf = (i: number): DOMRect => (rects[i] ??= $items[i].getBoundingClientRect());
 
       /** Returns rects of the targets (cached - see the WARN above) */
       const getTrgRects = (): DOMRect[] => {
@@ -477,7 +481,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
       };
 
       /** Defines iFrom, iTo & isRowLayout: the range in $items that belongs to trgActive */
-      const updateRange = (arr: DOMRect[]): void => {
+      const updateRange = (): void => {
         rangeOf = trgActive;
         iFrom = $items.findIndex((item) => trgActive.contains(item));
         if (iFrom === -1) {
@@ -496,8 +500,9 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
         // items are rendered in a row when at least 2 of them are on the same line (a multiline grid is a row-layout too)
         isRowLayout = false;
         for (let i = iFrom + 1; isLine && !isRowLayout && i <= iTo; ++i) {
-          const prev = arr[i - 1];
-          isRowLayout = Math.abs(arr[i].y + arr[i].height / 2 - (prev.y + prev.height / 2)) <= 3; // 3px because centers can be not aligned properly
+          const prev = rectOf(i - 1);
+          const r = rectOf(i);
+          isRowLayout = Math.abs(r.y + r.height / 2 - (prev.y + prev.height / 2)) <= 3; // 3px because centers can be not aligned properly
         }
       };
 
@@ -602,11 +607,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
           let nearest = eli; // index of nearest item
           let nearestEnd = eli; // index of last item in the nearest line
           let dist = Number.MAX_SAFE_INTEGER; // distance between centers
-          if (!rects) {
-            rects = $items.map((item) => item.getBoundingClientRect());
-          }
           if (rangeOf !== trgActive) {
-            updateRange(rects);
+            updateRange();
           }
           if (iTo < iFrom) {
             // the active target has no items at all - so the dragged one becomes the 1st there
@@ -624,7 +626,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
           // and nearestEnd goes out of rects-range
           let lineY: number | undefined;
           for (let i = iFrom; i <= iTo; ++i) {
-            const nextLineY = rects[i].y + rects[i].height / 2;
+            const rl = rectOf(i);
+            const nextLineY = rl.y + rl.height / 2;
             if (lineY === undefined || Math.abs(nextLineY - lineY) > 3) {
               // compare with 3px because centers can be not aligned properly
               lineY = nextLineY; // it's next line
@@ -642,7 +645,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
           // find nearest item in the nearest line
           dist = Number.MAX_SAFE_INTEGER;
           for (let i = nearest; i <= nearestEnd; ++i) {
-            const r = rects[i];
+            const r = rectOf(i);
             const dx = ev.clientX - (r.x + r.width / 2);
             const dy = ev.clientY - (r.y + r.height / 2);
             const c = Math.sqrt(dx * dx + dy * dy);
@@ -652,10 +655,10 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             }
           }
           // WARN: items of other targets aren't neighbors at all - otherwise the gap is measured between different lists
-          const at = (i: number): DOMRect | undefined => (i >= iFrom && i <= iTo ? rects![i] : undefined);
+          const at = (i: number): DOMRect | undefined => (i >= iFrom && i <= iTo ? rectOf(i) : undefined);
           // paint the line-indicator instead of moving the item (the layout isn't shifted at all)
           if (isLine) {
-            const r = rects[nearest];
+            const r = rectOf(nearest);
             // WARN: for a row the line is vertical (before/after the item), for a column - horizontal (above/below the item)
             const isBefore = isRowLayout ? ev.clientX < r.x + r.width / 2 : ev.clientY < r.y + r.height / 2;
             const nEl = $items[nearest];
@@ -688,8 +691,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
           }
           // move to the new place
           if (eli !== nearest) {
-            const rEl = rects[eli];
-            const rTrg = rects[nearest];
+            const rEl = rectOf(eli);
+            const rTrg = rectOf(nearest);
             const isSameLine = Math.abs(rTrg.y + rTrg.height / 2 - (rEl.y + rEl.height / 2)) <= 3; // 3px because centers can be not aligned properly
             const half = rTrg.x + rTrg.width / 2;
             // WARN: inside the line the cursor must cross the middle of the target - otherwise items of different sizes are swapped back & forth:
@@ -796,9 +799,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 customElements.define(tagName, WUPSortElement);
 
 /** TODO
- * 10 findings, most severe first:
+ * 9 findings, most severe first:
 
-src/sortElement.ts:600 — the rect cache is filled for items of all targets, but only [iFrom..iTo] plus rects[eli] are read; 3x100 items means 300 getBoundingClientRect() per post-swap move instead of ~101. Fill lazily per index.
 src/sortElement.ts:388 — the full $items gather (deep query per target + ownerOf walk per item + 2 forEach passes) runs before the eli === -1 early-out, so every tap on a non-item descendant pays for it and throws it away.
 src/sortElement.ts:643 — Math.sqrt per candidate in the per-move nearest-item loop; the value is only used in a < comparison, so squared distances are order-equivalent.
 src/sortElement.ts:400 — t === item || is redundant with item.contains(t) (contains is true for the node itself), and t instanceof Node is dead for real pointer events.
