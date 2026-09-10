@@ -1245,7 +1245,7 @@ exports[`control.selectMany sortable: drag&drop 3`] = `
         drag=""
         draggable="false"
         item=""
-        style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(30px, 15px);"
+        style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(30px, 15px);"
       >
         Donny
       </span>

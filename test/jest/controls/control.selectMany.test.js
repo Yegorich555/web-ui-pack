@@ -753,7 +753,7 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: trg.offsetWidth / 2, y: trg.offsetHeight / 2 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(30px, 15px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(30px, 15px);">Donny</span>",
         "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
@@ -786,7 +786,7 @@ describe("control.selectMany", () => {
     h.userMouseMove(dragEl, { x: r.right, y: trg.offsetHeight / 2 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(120px, 15px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(120px, 15px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Leo</span>",
@@ -801,7 +801,7 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: r.right, y: trg.offsetHeight / 2 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(180px, 15px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(180px, 15px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Leo</span>",
@@ -818,7 +818,7 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: r.right - 2, y: trg.offsetHeight / 2 + 5 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(178px, 20px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(178px, 20px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
@@ -835,7 +835,7 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: w * 2, y: 0 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(120px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(120px, 0px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
@@ -849,7 +849,7 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: 0, y: 0 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(0px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(0px, 0px);">Donny</span>",
         "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
@@ -864,7 +864,7 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: 0, y: trg.offsetHeight + 5 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(0px, 35px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(0px, 35px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
@@ -881,7 +881,7 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: w * 2 + w / 2, y: 0 }); // WARN: point the center of the 3rd place: x=w*2 is exactly the border between the 2nd & 3rd items (ambiguous nearest)
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(150px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(150px, 0px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
@@ -902,11 +902,11 @@ describe("control.selectMany", () => {
     expect(onChanged).toBeCalledTimes(1);
     expect(el.$value).toStrictEqual([20, 30, 10, 40]);
     expect(dragEl.outerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(150px, 0px); pointer-events: none; user-select: none;">Donny</span>"`
+      `"<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(150px, 0px); pointer-events: none; user-select: none;">Donny</span>"`
     );
     await nextFrame(5);
     expect(dragEl.outerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(120px, 0px); pointer-events: none; user-select: none;">Donny</span>"`
+      `"<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(120px, 0px); pointer-events: none; user-select: none;">Donny</span>"`
     );
     await nextFrame(50);
     expect(getChildren()).toMatchInlineSnapshot(`
@@ -932,7 +932,7 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: 1000, y: 1000 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(1000px, 1000px);" remove="">Mikky</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(1000px, 1000px);" remove="">Mikky</span>",
         "<span item="" aria-hidden="true" draggable="false" drop="">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true" draggable="false">Donny</span>",
