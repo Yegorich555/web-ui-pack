@@ -575,7 +575,9 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
           dr.style.transform = `translate(${x}px, ${y}px)`;
           if (canRemove) {
             // define if the item is inside the targets (if outside - it must be removed)
-            const rDrag = dr.getBoundingClientRect();
+            // WARN: the rect is derived from the translate & the size assigned above (position:fixed + left/top:0) - otherwise
+            // getBoundingClientRect right after the style-write forces a synchronous layout on every pointermove
+            const rDrag = { left: x, top: y, right: x + rect.width, bottom: y + rect.height } as DOMRect;
             isInside = getTrgRects().some((r) => isOverlap(r, rDrag));
             isInside ? dr.removeAttribute("remove") : dr.setAttribute("remove", "");
             if (!isInside) {
@@ -794,9 +796,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 customElements.define(tagName, WUPSortElement);
 
 /** TODO
- * 12 findings, most severe first:
+ * 11 findings, most severe first:
 
-src/sortElement.ts:575 — dr.getBoundingClientRect() right after writing dr.style.transform forces a synchronous layout on every pointermove when canRemove is on (selectMany always); the clone's rect is fully derivable from the translate + a one-time size read.
 src/sortElement.ts:600 — the rect cache is filled for items of all targets, but only [iFrom..iTo] plus rects[eli] are read; 3x100 items means 300 getBoundingClientRect() per post-swap move instead of ~101. Fill lazily per index.
 src/sortElement.ts:388 — the full $items gather (deep query per target + ownerOf walk per item + 2 forEach passes) runs before the eli === -1 early-out, so every tap on a non-item descendant pays for it and throws it away.
 src/sortElement.ts:643 — Math.sqrt per candidate in the per-move nearest-item loop; the value is only used in a < comparison, so squared distances are order-equivalent.
