@@ -766,7 +766,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
               dr.remove();
             });
 
-            (el._prevIndex !== $items.indexOf(el) || el.parentElement !== elParent) &&
+            // WARN: `eli` is the index of the item in $items (kept in sync by moveItem) - so an extra scan isn't required
+            (el._prevIndex !== eli || el.parentElement !== elParent) &&
               onChange(
                 $items.map((x) => x._prevIndex),
                 $items,
@@ -805,9 +806,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 customElements.define(tagName, WUPSortElement);
 
 /** TODO
- * 5 findings, most severe first:
+ * 4 findings, most severe first:
 
-src/sortElement.ts:755 — $items.indexOf(el) is an O(n) scan for a value eli provably already holds (moveItem keeps them in sync).
 src/sortElement.ts:423 — trgFrom re-derives el._prevTarget (assigned at :392) and trgTo() re-derives ownerOf(el); three ways to answer the same question.
 src/sortElement.ts:272 — $attach gates the $styleRoot append on its own addedStyles flag, unaware of baseElement's appendedRootStyles; using both a <wup-sort> element and $attach emits :root{--sort-active-color…} twice.
 src/sortElement.ts:169 — $style omits ${super.$style} while baseElement appends only the most-derived getter, so any future base rule is silently dropped (open item #14; every other component follows the convention, e.g. controls/baseControl.ts:287).
