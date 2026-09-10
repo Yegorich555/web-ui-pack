@@ -654,8 +654,6 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
               nearest = i;
             }
           }
-          // WARN: items of other targets aren't neighbors at all - otherwise the gap is measured between different lists
-          const at = (i: number): DOMRect | undefined => (i >= iFrom && i <= iTo ? rectOf(i) : undefined);
           // paint the line-indicator instead of moving the item (the layout isn't shifted at all)
           if (isLine) {
             const r = rectOf(nearest);
@@ -673,6 +671,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             const isNear = (a: DOMRect | undefined): a is DOMRect =>
               // for a row the neighbor must be on the same line - otherwise the gap is between lines (3px because centers can be not aligned properly)
               !!a && (!isRowLayout || Math.abs(a.y + a.height / 2 - (r.y + r.height / 2)) <= 3);
+            // WARN: items of other targets aren't neighbors at all - otherwise the gap is measured between different lists
+            const at = (i: number): DOMRect | undefined => (i >= iFrom && i <= iTo ? rectOf(i) : undefined);
             const other = at(isBefore ? nearest - 1 : nearest + 1); // item on the other side of the gap
             const mirror = at(isBefore ? nearest + 1 : nearest - 1); // item on the opposite side of the nearest (see below)
             const start = isRowLayout ? "x" : "y"; // axis of the gap: horizontal for a row, vertical for a column
@@ -799,7 +799,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 customElements.define(tagName, WUPSortElement);
 
 /** TODO
- * 9 findings, most severe first:
+ * 8 findings, most severe first:
 
 src/sortElement.ts:388 — the full $items gather (deep query per target + ownerOf walk per item + 2 forEach passes) runs before the eli === -1 early-out, so every tap on a non-item descendant pays for it and throws it away.
 src/sortElement.ts:643 — Math.sqrt per candidate in the per-move nearest-item loop; the value is only used in a < comparison, so squared distances are order-equivalent.
@@ -809,6 +809,5 @@ src/sortElement.ts:423 — trgFrom re-derives el._prevTarget (assigned at :392) 
 src/sortElement.ts:272 — $attach gates the $styleRoot append on its own addedStyles flag, unaware of baseElement's appendedRootStyles; using both a <wup-sort> element and $attach emits :root{--sort-active-color…} twice.
 src/sortElement.ts:169 — $style omits ${super.$style} while baseElement appends only the most-derived getter, so any future base rule is silently dropped (open item #14; every other component follows the convention, e.g. controls/baseControl.ts:287).
 src/sortElement.ts:496 — isRowLayout needs ≥2 items in the active target's range, so in line mode a target holding one item (or receiving its first item) is always treated as a column and the drop-line is drawn with the wrong orientation. (PLAUSIBLE)
-src/sortElement.ts:650 — at() is allocated on every un-throttled pointermove but used only inside the if (isLine) branch; move it in next to isNear/other/mirror.
  *
  */
