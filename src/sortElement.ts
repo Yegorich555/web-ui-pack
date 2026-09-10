@@ -429,7 +429,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
       /** Returns the target which holds the dragged item now (it's changed when the item is dragged into another target) */
       const trgTo = (): HTMLElement => ownerOf(el)!; // WARN: always found - the item isn't removed from the DOM here
 
-      // WARN: must be after the `eli === -1` return - otherwise draggability of non-item targets is destroyed forever (`cancel` isn't registered yet)
+      // WARN: must be after the returns above (a non-item target) - otherwise draggability of such an element is destroyed forever (`cancel` isn't registered yet)
       activeEl._wasDraggable = activeEl.draggable;
       activeEl.draggable = false; // prevent dragging on image & video: restored in `cancel`
 
