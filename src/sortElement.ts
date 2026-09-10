@@ -383,6 +383,22 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
         return; // prevent sort during the editing when user clicks on control and selects text
       }
 
+      // WARN: the pointed item is searched by `closest` (not among the gathered items) - otherwise every pointerdown
+      // on a non-item descendant pays for the whole gathering below and throws it away
+      const el = activeEl?.closest("[item='']") as SortItem | null;
+      if (!el || el.__isDragItem) {
+        return; // `__isDragItem` is possible when user moves item + mouseUp + during the animation gets it again
+      }
+      // WARN: `ownerOf` (not `targets.some(a => a.contains(el))`) - an item of a nested container (a nested <wup-sort> or
+      // another attached element) mustn't be stolen here
+      const elTarget = ownerOf(el);
+      if (!elTarget || !targets.includes(elTarget)) {
+        return; // the pointed item belongs to another container
+      }
+      if (el.__isReturning) {
+        return; // WARN: must be before `activeEl.draggable` - the item can't be grabbed again until its return-animation ends (otherwise the animation removes fresh [drop] & clone)
+      }
+
       // WARN: items of all the targets are gathered into the single array (in the order of the targets) - so indexes of onChange
       // are related to it & the reorder-logic below doesn't care whether the new place is in the same target or in another one
       const $items = targets
@@ -394,18 +410,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
         }, [] as SortItem[])
         .filter((x) => !x.__isDragItem); // possible when user moves item + mouseUp + during the animation gets it again
       $items.forEach((x, i) => (x._prevIndex = i));
-
-      const t = e.target as Node;
-      // WARN: `contains` is true for the node itself - so an extra `t === item` check isn't required
-      let eli = $items.findIndex((item) => item.contains(t));
-      if (eli === -1) {
-        return;
-      }
-
-      const el = $items[eli];
-      if (el.__isReturning) {
-        return; // WARN: must be before `activeEl.draggable` - the item can't be grabbed again until its return-animation ends (otherwise the animation removes fresh [drop] & clone)
-      }
+      let eli = $items.indexOf(el); // WARN: always found - `el` matches the same [item=''] + ownerOf conditions as the gathering above
       // WARN: the item can be moved into another target without changing its index in the whole set - so the index isn't enough to detect the change
       const elParent = el.parentElement;
       let dr: HTMLElement & { __isDragItem?: boolean };
@@ -800,9 +805,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 customElements.define(tagName, WUPSortElement);
 
 /** TODO
- * 6 findings, most severe first:
+ * 5 findings, most severe first:
 
-src/sortElement.ts:388 — the full $items gather (deep query per target + ownerOf walk per item + 2 forEach passes) runs before the eli === -1 early-out, so every tap on a non-item descendant pays for it and throws it away.
 src/sortElement.ts:755 — $items.indexOf(el) is an O(n) scan for a value eli provably already holds (moveItem keeps them in sync).
 src/sortElement.ts:423 — trgFrom re-derives el._prevTarget (assigned at :392) and trgTo() re-derives ownerOf(el); three ways to answer the same question.
 src/sortElement.ts:272 — $attach gates the $styleRoot append on its own addedStyles flag, unaware of baseElement's appendedRootStyles; using both a <wup-sort> element and $attach emits :root{--sort-active-color…} twice.
