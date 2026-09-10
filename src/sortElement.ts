@@ -391,8 +391,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
       }
       // WARN: `ownerOf` (not `targets.some(a => a.contains(el))`) - an item of a nested container (a nested <wup-sort> or
       // another attached element) mustn't be stolen here
-      const elTarget = ownerOf(el);
-      if (!elTarget || !targets.includes(elTarget)) {
+      const trgFrom = ownerOf(el); // target which holds the item before the dragging
+      if (!trgFrom || !targets.includes(trgFrom)) {
         return; // the pointed item belongs to another container
       }
       if (el.__isReturning) {
@@ -425,10 +425,9 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
       const lineW = 1; // thickness of the line-indicator
       // WARN: the new place is searched only among items of the pointed target - otherwise the nearest item is searched over all
       // the targets where the DOM-order isn't the visual order (2 lists side by side) and lines are detected wrongly
-      const trgFrom = targets.find((a) => a.contains(el))!; // WARN: always found - el is taken from the targets themselves
-      let trgActive = trgFrom;
+      let trgActive = trgFrom; // WARN: `trgFrom` is `ownerOf(el)` - defined on the pointerdown above
       /** Returns the target which holds the dragged item now (it's changed when the item is dragged into another target) */
-      const trgTo = (): HTMLElement => targets.find((a) => a.contains(el))!; // WARN: always found - the item isn't removed from the DOM here
+      const trgTo = (): HTMLElement => ownerOf(el)!; // WARN: always found - the item isn't removed from the DOM here
 
       // WARN: must be after the `eli === -1` return - otherwise draggability of non-item targets is destroyed forever (`cancel` isn't registered yet)
       activeEl._wasDraggable = activeEl.draggable;
@@ -806,9 +805,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 customElements.define(tagName, WUPSortElement);
 
 /** TODO
- * 4 findings, most severe first:
+ * 3 findings, most severe first:
 
-src/sortElement.ts:423 — trgFrom re-derives el._prevTarget (assigned at :392) and trgTo() re-derives ownerOf(el); three ways to answer the same question.
 src/sortElement.ts:272 — $attach gates the $styleRoot append on its own addedStyles flag, unaware of baseElement's appendedRootStyles; using both a <wup-sort> element and $attach emits :root{--sort-active-color…} twice.
 src/sortElement.ts:169 — $style omits ${super.$style} while baseElement appends only the most-derived getter, so any future base rule is silently dropped (open item #14; every other component follows the convention, e.g. controls/baseControl.ts:287).
 src/sortElement.ts:496 — isRowLayout needs ≥2 items in the active target's range, so in line mode a target holding one item (or receiving its first item) is always treated as a column and the drop-line is drawn with the wrong orientation. (PLAUSIBLE)
