@@ -643,12 +643,13 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             }
           }
           // find nearest item in the nearest line
+          // WARN: distances are squared (without Math.sqrt) - they are used only for the comparison below and sqrt keeps the order
           dist = Number.MAX_SAFE_INTEGER;
           for (let i = nearest; i <= nearestEnd; ++i) {
             const r = rectOf(i);
             const dx = ev.clientX - (r.x + r.width / 2);
             const dy = ev.clientY - (r.y + r.height / 2);
-            const c = Math.sqrt(dx * dx + dy * dy);
+            const c = dx * dx + dy * dy;
             if (c < dist) {
               dist = c;
               nearest = i;
@@ -799,10 +800,9 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 customElements.define(tagName, WUPSortElement);
 
 /** TODO
- * 8 findings, most severe first:
+ * 7 findings, most severe first:
 
 src/sortElement.ts:388 — the full $items gather (deep query per target + ownerOf walk per item + 2 forEach passes) runs before the eli === -1 early-out, so every tap on a non-item descendant pays for it and throws it away.
-src/sortElement.ts:643 — Math.sqrt per candidate in the per-move nearest-item loop; the value is only used in a < comparison, so squared distances are order-equivalent.
 src/sortElement.ts:400 — t === item || is redundant with item.contains(t) (contains is true for the node itself), and t instanceof Node is dead for real pointer events.
 src/sortElement.ts:755 — $items.indexOf(el) is an O(n) scan for a value eli provably already holds (moveItem keeps them in sync).
 src/sortElement.ts:423 — trgFrom re-derives el._prevTarget (assigned at :392) and trgTo() re-derives ownerOf(el); three ways to answer the same question.
