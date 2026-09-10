@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 1.2.8 (\_\_\_)
+## 1.2.8 (Sep 10, 2026)
 
 ### Fixes & Improvements
 
