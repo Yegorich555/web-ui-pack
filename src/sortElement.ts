@@ -5,6 +5,16 @@ import isOverlap from "./helpers/isOverlap";
 import { parseMsTime } from "./helpers/styleHelpers";
 
 const tagName = "wup-sort";
+/** Selector of the sortable items - WARN: the single owner of the string: the pointerdown-gate & the gathering must not drift */
+const itemSel = "[item='']";
+/** Vertical tolerance of the "same line" detection: centers of items can be not aligned properly */
+const lineTolerance = 3;
+
+/** Returns whether centers of the rects are on the same line (see {@link lineTolerance}) */
+function isSameLine(a: DOMRect, b: DOMRect): boolean {
+  return Math.abs(a.y + a.height / 2 - (b.y + b.height / 2)) <= lineTolerance;
+}
+
 /** Detach-functions of {@link WUPSortElement.$attach} - to prevent double attaching on the same element */
 const attachLst = new WeakMap<HTMLElement, () => void>();
 /** Class-names of {@link WUPSortElement.$attach} with already appended styles */
@@ -242,7 +252,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
    * );
    * ``` */
   static $attach(
-    parents: HTMLElement[], // todo add support for [wup-sort]='false' on parent. So in this case drag&drop to parent with wup-sort is allowed but without allowing to select exact position (by default inserted at the end)
+    parents: HTMLElement[],
     onChange: WUP.Sort.AttachOnChangeMulti,
     options?: WUP.Sort.AttachOptions
   ): () => void;
@@ -385,9 +395,12 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 
       // WARN: the pointed item is searched by `closest` (not among the gathered items) - otherwise every pointerdown
       // on a non-item descendant pays for the whole gathering below and throws it away
-      const el = activeEl?.closest("[item='']") as SortItem | null;
-      if (!el || el.__isDragItem) {
-        return; // `__isDragItem` is possible when user moves item + mouseUp + during the animation gets it again
+      const el = activeEl.closest(itemSel) as SortItem | null;
+      // `__isDragItem` & `__isReturning` are possible when user moves item + mouseUp + during the animation gets it again
+      // WARN: `__isReturning` must be checked before `activeEl.draggable` below - the item can't be grabbed again until its
+      // return-animation ends (otherwise the animation removes fresh [drop] & clone)
+      if (!el || el.__isDragItem || el.__isReturning) {
+        return;
       }
       // WARN: `ownerOf` (not `targets.some(a => a.contains(el))`) - an item of a nested container (a nested <wup-sort> or
       // another attached element) mustn't be stolen here
@@ -395,22 +408,19 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
       if (!trgFrom || !targets.includes(trgFrom)) {
         return; // the pointed item belongs to another container
       }
-      if (el.__isReturning) {
-        return; // WARN: must be before `activeEl.draggable` - the item can't be grabbed again until its return-animation ends (otherwise the animation removes fresh [drop] & clone)
-      }
 
       // WARN: items of all the targets are gathered into the single array (in the order of the targets) - so indexes of onChange
       // are related to it & the reorder-logic below doesn't care whether the new place is in the same target or in another one
       const $items = targets
         .reduce((arr, t) => {
-          const lst = (Array.prototype.slice.call(t.querySelectorAll("[item='']")) as SortItem[]) //
+          const lst = (Array.prototype.slice.call(t.querySelectorAll(itemSel)) as SortItem[]) //
             .filter((x) => ownerOf(x) === t); // skip items of a nested container (a nested <wup-sort> or another attached element)
           lst.forEach((x) => (x._prevTarget = t)); // to report the previous place of every item (see $attach with several parents)
           return arr.concat(lst);
         }, [] as SortItem[])
         .filter((x) => !x.__isDragItem); // possible when user moves item + mouseUp + during the animation gets it again
       $items.forEach((x, i) => (x._prevIndex = i));
-      let eli = $items.indexOf(el); // WARN: always found - `el` matches the same [item=''] + ownerOf conditions as the gathering above
+      let eli = el._prevIndex; // WARN: `_prevIndex` is assigned by the loop above - so an extra scan isn't required
       // WARN: the item can be moved into another target without changing its index in the whole set - so the index isn't enough to detect the change
       const elParent = el.parentElement;
       let dr: HTMLElement & { __isDragItem?: boolean };
@@ -425,7 +435,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
       const lineW = 1; // thickness of the line-indicator
       // WARN: the new place is searched only among items of the pointed target - otherwise the nearest item is searched over all
       // the targets where the DOM-order isn't the visual order (2 lists side by side) and lines are detected wrongly
-      let trgActive = trgFrom; // WARN: `trgFrom` is `ownerOf(el)` - defined on the pointerdown above
+      let trgActive = trgFrom;
       /** Returns the target which holds the dragged item now (it's changed when the item is dragged into another target) */
       const trgTo = (): HTMLElement => ownerOf(el)!; // WARN: always found - the item isn't removed from the DOM here
 
@@ -460,16 +470,18 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
       let isThrottle = false;
       // WARN: getBoundingClientRect forces layout (N calls per pointermove) - so rects are cached and reset only when they really change
       // WARN: the cache is sparse (filled per index by `rectOf`) - only items of the active target are really read
-      let rects: Array<DOMRect | undefined> = [];
+      const rects: Array<DOMRect | undefined> = [];
       let trgRects: DOMRect[] | null = null; // rects of the targets: to detect over which one the cursor is
       let isRowLayout = false; // true when items are rendered horizontally (or multiline) - see rects below
       let iFrom = 0; // index in $items of the 1st item of trgActive
       let iTo = $items.length - 1; // index in $items of the last item of trgActive (`iFrom - 1` when the target has no items at all)
       let rangeOf: HTMLElement | undefined; // target which iFrom, iTo & isRowLayout are defined for (see updateRange)
       const resetRects = (): void => {
-        rects = [];
+        // WARN: `length = 0` (not a new array) - the resetter is called on every scroll-tick during the dragging
+        rects.length = 0;
         trgRects = null;
-        rangeOf = undefined; // WARN: the range is based on rects (& the reorder can move an item into another target) - so it's outdated too
+        // WARN: `rangeOf` is NOT reset here - a scroll shifts all the rects by the same delta, so the DOM-order & the
+        // orientation are scroll-invariant: only the reorder in `moveItem` invalidates the range
       };
       const rScroll = onEvent(document, "scroll", resetRects, { capture: true, passive: true }); // scroll shifts viewport-based rects
 
@@ -482,6 +494,22 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
           trgRects = targets.map((a) => a.getBoundingClientRect());
         }
         return trgRects;
+      };
+
+      /** Returns whether items are rendered horizontally in `trgActive`: it's used ONLY when the target holds less than 2 items -
+       * so there are no neighbors to compare rects with (a single item or an empty target that gets its 1st item).
+       * WARN: best-effort by design - it covers flex & grid-auto-flow only, so `grid-template-columns`, `column-count` &
+       * `writing-mode` are reported as a column. A wrong answer costs the orientation of the 1px line-indicator, not the drop-place */
+      const isRowByStyle = (): boolean => {
+        const st = window.getComputedStyle(trgActive);
+        if (st.display.endsWith("flex")) {
+          return !st.flexDirection.startsWith("column"); // WARN: `inline-flex` is a row-layout too
+        }
+        if (st.display.endsWith("grid")) {
+          return st.gridAutoFlow.startsWith("column"); // WARN: in opposite to flex a grid-column means items in a row
+        }
+        // WARN: `el` (not the target) - an ordinary parent has no own direction, so the item's own flow decides
+        return window.getComputedStyle(el).display.startsWith("inline"); // inline-items flow in a row
       };
 
       /** Defines iFrom, iTo & isRowLayout: the range in $items that belongs to trgActive */
@@ -501,12 +529,19 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             ++iTo;
           }
         }
-        // items are rendered in a row when at least 2 of them are on the same line (a multiline grid is a row-layout too)
         isRowLayout = false;
-        for (let i = iFrom + 1; isLine && !isRowLayout && i <= iTo; ++i) {
-          const prev = rectOf(i - 1);
-          const r = rectOf(i);
-          isRowLayout = Math.abs(r.y + r.height / 2 - (prev.y + prev.height / 2)) <= 3; // 3px because centers can be not aligned properly
+        if (!isLine) {
+          return; // the orientation is read only by the line-indicator
+        }
+        if (iTo - iFrom < 1) {
+          // WARN: without neighbors the rects can't be compared at all - so the layout of the target itself is inspected
+          // (otherwise such a target is always treated as a column & the line-indicator is painted with the wrong orientation)
+          isRowLayout = isRowByStyle();
+          return;
+        }
+        // items are rendered in a row when at least 2 of them are on the same line (a multiline grid is a row-layout too)
+        for (let i = iFrom + 1; !isRowLayout && i <= iTo; ++i) {
+          isRowLayout = isSameLine(rectOf(i), rectOf(i - 1));
         }
       };
 
@@ -516,21 +551,23 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
         $items.splice(index, 0, $items.splice(eli, 1)[0]);
         eli = index;
         resetRects(); // the reorder re-layouts items (& the targets themselves) - so cached rects are outdated
+        rangeOf = undefined; // the reorder can move the item into another target - so the range is outdated too
         isThrottle = true;
         setTimeout(() => (isThrottle = false), 100); // to prevent fast changing position
       };
 
-      /** Paints the line-indicator at the pointed place (only for dropIndicator: 'line') */
-      const paintLine = (x: number, y: number, w: number, h: number): void => {
+      /** Paints the line-indicator across the pointed rect at `pos` on the main axis (only for dropIndicator: 'line') */
+      const paintLine = (pos: number, r: DOMRect): void => {
         if (!dropLine) {
           dropLine = document.createElement("div");
           dropLine.setAttribute("drop-line", "");
           el.parentElement!.prepend(dropLine); // WARN: position:fixed - so the parent doesn't affect the layout
         }
         dropLine.style.display = "";
-        dropLine.style.width = `${w}px`;
-        dropLine.style.height = `${h}px`;
-        dropLine.style.transform = `translate(${x}px, ${y}px)`;
+        // WARN: for a row the line is vertical (before/after the item), for a column - horizontal (above/below the item)
+        dropLine.style.width = `${isRowLayout ? lineW : r.width}px`;
+        dropLine.style.height = `${isRowLayout ? r.height : lineW}px`;
+        dropLine.style.transform = isRowLayout ? `translate(${pos}px, ${r.y}px)` : `translate(${r.x}px, ${pos}px)`;
       };
 
       const rect = el.getBoundingClientRect();
@@ -587,7 +624,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             // define if the item is inside the targets (if outside - it must be removed)
             // WARN: the rect is derived from the translate & the size assigned above (position:fixed + left/top:0) - otherwise
             // getBoundingClientRect right after the style-write forces a synchronous layout on every pointermove
-            const rDrag = { left: x, top: y, right: x + rect.width, bottom: y + rect.height } as DOMRect;
+            const rDrag = { left: x, top: y, right: x + rect.width, bottom: y + rect.height };
             isInside = getTrgRects().some((r) => isOverlap(r, rDrag));
             isInside ? dr.removeAttribute("remove") : dr.setAttribute("remove", "");
             if (!isInside) {
@@ -607,10 +644,6 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
           if (iTrg !== -1) {
             trgActive = targets[iTrg]; // WARN: rects are kept - crossing the cursor doesn't re-layout items (only the range is re-defined below)
           }
-          // find nearest line
-          let nearest = eli; // index of nearest item
-          let nearestEnd = eli; // index of last item in the nearest line
-          let dist = Number.MAX_SAFE_INTEGER; // distance between centers
           if (rangeOf !== trgActive) {
             updateRange();
           }
@@ -619,21 +652,24 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             const r = getTrgRects()[targets.indexOf(trgActive)];
             if (isLine) {
               dropTo = { at: iFrom, parent: trgActive, next: null };
-              paintLine(r.x, r.y, r.width, lineW); // WARN: on the top edge - there is no gap between items to point
+              paintLine(isRowLayout ? r.x : r.y, r); // WARN: on the edge of the target - there is no gap between items to point
             } else {
               // WARN: iFrom is the place BETWEEN items of the neighbor targets - so it's shifted when the item is taken from the left
               moveItem(iFrom > eli ? iFrom - 1 : iFrom, trgActive, null);
             }
             return;
           }
+          // find nearest line
+          let nearest = eli; // index of nearest item
+          let nearestEnd = eli; // index of last item in the nearest line
+          let dist = Number.MAX_SAFE_INTEGER; // distance between centers
           // WARN: undefined (not 0) - otherwise the 1st item is treated as a part of the line y=0 (possible when page is scrolled)
           // and nearestEnd goes out of rects-range
           let lineY: number | undefined;
           for (let i = iFrom; i <= iTo; ++i) {
             const rl = rectOf(i);
             const nextLineY = rl.y + rl.height / 2;
-            if (lineY === undefined || Math.abs(nextLineY - lineY) > 3) {
-              // compare with 3px because centers can be not aligned properly
+            if (lineY === undefined || Math.abs(nextLineY - lineY) > lineTolerance) {
               lineY = nextLineY; // it's next line
               const c = Math.abs(ev.clientY - lineY);
               if (c >= dist) {
@@ -674,8 +710,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             // WARN: the line must be painted in the middle of the gap between 2 items (not on the edge of the nearest one)
             // because user drops the item exactly between them
             const isNear = (a: DOMRect | undefined): a is DOMRect =>
-              // for a row the neighbor must be on the same line - otherwise the gap is between lines (3px because centers can be not aligned properly)
-              !!a && (!isRowLayout || Math.abs(a.y + a.height / 2 - (r.y + r.height / 2)) <= 3);
+              // for a row the neighbor must be on the same line - otherwise the gap is between lines
+              !!a && (!isRowLayout || isSameLine(a, r));
             // WARN: items of other targets aren't neighbors at all - otherwise the gap is measured between different lists
             const at = (i: number): DOMRect | undefined => (i >= iFrom && i <= iTo ? rectOf(i) : undefined);
             const other = at(isBefore ? nearest - 1 : nearest + 1); // item on the other side of the gap
@@ -690,15 +726,14 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
               gap = isBefore ? mirror[start] - r[end] : r[start] - mirror[end];
             }
             const pos = (isBefore ? r[start] - Math.max(gap, 0) / 2 : r[end] + Math.max(gap, 0) / 2) - lineW / 2;
-            // WARN: for a row the line is vertical (the height of the item), for a column - horizontal (the width of the item)
-            isRowLayout ? paintLine(pos, r.y, lineW, r.height) : paintLine(r.x, pos, r.width, lineW);
+            paintLine(pos, r);
             return;
           }
           // move to the new place
           if (eli !== nearest) {
             const rEl = rectOf(eli);
             const rTrg = rectOf(nearest);
-            const isSameLine = Math.abs(rTrg.y + rTrg.height / 2 - (rEl.y + rEl.height / 2)) <= 3; // 3px because centers can be not aligned properly
+            const isOneLine = isSameLine(rTrg, rEl);
             const half = rTrg.x + rTrg.width / 2;
             // WARN: inside the line the cursor must cross the middle of the target - otherwise items of different sizes are swapped back & forth:
             // after the swap the center of the target is shifted by the width of the dragged item, so the opposite condition can't be true anymore
@@ -708,7 +743,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             // WARN: when the cursor is over another target the item is moved immediately - the intention is unambiguous there
             // (the middle-crossing rule is about neighbors of the same list)
             const isCross = !trgActive.contains(el);
-            if (isCross || !isSameLine || (nearest > eli ? ev.clientX >= half : ev.clientX < half)) {
+            if (isCross || !isOneLine || (nearest > eli ? ev.clientX >= half : ev.clientX < half)) {
               const trg = $items[nearest];
               const isLeftOrTop = eli > nearest; // the nearest item is before the dragged one - so it must be replaced by it
               moveItem(nearest, trg.parentElement!, isLeftOrTop ? trg : trg.nextElementSibling); // insert before OR after
@@ -776,6 +811,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
               );
           }
         }
+        resetRects(); // WARN: the return-animation above retains this scope - so cached rects must be released here
         r0();
         rTouchMove?.();
         rScroll();
@@ -804,11 +840,5 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 
 customElements.define(tagName, WUPSortElement);
 
-/** TODO
- * 3 findings, most severe first:
-
-src/sortElement.ts:272 — $attach gates the $styleRoot append on its own addedStyles flag, unaware of baseElement's appendedRootStyles; using both a <wup-sort> element and $attach emits :root{--sort-active-color…} twice.
-src/sortElement.ts:169 — $style omits ${super.$style} while baseElement appends only the most-derived getter, so any future base rule is silently dropped (open item #14; every other component follows the convention, e.g. controls/baseControl.ts:287).
-src/sortElement.ts:496 — isRowLayout needs ≥2 items in the active target's range, so in line mode a target holding one item (or receiving its first item) is always treated as a column and the drop-line is drawn with the wrong orientation. (PLAUSIBLE)
- *
- */
+// todo add support for [wup-sort]='false' on parent: so drag&drop to a parent with wup-sort is allowed,
+// but without allowing to select the exact position (by default inserted at the end)

@@ -816,6 +816,59 @@ describe("sortElement", () => {
     expect(onChanged).toBeCalledTimes(0); // the order is the same as before dragging
   });
 
+  test("dropIndicator: line - target with a single item or without items at all", async () => {
+    // WARN: a target with less than 2 items has no neighbors to compare rects with - so the row-layout must be detected by styles
+    // (otherwise such a target is treated as a column & the line-indicator is painted with the wrong orientation)
+    document.body.innerHTML = `<ul id="l1">
+  <li item="">A1</li>
+  <li item="">A2</li>
+</ul>
+<ul id="l2">
+  <li item="">B1</li>
+</ul>
+<ul id="l3"></ul>`;
+    const [l1, l2, l3] = ["l1", "l2", "l3"].map((a) => document.getElementById(a));
+    el = document.body; // to re-use getItems(), bindDragEl() & lineStyle()
+
+    /** Returns sortable items of the pointed list */
+    const items = (t) => Array.prototype.slice.call(t.querySelectorAll(`[item='']:not([drag])`));
+    // every list renders items in a row: WARN: jsdom has no layout at all - so the styles must be mocked
+    h.setupCssCompute((a) => a === l1 || a === l2 || a === l3, { display: "flex", flexDirection: "row" });
+    /** Assign layout: 3 lists side by side (the 2nd one has a single item, the 3rd one is empty) */
+    [l1, l2, l3].forEach((t, ti) => {
+      const arr = items(t);
+      h.setupLayout(t, { x: ti * 200, y: 0, h: hi, w: Math.max(w * arr.length, w) });
+      arr.forEach((a, i) => h.setupLayout(a, { x: ti * 200 + w * i, y: 0, h: hi, w }));
+    });
+
+    const onChanged = jest.fn();
+    const detach = WUPSortElement.$attach([l1, l2, l3], onChanged, { dropIndicator: "line" });
+
+    const trg = getItems()[0]; // A1
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 20, y: 12 });
+    const dragEl = bindDragEl();
+
+    // over the left half of the single item: the line must be vertical (before the item) - not horizontal
+    h.userMouseMove(dragEl, { x: 210, y: 15 });
+    expect(lineStyle()).toBe(vLine(200));
+    // ... and after the item when the cursor crosses its middle
+    h.userMouseMove(dragEl, { x: 250, y: 15 });
+    expect(lineStyle()).toBe(vLine(200 + w));
+
+    // over the empty list: there are no items - so the line is painted on its left edge (not on the top one)
+    h.userMouseMove(dragEl, { x: 410, y: 15 });
+    expect(lineStyle()).toBe(`width: ${lw}px; height: ${hi}px; transform: translate(400px, 0px);`);
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(items(l1).map((a) => a.textContent)).toStrictEqual(["A2"]);
+    expect(items(l2).map((a) => a.textContent)).toStrictEqual(["B1"]);
+    expect(items(l3).map((a) => a.textContent)).toStrictEqual(["A1"]);
+    expect(onChanged).toBeCalledTimes(1);
+    detach();
+  });
+
   test("dragdrop is disposed on remove & re-applied on re-connect", () => {
     // the pointerdown-listener was registered via raw onEvent - so it stayed forever after the element was removed
     const spyRemove = jest.spyOn(el, "removeEventListener");
