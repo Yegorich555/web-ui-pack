@@ -395,9 +395,9 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
         .filter((x) => !x.__isDragItem); // possible when user moves item + mouseUp + during the animation gets it again
       $items.forEach((x, i) => (x._prevIndex = i));
 
-      const t = e.target;
-      // WARN: $items is always an array - so optional chaining & non-null assertion aren't required here
-      let eli = $items.findIndex((item) => t === item || (t instanceof Node && item.contains(t)));
+      const t = e.target as Node;
+      // WARN: `contains` is true for the node itself - so an extra `t === item` check isn't required
+      let eli = $items.findIndex((item) => item.contains(t));
       if (eli === -1) {
         return;
       }
@@ -800,10 +800,9 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 customElements.define(tagName, WUPSortElement);
 
 /** TODO
- * 7 findings, most severe first:
+ * 6 findings, most severe first:
 
 src/sortElement.ts:388 — the full $items gather (deep query per target + ownerOf walk per item + 2 forEach passes) runs before the eli === -1 early-out, so every tap on a non-item descendant pays for it and throws it away.
-src/sortElement.ts:400 — t === item || is redundant with item.contains(t) (contains is true for the node itself), and t instanceof Node is dead for real pointer events.
 src/sortElement.ts:755 — $items.indexOf(el) is an O(n) scan for a value eli provably already holds (moveItem keeps them in sync).
 src/sortElement.ts:423 — trgFrom re-derives el._prevTarget (assigned at :392) and trgTo() re-derives ownerOf(el); three ways to answer the same question.
 src/sortElement.ts:272 — $attach gates the $styleRoot append on its own addedStyles flag, unaware of baseElement's appendedRootStyles; using both a <wup-sort> element and $attach emits :root{--sort-active-color…} twice.
