@@ -242,7 +242,7 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
    * );
    * ``` */
   static $attach(
-    parents: HTMLElement[],
+    parents: HTMLElement[], // todo add support for [wup-sort]='false' on parent. So in this case drag&drop to parent with wup-sort is allowed but without allowing to select exact position (by default inserted at the end)
     onChange: WUP.Sort.AttachOnChangeMulti,
     options?: WUP.Sort.AttachOptions
   ): () => void;
@@ -789,3 +789,22 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 }
 
 customElements.define(tagName, WUPSortElement);
+
+/** TODO
+ * 13 findings, most severe first:
+
+src/sortElement.ts:575 — dr.getBoundingClientRect() right after writing dr.style.transform forces a synchronous layout on every pointermove when canRemove is on (selectMany always); the clone's rect is fully derivable from the translate + a one-time size read.
+src/sortElement.ts:600 — the rect cache is filled for items of all targets, but only [iFrom..iTo] plus rects[eli] are read; 3x100 items means 300 getBoundingClientRect() per post-swap move instead of ~101. Fill lazily per index.
+src/sortElement.ts:388 — the full $items gather (deep query per target + ownerOf walk per item + 2 forEach passes) runs before the eli === -1 early-out, so every tap on a non-item descendant pays for it and throws it away.
+src/sortElement.ts:557 — clone sized from el.offsetWidth/offsetHeight without box-sizing: border-box: with default content-box items the ghost renders padding+border too wide (and inflates the canRemove overlap test). rect at :526 already has the exact size.
+src/sortElement.ts:643 — Math.sqrt per candidate in the per-move nearest-item loop; the value is only used in a < comparison, so squared distances are order-equivalent.
+src/sortElement.ts:400 — t === item || is redundant with item.contains(t) (contains is true for the node itself), and t instanceof Node is dead for real pointer events.
+src/sortElement.ts:755 — $items.indexOf(el) is an O(n) scan for a value eli provably already holds (moveItem keeps them in sync).
+src/sortElement.ts:423 — trgFrom re-derives el._prevTarget (assigned at :392) and trgTo() re-derives ownerOf(el); three ways to answer the same question.
+src/sortElement.ts:464 — resetRects() doesn't clear rangeOf; the range invalidation is bolted onto the fill site at :601, so the cache has two half-invalidators and any future early-return above :599 silently reads a stale range.
+src/sortElement.ts:272 — $attach gates the $styleRoot append on its own addedStyles flag, unaware of baseElement's appendedRootStyles; using both a <wup-sort> element and $attach emits :root{--sort-active-color…} twice.
+src/sortElement.ts:169 — $style omits ${super.$style} while baseElement appends only the most-derived getter, so any future base rule is silently dropped (open item #14; every other component follows the convention, e.g. controls/baseControl.ts:287).
+src/sortElement.ts:496 — isRowLayout needs ≥2 items in the active target's range, so in line mode a target holding one item (or receiving its first item) is always treated as a column and the drop-line is drawn with the wrong orientation. (PLAUSIBLE)
+src/sortElement.ts:650 — at() is allocated on every un-throttled pointermove but used only inside the if (isLine) branch; move it in next to isNear/other/mirror.
+ *
+ */
