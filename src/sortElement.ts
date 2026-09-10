@@ -33,6 +33,19 @@ function ownerOf(item: HTMLElement): HTMLElement | null {
   return null;
 }
 
+/** Returns the 1st non-sortable child ([item=false]) of the pointed element: it's the place for the 1st item of an empty target -
+ * so items are always before such a footer (see the WARN in the dragging logic)
+ * WARN: only children (not descendants) - the result is used as `next` of `insertBefore` on the element itself */
+function firstFalseOf(el: HTMLElement): Element | null {
+  const { children } = el;
+  for (let i = 0; i < children.length; ++i) {
+    if (children[i].getAttribute("item") === "false") {
+      return children[i];
+    }
+  }
+  return null;
+}
+
 /** Sortable item with the internal service-properties assigned on the dragging start */
 type SortItem = HTMLElement & {
   /** Index of the item (among items of all the pointed parents) before the dragging */
@@ -426,6 +439,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
       let eli = el._prevIndex; // WARN: `_prevIndex` is assigned by the loop above - so an extra scan isn't required
       // WARN: the item can be moved into another target without changing its index in the whole set - so the index isn't enough to detect the change
       const elParent = el.parentElement;
+      // WARN: the whole place is stored (not only the parent) - it's restored when the item returns into its own end-only target (see `isEndOnly` below)
+      const elNext = el.nextElementSibling; // the sibling before the dragging: only the dragged item changes its place - so it's never outdated
       let dr: HTMLElement & { __isDragItem?: boolean };
       let isInside = true; // false when the item is dragged outside the target (to remove it - see canRemove)
       let isEnded = false; // to prevent double-handling: pointerup & pointercancel can be fired both
@@ -652,10 +667,15 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
           }
           // the active target doesn't allow to select the exact place (see attr `wup-sort='false'`) - so the item is appended to the end
           const isEndOnly = trgActive.getAttribute(tagName) === "false";
-          if (isEndOnly && trgActive.contains(el)) {
-            // the item is already here & there is nothing to select - so it must keep its place
+          // WARN: `trgFrom` (not `trgActive.contains(el)`) - the default dropIndicator really moves the item out of the target,
+          // so on the return such an item is appended to the end (re-ordered) instead of keeping its place
+          if (isEndOnly && trgActive === trgFrom) {
+            // the item belongs to the target & there is nothing to select - so it must keep its initial place
             dropTo = undefined; // WARN: the previous place (of another target) must be forgotten - otherwise it's applied on drop
             dropLine && (dropLine.style.display = "none");
+            if (eli !== el._prevIndex || el.parentElement !== elParent) {
+              moveItem(el._prevIndex, elParent!, elNext); // the item was moved into another target before - so it's returned back
+            }
             return;
           }
           const isEmpty = iTo < iFrom; // the active target has no items at all - so the dragged one becomes the 1st there
@@ -663,9 +683,10 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             // WARN: `iTo + 1` of an empty target is the place BETWEEN items of the neighbor targets - so it's shifted
             // when the item is taken from the left
             const at = iTo + 1; // the new place is the end of the target
-            // WARN: `nextElementSibling` (not `null`) - otherwise the item is appended after non-sortable items ([item=false])
+            // WARN: `nextElementSibling` & `firstFalseOf` (not `null`) - otherwise the item is appended after non-sortable
+            // items ([item=false]): the 1st item of an empty target jumps over such a footer & the next ones don't
             const parent = isEmpty ? trgActive : $items[iTo].parentElement!;
-            const next = isEmpty ? null : $items[iTo].nextElementSibling;
+            const next = isEmpty ? firstFalseOf(trgActive) : $items[iTo].nextElementSibling;
             if (isLine) {
               dropTo = { at, parent, next };
               if (isEmpty) {
@@ -676,7 +697,12 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
                 paintLine((isRowLayout ? r.right : r.bottom) - lineW / 2, r); // on the far edge of the last item
               }
             } else {
-              moveItem(at > eli ? at - 1 : at, parent, next);
+              const iNew = at > eli ? at - 1 : at; // index after removing the item from the previous place
+              // WARN: the place can be the same one (the item was appended to the end-only target before) - so an extra
+              // move (with the re-layout & the throttle on every 100ms of the dragging) must be skipped
+              if (iNew !== eli || parent !== el.parentElement) {
+                moveItem(iNew, parent, next);
+              }
             }
             return;
           }

@@ -1578,6 +1578,78 @@ describe("sortElement", () => {
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await h.wait();
     expect(onChanged).toBeCalledTimes(2);
+
+    // WARN: the default indicator really moves the item - so dragging out & back mustn't re-order it inside such a parent
+    layout();
+    [trg] = items(l2); // B2
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 110, clientY: 10 }));
+    h.userMouseMove(trg, { x: 118, y: 12 });
+    dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: 10, y: 5 }); // over the 1st item of the 1st list: the item is really moved there
+    expect(items(l1).map((a) => a.textContent)).toStrictEqual(["B2", "B1", "A2"]);
+    expect(items(l2).map((a) => a.textContent)).toStrictEqual(["A1"]);
+    await h.wait(); // wait for throttling
+    h.userMouseMove(dragEl, { x: 110, y: 5 }); // ... and back into the parent: the initial place must be restored
+    expect(items(l1).map((a) => a.textContent)).toStrictEqual(["B1", "A2"]);
+    expect(items(l2).map((a) => a.textContent)).toStrictEqual(["B2", "A1"]);
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(onChanged).toBeCalledTimes(2); // nothing is changed - so no event
+    detach();
+  });
+
+  test("$attach on several elements: the 1st item of an empty parent is placed before [item=false]", async () => {
+    // WARN: otherwise the 1st item jumps over such a footer & the next ones don't - so the footer changes its place
+    document.body.innerHTML = `<ul id="l1">
+  <li item="">A1</li>
+  <li item="">A2</li>
+</ul>
+<ul id="l2">
+  <li item="false">Not sortable</li>
+</ul>`;
+    const l1 = document.getElementById("l1");
+    const l2 = document.getElementById("l2");
+    el = document.body; // to re-use getItems() & bindDragEl()
+
+    /** Returns sortable items of the pointed list */
+    const items = (t) => Array.prototype.slice.call(t.querySelectorAll(`[item='']:not([drag])`));
+    /** Returns text of every child of the 2nd list (to check the place of the non-sortable one) */
+    const children = () => Array.prototype.slice.call(l2.children).map((a) => a.textContent);
+    /** Assign layout: 2 lists side by side; every item of a list is on its own row */
+    const layout = () =>
+      [l1, l2].forEach((t, ti) => {
+        const arr = items(t);
+        h.setupLayout(t, { x: ti * 100, y: 0, h: Math.max(hi * arr.length, hi), w });
+        arr.forEach((a, i) => h.setupLayout(a, { x: ti * 100, y: hi * i, h: hi, w }));
+      });
+    layout();
+
+    const onChanged = jest.fn();
+    const detach = WUPSortElement.$attach([l1, l2], onChanged);
+
+    // drag an item of the 1st list into the empty 2nd one
+    let trg = getItems()[0]; // A1
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 18, y: 12 });
+    let dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: 110, y: 5 });
+    expect(children()).toStrictEqual(["A1", "Not sortable"]);
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(children()).toStrictEqual(["A1", "Not sortable"]);
+
+    // the next item must be placed after the 1st one - so the non-sortable child keeps the end anyway
+    layout();
+    [trg] = getItems(); // A2
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 18, y: 12 });
+    dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: 110, y: hi - 5 }); // the bottom half of the single item of the 2nd list
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(children()).toStrictEqual(["A1", "A2", "Not sortable"]);
+    expect(items(l1).map((a) => a.textContent)).toStrictEqual([]);
     detach();
   });
 
