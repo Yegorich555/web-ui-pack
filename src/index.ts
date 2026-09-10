@@ -12,6 +12,7 @@ export { default as WUPNotifyElement } from "./notifyElement";
 export { default as WUPSpinElement } from "./spinElement";
 export { default as WUPCircleElement } from "./circleElement";
 export { default as WUPDropdownElement } from "./dropdownElement";
+export { default as WUPSortElement } from "./sortElement";
 
 export { default as WUPFormElement } from "./formElement";
 export { default as WUPTextControl } from "./controls/text";

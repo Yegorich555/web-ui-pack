@@ -1,11 +1,16 @@
 import Code from "src/elements/code";
+import Example from "src/elements/example";
+import MyLink from "src/elements/myLink";
 import { WUPRadioControl } from "web-ui-pack";
 
 WUPRadioControl.$use();
 
-export default function RadioCustomJS() {
+export default function Example2() {
   return (
-    <>
+    <Example header="Customized via JS dynamically" link="demo/src/components/controls/radio/example2.tsx">
+      <small>
+        See details in <MyLink href="/demo/src/components/controls/radio/example2.tsx">radio/example2.tsx</MyLink>
+      </small>
       <wup-radio
         ref={(el) => {
           if (el) {
@@ -25,7 +30,7 @@ export default function RadioCustomJS() {
         }}
       />
       <Code code={code} />
-    </>
+    </Example>
   );
 }
 

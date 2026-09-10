@@ -65,6 +65,7 @@ export default abstract class WUPBaseElement<
 
   /** StyleContent related to component & inherited components */
   static get $styleRoot(): string {
+    // NiceToHave: currently $styleRoot inheritted automatically so init WUPSortElement adds WUPBaseElement.$styleRoot and WUPSortElement.$styleRoot, but expected only WUPSortElement.$styleRoot
     return `:root {
           --base-focus: #00778d;
           --base-btn-bg: #009fbc;

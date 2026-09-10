@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import movable from "src/helpers/movable";
 import WUPPopupElement from "web-ui-pack/popup/popupElement";
 import { PopupOpenCases, PopupAnimations } from "web-ui-pack/popup/popupElement.types";
+import Example from "src/elements/example";
 import styles from "./popupView.scss";
 
 // example of attach - use this to avoid overhelmed layout by closed popups
@@ -88,8 +89,7 @@ export default function Example2() {
   const setTitle = useTitle();
 
   return (
-    <>
-      <h3>Example 2</h3>
+    <Example header="Example 2" link="demo/src/components/popup/example2.tsx">
       <small>
         <b>Dropdown behavior (with custom animation).</b> You can change position behavior/priority with option{" "}
         <b>placement</b>
@@ -111,6 +111,6 @@ export default function Example2() {
           <small>drag and move me</small>
         </button>
       </div>
-    </>
+    </Example>
   );
 }

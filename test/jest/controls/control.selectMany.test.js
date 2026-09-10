@@ -237,7 +237,7 @@ describe("control.selectMany", () => {
     expect(el.$initValue).toStrictEqual([10, 30]);
     // animation for [removed]
     expect(el.$refInput.parentElement.innerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true" removed="">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2">"`
+      `"<span item="false" aria-hidden="true" removed="">Donny</span><span item="" aria-hidden="true">Leo</span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-describedby="txt2">"`
     );
     expect(el.$isOpened).toBe(false); // because not-open by value-change
     await h.wait();
@@ -727,14 +727,19 @@ describe("control.selectMany", () => {
     const hi = 30;
     const w = 60;
     h.setupLayout(el, { x: 0, y: 0, h: hi * 2, w: w * 3 });
+    /** Rendered items in the DOM order; WARN: $refItems is updated by the end of dragging (not on every pointer move) */
+    const items = () =>
+      Array.prototype.slice
+        .call(el.$refInput.parentElement.querySelectorAll("[item='']"))
+        .filter((a) => !a.hasAttribute("drag"));
     const updateLayout = () => {
       // 1st line
       // WARN: Items doesn't change own position
-      h.setupLayout(el.$refItems[0], { x: 0, y: 0, h: hi, w }); // 1st
-      h.setupLayout(el.$refItems[1], { x: w, y: 0, h: hi, w }); // 2nd
-      h.setupLayout(el.$refItems[2], { x: w * 2, y: 0, h: hi, w }); // 3rd
+      h.setupLayout(items()[0], { x: 0, y: 0, h: hi, w }); // 1st
+      h.setupLayout(items()[1], { x: w, y: 0, h: hi, w }); // 2nd
+      h.setupLayout(items()[2], { x: w * 2, y: 0, h: hi, w }); // 3rd
       // 2nd line
-      h.setupLayout(el.$refItems[3], { x: 0, y: hi, h: hi, w }); // 1st
+      items()[3] && h.setupLayout(items()[3], { x: 0, y: hi, h: hi, w }); // 1st
     };
     updateLayout();
     let trg = el.$refItems[0];
@@ -748,8 +753,8 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: trg.offsetWidth / 2, y: trg.offsetHeight / 2 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(0px, 0px);">Donny</span>",
-        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(30px, 15px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
@@ -777,13 +782,13 @@ describe("control.selectMany", () => {
 
     // move to right of 2nd item
     updateLayout();
-    let r = el.$refItems[1].getBoundingClientRect();
+    let r = items()[1].getBoundingClientRect();
     h.userMouseMove(dragEl, { x: r.right, y: trg.offsetHeight / 2 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(90px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(120px, 15px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
-        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
@@ -792,13 +797,13 @@ describe("control.selectMany", () => {
 
     // checking throttling here
     updateLayout();
-    r = el.$refItems[2].getBoundingClientRect();
+    r = items()[2].getBoundingClientRect();
     h.userMouseMove(trg, { x: r.right, y: trg.offsetHeight / 2 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(150px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(180px, 15px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
-        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
@@ -813,10 +818,10 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: r.right - 2, y: trg.offsetHeight / 2 + 5 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(148px, 5px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(178px, 20px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
       ]
@@ -830,10 +835,10 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: w * 2, y: 0 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(90px, -15px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(120px, 0px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
       ]
@@ -844,8 +849,8 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: 0, y: 0 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(-30px, -15px);">Donny</span>",
-        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(0px, 0px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
@@ -859,11 +864,11 @@ describe("control.selectMany", () => {
     h.userMouseMove(trg, { x: 0, y: trg.offsetHeight + 5 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(-30px, 20px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(0px, 35px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
-        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
       ]
     `);
@@ -873,13 +878,13 @@ describe("control.selectMany", () => {
     // moving to 1st line; right side
     await h.wait(); // wait for throttling to get new position of 2nd item
     updateLayout();
-    h.userMouseMove(trg, { x: w * 2, y: 0 });
+    h.userMouseMove(trg, { x: w * 2 + w / 2, y: 0 }); // WARN: point the center of the 3rd place: x=w*2 is exactly the border between the 2nd & 3rd items (ambiguous nearest)
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(90px, -15px);">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(150px, 0px);">Donny</span>",
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" aria-hidden="true" drop="">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false" drop="">Donny</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
       ]
@@ -897,18 +902,18 @@ describe("control.selectMany", () => {
     expect(onChanged).toBeCalledTimes(1);
     expect(el.$value).toStrictEqual([20, 30, 10, 40]);
     expect(dragEl.outerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(90px, -15px);">Donny</span>"`
+      `"<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(150px, 0px); pointer-events: none; user-select: none;">Donny</span>"`
     );
     await nextFrame(5);
     expect(dragEl.outerHTML).toMatchInlineSnapshot(
-      `"<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(120px, 0px);">Donny</span>"`
+      `"<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(120px, 0px); pointer-events: none; user-select: none;">Donny</span>"`
     );
     await nextFrame(50);
     expect(getChildren()).toMatchInlineSnapshot(`
       [
         "<span item="" aria-hidden="true">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false">Donny</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
       ]
@@ -921,15 +926,16 @@ describe("control.selectMany", () => {
     trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
     // move outside of control
-    h.userMouseMove(trg, { x: 5, y: 5 });
+    h.userMouseMove(trg, { x: 20, y: 20 }); // WARN: dragging starts only when pointer is moved > 8px from the pointerdown-point
+    expect(el.querySelector("[drag][remove]")).toBeFalsy(); // because it is inside the control yet
     bindDragEl(); // simulate getBoundingClientRect for draggable element
     h.userMouseMove(trg, { x: 1000, y: 1000 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<span item="" aria-hidden="true" drag="" style="width: 60px; height: 30px; transform: translate(970px, 985px);" remove="">Mikky</span>",
-        "<span item="" aria-hidden="true" drop="">Mikky</span>",
+        "<span item="" aria-hidden="true" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(1000px, 1000px);" remove="">Mikky</span>",
+        "<span item="" aria-hidden="true" draggable="false" drop="">Mikky</span>",
         "<span item="" aria-hidden="true">Leo</span>",
-        "<span item="" aria-hidden="true">Donny</span>",
+        "<span item="" aria-hidden="true" draggable="false">Donny</span>",
         "<span item="" aria-hidden="true">Splinter</span>",
         "<input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list">",
       ]
@@ -943,9 +949,9 @@ describe("control.selectMany", () => {
 
     // cancel without move
     trg = el.$refItems[0];
-    let was = el.outerHTML;
     trg.dispatchEvent(new MouseEvent("mousedown", { cancelable: true, bubbles: true }));
     trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true }));
+    let was = el.outerHTML; // WARN: after pointerdown - because item gets [draggable=false] to prevent native dragging of images etc.
     trg.dispatchEvent(new MouseEvent("mouseup", { cancelable: true, bubbles: true }));
     trg.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await nextFrame(50);
@@ -1061,7 +1067,7 @@ describe("control.selectMany", () => {
         <ul
           aria-label="Items"
           aria-multiselectable="true"
-          id="txt6"
+          id="txt5"
           role="listbox"
           tabindex="-1"
         >
@@ -1081,7 +1087,7 @@ describe("control.selectMany", () => {
           <li
             aria-selected="true"
             focused=""
-            id="txt7"
+            id="txt6"
             role="option"
           >
             Leo

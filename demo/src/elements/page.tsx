@@ -15,8 +15,10 @@ export default function Page(props: React.PropsWithChildren<Props>) {
   return (
     <div
       className={props.className}
-      ref={(el) => {
-        if (el) {
+      ref={(h) => {
+        const el = h as HTMLElement & { _wasInit?: boolean };
+        if (el && !el._wasInit) {
+          el._wasInit = true;
           el.style.opacity = "0";
           setTimeout(() => (el.style.opacity = ""), 100); // to prevent awful blink
         }

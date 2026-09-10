@@ -1,4 +1,6 @@
 import Code from "src/elements/code";
+import Example from "src/elements/example";
+import MyLink from "src/elements/myLink";
 import { WUPRadioControl } from "web-ui-pack";
 
 WUPRadioControl.$use();
@@ -8,17 +10,18 @@ const items = [
   { value: false, text: "" },
 ];
 
-document.getElementById("1");
-
 declare module "react" {
   interface HTMLAttributes<T> {
     icon?: string;
   }
 }
 
-export default function RadioCustomHtml() {
+export default function Example3() {
   return (
-    <>
+    <Example header="Customized via HTML" link="demo/src/components/controls/radio/example3.tsx">
+      <small>
+        See details in <MyLink href="/demo/src/components/controls/radio/example3.tsx">radio/example3.tsx</MyLink>
+      </small>
       <wup-radio
         ref={(el) => {
           if (el) {
@@ -45,7 +48,7 @@ export default function RadioCustomHtml() {
       </wup-radio>
       <Code code={codeHtml} />
       <Code code={code} />
-    </>
+    </Example>
   );
 }
 

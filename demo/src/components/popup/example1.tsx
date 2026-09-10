@@ -1,9 +1,9 @@
+import Example from "src/elements/example";
 import styles from "./popupView.scss";
 
 export default function Example1() {
   return (
-    <>
-      <h3>Example 1</h3>
+    <Example header="Example 1" link="demo/src/components/popup/example1.tsx">
       <div className={styles.popupEx1}>
         <button
           id="trg"
@@ -59,6 +59,6 @@ export default function Example1() {
           left.end
         </wup-popup>
       </div>
-    </>
+    </Example>
   );
 }

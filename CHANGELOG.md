@@ -2,6 +2,20 @@
 
 # Changelog
 
+## 1.2.8 (\_\_\_)
+
+### Fixes & Improvements
+
+- **Global**. Add missed attributes for direct usage in html
+
+### New Features
+
+- helper [zip](src/helpers/files/zip.ts)
+- helper [exportToExcel](src/helpers/files/exportToExcel.ts)
+- helper [saveAsFile](src/helpers/files/saveAsFile.ts)
+- helper [csv](src/helpers/files/csv.ts)
+- [SortElement](src/sortElement.ts)
+
 ## 1.2.7 (Aug 25, 2026)
 
 ### Fixes & Improvements

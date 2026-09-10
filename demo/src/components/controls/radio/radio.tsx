@@ -1,11 +1,10 @@
 /* eslint-disable no-promise-executor-return */
 import Page from "src/elements/page";
 import { WUPRadioControl } from "web-ui-pack";
-import MyLink from "src/elements/myLink";
-import RadioCustomStyles from "./radio.customStyles";
-import stylesCom from "./controls.scss";
-import RadioCustomJS from "./radio.customJS";
-import RadioCustomHtml from "./radio.customHtml";
+import Example1 from "./example1";
+import Example2 from "./example2";
+import Example3 from "./example3";
+import stylesCom from "../controls.scss";
 
 WUPRadioControl.$use();
 
@@ -49,7 +48,7 @@ export default function RadioControlView() {
       ]}
       details={{
         tag: "wup-radio",
-        linkDemo: "demo/src/components/controls/radio.tsx",
+        linkDemo: "demo/src/components/controls/radio/radio.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
     >
@@ -107,31 +106,9 @@ export default function RadioControlView() {
           }}
         />
 
-        <section>
-          <h3>Customized via CSS only</h3>
-          <small>
-            See details in{" "}
-            <MyLink href="/demo/src/components/controls/radio.customCss.scss">radio.customStyles.scss</MyLink>
-          </small>
-          <RadioCustomStyles />
-        </section>
-
-        <section>
-          <h3>Customized via JS dynamically</h3>
-          <small>
-            See details in <MyLink href="/demo/src/components/controls/radio.customJS.tsx">radio.customJS.tsx</MyLink>
-          </small>
-          <RadioCustomJS />
-        </section>
-
-        <section>
-          <h3>Customized via HTML</h3>
-          <small>
-            See details in{" "}
-            <MyLink href="/demo/src/components/controls/radio.customHtml.tsx">radio.customHtml.tsx</MyLink>
-          </small>
-          <RadioCustomHtml />
-        </section>
+        <Example1 />
+        <Example2 />
+        <Example3 />
 
         <button type="submit">Submit</button>
       </wup-form>

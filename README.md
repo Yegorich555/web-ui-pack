@@ -7,6 +7,7 @@ Universal web package with high scalable [WebComponents](#components) and [helpe
 [![install size](https://packagephobia.now.sh/badge?p=web-ui-pack)](https://packagephobia.now.sh/result?p=web-ui-pack)
 [![npm downloads](https://img.shields.io/npm/dm/web-ui-pack.svg?style=flat-square)](http://npm-stat.com/charts.html?package=web-ui-pack)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 <!-- [![GitHub Sponsors](https://img.shields.io/github/sponsors/Yegorich555)](https://github.com/sponsors/Yegorich555) -->
 
 ## Demo
@@ -60,6 +61,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
 - _HTMLElement_ > _BaseElement_
 
   - [x] [DropdownElement](src/dropdownElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/dropdown)
+  - [x] [SortElement](src/sortElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/sort)
   - [x] [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
   - [x] [CircleElement](src/circleElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/circle)
   - _BaseModal_
@@ -289,6 +291,13 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
 - [**promiseWait**](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast API-request in case: pending > waitResponse > resetPending`
 - [**localeInfo**](src/objects/localeInfo.ts) ⇒ `Locale-object with definitions related to user-locale`
 - [**TimeObject**](src/objects/timeObject.ts) ⇒ `Plane time object without date`
+
+#### Helpers. Files
+
+- [**zip**](src/helpers/files/zip.ts) ⇒ `compress files into zip archive`
+- [**exportToExcel**](src/helpers/files/exportToExcel.ts) ⇒ `export data to excel-file`
+- [**saveAsFile**](src/helpers/files/saveAsFile.ts) ⇒ `save Blob into file`
+- [**csv**](src/helpers/files/csv.ts) ⇒ `convert data to csv-string & back`
 
 ---
 

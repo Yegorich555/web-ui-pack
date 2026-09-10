@@ -9,9 +9,10 @@ import PopupView from "./components/popup/popupView";
 
 import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
-import CircleView from "./components/circleView";
-import DropdownView from "./components/dropdownView";
-import ModalView from "./components/modalView";
+import CircleView from "./components/circle/circleView";
+import DropdownView from "./components/dropdown/dropdownView";
+import SortView from "./components/sort/sortView";
+import ModalView from "./components/modal/modalView";
 
 import TextControlView from "./components/controls/text";
 import TextareaControlView from "./components/controls/textarea";
@@ -19,7 +20,7 @@ import PasswordControlView from "./components/controls/password";
 import SelectControlView from "./components/controls/select";
 import SwitchControlView from "./components/controls/switch";
 import CheckControlView from "./components/controls/check";
-import RadioControlView from "./components/controls/radio";
+import RadioControlView from "./components/controls/radio/radio";
 import CalendarControlView from "./components/controls/calendar";
 import DateControlView from "./components/controls/date";
 import TimeControlView from "./components/controls/time";
@@ -32,8 +33,9 @@ import MyLink from "./elements/myLink";
 import imgLogo from "./assets/logo.png";
 import styles from "./main.scss";
 import Login from "./components/controls/login";
-import ModalAsAlertView from "./components/modalAsAlertView";
-import NotifyView from "./components/notifyView";
+import ModalAsAlertView from "./components/modal/modalAsAlertView";
+import NotifyView from "./components/notify/notifyView";
+import ExportToExcelView from "./components/exportToExcel/exportToExcel";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -55,7 +57,9 @@ const routes: IRoute[] = [
     { path: "modal", el: ModalView },
     { path: "modal-alert", label: "Alert", el: ModalAsAlertView },
     { path: "notify", el: NotifyView },
+    { path: "sort", el: SortView },
   ].sort((a, b) => a.path.localeCompare(b.path)),
+
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
   { path: "control/textarea", el: TextareaControlView, isNested: true },
@@ -70,6 +74,9 @@ const routes: IRoute[] = [
   { path: "control/date", el: DateControlView, isNested: true },
   { path: "control/time", el: TimeControlView, isNested: true },
   { path: "control/dateTime", el: DateTimeView, isNested: true },
+
+  { path: "files/excel", label: "Export to Excel", el: ExportToExcelView },
+
   { path: "faq", label: "FAQ", el: FAQView },
 ];
 

@@ -1,10 +1,20 @@
 {
 	"$schema": "https://raw.githubusercontent.com/JetBrains/web-types/master/schema/web-types.json",
 	"name": "web-ui-pack",
-	"version": "1.1.0",
+	"version": "1.2.7",
 	"description-markup": "markdown",
 	"contributions": {
 		"html": {
+			"attributes": [
+				{
+					"name": "wup-sort",
+					"description": "Point it on a parent of sortable items (see WUPSortElement.$attach) to accept dropped items without ordering them: \n\r an item dragged into such a parent is appended to the end \n\r items already placed there aren't re-ordered (dragging them into another parent is still allowed)",
+					"value": {
+						"kind": "plain",
+						"type": "'false'"
+					}
+				}
+			],
 			"elements": [
 				{
 					"name": "button",
@@ -89,12 +99,24 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
 								"kind": "plain",
 								"type": "'window.myValidations'"
 							}
+						},
+						{
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
 						},
 						{
 							"name": "w-storagekey",
@@ -152,12 +174,24 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
 								"kind": "plain",
 								"type": "'window.myValidations'"
 							}
+						},
+						{
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
 						},
 						{
 							"name": "w-storagekey",
@@ -294,6 +328,10 @@
 							"description": "Time to wait for user finishes typing to start validate and provide $change event"
 						},
 						{
+							"name": "w-selectonfocus",
+							"description": "Select whole text when input got focus (when input is not readonly and not disabled)"
+						},
+						{
 							"name": "w-clearbutton",
 							"description": "Show/hide clear button"
 						},
@@ -346,12 +384,24 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
 								"kind": "plain",
 								"type": "'window.myValidations'"
 							}
+						},
+						{
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
 						},
 						{
 							"name": "w-storagekey",
@@ -533,6 +583,10 @@
 							"description": "Time to wait for user finishes typing to start validate and provide $change event"
 						},
 						{
+							"name": "w-selectonfocus",
+							"description": "Select whole text when input got focus (when input is not readonly and not disabled)"
+						},
+						{
 							"name": "w-clearbutton",
 							"description": "Show/hide clear button"
 						},
@@ -585,12 +639,24 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
 								"kind": "plain",
 								"type": "'window.myValidations'"
 							}
+						},
+						{
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
 						},
 						{
 							"name": "w-storagekey",
@@ -651,8 +717,16 @@
 					"doc-url": "https://yegorich555.github.io/web-ui-pack/control/password",
 					"attributes": [
 						{
+							"name": "w-reverse",
+							"description": "Reversed-style for button-eye"
+						},
+						{
 							"name": "w-debouncems",
 							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-selectonfocus",
+							"description": "Select whole text when input got focus (when input is not readonly and not disabled)"
 						},
 						{
 							"name": "w-clearbutton",
@@ -687,6 +761,10 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
@@ -695,20 +773,12 @@
 							}
 						},
 						{
-							"name": "w-validationsshowall",
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
 							"description": "Show all validation-rules with checkpoints as list instead of single error"
-						},
-						{
-							"name": "w-storagekey",
-							"description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
-						},
-						{
-							"name": "w-storage",
-							"description": "Type of storage for saving value",
-							"value": {
-								"kind": "plain",
-								"type": "'local' | 'session' | 'url'"
-							}
 						}
 					]
 				},
@@ -758,12 +828,24 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
 								"kind": "plain",
 								"type": "'window.myValidations'"
 							}
+						},
+						{
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
 						},
 						{
 							"name": "w-storagekey",
@@ -807,6 +889,10 @@
 						{
 							"name": "w-debouncems",
 							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-selectonfocus",
+							"description": "Select whole text when input got focus (when input is not readonly and not disabled)"
 						},
 						{
 							"name": "w-clearbutton",
@@ -861,12 +947,24 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
 								"kind": "plain",
 								"type": "'window.myValidations'"
 							}
+						},
+						{
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
 						},
 						{
 							"name": "w-storagekey",
@@ -916,6 +1014,10 @@
 							"description": "Time to wait for user finishes typing to start validate and provide $change event"
 						},
 						{
+							"name": "w-selectonfocus",
+							"description": "Select whole text when input got focus (when input is not readonly and not disabled)"
+						},
+						{
 							"name": "w-clearbutton",
 							"description": "Show/hide clear button"
 						},
@@ -968,12 +1070,24 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
 								"kind": "plain",
 								"type": "'window.myValidations'"
 							}
+						},
+						{
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
 						},
 						{
 							"name": "w-storagekey",
@@ -985,6 +1099,21 @@
 							"value": {
 								"kind": "plain",
 								"type": "'local' | 'session' | 'url'"
+							}
+						}
+					]
+				},
+				{
+					"name": "wup-sort",
+					"description": "Wrapper to make items/children sortable",
+					"doc-url": "https://yegorich555.github.io/web-ui-pack/sort",
+					"attributes": [
+						{
+							"name": "w-dropindicator",
+							"description": "Style of the indicator that shows the new place of the dragged item: \n\r `ghost` - the item itself is moved between other items (so the layout is shifted during the dragging) \n\r `line` - a line is painted over the layout between items (the layout isn't shifted; the order is applied on drop)",
+							"value": {
+								"kind": "plain",
+								"type": "'ghost' | 'line'"
 							}
 						}
 					]
@@ -1066,12 +1195,24 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
 								"kind": "plain",
 								"type": "'window.myValidations'"
 							}
+						},
+						{
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
 						},
 						{
 							"name": "w-storagekey",
@@ -1095,6 +1236,10 @@
 						{
 							"name": "w-debouncems",
 							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-selectonfocus",
+							"description": "Select whole text when input got focus (when input is not readonly and not disabled)"
 						},
 						{
 							"name": "w-clearbutton",
@@ -1149,12 +1294,24 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
 								"kind": "plain",
 								"type": "'window.myValidations'"
 							}
+						},
+						{
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
 						},
 						{
 							"name": "w-storagekey",
@@ -1178,6 +1335,10 @@
 						{
 							"name": "w-debouncems",
 							"description": "Time to wait for user finishes typing to start validate and provide $change event"
+						},
+						{
+							"name": "w-selectonfocus",
+							"description": "Select whole text when input got focus (when input is not readonly and not disabled)"
 						},
 						{
 							"name": "w-clearbutton",
@@ -1212,12 +1373,24 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
 								"kind": "plain",
 								"type": "'window.myValidations'"
 							}
+						},
+						{
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
 						},
 						{
 							"name": "w-storagekey",
@@ -1275,12 +1448,32 @@
 							}
 						},
 						{
+							"name": "w-opencase",
+							"description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`"
+						},
+						{
+							"name": "w-readonlyinput",
+							"description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+						},
+						{
 							"name": "w-debouncems",
 							"description": "Time to wait for user finishes typing to start validate and provide $change event"
 						},
 						{
+							"name": "w-selectonfocus",
+							"description": "Select whole text when input got focus (when input is not readonly and not disabled)"
+						},
+						{
 							"name": "w-clearbutton",
 							"description": "Show/hide clear button"
+						},
+						{
+							"name": "w-mask",
+							"description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
+							"value": {
+								"kind": "plain",
+								"type": "'+1(000) 000-0000' | '0000-00-00' | '##0.##0.##0.##0' | '00:00 /[AP]/M' | '//[a-zA-Z]//{1,5}'"
+							}
 						},
 						{
 							"name": "w-maskholder",
@@ -1323,12 +1516,24 @@
 							"description": "Disallow copy value; use attr [readonly] for styling"
 						},
 						{
+							"name": "w-clearactions",
+							"description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+						},
+						{
 							"name": "w-validations",
 							"description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
 							"value": {
 								"kind": "plain",
 								"type": "'window.myValidations'"
 							}
+						},
+						{
+							"name": "w-validatedebouncems",
+							"description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+						},
+						{
+							"name": "w-validationshowall",
+							"description": "Show all validation-rules with checkpoints as list instead of single error"
 						},
 						{
 							"name": "w-storagekey",

@@ -1,0 +1,58 @@
+.list,
+.grid {
+  box-sizing: border-box;
+  margin: 10px 0;
+  padding: 6px;
+  border: 1px solid var(--base-sep);
+  border-radius: var(--border-radius);
+
+  > [item] {
+    box-sizing: border-box;
+    padding: 8px 12px;
+    border-radius: var(--border-radius);
+    background: rgba(0, 0, 0, 0.04);
+    cursor: default;
+  }
+
+  > [item="false"] {
+    opacity: 0.5;
+  }
+}
+
+.list > [item] {
+  margin: 4px 0;
+}
+
+ul.list {
+  list-style: none; // <ul> is used to show $attach on an ordinary element
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 400px; // to show multiline sorting
+
+  > [item] {
+    text-align: center;
+  }
+}
+
+.result {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.columns {
+  display: flex;
+  gap: 12px;
+
+  > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  ul.list {
+    min-height: 60px; // WARN: otherwise an empty column shrinks & it's impossible to drop an item into it
+  }
+}

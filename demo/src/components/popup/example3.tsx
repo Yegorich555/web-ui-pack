@@ -1,11 +1,11 @@
 import movable from "src/helpers/movable";
 import { PopupOpenCases } from "web-ui-pack/popup/popupElement.types";
+import Example from "src/elements/example";
 import styles from "./popupView.scss";
 
 export default function Example3() {
   return (
-    <>
-      <h3>Example 3</h3>
+    <Example header="Example 3" link="demo/src/components/popup/example3.tsx">
       <small>
         You can change position behavior/priority with option <b>placement</b>
       </small>
@@ -38,6 +38,6 @@ export default function Example3() {
           (option <b>toFitElement</b>)
         </wup-popup>
       </div>
-    </>
+    </Example>
   );
 }

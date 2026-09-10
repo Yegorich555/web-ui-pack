@@ -12,7 +12,7 @@ export default function ModalAsAlertView() {
       header="Modal As Alert"
       link="src/modalElement.ts"
       details={{
-        linkDemo: "demo/src/components/modalAsAlertView.tsx",
+        linkDemo: "demo/src/components/modal/modalAsAlertView.tsx",
       }}
       features={["This is ordinary modal. All features see on Modal page"]}
     >

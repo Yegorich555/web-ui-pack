@@ -1001,9 +1001,7 @@ mask-image: var(--ctrl-icon-img);
         padding: 0;
         margin-left: 0.5em;
       }
-      WUP-SELECTMANY [item][focused],
-      WUP-SELECTMANY [item][drag],
-      WUP-SELECTMANY [item][drop] {
+      WUP-SELECTMANY [item][focused] {
         color: var(--ctrl-focus-label);
         box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
       }
@@ -1046,18 +1044,52 @@ mask-image: var(--ctrl-icon-img);
           opacity: 0;
         }
       }
+      
+      WUP-SELECTMANY {
+        --sort-active-color: var(--ctrl-focus-label);
+        --sort-active-shadow: var(--ctrl-focus);
+      }
+      WUP-SELECTMANY {
+        display: block;
+      }
+      WUP-SELECTMANY [item][drag],
+      WUP-SELECTMANY [item][drop] {
+        color: var(--sort-active-color);
+        box-shadow: inset 0 0 3px 0 var(--sort-active-shadow);
+        opacity: 0.7;
+      }
       WUP-SELECTMANY [item][drag] {
         z-index: 9999;
         position: fixed;
         left:0; top:0;
         cursor: grabbing;
         text-decoration: none;
+        opacity: 0.8;
+      }
+      WUP-SELECTMANY [item][drag][remove] {
+        text-decoration: line-through;
+        opacity: 0.5;
+      }
+      WUP-SELECTMANY [drop-line] {
+        z-index: 9998;
+        position: fixed;
+        left:0; top:0;
+        pointer-events: none;
+        border-radius: 2px;
+        background: var(--sort-active-color);
+        box-shadow: 0 0 2px 0 var(--sort-active-shadow);
+      }
+      WUP-SELECTMANY[hovered] {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+         user-select: none;
+      }
+      
+      WUP-SELECTMANY [item][drag] {
         --ctrl-icon: var(--ctrl-select-item-del);
         color: var(--ctrl-select-item-text);
         background-color: var(--ctrl-select-item-bg);
-      }
-      WUP-SELECTMANY [item][drop] {
-        opacity: 0.7;
       }
 </style>
 `;
@@ -1152,6 +1184,7 @@ exports[`control.selectMany sortable: drag&drop 1`] = `
     <span>
       <span
         aria-hidden="true"
+        draggable="false"
         item=""
       >
         Donny
@@ -1209,13 +1242,15 @@ exports[`control.selectMany sortable: drag&drop 3`] = `
       <span
         aria-hidden="true"
         drag=""
+        draggable="false"
         item=""
-        style="width: 60px; height: 30px; transform: translate(0px, 0px);"
+        style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(30px, 15px);"
       >
         Donny
       </span>
       <span
         aria-hidden="true"
+        draggable="false"
         drop=""
         item=""
       >
@@ -1284,6 +1319,7 @@ exports[`control.selectMany sortable: drag&drop 14`] = `
       </span>
       <span
         aria-hidden="true"
+        draggable="false"
         item=""
       >
         Donny
@@ -1333,6 +1369,7 @@ exports[`control.selectMany sortable: drag&drop 16`] = `
       </span>
       <span
         aria-hidden="true"
+        draggable="false"
         item=""
       >
         Donny
