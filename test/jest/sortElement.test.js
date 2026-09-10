@@ -170,7 +170,7 @@ describe("sortElement", () => {
     h.userMouseMove(trg, { x: 20, y: 12 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<div item="" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(10px, 2px);">Item 1</div>",
+        "<div item="" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(10px, 2px);">Item 1</div>",
         "<div item="" draggable="false" drop="">Item 1</div>",
         "<div item="">Item 2</div>",
         "<div item="">Item 3</div>",
@@ -185,7 +185,7 @@ describe("sortElement", () => {
     h.userMouseMove(dragEl, { x: w + w / 2, y: hi / 2 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<div item="" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(80px, 5px);">Item 1</div>",
+        "<div item="" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(80px, 5px);">Item 1</div>",
         "<div item="">Item 2</div>",
         "<div item="" draggable="false" drop="">Item 1</div>",
         "<div item="">Item 3</div>",
@@ -199,7 +199,7 @@ describe("sortElement", () => {
     h.userMouseMove(dragEl, { x: w * 2 + w / 2, y: hi / 2 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<div item="" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(140px, 5px);">Item 1</div>",
+        "<div item="" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(140px, 5px);">Item 1</div>",
         "<div item="">Item 2</div>",
         "<div item="" draggable="false" drop="">Item 1</div>",
         "<div item="">Item 3</div>",
@@ -214,7 +214,7 @@ describe("sortElement", () => {
     h.userMouseMove(dragEl, { x: w * 2 + w / 2, y: hi / 2 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<div item="" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(140px, 5px);">Item 1</div>",
+        "<div item="" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(140px, 5px);">Item 1</div>",
         "<div item="">Item 2</div>",
         "<div item="">Item 3</div>",
         "<div item="" draggable="false" drop="">Item 1</div>",
@@ -229,7 +229,7 @@ describe("sortElement", () => {
     h.userMouseMove(dragEl, { x: 5, y: hi + hi / 2 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<div item="" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(-5px, 35px);">Item 1</div>",
+        "<div item="" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(-5px, 35px);">Item 1</div>",
         "<div item="">Item 2</div>",
         "<div item="">Item 3</div>",
         "<div item="">Item 4</div>",
@@ -244,7 +244,7 @@ describe("sortElement", () => {
     h.userMouseMove(dragEl, { x: 5, y: 5 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<div item="" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(-5px, -5px);">Item 1</div>",
+        "<div item="" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(-5px, -5px);">Item 1</div>",
         "<div item="" draggable="false" drop="">Item 1</div>",
         "<div item="">Item 2</div>",
         "<div item="">Item 3</div>",
@@ -260,7 +260,7 @@ describe("sortElement", () => {
     h.userMouseMove(dragEl, { x: w * 2 + w / 2, y: hi / 2 });
     expect(getChildren()).toMatchInlineSnapshot(`
       [
-        "<div item="" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(140px, 5px);">Item 1</div>",
+        "<div item="" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(140px, 5px);">Item 1</div>",
         "<div item="">Item 2</div>",
         "<div item="">Item 3</div>",
         "<div item="" draggable="false" drop="">Item 1</div>",
@@ -726,7 +726,7 @@ describe("sortElement", () => {
     expect(getChildren()).toMatchInlineSnapshot(`
       [
         "<div drop-line="" style="width: 1px; height: 30px; transform: translate(-5.5px, 0px);"></div>",
-        "<div item="" draggable="false" drag="" style="width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(10px, 10px);">Item 1</div>",
+        "<div item="" draggable="false" drag="" style="box-sizing: border-box; width: 60px; height: 30px; top: 0px; left: 0px; position: fixed; z-index: 9999; transform: translate(10px, 10px);">Item 1</div>",
         "<div item="" draggable="false" drop="">Item 1</div>",
         "<div item="">Item 2</div>",
         "<div item="">Item 3</div>",

@@ -554,8 +554,11 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
             // clone draggable element
             dr = el.cloneNode(true) as HTMLElement & { __isDragItem?: boolean };
             dr.setAttribute("drag", "");
-            dr.style.width = `${el.offsetWidth}px`;
-            dr.style.height = `${el.offsetHeight}px`;
+            // WARN: border-box & rect (not offsetWidth/Height) - otherwise the clone of an item with the default content-box
+            // is rendered wider & higher by its padding + border (and such a clone inflates the isInside-detection below)
+            dr.style.boxSizing = "border-box";
+            dr.style.width = `${rect.width}px`;
+            dr.style.height = `${rect.height}px`;
             el.parentElement!.prepend(dr);
             el.setAttribute("drop", ""); // mark current element
             // if pick item and move cursor fast control-focus-frame is blinking because because cursor much faster than js events
@@ -791,12 +794,11 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 customElements.define(tagName, WUPSortElement);
 
 /** TODO
- * 13 findings, most severe first:
+ * 12 findings, most severe first:
 
 src/sortElement.ts:575 — dr.getBoundingClientRect() right after writing dr.style.transform forces a synchronous layout on every pointermove when canRemove is on (selectMany always); the clone's rect is fully derivable from the translate + a one-time size read.
 src/sortElement.ts:600 — the rect cache is filled for items of all targets, but only [iFrom..iTo] plus rects[eli] are read; 3x100 items means 300 getBoundingClientRect() per post-swap move instead of ~101. Fill lazily per index.
 src/sortElement.ts:388 — the full $items gather (deep query per target + ownerOf walk per item + 2 forEach passes) runs before the eli === -1 early-out, so every tap on a non-item descendant pays for it and throws it away.
-src/sortElement.ts:557 — clone sized from el.offsetWidth/offsetHeight without box-sizing: border-box: with default content-box items the ghost renders padding+border too wide (and inflates the canRemove overlap test). rect at :526 already has the exact size.
 src/sortElement.ts:643 — Math.sqrt per candidate in the per-move nearest-item loop; the value is only used in a < comparison, so squared distances are order-equivalent.
 src/sortElement.ts:400 — t === item || is redundant with item.contains(t) (contains is true for the node itself), and t instanceof Node is dead for real pointer events.
 src/sortElement.ts:755 — $items.indexOf(el) is an O(n) scan for a value eli provably already holds (moveItem keeps them in sync).
