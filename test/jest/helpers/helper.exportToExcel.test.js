@@ -885,6 +885,14 @@ describe("helper.exportToExcel", () => {
     );
     expect(files["xl/tables/table1.xml"]).toContain(`<tableColumn id="1" name="12"/>`);
     expectValidXml("xl/worksheets/sheet1.xml");
+
+    // ...an empty text wipes the mapped header either: such a cell is rendered without any content
+    await headerValue({ type: ExcelCellTypes.text, stringVal: "" });
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(
+      `<c r="A1" s="${cellStyleId("A1")}" t="inlineStr"><is><t></t></is></c>`
+    );
+    expect(files["xl/tables/table1.xml"]).toContain(`<tableColumn id="1" name=""/>`);
+    expectValidXml("xl/worksheets/sheet1.xml");
   });
 
   test("cellCallback: the auto-width follows the style of a cell", async () => {

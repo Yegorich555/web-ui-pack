@@ -869,6 +869,57 @@ describe("sortElement", () => {
     detach();
   });
 
+  test("dropIndicator: line - the layout of a grid-target with less than 2 items", async () => {
+    // WARN: a flex-target is checked by the test above; a grid one reports the direction by `grid-auto-flow`
+    // & in opposite to flex its `column` means that items are rendered in a row
+    document.body.innerHTML = `<ul id="l1">
+  <li item="">A1</li>
+  <li item="">A2</li>
+</ul>
+<ul id="l2">
+  <li item="">B1</li>
+</ul>`;
+    const [l1, l2] = ["l1", "l2"].map((a) => document.getElementById(a));
+    el = document.body; // to re-use getItems(), bindDragEl() & lineStyle()
+
+    /** Assign layout: 2 lists side by side (the 2nd one has a single item - so it has no neighbors to compare rects with) */
+    h.setupLayout(l1, { x: 0, y: 0, h: hi, w: w * 2 });
+    h.setupLayout(l2, { x: 200, y: 0, h: hi, w });
+    getItems().forEach((a, i) => h.setupLayout(a, { x: i < 2 ? w * i : 200, y: 0, h: hi, w }));
+
+    /** Mock the layout of the 2nd list: WARN: jsdom has no layout at all - so the styles must be mocked */
+    const setGridFlow = (gridAutoFlow) => h.setupCssCompute((a) => a === l2, { display: "grid", gridAutoFlow });
+    /** Returns expected styles of the horizontal line-indicator of the 2nd list */
+    const hLineAt = (y) => `width: ${w}px; height: ${lw}px; transform: translate(200px, ${y - lw / 2}px);`;
+
+    const onChanged = jest.fn();
+    const detach = WUPSortElement.$attach([l1, l2], onChanged, { dropIndicator: "line" });
+
+    setGridFlow("column"); // items of such a grid flow in a row
+    const trg = getItems()[0]; // A1
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 20, y: 12 });
+    const dragEl = bindDragEl();
+
+    // over the left half of the single item: the line must be vertical (before the item) - not horizontal
+    h.userMouseMove(dragEl, { x: 210, y: 15 });
+    expect(lineStyle()).toBe(vLine(200));
+
+    // ... and `grid-auto-flow: row` is the opposite one: such items flow in a column
+    h.userMouseMove(dragEl, { x: 10, y: 15 }); // back to the 1st list - to re-define the range (& the layout) of the 2nd one
+    setGridFlow("row");
+    h.userMouseMove(dragEl, { x: 210, y: 10 }); // the top half of the single item
+    expect(lineStyle()).toBe(hLineAt(0));
+    h.userMouseMove(dragEl, { x: 210, y: 25 }); // ... and below the item when the cursor crosses its middle
+    expect(lineStyle()).toBe(hLineAt(hi));
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(getItems().map((a) => a.textContent)).toStrictEqual(["A2", "B1", "A1"]); // moved to the end of the 2nd list
+    expect(onChanged).toBeCalledTimes(1);
+    detach();
+  });
+
   test("dragdrop is disposed on remove & re-applied on re-connect", () => {
     // the pointerdown-listener was registered via raw onEvent - so it stayed forever after the element was removed
     const spyRemove = jest.spyOn(el, "removeEventListener");
@@ -1545,6 +1596,14 @@ describe("sortElement", () => {
     expect(items(l1).map((a) => a.textContent)).toStrictEqual(["A2"]);
     expect(items(l2).map((a) => a.textContent)).toStrictEqual(["B1", "B2", "A1"]);
 
+    // ... and the item is already at the end of it - so pointing another place mustn't move the item again
+    // (an extra move re-layouts items & re-starts the throttle on every 100ms of the dragging)
+    const spyInsert = jest.spyOn(l2, "insertBefore");
+    await h.wait(); // wait for the throttling of the move above
+    h.userMouseMove(dragEl, { x: 110, y: 45 }); // over the bottom half of the 2nd list
+    expect(items(l2).map((a) => a.textContent)).toStrictEqual(["B1", "B2", "A1"]);
+    expect(spyInsert).not.toBeCalled();
+
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await h.wait();
     expect(onChanged).toBeCalledTimes(1);
@@ -1606,6 +1665,7 @@ describe("sortElement", () => {
   <li item="">A2</li>
 </ul>
 <ul id="l2">
+  <li>Nothing here</li>
   <li item="false">Not sortable</li>
 </ul>`;
     const l1 = document.getElementById("l1");
@@ -1634,10 +1694,11 @@ describe("sortElement", () => {
     h.userMouseMove(trg, { x: 18, y: 12 });
     let dragEl = bindDragEl();
     h.userMouseMove(dragEl, { x: 110, y: 5 });
-    expect(children()).toStrictEqual(["A1", "Not sortable"]);
+    // WARN: only [item=false] is the footer - an ordinary child (without the attribute at all) isn't a place-holder
+    expect(children()).toStrictEqual(["Nothing here", "A1", "Not sortable"]);
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await h.wait();
-    expect(children()).toStrictEqual(["A1", "Not sortable"]);
+    expect(children()).toStrictEqual(["Nothing here", "A1", "Not sortable"]);
 
     // the next item must be placed after the 1st one - so the non-sortable child keeps the end anyway
     layout();
@@ -1648,7 +1709,7 @@ describe("sortElement", () => {
     h.userMouseMove(dragEl, { x: 110, y: hi - 5 }); // the bottom half of the single item of the 2nd list
     document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
     await h.wait();
-    expect(children()).toStrictEqual(["A1", "A2", "Not sortable"]);
+    expect(children()).toStrictEqual(["Nothing here", "A1", "A2", "Not sortable"]);
     expect(items(l1).map((a) => a.textContent)).toStrictEqual([]);
     detach();
   });
@@ -1716,6 +1777,25 @@ describe("sortElement", () => {
     expect(items(l1).map((a) => a.textContent)).toStrictEqual(["A2"]);
     expect(items(l2).map((a) => a.textContent)).toStrictEqual(["B1", "A1"]);
     expect(onChanged).toBeCalledTimes(1); // nothing is changed - so no event
+
+    // ... and such a parent can render items in a row: the line must be vertical (after the last item) - not horizontal
+    h.setupLayout(l1, { x: 0, y: 0, h: hi, w });
+    h.setupLayout(l2, { x: 100, y: 0, h: hi, w: w * 2 });
+    items(l1).forEach((a) => h.setupLayout(a, { x: 0, y: 0, h: hi, w }));
+    items(l2).forEach((a, i) => h.setupLayout(a, { x: 100 + w * i, y: 0, h: hi, w }));
+
+    [trg] = items(l1); // A2
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 18, y: 12 });
+    dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: 150, y: 15 }); // over the 1st item of the parent
+    expect(lineStyle()).toBe(vLine(100 + w * 2)); // WARN: after the last item - the exact place isn't selectable here
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(items(l1).map((a) => a.textContent)).toStrictEqual([]);
+    expect(items(l2).map((a) => a.textContent)).toStrictEqual(["B1", "A1", "A2"]);
+    expect(onChanged).toBeCalledTimes(2);
     detach();
   });
 
