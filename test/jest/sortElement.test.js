@@ -1508,6 +1508,145 @@ describe("sortElement", () => {
     detach();
   });
 
+  test("$attach on several elements: parent with [wup-sort=false]", async () => {
+    // WARN: such a parent accepts dropped items but doesn't allow to select the exact place - so an item is appended to the end
+    document.body.innerHTML = `<ul id="l1">
+  <li item="">A1</li>
+  <li item="">A2</li>
+</ul>
+<ul id="l2" wup-sort="false">
+  <li item="">B1</li>
+  <li item="">B2</li>
+</ul>`;
+    const l1 = document.getElementById("l1");
+    const l2 = document.getElementById("l2");
+    el = document.body; // to re-use getItems() & bindDragEl()
+
+    /** Returns sortable items of the pointed list */
+    const items = (t) => Array.prototype.slice.call(t.querySelectorAll(`[item='']:not([drag])`));
+    /** Assign layout: 2 lists side by side; every item of a list is on its own row */
+    const layout = () =>
+      [l1, l2].forEach((t, ti) => {
+        const arr = items(t);
+        h.setupLayout(t, { x: ti * 100, y: 0, h: Math.max(hi * arr.length, hi), w });
+        arr.forEach((a, i) => h.setupLayout(a, { x: ti * 100, y: hi * i, h: hi, w }));
+      });
+    layout();
+
+    const onChanged = jest.fn();
+    const detach = WUPSortElement.$attach([l1, l2], onChanged);
+
+    // drag an item of the 1st list over the 1st item of the 2nd one: it must be appended to the end anyway
+    let trg = getItems()[0]; // A1
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 18, y: 12 });
+    let dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: 110, y: 5 }); // over B1 - the 1st item of the 2nd list
+    expect(items(l1).map((a) => a.textContent)).toStrictEqual(["A2"]);
+    expect(items(l2).map((a) => a.textContent)).toStrictEqual(["B1", "B2", "A1"]);
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(onChanged).toBeCalledTimes(1);
+    const [from, to] = onChanged.mock.calls[0];
+    expect(from.parent).toBe(l1);
+    expect(from.newOrderedIndexes).toStrictEqual([1]);
+    expect(to.parent).toBe(l2);
+    expect(to.newOrderedIndexes).toStrictEqual([0, 1, -1]);
+
+    // items of such a parent aren't re-ordered inside it at all
+    layout();
+    [trg] = items(l2); // B1
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 110, clientY: 10 }));
+    h.userMouseMove(trg, { x: 118, y: 12 });
+    dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: 110, y: hi * 2 + 15 }); // over the last item of the 2nd list
+    expect(items(l2).map((a) => a.textContent)).toStrictEqual(["B1", "B2", "A1"]);
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(onChanged).toBeCalledTimes(1); // nothing is changed - so no event
+
+    // ... but such an item still can be dragged into another parent (with selecting the exact place there)
+    layout();
+    [trg] = items(l2); // B1
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 110, clientY: 10 }));
+    h.userMouseMove(trg, { x: 118, y: 12 });
+    dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: 10, y: 5 }); // over the 1st item of the 1st list
+    expect(items(l1).map((a) => a.textContent)).toStrictEqual(["B1", "A2"]);
+    expect(items(l2).map((a) => a.textContent)).toStrictEqual(["B2", "A1"]);
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(onChanged).toBeCalledTimes(2);
+    detach();
+  });
+
+  test("$attach on several elements: parent with [wup-sort=false] & dropIndicator line", async () => {
+    document.body.innerHTML = `<ul id="l1">
+  <li item="">A1</li>
+  <li item="">A2</li>
+</ul>
+<ul id="l2" wup-sort="false">
+  <li item="">B1</li>
+</ul>`;
+    const l1 = document.getElementById("l1");
+    const l2 = document.getElementById("l2");
+    el = document.body; // to re-use getItems(), bindDragEl() & lineStyle()
+
+    /** Returns sortable items of the pointed list */
+    const items = (t) => Array.prototype.slice.call(t.querySelectorAll(`[item='']:not([drag])`));
+    /** Assign layout: 2 lists side by side; every item of a list is on its own row */
+    const layout = () =>
+      [l1, l2].forEach((t, ti) => {
+        const arr = items(t);
+        h.setupLayout(t, { x: ti * 100, y: 0, h: Math.max(hi * arr.length, hi), w });
+        arr.forEach((a, i) => h.setupLayout(a, { x: ti * 100, y: hi * i, h: hi, w }));
+      });
+    layout();
+    /** Returns expected styles of the horizontal line-indicator of the list rendered at the pointed `x` */
+    const hLineAt = (x, y) => `width: ${w}px; height: ${lw}px; transform: translate(${x}px, ${y - lw / 2}px);`;
+
+    const onChanged = jest.fn();
+    const detach = WUPSortElement.$attach([l1, l2], onChanged, { dropIndicator: "line" });
+
+    // drag an item of the 1st list over the top half of the single item of the 2nd one
+    let trg = getItems()[0]; // A1
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 10, clientY: 10 }));
+    h.userMouseMove(trg, { x: 18, y: 12 });
+    let dragEl = bindDragEl();
+    h.userMouseMove(dragEl, { x: 110, y: 5 });
+    expect(lineStyle()).toBe(hLineAt(100, hi)); // WARN: after the last item - the exact place isn't selectable here
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(items(l1).map((a) => a.textContent)).toStrictEqual(["A2"]);
+    expect(items(l2).map((a) => a.textContent)).toStrictEqual(["B1", "A1"]);
+    expect(onChanged).toBeCalledTimes(1);
+    const [from, to] = onChanged.mock.calls[0];
+    expect(from.parent).toBe(l1);
+    expect(to.parent).toBe(l2);
+    expect(to.newOrderedIndexes).toStrictEqual([0, -1]);
+
+    // the item of such a parent keeps its place: the indicator is hidden & the place pointed in another parent is forgotten
+    layout();
+    [, trg] = items(l2); // A1
+    trg.dispatchEvent(new MouseEvent("pointerdown", { cancelable: true, bubbles: true, clientX: 110, clientY: 40 }));
+    h.userMouseMove(trg, { x: 118, y: 42 });
+    dragEl = bindDragEl();
+    expect(el.querySelector("[drop-line]")).toBeFalsy(); // nothing to point inside such a parent
+    h.userMouseMove(dragEl, { x: 10, y: 5 }); // over the 1st list: the place is selectable there
+    expect(lineStyle()).toBe(hLineAt(0, 0));
+    h.userMouseMove(dragEl, { x: 110, y: 40 }); // ... and back into the parent without ordering
+    expect(el.querySelector("[drop-line]").style.display).toBe("none");
+
+    document.dispatchEvent(new MouseEvent("pointerup", { cancelable: true, bubbles: true }));
+    await h.wait();
+    expect(items(l1).map((a) => a.textContent)).toStrictEqual(["A2"]);
+    expect(items(l2).map((a) => a.textContent)).toStrictEqual(["B1", "A1"]);
+    expect(onChanged).toBeCalledTimes(1); // nothing is changed - so no event
+    detach();
+  });
+
   test("$attach: items of a nested container aren't stolen", async () => {
     // WARN: items are searched among ALL the descendants (WUPSelectManyControl keeps them in `label > span`) -
     // so an item must belong to the nearest container that owns items, not to the outer one

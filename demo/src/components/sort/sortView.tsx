@@ -21,6 +21,9 @@ export default function SortView() {
         <>
           Dragging between several parents: <b>WUPSortElement.$attach([el1, el2], onChange)</b>
         </>,
+        <>
+          Parent with <b>[wup-sort=false]</b>: accepts dropped items (appended to the end) but without ordering them
+        </>,
         "Supports mouse & touchscreens (drag & drop)",
         "Supports single & multi-line (grid) layouts",
         <>
@@ -50,6 +53,12 @@ export default function SortView() {
   <li item>Item 1</li>
   <li item>Item 2</li>
   <li item="false">Item 3 - not sortable</li>
+</ul>`,
+          `html
+<!-- a parent with [wup-sort=false] accepts dropped items but without selecting the exact place:
+     an item dragged here is appended to the end & items already here aren't re-ordered -->
+<ul id="done" wup-sort="false">
+  <li item>Item 1</li>
 </ul>`,
         ],
         customJS: `const el = document.querySelector("wup-sort");

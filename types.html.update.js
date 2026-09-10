@@ -23,6 +23,13 @@ try {
       console.warn(`   [${a.name}]`);
     });
   });
+  // WARN: a global attribute isn't related to a tag (see [wup-sort] on a parent of sortable items) - so it isn't prefixed with `w-`
+  const globalAttrs = htmlTypes.globalAttributes ?? [];
+  globalAttrs.forEach((a) => {
+    a.name = a.name.toLowerCase().trim();
+    a.description = a.description.trim();
+    console.warn(`Proccessed global [${a.name}]`);
+  });
   fs.writeFileSync("./types.html.json", JSON.stringify(htmlTypes, null, "\t"));
 
   // update WebStorm: https://plugins.jetbrains.com/docs/intellij/websymbols-web-types.html#including-web-types
@@ -30,6 +37,18 @@ try {
   const arrRead = htmlWsTypes.contributions.html.elements;
   let arrWrite = arrRead;
   arrWrite = [];
+  /** Converts the attribute into the WebStorm-format */
+  const toWsAttr = (a) => {
+    const wsAttr = {
+      name: a.name,
+      description: a.description,
+    };
+    if (a.values?.length) {
+      wsAttr.value = { kind: "plain", type: a.values.map((av) => `'${av.name}'`).join(" | ") };
+    }
+    // NiceToHave: add css-vars here
+    return wsAttr;
+  };
   vscodeTags.forEach((tag) => {
     console.warn(`Proccessed <${tag.name}>`);
     const htmlDescr = {
@@ -40,21 +59,12 @@ try {
     if (urlDoc) {
       htmlDescr["doc-url"] = urlDoc;
     }
-    htmlDescr.attributes = tag.attributes.map((a) => {
-      const wsAttr = {
-        name: a.name,
-        description: a.description,
-      };
-      if (a.values?.length) {
-        wsAttr.value = { kind: "plain", type: a.values.map((av) => `'${av.name}'`).join(" | ") };
-      }
-      // NiceToHave: add css-vars here
-      return wsAttr;
-    });
+    htmlDescr.attributes = tag.attributes.map((a) => toWsAttr(a));
 
     arrWrite.push(htmlDescr);
   });
   htmlWsTypes.contributions.html.elements = arrWrite;
+  htmlWsTypes.contributions.html.attributes = globalAttrs.map((a) => toWsAttr(a));
   fs.writeFileSync("./types.html.webstorm.json", JSON.stringify(htmlWsTypes, null, "\t"));
 } catch (err) {
   console.error(err);

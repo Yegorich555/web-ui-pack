@@ -167,7 +167,8 @@ declare module "preact/jsx-runtime" {
  *  <div item="false">Item 3 - not sortable</div>
  * </wup-sort>
  * ```
- * @see {@link WUPSortElement.$attach} - to sort children of an ordinary element (when the extra wrapper breaks the layout) */
+ * @see {@link WUPSortElement.$attach} - to sort children of an ordinary element (when the extra wrapper breaks the layout)
+ * @see attr `wup-sort="false"` on a parent - to accept dropped items without ordering them (see {@link WUPSortElement.$attach}) */
 export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP.Sort.EventMap> {
   static get $styleRoot(): string {
     return `:root {
@@ -241,6 +242,8 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
    * (see {@link WUP.Sort.AttachChange}). WARN: `from === to` (the same object) when the item didn't change the parent
    * @param options see {@link WUP.Sort.AttachOptions}
    * @returns detach-function (removing eventListeners & applied styles)
+   * @see attr `wup-sort="false"` on a parent - to disable selecting the exact place there: an item dragged into such a parent
+   * is appended to the end & items already placed there aren't re-ordered (dragging them into another parent is still allowed)
    * @example
    * ```js
    * const detach = WUPSortElement.$attach(
@@ -647,15 +650,33 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
           if (rangeOf !== trgActive) {
             updateRange();
           }
-          if (iTo < iFrom) {
-            // the active target has no items at all - so the dragged one becomes the 1st there
-            const r = getTrgRects()[targets.indexOf(trgActive)];
+          // the active target doesn't allow to select the exact place (see attr `wup-sort='false'`) - so the item is appended to the end
+          const isEndOnly = trgActive.getAttribute(tagName) === "false";
+          if (isEndOnly && trgActive.contains(el)) {
+            // the item is already here & there is nothing to select - so it must keep its place
+            dropTo = undefined; // WARN: the previous place (of another target) must be forgotten - otherwise it's applied on drop
+            dropLine && (dropLine.style.display = "none");
+            return;
+          }
+          const isEmpty = iTo < iFrom; // the active target has no items at all - so the dragged one becomes the 1st there
+          if (isEmpty || isEndOnly) {
+            // WARN: `iTo + 1` of an empty target is the place BETWEEN items of the neighbor targets - so it's shifted
+            // when the item is taken from the left
+            const at = iTo + 1; // the new place is the end of the target
+            // WARN: `nextElementSibling` (not `null`) - otherwise the item is appended after non-sortable items ([item=false])
+            const parent = isEmpty ? trgActive : $items[iTo].parentElement!;
+            const next = isEmpty ? null : $items[iTo].nextElementSibling;
             if (isLine) {
-              dropTo = { at: iFrom, parent: trgActive, next: null };
-              paintLine(isRowLayout ? r.x : r.y, r); // WARN: on the edge of the target - there is no gap between items to point
+              dropTo = { at, parent, next };
+              if (isEmpty) {
+                const r = getTrgRects()[targets.indexOf(trgActive)];
+                paintLine(isRowLayout ? r.x : r.y, r); // WARN: on the edge of the target - there is no gap between items to point
+              } else {
+                const r = rectOf(iTo);
+                paintLine((isRowLayout ? r.right : r.bottom) - lineW / 2, r); // on the far edge of the last item
+              }
             } else {
-              // WARN: iFrom is the place BETWEEN items of the neighbor targets - so it's shifted when the item is taken from the left
-              moveItem(iFrom > eli ? iFrom - 1 : iFrom, trgActive, null);
+              moveItem(at > eli ? at - 1 : at, parent, next);
             }
             return;
           }
@@ -839,6 +860,3 @@ export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP
 }
 
 customElements.define(tagName, WUPSortElement);
-
-// todo add support for [wup-sort]='false' on parent: so drag&drop to a parent with wup-sort is allowed,
-// but without allowing to select the exact position (by default inserted at the end)

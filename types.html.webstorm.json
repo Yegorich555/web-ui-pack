@@ -5,6 +5,16 @@
 	"description-markup": "markdown",
 	"contributions": {
 		"html": {
+			"attributes": [
+				{
+					"name": "wup-sort",
+					"description": "Point it on a parent of sortable items (see WUPSortElement.$attach) to accept dropped items without ordering them: \n\r an item dragged into such a parent is appended to the end \n\r items already placed there aren't re-ordered (dragging them into another parent is still allowed)",
+					"value": {
+						"kind": "plain",
+						"type": "'false'"
+					}
+				}
+			],
 			"elements": [
 				{
 					"name": "button",

@@ -19,6 +19,9 @@ export default function Example5() {
   const onCrossChange = useCallback((el: HTMLDivElement | null) => {
     refDetachCross.current?.();
     const lists = el ? Array.from<HTMLElement>(el.querySelectorAll("ul")) : null;
+
+    lists![0].setAttribute("wup-sort", "false");
+
     refDetachCross.current = lists
       ? WUPSortElement.$attach(lists, (from, to) => {
           const setters = [setTodo, setDone];

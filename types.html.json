@@ -4,6 +4,23 @@
 	"_details": "// https://github.com/microsoft/vscode-html-languageservice/blob/main/docs/customData.schema.json",
 	"_usage": "https://code.visualstudio.com/api/extension-guides/custom-data-extension",
 	"_buildAuto": "https://github.com/runem/web-component-analyzer => run: wca analyze src --format json --outFile custom-elements.json/",
+	"globalAttributes": [
+		{
+			"name": "wup-sort",
+			"description": "Point it on a parent of sortable items (see WUPSortElement.$attach) to accept dropped items without ordering them: \n\r an item dragged into such a parent is appended to the end \n\r items already placed there aren't re-ordered (dragging them into another parent is still allowed)",
+			"values": [
+				{
+					"name": "false"
+				}
+			],
+			"references": [
+				{
+					"name": "@see WUPSortElement.$attach",
+					"url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/sortElement.ts"
+				}
+			]
+		}
+	],
 	"tags": [
 		{
 			"name": "button",
