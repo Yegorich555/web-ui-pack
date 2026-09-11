@@ -187,8 +187,7 @@ export type IExcelCellCallback<T = any> = (
 /** Font with the options that are required by the file-format (so it's always ready to be rendered) */
 type IExcelStyleFull = IExcelStyle & Required<Pick<IExcelStyle, "fontSize" | "fontFamily">>;
 
-/** Own font of a cell resolved into everything that the render & the auto-width need: it depends only on the
- * font-object that {@link IExcelCellCallback} returns & on the column, so it's cached per such a pair */
+/** Own font of a cell resolved for the render & the auto-width: cached per {@link IExcelCellCallback} font & column */
 interface ICellOverride {
   /** The pointed font merged into the font of the column */
   style: IExcelStyleFull;
@@ -198,8 +197,7 @@ interface ICellOverride {
   metrics: IFontMetrics;
   /** Ratio of the font-size of {@link ICellOverride.style} to the measured one */
   scale: number;
-  /** Width in px of a date-cell of this font (`-1` - not measured yet): a date is rendered by the format,
-   * so every date of the pair takes the very same width - see {@link renderSheet} */
+  /** Width in px of a date-cell of this font (`-1` - not measured): the format makes every date the same width */
   datePx: number;
 }
 
@@ -215,9 +213,8 @@ interface ISheetParts {
   lastLetter: string;
   /** Count of the data-rows (without the header-row) */
   rowsCount: number;
-  /** Content of `<autoFilter>`: the `<filterColumn>` of every header that hides its own filter-button
-   * (see {@link IExcelHeaderStyle.isSorted}); `""` - every column keeps the button (so the tag is an empty one),
-   * `null` - no column has it at all & the table gets no `<autoFilter>` */
+  /** `<autoFilter>`: a `<filterColumn>` per header that hides its filter-button (see
+   * {@link IExcelHeaderStyle.isSorted}); `""` - every column keeps it (an empty tag), `null` - no `<autoFilter>` */
   filterXml: string | null;
   /** Notes (the tooltips) of the cells; `null` - the sheet has no note at all */
   notes: ISheetNotes | null;
@@ -264,13 +261,11 @@ const escapeChar = (m: string): string => escapeMap[m as keyof typeof escapeMap]
 /** Escapes the chars that aren't allowed in the xml-content; called for every single cell, so it's a hot path */
 const escape = (str: string): string => (escapeTestRE.test(str) ? str.replace(escapeRE, escapeChar) : str);
 
-/** Size of the pending string that triggers the encoding; a bigger one saves a few `encode()` calls but keeps
- * a bigger temporary string alive - and the whole point of the writer is to never grow such a string */
+/** Pending size that triggers the encoding: a bigger one saves `encode()` calls but keeps a bigger temp string alive */
 const chunkChars = 64 * 1024;
 
-/** Collector of a big xml: the pieces are encoded chunk by chunk, so the document never exists as a single huge
- * JS string. `encode()` of a 30MB string first flattens it (a full copy of the text) and only then allocates the
- * bytes - here the temporary string never exceeds {@link chunkChars} & only the final buffer is allocated at once */
+/** Collector of a big xml encoded chunk by chunk: `encode()` of a single 30MB string first flattens it (a full
+ * copy) & only then allocates the bytes - here the temp string never exceeds {@link chunkChars} */
 interface IUtf8Writer {
   /** Appends a complete piece of the xml (never a half of it - see the note in {@link createUtf8Writer}) */
   add(str: string): void;
@@ -333,8 +328,7 @@ const newLine = String.fromCharCode(newLineCode);
  * WARN: it's read-only by the contract - the render never writes into a mapped cell */
 const emptyCell: IExcelCellValue = { type: ExcelCellTypes.text, stringVal: "" };
 
-/** Days between the Excel-epoch (`1899-12-30`: the year-1900 leap-bug of Lotus is a part of the format)
- * and `1970-01-01` of the JS-epoch */
+/** Days between the Excel-epoch (`1899-12-30` - the Lotus year-1900 leap-bug is a part of the format) & the JS one */
 const excelEpochDays = 25569;
 const msPerDay = 86400000;
 
@@ -361,10 +355,9 @@ const facePxMask = ExcelFontStyles.bold | ExcelFontStyles.italic;
 /** Packed char widths of every face of a family, indexed by the {@link facePxMask} bits of the font-style */
 type IFacePx = readonly [regular: string, bold: string, italic: string, boldItalic: string];
 
-/** Auto-width of a column: the file-format has no auto-width at all - `bestFit` is only a marker & Excel never
- * re-measures such a column, so the width must be estimated here.
- * Everything is calculated in pixels of the really applied font & converted into Excel-units (the widest digit
- * of the document font, see {@link exportToExcel.$defaults.style}) at the end */
+/** Auto-width of a column: the format has none - `bestFit` is only a marker & Excel never re-measures, so the
+ * width is estimated here in px of the really applied font & converted into Excel-units (the widest digit of
+ * the document font, see {@link exportToExcel.$defaults.style}) at the end */
 const autoWidth = {
   /** Font-size (in points) that {@link autoWidth.familyPx} is measured for */
   basePt: 11,
@@ -372,26 +365,22 @@ const autoWidth = {
   cellPaddingPx: 7,
   /** Space for the autoFilter dropdown button in a header cell */
   filterButtonPx: 18,
-  /** Char widths of every {@link IFacePx} face of a family, measured at {@link autoWidth.basePt}
-   * via GDI itself (`GetCharWidth32W` of the font selected into a DC):
-   * Excel renders a cell text via GDI, where every glyph advance is hinted to a whole pixel - so summing
-   * the fractional font-metrics instead under-estimates a long text by ~7% and cuts it off. A per-family (or
-   * a per-face) ratio doesn't work either, because that hinting isn't proportional: a digits-only text of
-   * `Arial` is ~11% wider than the same one of `Calibri` while its lowercase text is only ~6% wider, and
-   * `Arial Bold` ranges from +1% to +13% over `Arial` depending on the chars - so every face is measured
-   * on its own & only the font-size is applied as a ratio (see {@link autoWidth.getScale}).
-   * An italic face isn't a slanted regular one either: it's drawn by its own glyphs, so it's wider for some
-   * chars (`Calibri Italic M` is 13px against 12px) & narrower for others (the whole `Segoe UI Italic`) -
-   * measuring it as the regular one cuts a cell off & Excel shows a date/number column as `#####`.
-   * A family that repeats a face really measures it so & it isn't a copy-paste: a monospace one (`Consolas`,
-   * `Courier New`) advances every char by the same px in all the 4 faces, while `Tahoma` ships no italic face
-   * at all - GDI synthesizes it by shearing the regular glyphs, which keeps the advances untouched.
-   * A face holds the chars `32..126` packed one per char as `px + 48` (so the char `0` means 0px) plus
-   * the 96th char - the width of a non-latin (cyrillic etc.) char, averaged over `А..я` of the face.
-   * WARN: measure the advances themselves & never a rendered string: GDI kerns a pair (`11` of `Arial` is 1px
-   * narrower than 2 `1`), while Excel doesn't kern a cell at all - so a measured run under-estimates the width.
-   * WARN: the keys are lower-cased (Excel treats a font-name case-insensitively); a font that isn't listed here
-   * is measured as `Calibri` - a substituted font can't be predicted anyway */
+  /** Char widths of every {@link IFacePx} face of a family, measured at {@link autoWidth.basePt} via GDI itself
+   * (`GetCharWidth32W` of the font selected into a DC): Excel renders a cell via GDI, which hints every advance
+   * to a whole px - the fractional font-metrics under-estimate a long text by ~7% & cut it off. No ratio fixes
+   * it, the hinting isn't proportional: `Arial` digits are ~11% wider than `Calibri` ones but its lowercase only
+   * ~6%, `Arial Bold` is +1%..+13% over `Arial` by the chars - so every face is measured on its own & only the
+   * font-size is applied as a ratio (see {@link autoWidth.getScale}). An italic face has its own glyphs, not
+   * slanted regular ones: wider for some chars (`Calibri Italic M` is 13px against 12px), narrower for others
+   * (the whole `Segoe UI Italic`) - measured as the regular one it cuts a cell off & Excel shows `#####`.
+   * A repeated face is real & not a copy-paste: `Consolas`/`Courier New` advance every char by the same px in
+   * all the 4 faces, `Tahoma` ships no italic at all - GDI shears the regular glyphs, keeping the advances.
+   * A face packs the chars `32..126` one per char as `px + 48` (so `0` means 0px) plus the 96th one - the
+   * non-latin (cyrillic etc.) width, averaged over `А..я`.
+   * WARN: measure the advances themselves & never a rendered string - GDI kerns a pair (`11` of `Arial` is 1px
+   * narrower than 2 `1`) while Excel doesn't kern a cell, so a measured run under-estimates the width.
+   * WARN: the keys are lower-cased (Excel treats a font-name case-insensitively); an unlisted font is measured
+   * as `Calibri` - a substituted font can't be predicted anyway */
   familyPx: new Map<string, IFacePx>([
     ["calibri", ["35677;:3557745467777777777447777=988977994586<::8:87799=877565774786885784474<888856587;77657579", "35777;;4557745467777777777447777=988977:94586=::8:877:9>887565775786885784474<888856587;77657579", "35677;:3557745467777777777447777=988977994586=::8:877:9=877565774886875883473<888856587;77657579", "35777;;4557745477777777777447777=988977:94586=::8:877:9>887565775886875884474<888856587;77657579"]], // prettier-ignore
     ["arial", ["45588=:3556945448888888888449998?9:;;:9;:37:8;:<:<;:9:9?998444585888884883373=888858487;7785359:", "44788=;4556945448888888888449999?9;;;:9<;48;9=;<:<;::;9=::8545985898995994484<999968599;8786469:", "44588=:3556945448888888888449998?::;;:9<;48:8=;<:<;:9;:?::9444785888884883383=88885848898875459:", "45788=;3556945448888888888559999?;;;;:9<;38;9=;<:<;:9;:>:99544885898985994484>999968598<8876469;"]], // prettier-ignore
@@ -412,8 +401,7 @@ const autoWidth = {
    * uses are unpacked & they are kept forever - a document has a couple of them & a table is 128 bytes */
   metrics: new Map<string, IFontMetrics>(),
   /** Metrics of the face that the pointed font is rendered by (`underline` doesn't change the advances, so it
-   * shares the face of the same weight & slant); called once per sheet & per column (not per cell), so the
-   * lower-casing of the font-name & the lazy decoding are affordable here */
+   * shares the face); called per column, not per cell - so the lower-casing & the lazy decoding are affordable */
   getMetrics(style: IExcelStyleFull): IFontMetrics {
     const face = (style.fontStyle ?? 0) & facePxMask;
     // the substitution is resolved before the key is built, so every unlisted family shares the Calibri entries
@@ -460,9 +448,8 @@ const autoWidth = {
     }
     return line > max ? line : max;
   },
-  /** Excel-units of a column that a user has never resized: the standard `8.43` chars of the document-font
-   * (the usual 64px of `Calibri 11`). WARN: such a width must be pointed explicitly - a `<col>` without
-   * the `width` collapses the column to 0 & Excel shows it as a hidden one */
+  /** Excel-units of a never-resized column: the standard `8.43` chars of the document-font (64px of `Calibri 11`).
+   * WARN: must be pointed explicitly - a `<col>` without the `width` collapses the column & Excel hides it */
   getDefaultWidth(unitPx: number): number {
     // 5px is what Excel reserves inside a cell: `cellPaddingPx` without the 2px gap that only the auto-width adds
     return autoWidth.toUnits(8.43 * unitPx + 5, unitPx);
@@ -486,8 +473,7 @@ const baseFont: IExcelStyleFull = { fontSize: 11, fontFamily: "Calibri" };
 /** Every bit that {@link ExcelFontStyles} defines: an unknown bit of a user-value is ignored by the render */
 const fontStyleMask = ExcelFontStyles.bold | ExcelFontStyles.italic | ExcelFontStyles.underline;
 
-/** Xml-part of `styles.xml` per {@link IExcelStyle.fontStyle} (the index is the bitmask itself): the file-format
- * requires the tags to be ordered, so all the combinations are built once instead of per font */
+/** Xml-part per {@link IExcelStyle.fontStyle} (the index is the bitmask): ordered tags are required, so built once */
 const fontStyleXml: string[] = [];
 // the index 0 (no style at all) holds an empty part, so a font without a style needs no branch either
 for (let i = 0; i <= fontStyleMask; ++i) {
@@ -543,11 +529,9 @@ interface IStylesCollection {
 }
 
 interface IStyles {
-  /** Returns the index of the cell-format in `cellXfs` according to the pointed font; it's never `0` -
-   * that index is reserved (see the note in {@link createStyles}) */
+  /** Index of the cell-format in `cellXfs`; never `0` - it's reserved (see the note in {@link createStyles}) */
   getCellStyle(style: IExcelStyleFull, isWrapText: boolean, numFmtId?: number): number;
-  /** Returns the id of the number-format that renders the pointed {@link IExcelSettings.dateTimeFormat}
-   * & registers the format if it's not registered yet */
+  /** Id of the number-format for {@link IExcelSettings.dateTimeFormat}; registers it if it's new */
   getNumFmtId(dateTimeFormat: string): number;
   /** Content of `xl/styles.xml`: call it when all the sheets are generated */
   toXml(): string;
@@ -578,8 +562,7 @@ function createStylesCollection(startIndex = 0): IStylesCollection {
 /** Excel reserves the ids `0..163` for its built-in number-formats, so a custom one starts from 164 */
 const numFmtStartId = 164;
 
-/** Chars that Excel understands as a literal of a date-format as-is; any other one is escaped with a backslash
- * (`/` is the locale date-separator of Excel & a letter is a token, so both must be escaped) */
+/** Chars Excel keeps as a date-literal; the rest is escaped (`/` is the date-separator & a letter is a token) */
 const dateLiteralRE = /[-.,: ]/;
 
 /** Runs of the same char: a token of a date-format is such a run in both {@link dateToString} & Excel */
@@ -591,24 +574,20 @@ const dateTokenRE = /[yYMdDhHmsS]/;
 /** Converts a {@link dateToString} format into the number-format of Excel:
  * `YYYY-MM-DD hh:mm:ss A` => `yyyy-mm-dd hh:mm:ss AM/PM` */
 function toExcelDateFormat(format: string): string {
-  // the suffixes of dateToString: `Z` - the UTC-flag (Excel has no timezone, so it's just dropped),
-  // `a`/`A` - the 12-hour format (Excel defines it by the AM/PM-token at the end)
+  // suffixes of dateToString: `Z` - UTC (Excel has no timezone - dropped), `a`/`A` - 12h (a trailing AM/PM in Excel)
   let f = format.endsWith("Z") || format.endsWith("z") ? format.substring(0, format.length - 1) : format;
   const h12 = f.endsWith("a") || f.endsWith("A");
   f = h12 ? f.substring(0, f.length - 1) : f;
 
-  // a token is a run of the same char in both formats & means the very same in Excel but lower-cased
-  // ('MMM' is the short name of the month either), so only the fractions & the literals are really mapped
+  // a token means the same in Excel but lower-cased ('MMM' - short month either), so only fractions & literals map
   f = f.replace(dateRunRE, (run: string, char: string) => {
     if (!dateTokenRE.test(char)) {
-      // 'ss.fff' => 'ss.000' - the fractions of a second; a literal that Excel can read as a token of its own
-      // is escaped (`\/` etc.), the rest is kept as it is
+      // 'ss.fff' => 'ss.000'; a literal that Excel can read as a token of its own is escaped (`\/` etc.)
       if (char === "f" || char === "F") return "0".repeat(run.length);
       return dateLiteralRE.test(char) ? run : `\\${char}`.repeat(run.length);
     }
     if (char === "y" || char === "Y") return run.length > 2 ? "yyyy" : "yy"; // Excel has no 'yyy' at all
-    // WARN: the run is cut by 2 ('MMM' - by 3): 'mmmm'/'dddd' mean the name of a month/week-day in Excel
-    // & not a zero-padded number as in dateToString
+    // WARN: cut to 2 ('MMM' - to 3): 'mmmm'/'dddd' are a month/week-day name in Excel & not a padded number
     return run.substring(0, char === "M" && run.length === 3 ? 3 : 2).toLowerCase();
   });
 
@@ -630,8 +609,7 @@ function createStyles(defaultStyle: IExcelStyleFull): IStyles {
   const fills = createStylesCollection(2);
   const cellXfs = createStylesCollection();
   const numFmts = createStylesCollection(numFmtStartId);
-  /** Id of the number-format per pointed {@link IExcelSettings.dateTimeFormat}: a format is converted only once
-   * (every sheet/column re-asks for it, but the whole document usually has a single one) */
+  /** Id per {@link IExcelSettings.dateTimeFormat}: converted once, while every sheet/column re-asks for it */
   const numFmtIds = new Map<string, number>();
 
   const styles: IStyles = {
@@ -676,10 +654,8 @@ function createStyles(defaultStyle: IExcelStyleFull): IStyles {
     },
   };
 
-  // Excel binds cellXfs[0] to its built-in `Normal` cell-style & applies neither of them to a cell that carries
-  // no own `s`: such a cell keeps the Excel-defaults instead (the BOTTOM vertical alignment among them, so a
-  // custom `<alignment>` of cellXfs[0] is simply lost). So the index 0 is reserved by the very same plain xf that
-  // Excel writes itself, every real format starts from 1 & a cell always refers to its own one - see renderSheet()
+  // a cell without own `s` ignores cellXfs[0] (Excel binds it to the built-in `Normal`) & keeps the Excel-defaults,
+  // the BOTTOM alignment among them - so the index 0 holds the plain xf of Excel & real formats start from 1
   cellXfs.items.push(`<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>`);
   // the default font must be registered the 1st: Excel measures a column width in the widest digit of the font[0]
   styles.getCellStyle(defaultStyle, false);
@@ -688,10 +664,9 @@ function createStyles(defaultStyle: IExcelStyleFull): IStyles {
 
 /* -------------------------------- Notes (tooltips) ---------------------------------- */
 
-/** Notes of a sheet: a note is stored in 2 files at once - the text goes into `xl/comments{num}.xml` &
- * the box that Excel draws it in - into `xl/drawings/vmlDrawing{num}.vml` (a note is still kept in the legacy
- * VML-format, and without such a drawing Excel reports the document as a broken one).
- * Both are collected cell by cell exactly as the rows are, so nothing is stored per note either */
+/** Notes of a sheet: the text goes into `xl/comments{num}.xml` & the box - into `xl/drawings/vmlDrawing{num}.vml`
+ * (a note is still legacy VML & without the drawing Excel reports the document as broken).
+ * Both are collected cell by cell as the rows are - nothing is stored per note */
 interface ISheetNotes {
   /** Content of `<commentList>` of `xl/comments{num}.xml` */
   list: IUtf8Writer;
@@ -701,16 +676,14 @@ interface ISheetNotes {
   count: number;
 }
 
-/** Font that Excel renders a note by (the very same one that Excel sets itself); the indexed color 81 is
- * the system tooltip-text color */
+/** Note-font - the very same one Excel sets itself; the indexed color 81 is the system tooltip-text */
 const noteFontXml = `<rPr><sz val="9"/><color indexed="81"/><rFont val="Tahoma"/><family val="2"/></rPr>`;
 
 /** Id that Excel enumerates the shapes of a sheet from: the ids below are reserved by the drawing itself */
 const noteFirstShapeId = 1025;
 
-/** Size of the box of a note in points: the format has no auto-size for it at all (a text that doesn't fit is
- * simply clipped by the box), so it's estimated by the text - the numbers are the defaults of Excel itself:
- * a 108pt box fits ~40 chars of the 9pt Tahoma & every line of it takes 13.5pt */
+/** Size of the note-box in points: the format has no auto-size (an overflowing text is clipped), so it's estimated
+ * by the text; the numbers are the Excel-defaults - 108pt fits ~40 chars of the 9pt Tahoma & a line takes 13.5pt */
 const noteWidthPt = 108;
 const noteCharsPerLine = 40;
 const noteLinePt = 13.5;
@@ -719,22 +692,18 @@ const notePaddingPt = 9;
 /** Max height of the box: a longer text is scrolled by Excel instead of covering the whole screen */
 const noteMaxLines = 20;
 
-/** Standard height of a row & width of a column of Excel (20px & 64px): the box is anchored to the cells,
- * so its size is pointed in them either.
- * WARN: it's the default of Excel on purpose & not the measured {@link autoWidth} of this export - the box is
- * hidden & re-positioned by Excel itself on hover, so the anchor is only a coarse estimate */
+/** Excel-defaults of a row-height & a column-width (20px & 64px): the box is anchored to the cells, so sized in them.
+ * WARN: the Excel-default on purpose & not the measured {@link autoWidth} - Excel re-positions the box on hover */
 const rowHeightPt = 15;
 const colWidthPt = 48;
 
 /** Count of the columns that the box of a note spans over */
 const noteAnchorCols = Math.ceil(noteWidthPt / colWidthPt);
 
-/** Count of the lines that the text of a note takes inside the box: the hard line-breaks + the soft wrapping
- * by {@link noteCharsPerLine} (the box has a fixed width, so a longer line is wrapped by Excel).
- * `|| 1` is about an empty line - it takes a line either, while `Math.ceil(0 / n)` is `0` */
+/** Lines that the note-text takes in the box: the hard breaks + the soft wrapping by {@link noteCharsPerLine}
+ * (fixed box-width). `|| 1` is about an empty line - it takes a line either, while `Math.ceil(0 / n)` is `0` */
 function getNoteLines(text: string): number {
-  // such a text takes {@link noteMaxLines} whatever it contains (every char is either wrapped or a break),
-  // and the count is clamped by them anyway - so a huge tooltip is never scanned at all
+  // such a text takes {@link noteMaxLines} whatever it contains - so a huge tooltip is never scanned at all
   if (text.length >= noteMaxLines * noteCharsPerLine) return noteMaxLines;
   let lines = 0;
   let len = 0;
@@ -747,11 +716,9 @@ function getNoteLines(text: string): number {
   return lines + (Math.ceil(len / noteCharsPerLine) || 1);
 }
 
-/** `<v:shape>` of a single note: the box that Excel draws the text of the note in.
- * `visibility:hidden` is exactly what makes it a tooltip - such a box is shown only while the mouse is over
- * the cell (`Review > Show Notes` opens all of them at once).
- * WARN: `margin-left/top` is only the fallback position - `MoveWithCells` makes Excel re-calculate it from
- * the `<x:Anchor>` (the cells that the box spans over), so the box always pops up next to its own cell */
+/** `<v:shape>` of a single note - the box that Excel draws the text in; `visibility:hidden` is what makes it a
+ * tooltip (shown only on hover; `Review > Show Notes` opens all at once).
+ * WARN: `margin-left/top` is only a fallback - `MoveWithCells` makes Excel re-calc it from the `<x:Anchor>` cells */
 function getNoteShapeXml(id: number, colIndex: number, rowIndex: number, lines: number): string {
   const heightPt = Math.min(lines, noteMaxLines) * noteLinePt + notePaddingPt;
   const rows = Math.ceil(heightPt / rowHeightPt);
@@ -781,8 +748,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   const cols = sheet.mapping;
   const colCount = cols.length;
   const font = mergeStyle(ctx.style, sheet.style);
-  // the font of the sheet is the one of every column that doesn't override it & of the cells around the data,
-  // so its style is resolved once & re-used below instead of being re-registered per column
+  // the sheet-font serves every column that doesn't override it & the cells around the data - resolved once here
   const sheetStyle = styles.getCellStyle(font, false);
   const sheetColStyleXml = ` style="${sheetStyle}"`;
   // the header-row is the sheet-font + the header-options of the document & of the sheet (so a header keeps
@@ -794,11 +760,10 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   const headers: Array<string> = [];
   /** Widest content of the column in px; `-1` marks a column with an explicit width (nothing to measure) */
   const maxPx = new Float64Array(colCount);
-  // The font can differ per column, so everything that a cell of it needs is resolved once here & indexed
-  // by the column in the loops below.
-  // WARN: every single cell must carry an own `s` - the format of `<col>`/`<row>` is applied by Excel ONLY to
-  // a cell that isn't stored in the sheet at all, and a stored `<c>` without `s` gets no format at all (not even
-  // cellXfs[0] - see createStyles). `<col>` is still required for the cells around the data - see below
+  // The font can differ per column - everything a cell needs is resolved once here & indexed by the column.
+  // WARN: every cell must carry an own `s` - Excel applies the format of `<col>`/`<row>` ONLY to a cell that
+  // isn't stored at all & a stored `<c>` without `s` gets none (not even cellXfs[0] - see createStyles).
+  // `<col>` is still required for the cells around the data - see below
   /** `s="N" ` of an ordinary cell of the column */
   const cellStyleXml: Array<string> = [];
   /** `s="N" ` of a wrapped (array) cell of the column */
@@ -822,8 +787,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   /** Notes of the sheet: `null` until the very 1st tooltip really occurs - an export without them costs nothing */
   let notes: ISheetNotes | null = null;
 
-  /** Appends a note of the pointed cell into the both files that Excel stores such a tooltip in:
-   * the `rowIndex` is the one of the row of the sheet (`0` - the header-row), exactly as the anchor needs it */
+  /** Appends a note into the both files Excel stores a tooltip in; `rowIndex` is the sheet-row (`0` - the header) */
   function addNote(colIndex: number, rowIndex: number, tooltip: string): void {
     if (notes === null) notes = { list: createUtf8Writer(), vml: createUtf8Writer(), count: 0 };
     notes.list.add(
@@ -878,10 +842,9 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     cellStyleWrapXml.push(`s="${ws}" `);
     colStyleXml.push(` style="${cs}"`);
 
-    // the column defines the auto-width by its own font: the data-cells are measured by it & the header-cell
-    // by the header-font on top of it (an own font of the header that the callback points is already merged in).
-    // WARN: the header-font can't be skipped here - it's `bold` by default & a bold text is up to 16% wider
-    // (`Tahoma`, `Georgia`), so a column that is defined by its header would be cut off
+    // the data-cells are measured by the font of the column, the header-cell by the header-font on top of it.
+    // WARN: the header-font can't be skipped - it's `bold` by default & bold is up to 16% wider (`Tahoma`,
+    // `Georgia`), so a column that is defined by its header would be cut off
     const m = autoWidth.getMetrics(colFont);
     cellMetrics.push(m);
     cellScale[c] = autoWidth.getScale(colFont);
@@ -896,23 +859,19 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     headerCells += `<c r="${letter}1" s="${hs}" t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
   }
 
-  /** Format that a date-cell of the column is rendered by: an own one of the column wins over the sheet
-   * & over the document */
+  /** Format of a date-cell: an own one of the column wins over the sheet & over the document */
   function getDateFormat(c: number): string {
     return cols[c].dateTimeFormat || sheet.dateTimeFormat || ctx.dateTimeFormat;
   }
 
-  /** Width in px of the widest date of the pointed format rendered by the pointed font: a date-cell stores
-   * a number that has nothing to do with the rendered text, so it's measured by the format instead */
+  /** Px-width of the widest date of the format: a date-cell stores a number, so it's measured by the format */
   function getDatePx(format: string, m: IFontMetrics, scale: number): number {
     return autoWidth.getTextPx(dateToString(widestDate, format), m.charPx, m.defaultPx) * scale;
   }
 
-  /** Returns `s="N" ` of a date-cell of the column & caches it.
-   *
-   * It's called only when such a cell really occurs, so a column without a date registers no number-format at all.
-   * The auto-width is resolved here either: every date of the column takes the very same width (see
-   * {@link getDatePx}), so measuring it once per column is enough */
+  /** Returns `s="N" ` of a date-cell of the column & caches it: called on the 1st date, so a column without one
+   * registers no number-format. The auto-width is resolved here either - every date takes the same width
+   * (see {@link getDatePx}) */
   function getDateStyleXml(c: number): string {
     const f = getDateFormat(c);
     const ds = styles.getCellStyle(colFonts[c], false, styles.getNumFmtId(f));
@@ -926,13 +885,11 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     return xml;
   }
 
-  /** Resolved options per own font of a cell & per column - see {@link getCellOverride}; it's weak, so nothing
-   * is retained after the export & a font that the callback allocates per cell dies with its cell */
+  /** Resolved options per (font, column) - see {@link getCellOverride}; weak: a per-cell font dies with its cell */
   const overrides = new WeakMap<IExcelStyle, Array<ICellOverride | undefined>>();
 
-  /** Everything that a cell with an own font needs, resolved once per (font-object, column) pair: a callback
-   * usually returns a couple of shared font-objects (`red`, `bold` etc.), so nothing is re-merged & no metrics
-   * are re-resolved per cell. A font-object that is allocated by the callback itself simply misses the cache */
+  /** Everything a cell with an own font needs, resolved once per (font, column): a callback usually returns
+   * a couple of shared fonts (`red`, `bold` etc.); a font allocated per cell simply misses the cache */
   function getCellOverride(c: number, cellStyle: IExcelStyle): ICellOverride {
     let byCol = overrides.get(cellStyle);
     if (byCol === undefined) {
@@ -949,8 +906,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     return ov;
   }
 
-  /** Returns `s="N" ` of a cell with an own font & caches it: a wrapped & a date-cell need an own cell-format
-   * exactly as an ordinary cell of the column does */
+  /** Returns `s="N" ` of a cell with an own font & caches it: a wrapped & a date-cell need an own format */
   function getOverrideStyleXml(c: number, ov: ICellOverride, type: ExcelCellTypes): string {
     let xml = ov.styleXml[type];
     if (xml === undefined) {
@@ -967,16 +923,15 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
 
   for (let ri = 0; ri < data.length; ++ri) {
     const item = data[ri];
-    // the header-row is the row 0 of the sheet, so an item is shifted by it; resolved once per row
+    // the header-row is the row 0, so an item is shifted by it
     const rowIndex = ri + 1;
     // +1 to make it 1-based as Excel enumerates the rows; stringified once per row
     const rowNum = `${rowIndex + 1}`;
     let cells = "";
     for (let c = 0; c < colCount; ++c) {
       const h = cols[c];
-      // the mapped cell is consumed right here & never stored, so the object that it comes in dies immediately:
-      // V8 allocates such a short-living object by a pointer-bump & the scavenger costs nothing for it (it walks
-      // the survivors only) - measured as ~1% against a mutable holder that is re-used for every cell
+      // the mapped cell is consumed here & never stored: V8 allocates such a short-living object by
+      // a pointer-bump & the scavenger walks the survivors only - measured as ~1% against a re-used holder
       let cObjVal = getCellValue<any>(item[h.propName]) || emptyCell;
       /** Options of a cell that points an own font; `undefined` - the cell keeps the style of the column.
        * The callback is asked once per cell & the branch is predictable, so an export without it pays nothing */
@@ -996,8 +951,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
       const value = cObjVal.stringVal || "";
       const px = maxPx[c];
       if (px >= 0) {
-        // a date is excluded here: the stored value has nothing to do with the rendered text, so such a column
-        // is measured once by its format - see getDateStyleXml()
+        // a date is excluded: the stored value isn't the rendered text - see getDateStyleXml()
         if (type < ExcelCellTypes.date) {
           const m = ov ? ov.metrics : cellMetrics[c];
           // WARN: a number is measured by its JS-representation - the `General` format that Excel really renders
@@ -1034,8 +988,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     let w = width;
     if (w === undefined) {
       w = autoWidth.toUnits(maxPx[c] + autoWidth.cellPaddingPx, ctx.unitPx);
-      // the offset is pointed in the very same Excel-units, so it's simply added to the measured width
-      // (rounded again: a fractional offset brings a float-tail into the xml otherwise)
+      // the offset is in the same Excel-units - simply added (rounded again: a fractional one brings a float-tail)
       if (autoWidthOffset) w = Math.round((w + autoWidthOffset) * 100) / 100;
       if (maxWidth !== undefined && w > maxWidth) w = maxWidth;
       // a too big negative offset can eat the whole width: a negative one is read by Excel as a broken file,
@@ -1044,10 +997,9 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     }
     colsXml += `<col min="${c + 1}" max="${c + 1}" width="${w}"${colStyleXml[c]} bestFit="1" customWidth="1"/>`;
   }
-  // the sheet-font belongs to the whole sheet & not only to the mapped columns, but Excel stores a format per
-  // column - so the rest of them takes the same style with the standard width (`customWidth` isn't set: they
-  // aren't resized, only formatted). It covers a cell that isn't stored in the sheet at all - the one that
-  // a user types in after the export
+  // the sheet-font belongs to the whole sheet, but Excel stores a format per column - the rest of them takes
+  // the same style with the standard width (no `customWidth`: formatted, not resized), which covers the cells
+  // that a user types in after the export
   /* istanbul ignore else - a sheet of all 16384 mapped columns leaves no column for the range */
   if (colCount < maxColumns) {
     const w = autoWidth.getDefaultWidth(ctx.unitPx);
@@ -1078,8 +1030,7 @@ const workbookRelsHead = `<?xml version="1.0" ?><Relationships xmlns="http://sch
 const workbookRelsTail = `<Relationship Id="rId2" Type="${relTypes}/styles" Target="styles.xml"/>${relsTail}`;
 const contentTypesHead = `<?xml version="1.0" ?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default ContentType="application/xml" Extension="xml"/><Default ContentType="application/vnd.openxmlformats-package.relationships+xml" Extension="rels"/>`;
 const contentTypesTail = `<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" PartName="/xl/workbook.xml"/><Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml" PartName="/xl/styles.xml"/></Types>`;
-/** Type of the vml-drawings of the notes; WARN: it's a `Default` (by the extension) & the schema requires
- * every `Default` to go before the `Override`s */
+/** Vml-drawings of the notes; WARN: it's a `Default` & the schema requires every `Default` before the `Override`s */
 const contentTypesVml = `<Default ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing" Extension="vml"/>`;
 const commentsHead = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><comments xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><authors><author/></authors><commentList>`;
 const commentsTail = `</commentList></comments>`;
@@ -1087,10 +1038,8 @@ const commentsTail = `</commentList></comments>`;
 const vmlHead = `<xml xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><o:shapelayout v:ext="edit"><o:idmap v:ext="edit" data="1"/></o:shapelayout><v:shapetype id="_x0000_t202" coordsize="21600,21600" o:spt="202" path="m,l,21600r21600,l21600,xe"><v:stroke joinstyle="miter"/><v:path gradientshapeok="t" o:connecttype="rect"/></v:shapetype>`;
 const vmlTail = `</xml>`;
 const worksheetHead = `<?xml version="1.0" ?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:mx="http://schemas.microsoft.com/office/mac/excel/2008/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">`;
-
-/** Ids that a sheet refers to its own parts by: they are fixed per kind of the part & aren't enumerated,
- * so the producer ({@link getSheetRelsXml}) & the consumer ({@link getWorkSheetBytes}) share one literal.
- * A gap is legal for the format: a sheet with the notes but without a table simply has no `rId1` at all */
+/** Fixed per kind of the part & not enumerated, so the producer ({@link getSheetRelsXml}) & the consumer
+ * ({@link getWorkSheetBytes}) share one literal. A gap is legal: notes without a table means no `rId1` at all */
 const relIdTable = "rId1";
 const relIdVml = "rId2";
 const relIdComments = "rId3";
@@ -1123,7 +1072,7 @@ function getWorkbookRelsXml(sheets: Array<IExportSheet>): string {
 /** `[Content_Types].xml`: the mime-type of every file inside the archive */
 function getContentTypesXml(sheets: Array<IExportSheet>): string {
   let items = "";
-  /** The document has at least one note: the vml-extension is declared once for the whole package */
+  /** Any note at all: the vml-extension is declared once per package */
   let hasVml = false;
   for (let i = 0; i < sheets.length; ++i) {
     const { num, hasTable, hasNotes } = sheets[i];
@@ -1145,24 +1094,20 @@ function getContentTypesXml(sheets: Array<IExportSheet>): string {
   return `${contentTypesHead}${hasVml ? contentTypesVml : ""}${items}${contentTypesTail}`;
 }
 
-/** `xl/worksheets/sheet{num}.xml`: the widths of the columns + the header-row & the data-rows.
- * The rows are already encoded, so the head & the tail are only wrapped around them - the biggest file of the
- * document is never built as a string. `<cols>` has to go first, that's why the widths are resolved before it */
+/** `xl/worksheets/sheet{num}.xml`: the widths + the rows. The rows come already encoded - the biggest file
+ * of the document is never built as a string. `<cols>` has to go first, so the widths are resolved before it */
 function getWorkSheetBytes({ parts, hasTable, hasNotes }: IExportSheet): Uint8Array {
   return parts.rows.toBytes(
     `${worksheetHead}<cols>${parts.colsXml}</cols><sheetData>`,
-    // WARN: the order of the tags is required by the schema: `<legacyDrawing>` (the boxes of the notes)
-    // goes before `<tableParts>`
+    // WARN: the schema requires `<legacyDrawing>` (the boxes of the notes) before `<tableParts>`
     `</sheetData>${hasNotes ? sheetDrawingXml : ""}${hasTable ? sheetTablePartsXml : ""}</worksheet>`
   );
 }
 
-/** Full name of the style that {@link IExcelSheet.tableStyle} points: a short name of a built-in family
- * (`Light16`, `Medium9`, `Dark2`) is expanded into the `TableStyle{name}` that the file-format stores,
- * everything else goes as-is (a style of a custom theme).
- * `None` (or nothing at all) gives `""` - no style: the `name` is then skipped in the table-part, exactly as
- * Excel itself saves a table that a user has reset to `None`, while the striping stays enabled, so picking
- * a style in the UI shows the banded rows at once */
+/** Full name of {@link IExcelSheet.tableStyle}: a built-in short name (`Light16`, `Medium9`, `Dark2`) becomes
+ * `TableStyle{name}`, anything else goes as-is (a custom theme). `None`/nothing gives `""` - no `name` at all,
+ * exactly as Excel saves a table that a user has reset; the striping stays on, so picking a style in the UI
+ * shows the banded rows at once */
 function getTableStyleName(tableStyle: ExcelTableStyle | undefined): string {
   if (!tableStyle || tableStyle === "None") return "";
   return /^(?:Light|Medium|Dark)\d+$/.test(tableStyle) ? `TableStyle${tableStyle}` : tableStyle;
@@ -1173,8 +1118,8 @@ function getTableXml({ num, parts, tableStyleName }: IExportSheet): string {
   const { headers, filterXml } = parts;
   const ref = `A1:${parts.lastLetter}${parts.rowsCount + 1}`;
   const styleName = tableStyleName ? ` name="${escape(tableStyleName)}"` : "";
-  // a table without the filter at all keeps no `<autoFilter>` (it's optional by the schema), and a table where
-  // only some of the columns hide the button holds such a column inside the tag - see IExcelHeaderStyle.isSorted
+  // `<autoFilter>` is optional by the schema: no filter at all - no tag; a column that hides only its own
+  // button goes inside the tag - see IExcelHeaderStyle.isSorted
   let filter = "";
   if (filterXml !== null) {
     filter = filterXml ? `<autoFilter ref="${ref}">${filterXml}</autoFilter>` : `<autoFilter ref="${ref}"/>`;
@@ -1193,10 +1138,9 @@ function getTableXml({ num, parts, tableStyleName }: IExportSheet): string {
   );
 }
 
-/** `xl/worksheets/_rels/sheet{num}.xml.rels`: the links from the sheet to its table-file & to the files of
- * the notes (the ids are the {@link relIdTable} ones).
- * `""` - the sheet refers to nothing at all: an empty rels-file is read by Excel as a broken content, so
- * the file is then skipped - the list of the parts is answered here & never re-derived by the caller */
+/** `xl/worksheets/_rels/sheet{num}.xml.rels`: the sheet -> its table-file & the files of the notes (the ids
+ * of {@link relIdTable}). `""` - refers to nothing: Excel reads an empty rels-file as a broken content, so
+ * the file is skipped - answered here & never re-derived by the caller */
 function getSheetRelsXml({ num, hasTable, hasNotes }: IExportSheet): string {
   let items = hasTable
     ? `<Relationship Id="${relIdTable}" Type="${relTypes}/table" Target="../tables/table${num}.xml"/>`
@@ -1237,7 +1181,7 @@ export default async function exportToExcel<T>(
     headerStyle,
     getCellValue,
     cellCallback,
-    // the locale can be refreshed after this module is imported, so the default is resolved here & not on $defaults
+    // the locale can change after the import, so the default is resolved here & not on `$defaults`
     dateTimeFormat: dateTimeFormat || localeInfo.dateTime,
     unitPx: autoWidth.getUnitPx(documentFont),
   };
@@ -1248,7 +1192,7 @@ export default async function exportToExcel<T>(
     return {
       num,
       parts,
-      /** Excel doesn't allow []:*?/\ in a tab name and cuts it by 31 chars */
+      /** Excel forbids []:*?/\ in a tab name & cuts it by 31 chars */
       name: escape((sheet.name || `Sheet${num}`).replace(/[[\]:*?/\\]/g, " ").substring(0, 31)),
       hasTable: parts.rowsCount > 0,
       hasNotes: parts.notes !== null,
@@ -1257,9 +1201,8 @@ export default async function exportToExcel<T>(
     };
   });
 
-  // Flat file structure for zip(). It accepts the UTF-8 bytes as-is, so every part is encoded right here instead
-  // of inside zip(): that way an xml-string becomes garbage as soon as it's converted & the whole document never
-  // exists as strings and as bytes at the same time. The small parts are tiny enough to be built as a string
+  // Flat structure for zip(): it takes the UTF-8 bytes as-is, so every part is encoded right here - an xml-string
+  // becomes garbage at once & the document never exists as strings & as bytes together (the small parts are cheap)
   const files: Record<string, Uint8Array> = {
     "xl/workbook.xml": strToU8(getWorkbookXml(sheets)),
     "xl/_rels/workbook.xml.rels": strToU8(getWorkbookRelsXml(sheets)),
@@ -1282,7 +1225,7 @@ export default async function exportToExcel<T>(
     if (rels) {
       files[`xl/worksheets/_rels/sheet${s.num}.xml.rels`] = strToU8(rels);
     }
-    // the rendered xml is the biggest allocation of the export: drop it as soon as it's encoded
+    // the biggest allocation of the export: drop it as soon as it's encoded
     s.parts = null!;
   });
   // styles are collected during the generation above, so the file is added at the very end
@@ -1295,8 +1238,8 @@ export default async function exportToExcel<T>(
     });
   });
 
-  // `zipped` is passed as-is: wrapping it into a new Uint8Array would copy the whole file one more time.
-  // The cast is only about the lib-typing (`Uint8Array<ArrayBufferLike>`): zip() never returns a SharedArrayBuffer
+  // `zipped` as-is: a new Uint8Array would copy the whole file again. The cast is only the lib-typing
+  // (`Uint8Array<ArrayBufferLike>`): zip() never returns a SharedArrayBuffer
   const b = new Blob([zipped as BlobPart], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });

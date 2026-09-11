@@ -32,7 +32,7 @@ const wk = <T>(
   return w;
 };
 
-// aliases for shorter compressed code (most minifiers don't do this)
+// aliases for shorter compressed code
 const U8 = Uint8Array;
 const U16 = Uint16Array;
 const I32 = Int32Array;
