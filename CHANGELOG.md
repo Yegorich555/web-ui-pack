@@ -6,7 +6,9 @@
 
 ### Fixes & Improvements
 
-- helper [exportToExcel](src/helpers/files/exportToExcel.ts). Added prop **isSorted** for headers
+- helper [exportToExcel](src/helpers/files/exportToExcel.ts).
+  - Added prop **isSorted** for headers
+  - Added arg **sheetIndex** for cellCallback
 
 ---
 

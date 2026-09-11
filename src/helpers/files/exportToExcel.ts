@@ -180,6 +180,8 @@ export type IExcelCellCallback<T = any> = (
   /** Index of the row of the sheet: `0` - the header-row, `N` - the item `N - 1` of {@link IExcelSheet.data}
    * (so it's the row-number of Excel itself minus 1) */
   rowIndex: number,
+  /** Index of the sheet of the pointed {@link exportToExcel} array (`0` - the 1st tab of the document) */
+  sheetIndex: number,
   /** Column that the cell belongs to */
   mapping: IExcelColumnMap<T>
 ) => IExcelCellOverride | undefined | null;
@@ -743,7 +745,7 @@ function getNoteShapeXml(id: number, colIndex: number, rowIndex: number, lines: 
  * A single pass over the data: a cell value is measured for the auto-width & appended to the xml at once, so
  * nothing is stored per cell. Keeping the mapped values instead (as `Array<Array<{value, style}>>`) costs an array
  * per row + an object & a retained string per cell and forces 2 extra passes over the whole dataset. */
-function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
+function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext): ISheetParts {
   const { allStyles: styles, getCellValue, cellCallback } = ctx;
   const cols = sheet.mapping;
   const colCount = cols.length;
@@ -821,7 +823,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     // the header-row is asked with the `rowIndex` 0: it's a cell of the sheet either & it's the only chance
     // to override a header (the auto-width & the table-part are resolved by the result right below)
     if (cellCallback) {
-      const res = cellCallback({ type: ExcelCellTypes.text, stringVal: text }, 0, h);
+      const res = cellCallback({ type: ExcelCellTypes.text, stringVal: text }, 0, sheetIndex, h);
       if (res != null) {
         if (res.value) {
           // a header is always stored as a text (the table refers to a column by the very text of its header),
@@ -937,7 +939,7 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
        * The callback is asked once per cell & the branch is predictable, so an export without it pays nothing */
       let ov: ICellOverride | undefined;
       if (cellCallback) {
-        const res = cellCallback(cObjVal, rowIndex, h);
+        const res = cellCallback(cObjVal, rowIndex, sheetIndex, h);
         // a callback that only styles a cell returns no value at all, so the mapped one stays applied
         if (res != null) {
           if (res.value) cObjVal = res.value;
@@ -1165,6 +1167,9 @@ export default async function exportToExcel<T>(
   /** Called for every single cell of every sheet right after the value is mapped by
    * {@link exportToExcel.$defaults.getCellValue}
    *
+   * It is shared by every sheet of the export, so the `sheetIndex` points the sheet of the pointed array
+   * that the cell belongs to.
+   *
    * A header-cell is asked either - once per column, before the data & with the `rowIndex` `0` (an item of
    * {@link IExcelSheet.data} starts from the `1`), so a callback that is about the items must skip such a cell:
    * `(v, i) => (i ? ... : undefined)`. Its `value` is the resolved {@link IExcelColumnMap.headerText} &
@@ -1188,7 +1193,7 @@ export default async function exportToExcel<T>(
 
   const sheets: Array<IExportSheet> = sheetsData.map((sheet, i) => {
     const num = i + 1;
-    const parts = renderSheet(sheet, ctx);
+    const parts = renderSheet(sheet, i, ctx);
     return {
       num,
       parts,

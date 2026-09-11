@@ -95,7 +95,7 @@ const styleYoung: IExcelStyle = { backgroundColor: "#ffe699", fontStyle: ExcelFo
 
 /** Points an own value &/or style per cell: a row of an inactive user is red-italic, an age below 30 is
  * highlighted & a boolean is rendered as Yes/No */
-export const userCellCallback: IExcelCellCallback<IUser> = (value, rowIndex, mapping) => {
+export const userCellCallback: IExcelCellCallback<IUser> = (value, rowIndex, _sheetIndex, mapping) => {
   // the header-row (the `rowIndex` 0) belongs to no user at all, so it keeps its own style
   if (!rowIndex) return undefined;
   const user = users[rowIndex - 1];
@@ -110,7 +110,7 @@ export const userCellCallback: IExcelCellCallback<IUser> = (value, rowIndex, map
 
 /** Points a note (the tooltip of Excel) per cell: the name-cell explains the whole row & an inactive user
  * gets a warning on top of it */
-export const tooltipCellCallback: IExcelCellCallback<IUser> = (_value, rowIndex, mapping) => {
+export const tooltipCellCallback: IExcelCellCallback<IUser> = (_value, rowIndex, _sheetIndex, mapping) => {
   if (mapping.propName !== "name") return undefined;
   // the header-cell of the column is asked either (the `rowIndex` 0: the row that has no user at all)
   if (!rowIndex) return { tooltip: "Hover a cell of this column to see the whole user" };

@@ -852,7 +852,7 @@ describe("helper.exportToExcel", () => {
         },
       ],
       null,
-      (value, rowIndex, mapping) => {
+      (value, rowIndex, _sheetIndex, mapping) => {
         calls.push(`${mapping.propName}${rowIndex}:${value.stringVal}`);
         // an own value only: the style of the column is kept
         if (mapping.propName === "s") {
@@ -891,6 +891,31 @@ describe("helper.exportToExcel", () => {
     expect(noCb()).toBe(expected);
   });
 
+  test("cellCallback: the sheetIndex points the sheet that the cell belongs to", async () => {
+    const calls = [];
+    await exportToExcel(
+      [
+        { name: "First", data: [{ v: "a" }], mapping: [{ propName: "v" }] },
+        { name: "Second", data: [{ v: "b" }, { v: "c" }], mapping: [{ propName: "v" }] },
+      ],
+      null,
+      (value, rowIndex, sheetIndex, mapping) => {
+        calls.push(`${sheetIndex}.${rowIndex}:${mapping.propName}:${value.stringVal}`);
+        // the very same callback serves every sheet, so only the 2nd one is overridden here
+        return sheetIndex === 1 && rowIndex ? { value: { type: ExcelCellTypes.text, stringVal: "own" } } : undefined;
+      }
+    );
+    // the sheets are rendered one by one (the header-row of a sheet goes before its data)
+    expect(calls).toEqual(["0.0:v:V", "0.1:v:a", "1.0:v:V", "1.1:v:b", "1.2:v:c"]);
+    // the 1st sheet keeps the mapped values, while every data-cell of the 2nd one is overridden
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(
+      `<c r="A2" s="${cellStyleId("A2")}" t="inlineStr"><is><t>a</t></is></c>`
+    );
+    const xml2 = files["xl/worksheets/sheet2.xml"];
+    expect(xml2).toContain(`<c r="A2" s="${cellStyleId("A2", 2)}" t="inlineStr"><is><t>own</t></is></c>`);
+    expect(xml2).toContain(`<c r="A3" s="${cellStyleId("A3", 2)}" t="inlineStr"><is><t>own</t></is></c>`);
+  });
+
   test("cellCallback: an own value, style & tooltip of a header-cell (rowIndex 0)", async () => {
     const blue = { color: "#0000ff" };
     const sheets = [
@@ -902,7 +927,7 @@ describe("helper.exportToExcel", () => {
     const base = colWidth(1);
     const headerFont = fontById(cellStyleId("A1"));
 
-    await run((_value, rowIndex, mapping) =>
+    await run((_value, rowIndex, _sheetIndex, mapping) =>
       !rowIndex && mapping.propName === "v"
         ? { value: { type: ExcelCellTypes.text, stringVal: "Renamed & wiiiiiide" }, style: blue, tooltip: "About" }
         : undefined
@@ -1086,7 +1111,7 @@ describe("helper.exportToExcel", () => {
       // the 2nd sheet has no note at all => no extra files & no <legacyDrawing> for it
       { name: "Plain", data: [{ v: 1 }], mapping: [{ propName: "v" }] },
     ];
-    await exportToExcel(sheets, null, (_value, rowIndex, mapping) =>
+    await exportToExcel(sheets, null, (_value, rowIndex, _sheetIndex, mapping) =>
       // an empty tooltip is the very same as no tooltip at all
       mapping.propName === "s" ? { tooltip: rowIndex === 1 ? `Q&A <"'\`>` : "" } : undefined
     );
