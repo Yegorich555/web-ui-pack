@@ -4,16 +4,6 @@ import dateToString from "../dateToString";
 import localeInfo from "../../objects/localeInfo";
 import utilSaveAsFile from "./saveAsFile";
 
-/* Main concepts: max performance and min memory consumption on excel sheet generation.
- *
- * The module is split by the lifetime of the parts:
- * - pure helpers & static xml-parts are defined on the module-level: allocated once instead of on every export;
- * - {@link createStyles} is the only stateful collector: Excel stores every font/fill once & a cell refers to it;
- * - {@link renderSheet} is a single pass over the data: a value is measured & rendered at once, so nothing
- *   per-cell is kept in memory (see the comment there);
- * - {@link exportToExcel} is an orchestrator: builds the per-export {@link IExportContext} & zips the result.
- *  */
-
 /** Font & styles that applied to cell or globally per sheet/document */
 export interface IExcelStyle {
   /** Size of the font in points
@@ -44,20 +34,24 @@ export interface IExcelStyle {
     | (string & {});
   /** Style of the text; point several styles for example:`ExcelFontStyles.bold | ExcelFontStyles.underline` */
   fontStyle?: ExcelFontStyles;
-
   /** Color of the text in hex-format `#rrggbb`, ex. `#ff0000`;
    * an unparsable value is ignored (so the inherited color stays applied) */
   color?: string;
   /** Background color of the cell
    * @see {@link IExcelStyle.color} for the supported format */
   backgroundColor?: string;
-
   /** Horizontal alignment of the content of the cell
    * @defaultValue `general` of Excel => a text is aligned to the left & a number/date to the right */
   horizontalAlign?: "left" | "center" | "right";
   /** Vertical alignment of the content of the cell
    * @defaultValue "top" */
   verticalAlign?: "top" | "center" | "bottom";
+}
+
+export interface IExcelHeaderStyle extends IExcelStyle {
+  /** Applies Sort & Filter styles on headers
+   * @defaultValue true */
+  isSorted?: boolean;
 }
 
 /** Style of the text of a cell */
@@ -73,12 +67,10 @@ export interface IExcelSettings {
    * so a column keeps its own fontFamily/fontSize in the header-row as well
    * @defaultValue {@link IExcelSheet.style} => the style of the sheet */
   style?: IExcelStyle;
-
   /** Style for the header cell of the column; missed options are inherited from the header-style of the sheet
    * ({@link IExcelSheet.headerStyle} + {@link exportToExcel.$defaults.headerStyle} + the style of the sheet)
    * @defaultValue {@link exportToExcel.$defaults.headerStyle} + {@link exportToExcel.$defaults.style} => `{ fontSize: 11, fontFamily: "Calibri", fontStyle: ExcelFontStyles.bold }` */
-  headerStyle?: IExcelStyle;
-
+  headerStyle?: IExcelHeaderStyle;
   /** Format that a date-cell is rendered by; it's a {@link dateToString} format (`yyyy-MM-dd hh:mm:ss A`)
    * that is converted into the number-format of Excel (`yyyy-mm-dd hh:mm:ss AM/PM`)
    *
@@ -223,6 +215,10 @@ interface ISheetParts {
   lastLetter: string;
   /** Count of the data-rows (without the header-row) */
   rowsCount: number;
+  /** Content of `<autoFilter>`: the `<filterColumn>` of every header that hides its own filter-button
+   * (see {@link IExcelHeaderStyle.isSorted}); `""` - every column keeps the button (so the tag is an empty one),
+   * `null` - no column has it at all & the table gets no `<autoFilter>` */
+  filterXml: string | null;
   /** Notes (the tooltips) of the cells; `null` - the sheet has no note at all */
   notes: ISheetNotes | null;
 }
@@ -247,7 +243,7 @@ interface IExportContext {
   /** Collector of the document styles */
   allStyles: IStyles;
   style: IExcelStyleFull;
-  headerStyle: IExcelStyle | undefined;
+  headerStyle: IExcelHeaderStyle | undefined;
   /** Width in px of a single Excel-unit of the column width */
   unitPx: number;
   getCellValue: <T = any>(v: T[keyof T]) => IExcelCellValue;
@@ -257,14 +253,7 @@ interface IExportContext {
 
 /* ---------------------------------- Shared helpers ---------------------------------- */
 
-const escapeMap = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#39;",
-  "`": "&#96;",
-};
+const escapeMap = {"&": "&amp;","<": "&lt;",">": "&gt;",'"': "&quot;","'": "&#39;","`": "&#96;"}; // prettier-ignore
 
 const escapeRE = /[&<>"'`]/g;
 /** Non-global twin of {@link escapeRE} - `test()` takes the fast regexp-path, while `replace()` with a callback
@@ -302,9 +291,9 @@ function createUtf8Writer(): IUtf8Writer {
   const flush = (): void => {
     /* istanbul ignore if - reachable only when the previous add() has flushed exactly at the boundary */
     if (!pending) return;
-    const bytes = strToU8(pending);
-    chunks.push(bytes);
-    total += bytes.length;
+    const b = strToU8(pending);
+    chunks.push(b);
+    total += b.length;
     pending = "";
   };
 
@@ -323,9 +312,9 @@ function createUtf8Writer(): IUtf8Writer {
       result.set(pre, 0);
       let offset = pre.length;
       for (let i = 0; i < chunks.length; ++i) {
-        const chunk = chunks[i];
-        result.set(chunk, offset);
-        offset += chunk.length;
+        const c = chunks[i];
+        result.set(c, offset);
+        offset += c.length;
         chunks[i] = emptyBytes; // let the chunk be collected while the rest is still being copied
       }
       result.set(post, offset);
@@ -517,10 +506,10 @@ function mergeStyle(base: IExcelStyleFull, ...styles: Array<IExcelStyle | undefi
     const keys = Object.keys(s) as Array<keyof IExcelStyle>;
     for (let k = 0; k < keys.length; ++k) {
       const key = keys[k];
-      const value = s[key];
-      if (value === undefined) continue;
-      if ((key === "color" || key === "backgroundColor") && !toARGB(value as string)) continue;
-      (result[key] as unknown) = value;
+      const v = s[key];
+      if (v === undefined) continue;
+      if ((key === "color" || key === "backgroundColor") && !toARGB(v as string)) continue;
+      (result[key] as unknown) = v;
     }
   }
   return result;
@@ -656,10 +645,10 @@ function createStyles(defaultStyle: IExcelStyleFull): IStyles {
     },
     getCellStyle(style: IExcelStyleFull, isWrapText: boolean, numFmtId = 0): number {
       const fontId = fonts.indexOf(getFontXml(style));
-      const bgColor = toARGB(style.backgroundColor);
-      const fillId = bgColor
+      const bg = toARGB(style.backgroundColor);
+      const fillId = bg
         ? fills.indexOf(
-            `<fill><patternFill patternType="solid"><fgColor rgb="${bgColor}"/><bgColor indexed="64"/></patternFill></fill>`
+            `<fill><patternFill patternType="solid"><fgColor rgb="${bg}"/><bgColor indexed="64"/></patternFill></fill>`
           )
         : 0;
       return cellXfs.indexOf(
@@ -825,6 +814,10 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   /** Ratio of the font-size of the column to the measured one */
   const cellScale = new Float64Array(colCount);
   let headerCells = "";
+  /** `<filterColumn>` of every column that hides its filter-button - see {@link ISheetParts.filterXml} */
+  let filterXml = "";
+  /** Count of the columns that keep the filter-button: `0` - the table has no `<autoFilter>` at all */
+  let sortedCount = 0;
 
   /** Notes of the sheet: `null` until the very 1st tooltip really occurs - an export without them costs nothing */
   let notes: ISheetNotes | null = null;
@@ -849,6 +842,11 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     colFonts.push(colFont);
     const hBase = h.style ? mergeStyle(colFont, ctx.headerStyle, sheet.headerStyle) : sheetHeaderFont;
     let hFont = h.headerStyle ? mergeStyle(hBase, h.headerStyle) : hBase;
+    // the filter-button is inherited exactly as the header-font is (the column wins over the sheet & the sheet
+    // over the document), but it's not a font-option at all - so it's resolved on its own & isn't merged
+    const isSorted = h.headerStyle?.isSorted ?? sheet.headerStyle?.isSorted ?? ctx.headerStyle?.isSorted ?? true;
+    if (isSorted) ++sortedCount;
+    else filterXml += `<filterColumn colId="${c}" hiddenButton="1"/>`;
     const letter = getColumnLetter(c);
     letters.push(letter);
 
@@ -874,11 +872,11 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     }
     headers.push(text);
 
-    const colStyle = h.style ? styles.getCellStyle(colFont, false) : sheetStyle;
-    const wrapStyle = styles.getCellStyle(colFont, true);
-    cellStyleXml.push(`s="${colStyle}" `);
-    cellStyleWrapXml.push(`s="${wrapStyle}" `);
-    colStyleXml.push(` style="${colStyle}"`);
+    const cs = h.style ? styles.getCellStyle(colFont, false) : sheetStyle;
+    const ws = styles.getCellStyle(colFont, true);
+    cellStyleXml.push(`s="${cs}" `);
+    cellStyleWrapXml.push(`s="${ws}" `);
+    colStyleXml.push(` style="${cs}"`);
 
     // the column defines the auto-width by its own font: the data-cells are measured by it & the header-cell
     // by the header-font on top of it (an own font of the header that the callback points is already merged in).
@@ -891,10 +889,11 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     maxPx[c] =
       h.width !== undefined
         ? -1
-        : autoWidth.getTextPx(text, hm.charPx, hm.defaultPx) * autoWidth.getScale(hFont) + autoWidth.filterButtonPx;
+        : autoWidth.getTextPx(text, hm.charPx, hm.defaultPx) * autoWidth.getScale(hFont) +
+          (isSorted ? autoWidth.filterButtonPx : 0);
 
-    const headerStyle = styles.getCellStyle(hFont, isWrap);
-    headerCells += `<c r="${letter}1" s="${headerStyle}" t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
+    const hs = styles.getCellStyle(hFont, isWrap);
+    headerCells += `<c r="${letter}1" s="${hs}" t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
   }
 
   /** Format that a date-cell of the column is rendered by: an own one of the column wins over the sheet
@@ -915,14 +914,14 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
    * The auto-width is resolved here either: every date of the column takes the very same width (see
    * {@link getDatePx}), so measuring it once per column is enough */
   function getDateStyleXml(c: number): string {
-    const format = getDateFormat(c);
-    const dateStyle = styles.getCellStyle(colFonts[c], false, styles.getNumFmtId(format));
+    const f = getDateFormat(c);
+    const ds = styles.getCellStyle(colFonts[c], false, styles.getNumFmtId(f));
     const px = maxPx[c];
     if (px >= 0) {
-      const w = getDatePx(format, cellMetrics[c], cellScale[c]);
+      const w = getDatePx(f, cellMetrics[c], cellScale[c]);
       if (w > px) maxPx[c] = w;
     }
-    const xml = `s="${dateStyle}" `;
+    const xml = `s="${ds}" `;
     cellStyleDateXml[c] = xml;
     return xml;
   }
@@ -955,8 +954,8 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
   function getOverrideStyleXml(c: number, ov: ICellOverride, type: ExcelCellTypes): string {
     let xml = ov.styleXml[type];
     if (xml === undefined) {
-      const numFmtId = type === ExcelCellTypes.date ? styles.getNumFmtId(getDateFormat(c)) : 0;
-      xml = `s="${styles.getCellStyle(ov.style, type === ExcelCellTypes.textWrap, numFmtId)}" `;
+      const fmt = type === ExcelCellTypes.date ? styles.getNumFmtId(getDateFormat(c)) : 0;
+      xml = `s="${styles.getCellStyle(ov.style, type === ExcelCellTypes.textWrap, fmt)}" `;
       ov.styleXml[type] = xml;
     }
     return xml;
@@ -1055,44 +1054,38 @@ function renderSheet(sheet: IExcelSheet, ctx: IExportContext): ISheetParts {
     colsXml += `<col min="${colCount + 1}" max="${maxColumns}" width="${w}"${sheetColStyleXml}/>`;
   }
 
-  return { rows, colsXml, headers, lastLetter: letters[colCount - 1], rowsCount: data.length, notes };
+  return {
+    rows,
+    colsXml,
+    headers,
+    lastLetter: letters[colCount - 1],
+    rowsCount: data.length,
+    filterXml: sortedCount ? filterXml : null,
+    notes,
+  };
 }
 
 /* --------------------------------- Xml generation ----------------------------------- */
 
 /** Base of the `Type` of every relationship of the package: the kind of the part is appended to it */
 const relTypes = `http://schemas.openxmlformats.org/officeDocument/2006/relationships`;
-
 /** Envelope of a `.rels`-file; WARN: {@link workbookRelsHead} keeps an own (shorter) xml-declaration */
 const relsHead = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`;
-
 const relsTail = `</Relationships>`;
-
 const relsXml = `${relsHead}<Relationship Id="rId1" Type="${relTypes}/officeDocument" Target="xl/workbook.xml"/>${relsTail}`;
-
 const workbookHead = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mx="http://schemas.microsoft.com/office/mac/excel/2008/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main"><workbookPr/><sheets>`;
-
 const workbookRelsHead = `<?xml version="1.0" ?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">`;
-
 const workbookRelsTail = `<Relationship Id="rId2" Type="${relTypes}/styles" Target="styles.xml"/>${relsTail}`;
-
 const contentTypesHead = `<?xml version="1.0" ?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default ContentType="application/xml" Extension="xml"/><Default ContentType="application/vnd.openxmlformats-package.relationships+xml" Extension="rels"/>`;
-
 const contentTypesTail = `<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" PartName="/xl/workbook.xml"/><Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml" PartName="/xl/styles.xml"/></Types>`;
-
 /** Type of the vml-drawings of the notes; WARN: it's a `Default` (by the extension) & the schema requires
  * every `Default` to go before the `Override`s */
 const contentTypesVml = `<Default ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing" Extension="vml"/>`;
-
 const commentsHead = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><comments xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><authors><author/></authors><commentList>`;
-
 const commentsTail = `</commentList></comments>`;
-
 /** The shape-type of the boxes of the notes is declared once per drawing & every `<v:shape>` refers to it */
 const vmlHead = `<xml xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><o:shapelayout v:ext="edit"><o:idmap v:ext="edit" data="1"/></o:shapelayout><v:shapetype id="_x0000_t202" coordsize="21600,21600" o:spt="202" path="m,l,21600r21600,l21600,xe"><v:stroke joinstyle="miter"/><v:path gradientshapeok="t" o:connecttype="rect"/></v:shapetype>`;
-
 const vmlTail = `</xml>`;
-
 const worksheetHead = `<?xml version="1.0" ?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:mx="http://schemas.microsoft.com/office/mac/excel/2008/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">`;
 
 /** Ids that a sheet refers to its own parts by: they are fixed per kind of the part & aren't enumerated,
@@ -1104,7 +1097,6 @@ const relIdComments = "rId3";
 
 /** `<legacyDrawing>` of the sheet: the boxes of the notes (see {@link ISheetNotes}) */
 const sheetDrawingXml = `<legacyDrawing r:id="${relIdVml}"/>`;
-
 /** `<tableParts>` of the sheet: the link to its table-file */
 const sheetTablePartsXml = `<tableParts count="1"><tablePart r:id="${relIdTable}"/></tableParts>`;
 
@@ -1178,9 +1170,15 @@ function getTableStyleName(tableStyle: ExcelTableStyle | undefined): string {
 
 /** `xl/tables/table{num}.xml`: the table over the data - it provides the autoFilter & the row-striping */
 function getTableXml({ num, parts, tableStyleName }: IExportSheet): string {
-  const { headers } = parts;
+  const { headers, filterXml } = parts;
   const ref = `A1:${parts.lastLetter}${parts.rowsCount + 1}`;
   const styleName = tableStyleName ? ` name="${escape(tableStyleName)}"` : "";
+  // a table without the filter at all keeps no `<autoFilter>` (it's optional by the schema), and a table where
+  // only some of the columns hide the button holds such a column inside the tag - see IExcelHeaderStyle.isSorted
+  let filter = "";
+  if (filterXml !== null) {
+    filter = filterXml ? `<autoFilter ref="${ref}">${filterXml}</autoFilter>` : `<autoFilter ref="${ref}"/>`;
+  }
 
   let cols = "";
   for (let i = 0; i < headers.length; ++i) {
@@ -1190,7 +1188,7 @@ function getTableXml({ num, parts, tableStyleName }: IExportSheet): string {
   return (
     `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ` +
     `id="${num}" name="Table${num}" displayName="Table${num}" ref="${ref}" insertRow="1" totalsRowShown="0">` +
-    `<autoFilter ref="${ref}"/><tableColumns count="${headers.length}">${cols}</tableColumns>` +
+    `${filter}<tableColumns count="${headers.length}">${cols}</tableColumns>` +
     `<tableStyleInfo${styleName} showFirstColumn="0" showLastColumn="0" showRowStripes="1" showColumnStripes="0"/></table>`
   );
 }
@@ -1221,27 +1219,14 @@ export default async function exportToExcel<T>(
    * @example "test-excel.xlsx" */
   saveAsFile?: string | null | false,
   /** Called for every single cell of every sheet right after the value is mapped by
-   * {@link exportToExcel.$defaults.getCellValue}: return an own `value`, `style` &/or `tooltip` to override
-   * the cell, ex. `(v) => (v.stringVal[0] === "-" ? { style: redFont } : undefined)`.
+   * {@link exportToExcel.$defaults.getCellValue}
    *
    * A header-cell is asked either - once per column, before the data & with the `rowIndex` `0` (an item of
    * {@link IExcelSheet.data} starts from the `1`), so a callback that is about the items must skip such a cell:
    * `(v, i) => (i ? ... : undefined)`. Its `value` is the resolved {@link IExcelColumnMap.headerText} &
    * the pointed one renames the column of the table together with the cell (only the `stringVal` is taken -
    * see {@link IExcelCellOverride.value}), while the `style` is merged into the header-font of the column.
-   *
-   * The `style` is merged into the font of the column, so only the difference has to be pointed, and the
-   * auto-width of the column follows such a cell as well (a wider/bolder font included).
-   *
-   * The `tooltip` becomes a note of the cell (the `Review > Notes` of Excel): the cell is marked with a red
-   * corner & the text pops up while the mouse is over it.
-   *
-   * WARN: it's called for every single cell (the hottest path of the export together with `getCellValue`):
-   * - return the very same font-object for the cells that share the style (a `const` outside of the callback):
-   * an own font is merged & measured once per such an object & column, while an object-literal that is built
-   * per cell misses that cache & is re-resolved every time;
-   * - never mutate the pointed `value` - an empty cell is a shared read-only object; return an own one instead;
-   * - a `tooltip` is a drawing over the sheet (~0.7Kb per note): point it only for the cells that need it */
+   * */
   cellCallback?: IExcelCellCallback<T>
 ): Promise<Blob> {
   const { getCellValue, style, headerStyle, dateTimeFormat, tableStyle } = exportToExcel.$defaults;
@@ -1356,7 +1341,7 @@ exportToExcel.$defaults = {
   },
 
   style: { fontSize: 11, fontFamily: "Calibri", verticalAlign: "center" },
-  headerStyle: { fontStyle: ExcelFontStyles.bold },
+  headerStyle: { fontStyle: ExcelFontStyles.bold, isSorted: true },
 } as IExcelDefaults;
 
 interface IExcelDefaults extends IExcelSettings {

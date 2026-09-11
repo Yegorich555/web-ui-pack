@@ -230,6 +230,74 @@ describe("helper.exportToExcel", () => {
     cases.forEach(([, name], i) => expect(styleInfo(i + 1)).toBe(`<tableStyleInfo${name} ${rest}`));
   });
 
+  test("isSorted: the filter-button of a header per column, per sheet & $defaults", async () => {
+    /** `<autoFilter>` of the table of the pointed sheet; `""` - the table has no filter at all */
+    const filterOf = (num) =>
+      (files[`xl/tables/table${num}.xml`].match(/<autoFilter[^>]*\/>|<autoFilter[^>]*>.*?<\/autoFilter>/) || [""])[0];
+
+    await exportToExcel([
+      // 1st: nothing is pointed => $defaults.headerStyle.isSorted (true) => the ordinary filter over every column
+      { name: "s1", data: [{ v: 1, v2: 2 }], mapping: [{ propName: "v" }, { propName: "v2" }] },
+      // 2nd: a single column hides its own button & the rest of the table keeps the filter
+      {
+        name: "s2",
+        data: [{ v: 1, v2: 2, v3: 3 }],
+        mapping: [{ propName: "v" }, { propName: "v2", headerStyle: { isSorted: false } }, { propName: "v3" }],
+      },
+      // 3rd: the sheet hides them all => no <autoFilter> at all
+      {
+        name: "s3",
+        headerStyle: { isSorted: false },
+        data: [{ v: 1, v2: 2 }],
+        mapping: [{ propName: "v" }, { propName: "v2" }],
+      },
+      // 4th: the column wins over the sheet exactly as the header-font does
+      {
+        name: "s4",
+        headerStyle: { isSorted: false },
+        data: [{ v: 1, v2: 2 }],
+        mapping: [{ propName: "v" }, { propName: "v2", headerStyle: { isSorted: true } }],
+      },
+    ]);
+    expect(filterOf(1)).toBe(`<autoFilter ref="A1:B2"/>`);
+    expect(filterOf(2)).toBe(`<autoFilter ref="A1:C2"><filterColumn colId="1" hiddenButton="1"/></autoFilter>`);
+    expect(filterOf(3)).toBe("");
+    expect(files["xl/tables/table3.xml"]).not.toContain("autoFilter"); // the tag is skipped & not an empty one
+    expect(filterOf(4)).toBe(`<autoFilter ref="A1:B2"><filterColumn colId="0" hiddenButton="1"/></autoFilter>`);
+    // the filter is the very 1st tag of the table by the schema, so a broken order breaks the whole document
+    [1, 2, 3, 4].forEach((i) => expectValidXml(`xl/tables/table${i}.xml`));
+  });
+
+  test("isSorted: false doesn't reserve the room for the filter-button", async () => {
+    await exportToExcel([
+      {
+        // the header is wider than the content, so the auto-width is defined by it & by the button
+        name: "W",
+        data: [{ v: "i" }],
+        mapping: [
+          { propName: "v", headerText: "Header" },
+          { propName: "v", headerText: "Header", headerStyle: { isSorted: false } },
+          { propName: "v", headerText: "Header", headerStyle: { isSorted: false }, width: 20 },
+        ],
+      },
+    ]);
+    // the button takes 18px & a single Excel-unit of the document-font (Calibri 11) is 7px
+    expect(colWidth(1) - colWidth(2)).toBeCloseTo(18 / 7, 1);
+    expect(colWidth(3)).toBe(20); // an explicit width isn't measured at all
+  });
+
+  test("isSorted: $defaults.headerStyle can be dropped at all", async () => {
+    const { headerStyle } = exportToExcel.$defaults;
+    exportToExcel.$defaults.headerStyle = undefined;
+    try {
+      await exportToExcel([{ name: "s", data: [{ v: 1 }], mapping: [{ propName: "v" }] }]);
+    } finally {
+      exportToExcel.$defaults.headerStyle = headerStyle;
+    }
+    // no header-style at all => the button is still applied: `true` is the default of isSorted itself
+    expect(files["xl/tables/table1.xml"]).toContain(`<autoFilter ref="A1:A2"/>`);
+  });
+
   test("column letters: A..Z, AA, AB", async () => {
     const mapping = Array.from({ length: 28 }, (_v, i) => ({ propName: `c${i}`, headerText: `${i}`, width: 3 }));
     await exportToExcel([{ name: "Letters", data: [{ c25: "z", c26: "aa", c27: "ab" }], mapping }]);

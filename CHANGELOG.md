@@ -2,6 +2,14 @@
 
 # Changelog
 
+## 1.2.9 (\_\_\_)
+
+### Fixes & Improvements
+
+- helper [exportToExcel](src/helpers/files/exportToExcel.ts). Added prop **isSorted** for headers
+
+---
+
 ## 1.2.8 (Sep 10, 2026)
 
 ### Fixes & Improvements
