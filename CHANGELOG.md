@@ -8,7 +8,7 @@
 
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts).
   - Added prop **isSorted** for headers
-  - Added prop **isFreezeHeaders** for sheets
+  - Added props **freezeRows** & **freezeColumns** for sheets
   - Added arg **sheetIndex** for cellCallback
 
 ---

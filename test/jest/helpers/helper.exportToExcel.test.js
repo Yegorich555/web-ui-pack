@@ -298,44 +298,61 @@ describe("helper.exportToExcel", () => {
     expect(files["xl/tables/table1.xml"]).toContain(`<autoFilter ref="A1:A2"/>`);
   });
 
-  test("isFreezeHeaders: per sheet & $defaults", async () => {
-    /** `<sheetViews>` of the pointed sheet; `""` - the sheet isn't frozen at all */
+  test("freeze: rows & columns per sheet & $defaults", async () => {
+    /** `<sheetViews>` of the pointed sheet; `""` - the sheet has no frozen pane at all */
     const viewOf = (num) => (files[`xl/worksheets/sheet${num}.xml`].match(/<sheetViews>.*?<\/sheetViews>/) || [""])[0];
+    /** `<sheetViews>` that the pointed split produces */
+    const frozen = (split, cell, pane) =>
+      `<sheetViews><sheetView workbookViewId="0"><pane ${split} topLeftCell="${cell}" activePane="${pane}" ` +
+      `state="frozen"/><selection pane="${pane}" activeCell="${cell}" sqref="${cell}"/></sheetView></sheetViews>`;
 
-    const orig = exportToExcel.$defaults.isFreezeHeaders;
-    exportToExcel.$defaults.isFreezeHeaders = false;
-    try {
-      await exportToExcel([
-        // 1st: nothing is pointed => $defaults.isFreezeHeaders (false) => no frozen pane at all
-        { name: "s1", data: [{ v: 1 }], mapping: [{ propName: "v" }] },
-        // 2nd: an own option of the sheet wins over $defaults
-        { name: "s2", data: [{ v: 2 }], mapping: [{ propName: "v" }], isFreezeHeaders: true },
-        // 3rd: a sheet without data is frozen either - the header-row is there anyway
-        { name: "s3", data: [], mapping: [{ propName: "v" }], isFreezeHeaders: true },
-      ]);
-    } finally {
-      exportToExcel.$defaults.isFreezeHeaders = orig;
-    }
-    const frozen =
-      `<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" ` +
-      `state="frozen"/><selection pane="bottomLeft" activeCell="A2" sqref="A2"/></sheetView></sheetViews>`;
-    expect(viewOf(1)).toBe("");
-    expect(files["xl/worksheets/sheet1.xml"]).not.toContain("sheetView"); // the tag is skipped & not an empty one
-    expect(viewOf(2)).toBe(frozen);
-    expect(viewOf(3)).toBe(frozen);
+    const mapping = [{ propName: "v" }, { propName: "v2" }, { propName: "v3" }];
+    const data = [{ v: 1, v2: 2, v3: 3 }];
+    await exportToExcel([
+      // 1st: nothing is pointed => $defaults (the header-row & no column)
+      { name: "s1", data, mapping },
+      // 2nd: the columns only - the header-row is unfrozen explicitly
+      { name: "s2", data, mapping, freezeRows: 0, freezeColumns: 2 },
+      // 3rd: the both axes at once
+      { name: "s3", data, mapping, freezeRows: 2, freezeColumns: 1 },
+      // 4th: nothing at all
+      { name: "s4", data, mapping, freezeRows: 0 },
+      // 5th: a sheet without data is frozen either - the header-row is there even without a single item
+      { name: "s5", data: [], mapping, freezeColumns: 1 },
+    ]);
+    expect(viewOf(1)).toBe(frozen(`ySplit="1"`, "A2", "bottomLeft"));
+    expect(viewOf(2)).toBe(frozen(`xSplit="2"`, "C1", "topRight"));
+    expect(viewOf(3)).toBe(frozen(`xSplit="1" ySplit="2"`, "B3", "bottomRight"));
+    expect(viewOf(4)).toBe("");
+    expect(files["xl/worksheets/sheet4.xml"]).not.toContain("sheetView"); // the tag is skipped & not an empty one
+    expect(viewOf(5)).toBe(frozen(`xSplit="1" ySplit="1"`, "B2", "bottomRight"));
     // <sheetViews> must go before <cols> by the schema, so a broken order breaks the whole document
-    expect(files["xl/worksheets/sheet2.xml"]).toContain(`${frozen}<cols>`);
-    [1, 2, 3].forEach((i) => expectValidXml(`xl/worksheets/sheet${i}.xml`));
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`${viewOf(1)}<cols>`);
+    [1, 2, 3, 4, 5].forEach((i) => expectValidXml(`xl/worksheets/sheet${i}.xml`));
   });
 
-  test("isFreezeHeaders: enabled by $defaults for every sheet", async () => {
-    await exportToExcel([
-      { name: "s1", data: [{ v: 1 }], mapping: [{ propName: "v" }] },
-      { name: "s2", data: [{ v: 2 }], mapping: [{ propName: "v" }], isFreezeHeaders: false },
-    ]);
-    // the default of the document is `true`, so only the sheet that points `false` isn't frozen
-    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<pane ySplit="1" topLeftCell="A2"`);
-    expect(files["xl/worksheets/sheet2.xml"]).not.toContain("sheetView");
+  test("freeze: $defaults & the normalization of the pointed counts", async () => {
+    const { freezeRows, freezeColumns } = exportToExcel.$defaults;
+    exportToExcel.$defaults.freezeRows = 0;
+    exportToExcel.$defaults.freezeColumns = 2;
+    try {
+      await exportToExcel([
+        // 1st: $defaults of the document win for every sheet that points nothing
+        { name: "s1", data: [{ v: 1 }], mapping: [{ propName: "v" }] },
+        // 2nd: a fractional count is cut & a negative one (NaN either) means no frozen pane at all
+        { name: "s2", data: [{ v: 1 }], mapping: [{ propName: "v" }], freezeRows: 2.7, freezeColumns: -5 },
+        // 3rd: a count bigger than the sheet itself is limited by the last cell of the format (XFD1048576)
+        { name: "s3", data: [{ v: 1 }], mapping: [{ propName: "v" }], freezeRows: 1e9, freezeColumns: 1e9 },
+      ]);
+    } finally {
+      exportToExcel.$defaults.freezeRows = freezeRows;
+      exportToExcel.$defaults.freezeColumns = freezeColumns;
+    }
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<pane xSplit="2" topLeftCell="C1" activePane="topRight"`);
+    expect(files["xl/worksheets/sheet2.xml"]).toContain(`<pane ySplit="2" topLeftCell="A3" activePane="bottomLeft"`);
+    expect(files["xl/worksheets/sheet3.xml"]).toContain(
+      `<pane xSplit="16383" ySplit="1048575" topLeftCell="XFD1048576" activePane="bottomRight"`
+    );
   });
 
   test("column letters: A..Z, AA, AB", async () => {
