@@ -104,6 +104,9 @@ export interface IExcelSheet<T = any> extends IExcelSettings {
   /** Built-in table-style of Excel
    * @defaultValue {@link exportToExcel.$defaults.tableStyle} => "Light16" */
   tableStyle?: ExcelTableStyle;
+  /** Freezes the header-row of the sheet, so it stays visible while the data is scrolled
+   * @defaultValue {@link exportToExcel.$defaults.isFreezeHeaders} => true */
+  isFreezeHeaders?: boolean;
 }
 
 /** `1 | 2 | ... | To - 1`: the numbers that {@link ExcelTableStyle} enumerates the styles of a family by */
@@ -233,6 +236,8 @@ interface IExportSheet {
   hasTable: boolean;
   /** The sheet has at least one note: it costs 2 extra files (see {@link ISheetNotes}) & a `<legacyDrawing>` */
   hasNotes: boolean;
+  /** The header-row is frozen: the resolved {@link IExcelSheet.isFreezeHeaders} */
+  isFreezeHeaders: boolean;
   /** Full name of the table-style: the resolved {@link IExcelSheet.tableStyle}; `""` - no style at all */
   tableStyleName: string;
 }
@@ -1046,6 +1051,11 @@ const relIdTable = "rId1";
 const relIdVml = "rId2";
 const relIdComments = "rId3";
 
+/** `<sheetViews>` of a sheet with the frozen header-row: the split goes right above the row 2, so the header
+ * stays visible while the data is scrolled. The `<selection>` moves the cursor into the scrollable pane - exactly
+ * what Excel stores itself (`A1` of the frozen pane would stay the active cell otherwise) */
+const sheetFreezeXml = `<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A2" sqref="A2"/></sheetView></sheetViews>`;
+
 /** `<legacyDrawing>` of the sheet: the boxes of the notes (see {@link ISheetNotes}) */
 const sheetDrawingXml = `<legacyDrawing r:id="${relIdVml}"/>`;
 /** `<tableParts>` of the sheet: the link to its table-file */
@@ -1098,9 +1108,10 @@ function getContentTypesXml(sheets: Array<IExportSheet>): string {
 
 /** `xl/worksheets/sheet{num}.xml`: the widths + the rows. The rows come already encoded - the biggest file
  * of the document is never built as a string. `<cols>` has to go first, so the widths are resolved before it */
-function getWorkSheetBytes({ parts, hasTable, hasNotes }: IExportSheet): Uint8Array {
+function getWorkSheetBytes({ parts, hasTable, hasNotes, isFreezeHeaders }: IExportSheet): Uint8Array {
   return parts.rows.toBytes(
-    `${worksheetHead}<cols>${parts.colsXml}</cols><sheetData>`,
+    // WARN: the schema requires `<sheetViews>` (the frozen header-row) before `<cols>`
+    `${worksheetHead}${isFreezeHeaders ? sheetFreezeXml : ""}<cols>${parts.colsXml}</cols><sheetData>`,
     // WARN: the schema requires `<legacyDrawing>` (the boxes of the notes) before `<tableParts>`
     `</sheetData>${hasNotes ? sheetDrawingXml : ""}${hasTable ? sheetTablePartsXml : ""}</worksheet>`
   );
@@ -1178,7 +1189,7 @@ export default async function exportToExcel<T>(
    * */
   cellCallback?: IExcelCellCallback<T>
 ): Promise<Blob> {
-  const { getCellValue, style, headerStyle, dateTimeFormat, tableStyle } = exportToExcel.$defaults;
+  const { getCellValue, style, headerStyle, dateTimeFormat, tableStyle, isFreezeHeaders } = exportToExcel.$defaults;
   const documentFont = mergeStyle(baseFont, style);
   const ctx: IExportContext = {
     allStyles: createStyles(documentFont),
@@ -1203,6 +1214,8 @@ export default async function exportToExcel<T>(
       hasNotes: parts.notes !== null,
       // an own style of the sheet wins over the document one
       tableStyleName: getTableStyleName(sheet.tableStyle ?? tableStyle),
+      // an empty sheet is frozen either: the header-row is there even without a single item
+      isFreezeHeaders: sheet.isFreezeHeaders ?? isFreezeHeaders,
     };
   });
 
@@ -1259,6 +1272,7 @@ export default async function exportToExcel<T>(
 exportToExcel.$defaults = {
   dateTimeFormat: "",
   tableStyle: "Light16",
+  isFreezeHeaders: true,
 
   getCellValue: function getCellValue(v) {
     const t = typeof v;
@@ -1295,6 +1309,8 @@ exportToExcel.$defaults = {
 interface IExcelDefaults extends IExcelSettings {
   /** Built-in table-style for every sheet that doesn't point an own {@link IExcelSheet.tableStyle} */
   tableStyle: ExcelTableStyle;
+  /** Freezes the header-row of every sheet that doesn't point an own {@link IExcelSheet.isFreezeHeaders} */
+  isFreezeHeaders: boolean;
   /** Maps an item-property into the content of a cell: how Excel must store it + the already stringified value
    * (a finite number becomes {@link ExcelCellTypes.number}, a Date - a real {@link ExcelCellTypes.date},
    * an array - a multiline {@link ExcelCellTypes.textWrap}, everything else - a plain {@link ExcelCellTypes.text}).

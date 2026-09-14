@@ -298,6 +298,46 @@ describe("helper.exportToExcel", () => {
     expect(files["xl/tables/table1.xml"]).toContain(`<autoFilter ref="A1:A2"/>`);
   });
 
+  test("isFreezeHeaders: per sheet & $defaults", async () => {
+    /** `<sheetViews>` of the pointed sheet; `""` - the sheet isn't frozen at all */
+    const viewOf = (num) => (files[`xl/worksheets/sheet${num}.xml`].match(/<sheetViews>.*?<\/sheetViews>/) || [""])[0];
+
+    const orig = exportToExcel.$defaults.isFreezeHeaders;
+    exportToExcel.$defaults.isFreezeHeaders = false;
+    try {
+      await exportToExcel([
+        // 1st: nothing is pointed => $defaults.isFreezeHeaders (false) => no frozen pane at all
+        { name: "s1", data: [{ v: 1 }], mapping: [{ propName: "v" }] },
+        // 2nd: an own option of the sheet wins over $defaults
+        { name: "s2", data: [{ v: 2 }], mapping: [{ propName: "v" }], isFreezeHeaders: true },
+        // 3rd: a sheet without data is frozen either - the header-row is there anyway
+        { name: "s3", data: [], mapping: [{ propName: "v" }], isFreezeHeaders: true },
+      ]);
+    } finally {
+      exportToExcel.$defaults.isFreezeHeaders = orig;
+    }
+    const frozen =
+      `<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" ` +
+      `state="frozen"/><selection pane="bottomLeft" activeCell="A2" sqref="A2"/></sheetView></sheetViews>`;
+    expect(viewOf(1)).toBe("");
+    expect(files["xl/worksheets/sheet1.xml"]).not.toContain("sheetView"); // the tag is skipped & not an empty one
+    expect(viewOf(2)).toBe(frozen);
+    expect(viewOf(3)).toBe(frozen);
+    // <sheetViews> must go before <cols> by the schema, so a broken order breaks the whole document
+    expect(files["xl/worksheets/sheet2.xml"]).toContain(`${frozen}<cols>`);
+    [1, 2, 3].forEach((i) => expectValidXml(`xl/worksheets/sheet${i}.xml`));
+  });
+
+  test("isFreezeHeaders: enabled by $defaults for every sheet", async () => {
+    await exportToExcel([
+      { name: "s1", data: [{ v: 1 }], mapping: [{ propName: "v" }] },
+      { name: "s2", data: [{ v: 2 }], mapping: [{ propName: "v" }], isFreezeHeaders: false },
+    ]);
+    // the default of the document is `true`, so only the sheet that points `false` isn't frozen
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<pane ySplit="1" topLeftCell="A2"`);
+    expect(files["xl/worksheets/sheet2.xml"]).not.toContain("sheetView");
+  });
+
   test("column letters: A..Z, AA, AB", async () => {
     const mapping = Array.from({ length: 28 }, (_v, i) => ({ propName: `c${i}`, headerText: `${i}`, width: 3 }));
     await exportToExcel([{ name: "Letters", data: [{ c25: "z", c26: "aa", c27: "ab" }], mapping }]);
