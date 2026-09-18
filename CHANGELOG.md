@@ -10,7 +10,8 @@
   - Added prop **isSorted** for headers
   - Added props **freezeRows** & **freezeColumns** for sheets
   - Added arg **sheetIndex** for cellCallback
-  - Add numberFormat into settings
+  - Added numberFormat into settings
+  - Added dateFormat types into TS
 - **Global**. Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (use able to see formats in TS)
 
 ---

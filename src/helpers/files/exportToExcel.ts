@@ -1,7 +1,7 @@
 import zip, { strToU8 } from "./zip";
 import { stringPrettify } from "../string";
 import dateToString from "../dateToString";
-import localeInfo from "../../objects/localeInfo";
+import localeInfo, { WUPDateTimeFormat } from "../../objects/localeInfo";
 import utilSaveAsFile from "./saveAsFile";
 
 /** Font & styles that applied to cell or globally per sheet/document */
@@ -71,19 +71,62 @@ export interface IExcelSettings {
    * ({@link IExcelSheet.headerStyle} + {@link exportToExcel.$defaults.headerStyle} + the style of the sheet)
    * @defaultValue {@link exportToExcel.$defaults.headerStyle} + {@link exportToExcel.$defaults.style} => `{ fontSize: 11, fontFamily: "Calibri", fontStyle: ExcelFontStyles.bold }` */
   headerStyle?: IExcelHeaderStyle;
-  /** Format that a date-cell is rendered by; it's a {@link dateToString} format (`yyyy-MM-dd hh:mm:ss A`)
-   * that is converted into the number-format of Excel (`yyyy-mm-dd hh:mm:ss AM/PM`)
+  /** Format that a date-cell is rendered by; the both languages are supported:
+   * * a {@link dateToString} format ({@link WUPDateTimeFormat}: `YYYY-MM-DD hh:mm:ss A`) - it's converted into
+   * the number-format of Excel (`yyyy-mm-dd hh:mm:ss AM/PM`) & every literal of it is escaped to stay a literal;
+   * * the number-format of Excel itself ({@link ExcelDateTimeFormat}: `d-mmm-yy`, `[$-409]mmmm d, yyyy`) - it goes
+   * into the document as-is.
+   *
+   * A format is taken as the Excel one when it holds a token that {@link dateToString} hasn't at all
+   * (`AM/PM`, `A/P`, `[]`, `"`, `\`, `;`) or when it holds no token of it either (the uppercase `M` - the month,
+   * `Y`, `D`, `H`, `S`, `F` & the trailing `A`/`Z`) - so `dd/MM/yyyy` is a dateToString format, while
+   * `dd/mm/yyyy` & `mmm d, yyyy` are the Excel ones (see {@link isExcelDateFormat})
    *
    * WARN: Excel has no timezone at all, so a date is stored as the local wall-clock time; the `Z`-suffix
    * (the UTC-flag of {@link dateToString}) is ignored
    * @defaultValue {@link exportToExcel.$defaults.dateTimeFormat}
    * @defaultValue {@link localeInfo.dateTime} */
-  dateTimeFormat?: string;
+  dateTimeFormat?: ExcelDateTimeFormat | WUPDateTimeFormat;
 
   /** Format of number-cell (`#,##0.00`, `0.00%`, `$#,##0.00` etc.)
    * @defaultValue {@link exportToExcel.$defaults.numberFormat} => `""` - the `General` format of Excel */
   numberFormat?: ExcelNumberFormat;
 }
+
+/** Built-in Excel date/time formats (the tokens are case-insensitive for Excel; a date-cell stores a number,
+ * so everything below is only the way Excel renders it):
+ * * `yy`/`yyyy` - the year (2 or 4 digits)
+ * * `m`/`mm` - the month, `mmm`/`mmmm`/`mmmmm` - its name (`Dec` / `December` / `D`)
+ * * `d`/`dd` - the day, `ddd`/`dddd` - the name of the week-day (`Fri` / `Friday`)
+ * * `h`/`hh`, `m`/`mm` (right after an hour), `s`/`ss` - the time, `.0`.. - the fractions of a second
+ * * `AM/PM` (`A/P`) - the 12-hour clock; an hour without it is a 24-hour one
+ * * `[h]`/`[mm]`/`[ss]` - the elapsed time: such a part isn't rolled over by the next unit */
+export type ExcelDateTimeFormat =
+  | "General" // 45356.57 - no format at all: Excel renders the stored date-serial as a plain number
+  // the built-in formats of Excel (the `Number` tab of the `Format Cells` dialog)
+  | "m/d/yyyy" // 3/5/2024 - WARN: `/` is the date-separator of the locale & not a literal slash
+  | "d-mmm-yy" // 5-Mar-24
+  | "d-mmm" // 5-Mar
+  | "mmm-yy" // Mar-24
+  | "h:mm AM/PM" // 1:45 PM
+  | "h:mm:ss AM/PM" // 1:45:30 PM
+  | "h:mm" // 13:45
+  | "h:mm:ss" // 13:45:30
+  | "m/d/yyyy h:mm" // 3/5/2024 13:45
+  | "mm:ss" // 45:30
+  | "mm:ss.0" // 45:30.5
+  | "[h]:mm:ss" // 37:45:30 - the elapsed time (26 hours are 26 & not 2)
+  // the ISO-like ones: a token is a literal for every locale, so such a document looks the same everywhere
+  | "yyyy-mm-dd" // 2024-03-05
+  | "yyyy-mm-dd hh:mm" // 2024-03-05 13:45
+  | "yyyy-mm-dd hh:mm:ss" // 2024-03-05 13:45:30
+  | "dd.mm.yyyy" // 05.03.2024
+  | "dd.mm.yyyy hh:mm:ss" // 05.03.2024 13:45:30
+  // the named ones
+  | "mmm d, yyyy" // Mar 5, 2024
+  | "mmmm d, yyyy" // March 5, 2024
+  | "dddd, mmmm d, yyyy" // Tuesday, March 5, 2024
+  | (string & {});
 
 /** Built-in Excel number formats:
  * * `0` - padded digit
@@ -400,6 +443,18 @@ const msPerDay = 86400000;
  * (the supported fonts render every digit by the same width, so the exact digits don't matter) */
 const widestDate = new Date(2222, 11, 28, 22, 58, 58, 888);
 
+/** Text that a date-cell without a format is measured by: Excel renders the stored date-serial as a plain
+ * number & the `General` of it keeps ~11 chars (see {@link ExcelDateTimeFormat}) */
+const generalDateText = "45356.57326";
+
+/** Format of a cell: an own one of the column wins over the sheet & over the document; `""` - none at all.
+ * `General` is exactly what a cell without a format is rendered by (the built-in id 0 of Excel), so it's
+ * answered as none either: the document registers no custom format for it */
+function resolveFormat(colFormat: string | undefined, sheetFormat: string | undefined, docFormat: string): string {
+  const f = colFormat || sheetFormat || docFormat;
+  return !f || f.toLowerCase() === "general" ? "" : f;
+}
+
 /** Count of the ASCII chars (`32..126`) that {@link autoWidth.familyPx} holds the measured width of */
 const asciiCount = 95;
 
@@ -436,6 +491,19 @@ interface INumberFormat {
 
 /** Decoded formats: a format is pointed per document/sheet/column, so it's decoded once for all of them */
 const numberFormats = new Map<string, INumberFormat>();
+
+/** Index of the char that closes a part of a format (a quote, a bracket); an unclosed part is read till
+ * the very end of the format - a broken format is never a crash */
+function indexOfEnd(format: string, char: string, from: number): number {
+  const i = format.indexOf(char, from);
+  return i < 0 ? format.length : i;
+}
+
+/** Sign that a `[$sym-code]` part of a format renders: `[$€-407]` shows the `€` & never the locale-code itself */
+function getCurrencySign(part: string): string {
+  const dash = part.indexOf("-");
+  return dash < 0 ? part.substring(1) : part.substring(1, dash);
+}
 
 /** Decodes a number-format into the parts that the auto-width needs; called per column & cached by the format.
  * WARN: only the 1st section of a multi-section format (`positive;negative;zero;text`) is read - a negative
@@ -482,20 +550,17 @@ function parseNumberFormat(format: string): INumberFormat {
         break;
       case '"': {
         // a quoted literal (`0" pcs"`)
-        const end = format.indexOf('"', i + 1);
-        f.literal += format.substring(i + 1, end < 0 ? format.length : end);
-        i = end < 0 ? format.length : end;
+        const end = indexOfEnd(format, '"', i + 1);
+        f.literal += format.substring(i + 1, end);
+        i = end;
         break;
       }
       case "[": {
         // a color/condition/locale renders nothing at all but `[$sym-code]` - the currency sign of the locale
-        const end = format.indexOf("]", i + 1);
-        const part = format.substring(i + 1, end < 0 ? format.length : end);
-        if (part[0] === "$") {
-          const dash = part.indexOf("-");
-          f.literal += dash < 0 ? part.substring(1) : part.substring(1, dash);
-        }
-        i = end < 0 ? format.length : end;
+        const end = indexOfEnd(format, "]", i + 1);
+        const part = format.substring(i + 1, end);
+        if (part[0] === "$") f.literal += getCurrencySign(part);
+        i = end;
         break;
       }
       case "_": // reserves the width of the next char (Excel renders such a padding as a space)
@@ -778,9 +843,29 @@ const dateRunRE = /(.)\1*/g;
 /** Tokens of {@link dateToString} that Excel understands as the very same but lower-cased ones */
 const dateTokenRE = /[yYMdDhHmsS]/;
 
+/** Parts that only the number-format language of Excel has: `AM/PM`/`A/P` - the 12-hour clock ({@link dateToString}
+ * has the trailing `a`/`A` instead), `[]` - a section (`[h]`, `[$-409]`, `[Red]`), `"`/`\` - a literal,
+ * `;` - the sections of a format */
+const excelDateRE = /AM\/PM|A\/P|[[\]"\\;]/i;
+
+/** Tokens that only {@link dateToString} has: it needs the uppercase `M` for a month (the lower-cased one is
+ * the minutes) & takes a trailing `a`/`A`/`z`/`Z` as the 12-hour/UTC flag, while Excel is case-insensitive &
+ * renders such a char as a literal one */
+const wupDateRE = /[YMDHSF]|[aAzZ]$/;
+
+/** `true` - the format is the number-format language of Excel itself, so it goes into the document as-is;
+ * `false` - it's a {@link dateToString} format & must be converted by {@link toExcelDateFormat}.
+ * A format that both of them read the very same way (`yyyy-mm-dd`, `hh:mm:ss`) is taken as the Excel one:
+ * it keeps the tokens of the locale (`/` - the date-separator) that the conversion escapes into the literals */
+function isExcelDateFormat(format: string): boolean {
+  // `AM/PM` holds the uppercase `M`, so the Excel-only parts are checked the 1st
+  return excelDateRE.test(format) || !wupDateRE.test(format);
+}
+
 /** Converts a {@link dateToString} format into the number-format of Excel:
- * `YYYY-MM-DD hh:mm:ss A` => `yyyy-mm-dd hh:mm:ss AM/PM` */
+ * `YYYY-MM-DD hh:mm:ss A` => `yyyy-mm-dd hh:mm:ss AM/PM`; a format that is the Excel one already goes as-is */
 function toExcelDateFormat(format: string): string {
+  if (isExcelDateFormat(format)) return format;
   // suffixes of dateToString: `Z` - UTC (Excel has no timezone - dropped), `a`/`A` - 12h (a trailing AM/PM in Excel)
   let f = format.endsWith("Z") || format.endsWith("z") ? format.substring(0, format.length - 1) : format;
   const h12 = f.endsWith("a") || f.endsWith("A");
@@ -799,6 +884,140 @@ function toExcelDateFormat(format: string): string {
   });
 
   return h12 ? `${f}AM/PM` : f;
+}
+
+/** Longest name per `locale + token`: resolving one costs an `Intl.DateTimeFormat` (the `localeInfo` getters
+ * re-read the months by the very same way), while a format is resolved per column of every sheet */
+const longestNames = new Map<string, string>();
+
+/** Longest name that Excel renders by the `mmm`/`mmmm`/`ddd`/`dddd` token: a cell shows the name of its own
+ * date, so a column must fit the widest one (compared by the chars - a px-exact one costs a measuring per name).
+ * WARN: a week-day is never taken from `localeInfo.namesDayShort` - it's the 2-letter header of the
+ * calendar-control (`Mo`) & not the abbreviation of Excel (`Mon`) */
+function getLongestName(token: string): string {
+  const key = `${localeInfo.locale} ${token}`;
+  let r = longestNames.get(key);
+  if (r !== undefined) return r;
+
+  let names: Array<string>;
+  if (token[0] === "m") {
+    names = token.length > 3 ? localeInfo.namesMonth : localeInfo.namesMonthShort;
+  } else {
+    const f = new Intl.DateTimeFormat(localeInfo.locale || "en-US", { weekday: token.length > 3 ? "long" : "short" });
+    const dt = new Date(2022, 7, 1); // the 1st of August 2022 is a Monday, so the whole week is walked by the date
+    names = [];
+    for (let i = 1; i < 8; ++i) {
+      dt.setDate(i);
+      names.push(f.format(dt));
+    }
+  }
+
+  r = "";
+  for (let i = 0; i < names.length; ++i) {
+    if (names[i].length > r.length) r = names[i];
+  }
+  longestNames.set(key, r);
+  return r;
+}
+
+/** Text that a token of an Excel date-format renders {@link widestDate} by; `null` - it's not a token at all.
+ * A month & the minutes are the both 2-digit here, so the `m`-token needs no context to be measured */
+function getExcelDateToken(char: string, len: number): string | null {
+  switch (char) {
+    case "y":
+    case "e": // the era-year: it's the ordinary 4-digit one for the gregorian calendar
+      return len > 2 ? "2222" : "22";
+    case "m":
+      if (len > 4) return getLongestName("mmmm").substring(0, 1); // `mmmmm` - the 1st letter of the name only
+      if (len === 4) return getLongestName("mmmm");
+      if (len === 3) return getLongestName("mmm");
+      return "12";
+    case "d":
+      if (len > 3) return getLongestName("dddd");
+      if (len === 3) return getLongestName("ddd");
+      return "28";
+    case "h":
+      return "22";
+    case "s":
+      return "58";
+    case "0": // the fractions of a second (`ss.000`)
+      return "8".repeat(len);
+    default:
+      return null;
+  }
+}
+
+/** Renders {@link widestDate} by a number-format of Excel: a date-cell stores a number & Excel renders it by
+ * the format, so the width of such a column can't be measured from the value at all ({@link dateToString} reads
+ * an own language, so it renders an Excel-format as a garbage).
+ * WARN: it's an estimation - the elapsed time (`[h]`) is unbounded & is measured by 2 digits, so point
+ * {@link IExcelColumnMap.width} for a column of such a format */
+function excelDateToString(format: string): string {
+  let s = "";
+  let i = 0;
+  while (i < format.length) {
+    const c = format[i];
+    if (c === ";") break; // a value is rendered by the 1st section of the format only
+    switch (c) {
+      case '"': {
+        // a quoted literal (`yyyy" year"`)
+        const end = indexOfEnd(format, '"', i + 1);
+        s += format.substring(i + 1, end);
+        i = end + 1;
+        break;
+      }
+      case "\\": // the next char is a literal one (`\-`)
+      case "_": // reserves the width of the next char (Excel renders such a padding as a space)
+        s += format.substring(i + 1, i + 2);
+        i += 2;
+        break;
+      case "*": // repeats the next char to fill the cell: it never widens a column
+        i += 2;
+        break;
+      case "[": {
+        const end = indexOfEnd(format, "]", i + 1);
+        const part = format.substring(i + 1, end);
+        if (part[0] === "$") {
+          s += getCurrencySign(part); // `[$sym-code]` - a currency sign + the locale that the names are taken from
+        } else {
+          // `[h]`/`[mm]`/`[ss]` - the elapsed time; a color/condition (`[Red]`, `[>0]`) renders nothing at all
+          const t = getExcelDateToken(part.substring(0, 1).toLowerCase(), part.length);
+          if (t !== null) s += t;
+        }
+        i = end + 1;
+        break;
+      }
+      case "@": // the text-placeholder: a date-cell renders nothing by it
+        ++i;
+        break;
+      case "A":
+      case "a": {
+        // the 12-hour clock (Excel reads it case-insensitively): `AM` is 1px wider than `PM` for the supported
+        // fonts, so the widest part of the pair is measured; a lonely `a` is a literal & not a token at all
+        const next = format.substring(i, i + 5).toUpperCase();
+        if (next === "AM/PM") {
+          s += format.substring(i, i + 2);
+          i += 5;
+        } else if (next.startsWith("A/P")) {
+          s += c;
+          i += 3;
+        } else {
+          s += c;
+          ++i;
+        }
+        break;
+      }
+      default: {
+        // a run of the same char is a single token (`yyyy`, `mmm`)
+        let n = 1;
+        while (format[i + n] === c) ++n;
+        const t = getExcelDateToken(c.toLowerCase(), n);
+        s += t === null ? c.repeat(n) : t;
+        i += n;
+      }
+    }
+  }
+  return s;
 }
 
 function getFontXml(f: IExcelStyleFull): string {
@@ -1088,22 +1307,24 @@ function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext
     headerCells += `<c r="${letter}1" s="${hs}" t="inlineStr"><is><t>${escape(text)}</t></is></c>`;
   }
 
-  /** Format of a date-cell: an own one of the column wins over the sheet & over the document */
+  /** Format of a date-cell (see {@link resolveFormat}): `""` - Excel shows the stored date-serial as a number */
   function getDateFormat(c: number): string {
-    return cols[c].dateTimeFormat || sheet.dateTimeFormat || ctx.dateTimeFormat;
+    return resolveFormat(cols[c].dateTimeFormat, sheet.dateTimeFormat, ctx.dateTimeFormat);
   }
 
-  /** Format of a number-cell: an own one of the column wins over the sheet & over the document; `""` - none.
-   * `General` is exactly what such a cell is rendered by anyway (the built-in id 0), so it's answered as none:
-   * the document registers no custom format for it & the width is measured by the value itself */
+  /** Format of a number-cell (see {@link resolveFormat}): `""` - the width is measured by the value itself */
   function getNumberFormat(c: number): string {
-    const f = cols[c].numberFormat || sheet.numberFormat || ctx.numberFormat;
-    return !f || f.toLowerCase() === "general" ? "" : f;
+    return resolveFormat(cols[c].numberFormat, sheet.numberFormat, ctx.numberFormat);
   }
 
-  /** Px-width of the widest date of the format: a date-cell stores a number, so it's measured by the format */
+  /** Px-width of the widest date of the format: a date-cell stores a number, so it's measured by the format
+   * (the both languages are rendered - see {@link IExcelSettings.dateTimeFormat}); `""` - no format at all */
   function getDatePx(format: string, m: IFontMetrics, scale: number): number {
-    return autoWidth.getTextPx(dateToString(widestDate, format), m.charPx, m.defaultPx) * scale;
+    let txt: string;
+    if (!format) txt = generalDateText;
+    else if (isExcelDateFormat(format)) txt = excelDateToString(format);
+    else txt = dateToString(widestDate, format);
+    return autoWidth.getTextPx(txt, m.charPx, m.defaultPx) * scale;
   }
 
   /** Returns `s="N" ` of a date-cell of the column & caches it: called on the 1st date, so a column without one
@@ -1111,7 +1332,7 @@ function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext
    * (see {@link getDatePx}) */
   function getDateStyleXml(c: number): string {
     const f = getDateFormat(c);
-    const ds = styles.getCellStyle(colFonts[c], false, styles.getDateFmtId(f));
+    const ds = styles.getCellStyle(colFonts[c], false, f ? styles.getDateFmtId(f) : 0);
     const px = maxPx[c];
     if (px >= 0) {
       const w = getDatePx(f, cellMetrics[c], cellScale[c]);
@@ -1148,10 +1369,12 @@ function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext
   function getOverrideStyleXml(c: number, ov: ICellOverride, type: ExcelCellTypes): string {
     let xml = ov.styleXml[type];
     if (xml === undefined) {
-      // such a cell changes only the font & keeps the number-format of the column (a date has always one)
+      // such a cell changes only the font & keeps the number-format of the column
       let fmt = 0;
-      if (type === ExcelCellTypes.date) fmt = styles.getDateFmtId(getDateFormat(c));
-      else if (type === ExcelCellTypes.number) fmt = colNumFmt[c]?.fmtId ?? 0;
+      if (type === ExcelCellTypes.date) {
+        const f = getDateFormat(c);
+        if (f) fmt = styles.getDateFmtId(f);
+      } else if (type === ExcelCellTypes.number) fmt = colNumFmt[c]?.fmtId ?? 0;
       xml = `s="${styles.getCellStyle(ov.style, type === ExcelCellTypes.textWrap, fmt)}" `;
       ov.styleXml[type] = xml;
     }

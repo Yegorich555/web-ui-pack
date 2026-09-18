@@ -824,7 +824,7 @@ describe("helper.exportToExcel", () => {
       "DD.MM.YYYY, hh:mm:ss", // de-DE, ru-RU
       "YYYY/M/D h:mm:ss", // ja-JP
       "MMM d, yy hh:mm:ss.fff Z", // the short name of the month + the fractions + the UTC-flag
-      "dddd", // WARN: 'ddd'+ is the name of the week-day in Excel, so it's cut by 2
+      "DDDD", // WARN: 'ddd'+ is the name of the week-day in Excel, so a longer run is cut by 2
     ];
     await exportToExcel([
       {
@@ -843,6 +843,101 @@ describe("helper.exportToExcel", () => {
         `<numFmt numFmtId="169" formatCode="dd"/>` +
         `</numFmts>`
     );
+  });
+
+  test("dates: an Excel-native format goes into the document as-is", async () => {
+    // the both languages are supported: such a format holds a token that dateToString hasn't at all (or no
+    // token of it at all), so it's never converted & every part of it keeps the meaning that Excel gives it
+    const formats = [
+      "m/d/yyyy", // '/' stays the date-separator of the locale (a converted format escapes it into a literal)
+      "d-mmm-yy", // 'mmm'+ is the name of the month in Excel & a padded number for dateToString
+      "dddd, mmmm d, yyyy",
+      "h:mm:ss AM/PM", // the 12-hour clock of Excel (dateToString has the trailing 'a'/'A' instead)
+      "[$-409]mm:ss.0",
+      "[h]:mm:ss",
+      "hh:mm", // the both languages read it the very same way, so it goes as-is either
+    ];
+    await exportToExcel([
+      {
+        data: [{ v: new Date(2024, 2, 5) }],
+        mapping: formats.map((dateTimeFormat) => ({ propName: "v", dateTimeFormat })),
+      },
+    ]);
+    const fmts = formats.map((f, i) => `<numFmt numFmtId="${164 + i}" formatCode="${f}"/>`).join("");
+    expect(files["xl/styles.xml"]).toContain(`<numFmts count="${formats.length}">${fmts}</numFmts>`);
+  });
+
+  test("dates: 'General' points no format at all", async () => {
+    const sheet = {
+      data: [{ v: new Date(2024, 2, 5), d: new Date(2024, 2, 5) }],
+      // 'General' is what a cell without a format is rendered by anyway: Excel shows the stored date-serial
+      mapping: [
+        { propName: "v", headerText: ".", headerStyle: { isSorted: false }, dateTimeFormat: "General" },
+        { propName: "d", headerText: ".", headerStyle: { isSorted: false }, dateTimeFormat: "dd" },
+      ],
+    };
+    await exportToExcel([sheet]);
+    expect(files["xl/styles.xml"]).toContain(`<numFmts count="1">`); // the 'dd' of the 2nd column only
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="0" `);
+    // ...such a column is measured by the date-serial itself & not by a format
+    expect(colWidth(1)).toBeGreaterThan(colWidth(2));
+
+    // a cell with an own font keeps the very same 'no format at all'
+    await exportToExcel([sheet], null, (v, rowIndex) => (rowIndex ? { style: { fontSize: 22 } } : undefined));
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="0" `);
+  });
+
+  test("dates: the Excel format-language is decoded for the auto-width", async () => {
+    const widthOf = async (dateTimeFormat) => {
+      await exportToExcel([
+        {
+          data: [{ v: new Date(2024, 2, 5, 13, 45, 30) }],
+          // the header must not define the width here: a dot is narrower than every format below
+          mapping: [{ propName: "v", headerText: ".", headerStyle: { isSorted: false }, dateTimeFormat }],
+        },
+      ]);
+      return colWidth();
+    };
+    const base = await widthOf("d"); // the day alone: 2 digits (a token renders the widest date of the format)
+    expect(await widthOf("dd")).toBe(base);
+    expect(await widthOf("m")).toBe(base); // a month & the minutes are the both 2-digit
+    expect(await widthOf("hh")).toBe(base);
+    expect(await widthOf("ss")).toBe(base);
+    expect(await widthOf("yy")).toBe(base);
+    expect(await widthOf("ee")).toBe(base); // the era-year renders the ordinary one
+    expect(await widthOf("[hh]")).toBe(base); // WARN: the elapsed time is unbounded & is measured by 2 digits
+    expect(await widthOf("yyyy")).toBeGreaterThan(base);
+    // the names of the month & of the week-day: a column must fit the longest one of the locale
+    expect(await widthOf("mmm")).toBeGreaterThan(base);
+    expect(await widthOf("mmmm")).toBeGreaterThan(await widthOf("mmm"));
+    expect(await widthOf("mmmmm")).toBeLessThan(base); // ...the 1st letter of the name only
+    expect(await widthOf("ddd")).toBeGreaterThan(base);
+    expect(await widthOf("dddd")).toBeGreaterThan(await widthOf("ddd"));
+    // the fractions of a second & the 12-hour clock ('AM' is the widest part of the pair)
+    expect(await widthOf("ss.000")).toBeGreaterThan(await widthOf("ss"));
+    expect(await widthOf("hh A/P")).toBeGreaterThan(await widthOf("hh"));
+    expect(await widthOf("hh AM/PM")).toBeGreaterThan(await widthOf("hh A/P"));
+    expect(await widthOf("a-dd")).toBeGreaterThan(base); // ...a lonely 'a' isn't a token at all
+    // a quoted text, an escaped char & a padding ('_' reserves the width of the next char) are all rendered
+    expect(await widthOf('dd" year"')).toBeGreaterThan(await widthOf('dd"y"'));
+    expect(await widthOf("dd\\d")).toBeGreaterThan(base);
+    expect(await widthOf("_(dd")).toBeGreaterThan(base);
+    // ...a color, a condition, a fill & the text-placeholder render nothing at all
+    expect(await widthOf("[Red]dd")).toBe(base);
+    expect(await widthOf("[>5]dd")).toBe(base);
+    expect(await widthOf("*-dd")).toBe(base);
+    expect(await widthOf("@dd")).toBe(base);
+    // the currency sign of a locale-part is rendered - unlike the locale-code itself
+    expect(await widthOf("[$€-407]dd")).toBeGreaterThan(base);
+    expect(await widthOf("[$€]dd")).toBeGreaterThan(base);
+    expect(await widthOf("[$-407]dd")).toBe(base);
+    // only the 1st section of a multi-section format is measured
+    expect(await widthOf("dd;yyyy-mm-dd")).toBe(base);
+    // a broken format is never a crash: an unclosed part is read till the end of the format
+    expect(await widthOf('dd"yr')).toBeGreaterThan(base);
+    expect(await widthOf("[Reddd")).toBeLessThan(base); // ...such a format renders nothing at all
+    expect(await widthOf("dd_")).toBe(base);
+    expect(await widthOf("dd\\")).toBe(base);
   });
 
   test("numbers: an own format of the column, of the sheet & of $defaults", async () => {
