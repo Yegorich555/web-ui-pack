@@ -85,14 +85,15 @@ export interface IExcelSettings {
   numberFormat?: ExcelNumberFormat;
 }
 
-/** Number-format of a cell (see {@link IExcelSettings.numberFormat}): the listed ones are the built-in formats
- * of Excel (the very same ones that its `Format Cells` dialog offers) & the rendered result is shown per format
- * for the `1234.5`; any other format-code goes as-is, so a custom format is pointed by itself.
- *
- * The language of such a code is: `0` - a digit that is padded even if the value hasn't it, `#` - a digit that
- * renders nothing instead, `.` - the decimal point, `,` - the group-separator (a trailing one divides the value
- * by 1000 instead), `%` - multiplies the value by 100, `[Red]` - a color of the text, `"..."`/`\x` - a literal;
- * a format of several `;`-sections applies them to the positive/negative/zero values */
+/** Built-in Excel number formats:
+ * * `0` - padded digit
+ * * `#` - optional digit
+ * * `.` - decimal point
+ * * `,` - group separator (or divides by 1000 when trailing)
+ * * `%` - multiplies by 100
+ * * `[Red]` - text color
+ * * `"..."` / `\x` - literal
+ * * `;` - separates positive, negative, and zero formats */
 export type ExcelNumberFormat =
   | "General" // 1234.5 - the default of Excel: as many digits as the cell fits
   // ordinary numbers

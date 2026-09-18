@@ -1,3 +1,52 @@
+/** Date-formats */
+export type WUPDateFormat =
+  | "YYYY-MM-DD" // 2222-01-03
+  | "YYYY-M-D" // 2222-1-3
+  | "YYYY/MM/DD" // 2222/01/03
+  | "YYYY/M/D" // 2222/1/3
+  | "YYYY.MM.DD" // 2222.01.03
+  | "YYYY. MM. DD" // 2222. 01. 03
+  | "YYYY. M. D" // 2222. 1. 3
+  // the day is the 1st (the most of Europe)
+  | "DD.MM.YYYY" // 03.01.2222
+  | "D.MM.YYYY" // 3.01.2222
+  | "D.M.YYYY" // 3.1.2222
+  | "DD. MM. YYYY" // 03. 01. 2222
+  | "D. M. YYYY" // 3. 1. 2222
+  | "DD/MM/YYYY" // 03/01/2222
+  | "D/MM/YYYY" // 3/01/2222
+  | "D/M/YYYY" // 3/1/2222
+  | "DD-MM-YYYY" // 03-01-2222
+  | "D-M-YYYY" // 3-1-2222
+  // the month is the 1st (en-US etc.)
+  | "MM/DD/YYYY" // 01/03/2222
+  | "M/D/YYYY"; // 1/3/2222
+
+/** Time formats */
+export type WUPTimeFormat =
+  // the 24-hour clock
+  | "hh:mm:ss" // 04:05:06
+  | "h:mm:ss" // 4:05:06
+  | "hh:mm" // 04:05
+  | "h:mm" // 4:05
+  // the 12-hour clock: the trailing `A`/`a` renders AM/PM or am/pm
+  | "hh:mm:ss A" // 04:05:06 AM
+  | "hh:mm:ss a" // 04:05:06 am
+  | "h:mm:ss A" // 4:05:06 AM
+  | "h:mm:ss a" // 4:05:06 am
+  | "hh:mm A" // 04:05 AM
+  | "hh:mm a" // 04:05 am
+  | "h:mm A" // 4:05 AM
+  | "h:mm a" // 4:05 am
+  // the dot as the separator (da-DK, fi-FI, id-ID etc.)
+  | "hh.mm.ss" // 04.05.06
+  | "h.mm.ss" // 4.05.06
+  | "hh.mm" // 04.05
+  | "h.mm"; // 4.05
+
+/** Format of the date+time  */
+export type WUPDateTimeFormat = `${WUPDateFormat} ${WUPTimeFormat}` | `${WUPDateFormat}, ${WUPTimeFormat}`;
+
 export class WUPlocaleInfo {
   /** Last pointed locale
    * @defaultValue "" (en-US with custom dateTime format) */
@@ -9,16 +58,15 @@ export class WUPlocaleInfo {
   /** Thousands separator for number 1,234.5 it's comma */
   sep1000 = ",";
   /** Date format, example YYYY-MM-DD */
-  date = "YYYY-MM-DD";
+  date: WUPDateFormat = "YYYY-MM-DD";
   /** Time format, example hh:mm:ss A */
-  time = "hh:mm:ss A";
+  time: WUPTimeFormat = "hh:mm:ss A";
   /** Date+Time format, example YYYY-MM-DD hh:mm:ss A */
-  dateTime = "YYYY-MM-DD hh:mm:ss A";
+  dateTime: WUPDateTimeFormat = "YYYY-MM-DD hh:mm:ss A";
   /** First day of week where 1-Monday, 7-Sunday;
    * @tutorial Troubleshooting
    * * detection depends on `Intl.Locale.prototype.weekInfo` https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/weekInfo
-   * and works from Chrome99 & Safari 15.4 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/weekInfo#browser_compatibility
-   */
+   * and works from Chrome99 & Safari 15.4 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/weekInfo#browser_compatibility */
   firstWeekDay = 1;
 
   /** Re-define all values (call it if localization changed or you want to set another locale) */
@@ -81,7 +129,11 @@ export class WUPlocaleInfo {
   }
 
   /** Returns date-time formats according to pointed locale or (user-locale if pointed undefined) */
-  getDateFormat(locale?: string): { date: string; time: string; dateTime: string } {
+  getDateFormat(locale?: string): {
+    date: WUPDateFormat;
+    time: WUPTimeFormat;
+    dateTime: WUPDateTimeFormat;
+  } {
     // "1/3/2222, 4:05:06 AM";
     const s = new Date(2222, 0, 3, 4, 5, 6).toLocaleString(locale).replace(/am/, "a").replace(/AM/, "A");
     let dateTime = "";
@@ -139,9 +191,9 @@ export class WUPlocaleInfo {
     const startTime = /[hms]/.exec(dateTime)!.index;
 
     const r = {
-      date: dateTime.substring(startDate, endDate + 1),
-      time: dateTime.substring(startTime, endTime + 1),
-      dateTime,
+      date: dateTime.substring(startDate, endDate + 1) as WUPDateFormat,
+      time: dateTime.substring(startTime, endTime + 1) as WUPTimeFormat,
+      dateTime: dateTime as WUPDateTimeFormat,
     };
     return r;
   }

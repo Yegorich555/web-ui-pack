@@ -2,7 +2,7 @@
 import { AttributeMap, AttributeTypes } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import WUPScrolled from "../helpers/scrolled";
-import localeInfo from "../objects/localeInfo";
+import localeInfo, { WUPTimeFormat } from "../objects/localeInfo";
 import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
 import { WUPcssIcon } from "../styles";
@@ -28,7 +28,7 @@ declare global {
        * @example `hh:mm a` or `h:m`
        * @tutorial Troubleshooting
        * * with changing $options.format need to change/reset mask/maskholder also */
-      format: string;
+      format: WUPTimeFormat | (string & {});
       /** Increment value in minutes
        *  @defaultValue 1
        * @tutorial Troubleshooting
@@ -51,7 +51,7 @@ declare global {
     interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** Default value in format hh:mm or hh:mm a */
       "w-initValue"?: string;
-      "w-format"?: string;
+      "w-format"?: WUPTimeFormat | (string & {});
       "w-step"?: number;
       "w-menuButtonsOff"?: boolean | "";
       /** User can't select date less than min; format hh:mm */

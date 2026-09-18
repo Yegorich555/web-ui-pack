@@ -3,7 +3,7 @@ import dateCompareWithoutTime from "../helpers/dateCompareWithoutTime";
 import dateCopyTime from "../helpers/dateCopyTime";
 import dateFromString from "../helpers/dateFromString";
 import dateToString from "../helpers/dateToString";
-import localeInfo from "../objects/localeInfo";
+import localeInfo, { WUPDateFormat } from "../objects/localeInfo";
 import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl from "./baseCombo";
@@ -31,7 +31,7 @@ declare global {
        * @example `yyyy-mm-dd` or `dd/mm/yyyy`
        * @tutorial Troubleshooting
        * * with changing $options.format need to change/reset mask/maskholder also */
-      format: string;
+      format: WUPDateFormat | (string & {});
       /** Anchor to TimeControl to sync with date
        * @tutorial dateControl is master and it means
        * * DateControl value merged with TimeControl value (don't need to look for timeControl value at all)
@@ -54,7 +54,7 @@ declare global {
         WUP.Calendar.JSXProps<C>,
         WUP.Base.OnlyNames<NewOptions> {
       "w-initValue"?: string;
-      "w-format"?: string;
+      "w-format"?: WUPDateFormat | (string & {});
       /** Anchor to TimeControl to sync with date
        *  * Point querySelector (id, `next` or`false`) to related element
        * @example

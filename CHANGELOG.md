@@ -11,6 +11,7 @@
   - Added props **freezeRows** & **freezeColumns** for sheets
   - Added arg **sheetIndex** for cellCallback
   - Add numberFormat into settings
+- **Global**. Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (use able to see formats in TS)
 
 ---
 
