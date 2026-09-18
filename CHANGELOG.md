@@ -14,6 +14,10 @@
   - Added dateFormat types into TS
 - **Global**. Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (use able to see formats in TS)
 
+### New Features
+
+- helper [imageConvert](src/helpers/files/imageConvert.ts)
+
 ---
 
 ## 1.2.8 (Sep 10, 2026)
