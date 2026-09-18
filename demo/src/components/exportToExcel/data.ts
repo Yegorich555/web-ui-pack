@@ -75,7 +75,8 @@ export const departments: IDepartment[] = [
 export const departmentColumns: IExcelSheet<IDepartment>["mapping"] = [
   { propName: "title", headerText: "Department" },
   { propName: "headCount" },
-  { propName: "budget", maxWidth: 20 },
+  // a number-cell is stored as a real number & only rendered by the pointed number-format of Excel
+  { propName: "budget", maxWidth: 20, numberFormat: "#,##0.00" },
 ];
 
 /** The same columns but with a custom header-style per column */

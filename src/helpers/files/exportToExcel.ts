@@ -79,7 +79,43 @@ export interface IExcelSettings {
    * @defaultValue {@link exportToExcel.$defaults.dateTimeFormat}
    * @defaultValue {@link localeInfo.dateTime} */
   dateTimeFormat?: string;
+
+  /** Format of number-cell (`#,##0.00`, `0.00%`, `$#,##0.00` etc.)
+   * @defaultValue {@link exportToExcel.$defaults.numberFormat} => `""` - the `General` format of Excel */
+  numberFormat?: ExcelNumberFormat;
 }
+
+/** Number-format of a cell (see {@link IExcelSettings.numberFormat}): the listed ones are the built-in formats
+ * of Excel (the very same ones that its `Format Cells` dialog offers) & the rendered result is shown per format
+ * for the `1234.5`; any other format-code goes as-is, so a custom format is pointed by itself.
+ *
+ * The language of such a code is: `0` - a digit that is padded even if the value hasn't it, `#` - a digit that
+ * renders nothing instead, `.` - the decimal point, `,` - the group-separator (a trailing one divides the value
+ * by 1000 instead), `%` - multiplies the value by 100, `[Red]` - a color of the text, `"..."`/`\x` - a literal;
+ * a format of several `;`-sections applies them to the positive/negative/zero values */
+export type ExcelNumberFormat =
+  | "General" // 1234.5 - the default of Excel: as many digits as the cell fits
+  // ordinary numbers
+  | "0" // 1235 - an integer (a fraction is rounded off & never cut)
+  | "0.00" // 1234.50
+  | "#,##0" // 1,235 - the thousands are grouped
+  | "#,##0.00" // 1,234.50
+  // an own section for the negative values: it replaces the minus-sign by the pointed part
+  | "#,##0;(#,##0)" // (1,235)
+  | "#,##0.00;(#,##0.00)" // (1,234.50)
+  | "#,##0;[Red](#,##0)" // (1,235) in red
+  | "#,##0.00;[Red](#,##0.00)" // (1,234.50) in red
+  // the format scales/expands the value & the stored number isn't changed at all
+  | "0%" // 123450%
+  | "0.00%" // 123450.00%
+  | "#,##0," // 1 - the value in thousands
+  | "0.00E+00" // 1.23E+03 - the scientific form
+  | "# ?/?" // 1234 1/2 - the fraction as a simple one
+  | "# ??/??" // 1234 1/2 - ...up to 2 digits in it
+  // a literal (a currency sign etc.) is rendered as-is; quote it if Excel reads it as a token of its own
+  | "$#,##0.00" // $1,234.50
+  | '#,##0.00" €"' // 1,234.50 €
+  | (string & {});
 
 export interface IExcelColumnMap<T = any> extends IExcelSettings {
   /** Item property name to map on excel cell per column */
@@ -136,7 +172,8 @@ export const enum ExcelCellTypes {
   text,
   /** Multiline text */
   textWrap,
-  /** Store as a real number so Excel sums/sorts/filters */
+  /** Store as a real number so Excel sums/sorts/filters; the cell is rendered by
+   * {@link IExcelSettings.numberFormat} (nothing at all by default - the `General` of Excel) */
   number,
   /** Store as date so Excel sorts/filters: the value is a date-serial (see {@link IExcelCellValue.stringVal})
    * & the cell is rendered by {@link IExcelSettings.dateTimeFormat} */
@@ -207,6 +244,19 @@ interface ICellOverride {
   scale: number;
   /** Width in px of a date-cell of this font (`-1` - not measured): the format makes every date the same width */
   datePx: number;
+  /** Width in px of the value-independent part of the number-format of the column measured by this font
+   * (`-1` - not measured): the digits of a cell are added to it - see {@link autoWidth.getNumberPx} */
+  numPx: number;
+}
+
+/** Number-format of a column resolved for the render & for the auto-width */
+interface IColumnNumberFormat {
+  /** Id of the registered number-format: a cell with an own font re-uses it */
+  fmtId: number;
+  /** Decoded format: the width of a cell is summed by its parts */
+  format: INumberFormat;
+  /** {@link ICellOverride.numPx} of the font of the column itself */
+  fixedPx: number;
 }
 
 /** Rendered xml-parts of a sheet: the data is never stored cell-by-cell, only the ready-to-use content */
@@ -257,6 +307,8 @@ interface IExportContext {
   getCellValue: <T = any>(v: T[keyof T]) => IExcelCellValue;
   cellCallback: IExcelCellCallback | undefined;
   dateTimeFormat: string;
+  /** `""` - no format at all: a number-cell is rendered by the `General` of Excel */
+  numberFormat: string;
 }
 
 /* ---------------------------------- Shared helpers ---------------------------------- */
@@ -360,6 +412,108 @@ interface IFontMetrics {
   maxDigitPx: number;
 }
 
+/** Char-codes of the parts that a number-format renders around the digits of a value */
+const pointCode = 46;
+const groupCode = 44;
+const minusCode = 45;
+
+/** Number-format of Excel ({@link IExcelSettings.numberFormat}) decoded for the auto-width: a number-cell stores
+ * a raw number & Excel renders it by the format, so the width can't be measured from the value alone */
+interface INumberFormat {
+  /** Count of the fraction digits that the format renders (the placeholders after the decimal point) */
+  decimals: number;
+  /** Min count of the integer digits: a `0`-placeholder is padded even for a shorter number */
+  minInt: number;
+  /** Count of the integer digits that the scaling of the format adds: `%` multiplies the value by 100 (+2),
+   * every trailing `,` divides it by 1000 (-3) */
+  scaleDigits: number;
+  /** The format groups the thousands (`#,##0`): a separator is rendered per 3 integer digits */
+  hasGroup: boolean;
+  /** Chars that the format renders around the number itself: a currency sign, `%`, a padding etc. */
+  literal: string;
+}
+
+/** Decoded formats: a format is pointed per document/sheet/column, so it's decoded once for all of them */
+const numberFormats = new Map<string, INumberFormat>();
+
+/** Decodes a number-format into the parts that the auto-width needs; called per column & cached by the format.
+ * WARN: only the 1st section of a multi-section format (`positive;negative;zero;text`) is read - a negative
+ * value is measured by the positive part plus the minus-sign */
+function parseNumberFormat(format: string): INumberFormat {
+  const cached = numberFormats.get(format);
+  if (cached) return cached;
+  const f: INumberFormat = { decimals: 0, minInt: 0, scaleDigits: 0, hasGroup: false, literal: "" };
+  /** The chars after the decimal point are the fraction ones */
+  let isFraction = false;
+  /** A digit-placeholder is already read: a `,` before the very 1st one is a literal & not a separator */
+  let hasDigit = false;
+  /** Commas that no digit-placeholder follows yet: such a comma scales the value instead of grouping it */
+  let scaleCommas = 0;
+  for (let i = 0; i < format.length; ++i) {
+    const c = format[i];
+    if (c === ";") break;
+    switch (c) {
+      case "0":
+      case "#":
+      case "?":
+        if (isFraction) ++f.decimals;
+        else if (c === "0") ++f.minInt;
+        // a comma that a placeholder follows groups the thousands & never scales (`#,##0,` does the both)
+        if (scaleCommas) {
+          f.hasGroup = true;
+          scaleCommas = 0;
+        }
+        hasDigit = true;
+        break;
+      case ".":
+        isFraction = true;
+        break;
+      case ",":
+        if (hasDigit) ++scaleCommas;
+        else f.literal += c;
+        break;
+      case "%":
+        f.scaleDigits += 2;
+        f.literal += c;
+        break;
+      case "\\": // the next char is a literal one (`\$`)
+        if (++i < format.length) f.literal += format[i];
+        break;
+      case '"': {
+        // a quoted literal (`0" pcs"`)
+        const end = format.indexOf('"', i + 1);
+        f.literal += format.substring(i + 1, end < 0 ? format.length : end);
+        i = end < 0 ? format.length : end;
+        break;
+      }
+      case "[": {
+        // a color/condition/locale renders nothing at all but `[$sym-code]` - the currency sign of the locale
+        const end = format.indexOf("]", i + 1);
+        const part = format.substring(i + 1, end < 0 ? format.length : end);
+        if (part[0] === "$") {
+          const dash = part.indexOf("-");
+          f.literal += dash < 0 ? part.substring(1) : part.substring(1, dash);
+        }
+        i = end < 0 ? format.length : end;
+        break;
+      }
+      case "_": // reserves the width of the next char (Excel renders such a padding as a space)
+        if (++i < format.length) f.literal += format[i];
+        break;
+      case "*": // repeats the next char to fill the cell: it never widens a column
+        ++i;
+        break;
+      case "@": // the text-placeholder: a number-cell renders nothing by it
+        break;
+      default:
+        f.literal += c;
+    }
+  }
+  f.scaleDigits -= scaleCommas * 3;
+  numberFormats.set(format, f);
+  return f;
+}
+
 /** Bits of {@link IExcelStyle.fontStyle} that index a face inside a family of {@link autoWidth.familyPx} */
 const facePxMask = ExcelFontStyles.bold | ExcelFontStyles.italic;
 
@@ -459,6 +613,42 @@ const autoWidth = {
     }
     return line > max ? line : max;
   },
+  /** Width in px of the parts of a number-format that don't depend on the value (the literals & the fraction):
+   * resolved once per (format, font) - a cell adds only its own digits to it */
+  getNumberFixedPx(f: INumberFormat, m: IFontMetrics): number {
+    return (
+      autoWidth.getTextPx(f.literal, m.charPx, m.defaultPx) +
+      (f.decimals ? f.decimals * m.maxDigitPx + m.charPx[pointCode] : 0)
+    );
+  },
+  /** Width in px of a number-cell as its format renders it: the ready `fixedPx` + the digits of the value.
+   * It's a hot path (every number-cell of a formatted column), so the rendered text is never built - the parts
+   * are summed instead: every digit of a supported font is of the very same width (see {@link autoWidth.familyPx}),
+   * so the count of them is enough.
+   * WARN: it's an estimation - a rounded fraction, a condition of the format etc. can only make the rendered
+   * text shorter & never wider (a too narrow column is shown by Excel as `#####`) */
+  getNumberPx(value: string, f: INumberFormat, fixedPx: number, m: IFontMetrics): number {
+    let end = value.length;
+    let ints = 0;
+    // JS stringifies a huge/tiny number as `1e+21`, while Excel renders every single digit of it
+    const e = value.indexOf("e");
+    if (e >= 0) {
+      ints = +value.substring(e + 1); // the exponent shifts the point, so it adds/removes the very digits
+      end = e;
+    }
+    const dot = value.indexOf(".");
+    if (dot >= 0 && dot < end) end = dot;
+    const isNeg = value.charCodeAt(0) === minusCode;
+    ints += isNeg ? end - 1 : end; // the sign isn't a digit & is measured on its own
+    ints += f.scaleDigits;
+    if (ints < f.minInt) ints = f.minInt;
+    // a `#`-only format renders no leading zero at all (`#.00` => `.50`), but a spare digit is much safer
+    if (ints < 1) ints = 1;
+    let px = fixedPx + ints * m.maxDigitPx;
+    if (f.hasGroup && ints > 3) px += Math.floor((ints - 1) / 3) * m.charPx[groupCode];
+    if (isNeg) px += m.charPx[minusCode];
+    return px;
+  },
   /** Excel-units of a never-resized column: the standard `8.43` chars of the document-font (64px of `Calibri 11`).
    * WARN: must be pointed explicitly - a `<col>` without the `width` collapses the column & Excel hides it */
   getDefaultWidth(unitPx: number): number {
@@ -546,7 +736,9 @@ interface IStyles {
   /** Index of the cell-format in `cellXfs`; never `0` - it's reserved (see the note in {@link createStyles}) */
   getCellStyle(style: IExcelStyleFull, isWrapText: boolean, numFmtId?: number): number;
   /** Id of the number-format for {@link IExcelSettings.dateTimeFormat}; registers it if it's new */
-  getNumFmtId(dateTimeFormat: string): number;
+  getDateFmtId(dateTimeFormat: string): number;
+  /** Id of the number-format for {@link IExcelSettings.numberFormat}; registers it if it's new */
+  getNumberFmtId(numberFormat: string): number;
   /** Content of `xl/styles.xml`: call it when all the sheets are generated */
   toXml(): string;
 }
@@ -624,16 +816,21 @@ function createStyles(defaultStyle: IExcelStyleFull): IStyles {
   const cellXfs = createStylesCollection();
   const numFmts = createStylesCollection(numFmtStartId);
   /** Id per {@link IExcelSettings.dateTimeFormat}: converted once, while every sheet/column re-asks for it */
-  const numFmtIds = new Map<string, number>();
+  const dateFmtIds = new Map<string, number>();
 
   const styles: IStyles = {
-    getNumFmtId(dateTimeFormat: string): number {
-      let id = numFmtIds.get(dateTimeFormat);
+    getDateFmtId(dateTimeFormat: string): number {
+      let id = dateFmtIds.get(dateTimeFormat);
       if (id === undefined) {
         id = numFmts.indexOf(escape(toExcelDateFormat(dateTimeFormat)));
-        numFmtIds.set(dateTimeFormat, id);
+        dateFmtIds.set(dateTimeFormat, id);
       }
       return id;
+    },
+    // a number-format is pointed in the very format-language of Excel, so it goes as-is & needs no own cache:
+    // the collection dedupes it by the string itself (it's asked once per column either)
+    getNumberFmtId(numberFormat: string): number {
+      return numFmts.indexOf(escape(numberFormat));
     },
     getCellStyle(style: IExcelStyleFull, isWrapText: boolean, numFmtId = 0): number {
       const fontId = fonts.indexOf(getFontXml(style));
@@ -784,6 +981,10 @@ function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext
   const cellStyleWrapXml: Array<string> = [];
   /** `s="N" ` of a date-cell of the column: resolved by {@link getDateStyleXml} on the 1st date of the column */
   const cellStyleDateXml: Array<string | undefined> = [];
+  /** `s="N" ` of a number-cell of the column: the ordinary style if the column points no number-format */
+  const cellStyleNumXml: Array<string> = [];
+  /** Number-format of the column; `undefined` - neither the column nor the sheet/document points one */
+  const colNumFmt: Array<IColumnNumberFormat | undefined> = [];
   /** ` style="N"` of the `<col>` of the column */
   const colStyleXml: Array<string> = [];
   /** Metrics of the column-font: the auto-width measures the header & every cell of the column by them */
@@ -862,6 +1063,19 @@ function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext
     const m = autoWidth.getMetrics(colFont);
     cellMetrics.push(m);
     cellScale[c] = autoWidth.getScale(colFont);
+
+    // the number-format is optional & has no default at all, so it's resolved right here - unlike the lazy
+    // date-one, which every column inherits & which must cost nothing for a column without a date-cell
+    const numFmt = getNumberFormat(c);
+    if (!numFmt) {
+      colNumFmt.push(undefined);
+      cellStyleNumXml.push(cellStyleXml[c]);
+    } else {
+      const fmtId = styles.getNumberFmtId(numFmt);
+      const format = parseNumberFormat(numFmt);
+      colNumFmt.push({ fmtId, format, fixedPx: autoWidth.getNumberFixedPx(format, m) });
+      cellStyleNumXml.push(`s="${styles.getCellStyle(colFont, false, fmtId)}" `);
+    }
     const hm = autoWidth.getMetrics(hFont);
     maxPx[c] =
       h.width !== undefined
@@ -878,6 +1092,14 @@ function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext
     return cols[c].dateTimeFormat || sheet.dateTimeFormat || ctx.dateTimeFormat;
   }
 
+  /** Format of a number-cell: an own one of the column wins over the sheet & over the document; `""` - none.
+   * `General` is exactly what such a cell is rendered by anyway (the built-in id 0), so it's answered as none:
+   * the document registers no custom format for it & the width is measured by the value itself */
+  function getNumberFormat(c: number): string {
+    const f = cols[c].numberFormat || sheet.numberFormat || ctx.numberFormat;
+    return !f || f.toLowerCase() === "general" ? "" : f;
+  }
+
   /** Px-width of the widest date of the format: a date-cell stores a number, so it's measured by the format */
   function getDatePx(format: string, m: IFontMetrics, scale: number): number {
     return autoWidth.getTextPx(dateToString(widestDate, format), m.charPx, m.defaultPx) * scale;
@@ -888,7 +1110,7 @@ function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext
    * (see {@link getDatePx}) */
   function getDateStyleXml(c: number): string {
     const f = getDateFormat(c);
-    const ds = styles.getCellStyle(colFonts[c], false, styles.getNumFmtId(f));
+    const ds = styles.getCellStyle(colFonts[c], false, styles.getDateFmtId(f));
     const px = maxPx[c];
     if (px >= 0) {
       const w = getDatePx(f, cellMetrics[c], cellScale[c]);
@@ -914,7 +1136,8 @@ function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext
     if (ov === undefined) {
       // an own font of the cell is merged into the font of the column: only the difference has to be pointed
       const s = mergeStyle(colFonts[c], cellStyle);
-      ov = { style: s, styleXml: [], metrics: autoWidth.getMetrics(s), scale: autoWidth.getScale(s), datePx: -1 };
+      const metrics = autoWidth.getMetrics(s);
+      ov = { style: s, styleXml: [], metrics, scale: autoWidth.getScale(s), datePx: -1, numPx: -1 };
       byCol[c] = ov;
     }
     return ov;
@@ -924,7 +1147,10 @@ function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext
   function getOverrideStyleXml(c: number, ov: ICellOverride, type: ExcelCellTypes): string {
     let xml = ov.styleXml[type];
     if (xml === undefined) {
-      const fmt = type === ExcelCellTypes.date ? styles.getNumFmtId(getDateFormat(c)) : 0;
+      // such a cell changes only the font & keeps the number-format of the column (a date has always one)
+      let fmt = 0;
+      if (type === ExcelCellTypes.date) fmt = styles.getDateFmtId(getDateFormat(c));
+      else if (type === ExcelCellTypes.number) fmt = colNumFmt[c]?.fmtId ?? 0;
       xml = `s="${styles.getCellStyle(ov.style, type === ExcelCellTypes.textWrap, fmt)}" `;
       ov.styleXml[type] = xml;
     }
@@ -968,9 +1194,19 @@ function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext
         // a date is excluded: the stored value isn't the rendered text - see getDateStyleXml()
         if (type < ExcelCellTypes.date) {
           const m = ov ? ov.metrics : cellMetrics[c];
-          // WARN: a number is measured by its JS-representation - the `General` format that Excel really renders
-          // it by is close enough & can only be narrower (Excel rounds a long fraction to fit the column)
-          const w = autoWidth.getTextPx(value, m.charPx, m.defaultPx) * (ov ? ov.scale : cellScale[c]);
+          const nf = type === ExcelCellTypes.number ? colNumFmt[c] : undefined;
+          let w: number;
+          if (nf) {
+            // a formatted number is rendered by its format & not by the stored value, so the width is summed
+            // from the parts; an own font measures the value-independent part once per (font, column) either
+            if (ov && ov.numPx < 0) ov.numPx = autoWidth.getNumberFixedPx(nf.format, ov.metrics);
+            w = autoWidth.getNumberPx(value, nf.format, ov ? ov.numPx : nf.fixedPx, m);
+          } else {
+            // WARN: a number without a format is measured by its JS-representation - the `General` format that
+            // Excel really renders it by is close enough & can only be narrower (a long fraction is rounded)
+            w = autoWidth.getTextPx(value, m.charPx, m.defaultPx);
+          }
+          w *= ov ? ov.scale : cellScale[c];
           if (w > px) maxPx[c] = w;
         } else if (ov) {
           // an own font renders the very same date wider/narrower, so it's measured once per (font, column)
@@ -983,6 +1219,7 @@ function renderSheet(sheet: IExcelSheet, sheetIndex: number, ctx: IExportContext
       let styleXml: string;
       if (ov) styleXml = getOverrideStyleXml(c, ov, type);
       else if (type === ExcelCellTypes.date) styleXml = cellStyleDateXml[c] || getDateStyleXml(c);
+      else if (type === ExcelCellTypes.number) styleXml = cellStyleNumXml[c];
       else if (type === ExcelCellTypes.textWrap) styleXml = cellStyleWrapXml[c];
       else styleXml = cellStyleXml[c];
       // a number (a date is stored as one either) is never escaped & needs no `<is>`-wrapper, so it's a separate
@@ -1214,7 +1451,7 @@ export default async function exportToExcel<T>(
    * */
   cellCallback?: IExcelCellCallback<T>
 ): Promise<Blob> {
-  const { getCellValue, style, headerStyle, dateTimeFormat, tableStyle, freezeRows, freezeColumns } =
+  const { getCellValue, style, headerStyle, dateTimeFormat, numberFormat, tableStyle, freezeRows, freezeColumns } =
     exportToExcel.$defaults;
   const documentFont = mergeStyle(baseFont, style);
   const ctx: IExportContext = {
@@ -1225,6 +1462,7 @@ export default async function exportToExcel<T>(
     cellCallback,
     // the locale can change after the import, so the default is resolved here & not on `$defaults`
     dateTimeFormat: dateTimeFormat || localeInfo.dateTime,
+    numberFormat: numberFormat || "",
     unitPx: autoWidth.getUnitPx(documentFont),
   };
 
@@ -1297,6 +1535,7 @@ export default async function exportToExcel<T>(
 
 exportToExcel.$defaults = {
   dateTimeFormat: "",
+  numberFormat: "",
   tableStyle: "Light16",
   freezeRows: 1,
   freezeColumns: 0,

@@ -845,6 +845,177 @@ describe("helper.exportToExcel", () => {
     );
   });
 
+  test("numbers: an own format of the column, of the sheet & of $defaults", async () => {
+    const orig = exportToExcel.$defaults.numberFormat;
+    exportToExcel.$defaults.numberFormat = "0.0";
+    try {
+      await exportToExcel([
+        {
+          name: "S1",
+          data: [{ v: 1234.5, own: 1234.5, txt: "1234.5" }],
+          mapping: [
+            { propName: "v" }, // the format of $defaults is inherited by every column
+            { propName: "own", numberFormat: '#,##0.00" &"' }, // ...an own format of the column wins over it
+            { propName: "txt" }, // a text-cell is never formatted at all
+          ],
+        },
+        // the format of the sheet wins over $defaults & is inherited by every column of it
+        { name: "S2", data: [{ v: 0.25 }], mapping: [{ propName: "v" }], numberFormat: "0%" },
+      ]);
+    } finally {
+      exportToExcel.$defaults.numberFormat = orig;
+    }
+    // a number-format is the Excel-language itself (unlike a dateTimeFormat), so it's only xml-escaped
+    expect(files["xl/styles.xml"]).toContain(
+      `<numFmts count="3"><numFmt numFmtId="164" formatCode="0.0"/>` +
+        `<numFmt numFmtId="165" formatCode="#,##0.00&quot; &amp;&quot;"/>` +
+        `<numFmt numFmtId="166" formatCode="0%"/></numFmts>`
+    );
+    // the stored value is never changed - only the way Excel renders it
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`t="n"><v>1234.5</v>`);
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164" `);
+    expect(xfById(cellStyleId("A2"))).toContain(`applyNumberFormat="1"`);
+    expect(xfById(cellStyleId("B2"))).toContain(`numFmtId="165" `);
+    expect(xfById(cellStyleId("C2"))).toContain(`numFmtId="0" `);
+    expect(xfById(cellStyleId("A2", 2))).toContain(`numFmtId="166" `);
+  });
+
+  test("numbers: the format is applied to a number-cell only", async () => {
+    await exportToExcel([
+      {
+        name: "Mixed",
+        data: [{ v: 1234.5 }, { v: new Date(2024, 2, 5) }, { v: "text" }],
+        // the very same column can hold both formats: a cell takes the one of its own type
+        mapping: [{ propName: "v", numberFormat: "#,##0.00", dateTimeFormat: "dd/MM/yyyy" }],
+      },
+    ]);
+    expect(files["xl/styles.xml"]).toContain(
+      `<numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0.00"/>` +
+        `<numFmt numFmtId="165" formatCode="dd\\/mm\\/yyyy"/></numFmts>`
+    );
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164" `);
+    expect(xfById(cellStyleId("A3"))).toContain(`numFmtId="165" `);
+    expect(xfById(cellStyleId("A4"))).toContain(`numFmtId="0" `);
+  });
+
+  test("numbers: 'General' points no format at all", async () => {
+    await exportToExcel([
+      {
+        name: "G",
+        data: [{ v: 1, v2: 2 }],
+        // 'General' is what such a cell is rendered by anyway, so no custom format is registered for it
+        mapping: [
+          { propName: "v", numberFormat: "General" },
+          { propName: "v2", numberFormat: "" },
+        ],
+      },
+    ]);
+    expect(files["xl/styles.xml"]).not.toContain("<numFmts");
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="0" `);
+    expect(xfById(cellStyleId("B2"))).toContain(`numFmtId="0" `);
+  });
+
+  test("numbers: the auto-width is estimated by the format & not by the stored value", async () => {
+    const widthOf = async (numberFormat, v = 1234567.5) => {
+      await exportToExcel([{ name: "W", data: [{ v }], mapping: [{ propName: "v", headerText: "V", numberFormat }] }]);
+      return colWidth();
+    };
+    // '1234567.5' as JS stringifies it: the width that a column without a format is measured by
+    const plain = await widthOf(undefined);
+    // the group-separators & the forced fraction are rendered by Excel, so the column must fit them
+    expect(await widthOf("#,##0.00")).toBeGreaterThan(plain);
+    // ...a currency sign & a text-literal are a part of the rendered cell either
+    expect(await widthOf('"$"#,##0.00')).toBeGreaterThan(await widthOf("#,##0.00"));
+    // '%' multiplies the value by 100 => 2 extra digits + the sign itself
+    expect(await widthOf("0%")).toBeGreaterThan(await widthOf("0"));
+    // ...while a trailing comma divides it by 1000 => 3 digits less
+    expect(await widthOf("#,##0,")).toBeLessThan(await widthOf("#,##0"));
+    // a negative value is measured with its minus-sign
+    expect(await widthOf("0.00", -1234567.5)).toBeGreaterThan(await widthOf("0.00", 1234567.5));
+    // JS stringifies a huge number as '1e+21', while Excel renders every single digit of it
+    expect(await widthOf("#,##0", 1e21)).toBeGreaterThan(await widthOf("#,##0", 1234567.5));
+    // ...and a tiny one as '1e-7': the format defines the whole width of such a cell
+    expect(await widthOf("0.00", 1e-7)).toBe(await widthOf("0.00", 1));
+    // an explicit width wins & such a column isn't measured at all
+    await exportToExcel([
+      { name: "W", data: [{ v: 1234567.5 }], mapping: [{ propName: "v", numberFormat: "#,##0.00", width: 4 }] },
+    ]);
+    expect(colWidth()).toBe(4);
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164" `);
+  });
+
+  test("numbers: the format-language is decoded for the auto-width", async () => {
+    const widthOf = async (numberFormat, v = 1) => {
+      await exportToExcel([
+        {
+          name: "W",
+          data: [{ v }],
+          // the header must not define the width here: a single digit is narrower than the filter-button
+          mapping: [{ propName: "v", headerText: ".", headerStyle: { isSorted: false }, numberFormat }],
+        },
+      ]);
+      return colWidth();
+    };
+    const base = await widthOf("0"); // a single digit of the value & nothing around it
+    // a '#'/'?' placeholder renders nothing by itself, while a '0' is padded even for a shorter number
+    expect(await widthOf("#")).toBe(base);
+    expect(await widthOf("?")).toBe(base);
+    expect(await widthOf("0000")).toBeGreaterThan(base);
+    // the fraction is rendered by the format (the decimal point included)
+    expect(await widthOf("0.??")).toBeGreaterThan(base);
+    // a char that isn't a token of the format is a literal one: an escape is optional for such a char
+    expect(await widthOf("$0")).toBeGreaterThan(base);
+    // an escaped char, a quoted text & a padding ('_' reserves the width of the next char) are all rendered
+    expect(await widthOf("0\\$")).toBeGreaterThan(base);
+    expect(await widthOf('0" pcs"')).toBeGreaterThan(await widthOf('0"p"'));
+    expect(await widthOf("_(0")).toBeGreaterThan(base);
+    // ...a color, a condition, a fill & the text-placeholder render nothing at all
+    expect(await widthOf("[Red]0")).toBe(base);
+    expect(await widthOf("[>5]0")).toBe(base);
+    expect(await widthOf("*-0")).toBe(base);
+    expect(await widthOf("@0")).toBe(base);
+    // the currency sign of a locale-part is rendered - unlike the locale-code itself
+    expect(await widthOf("[$€-407]0")).toBeGreaterThan(base);
+    expect(await widthOf("[$€]0")).toBeGreaterThan(base);
+    expect(await widthOf("[$-407]0")).toBe(base);
+    // a comma before the very 1st placeholder is a literal & not a separator
+    expect(await widthOf(",0")).toBeGreaterThan(base);
+    // the scaling can eat the whole value, but a digit is always rendered
+    expect(await widthOf("#,")).toBe(base);
+    // only the 1st section of a multi-section format is measured
+    expect(await widthOf("0;-0.0000;0.0000")).toBe(base);
+    // a broken format is never a crash: an unclosed part is read till the end of the format
+    expect(await widthOf('0"pcs')).toBeGreaterThan(base);
+    expect(await widthOf("[Red0")).toBe(base);
+    expect(await widthOf("0_")).toBe(base);
+    expect(await widthOf("0\\")).toBe(base);
+  });
+
+  test("cellCallback: an own font of a number-cell keeps the format of the column", async () => {
+    const big = { fontSize: 22 };
+    const sheet = (numberFormat) => ({
+      name: "S",
+      // the 1st 2 cells share the font, so the format is measured once per (font, column) & re-used
+      data: [{ v: 1234567.5 }, { v: 1234567.5 }, { v: 7 }],
+      mapping: [{ propName: "v", headerText: "V", numberFormat }],
+    });
+    const cb = (v, i) => (i && i < 3 ? { style: big } : undefined);
+
+    await exportToExcel([sheet("#,##0.00")], false, cb);
+    const wFormatted = colWidth();
+    const id = cellStyleId("A2");
+    // an own font of a cell changes only the font & keeps the number-format of the column
+    expect(xfById(id)).toContain(`numFmtId="164" `);
+    expect(fontById(id)).toContain(`<sz val="22"/>`);
+    // ...the cells without an own font keep the very same format either
+    expect(xfById(cellStyleId("A4"))).toContain(`numFmtId="164" `);
+
+    await exportToExcel([sheet()], false, cb);
+    // the width of such a cell is defined by the format & by the own font together
+    expect(wFormatted).toBeGreaterThan(colWidth());
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="0" `);
+  });
+
   test("getCellValue: the type of a cell is defined by the mapper & not by the value", async () => {
     const orig = exportToExcel.$defaults.getCellValue;
     // the mapper owns both parts of a cell: a stringified number can be forced into a number-cell, a real

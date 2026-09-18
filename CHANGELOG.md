@@ -10,6 +10,7 @@
   - Added prop **isSorted** for headers
   - Added props **freezeRows** & **freezeColumns** for sheets
   - Added arg **sheetIndex** for cellCallback
+  - Add numberFormat into settings
 
 ---
 
