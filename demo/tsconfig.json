@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "ignoreDeprecations": "6.0", // for baseUrl: required for imports like "src/elements/..." & tsconfig-paths-webpack-plugin
     "baseUrl": "./",
     "paths": {
       "web-ui-pack": ["../src"],
@@ -10,11 +11,13 @@
     // "jsxImportSource": "preact",
     "allowJs": true,
     "outDir": "",
+    "rootDir": "../", // TS6+ defaults rootDir to tsconfig folder; override inherited "./src"
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo", // override inherited "../dist/..." to avoid sharing root build cache
     "noEmit": true, // exclude errors in console because it should be wrapped by webpack
     "esModuleInterop": true,
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
