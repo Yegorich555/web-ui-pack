@@ -36,6 +36,7 @@ import Login from "./components/controls/login";
 import ModalAsAlertView from "./components/modal/modalAsAlertView";
 import NotifyView from "./components/notify/notifyView";
 import ExportToExcelView from "./components/exportToExcel/exportToExcel";
+import ImageConvertView from "./components/imageConvert/imageConvert";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -76,6 +77,7 @@ const routes: IRoute[] = [
   { path: "control/dateTime", el: DateTimeView, isNested: true },
 
   { path: "files/excel", label: "Export to Excel", el: ExportToExcelView },
+  { path: "files/image", label: "Image convert", el: ImageConvertView },
 
   { path: "faq", label: "FAQ", el: FAQView },
 ];
