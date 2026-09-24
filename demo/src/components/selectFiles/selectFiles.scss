@@ -1,0 +1,68 @@
+.toolbar,
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+
+  > button {
+    margin: 0;
+  }
+
+  > small {
+    color: $basicTextColor2;
+  }
+}
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+
+  > * {
+    width: 200px;
+    margin: 0;
+  }
+
+  > .wide {
+    width: 420px;
+    max-width: 100%;
+  }
+}
+
+.opts {
+  display: block;
+  margin-top: 16px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.status {
+  min-height: 1.4em;
+  margin-top: 14px;
+  font-weight: bold;
+
+  &[data-error] {
+    color: #e74c3c;
+  }
+}
+
+.files {
+  margin: 14px 0 20px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 4px 12px;
+    border: $borderStyle;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+
+  small {
+    color: $basicTextColor2;
+  }
+}

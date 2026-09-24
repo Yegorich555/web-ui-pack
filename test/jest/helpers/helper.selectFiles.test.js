@@ -109,7 +109,9 @@ describe("helper.selectFiles", () => {
   });
 
   test("only one dialog at once", async () => {
-    const now = jest.spyOn(Date, "now").mockReturnValue(10_000);
+    // `performance.now` instead of `Date.now`: it's monotonic, so the system clock moving back doesn't block calls
+    const dateNow = jest.spyOn(Date, "now").mockReturnValue(0);
+    const now = jest.spyOn(performance, "now").mockReturnValue(10_000);
     const onSelect = jest.fn((files) => files.length);
 
     // double-click: the browser opens a single dialog & ignores the next `click()`
@@ -121,27 +123,46 @@ describe("helper.selectFiles", () => {
     select(png());
     await expect(p1).resolves.toBe(1);
 
-    // the dialog is closed without any event (old browsers) or isn't opened at all: the next call replaces it
-    const p2 = selectFiles(onSelect);
+    // the next call after 1s replaces the opened one: its dialog isn't opened at all or is opened yet (non-modal picker)
+    const p2 = selectFiles(onSelect, { accept: ["image/*"] });
     now.mockReturnValue(10_999 + 1000);
-    const p3 = selectFiles(onSelect);
+    dateNow.mockReturnValue(-60_000); // the system clock is moved back
+    const onSelect3 = jest.fn((files) => `3: ${files.length}`);
+    const p3 = selectFiles(onSelect3, { multiple: true });
     await expect(p2).resolves.toBeNull();
     expect(clicked).toHaveLength(3);
+    // the input is reused: the browser ignores `click()` of another input while the dialog is opened
+    expect(clicked[2]).toBe(clicked[1]);
     expect(document.body.children).toHaveLength(1);
-    expect(clicked[1].isConnected).toBe(false);
-    // the late events of the replaced input are ignored
-    Object.defineProperty(clicked[1], "files", { value: [png()] });
-    clicked[1].dispatchEvent(new Event("change"));
-    clicked[1].dispatchEvent(new Event("cancel"));
+    // with the options of the next call
+    expect(clicked[2].multiple).toBe(true);
+    expect(clicked[2].hasAttribute("accept")).toBe(false);
     select(png(), png());
-    await expect(p3).resolves.toBe(2);
-    expect(onSelect).toHaveBeenCalledTimes(2);
+    await expect(p3).resolves.toBe("3: 2");
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(onSelect3).toHaveBeenCalledTimes(1);
+    expect(document.body.innerHTML).toBe("");
+    // the late events of the removed input are ignored
+    clicked[2].dispatchEvent(new Event("change"));
+    clicked[2].dispatchEvent(new Event("cancel"));
+    expect(onSelect3).toHaveBeenCalledTimes(1);
+
+    // the same for cancel
+    now.mockReturnValue(40_000);
+    const p4 = selectFiles(onSelect);
+    now.mockReturnValue(50_000);
+    const p5 = selectFiles(onSelect);
+    clicked[4].dispatchEvent(new Event("cancel"));
+    await expect(p4).resolves.toBeNull();
+    await expect(p5).resolves.toBeNull();
     expect(document.body.innerHTML).toBe("");
 
-    // a settled call doesn't block the next one
-    const p4 = selectFiles(onSelect);
+    // a settled call doesn't block the next one & uses a new input
+    const p6 = selectFiles(onSelect);
+    expect(clicked[5]).not.toBe(clicked[4]);
     select(png());
-    await expect(p4).resolves.toBe(1);
+    await expect(p6).resolves.toBe(1);
+    expect(onSelect).toHaveBeenCalledTimes(2);
   });
 
   test("option accept", async () => {
@@ -176,6 +197,17 @@ describe("helper.selectFiles", () => {
       "File 'a.bin' has invalid format. Expected: image/*"
     );
     expect(await check(["image/*"], new File(["1"], "heic"))).toMatch("has invalid format"); // without extension
+    expect(await check(["text/markdown"], new File(["1"], "README.md"))).toBe(1);
+    expect(await check(["text/csv"], new File(["1"], "a.csv"))).toBe(1);
+    // `Object.prototype` isn't used as a type by extension
+    expect(await check(["image/*"], new File(["1"], "a.constructor"))).toMatch("has invalid format");
+
+    // the browser can report an OS-specific type: it's matched by the extension as well
+    const zip = new File(["1"], "a.zip", { type: "application/x-zip-compressed" }); // Windows
+    expect(await check(["application/zip"], zip)).toBe(1);
+    expect(await check(["application/x-zip-compressed"], zip)).toBe(1);
+    expect(await check(["text/csv"], new File(["1"], "a.csv", { type: "application/vnd.ms-excel" }))).toBe(1);
+    expect(await check(["image/png"], new File(["1"], "photo", { type: "image/jpeg" }))).toMatch("has invalid format");
 
     // empty rules are skipped: otherwise they match every file with empty `type`
     expect(await check(["image/png", " "], new File(["1"], "a.bin"))).toBe(
@@ -193,8 +225,31 @@ describe("helper.selectFiles", () => {
     const p = selectFiles(onSelect, { accept: ["image/png"], multiple: true });
     select(png(), new File(["1"], "b.txt", { type: "text/plain" }));
     await expect(p).rejects.toThrow("File 'b.txt' has invalid format. Expected: image/png");
-    expect(onSelect).toHaveBeenCalledTimes(10); // only for the accepted ones above
+    expect(onSelect).toHaveBeenCalledTimes(15); // only for the accepted ones above
     expect(document.body.innerHTML).toBe("");
+
+    // invalid value is rejected before opening the dialog & before replacing the opened one
+    jest.spyOn(performance, "now").mockReturnValue(10_000);
+    const opened = selectFiles(onSelect);
+    performance.now.mockReturnValue(20_000);
+    const openedInp = clicked[clicked.length - 1];
+    const clickedCount = clicked.length;
+    await expect(selectFiles(onSelect, { accept: ["pdf"] })).rejects.toThrow("Invalid option accept: 'pdf'");
+    await expect(selectFiles(onSelect, { accept: ["image/"] })).rejects.toThrow("Invalid option accept: 'image/'");
+    await expect(selectFiles(onSelect, { accept: ["*/png"] })).rejects.toThrow("Invalid option accept: '*/png'");
+    await expect(selectFiles(onSelect, { accept: ["."] })).rejects.toThrow("Invalid option accept: '.'");
+    await expect(selectFiles(onSelect, { accept: "image/*" })).rejects.toThrow(
+      "Invalid option accept: image/*. Expected an array"
+    );
+    expect(clicked).toHaveLength(clickedCount); // nothing is clicked
+    expect(document.body.children).toHaveLength(1);
+    // so the opened call is still pending
+    const late = jest.fn();
+    opened.then(late);
+    await Promise.resolve();
+    expect(late).not.toHaveBeenCalled();
+    openedInp.dispatchEvent(new Event("cancel"));
+    await expect(opened).resolves.toBeNull();
   });
 
   test("option maxSize", async () => {

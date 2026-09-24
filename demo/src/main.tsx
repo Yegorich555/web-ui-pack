@@ -37,6 +37,7 @@ import ModalAsAlertView from "./components/modal/modalAsAlertView";
 import NotifyView from "./components/notify/notifyView";
 import ExportToExcelView from "./components/exportToExcel/exportToExcel";
 import ImageConvertView from "./components/imageConvert/imageConvert";
+import SelectFilesView from "./components/selectFiles/selectFiles";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -78,6 +79,7 @@ const routes: IRoute[] = [
 
   { path: "files/excel", label: "Export to Excel", el: ExportToExcelView },
   { path: "files/image", label: "Image convert", el: ImageConvertView },
+  { path: "files/select", label: "Select files", el: SelectFilesView },
 
   { path: "faq", label: "FAQ", el: FAQView },
 ];
