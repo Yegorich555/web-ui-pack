@@ -14,8 +14,6 @@ export interface ISelectFilesOptions {
   maxSize?: number;
 }
 
-const ox = "application/vnd.openxmlformats-officedocument.";
-const od = "application/vnd.oasis.opendocument.";
 /** Mime-types by extensions: to match the files with an OS-specific or empty `type` (it depends on the OS)
  * & for {@link SelectFilesAccept}.
  * WARN: `Map` instead of an object: otherwise `a.constructor` gets a type from `Object.prototype` */
@@ -65,12 +63,12 @@ export const mimeByExt = new Map([
   ["doc", "application/msword"],
   ["xls", "application/vnd.ms-excel"],
   ["ppt", "application/vnd.ms-powerpoint"],
-  ["docx", `${ox}wordprocessingml.document`],
-  ["xlsx", `${ox}spreadsheetml.sheet`],
-  ["pptx", `${ox}presentationml.presentation`],
-  ["odt", `${od}text`],
-  ["ods", `${od}spreadsheet`],
-  ["odp", `${od}presentation`],
+  ["docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  ["xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
+  ["pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"],
+  ["odt", "application/vnd.oasis.opendocument.text"],
+  ["ods", "application/vnd.oasis.opendocument.spreadsheet"],
+  ["odp", "application/vnd.oasis.opendocument.presentation"],
   ["epub", "application/epub+zip"],
   ["zip", "application/zip"],
   ["7z", "application/x-7z-compressed"],
