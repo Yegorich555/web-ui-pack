@@ -298,7 +298,8 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
 - [**exportToExcel**](src/helpers/files/exportToExcel.ts) ⇒ `export data to excel-file`
 - [**saveAsFile**](src/helpers/files/saveAsFile.ts) ⇒ `save Blob into file`
 - [**csv**](src/helpers/files/csv.ts) ⇒ `convert data to csv-string & back`
-- [**image**](src/helpers/files/image.ts) ⇒ `resize/crop image-file & convert it to png/jpg/webp`
+- [**imageConvert**](src/helpers/files/imageConvert.ts) ⇒ `resize/crop image-file & convert it to png/jpg/webp`
+- [**selectFiles**](src/helpers/files/selectFiles.ts) ⇒ `open browser-dialog to select file(s) & validate them`
 
 ---
 

@@ -36,3 +36,4 @@ export { default as exportToExcel } from "./helpers/files/exportToExcel";
 export { default as saveAsFile } from "./helpers/files/saveAsFile";
 export { csvFromData, csvToData, csvDefineDelimiter } from "./helpers/files/csv";
 export { default as imageConvert } from "./helpers/files/imageConvert";
+export { default as selectFiles } from "./helpers/files/selectFiles";

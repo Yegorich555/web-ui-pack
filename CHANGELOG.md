@@ -17,6 +17,7 @@
 ### New Features
 
 - helper [imageConvert](src/helpers/files/imageConvert.ts)
+- helper [selectFiles](src/helpers/files/selectFiles.ts)
 
 ---
 
