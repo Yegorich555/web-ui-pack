@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from "re
 import { WUPHelpers, WUPSwitchControl } from "web-ui-pack";
 import { useBuiltinStyle, WUPcssButton, WUPcssScrollSmall } from "web-ui-pack/styles";
 import PopupView from "./components/popup/popupView";
+import TooltipView from "./components/popup/tooltipView";
 
 import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
@@ -55,6 +56,7 @@ const routes: IRoute[] = [
     { path: "spin", el: SpinView },
     { path: "circle", el: CircleView },
     { path: "popup", el: PopupView },
+    { path: "tooltip", el: TooltipView },
     { path: "dropdown", el: DropdownView },
     { path: "modal", el: ModalView },
     { path: "modal-alert", label: "Alert", el: ModalAsAlertView },

@@ -10,6 +10,7 @@ import animateStack from "../helpers/animateStack";
 import isIntoView from "../helpers/isIntoView";
 import viewportSize from "../helpers/viewportSize";
 import WUPBaseModal from "../baseModal";
+import onEvent from "../helpers/onEvent";
 
 const attachLst = new Map<HTMLElement | SVGElement, () => void>();
 
@@ -22,6 +23,15 @@ declare global {
 
 // details here https://react.dev/blog/2024/04/25/react-19-upgrade-guide#the-jsx-namespace-in-typescript
 declare module "react" {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface HTMLAttributes<T> {
+    /** Enable custom tooltip (shows on hover); requires {@link WUPPopupElement.$useTooltip}
+     * @tutorial
+     * * ```<div w-tooltip="Some text" >...</div>```
+     * * ```<div aria-label="Some text" w-tooltip="" >...</div>``` */
+    "w-tooltip"?: string;
+  }
+
   namespace JSX {
     interface IntrinsicElements {
       /**  Popup element
@@ -34,8 +44,15 @@ declare module "react" {
 // @ts-ignore - because Preact & React can't work together
 declare module "preact/jsx-runtime" {
   namespace JSX {
+    // WARN: in opposite to React preact declares HTMLAttributes inside the JSX-namespace
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    interface HTMLAttributes<RefType> {}
+    interface HTMLAttributes<RefType> {
+      /** Enable custom tooltip (shows on hover); requires {@link WUPPopupElement.$useTooltip}
+       * @tutorial
+       * * ```<div w-tooltip="Some text" >...</div>```
+       * * ```<div aria-label="Some text" w-tooltip="" >...</div>``` */
+      "w-tooltip"?: string;
+    }
     interface IntrinsicElements {
       /**  Popup element
        *  @see {@link WUPPopupElement} */
@@ -237,6 +254,57 @@ export default class WUPPopupElement<
     const d = super.cloneDefaults() as WUP.Popup.Options;
     d.placement = [...d.placement];
     return d as unknown as T;
+  }
+
+  /** Listen for events to show tooltip; enable attr `[w-tooltip]` on HTMLElements */
+  static $useTooltip(options?: WUP.Popup.TooltipOptions): { dispose: () => void } {
+    WUPPopupElement.$use();
+    const { delayMs, className, ...popupOptions } = options ?? {};
+    const listen = (e: Event): void => {
+      const t = e.target as HTMLElement;
+      if (t.hasAttribute != null && t.hasAttribute("w-tooltip")) {
+        let p: WUPPopupElement;
+        const tid = setTimeout(() => {
+          const text = t.getAttribute("w-tooltip") || t.getAttribute("aria-label");
+          if (!text) {
+            reset();
+            return;
+          }
+
+          p = document.createElement(tagName);
+          if (className) p.className = className;
+          p.setAttribute("tooltip", ""); // to apply tooltip styles
+          p.$options.placement = [PopupPlacements.$top.$start];
+          p.$options.offset = [4, 4];
+          Object.assign(p.$options, popupOptions);
+          p.$options.openCase = PopupOpenCases.onInit;
+          p.$options.target = t;
+          p.textContent = text; // WARN: textContent (not innerHTML) otherwise it is open to XSS
+          p.style.zIndex = "99999";
+          document.body.appendChild(p);
+        }, delayMs || 1000);
+
+        const reset = (): void => {
+          clearTimeout(tid);
+          lst.forEach((a) => t.removeEventListener(a, reset));
+          p?.$close().finally(() => p.remove());
+        };
+        // "mousedown" can be long-pressed and fired before "click"
+        // "click" can be fired without mousedown (by SpaceDown on button)
+        // "touchend" can be fired outside element => in this case click is skipped
+        const lst = <Array<keyof HTMLElementEventMap>>["mouseleave", "mousedown", "click", "touchend"];
+        lst.forEach((a) => t.addEventListener(a, reset, { passive: true, capture: true }));
+      }
+    };
+    const r1 = onEvent(document, "mouseenter", listen, { passive: true, capture: true });
+    const r2 = onEvent(document, "touchstart", listen, { passive: true, capture: true });
+
+    return {
+      dispose: () => {
+        r1();
+        r2();
+      },
+    };
   }
 
   /** Listen for target according to openCase and create/remove popup when it's required (by open/close).

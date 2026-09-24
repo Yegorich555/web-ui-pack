@@ -148,13 +148,23 @@ declare global {
       tooltip?: "";
     }
 
+    interface EventMap extends WUP.BaseModal.EventMap<PopupOpenCases, PopupCloseCases> {}
+
+    /** Options for {@link WUPPopupElement.$attach}; `target` & `openCase` are defined by the hook itself */
     interface AttachOptions extends Partial<Omit<Options, "target">> {
       target: HTMLElement | SVGElement;
       text: string | undefined | null;
       tagName?: string;
     }
 
-    interface EventMap extends WUP.BaseModal.EventMap<PopupOpenCases, PopupCloseCases> {}
+    /** Options for {@link WUPPopupElement.$useTooltip}; `target` & `openCase` are defined by the hook itself */
+    interface TooltipOptions extends Partial<Omit<Options, "target" | "openCase">> {
+      /** Wait for pointed time before show tooltip
+       * @defaultValue 1000 */
+      delayMs?: number;
+      /** CSS className for <wup-popup/> */
+      className?: string;
+    }
   }
 }
 

@@ -19,6 +19,16 @@
           "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/sortElement.ts"
         }
       ]
+    },
+    {
+      "name": "w-tooltip",
+      "description": "Text of custom tooltip that shows on hover (requires WUPPopupElement.$useTooltip): \n\r set empty string to use [aria-label] content",
+      "references": [
+        {
+          "name": "@see WUPPopupElement.$useTooltip",
+          "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.ts"
+        }
+      ]
     }
   ],
   "tags": [

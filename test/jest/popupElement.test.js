@@ -1967,4 +1967,136 @@ describe("popupElement", () => {
     await h.wait();
     expect(el.$isOpened).toBe(false);
   });
+
+  test("static.$useTooltip", async () => {
+    el.remove();
+    trg.setAttribute("w-tooltip", "Some tooltip");
+    const spy = h.spyEventListeners();
+    const hover = (t = trg) => t.dispatchEvent(new MouseEvent("mouseenter"));
+    const leave = (t = trg) => t.dispatchEvent(new MouseEvent("mouseleave"));
+    /** @returns {WUPPopupElement | null} */
+    const getPopup = () => document.body.querySelector("wup-popup");
+
+    let r = WUPPopupElement.$useTooltip();
+    hover();
+    await h.wait(999);
+    expect(getPopup()).toBeNull(); // because waiting for delayMs: 1000 by default
+    await h.wait(1);
+    let p = getPopup();
+    expect(p).toBeTruthy();
+    await h.wait();
+    expect(p.$isOpened).toBe(true);
+    expect(p.$options.openCase).toBe(PopupOpenCases.onInit);
+    expect(p.$options.target).toBe(trg);
+    expect(p.$options.placement).toEqual([WUPPopupElement.$placements.$top.$start]);
+    expect(p.$options.offset).toEqual([4, 4]);
+    expect(p.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup tooltip="" style="z-index: 99999; transform: translate(136px, 96px);" open="" position="top" show="">Some tooltip</wup-popup>"`
+    );
+
+    leave();
+    await h.wait();
+    expect(p.isConnected).toBe(false); // popup is removed after closing
+    expect(getPopup()).toBeNull();
+
+    // leaving before delay: popup isn't rendered
+    hover();
+    await h.wait(500);
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // other events also hide tooltip
+    const checkHideBy = async (ev) => {
+      hover();
+      await h.wait();
+      expect(getPopup()).toBeTruthy();
+      trg.dispatchEvent(new MouseEvent(ev));
+      await h.wait();
+      expect(getPopup()).toBeNull();
+    };
+    await checkHideBy("mousedown");
+    await checkHideBy("click");
+    await checkHideBy("touchend");
+
+    // touchstart opens tooltip also
+    trg.dispatchEvent(new Event("touchstart"));
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    trg.dispatchEvent(new Event("touchend"));
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // empty [w-tooltip] uses [aria-label]
+    trg.setAttribute("w-tooltip", "");
+    trg.setAttribute("aria-label", "Aria text");
+    hover();
+    await h.wait();
+    expect(getPopup().innerHTML).toBe("Aria text");
+    leave();
+    await h.wait();
+
+    // text is rendered as text (not parsed as HTML) to prevent XSS
+    trg.setAttribute("w-tooltip", `<img src="x" onerror="alert(1)"><b>Bold</b>`);
+    hover();
+    await h.wait();
+    expect(getPopup().children.length).toBe(0);
+    expect(getPopup().textContent).toBe(`<img src="x" onerror="alert(1)"><b>Bold</b>`);
+    leave();
+    await h.wait();
+    trg.setAttribute("w-tooltip", "");
+
+    // without text tooltip isn't rendered
+    trg.removeAttribute("aria-label");
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    leave();
+    await h.wait();
+
+    // elements without [w-tooltip] are skipped
+    trg.removeAttribute("w-tooltip");
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    document.dispatchEvent(new MouseEvent("mouseenter")); // target without hasAttribute
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    r.dispose();
+    spy.check(); // checking memory leak
+    trg.setAttribute("w-tooltip", "Some tooltip");
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeNull(); // because listeners are removed
+
+    // options
+    r = WUPPopupElement.$useTooltip({
+      delayMs: 200,
+      className: "my-tooltip",
+      arrowEnable: true,
+      placement: [WUPPopupElement.$placements.$bottom.$middle],
+      offset: [1, 2],
+      openCase: PopupOpenCases.onClick, // not allowed to override
+      target: document.body, // not allowed to override
+    });
+    hover();
+    await h.wait(200);
+    p = getPopup();
+    expect(p).toBeTruthy();
+    await h.wait();
+    expect(p.className).toBe("my-tooltip");
+    expect(p.$options.arrowEnable).toBe(true);
+    expect(p.$refArrow).toBeTruthy();
+    expect(p.$options.placement).toEqual([WUPPopupElement.$placements.$bottom.$middle]);
+    expect(p.$options.offset).toEqual([1, 2]);
+    expect(p.$options.openCase).toBe(PopupOpenCases.onInit);
+    expect(p.$options.target).toBe(trg);
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    r.dispose();
+    spy.check(); // checking memory leak
+  });
 });

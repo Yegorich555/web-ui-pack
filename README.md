@@ -67,7 +67,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
   - _BaseModal_
 
     - [x] [PopupElement](#example) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
-      - [ ] Tooltip Hook
+      - [x] Tooltip Hook
     - [x] [ModalElement](src/modalElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
       - [x] Modal in modal
       - [x] Confirm modal
