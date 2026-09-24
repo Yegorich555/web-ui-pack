@@ -256,22 +256,41 @@ export default class WUPPopupElement<
     return d as unknown as T;
   }
 
-  /** Listen for events to show tooltip; enable attr `[w-tooltip]` on HTMLElements */
+  /** Listen for events to show tooltip; enable attr `[w-tooltip]` on HTMLElements
+   * @tutorial Rules (according to WCAG 1.4.13)
+   * * tooltip is shown on hover & keyboard focus (`:focus-visible`; only with option `showOnFocus`)
+   * * hoverable: pointer can be moved from target to tooltip (hides after `hoverCloseTimeout`)
+   * * dismissible: by pressing Escape
+   * * persistent: visible until target is hovered or focused */
   static $useTooltip(options?: WUP.Popup.TooltipOptions): { dispose: () => void } {
     WUPPopupElement.$use();
-    const { delayMs, className, ...popupOptions } = options ?? {};
+    const { delayMs, className, showOnFocus, ...popupOptions } = options ?? {};
     let t: HTMLElement | null = null; // current target; only 1 tooltip at once
     let p: WUPPopupElement | undefined;
-    let tid: ReturnType<typeof setTimeout> | undefined;
+    let tid: ReturnType<typeof setTimeout> | undefined; // timeout to show (before popup is rendered) or to hide (after)
+    let isHover = false;
+    let isFocus = false;
 
     const reset = (): void => {
       if (!t) return; // nothing to reset
       clearTimeout(tid);
       t = null;
+      isHover = false;
+      isFocus = false;
       const pp = p;
       p = undefined;
       pp?.$close().finally(() => pp.remove());
     };
+
+    /** Wait for delay before show tooltip for new target */
+    const init = (el: HTMLElement): void => {
+      reset();
+      t = el;
+      tid = setTimeout(show, delayMs ?? 1000);
+    };
+
+    /** Returns whether element is target or tooltip itself */
+    const isOwn = (el: EventTarget): boolean => el === t || (!!p && (el === p || el === p.$refArrow));
 
     const show = (): void => {
       const text = t!.getAttribute("w-tooltip") || t!.getAttribute("aria-label");
@@ -301,15 +320,32 @@ export default class WUPPopupElement<
         "pointerenter",
         (e) => {
           const el = e.target as HTMLElement;
-          if (el === t || !el.hasAttribute?.("w-tooltip")) return;
-          reset();
-          t = el;
-          tid = setTimeout(show, delayMs ?? 1000);
+          if (isOwn(el)) {
+            isHover = true;
+            p && clearTimeout(tid); // pointer is moved from target to tooltip or back => cancel hiding
+          } else if (el.hasAttribute?.("w-tooltip")) {
+            init(el);
+            isHover = true;
+          }
         },
         opts
       ),
       // pointerleave doesn't bubble but capture-listener gets it from children also => compare target
-      onEvent(document, "pointerleave", (e) => e.target === t && reset(), opts),
+      onEvent(
+        document,
+        "pointerleave",
+        (e) => {
+          if (!isOwn(e.target)) return;
+          isHover = false;
+          if (isFocus) return; // visible until focusout
+          if (p) {
+            clearTimeout(tid);
+            tid = setTimeout(reset, p.$options.hoverCloseTimeout); // wait for user moves pointer over tooltip
+          } else reset();
+        },
+        opts
+      ),
+      onEvent(document, "keydown", (e) => e.key === "Escape" && reset(), opts),
       // mouse & pen: pressing hides tooltip; touch: tooltip is visible during the long-press
       onEvent(document, "pointerdown", (e) => e.pointerType !== "touch" && reset(), opts),
       // touch is released or turned into scroll
@@ -318,6 +354,31 @@ export default class WUPPopupElement<
       // "click" can be fired without pointerdown (by SpaceDown on button)
       onEvent(document, "click", reset, opts),
     ];
+    showOnFocus &&
+      rst.push(
+        onEvent(
+          document,
+          "focusin",
+          (e) => {
+            const el = e.target as HTMLElement;
+            if (!el.hasAttribute("w-tooltip") || !el.matches(":focus-visible")) return; // skip focus by pointer
+            el !== t && init(el);
+            isFocus = true;
+            p && clearTimeout(tid); // cancel hiding after pointerleave
+          },
+          opts
+        ),
+        onEvent(
+          document,
+          "focusout",
+          (e) => {
+            if (e.target !== t) return;
+            isFocus = false;
+            !isHover && reset();
+          },
+          opts
+        )
+      );
 
     return {
       dispose: () => {

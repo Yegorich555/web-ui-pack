@@ -2080,6 +2080,102 @@ describe("popupElement", () => {
     await h.wait();
     expect(getPopup()).toBeNull();
 
+    // WCAG 1.4.13 hoverable: pointer can be moved from target to tooltip
+    hover();
+    await h.wait();
+    p = getPopup();
+    leave();
+    await h.wait(400);
+    expect(p.isConnected).toBe(true); // because waiting for hoverCloseTimeout: 500 by default
+    hover(p);
+    await h.wait();
+    expect(p.isConnected).toBe(true); // hiding is canceled
+    leave(p);
+    hover(); // back to target
+    await h.wait();
+    expect(p.isConnected).toBe(true);
+    leave();
+    await h.wait(100);
+    hover(p);
+    leave(p);
+    await h.wait();
+    expect(p.isConnected).toBe(false);
+
+    // WCAG 1.4.13 dismissible: by Escape
+    hover();
+    await h.wait();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+    await h.wait();
+    expect(getPopup()).toBeTruthy(); // other keys are skipped
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    leave();
+
+    // WCAG 1.4.13 persistent: tooltip is shown on keyboard focus & visible until focusout
+    const focus = (t = trg) => t.dispatchEvent(new FocusEvent("focusin"));
+    const blur = (t = trg) => t.dispatchEvent(new FocusEvent("focusout"));
+    let isFocusVisible = true;
+    // jsdom doesn't support :focus-visible
+    const spyMatches = [trg, trg2].map((a) => jest.spyOn(a, "matches").mockImplementation(() => isFocusVisible));
+    focus(); // keyboard focus is skipped by default
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    blur();
+    r.dispose();
+
+    r = WUPPopupElement.$useTooltip({ showOnFocus: true });
+    isFocusVisible = false;
+    focus(); // focus by pointer is skipped
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    isFocusVisible = true;
+    focus(document.body); // element without [w-tooltip] is skipped
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    focus();
+    await h.wait(999);
+    expect(getPopup()).toBeNull(); // because waiting for delayMs
+    await h.wait(1);
+    expect(getPopup()).toBeTruthy();
+    hover();
+    leave(); // pointer leaving doesn't hide when target is focused
+    blur(trg2); // focusout of other element is skipped
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    blur();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // focusout doesn't hide when target is hovered
+    hover();
+    focus();
+    await h.wait();
+    blur();
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // focusin cancels hiding after pointerleave
+    hover();
+    await h.wait();
+    leave();
+    await h.wait(100);
+    focus();
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    focus(trg2); // other target replaces previous
+    await h.wait();
+    expect(getPopup().textContent).toBe("Tooltip 2");
+    blur(trg2);
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    spyMatches.forEach((a) => a.mockRestore());
+    r.dispose();
+    r = WUPPopupElement.$useTooltip();
+
     // target is removed before delay: popup isn't rendered
     hover(trg2);
     trg2.remove();
@@ -2140,6 +2236,7 @@ describe("popupElement", () => {
       delayMs: 200,
       className: "my-tooltip",
       arrowEnable: true,
+      hoverCloseTimeout: 50,
       placement: [WUPPopupElement.$placements.$bottom.$middle],
       offset: [1, 2],
       openCase: PopupOpenCases.onClick, // not allowed to override
@@ -2157,7 +2254,17 @@ describe("popupElement", () => {
     expect(p.$options.offset).toEqual([1, 2]);
     expect(p.$options.openCase).toBe(PopupOpenCases.onInit);
     expect(p.$options.target).toBe(trg);
+    // arrow is part of tooltip
     leave();
+    await h.wait(40);
+    hover(p.$refArrow);
+    await h.wait();
+    expect(p.isConnected).toBe(true);
+    leave(p.$refArrow);
+    await h.wait(40);
+    expect(p.$isClosing).toBe(false);
+    await h.wait(10);
+    expect(p.$isClosing).toBe(true); // hidden by custom hoverCloseTimeout
     await h.wait();
     expect(getPopup()).toBeNull();
     r.dispose();

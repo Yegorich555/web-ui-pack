@@ -162,6 +162,9 @@ declare global {
       /** Wait for pointed time before show tooltip
        * @defaultValue 1000 */
       delayMs?: number;
+      /** Show tooltip on keyboard focus also (`:focus-visible`)
+       * @defaultValue false */
+      showOnFocus?: boolean;
       /** CSS className for <wup-popup/> */
       className?: string;
     }
