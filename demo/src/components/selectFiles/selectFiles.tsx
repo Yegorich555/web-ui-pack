@@ -135,7 +135,6 @@ export default function SelectFilesView() {
 
         <div className={styles.form}>
           <wup-text
-            class={styles.wide}
             w-label="accept (comma-separated: image/*, .pdf, application/zip)"
             ref={(el) => {
               if (el) {

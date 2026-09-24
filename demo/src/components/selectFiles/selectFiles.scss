@@ -15,21 +15,13 @@
   }
 }
 
+// the controls are stacked like in <wup-form>
 .form {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 12px;
+  max-width: 500px;
   margin-top: 20px;
 
   > * {
-    width: 200px;
-    margin: 0;
-  }
-
-  > .wide {
-    width: 420px;
-    max-width: 100%;
+    margin-bottom: 0;
   }
 }
 

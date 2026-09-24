@@ -4,6 +4,7 @@ import Example from "src/elements/example";
 import Page from "src/elements/page";
 import imageConvert, { IImageConvertOptions, WUPImageEncodeFormat } from "web-ui-pack/helpers/files/imageConvert";
 import saveAsFile from "web-ui-pack/helpers/files/saveAsFile";
+import selectFiles from "web-ui-pack/helpers/files/selectFiles";
 import styles from "./imageConvert.scss";
 
 /** Info about an image that is shown in the preview */
@@ -18,28 +19,23 @@ interface IImageInfo {
 type SizeOption = "width" | "height" | "maxWidth" | "maxHeight" | "minWidth" | "minHeight";
 const sizeOptions: SizeOption[] = ["width", "height", "maxWidth", "maxHeight", "minWidth", "minHeight"];
 
-interface IFormState extends Record<SizeOption, string> {
+interface IFormState extends Partial<Record<SizeOption, number>> {
   keepAspectRatio: boolean;
-  format: WUPImageEncodeFormat | "";
-  quality: string;
-  background: string;
+  format?: WUPImageEncodeFormat;
+  quality?: number;
+  background?: string;
 }
 
 /** Form without any options: presets are applied on top of it */
-const emptyForm: IFormState = {
-  width: "",
-  height: "",
-  maxWidth: "",
-  maxHeight: "",
-  minWidth: "",
-  minHeight: "",
-  keepAspectRatio: true,
-  format: "",
-  quality: "",
-  background: "",
-};
+const emptyForm: IFormState = { keepAspectRatio: true };
 
-const defaultForm: IFormState = { ...emptyForm, maxWidth: "300", maxHeight: "300" };
+const defaultForm: IFormState = { ...emptyForm, maxWidth: 300, maxHeight: 300 };
+
+const formatItems: WUP.Select.MenuItem<WUPImageEncodeFormat>[] = [
+  { text: "png", value: "png" },
+  { text: "jpg", value: "jpg" },
+  { text: "webp", value: "webp" },
+];
 
 interface IPreset {
   label: string;
@@ -48,21 +44,21 @@ interface IPreset {
 }
 
 const presets: IPreset[] = [
-  { label: "Preview", details: "{ maxWidth: 300, maxHeight: 300 }", form: { maxWidth: "300", maxHeight: "300" } },
+  { label: "Preview", details: "{ maxWidth: 300, maxHeight: 300 }", form: { maxWidth: 300, maxHeight: 300 } },
   {
     label: "Avatar",
     details: '{ width: 96, height: 96, keepAspectRatio: false, format: "jpg" }',
-    form: { width: "96", height: "96", keepAspectRatio: false, format: "jpg" },
+    form: { width: 96, height: 96, keepAspectRatio: false, format: "jpg" },
   },
   {
     label: "Increase",
     details: "{ minWidth: 1600, minHeight: 1600 }",
-    form: { minWidth: "1600", minHeight: "1600" },
+    form: { minWidth: 1600, minHeight: 1600 },
   },
   {
     label: "Compress",
     details: '{ format: "webp", quality: 0.5 }',
-    form: { format: "webp", quality: "0.5" },
+    form: { format: "webp", quality: 0.5 },
   },
   {
     label: "Fill transparency",
@@ -75,11 +71,11 @@ const presets: IPreset[] = [
 function toOptions(f: IFormState): IImageConvertOptions {
   const opts: IImageConvertOptions = {};
   sizeOptions.forEach((k) => {
-    if (f[k] !== "") opts[k] = +f[k];
+    if (f[k] != null) opts[k] = f[k];
   });
   if (!f.keepAspectRatio) opts.keepAspectRatio = false;
   if (f.format) opts.format = f.format;
-  if (f.quality !== "") opts.quality = +f.quality;
+  if (f.quality != null) opts.quality = f.quality;
   if (f.background) opts.background = f.background;
   return opts;
 }
@@ -194,8 +190,14 @@ export default function ImageConvertView() {
     convert(source, form);
   }, [source, form]);
 
-  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const file = e.target.files?.[0];
+  const onChooseClick = async (): Promise<void> => {
+    let file: File | null;
+    try {
+      file = await selectFiles((files) => files[0], { accept: ["image/*"] });
+    } catch (err) {
+      setError((err as Error).message);
+      return;
+    }
     if (!file) return;
     try {
       setSource(await readImageInfo(file, file.name));
@@ -235,10 +237,9 @@ export default function ImageConvertView() {
 
       <Example header="Try it" link="demo/src/components/imageConvert/imageConvert.tsx">
         <div className={styles.toolbar}>
-          <label className="btn" htmlFor="ic_file">
+          <button className="btn" type="button" onClick={onChooseClick}>
             Choose image...
-            <input id="ic_file" type="file" accept="image/*" hidden onChange={onFileChange} />
-          </label>
+          </button>
           <small>or use the generated sample below (it has transparent corners)</small>
         </div>
 
@@ -258,61 +259,60 @@ export default function ImageConvertView() {
 
         <div className={styles.form}>
           {sizeOptions.map((k) => (
-            <label key={k} htmlFor={`ic_${k}`}>
-              <span>{k}</span>
-              <input
-                id={`ic_${k}`}
-                type="number"
-                min={0}
-                value={form[k]}
-                onChange={(e) => setField(k, e.target.value)}
-              />
-            </label>
+            <wup-num
+              key={k}
+              w-label={k}
+              ref={(el) => {
+                if (el) {
+                  el.$value = form[k];
+                  el.$onChange = () => setField(k, el.$value);
+                }
+              }}
+            />
           ))}
-          <label htmlFor="ic_format">
-            <span>format</span>
-            <select
-              id="ic_format"
-              value={form.format}
-              onChange={(e) => setField("format", e.target.value as IFormState["format"])}
-            >
-              <option value="">same as source</option>
-              <option value="png">png</option>
-              <option value="jpg">jpg</option>
-              <option value="webp">webp</option>
-            </select>
-          </label>
-          <label htmlFor="ic_quality">
-            <span>quality</span>
-            <input
-              id="ic_quality"
-              type="number"
-              min={0}
-              max={1}
-              step={0.05}
-              value={form.quality}
-              onChange={(e) => setField("quality", e.target.value)}
-            />
-          </label>
-          <label htmlFor="ic_background">
-            <span>background</span>
-            <input
-              id="ic_background"
-              type="text"
-              placeholder="#fff"
-              value={form.background}
-              onChange={(e) => setField("background", e.target.value)}
-            />
-          </label>
-          <label className={styles.check} htmlFor="ic_keepAspectRatio">
-            <input
-              id="ic_keepAspectRatio"
-              type="checkbox"
-              checked={form.keepAspectRatio}
-              onChange={(e) => setField("keepAspectRatio", e.target.checked)}
-            />
-            <span>keepAspectRatio</span>
-          </label>
+          <wup-select
+            w-label="format (empty: as source)"
+            ref={(el) => {
+              if (el) {
+                if (!el.$options.readOnlyInput) {
+                  el.$options.readOnlyInput = true;
+                  el.$options.items = formatItems;
+                }
+                el.$value = form.format;
+                el.$onChange = () => setField("format", el.$value);
+              }
+            }}
+          />
+          <wup-num
+            w-label="quality"
+            ref={(el) => {
+              if (el) {
+                if (!el.$options.format) {
+                  el.$options.format = { maxDecimal: 2 };
+                }
+                el.$value = form.quality;
+                el.$onChange = () => setField("quality", el.$value);
+              }
+            }}
+          />
+          <wup-text
+            w-label="background"
+            ref={(el) => {
+              if (el) {
+                el.$value = form.background;
+                el.$onChange = () => setField("background", el.$value);
+              }
+            }}
+          />
+          <wup-check
+            w-label="keepAspectRatio"
+            ref={(el) => {
+              if (el) {
+                el.$value = form.keepAspectRatio;
+                el.$onChange = () => setField("keepAspectRatio", !!el.$value);
+              }
+            }}
+          />
         </div>
 
         <code className={styles.opts}>imageConvert(file, {optsJSON});</code>

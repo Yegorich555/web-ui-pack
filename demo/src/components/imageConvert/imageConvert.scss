@@ -6,8 +6,7 @@
   gap: 12px;
   margin-top: 20px;
 
-  > button,
-  > label {
+  > button {
     margin: 0;
   }
 
@@ -16,39 +15,17 @@
   }
 }
 
+// pairs of related controls: width/height, maxWidth/maxHeight etc.
 .form {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 12px;
+  display: grid;
+  /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 0 16px;
+  max-width: 700px;
   margin-top: 20px;
 
-  > label {
-    display: flex;
-    flex-flow: column;
-    gap: 4px;
-    width: 150px;
-
-    > span {
-      font-size: 13px;
-      color: $basicTextColor2;
-    }
-
-    > input,
-    > select {
-      padding: 4px 8px;
-      border: $borderStyle;
-      border-radius: $borderRadius;
-      background: $basicBgColor;
-      color: inherit;
-      font: inherit;
-    }
-  }
-
-  > .check {
-    flex-flow: row;
-    align-items: center;
-    padding-bottom: 6px;
+  > * {
+    margin-bottom: 0;
   }
 }
 
