@@ -260,49 +260,69 @@ export default class WUPPopupElement<
   static $useTooltip(options?: WUP.Popup.TooltipOptions): { dispose: () => void } {
     WUPPopupElement.$use();
     const { delayMs, className, ...popupOptions } = options ?? {};
-    const listen = (e: Event): void => {
-      const t = e.target as HTMLElement;
-      if (t.hasAttribute != null && t.hasAttribute("w-tooltip")) {
-        let p: WUPPopupElement;
-        const tid = setTimeout(() => {
-          const text = t.getAttribute("w-tooltip") || t.getAttribute("aria-label");
-          if (!text) {
-            reset();
-            return;
-          }
+    let t: HTMLElement | null = null; // current target; only 1 tooltip at once
+    let p: WUPPopupElement | undefined;
+    let tid: ReturnType<typeof setTimeout> | undefined;
 
-          p = document.createElement(tagName);
-          if (className) p.className = className;
-          p.setAttribute("tooltip", ""); // to apply tooltip styles
-          p.$options.placement = [PopupPlacements.$top.$start];
-          p.$options.offset = [4, 4];
-          Object.assign(p.$options, popupOptions);
-          p.$options.openCase = PopupOpenCases.onInit;
-          p.$options.target = t;
-          p.textContent = text; // WARN: textContent (not innerHTML) otherwise it is open to XSS
-          p.style.zIndex = "99999";
-          document.body.appendChild(p);
-        }, delayMs || 1000);
-
-        const reset = (): void => {
-          clearTimeout(tid);
-          lst.forEach((a) => t.removeEventListener(a, reset));
-          p?.$close().finally(() => p.remove());
-        };
-        // "mousedown" can be long-pressed and fired before "click"
-        // "click" can be fired without mousedown (by SpaceDown on button)
-        // "touchend" can be fired outside element => in this case click is skipped
-        const lst = <Array<keyof HTMLElementEventMap>>["mouseleave", "mousedown", "click", "touchend"];
-        lst.forEach((a) => t.addEventListener(a, reset, { passive: true, capture: true }));
-      }
+    const reset = (): void => {
+      if (!t) return; // nothing to reset
+      clearTimeout(tid);
+      t = null;
+      const pp = p;
+      p = undefined;
+      pp?.$close().finally(() => pp.remove());
     };
-    const r1 = onEvent(document, "mouseenter", listen, { passive: true, capture: true });
-    const r2 = onEvent(document, "touchstart", listen, { passive: true, capture: true });
+
+    const show = (): void => {
+      const text = t!.getAttribute("w-tooltip") || t!.getAttribute("aria-label");
+      if (!text || !t!.isConnected) {
+        reset();
+        return;
+      }
+
+      p = document.createElement(tagName);
+      if (className) p.className = className;
+      p.setAttribute("tooltip", ""); // to apply tooltip styles
+      p.$options.placement = [PopupPlacements.$top.$start];
+      p.$options.offset = [4, 4];
+      Object.assign(p.$options, popupOptions);
+      p.$options.openCase = PopupOpenCases.onInit;
+      p.$options.target = t;
+      p.textContent = text; // WARN: textContent (not innerHTML) otherwise it is open to XSS
+      p.style.zIndex = "99999";
+      document.body.appendChild(p);
+    };
+
+    const opts = { passive: true, capture: true };
+    const rst = [
+      // pointerenter is fired for each element in hierarchy (for touch also) in opposite to touchstart
+      onEvent(
+        document,
+        "pointerenter",
+        (e) => {
+          const el = e.target as HTMLElement;
+          if (el === t || !el.hasAttribute?.("w-tooltip")) return;
+          reset();
+          t = el;
+          tid = setTimeout(show, delayMs ?? 1000);
+        },
+        opts
+      ),
+      // pointerleave doesn't bubble but capture-listener gets it from children also => compare target
+      onEvent(document, "pointerleave", (e) => e.target === t && reset(), opts),
+      // mouse & pen: pressing hides tooltip; touch: tooltip is visible during the long-press
+      onEvent(document, "pointerdown", (e) => e.pointerType !== "touch" && reset(), opts),
+      // touch is released or turned into scroll
+      onEvent(document, "pointerup", reset, opts),
+      onEvent(document, "pointercancel", reset, opts),
+      // "click" can be fired without pointerdown (by SpaceDown on button)
+      onEvent(document, "click", reset, opts),
+    ];
 
     return {
       dispose: () => {
-        r1();
-        r2();
+        reset();
+        rst.forEach((r) => r());
       },
     };
   }

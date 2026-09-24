@@ -1972,8 +1972,14 @@ describe("popupElement", () => {
     el.remove();
     trg.setAttribute("w-tooltip", "Some tooltip");
     const spy = h.spyEventListeners();
-    const hover = (t = trg) => t.dispatchEvent(new MouseEvent("mouseenter"));
-    const leave = (t = trg) => t.dispatchEvent(new MouseEvent("mouseleave"));
+    /** Simulate pointer event: jsdom has no PointerEvent - so pointerType must be defined manually */
+    const pointer = (t, type, pointerType = "mouse") => {
+      const ev = new MouseEvent(type);
+      Object.defineProperty(ev, "pointerType", { get: () => pointerType });
+      t.dispatchEvent(ev);
+    };
+    const hover = (t = trg, pointerType = "mouse") => pointer(t, "pointerenter", pointerType);
+    const leave = (t = trg) => pointer(t, "pointerleave");
     /** @returns {WUPPopupElement | null} */
     const getPopup = () => document.body.querySelector("wup-popup");
 
@@ -2007,23 +2013,76 @@ describe("popupElement", () => {
     expect(getPopup()).toBeNull();
 
     // other events also hide tooltip
-    const checkHideBy = async (ev) => {
+    const checkHideBy = async (ev, pointerType) => {
       hover();
       await h.wait();
       expect(getPopup()).toBeTruthy();
-      trg.dispatchEvent(new MouseEvent(ev));
+      pointer(trg, ev, pointerType);
       await h.wait();
       expect(getPopup()).toBeNull();
     };
-    await checkHideBy("mousedown");
+    await checkHideBy("pointerdown");
+    await checkHideBy("pointerdown", "pen");
     await checkHideBy("click");
-    await checkHideBy("touchend");
+    await checkHideBy("pointerup");
+    await checkHideBy("pointercancel");
+    // events without active tooltip are skipped
+    ["pointerdown", "pointerup", "pointercancel", "click", "pointerleave"].forEach((ev) => pointer(trg, ev));
+    await h.wait();
+    expect(getPopup()).toBeNull();
 
-    // touchstart opens tooltip also
-    trg.dispatchEvent(new Event("touchstart"));
+    // touch: tooltip is visible during the long-press & hidden by release
+    hover(trg, "touch");
+    pointer(trg, "pointerdown", "touch");
     await h.wait();
     expect(getPopup()).toBeTruthy();
-    trg.dispatchEvent(new Event("touchend"));
+    pointer(trg, "pointerup", "touch");
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // leaving child of target doesn't hide tooltip
+    const child = trg.appendChild(document.createElement("span"));
+    hover();
+    hover(child); // skipped because without [w-tooltip]
+    leave(child);
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    child.remove();
+
+    // repeated pointerenter on the same target doesn't duplicate tooltip
+    hover();
+    await h.wait(500);
+    hover();
+    await h.wait(500);
+    expect(document.body.querySelectorAll("wup-popup").length).toBe(1);
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // only 1 tooltip at once: new target replaces previous
+    const trg2 = document.body.appendChild(document.createElement("button"));
+    trg2.setAttribute("w-tooltip", "Tooltip 2");
+    hover();
+    await h.wait();
+    expect(getPopup().textContent).toBe("Some tooltip");
+    hover(trg2);
+    await h.wait();
+    expect(document.body.querySelectorAll("wup-popup").length).toBe(1);
+    expect(getPopup().textContent).toBe("Tooltip 2");
+    expect(getPopup().$options.target).toBe(trg2);
+    leave(trg); // leaving not current target is skipped
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    leave(trg2);
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // target is removed before delay: popup isn't rendered
+    hover(trg2);
+    trg2.remove();
     await h.wait();
     expect(getPopup()).toBeNull();
 
@@ -2059,13 +2118,19 @@ describe("popupElement", () => {
     hover();
     await h.wait();
     expect(getPopup()).toBeNull();
-    document.dispatchEvent(new MouseEvent("mouseenter")); // target without hasAttribute
+    hover(document); // target without hasAttribute
     await h.wait();
     expect(getPopup()).toBeNull();
 
-    r.dispose();
-    spy.check(); // checking memory leak
+    // dispose hides opened tooltip
     trg.setAttribute("w-tooltip", "Some tooltip");
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    r.dispose();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    spy.check(); // checking memory leak
     hover();
     await h.wait();
     expect(getPopup()).toBeNull(); // because listeners are removed
@@ -2092,6 +2157,16 @@ describe("popupElement", () => {
     expect(p.$options.offset).toEqual([1, 2]);
     expect(p.$options.openCase).toBe(PopupOpenCases.onInit);
     expect(p.$options.target).toBe(trg);
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    r.dispose();
+
+    // delayMs: 0 shows tooltip without delay
+    r = WUPPopupElement.$useTooltip({ delayMs: 0 });
+    hover();
+    jest.advanceTimersByTime(0);
+    expect(getPopup()).toBeTruthy();
     leave();
     await h.wait();
     expect(getPopup()).toBeNull();
