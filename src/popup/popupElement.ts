@@ -28,7 +28,8 @@ declare module "react" {
     /** Enable custom tooltip (shows on hover); requires {@link WUPPopupElement.$useTooltip}
      * @tutorial
      * * ```<div w-tooltip="Some text" >...</div>```
-     * * ```<div aria-label="Some text" w-tooltip="" >...</div>``` */
+     * * ```<div aria-label="Some text" w-tooltip="" >...</div>```
+     * * ```<div aria-describedby="tip-id" w-tooltip="" >...</div><p id="tip-id" hidden>Same text for many</p>``` */
     "w-tooltip"?: string;
   }
 
@@ -50,7 +51,8 @@ declare module "preact/jsx-runtime" {
       /** Enable custom tooltip (shows on hover); requires {@link WUPPopupElement.$useTooltip}
        * @tutorial
        * * ```<div w-tooltip="Some text" >...</div>```
-       * * ```<div aria-label="Some text" w-tooltip="" >...</div>``` */
+       * * ```<div aria-label="Some text" w-tooltip="" >...</div>```
+       * * ```<div aria-describedby="tip-id" w-tooltip="" >...</div><p id="tip-id" hidden>Same text for many</p>``` */
       "w-tooltip"?: string;
     }
     interface IntrinsicElements {
@@ -292,8 +294,17 @@ export default class WUPPopupElement<
     /** Returns whether element is target or tooltip itself */
     const isOwn = (el: EventTarget): boolean => el === t || (!!p && (el === p || el === p.$refArrow));
 
+    /** Returns text of elements pointed by [aria-describedby]; so many targets can refer to a single element with the same text */
+    const getDescription = (el: HTMLElement): string | undefined =>
+      el
+        .getAttribute("aria-describedby")
+        ?.split(" ")
+        .map((id) => document.getElementById(id)?.textContent)
+        .filter((s) => s)
+        .join(" ");
+
     const show = (): void => {
-      const text = t!.getAttribute("w-tooltip") || t!.getAttribute("aria-label");
+      const text = t!.getAttribute("w-tooltip") || getDescription(t!) || t!.getAttribute("aria-label");
       if (!text || !t!.isConnected) {
         reset();
         return;
@@ -1148,4 +1159,3 @@ customElements.define(tagName, WUPPopupElement);
 // NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore
 // NiceToHave 2 popups can overflow each other: need option to try place several popups at once without overflow. Example on wup-pwd page: issue with 2 errors
 // NiceToHave animation.default animates to opacity: 1 but need to animate to opacityFromCss
-// todo add tooltip hook + need to figure out to use tooltipTargetId or similar pointer as works with area-describedby="id-of-content" for cases when a lot of tooltips in table must show same message

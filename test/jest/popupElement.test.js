@@ -2191,6 +2191,30 @@ describe("popupElement", () => {
     leave();
     await h.wait();
 
+    // empty [w-tooltip] uses content of elements pointed by [aria-describedby] (many targets can refer to the same element)
+    document.body.insertAdjacentHTML("beforeend", `<p id="tip1" hidden>Shared <b>text</b></p><p id="tip2">Text 2</p>`);
+    trg.setAttribute("aria-describedby", "tip1");
+    hover();
+    await h.wait();
+    expect(getPopup().innerHTML).toBe("Shared text"); // [aria-describedby] has priority over [aria-label]
+    leave();
+    await h.wait();
+    trg.setAttribute("aria-describedby", "tip1 missed tip2"); // not found elements are skipped
+    hover();
+    await h.wait();
+    expect(getPopup().innerHTML).toBe("Shared text Text 2");
+    leave();
+    await h.wait();
+    trg.setAttribute("aria-describedby", "missed");
+    hover();
+    await h.wait();
+    expect(getPopup().innerHTML).toBe("Aria text"); // fallback to [aria-label]
+    leave();
+    await h.wait();
+    document.getElementById("tip1").remove();
+    document.getElementById("tip2").remove();
+    trg.removeAttribute("aria-describedby");
+
     // text is rendered as text (not parsed as HTML) to prevent XSS
     trg.setAttribute("w-tooltip", `<img src="x" onerror="alert(1)"><b>Bold</b>`);
     hover();

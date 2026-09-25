@@ -17,7 +17,7 @@ export default function TooltipView() {
       details={{ linkDemo: "demo/src/components/popup/tooltipView.tsx" }}
       features={[
         "Shows tooltip on hover (with delay) for any element with attribute [w-tooltip]",
-        "Uses [aria-label] content when [w-tooltip] is empty",
+        "Uses content of elements pointed by [aria-describedby] or [aria-label] when [w-tooltip] is empty",
         "Single global listener: popup is rendered only on hover and removed after",
         <>
           Text is rendered as text (not HTML) so it&apos;s safe for user content. If you need HTML content inside
@@ -60,6 +60,30 @@ export default function TooltipView() {
           </tbody>
         </table>
       </section>
+      <section>
+        <h3>Same text for many elements</h3>
+        <small>
+          Point <b>[aria-describedby]</b> to a single element with text instead of duplicating it in every{" "}
+          <b>[w-tooltip]</b>
+        </small>
+        <Code code={codeShared} />
+        <p id="tooltipShared" hidden>
+          This action isn&apos;t available for the current user
+        </p>
+        <table className={styles.table}>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r}>
+                {cols.map((c) => (
+                  <td key={c} w-tooltip="" aria-describedby="tooltipShared">
+                    {c}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
     </Page>
   );
 }
@@ -74,3 +98,9 @@ const codeHTML = `html
 <button type="button" w-tooltip="Some text here">Hover me</button>
 <!-- empty [w-tooltip] uses [aria-label] content -->
 <button type="button" w-tooltip="" aria-label="Some text here">&#9432;</button>`;
+
+const codeShared = `html
+<p id="tipShared" hidden>Same text for many elements</p>
+<!-- empty [w-tooltip] uses content of elements pointed by [aria-describedby] -->
+<td w-tooltip="" aria-describedby="tipShared">Cell 1</td>
+<td w-tooltip="" aria-describedby="tipShared">Cell 2</td>`;
