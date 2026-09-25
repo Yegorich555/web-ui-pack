@@ -356,6 +356,33 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isDisabled).toBe(false);
       expect(el.getAttribute("disabled")).toBe(null);
       expect(((el as any).$refFieldset || el.$refInput).disabled).toBe(false);
+
+      // string is reason for tooltip
+      el.$options.disabled = "Some reason";
+      jest.advanceTimersByTime(1);
+      expect(el.$isDisabled).toBe(true);
+      expect(el.getAttribute("disabled")).toBe("Some reason");
+      expect(((el as any).$refFieldset || el.$refInput).disabled).toBe(true);
+      // tooltip is registered automatically
+      el.dispatchEvent(new MouseEvent("pointerenter"));
+      jest.advanceTimersByTime(1000);
+      expect(document.body.querySelector("wup-popup[tooltip]")?.textContent).toBe("Some reason");
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // hide tooltip
+
+      el.setAttribute("disabled", "Other reason");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.disabled).toBe("Other reason");
+      expect(el.getAttribute("disabled")).toBe("Other reason");
+      el.setAttribute("disabled", "false");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.disabled).toBe(false);
+      expect(el.$isDisabled).toBe(false);
+      el.setAttribute("disabled", "");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.disabled).toBe(true);
+      el.removeAttribute("disabled");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.disabled).toBe(false);
     });
 
     test("label", () => {
@@ -387,6 +414,35 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
       if (cfg.testReadonly) cfg.testReadonly.false(el);
       else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
+
+      // string is reason for tooltip
+      el.$options.readOnly = "Some reason";
+      jest.advanceTimersByTime(1);
+      expect(el.$isReadOnly).toBe(true);
+      expect(el.getAttribute("readonly")).toBe("Some reason");
+      if (cfg.testReadonly) cfg.testReadonly.true(el);
+      else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(true);
+      // tooltip is registered automatically & nested readonly input doesn't replace it
+      el.dispatchEvent(new MouseEvent("pointerenter"));
+      el.$refInput.dispatchEvent(new MouseEvent("pointerenter"));
+      jest.advanceTimersByTime(1000);
+      expect(document.body.querySelector("wup-popup[tooltip]")?.textContent).toBe("Some reason");
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // hide tooltip
+
+      el.setAttribute("readonly", "Other reason");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.readOnly).toBe("Other reason");
+      expect(el.getAttribute("readonly")).toBe("Other reason");
+      el.setAttribute("readonly", "false");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.readOnly).toBe(false);
+      expect(el.$isReadOnly).toBe(false);
+      el.setAttribute("readonly", "");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.readOnly).toBe(true);
+      el.removeAttribute("readonly");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.readOnly).toBe(false);
     });
 
     test("name - without form", () => {

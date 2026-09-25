@@ -637,6 +637,81 @@ exports[`control.radio base options readonly 2`] = `
 </wup-radio>
 `;
 
+exports[`control.radio base options readonly 3`] = `
+<wup-radio
+  readonly="Some reason"
+>
+  <fieldset>
+    <legend>
+      <strong />
+      <span
+        class="wup-hidden"
+      >
+        readonly
+      </span>
+    </legend>
+    <label
+      for="txt2"
+    >
+      Donny
+      <input
+        autocomplete="off"
+        id="txt2"
+        name="txt1473"
+        readonly=""
+        tabindex="0"
+        type="radio"
+      />
+      <span
+        icon=""
+      />
+    </label>
+    <label
+      for="txt3"
+    >
+      Mikky
+      <input
+        id="txt3"
+        name="txt1473"
+        readonly=""
+        type="radio"
+      />
+      <span
+        icon=""
+      />
+    </label>
+    <label
+      for="txt4"
+    >
+      Leo
+      <input
+        id="txt4"
+        name="txt1473"
+        readonly=""
+        type="radio"
+      />
+      <span
+        icon=""
+      />
+    </label>
+    <label
+      for="txt5"
+    >
+      Splinter
+      <input
+        id="txt5"
+        name="txt1473"
+        readonly=""
+        type="radio"
+      />
+      <span
+        icon=""
+      />
+    </label>
+  </fieldset>
+</wup-radio>
+`;
+
 exports[`control.radio common tests render + styles 1`] = `<wup-radio />`;
 
 exports[`control.radio common tests render + styles 2`] = `

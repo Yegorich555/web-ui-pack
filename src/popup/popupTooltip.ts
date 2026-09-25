@@ -86,7 +86,8 @@ function listenTooltips(): NonNullable<typeof tooltipLst> {
           return;
         }
         const reg = el.hasAttribute && tooltipRegs.find((a) => el.hasAttribute(a.attr));
-        if (reg) {
+        // nested element with empty attr doesn't replace tooltip of parent: ex. <wup-text readonly="Reason"><input readonly/>
+        if (reg && !(t?.contains(el) && !el.getAttribute(reg.attr))) {
           init(el, reg);
           isHover = true;
         }
@@ -148,6 +149,11 @@ function listenTooltips(): NonNullable<typeof tooltipLst> {
       rst.forEach((f) => f());
     },
   };
+}
+
+/** Call `useTooltip({ attr })` if pointed attr isn't registered yet; registration is never disposed */
+export function useTooltipOnce(attr: string): void {
+  !tooltipRegs.some((a) => a.attr === attr) && useTooltip({ attr });
 }
 
 /** Listen for events to show tooltip for elements with pointed attr; see `WUPPopupElement.$useTooltip()` */

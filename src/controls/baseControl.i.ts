@@ -17,8 +17,8 @@ export default interface IBaseControl<ValueType = any> extends HTMLElement {
     label?: string | null;
     name?: string | null;
     autoComplete?: string | boolean | null;
-    readOnly?: boolean | null;
-    disabled?: boolean | null;
+    readOnly?: boolean | string | null;
+    disabled?: boolean | string | null;
   };
 
   gotFormChanges: (propsChanged: Array<string> | null) => void;

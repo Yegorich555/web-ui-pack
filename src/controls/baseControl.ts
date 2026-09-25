@@ -8,6 +8,7 @@ import onFocusGot from "../helpers/onFocusGot";
 import { stringPrettify } from "../helpers/string";
 import WUPPopupElement from "../popup/popupElement";
 import { PopupOpenCases } from "../popup/popupElement.types";
+import { useTooltipOnce } from "../popup/popupTooltip";
 import { WUPcssIcon } from "../styles";
 import IBaseControl from "./baseControl.i";
 
@@ -106,10 +107,12 @@ declare global {
        * @see {@link HTMLInputElement.autocomplete}
        * @defaultValue null - means false if form.$options.autoComplete false also */
       autoComplete: AutoComplete | boolean | null;
-      /** Disallow edit/copy value; adds attr [disabled] for styling */
-      disabled: boolean;
-      /** Disallow copy value; adds attr [readonly] for styling @defaultValue false */
-      readOnly: boolean;
+      /** Disallow edit/copy value; adds attr [disabled] for styling
+       * * point string (reason) to show it via tooltip (`WUPPopupElement.$useTooltip({ attr: "disabled" })` is applied automatically; call it before to customize) */
+      disabled: boolean | string;
+      /** Disallow copy value; adds attr [readonly] for styling @defaultValue false
+       * * point string (reason) to show it via tooltip (`WUPPopupElement.$useTooltip({ attr: "readonly" })` is applied automatically; call it before to customize) */
+      readOnly: boolean | string;
       /** Debounce option for onFocusLost event (for validationCases.onFocusLost);
        * @see {@link onFocusLostOptions.debounceMs} in helpers/onFocusLost;
        * @defaultValue 100ms */
@@ -192,10 +195,12 @@ declare global {
 
       /** @deprecated use [disabled] instead since related to CSS-styles */
       "w-disabled"?: boolean | "";
-      disabled?: boolean | "";
+      /** Point string (reason) to show it via tooltip */
+      disabled?: boolean | string;
       /** @deprecated use [disabled] instead since related to CSS-styles */
       "w-readonly"?: boolean | "";
-      readonly?: boolean | "";
+      /** Point string (reason) to show it via tooltip */
+      readonly?: boolean | string;
 
       "w-clearActions"?: ClearActions | number;
       /** @deprecated use static `.$defaults.validationCase` instead */
@@ -449,6 +454,10 @@ export default abstract class WUPBaseControl<
       type: AttributeTypes.parseCustom, // it's parsed manually on gotChanges
       parse: (v) => v,
     };
+    // string is reason that is shown via tooltip
+    const parseReason = (v: string): boolean | string => (v === "" || v === "true" ? true : v !== "false" && v);
+    m.disabled.parse = parseReason;
+    m.readonly.parse = parseReason;
     return m;
   }
 
@@ -553,14 +562,14 @@ export default abstract class WUPBaseControl<
   get $isDisabled(): boolean {
     // @ts-expect-error
     const o = this.$form?._opts;
-    return o?.disabled || this._opts.disabled || false;
+    return !!(o?.disabled || this._opts.disabled);
   }
 
   /** Returns if related form or control readonly (true even if form.$options.readOnly && !control.$options.readOnly) */
   get $isReadOnly(): boolean {
     // @ts-expect-error
     const o = this.$form?._opts;
-    return o?.readOnly || this._opts.readOnly || false;
+    return !!(o?.readOnly || this._opts.readOnly);
   }
 
   /** Returns if value is required - can't be undefined (depends on $options.validations.required) */
@@ -670,8 +679,11 @@ export default abstract class WUPBaseControl<
     this.setAttr.call(i, "aria-label", n);
 
     // set other props
-    this.setAttr("disabled", this._opts.disabled, true);
-    this.setAttr("readonly", this._opts.readOnly, true);
+    const { disabled, readOnly } = this._opts;
+    this.setAttr("disabled", disabled, disabled === true);
+    this.setAttr("readonly", readOnly, readOnly === true);
+    typeof disabled === "string" && useTooltipOnce("disabled"); // string is reason for tooltip
+    typeof readOnly === "string" && useTooltipOnce("readonly");
     const isReq = this.$isRequired;
     this.setAttr("required", isReq, true);
     this.setAttr.call(this.$refInput, "aria-required", isReq);
@@ -1250,6 +1262,3 @@ export default abstract class WUPBaseControl<
     canClear && setTimeout(() => !e.defaultPrevented && this.clearValue()); // timeout to wait for modal to handle it
   }
 }
-
-// NiceToHave when control is disabled need to show tooltip with reason
-// NiceToHave when control is readonly need to show tooltip with reason

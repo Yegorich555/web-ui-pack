@@ -2366,6 +2366,40 @@ describe("popupElement", () => {
     expect(getPopup()).toBeNull();
     leave();
 
+    // nested element with empty attr doesn't replace tooltip of parent: ex. <wup-text readonly="Reason"><input readonly/>
+    const nested = trg.appendChild(document.createElement("input"));
+    nested.setAttribute("readonly", "");
+    nested.setAttribute("aria-label", "Nested aria");
+    trg.setAttribute("readonly", "Readonly text");
+    hover();
+    hover(nested);
+    await h.wait();
+    expect(getPopup().textContent).toBe("Readonly text");
+    expect(getPopup().$options.target).toBe(trg);
+    leave(nested); // pointer moved from nested to parent
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    nested.setAttribute("readonly", "Nested text"); // nested element with own text replaces tooltip of parent
+    hover();
+    hover(nested);
+    await h.wait();
+    expect(getPopup().textContent).toBe("Nested text");
+    leave(nested);
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    leave();
+    hover(nested); // without parent target nested element with empty attr is processed as usual
+    nested.setAttribute("readonly", "");
+    await h.wait();
+    expect(getPopup().textContent).toBe("Nested aria");
+    leave(nested);
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    nested.remove();
+
     trg.setAttribute("readonly", "");
     hover();
     await h.wait();

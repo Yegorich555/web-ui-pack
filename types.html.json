@@ -168,11 +168,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -290,11 +290,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -645,11 +645,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -1049,11 +1049,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -1264,11 +1264,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -1362,11 +1362,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -1555,11 +1555,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -1752,11 +1752,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -1967,11 +1967,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -2128,11 +2128,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -2250,11 +2250,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -2491,11 +2491,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
