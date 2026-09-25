@@ -1997,7 +1997,7 @@ describe("popupElement", () => {
     expect(p.$options.placement).toEqual([WUPPopupElement.$placements.$top.$start]);
     expect(p.$options.offset).toEqual([4, 4]);
     expect(p.outerHTML).toMatchInlineSnapshot(
-      `"<wup-popup tooltip="" style="z-index: 99999; transform: translate(136px, 96px);" open="" position="top" show="">Some tooltip</wup-popup>"`
+      `"<wup-popup tooltip="" open="" style="transform: translate(136px, 96px);" position="top" show="">Some tooltip</wup-popup>"`
     );
 
     leave();
@@ -2301,8 +2301,84 @@ describe("popupElement", () => {
     leave();
     await h.wait();
     expect(getPopup()).toBeNull();
-
     r.dispose();
+
+    // custom attr instead of [w-tooltip]
+    r = WUPPopupElement.$useTooltip({ attr: "data-tip", showOnFocus: true });
+    hover(); // [w-tooltip] is skipped
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    leave();
+    trg.removeAttribute("w-tooltip");
+    trg.setAttribute("data-tip", "Custom tip");
+    hover();
+    await h.wait();
+    expect(getPopup().textContent).toBe("Custom tip");
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    const spyFocusVisible = jest.spyOn(trg, "matches").mockImplementation(() => true);
+    focus();
+    await h.wait();
+    expect(getPopup().textContent).toBe("Custom tip");
+    blur();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    spyFocusVisible.mockRestore();
+    r.dispose();
+    r.dispose(); // repeated dispose is skipped
+    spy.check(); // checking memory leak
+
+    // several calls with different attrs share a single set of listeners
+    trg.removeAttribute("data-tip");
+    const spyOn = jest.spyOn(document, "addEventListener");
+    const r1 = WUPPopupElement.$useTooltip({ attr: "readonly", className: "tip-1" });
+    const cnt = spyOn.mock.calls.length;
+    expect(cnt).toBeGreaterThan(0);
+    const r2 = WUPPopupElement.$useTooltip({ attr: "disabled", className: "tip-2", delayMs: 0 });
+    expect(spyOn.mock.calls.length).toBe(cnt); // listeners aren't duplicated
+    spyOn.mockRestore();
+
+    trg.setAttribute("aria-label", "Aria text");
+    trg.setAttribute("disabled", "");
+    hover();
+    jest.advanceTimersByTime(0);
+    expect(getPopup().className).toBe("tip-2"); // options related to attr are applied
+    expect(getPopup().textContent).toBe("Aria text");
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    trg.setAttribute("readonly", "Readonly text");
+    hover();
+    await h.wait();
+    expect(getPopup().className).toBe("tip-1"); // 1st registered attr has priority
+    expect(getPopup().textContent).toBe("Readonly text");
+
+    r2.dispose(); // dispose of other attr doesn't hide current tooltip
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    leave();
+    await h.wait();
+    trg.removeAttribute("readonly");
+    hover(); // [disabled] isn't registered anymore
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    leave();
+
+    trg.setAttribute("readonly", "");
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    r1.dispose(); // dispose of the last attr hides tooltip & removes listeners
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    trg.removeAttribute("readonly");
+    trg.removeAttribute("disabled");
+    trg.removeAttribute("aria-label");
     spy.check(); // checking memory leak
   });
 });

@@ -20,7 +20,7 @@
 
 - helper [imageConvert](src/helpers/files/imageConvert.ts)
 - helper [selectFiles](src/helpers/files/selectFiles.ts)
-- [PopupElement](src/popup/popupElement.ts). Added `WUPPopupElement.$useTooltip()` to show tooltip on hover for elements with attribute `[w-tooltip]` (empty `[w-tooltip]` uses content of elements pointed by `[aria-describedby]` or `[aria-label]`)
+- [PopupElement](src/popup/popupElement.ts). Added `WUPPopupElement.$useTooltip()` to show tooltip on hover for elements with attribute `[w-tooltip]` (empty `[w-tooltip]` uses content of elements pointed by `[aria-describedby]` or `[aria-label]`; attribute is configurable via option `attr`; several calls with different attrs share a single set of listeners)
 
 ---
 

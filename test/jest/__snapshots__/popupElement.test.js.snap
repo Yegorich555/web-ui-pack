@@ -189,6 +189,9 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         background: var(--popup-bg);
         text-overflow: ellipsis;
       }
+      WUP-POPUP[tooltip] {
+         z-index: 99999;
+      }
       WUP-POPUP[tooltip],
       WUP-POPUP[tooltip]+WUP-POPUP-arrow {
         --popup: var(--tooltip-text);
@@ -271,6 +274,9 @@ TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
         color: var(--popup-text);
         background: var(--popup-bg);
         text-overflow: ellipsis;
+      }
+      TEST-EL[tooltip] {
+         z-index: 99999;
       }
       TEST-EL[tooltip],
       TEST-EL[tooltip]+TEST-EL-arrow {
@@ -525,6 +531,9 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         background: var(--popup-bg);
         text-overflow: ellipsis;
       }
+      WUP-POPUP[tooltip] {
+         z-index: 99999;
+      }
       WUP-POPUP[tooltip],
       WUP-POPUP[tooltip]+WUP-POPUP-arrow {
         --popup: var(--tooltip-text);
@@ -607,6 +616,9 @@ TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
         color: var(--popup-text);
         background: var(--popup-bg);
         text-overflow: ellipsis;
+      }
+      TEST-EL[tooltip] {
+         z-index: 99999;
       }
       TEST-EL[tooltip],
       TEST-EL[tooltip]+TEST-EL-arrow {

@@ -165,6 +165,9 @@ declare global {
       /** Show tooltip on keyboard focus also (`:focus-visible`)
        * @defaultValue false */
       showOnFocus?: boolean;
+      /** Attribute to enable tooltip on HTMLElements (also used as text source)
+       * @defaultValue "w-tooltip" */
+      attr?: string;
       /** CSS className for <wup-popup/> */
       className?: string;
     }

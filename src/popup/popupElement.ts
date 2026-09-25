@@ -10,7 +10,7 @@ import animateStack from "../helpers/animateStack";
 import isIntoView from "../helpers/isIntoView";
 import viewportSize from "../helpers/viewportSize";
 import WUPBaseModal from "../baseModal";
-import onEvent from "../helpers/onEvent";
+import useTooltip from "./popupTooltip";
 
 const attachLst = new Map<HTMLElement | SVGElement, () => void>();
 
@@ -217,6 +217,9 @@ export default class WUPPopupElement<
         background: var(--popup-bg);
         text-overflow: ellipsis;
       }
+      :host[tooltip] {
+         z-index: 99999;
+      }
       :host[tooltip],
       :host[tooltip]+:host-arrow {
         --popup: var(--tooltip-text);
@@ -258,145 +261,17 @@ export default class WUPPopupElement<
     return d as unknown as T;
   }
 
-  /** Listen for events to show tooltip; enable attr `[w-tooltip]` on HTMLElements
+  /** Listen for events to show tooltip; enable attr `[w-tooltip]` (see option `attr`) on HTMLElements
    * @tutorial Rules (according to WCAG 1.4.13)
    * * tooltip is shown on hover & keyboard focus (`:focus-visible`; only with option `showOnFocus`)
    * * hoverable: pointer can be moved from target to tooltip (hides after `hoverCloseTimeout`)
    * * dismissible: by pressing Escape
-   * * persistent: visible until target is hovered or focused */
+   * * persistent: visible until target is hovered or focused
+   * @tutorial Troubleshooting:
+   * * call it several times with different `attr` to apply different options; all calls share a single set of listeners
+   * * if element has several registered attrs then options of the first call are applied */
   static $useTooltip(options?: WUP.Popup.TooltipOptions): { dispose: () => void } {
-    WUPPopupElement.$use();
-    const { delayMs, className, showOnFocus, ...popupOptions } = options ?? {};
-    let t: HTMLElement | null = null; // current target; only 1 tooltip at once
-    let p: WUPPopupElement | undefined;
-    let tid: ReturnType<typeof setTimeout> | undefined; // timeout to show (before popup is rendered) or to hide (after)
-    let isHover = false;
-    let isFocus = false;
-
-    const reset = (): void => {
-      if (!t) return; // nothing to reset
-      clearTimeout(tid);
-      t = null;
-      isHover = false;
-      isFocus = false;
-      const pp = p;
-      p = undefined;
-      pp?.$close().finally(() => pp.remove());
-    };
-
-    /** Wait for delay before show tooltip for new target */
-    const init = (el: HTMLElement): void => {
-      reset();
-      t = el;
-      tid = setTimeout(show, delayMs ?? 1000);
-    };
-
-    /** Returns whether element is target or tooltip itself */
-    const isOwn = (el: EventTarget): boolean => el === t || (!!p && (el === p || el === p.$refArrow));
-
-    /** Returns text of elements pointed by [aria-describedby]; so many targets can refer to a single element with the same text */
-    const getDescription = (el: HTMLElement): string | undefined =>
-      el
-        .getAttribute("aria-describedby")
-        ?.split(" ")
-        .map((id) => document.getElementById(id)?.textContent)
-        .filter((s) => s)
-        .join(" ");
-
-    const show = (): void => {
-      const text = t!.getAttribute("w-tooltip") || getDescription(t!) || t!.getAttribute("aria-label");
-      if (!text || !t!.isConnected) {
-        reset();
-        return;
-      }
-
-      p = document.createElement(tagName);
-      if (className) p.className = className;
-      p.setAttribute("tooltip", ""); // to apply tooltip styles
-      p.$options.placement = [PopupPlacements.$top.$start];
-      p.$options.offset = [4, 4];
-      Object.assign(p.$options, popupOptions);
-      p.$options.openCase = PopupOpenCases.onInit;
-      p.$options.target = t;
-      p.textContent = text; // WARN: textContent (not innerHTML) otherwise it is open to XSS
-      p.style.zIndex = "99999";
-      document.body.appendChild(p);
-    };
-
-    const opts = { passive: true, capture: true };
-    const rst = [
-      // pointerenter is fired for each element in hierarchy (for touch also) in opposite to touchstart
-      onEvent(
-        document,
-        "pointerenter",
-        (e) => {
-          const el = e.target as HTMLElement;
-          if (isOwn(el)) {
-            isHover = true;
-            p && clearTimeout(tid); // pointer is moved from target to tooltip or back => cancel hiding
-          } else if (el.hasAttribute?.("w-tooltip")) {
-            init(el);
-            isHover = true;
-          }
-        },
-        opts
-      ),
-      // pointerleave doesn't bubble but capture-listener gets it from children also => compare target
-      onEvent(
-        document,
-        "pointerleave",
-        (e) => {
-          if (!isOwn(e.target)) return;
-          isHover = false;
-          if (isFocus) return; // visible until focusout
-          if (p) {
-            clearTimeout(tid);
-            tid = setTimeout(reset, p.$options.hoverCloseTimeout); // wait for user moves pointer over tooltip
-          } else reset();
-        },
-        opts
-      ),
-      onEvent(document, "keydown", (e) => e.key === "Escape" && reset(), opts),
-      // mouse & pen: pressing hides tooltip; touch: tooltip is visible during the long-press
-      onEvent(document, "pointerdown", (e) => e.pointerType !== "touch" && reset(), opts),
-      // touch is released or turned into scroll
-      onEvent(document, "pointerup", reset, opts),
-      onEvent(document, "pointercancel", reset, opts),
-      // "click" can be fired without pointerdown (by SpaceDown on button)
-      onEvent(document, "click", reset, opts),
-    ];
-    showOnFocus &&
-      rst.push(
-        onEvent(
-          document,
-          "focusin",
-          (e) => {
-            const el = e.target as HTMLElement;
-            if (!el.hasAttribute("w-tooltip") || !el.matches(":focus-visible")) return; // skip focus by pointer
-            el !== t && init(el);
-            isFocus = true;
-            p && clearTimeout(tid); // cancel hiding after pointerleave
-          },
-          opts
-        ),
-        onEvent(
-          document,
-          "focusout",
-          (e) => {
-            if (e.target !== t) return;
-            isFocus = false;
-            !isHover && reset();
-          },
-          opts
-        )
-      );
-
-    return {
-      dispose: () => {
-        reset();
-        rst.forEach((r) => r());
-      },
-    };
+    return useTooltip(options);
   }
 
   /** Listen for target according to openCase and create/remove popup when it's required (by open/close).
