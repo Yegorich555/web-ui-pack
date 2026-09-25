@@ -1,5 +1,5 @@
 /* eslint-disable prefer-destructuring */
-import { AttributeMap, AttributeTypes } from "../baseElement";
+import { AttributeMap, AttributeTypes, inheritDefaults } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import WUPScrolled from "../helpers/scrolled";
 import localeInfo, { WUPTimeFormat } from "../objects/localeInfo";
@@ -299,10 +299,8 @@ export default class WUPTimeControl<
     return m;
   }
 
-  static $defaults: WUP.Time.Options = {
-    ...WUPBaseComboControl.$defaults,
-    validationRules: {
-      ...WUPBaseComboControl.$defaults.validationRules,
+  static $defaults: WUP.Time.Options = inheritDefaults(WUPBaseComboControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseComboControl.$defaults.validationRules, {
       min: (v, setV, c) =>
         (v === undefined || v < setV) &&
         __wupln(`Min value is ${setV.format((c as WUPTimeControl)._opts.format)}`, "validation"),
@@ -311,14 +309,14 @@ export default class WUPTimeControl<
         __wupln(`Max value is ${setV.format((c as WUPTimeControl)._opts.format)}`, "validation"),
       exclude: (v, fn, c) =>
         (v === undefined || fn.test(v, c as WUPTimeControl)) && __wupln("This value is disabled", "validation"),
-    },
+    }),
     step: 1,
     format: "",
     min: null,
     max: null,
     exclude: null,
     menuButtonsOff: false,
-  };
+  });
 
   constructor() {
     super();

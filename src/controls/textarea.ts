@@ -1,3 +1,4 @@
+import { inheritDefaults } from "../baseElement";
 import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 import WUPTextareaInput from "./textarea.input";
@@ -88,15 +89,13 @@ export default class WUPTextareaControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Textarea.Options = {
-    ...WUPTextControl.$defaults,
-    validationRules: {
-      ...WUPTextControl.$defaults.validationRules,
-      // WARN: validations min/max must depends only on visible chars
+  static $defaults: WUP.Textarea.Options = inheritDefaults(WUPTextControl.$defaults, {
+    validationRules: inheritDefaults(WUPTextControl.$defaults.validationRules, {
+      // WARN: validations min/max must depend on visible chars only
       min: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.min!.call!(c, v?.replace(/\n/g, ""), setV, c, r),
       max: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.max!.call!(c, v?.replace(/\n/g, ""), setV, c, r),
-    },
-  };
+    }),
+  });
 
   $refInput = document.createElement("wup-areainput") as HTMLInputElement;
 

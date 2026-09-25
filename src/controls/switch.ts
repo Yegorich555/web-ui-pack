@@ -1,4 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
+import { inheritDefaults } from "../baseElement";
 import { WUPCssIconHover, WUPcssHidden } from "../styles";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
@@ -170,11 +171,10 @@ export default class WUPSwitchControl<
     return arr;
   }
 
-  static $defaults: WUP.Switch.Options = {
-    ...WUPBaseControl.$defaults,
-    validationRules: { ...WUPBaseControl.$defaults.validationRules },
+  static $defaults: WUP.Switch.Options = inheritDefaults(WUPBaseControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {}),
     reverse: false,
-  };
+  });
 
   get $value(): boolean {
     return !!super.$value as boolean;

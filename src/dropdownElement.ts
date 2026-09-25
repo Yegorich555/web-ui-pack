@@ -1,4 +1,4 @@
-import WUPBaseElement from "./baseElement";
+import WUPBaseElement, { inheritDefaults } from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
 import { PopupAnimations, PopupCloseCases, PopupOpenCases } from "./popup/popupElement.types";
 import { WUPcssButton, WUPcssMenu } from "./styles";
@@ -114,8 +114,7 @@ export default class WUPDropdownElement<
   /** Default options applied to every element. Change it to configure default behavior
    * * @tutorial Troubleshooting
    * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` directly */
-  static $defaults: WUP.Dropdown.Options = {
-    ...WUPPopupElement.$defaults,
+  static $defaults: WUP.Dropdown.Options = inheritDefaults(WUPPopupElement.$defaults, {
     animation: PopupAnimations.drawer,
     openCase: PopupOpenCases.onClick | PopupOpenCases.onFocus,
     closeOnPopupClick: true,
@@ -131,7 +130,7 @@ export default class WUPDropdownElement<
       WUPPopupElement.$placements.$top.$start.$resizeHeight,
       WUPPopupElement.$placements.$top.$end.$resizeHeight,
     ],
-  };
+  });
 
   /** Reference to nested HTMLElement tied with $options.label */
   $refTitle = this.firstElementChild as HTMLElement;

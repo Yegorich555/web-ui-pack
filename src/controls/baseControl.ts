@@ -452,7 +452,6 @@ export default abstract class WUPBaseControl<
     return m;
   }
 
-  // todo changing global-common-defaults from another project doesn't affect on controls - need to figure out way when user can setup everything in one place
   static $defaults: WUP.BaseControl.Options = {
     autoComplete: null, // WARN: without null impossible to use with form.autoComplete: possible to change is user options will be empty/not cloned by default
     autoFocus: false,

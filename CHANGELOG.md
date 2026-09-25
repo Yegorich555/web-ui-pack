@@ -6,6 +6,7 @@
 
 ### Fixes & Improvements
 
+- **Global**. Changing parent `$defaults` now affects inherited components (ex. `WUPBaseControl.$defaults.validateDebounceMs = 300` affects every control)
 - **Controls**. Fixed validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts).
   - Added prop **isSorted** for headers

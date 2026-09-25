@@ -1,3 +1,4 @@
+import { inheritDefaults } from "../baseElement";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { PopupOpenCases, PopupAnimations } from "../popup/popupElement.types";
@@ -104,14 +105,11 @@ export default abstract class WUPBaseComboControl<
       }`;
   }
 
-  static $defaults: WUP.BaseCombo.Options<any> = {
-    ...WUPTextControl.$defaults,
-    validationRules: {
-      ...WUPBaseControl.$defaults.validationRules,
-    },
+  static $defaults: WUP.BaseCombo.Options<any> = inheritDefaults(WUPTextControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {}),
     openCase: MenuOpenCases.onClick | MenuOpenCases.onFocus | MenuOpenCases.onPressArrowKey,
     readOnlyInput: false,
-  };
+  });
 
   /** Fires after popup-menu is opened (after animation finishes) */
   $onOpenMenu?: (e: Event) => void;

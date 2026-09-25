@@ -1,4 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
+import { inheritDefaults } from "../baseElement";
 import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import { WUPcssIcon } from "../styles";
@@ -343,24 +344,22 @@ export default class WUPTextControl<
   static $errorParse = __wupln("Invalid value", "validation");
   static $errorMask = __wupln("Incomplete value", "validation");
 
-  static $defaults: WUP.Text.Options = {
-    ...WUPBaseControl.$defaults,
+  static $defaults: WUP.Text.Options = inheritDefaults(WUPBaseControl.$defaults, {
     selectOnFocus: false,
     clearButton: true,
-    validationRules: {
-      ...WUPBaseControl.$defaults.validationRules,
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {
       min: (v, setV) =>
         (v === undefined || v.length < setV) && __wupln(`Min length is ${setV} characters`, "validation"),
       max: (v, setV) =>
         (v === undefined || v.length > setV) && __wupln(`Max length is ${setV} characters`, "validation"),
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && __wupln("Invalid email address", "validation"),
-    },
+    }),
     debounceMs: 0,
     mask: "",
     maskholder: "",
     prefix: "",
     postfix: "",
-  };
+  });
 
   $refBtnClear?: HTMLButtonElement;
   $refMaskholder?: HTMLSpanElement;

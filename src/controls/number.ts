@@ -1,4 +1,5 @@
 /* eslint-disable max-classes-per-file */
+import { inheritDefaults } from "../baseElement";
 import onScroll from "../helpers/onScroll";
 import { mathFixFP, onEvent } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
@@ -119,19 +120,17 @@ export default class WUPNumberControl<
   #ctr = this.constructor as typeof WUPNumberControl;
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Number.Options = {
-    ...(WUPTextControl.$defaults as WUP.Number.TextAnyOptions<any, any>),
-    validationRules: {
-      ...WUPBaseControl.$defaults.validationRules,
+  static $defaults: WUP.Number.Options = inheritDefaults(WUPTextControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {
       min: (v, setV, c) =>
         (v == null || v < setV) && __wupln(`Min value is ${(c as WUPNumberControl).valueToInput(setV)}`, "validation"),
       max: (v, setV, c) =>
         (v == null || v > setV) && __wupln(`Max value is ${(c as WUPNumberControl).valueToInput(setV)}`, "validation"),
-    },
+    }),
     format: null,
     scale: 1,
     offset: 0,
-  };
+  });
 
   /** Custom number parsing: better Number.parse because ignores wrong chars + depends format */
   static $parse(s: string, format: Required<WUP.Number.Format>): number | undefined {

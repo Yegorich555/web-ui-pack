@@ -1,3 +1,4 @@
+import { inheritDefaults } from "../baseElement";
 import { WUPcssHidden } from "../styles";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
@@ -209,12 +210,11 @@ export default class WUPRadioControl<
       }`;
   }
 
-  static $defaults: WUP.Radio.Options = {
-    ...WUPBaseControl.$defaults,
-    validationRules: { ...WUPBaseControl.$defaults.validationRules },
+  static $defaults: WUP.Radio.Options = inheritDefaults(WUPBaseControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {}),
     items: [],
     reverse: false,
-  };
+  });
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
     const d = super.cloneDefaults() as WUP.Radio.Options;

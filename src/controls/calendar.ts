@@ -3,7 +3,7 @@ import { WUPcssHidden } from "../styles";
 import WUPScrolled from "../helpers/scrolled";
 import { dateCopyTime, dateFromString, dateToString } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
-import { AttributeMap, AttributeTypes } from "../baseElement";
+import { AttributeMap, AttributeTypes, inheritDefaults } from "../baseElement";
 
 const tagName = "wup-calendar";
 
@@ -384,18 +384,15 @@ export default class WUPCalendarControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Calendar.Options = {
-    ...WUPBaseControl.$defaults,
-    validationRules: {
-      ...WUPBaseControl.$defaults.validationRules,
-    },
+  static $defaults: WUP.Calendar.Options = inheritDefaults(WUPBaseControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {}),
     utc: true,
     firstWeekDay: null,
     startWith: null,
     min: null,
     max: null,
     exclude: null,
-  };
+  });
 
   constructor() {
     super();

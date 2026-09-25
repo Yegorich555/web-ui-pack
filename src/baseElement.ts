@@ -36,6 +36,37 @@ export const enum AttributeTypes {
   selector,
 }
 
+/** Returns `$defaults` linked to parent: every option is read from parent until it's overridden,
+ * so changing parent `$defaults` affects inherited classes too
+ * * options added to parent later are accessible via prototype (of the first parent only) but aren't enumerable;
+ *   it's enough for `validationRules` because rules are read by key
+ * @param parent `$defaults` of parent; pass array for several parents: every option is read from the first parent that has it
+ * @param own options of inherited class: override parent ones and aren't affected by parent anymore
+ * @example
+ * static $defaults: WUP.Text.Options = inheritDefaults(WUPBaseControl.$defaults, { clearButton: true });
+ * WUPBaseControl.$defaults.validateDebounceMs = 300; // affects WUPTextControl.$defaults too
+ * WUPTextControl.$defaults.validateDebounceMs = 100; // from now on changing WUPBaseControl doesn't affect it */
+export function inheritDefaults<T extends Record<string, any>>(
+  parent: Record<string, any> | Array<Record<string, any>>,
+  own: NoInfer<Partial<T>>
+): T {
+  const parents: Array<Record<string, any>> = Array.isArray(parent) ? parent : [parent];
+  const o = Object.create(parents[0]);
+  const overridden = new Map<string, any>();
+  parents.forEach((p) =>
+    Object.keys(p).forEach((k) => {
+      !Object.hasOwn(o, k) &&
+        Object.defineProperty(o, k, {
+          configurable: true,
+          enumerable: true,
+          get: () => (overridden.has(k) ? overridden.get(k) : p[k]),
+          set: (v) => overridden.set(k, v),
+        });
+    })
+  );
+  return Object.assign(o, own);
+}
+
 /** Basic abstract class for every component in web-ui-pack */
 export default abstract class WUPBaseElement<
   TOptions extends Record<string, any> = Record<string, any>,

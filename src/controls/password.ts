@@ -1,3 +1,4 @@
+import { inheritDefaults } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import { stringLowerCount, stringUpperCount } from "../helpers/string";
 import { WUPcssIcon } from "../styles";
@@ -147,10 +148,8 @@ export default class WUPPasswordControl<
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Password.Options = {
-    ...WUPTextControl.$defaults,
-    validationRules: {
-      ...WUPTextControl.$defaults.validationRules,
+  static $defaults: WUP.Password.Options = inheritDefaults(WUPTextControl.$defaults, {
+    validationRules: inheritDefaults(WUPTextControl.$defaults.validationRules, {
       minNumber: (v, setV) =>
         (!v || (v.match(/[0-9]/g)?.length ?? 0) < setV) &&
         __wupln(`Must contain at least ${setV} number${setV === 1 ? "" : "s"}`, "validation"),
@@ -189,9 +188,9 @@ export default class WUPPasswordControl<
         }
         return __wupln("Passwords must be equal", "validation");
       },
-    },
+    }),
     reverse: false,
-  };
+  });
 
   $refBtnEye = document.createElement("button");
   protected override renderControl(): void {

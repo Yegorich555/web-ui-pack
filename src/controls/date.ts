@@ -1,4 +1,4 @@
-import { AttributeMap, AttributeTypes } from "../baseElement";
+import { AttributeMap, AttributeTypes, inheritDefaults } from "../baseElement";
 import dateCompareWithoutTime from "../helpers/dateCompareWithoutTime";
 import dateCopyTime from "../helpers/dateCopyTime";
 import dateFromString from "../helpers/dateFromString";
@@ -144,12 +144,9 @@ export default class WUPDateControl<
     return m;
   }
 
-  static $defaults: WUP.Date.Options = {
-    ...WUPBaseComboControl.$defaults,
-    ...WUPCalendarControl.$defaults,
+  static $defaults: WUP.Date.Options = inheritDefaults([WUPBaseComboControl.$defaults, WUPCalendarControl.$defaults], {
     // debounceMs: 500,
-    validationRules: {
-      ...WUPBaseComboControl.$defaults.validationRules,
+    validationRules: inheritDefaults(WUPBaseComboControl.$defaults.validationRules, {
       min: (v, setV, c) =>
         (v === undefined || dateCompareWithoutTime(v, setV, (c as WUPDateControl)._opts.utc) === -1) &&
         __wupln(`Min value is ${(c as WUPDateControl).valueToInput(setV)}`, "validation"),
@@ -159,12 +156,12 @@ export default class WUPDateControl<
       exclude: (v, setV, c) =>
         (v === undefined || setV.some((d) => dateCompareWithoutTime(v, d, (c as WUPDateControl)._opts.utc) === 0)) &&
         __wupln(`This value is disabled`, "validation"),
-    },
+    }),
     format: "",
     sync: null,
     // firstWeekDay: 1,
     // format: localeInfo.date.toLowerCase()
-  };
+  });
 
   get $initValue(): ValueType | undefined {
     return super.$initValue;

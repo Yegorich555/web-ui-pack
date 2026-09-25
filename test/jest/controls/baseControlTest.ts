@@ -14,6 +14,7 @@ declare global {
     interface ValidityMap {
       $alwaysValid: boolean;
       $alwaysInvalid: boolean;
+      $inheritedRule: boolean;
     }
   }
 }
@@ -220,6 +221,27 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$initValue).toBe(cfg.initValues[1].value);
       expect(el.$value).toBe(el.$initValue);
     });
+  });
+
+  test("$defaults inherited from WUPBaseControl", () => {
+    const was = WUPBaseControl.$defaults.focusDebounceMs;
+    WUPBaseControl.$defaults.focusDebounceMs = 321;
+    expect(elType.$defaults.focusDebounceMs).toBe(321);
+    expect((document.createElement(tagName) as WUPBaseControl).$options.focusDebounceMs).toBe(321);
+
+    // option overridden by inherited class isn't affected by parent anymore
+    elType.$defaults.focusDebounceMs = 5;
+    WUPBaseControl.$defaults.focusDebounceMs = 322;
+    expect(elType.$defaults.focusDebounceMs).toBe(5);
+    WUPBaseControl.$defaults.focusDebounceMs = was;
+    elType.$defaults.focusDebounceMs = was;
+
+    // rule added to parent later is available for inherited class
+    WUPBaseControl.$defaults.validationRules.$inheritedRule = () => "Inherited error";
+    el.$options.validations = { $inheritedRule: true };
+    el.$value = cfg.initValues[0].value;
+    expect(el.$validate()).toBe("Inherited error");
+    delete WUPBaseControl.$defaults.validationRules.$inheritedRule;
   });
 
   describe("base options", () => {

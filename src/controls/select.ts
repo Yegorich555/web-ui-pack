@@ -1,3 +1,4 @@
+import { inheritDefaults } from "../baseElement";
 import nestedProperty from "../helpers/nestedProperty";
 import onEvent from "../helpers/onEvent";
 import promiseWait from "../helpers/promiseWait";
@@ -206,18 +207,16 @@ export default class WUPSelectControl<
     return !inputValue || menuItemText.startsWith(inputValue) || menuItemText.includes(` ${inputValue}`);
   }
 
-  static $defaults: WUP.Select.Options = {
-    ...WUPBaseComboControl.$defaults,
-    validationRules: {
-      ...WUPBaseComboControl.$defaults.validationRules,
+  static $defaults: WUP.Select.Options = inheritDefaults(WUPBaseComboControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseComboControl.$defaults.validationRules, {
       minCount: (v, setV) => (v == null || v.length < setV) && __wupln(`Min count is ${setV}`, "validation"),
       maxCount: (v, setV) => (v == null || v.length > setV) && __wupln(`Max count is ${setV}`, "validation"),
-    },
+    }),
     openCase: MenuOpenCases.onClick | MenuOpenCases.onFocus | MenuOpenCases.onPressArrowKey | MenuOpenCases.onInput,
     allowNewValue: false,
     multiple: false,
     items: [],
-  };
+  });
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
     const d = super.cloneDefaults() as WUP.Select.Options;

@@ -1,3 +1,4 @@
+import { inheritDefaults } from "../baseElement";
 import { isAnimEnabled } from "../helpers/animate";
 import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
@@ -273,12 +274,11 @@ export default class WUPSelectManyControl<
     return super.$filterMenuItem.call(this, menuItemText, menuItemValue, inputValue, inputRawValue);
   }
 
-  static $defaults: WUP.SelectMany.Options = {
-    ...WUPSelectControl.$defaults,
+  static $defaults: WUP.SelectMany.Options = inheritDefaults(WUPSelectControl.$defaults, {
     multiple: true,
     sortable: false,
     hideSelected: false,
-  };
+  });
 
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;

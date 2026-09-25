@@ -1,3 +1,4 @@
+import { inheritDefaults } from "../baseElement";
 import { WUPCssIconHover, WUPcssIcon } from "../styles";
 import WUPSwitchControl from "./switch";
 
@@ -108,10 +109,9 @@ export default class WUPCheckControl<
       }`;
   }
 
-  static $defaults: WUP.Check.Options = {
-    ...WUPSwitchControl.$defaults,
-    // WARN: it's shared =>  validationRules: { ...WUPSwitchControl.$defaults.validationRules },
-  };
+  static $defaults: WUP.Check.Options = inheritDefaults(WUPSwitchControl.$defaults, {
+    // WARN: validationRules are shared with WUPSwitchControl; to add own rules use `validationRules: inheritDefaults(WUPSwitchControl.$defaults.validationRules, {...})`
+  });
 
   protected override renderControl(): void {
     this.$refInput.id = this.#ctr.$uniqueId;
