@@ -461,7 +461,10 @@ export default abstract class WUPBaseControl<
     validateDebounceMs: 500,
     validationCase: ValidationCases.onChangeSmart | ValidationCases.onFocusLost | ValidationCases.onFocusWithValue,
     validationRules: {
-      required: (v, setV) => setV === true && this.$isEmpty(v) && __wupln("This field is required", "validation"),
+      required: (v, setV, c) =>
+        setV === true &&
+        (c.constructor as typeof WUPBaseControl).$isEmpty(v) &&
+        __wupln("This field is required", "validation"),
     },
     validations: null,
     validationShowAll: false,

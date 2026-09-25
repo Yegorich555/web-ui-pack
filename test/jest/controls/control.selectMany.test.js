@@ -309,6 +309,15 @@ describe("control.selectMany", () => {
     expect(el.querySelector("[focused]").textContent).toBe(getItems()[2].text); // 3rd item
   });
 
+  test("validation [required] uses static $isEmpty of control", async () => {
+    el.$options.validations = { required: true };
+    await h.wait(1);
+    el.$value = [];
+    expect(el.$validate()).toBe("This field is required");
+    el.$value = [10];
+    expect(el.$validate()).toBeFalsy();
+  });
+
   test("option [hideSelected]", async () => {
     el.$options.hideSelected = false; // tests with 'true' see above
     el.$value = [getItems()[0].value];

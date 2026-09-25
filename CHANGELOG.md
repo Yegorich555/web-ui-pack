@@ -6,6 +6,7 @@
 
 ### Fixes & Improvements
 
+- **Controls**. Fixed validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts).
   - Added prop **isSorted** for headers
   - Added props **freezeRows** & **freezeColumns** for sheets
