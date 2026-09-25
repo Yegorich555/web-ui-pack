@@ -770,5 +770,4 @@ export default class WUPTextControl<
 }
 
 customElements.define(tagName, WUPTextControl);
-// todo example how to create built-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask

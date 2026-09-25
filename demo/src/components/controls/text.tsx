@@ -6,6 +6,7 @@ import Code from "src/elements/code";
 import stylesCom from "./controls.scss";
 import styles from "./text.scss";
 import TextControlWithMask from "./text.mask";
+import TextControlPhone from "./text.phone";
 
 WUPTextControl.$use();
 
@@ -155,6 +156,7 @@ export default function TextControlView() {
             w-initValue="12"
           />
         </TextControlWithMask>
+        <TextControlPhone />
 
         <FAQ
           endString=""
