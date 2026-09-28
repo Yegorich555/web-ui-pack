@@ -268,9 +268,9 @@ export default class WUPModalElement<
   // static get observedOptions(): Array<keyof WUP.Modal.Options> { return []; }
   // static get observedAttributes(): Array<string> { return []; }
 
-  /** Default class used for fade - blurring background for main content
-   * @defaultValue "wup-modal-fade" */
-  static $classFade = "wup-modal-fade";
+  /** Class used for fade - blurring background for main content
+   * @defaultValue "wup-modal-fade" - can't be changed */
+  static readonly $classFade = "wup-modal-fade";
   /** Default class that appended to body when modal opened (required to hide body scroll)
    * @defaultValue "wup-modal-open" */
   static $classOpened = "wup-modal-open";
