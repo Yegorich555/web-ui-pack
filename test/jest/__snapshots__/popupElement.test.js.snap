@@ -105,8 +105,8 @@ padding:0;}
 }
 
   :root {
-        --modal-anim-t: 400ms;
-      }
+  --modal-anim-t: 400ms;
+}
   
       :root {
         --popup-anim-t: 300ms;
@@ -126,24 +126,28 @@ padding:0;}
         --tooltip-shadow: #0006;
       }
   
-      WUP-POPUP {
-        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        z-index: 8000;
-        display: none;
-        opacity: 0;
-        position: fixed!important;
-        border-radius: var(--border-radius);
-        padding: var(--base-margin);
-        box-sizing: border-box;
-        white-space: pre-line;
-        overflow: auto;
-        overflow: overlay;
-      }
-      WUP-POPUP[open] { display: block; }
-      WUP-POPUP[show] { opacity: 1; }
-      
+WUP-POPUP {
+  --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  z-index: 8000;
+  display: none;
+  opacity: 0;
+  position: fixed !important;
+  border-radius: var(--border-radius);
+  padding: var(--base-margin);
+  box-sizing: border-box;
+  white-space: pre-line;
+  overflow: auto;
+  overflow: overlay;
+}
+WUP-POPUP[open] {
+  display: block;
+}
+WUP-POPUP[show] {
+  opacity: 1;
+}
 WUP-POPUP::-webkit-scrollbar {
-  width: 10px; height: 10px;
+  width: 10px;
+  height: 10px;
   cursor: pointer;
 }
 WUP-POPUP::-webkit-scrollbar-corner {
@@ -151,30 +155,27 @@ WUP-POPUP::-webkit-scrollbar-corner {
   cursor: pointer;
 }
 WUP-POPUP::-webkit-scrollbar-thumb {
-  border: 3px solid rgba(0,0,0,0);
+  border: 3px solid rgba(0, 0, 0, 0);
   background-clip: padding-box;
-  background-color: var(--scroll, rgba(0,0,0,0.2));
+  background-color: var(--scroll, rgba(0, 0, 0, 0.2));
   border-radius: 999px;
   cursor: pointer;
 }
-WUP-POPUP::-webkit-scrollbar-track-piece:vertical:start,
-WUP-POPUP::-webkit-scrollbar-track-piece:vertical:end,
-WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:start,
-WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
+@media (hover: hover) {
+WUP-POPUP::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
+  cursor: pointer;
+}
+}
+WUP-POPUP::-webkit-scrollbar-track-piece:vertical:start, WUP-POPUP::-webkit-scrollbar-track-piece:vertical:end, WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:start, WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
   cursor: pointer;
 }
-@media (hover) {
-  WUP-POPUP::-webkit-scrollbar-thumb:hover {
-    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
-    cursor: pointer;
+@media not all and (prefers-reduced-motion) {
+  WUP-POPUP {
+    transition: opacity var(--modal-anim), transform var(--modal-anim);
   }
 }
-      @media not all and (prefers-reduced-motion) {
-        WUP-POPUP {
-          transition: opacity var(--modal-anim), transform var(--modal-anim);
-        }
-      }
       WUP-POPUP,
       WUP-POPUP-arrow {
         --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -212,24 +213,28 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         overflow: visible;
       }
   
-      TEST-EL {
-        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        z-index: 8000;
-        display: none;
-        opacity: 0;
-        position: fixed!important;
-        border-radius: var(--border-radius);
-        padding: var(--base-margin);
-        box-sizing: border-box;
-        white-space: pre-line;
-        overflow: auto;
-        overflow: overlay;
-      }
-      TEST-EL[open] { display: block; }
-      TEST-EL[show] { opacity: 1; }
-      
+TEST-EL {
+  --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  z-index: 8000;
+  display: none;
+  opacity: 0;
+  position: fixed !important;
+  border-radius: var(--border-radius);
+  padding: var(--base-margin);
+  box-sizing: border-box;
+  white-space: pre-line;
+  overflow: auto;
+  overflow: overlay;
+}
+TEST-EL[open] {
+  display: block;
+}
+TEST-EL[show] {
+  opacity: 1;
+}
 TEST-EL::-webkit-scrollbar {
-  width: 10px; height: 10px;
+  width: 10px;
+  height: 10px;
   cursor: pointer;
 }
 TEST-EL::-webkit-scrollbar-corner {
@@ -237,30 +242,27 @@ TEST-EL::-webkit-scrollbar-corner {
   cursor: pointer;
 }
 TEST-EL::-webkit-scrollbar-thumb {
-  border: 3px solid rgba(0,0,0,0);
+  border: 3px solid rgba(0, 0, 0, 0);
   background-clip: padding-box;
-  background-color: var(--scroll, rgba(0,0,0,0.2));
+  background-color: var(--scroll, rgba(0, 0, 0, 0.2));
   border-radius: 999px;
   cursor: pointer;
 }
-TEST-EL::-webkit-scrollbar-track-piece:vertical:start,
-TEST-EL::-webkit-scrollbar-track-piece:vertical:end,
-TEST-EL::-webkit-scrollbar-track-piece:horizontal:start,
-TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
+@media (hover: hover) {
+TEST-EL::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
+  cursor: pointer;
+}
+}
+TEST-EL::-webkit-scrollbar-track-piece:vertical:start, TEST-EL::-webkit-scrollbar-track-piece:vertical:end, TEST-EL::-webkit-scrollbar-track-piece:horizontal:start, TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
   cursor: pointer;
 }
-@media (hover) {
-  TEST-EL::-webkit-scrollbar-thumb:hover {
-    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
-    cursor: pointer;
+@media not all and (prefers-reduced-motion) {
+  TEST-EL {
+    transition: opacity var(--modal-anim), transform var(--modal-anim);
   }
 }
-      @media not all and (prefers-reduced-motion) {
-        TEST-EL {
-          transition: opacity var(--modal-anim), transform var(--modal-anim);
-        }
-      }
       TEST-EL,
       TEST-EL-arrow {
         --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -446,8 +448,8 @@ padding:0;}
 }
 
   :root {
-        --modal-anim-t: 400ms;
-      }
+  --modal-anim-t: 400ms;
+}
   
       :root {
         --popup-anim-t: 300ms;
@@ -467,24 +469,28 @@ padding:0;}
         --tooltip-shadow: #0006;
       }
   
-      WUP-POPUP {
-        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        z-index: 8000;
-        display: none;
-        opacity: 0;
-        position: fixed!important;
-        border-radius: var(--border-radius);
-        padding: var(--base-margin);
-        box-sizing: border-box;
-        white-space: pre-line;
-        overflow: auto;
-        overflow: overlay;
-      }
-      WUP-POPUP[open] { display: block; }
-      WUP-POPUP[show] { opacity: 1; }
-      
+WUP-POPUP {
+  --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  z-index: 8000;
+  display: none;
+  opacity: 0;
+  position: fixed !important;
+  border-radius: var(--border-radius);
+  padding: var(--base-margin);
+  box-sizing: border-box;
+  white-space: pre-line;
+  overflow: auto;
+  overflow: overlay;
+}
+WUP-POPUP[open] {
+  display: block;
+}
+WUP-POPUP[show] {
+  opacity: 1;
+}
 WUP-POPUP::-webkit-scrollbar {
-  width: 10px; height: 10px;
+  width: 10px;
+  height: 10px;
   cursor: pointer;
 }
 WUP-POPUP::-webkit-scrollbar-corner {
@@ -492,30 +498,27 @@ WUP-POPUP::-webkit-scrollbar-corner {
   cursor: pointer;
 }
 WUP-POPUP::-webkit-scrollbar-thumb {
-  border: 3px solid rgba(0,0,0,0);
+  border: 3px solid rgba(0, 0, 0, 0);
   background-clip: padding-box;
-  background-color: var(--scroll, rgba(0,0,0,0.2));
+  background-color: var(--scroll, rgba(0, 0, 0, 0.2));
   border-radius: 999px;
   cursor: pointer;
 }
-WUP-POPUP::-webkit-scrollbar-track-piece:vertical:start,
-WUP-POPUP::-webkit-scrollbar-track-piece:vertical:end,
-WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:start,
-WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
+@media (hover: hover) {
+WUP-POPUP::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
+  cursor: pointer;
+}
+}
+WUP-POPUP::-webkit-scrollbar-track-piece:vertical:start, WUP-POPUP::-webkit-scrollbar-track-piece:vertical:end, WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:start, WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
   cursor: pointer;
 }
-@media (hover) {
-  WUP-POPUP::-webkit-scrollbar-thumb:hover {
-    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
-    cursor: pointer;
+@media not all and (prefers-reduced-motion) {
+  WUP-POPUP {
+    transition: opacity var(--modal-anim), transform var(--modal-anim);
   }
 }
-      @media not all and (prefers-reduced-motion) {
-        WUP-POPUP {
-          transition: opacity var(--modal-anim), transform var(--modal-anim);
-        }
-      }
       WUP-POPUP,
       WUP-POPUP-arrow {
         --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -553,24 +556,28 @@ WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
         overflow: visible;
       }
   
-      TEST-EL {
-        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        z-index: 8000;
-        display: none;
-        opacity: 0;
-        position: fixed!important;
-        border-radius: var(--border-radius);
-        padding: var(--base-margin);
-        box-sizing: border-box;
-        white-space: pre-line;
-        overflow: auto;
-        overflow: overlay;
-      }
-      TEST-EL[open] { display: block; }
-      TEST-EL[show] { opacity: 1; }
-      
+TEST-EL {
+  --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  z-index: 8000;
+  display: none;
+  opacity: 0;
+  position: fixed !important;
+  border-radius: var(--border-radius);
+  padding: var(--base-margin);
+  box-sizing: border-box;
+  white-space: pre-line;
+  overflow: auto;
+  overflow: overlay;
+}
+TEST-EL[open] {
+  display: block;
+}
+TEST-EL[show] {
+  opacity: 1;
+}
 TEST-EL::-webkit-scrollbar {
-  width: 10px; height: 10px;
+  width: 10px;
+  height: 10px;
   cursor: pointer;
 }
 TEST-EL::-webkit-scrollbar-corner {
@@ -578,30 +585,27 @@ TEST-EL::-webkit-scrollbar-corner {
   cursor: pointer;
 }
 TEST-EL::-webkit-scrollbar-thumb {
-  border: 3px solid rgba(0,0,0,0);
+  border: 3px solid rgba(0, 0, 0, 0);
   background-clip: padding-box;
-  background-color: var(--scroll, rgba(0,0,0,0.2));
+  background-color: var(--scroll, rgba(0, 0, 0, 0.2));
   border-radius: 999px;
   cursor: pointer;
 }
-TEST-EL::-webkit-scrollbar-track-piece:vertical:start,
-TEST-EL::-webkit-scrollbar-track-piece:vertical:end,
-TEST-EL::-webkit-scrollbar-track-piece:horizontal:start,
-TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
+@media (hover: hover) {
+TEST-EL::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
+  cursor: pointer;
+}
+}
+TEST-EL::-webkit-scrollbar-track-piece:vertical:start, TEST-EL::-webkit-scrollbar-track-piece:vertical:end, TEST-EL::-webkit-scrollbar-track-piece:horizontal:start, TEST-EL::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
   cursor: pointer;
 }
-@media (hover) {
-  TEST-EL::-webkit-scrollbar-thumb:hover {
-    background-color: var(--scroll-hover, rgba(0,0,0,0.5));
-    cursor: pointer;
+@media not all and (prefers-reduced-motion) {
+  TEST-EL {
+    transition: opacity var(--modal-anim), transform var(--modal-anim);
   }
 }
-      @media not all and (prefers-reduced-motion) {
-        TEST-EL {
-          transition: opacity var(--modal-anim), transform var(--modal-anim);
-        }
-      }
       TEST-EL,
       TEST-EL-arrow {
         --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;

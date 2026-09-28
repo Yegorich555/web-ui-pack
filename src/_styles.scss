@@ -1,0 +1,167 @@
+/// Style for small-scroll; vars --scroll, --scroll-hover to customize styling
+/// @example :host { @include wup-scrollSmall; }
+@mixin wup-scrollSmall {
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: none;
+    cursor: pointer;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border: 3px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    background-color: var(--scroll, rgba(0, 0, 0, 0.2));
+    border-radius: 999px;
+    cursor: pointer;
+
+    // `@media (hover: hover)` is added by postcss-hover-media-feature
+    &:hover {
+      background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
+      cursor: pointer;
+    }
+  }
+
+  &::-webkit-scrollbar-track-piece:vertical:start,
+  &::-webkit-scrollbar-track-piece:vertical:end,
+  &::-webkit-scrollbar-track-piece:horizontal:start,
+  &::-webkit-scrollbar-track-piece:horizontal:end {
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+/// Style for button with icons
+/// @example :host > button { @include wup-btnIcon; }
+@mixin wup-btnIcon {
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+
+  &:after {
+    content: "";
+    display: inline-block;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    background: var(--icon, #000);
+    /* stylelint-disable plugin/no-unsupported-browser-features */
+    -webkit-mask-size: var(--icon-size, 1em);
+    mask-size: var(--icon-size, 1em);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-image: var(--icon-img);
+    mask-image: var(--icon-img);
+    /* stylelint-enable plugin/no-unsupported-browser-features */
+  }
+
+  &:focus {
+    box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+
+    &:after {
+      background: var(--icon-hover, var(--icon, #000));
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+
+      &:after {
+        background: var(--icon-hover, var(--icon, #000));
+      }
+    }
+
+    &:focus:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+/// Default style for primary/submit button; WARN: it contains min-width: 10em...
+/// @param $type 1 - primary, 2/3 - secondary styles via vars `--base-btn2-*`, `--base-btn3-*`
+/// @example :host button[type="submit"] { @include wup-button; }
+@mixin wup-button($type: 1) {
+  $v: if($type == 1, "", $type);
+
+  box-shadow: none;
+  border: none;
+  border-radius: var(--border-radius);
+  box-sizing: border-box;
+  padding: 11px;
+  margin: var(--base-margin) 0;
+  min-width: 10em;
+  cursor: pointer;
+  font: inherit;
+  font-weight: bold;
+  background: var(--base-btn#{$v}-bg);
+  color: var(--base-btn#{$v}-text);
+  outline: none;
+
+  &:focus {
+    box-shadow: inset 0 0 0 2px var(--base-btn-focus);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      box-shadow: inset 0 0 0 99999px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  &[disabled] {
+    opacity: 0.3;
+    cursor: not-allowed;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  &[aria-busy] {
+    cursor: wait;
+  }
+
+  &[busy] {
+    position: relative;
+
+    &:after {
+      content: "";
+      display: block;
+      position: absolute;
+      height: 3px;
+      width: 90%;
+      width: calc(100% - calc(var(--base-margin) * 2));
+      background-color: #fff;
+      animation: BTN-BUSY 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+      opacity: 0.3;
+      left: 50%;
+    }
+  }
+
+  // Sass moves it to the root level
+  @keyframes BTN-BUSY {
+    0% {
+      transform: translateX(-50%) scaleX(40%);
+    }
+
+    50% {
+      transform: translateX(-50%) scaleX(100%);
+    }
+
+    100% {
+      transform: translateX(-50%) scaleX(40%);
+    }
+  }
+}

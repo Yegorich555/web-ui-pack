@@ -1,7 +1,6 @@
 import { AttributeMap, AttributeTypes } from "./baseElement";
 import WUPBaseModal from "./baseModal";
 import focusFirst from "./helpers/focusFirst";
-import { WUPcssButton } from "./styles";
 
 export const enum ModalOpenCases {
   /** When $open() is called programmatically */
@@ -278,134 +277,11 @@ export default class WUPModalElement<
 
   // WARN: modal-anim shouldn't affect on animation of nested
   static get $styleRoot(): string {
-    return `:root {
-        --modal-anim-t: 400ms;
-        --modal-text: inherit;
-        --modal-bg: #fff;
-        --modal-fade: #0007;
-        --modal-margin: 2em;
-      }
-      [wupdark] {
-        --modal-bg: #222a36;
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        z-index: 9002;
-        width: 100%;
-        max-width: 600px;
-        min-height: 150px;
-        color: var(--modal-text);
-        background: var(--modal-bg);
-        border: 1px solid #0002;
-        user-select: none;
-        pointer-events: none;
-        touch-action: none;
-        outline: none;
-      }
-      :host[open] {
-        user-select: initial;
-        pointer-events: initial;
-        touch-action: initial;
-       }
-      :host[w-placement="top"] {
-        top:0;left:0;right:0;
-        margin: var(--modal-margin);
-        margin-left: auto;
-        margin-right: auto;
-        max-height: calc(100% - var(--modal-margin) * 2);
-        transform: translateY(-50%);
-      }
-      :host[w-placement="center"] {
-        top:0;left:0;right:0;bottom:0;
-        margin: auto;
-        height: fit-content${
-          /* This is tricky rule. If it will buggy need to rewrite centering logic via js-core like it works with popup  */ ""
-        };
-        max-height: calc(100% - var(--modal-margin) * 2);
-        transform: translateY(-150%);
-      }
-      :host[w-placement="right"] {
-        right:0;top:0;bottom:0;
-        border-radius: 0;
-        transform: translateX(100%);
-      }
-      :host[w-placement="left"] {
-        left:0;top:0;bottom:0;
-        border-radius: 0;
-        transform: translateX(-100%);
-      }
-      :host[show] {
-        transform: none;
-      }
-      :host[hide] {
-        opacity: 0!important;
-        pointer-events: none!important;
-        user-select: none!important;
-        touch-action: none!important;
-      }
-      @media (max-width: 600px) {
-        :host {
-          --modal-margin: 0px;
-          border-radius: 0;
-        }
-      }
-      .${this.$classFade} {
-         --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        z-index: 9000;
-        display: block;
-        position: fixed;
-        top:0;left:0;right:0;bottom:0;
-        background: var(--modal-fade);
-        opacity: 0;
-        pointer-events: none;
-        touch-action: none;
-      }
-      .${this.$classFade}[show] {
-         pointer-events: initial;
-         touch-action: initial;
-         opacity: 1;
-      }
-      @media not all and (prefers-reduced-motion) {
-       .${this.$classFade} {
-          transition: opacity var(--modal-anim), transform var(--modal-anim);
-        }
-      }
-      :host > button[close] {
-        --icon-img: var(--wup-icon-cross);
-        z-index: 10;
-        position: absolute;
-        right: 0;
-        margin: -0.2em 1em 0;
-      }
-      :host h2 {
-        margin: 0 0 1em;
-        padding-right: 1.8em;
-      }
-      :host wup-form {
-        max-width: initial;
-      }
-      :host wup-form button[type=submit] {
-        margin-bottom: 0;
-        margin-left: auto;
-      }
-      :host footer {
-        display: flex;
-        gap: calc(var(--base-margin) / 2);
-        margin-top: var(--base-margin);
-        justify-content: flex-end;
-      }
-      ${WUPcssButton(":host footer>button")}
-      :host footer>button[type] {
-         margin: 0;
-         min-width: 7em;
-      }
-      :host footer>button[data-close=modal] {
-         background: var(--base-btn2-bg);
-         color: var(--base-btn2-text);
-      }`;
+    return super.$style;
   }
 
   static $defaults: WUP.Modal.Options = {
