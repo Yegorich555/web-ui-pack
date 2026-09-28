@@ -1,6 +1,5 @@
 // import WUPBaseElement from "../baseElement";
 import WUPBaseElement from "../baseElement";
-import { WUPcssScrollSmall } from "../styles";
 
 let isFirst = true;
 /** Represents contenteditable element with custom input props as value, select etc. */
@@ -13,16 +12,7 @@ export default class WUPTextareaInput extends HTMLElement {
   }
 
   static get $style(): string {
-    return `:host {
-          display: inline-block; ${/* it removes extra space below */ ""}
-          cursor: text;
-          white-space: pre-wrap;
-          word-break: break-word;
-          overflow-wrap: break-word;
-          overflow: auto;
-          margin: 0; padding: 0;
-        }
-        ${WUPcssScrollSmall(":host")}`;
+    return "";
   }
 
   constructor() {

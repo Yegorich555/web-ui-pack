@@ -4,7 +4,6 @@ import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSortElement from "../sortElement";
-import { WUPcssIcon, WUPcssScrollSmall } from "../styles";
 import { MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 import WUPSelectControl from "./select";
@@ -118,143 +117,11 @@ export default class WUPSelectManyControl<
   #ctr = this.constructor as typeof WUPSelectManyControl;
 
   static get $styleRoot(): string {
-    return `:root {
-        --ctrl-select-item-text: inherit;
-        --ctrl-select-item-bg: rgba(0,0,0,0.04);
-        --ctrl-select-item-del-display: none;
-        --ctrl-select-item-del: var(--ctrl-icon);
-        --ctrl-select-item-del-img: var(--wup-icon-cross);
-        --ctrl-select-item-del-size: 0.8em;
-        --ctrl-select-gap: 0.5em;
-      }
-      [wupdark] {
-        --ctrl-select-item-bg: #fff2;
-        --ctrl-select-item-del: var(--ctrl-icon);
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host label {
-        position: relative;
-      }
-      ${WUPcssScrollSmall(":host label>span")}
-      :host label > span {
-        position: initial;
-        overflow: auto;
-        gap: var(--ctrl-select-gap);
-        flex-wrap: wrap;
-        flex-direction: row;
-        margin: var(--ctrl-padding);
-        padding: 0;
-        margin-left: 0;
-        margin-right: 0;
-        max-height: 5em;
-      }
-      :host strong {
-        top: 1.6em;
-        margin: var(--ctrl-padding);
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-      :host[filled] strong {
-        transform: var(--ctrl-label-active-pos);
-      }
-      :host [item],
-      :host input {
-        padding: var(--ctrl-select-gap);
-      }
-      :host input {
-        flex: 1 1 auto;
-        width: 0;
-        min-width: 1em;
-        padding-left: 0; padding-right: 0;
-      }
-      :host[filled] input:placeholder-shown,
-      :host[filled] input:not(:focus) {
-        min-width: 0;
-        padding-left: calc(var(--ctrl-select-gap));
-        margin-right: 0;
-        margin-left: calc(-1 * var(--ctrl-select-gap));
-      }
-      :host [item] {
-        --ctrl-icon: var(--ctrl-select-item-del);
-        --ctrl-icon-size: var(--ctrl-select-item-del-size);
-        --ctrl-icon-img: var(--ctrl-select-item-del-img);
-        color: var(--ctrl-select-item-text);
-        background-color: var(--ctrl-select-item-bg);
-        border-radius: var(--ctrl-border-radius);
-        cursor: pointer;
-        box-sizing: border-box;
-        white-space: nowrap;
-        overflow: hidden;
-        flex: 0 0 auto;
-      }
-      :host [item]:after {
-        ${WUPcssIcon}
-        display: var(--ctrl-select-item-del-display);
-        content: "";
-        padding: 0;
-        margin-left: 0.5em;
-      }
-      :host [item][focused] {
-        color: var(--ctrl-focus-label);
-        box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
-      }
-      :host [item][removed],
-      :host [item][drag][remove]  {
-        --ctrl-icon: var(--ctrl-err);
-        text-decoration: line-through;
-        color: var(--ctrl-err);
-        background-color: var(--ctrl-err-bg);
-      }
-      :host[readonly] [item] {
-        pointer-events: none;
-        touch-action: none;
-      }
-      :host button[clear] {
-        display: inline-block;
-        opacity: 0;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        :host [item]:hover {
-          --ctrl-icon: var(--ctrl-err);
-          text-decoration: line-through;
-          color: var(--ctrl-err);
-          background-color: var(--ctrl-err-bg);
-        }
-      }
-      @media not all and (pointer: fine) {
-        :host [item] {
-          -webkit-user-select: none;
-          user-select: none;
-        }${/* don't allow select text on blocks to allow custom touch-logic */ ""}
-      }
-      @media not all and (prefers-reduced-motion) {
-        :host [item][removed] {
-          transition: all var(--anim-t) ease-in-out;
-          transition-property: margin, padding, width, opacity;
-          padding-left: 0; padding-right: 0;
-          margin-left: 0; margin-right: 0;
-          width: 0;
-          opacity: 0;
-        }
-      }
-      ${
-        /* dragdrop styles ([drag], [drop], [drop-line], [hovered]) are reused from the sortElement: see $options.sortable
-            WARN: $styleRoot of the sortElement isn't appended (see $attach with className:null) - so its css-vars are defined here */ ""
-      }
-      :host {
-        --sort-active-color: var(--ctrl-focus-label);
-        --sort-active-shadow: var(--ctrl-focus);
-      }
-      ${WUPSortElement.$style}
-      ${/* WARN: after the styles above - the drag-clone must keep colors of an ordinary item */ ""}
-      :host [item][drag] {
-        --ctrl-icon: var(--ctrl-select-item-del);
-        color: var(--ctrl-select-item-text);
-        background-color: var(--ctrl-select-item-bg);
-      }`;
+    return super.$style;
   }
 
   static override $isEmpty(v: unknown[] | undefined): boolean {

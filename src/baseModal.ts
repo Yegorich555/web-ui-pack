@@ -1,6 +1,5 @@
 import WUPBaseElement from "./baseElement";
 import { parseMsTime } from "./helpers/styleHelpers";
-import { WUPcssScrollSmall } from "./styles";
 
 const enum OpenCases {
   /** When $open() is called programmatically */
@@ -49,34 +48,11 @@ export default abstract class WUPBaseModal<
 > extends WUPBaseElement<TOptions, Events> {
   // #ctr = this.constructor as typeof WUPBaseModal;
   static get $styleRoot(): string {
-    return `:root {
-        --modal-anim-t: 400ms;
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        z-index: 8000;
-        display: none;
-        opacity: 0;
-        position: fixed!important;
-        border-radius: var(--border-radius);
-        padding: var(--base-margin);
-        box-sizing: border-box;
-        white-space: pre-line;
-        overflow: auto;
-        overflow: overlay;
-      }
-      :host[open] { display: block; }
-      :host[show] { opacity: 1; }
-      ${WUPcssScrollSmall(":host")}
-      @media not all and (prefers-reduced-motion) {
-        :host {
-          transition: opacity var(--modal-anim), transform var(--modal-anim);
-        }
-      }`;
+    return super.$style;
   }
 
   // static $defaults: WUP.BaseModal.Options = {};

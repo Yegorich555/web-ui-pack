@@ -182,64 +182,11 @@ export default class WUPPopupElement<
   };
 
   static get $styleRoot(): string {
-    return `
-      :root {
-        --popup-anim-t: 300ms;
-        --popup-text: inherit;
-        --popup-bg: #fff;
-        --popup-shadow: #0003;
-        --tooltip-text: inherit;
-        --tooltip-bg: rgba(255,255,255,0.9);
-        --tooltip-shadow: #0003;
-      }
-      [wupdark] {
-        --popup-text: #d8d8d8;
-        --popup-bg: #2b3645;
-        --popup-shadow: #0006;
-        --tooltip-text: #d8d8d8;
-        --tooltip-bg: rgba(16,70,82,0.9);
-        --tooltip-shadow: #0006;
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host,
-      :host-arrow {
-        --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        opacity: 0;
-      }
-      :host {
-        top:0;left:0;
-        padding: 4px; margin: 0;
-        box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup-text);
-        background: var(--popup-bg);
-        text-overflow: ellipsis;
-      }
-      :host[tooltip] {
-         z-index: 99999;
-      }
-      :host[tooltip],
-      :host[tooltip]+:host-arrow {
-        --popup: var(--tooltip-text);
-        --popup-bg: var(--tooltip-bg);
-        --popup-shadow: var(--tooltip-shadow);
-      }
-      :host[show]+:host-arrow { opacity: 1; }
-      @media not all and (prefers-reduced-motion) {
-        :host,
-        :host+:host-arrow {
-          transition: opacity var(--popup-anim);
-        }
-      }
-      :host[w-animation] {
-        transition-property: none;
-        opacity: 1;
-      }
-      :host[w-animation=stack] {
-        overflow: visible;
-      }`;
+    return super.$style;
   }
 
   /** Default options. Change it to configure default behavior */

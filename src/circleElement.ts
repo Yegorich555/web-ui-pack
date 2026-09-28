@@ -163,76 +163,11 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   // #ctr = this.constructor as typeof WUPCircleElement;
 
   static get $styleRoot(): string {
-    return `:root {
-          --circle-0: #e4e4e4;
-          --circle-1: #009fbc;
-          --circle-2: #ff9f00;
-          --circle-3: #1fb13f;
-          --circle-4: #9482bd;
-          --circle-5: #8bc4d7;
-          --circle-6: #1abdb5;
-          --circle-7: #a0db67;
-          --circle-8: #67dbba;
-        }
-        [wupdark] {
-          --circle-0: #104652;
-        }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        contain: style;
-        display: block;
-        position: relative;
-        overflow: visible;
-        margin: auto;
-        min-width: 100px;
-        min-height: 50px;
-        --anim-t: 400ms;
-      }
-      :host>strong {
-        display: block;
-        position: absolute;
-        transform: translate(-50%,-50%);
-        top: 50%; left: 50%;
-        font-size: larger;
-        max-width: calc(100% - 20px);
-        white-space: pre-line;
-        text-align: center;
-      }
-      :host[half] {
-        aspect-ratio: 2;
-      }
-      :host[half]>strong {
-        top: initial;
-        bottom: 0;
-        transform: translateX(-50%);
-      }
-      :host>svg {
-        overflow: visible;
-        display: block;
-      }
-      :host>svg path {
-        stroke-width: 0;
-        fill-rule: evenodd;
-      }
-      :host>svg>path { fill: var(--circle-0); }
-      :host>svg>g>path:nth-child(1) { fill: var(--circle-1); }
-      :host>svg>g>path:nth-child(2) { fill: var(--circle-2); }
-      :host>svg>g>path:nth-child(3) { fill: var(--circle-3); }
-      :host>svg>g>path:nth-child(4) { fill: var(--circle-4); }
-      :host>svg>g>path:nth-child(5) { fill: var(--circle-5); }
-      :host>svg>g>path:nth-child(6) { fill: var(--circle-6); }
-      :host>svg>g>path:nth-child(7) { fill: var(--circle-7); }
-      :host>svg>g>path:nth-child(8) { fill: var(--circle-8); }
-      :host>wup-popup,
-      :host>wup-popup-arrow {
-        white-space: pre;
-        pointer-events: none;
-        user-select: none;
-        touch-action: none;
-      }`;
+    return super.$style;
   }
 
   static $defaults: WUP.Circle.Options = {

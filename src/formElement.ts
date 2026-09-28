@@ -1,7 +1,6 @@
 import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
-import { WUPcssButton } from "./styles";
 
 export const enum SubmitActions {
   /** Disable any action */
@@ -187,37 +186,11 @@ export default class WUPFormElement<
   #ctr = this.constructor as typeof WUPFormElement;
 
   static get $styleRoot(): string {
-    return `:root {
-      --btn-submit-text: var(--base-btn-text);
-      --btn-submit-bg: var(--base-btn-bg);
-      --btn-submit-focus: var(--base-btn-focus);
-    }
-    [wupdark] {
-      --btn-submit-text: var(--base-btn-text);
-      --btn-submit-bg: var(--base-btn-bg);
-      --btn-submit-focus: var(--base-btn-focus);
-    }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-        :host {
-          position: relative;
-          display: block;
-          max-width: 500px;
-          margin: auto;
-        }
-        ${WUPcssButton(":host button[type=submit]")}
-        :host button[type=submit] {
-          --base-btn-text: var(--btn-submit-text);
-          --base-btn-bg: var(--btn-submit-bg);
-          --base-btn-focus: var(--btn-submit-focus);
-          display: block;
-          position: relative;
-        }
-        :host[aria-busy] {
-          cursor: progress;
-        }`;
+    return super.$style;
   }
 
   static get mappedAttributes(): Record<string, AttributeMap> {

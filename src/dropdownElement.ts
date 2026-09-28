@@ -1,7 +1,6 @@
 import WUPBaseElement, { inheritDefaults } from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
 import { PopupAnimations, PopupCloseCases, PopupOpenCases } from "./popup/popupElement.types";
-import { WUPcssButton, WUPcssMenu } from "./styles";
 
 const tagName = "wup-dropdown";
 declare global {
@@ -99,16 +98,7 @@ export default class WUPDropdownElement<
   #ctr = this.constructor as typeof WUPDropdownElement;
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        contain: style;
-        display: inline-block;
-      }${WUPcssButton(":host button")}
-      :host button {
-        min-width: initial;
-        margin: 0;
-        padding: 0.7em;
-      }${WUPcssMenu(":host>[menu]")}`;
+    return super.$style;
   }
 
   /** Default options applied to every element. Change it to configure default behavior

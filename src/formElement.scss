@@ -1,0 +1,33 @@
+@import "styles";
+
+:root {
+  --btn-submit-text: var(--base-btn-text);
+  --btn-submit-bg: var(--base-btn-bg);
+  --btn-submit-focus: var(--base-btn-focus);
+
+  [wupdark] {
+    --btn-submit-text: var(--base-btn-text);
+    --btn-submit-bg: var(--base-btn-bg);
+    --btn-submit-focus: var(--base-btn-focus);
+  }
+}
+
+:host {
+  position: relative;
+  display: block;
+  max-width: 500px;
+  margin: auto;
+
+  button[type="submit"] {
+    @include wup-button;
+    --base-btn-text: var(--btn-submit-text);
+    --base-btn-bg: var(--btn-submit-bg);
+    --base-btn-focus: var(--btn-submit-focus);
+    display: block;
+    position: relative;
+  }
+
+  &[aria-busy] {
+    cursor: progress;
+  }
+}

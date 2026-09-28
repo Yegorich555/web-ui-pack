@@ -1,0 +1,211 @@
+@import "../styles";
+
+:root {
+  --ctrl-autofill: #00869e;
+  --ctrl-clear: red;
+  --ctrl-clear-hover: rgba(255, 0, 0, 0.1);
+  --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
+
+  [wupdark] {
+    --ctrl-clear-hover: rgba(255, 0, 0, 0.2);
+    --ctrl-autofill: #89bc55;
+    --ctrl-autofill-caret: #fff;
+  }
+}
+
+:host {
+  cursor: text;
+  text-align: start;
+
+  label > span {
+    width: 100%;
+    position: relative; // to position <strong /> relative to input
+    display: flex;
+    flex-direction: row-reverse; // WA: required for reading <strong /> 1st
+  }
+
+  input,
+  textarea,
+  [maskholder],
+  [prefix],
+  [postfix] {
+    padding: var(--ctrl-padding);
+    padding-left: 0;
+    padding-right: 0;
+    font: inherit;
+    text-align: inherit;
+    color: inherit;
+    margin: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"],
+  [maskholder],
+  [postfix] {
+    width: 100%;
+    box-sizing: border-box;
+    border: none;
+    background: none;
+    outline: none;
+  }
+
+  [prefix],
+  [postfix] {
+    color: inherit;
+    flex-shrink: 0;
+  }
+
+  [maskholder],
+  [prefix],
+  [postfix] {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+    text-overflow: initial;
+    white-space: pre;
+  }
+
+  [postfix] {
+    position: absolute;
+  }
+
+  [maskholder] {
+    position: absolute;
+    opacity: 0.65;
+  }
+
+  [maskholder] > i,
+  [postfix] > i {
+    visibility: hidden;
+    font: inherit;
+    white-space: pre;
+  }
+
+  // `:-webkit-autofill` is added by autoprefixer
+  input:autofill,
+  textarea:autofill,
+  [contenteditable="true"]:autofill {
+    font: inherit;
+    background-clip: text;
+    -webkit-text-fill-color: var(--ctrl-autofill);
+    caret-color: var(--ctrl-autofill-caret, auto);
+  }
+
+  strong {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    transform-origin: top left;
+    transform: translateY(-50%);
+    font-weight: normal;
+    text-decoration: none;
+    backface-visibility: hidden; // to fix sometimes blink during the animation
+
+    @media not all and (prefers-reduced-motion) {
+      transition: top var(--anim), transform var(--anim), color var(--anim);
+    }
+  }
+
+  input:not(:focus)::placeholder,
+  textarea:not(:focus)::placeholder {
+    color: transparent;
+  }
+
+  &:focus-within strong,
+  input:not(:placeholder-shown) + strong,
+  textarea:not(:placeholder-shown) + strong,
+  [contenteditable="true"]:not(:empty) + strong,
+  legend {
+    transform: var(--ctrl-label-active-pos);
+  }
+
+  // `:-webkit-autofill + strong` is added by autoprefixer
+  /* stylelint-disable-next-line no-descending-specificity */
+  input:autofill + strong,
+  textarea:autofill + strong,
+  [contenteditable="true"]:autofill + strong {
+    transform: var(--ctrl-label-active-pos);
+  }
+
+  &:focus-within [maskholder],
+  &:focus-within [prefix],
+  &:focus-within [postfix],
+  input:not(:placeholder-shown) ~ [prefix],
+  input:not(:placeholder-shown) ~ [postfix],
+  textarea:not(:placeholder-shown) ~ [prefix],
+  textarea:not(:placeholder-shown) ~ [postfix] {
+    display: inline-block;
+    opacity: 1;
+  }
+
+  // style for icons
+  label:after,
+  label:before {
+    @include wup-icon;
+    cursor: pointer;
+    /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+    mask-image: none;
+  }
+
+  label:after {
+    margin-right: calc(var(--ctrl-icon-size) / -2);
+  }
+
+  label:before {
+    margin-left: calc(var(--ctrl-icon-size) / -2);
+  }
+
+  label > button {
+    z-index: 1;
+    contain: strict;
+    font-size: inherit;
+    flex: 0 0 auto;
+    align-self: center;
+  }
+
+  button[clear] {
+    --icon-size: var(--ctrl-icon-size);
+    --icon-hover-r: 24px;
+    --icon-img: var(--wup-icon-cross);
+    --icon: var(--ctrl-label);
+    --icon-hover: var(--ctrl-clear);
+    --icon-hover-bg: var(--ctrl-clear-hover);
+    display: none;
+    opacity: 0;
+    margin-right: -0.5em;
+  }
+
+  button[clear="back"] {
+    --icon-img: var(--wup-icon-back);
+  }
+
+  &:focus-within button[clear] {
+    display: inline-block;
+    opacity: 1;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover button[clear] {
+      display: inline-block;
+      opacity: 1;
+    }
+  }
+
+  &[disabled] button[clear],
+  &[readonly] button[clear] {
+    display: none;
+    pointer-events: none;
+  }
+}

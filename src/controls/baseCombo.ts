@@ -89,35 +89,7 @@ export default abstract class WUPBaseComboControl<
   #ctr = this.constructor as typeof WUPBaseComboControl;
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        cursor: pointer;
-      }
-      :host input {
-        cursor: text;
-      }
-      :host input:placeholder-shown,
-      :host input:read-only {
-        cursor: pointer;
-      }
-      :host label:after {
-        content: "";
-        -webkit-mask-image: var(--ctrl-icon-img);
-        mask-image: var(--ctrl-icon-img);
-      }
-      @media not all and (prefers-reduced-motion) {
-        :host label:after {
-          transition: transform var(--anim);
-        }
-      }
-      :host button[clear] {
-        margin: 0;
-      }
-      :host > [menu] {
-        padding: 0;
-        max-height: 300px;
-        z-index: 8010;
-      }`;
+    return super.$style;
   }
 
   static $defaults: WUP.BaseCombo.Options<any> = inheritDefaults(WUPTextControl.$defaults, {

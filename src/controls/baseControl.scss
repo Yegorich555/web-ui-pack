@@ -1,0 +1,193 @@
+@import "../styles";
+
+// NiceToHave: change icons to fonts: wupfont: in this case possible to improve btnClear: hover
+:root {
+  --ctrl-padding: 1.5em 1em 0.5em 1em;
+  --ctrl-focus: var(--base-focus);
+  --ctrl-focus-label: var(--ctrl-focus);
+  --ctrl-selected: var(--ctrl-focus);
+  --ctrl-label: #5e5e5e;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-icon-size: 1em;
+  --ctrl-text: inherit;
+  --ctrl-bg: #fff;
+  --ctrl-border: #e6e6e6;
+  --ctrl-border-radius: var(--border-radius);
+  --ctrl-err: #ad0000;
+  --ctrl-err-bg: #fff4fa;
+  --ctrl-err-valid: green;
+  --ctrl-invalid-border: red;
+
+  [wupdark] {
+    --ctrl-bg: none;
+    --ctrl-border: #104652;
+    --ctrl-label: #919191;
+    --ctrl-icon: var(--ctrl-label);
+    --ctrl-focus-label: #25a1b6;
+    --ctrl-selected: #25a1b6;
+    --ctrl-err: #ff6666;
+    --ctrl-err-bg: #000;
+    --ctrl-err-valid: #54d754;
+  }
+}
+
+:host {
+  --ctrl-focus-border: var(--ctrl-focus);
+  contain: style; // WARN: it's tricky rule
+  display: block;
+  flex: 1;
+  margin: var(--base-margin) 0;
+  box-shadow: 0 0 0 1px var(--ctrl-border);
+  border-radius: var(--ctrl-border-radius);
+  color: var(--ctrl-text);
+  background: var(--ctrl-bg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent; // issue: https://stackoverflow.com/questions/25704650/disable-blue-highlight-when-touch-press-object-with-cursorpointer
+
+  strong,
+  legend {
+    color: var(--ctrl-label);
+    pointer-events: none;
+  }
+
+  &[invalid],
+  &[invalid] > [menu] {
+    --ctrl-focus-border: var(--ctrl-invalid-border);
+    box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+  }
+
+  &:focus-within,
+  &:focus-within > [menu] {
+    box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+  }
+
+  &:focus-within {
+    strong,
+    legend {
+      color: var(--ctrl-focus-label);
+      pointer-events: initial;
+    }
+  }
+
+  [disabled] &,
+  &[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    user-select: none;
+  }
+
+  &[busy] {
+    opacity: 0.8;
+    cursor: inherit;
+    user-select: none;
+  }
+
+  [disabled] & > label,
+  &[disabled] > label,
+  &[busy] > label {
+    pointer-events: none;
+  }
+
+  /* stylelint-disable-next-line no-descending-specificity */
+  label {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    font: inherit;
+    cursor: inherit;
+    padding: var(--ctrl-padding);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  input,
+  textarea {
+    padding: 0;
+    margin: 0;
+    cursor: inherit;
+  }
+
+  [contenteditable="true"] {
+    margin: var(--ctrl-padding);
+    margin-left: 0;
+    margin-right: 0;
+    cursor: inherit;
+  }
+
+  /* stylelint-disable-next-line no-descending-specificity */
+  strong {
+    cursor: inherit;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  [aria-required="true"] + strong:after,
+  fieldset[aria-required="true"] > legend:after {
+    content: "*";
+    font-size: larger;
+    font-weight: bolder;
+    line-height: 0;
+  }
+
+  [error] {
+    cursor: pointer;
+    font-size: small;
+    color: var(--ctrl-err);
+    background: var(--ctrl-err-bg);
+    overflow: auto;
+    overflow: overlay; // overlay doesn't work on some browsers
+    // text-shadow: 0 0 0 var(--ctrl-err);
+
+    ul {
+      margin: 0;
+      padding: 2px 4px 2px;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      margin-left: -5px;
+
+      &:before {
+        content: "";
+        --ctrl-icon-img: var(--wup-icon-dot);
+        --ctrl-icon: var(--ctrl-err);
+        @include wup-icon;
+      }
+
+      &[valid] {
+        color: var(--ctrl-err-valid);
+
+        &:before {
+          content: "";
+          --ctrl-icon-img: var(--wup-icon-check);
+          --ctrl-icon: var(--ctrl-err-valid);
+        }
+      }
+    }
+  }
+
+  &:focus-within [error] {
+    max-height: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover strong,
+    &[hovered] strong {
+      color: var(--ctrl-focus-label);
+    }
+
+    &:hover,
+    &:hover > [menu],
+    &[hovered],
+    &[hovered] > [menu] {
+      box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+    }
+  }
+
+  @media not all and (prefers-reduced-motion) {
+    transition: box-shadow var(--anim);
+  }
+}

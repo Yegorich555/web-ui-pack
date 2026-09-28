@@ -1,7 +1,6 @@
 import { inheritDefaults } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import { stringLowerCount, stringUpperCount } from "../helpers/string";
-import { WUPcssIcon } from "../styles";
 import WUPTextControl from "./text";
 
 const tagName = "wup-pwd";
@@ -112,39 +111,7 @@ export default class WUPPasswordControl<
   // }
 
   static get $style(): string {
-    return `${super.$style}
-        :host {
-          --ctrl-icon-img: var(--wup-icon-eye);
-        }
-        :host[w-reverse] {
-          --ctrl-icon-img: var(--wup-icon-eye-off);
-        }
-        :host input[type=password] {
-          font-family: Verdana, sans-serif;
-          letter-spacing: 0.125em;
-        }
-        :host button[eye] {
-          ${WUPcssIcon}
-          cursor: pointer;
-          margin-right: -0.5em;
-          -webkit-mask-size: calc(var(--ctrl-icon-size) * 1.3);
-          mask-size: calc(var(--ctrl-icon-size) * 1.3);
-        }
-        :host button[eye=off] {
-          --ctrl-icon-img: var(--wup-icon-eye-off);
-        }
-        :host[w-reverse] button[eye="off"] {
-          --ctrl-icon-img: var(--wup-icon-eye);
-        }
-        @media (hover: hover) and (pointer: fine) {
-          :host button[eye]:hover {
-            box-shadow: none;
-            background-color: var(--ctrl-focus-label);
-          }
-        }
-        :host button[clear] {
-          margin: 0;
-        }`;
+    return super.$style;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */

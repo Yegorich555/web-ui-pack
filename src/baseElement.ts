@@ -5,7 +5,7 @@ import focusFirst from "./helpers/focusFirst";
 import nestedProperty from "./helpers/nestedProperty";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
-import { WUPcssHidden, WUPcssBtnIcon, WUPcssIconSet } from "./styles";
+import { WUPcssHidden, WUPcssBtnIcon } from "./styles";
 
 // theoretically such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
@@ -91,45 +91,13 @@ export default abstract class WUPBaseElement<
 
   /** StyleContent related to component */
   static get $style(): string {
-    return "";
+    return ""; // WARN: it's injected from baseElement.scss via stylesLoader.js
   }
 
   /** StyleContent related to component & inherited components */
   static get $styleRoot(): string {
     // NiceToHave: currently $styleRoot inheritted automatically so init WUPSortElement adds WUPBaseElement.$styleRoot and WUPSortElement.$styleRoot, but expected only WUPSortElement.$styleRoot
-    return `:root {
-          --base-focus: #00778d;
-          --base-btn-bg: #009fbc;
-          --base-btn-text: #fff;
-          --base-btn-focus: #005766;
-          --base-btn2-bg: #6c757d;
-          --base-btn2-text: #fff;
-          --base-btn3-bg: none;
-          --base-btn3-text: inherit;
-          --base-sep: #e4e4e4;
-          --base-margin: 20px;
-          --border-radius: 6px;
-          --anim-t: 200ms;
-          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-          --icon-hover-r: 30px;
-          --icon-hover-bg: #0001;
-          --icon-focus-bg: #0000001a;
-          --icon-size: 14px;
-          --menu-hover-text: inherit;
-          --menu-hover-bg: #f1f1f1;
-          ${WUPcssIconSet}
-        }
-        [wupdark] {
-          --base-btn-focus: #bdbdbd;
-          --base-sep: #141414;
-          --icon: #fff;
-          --icon-hover-bg: #fff1;
-          --icon-focus-bg: #fff2;
-          --scroll: #fff2;
-          --scroll-hover: #fff3;
-          --menu-hover-text: inherit;
-          --menu-hover-bg: #222a36;
-        }`;
+    return ""; // WARN: it's injected from baseElement.scss via stylesLoader.js
   }
 
   /** Get unique id for html elements; Every getter returns new id */

@@ -52,6 +52,13 @@ module.exports = function (env, argv) {
     module: {
       rules: [
         { test: /\.txt/, type: "asset/source" },
+        // it injects styles from {fileName}.scss into {fileName}.ts of web-ui-pack (the same as for built result)
+        {
+          test: /\.ts$/,
+          include: path.resolve(__dirname, "../src"),
+          enforce: "pre",
+          loader: path.resolve(__dirname, "../stylesLoader.js"),
+        },
         // rule for js, jsx files
         {
           test: /\.(ts|tsx)$/,

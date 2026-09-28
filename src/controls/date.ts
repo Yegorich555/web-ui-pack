@@ -126,16 +126,7 @@ export default class WUPDateControl<
   // }
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        --ctrl-icon-img: var(--wup-icon-date);
-      }
-      :host > [menu] {
-        overflow: hidden;
-      }
-      :host > [menu] > wup-calendar {
-        margin: 0;
-      }`;
+    return super.$style;
   }
 
   static get mappedAttributes(): Record<string, AttributeMap> {

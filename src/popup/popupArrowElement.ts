@@ -25,24 +25,7 @@ export default class WUPPopupArrowElement extends HTMLElement {
     if (isFirst) {
       isFirst = false;
       const s = document.createElement("style");
-      s.textContent = `
-          wup-popup-arrow {
-            z-index: 8001;
-            position: fixed;
-            top: 0; left: 0;
-            width:1.2rem; height:0.6rem;
-            overflow: visible;
-            filter: drop-shadow(0 3px 2px var(--popup-shadow));
-          }
-          wup-popup-arrow:before {
-            content: "";
-            display: block;
-            width: 100%; height: 100%;
-            clip-path: polygon(0 1px, 0 0, 100% 0, 100% 1px, 50% 100%);
-            margin-top: -1px;
-            background: var(--popup-bg, #fff);
-          }
-        `;
+      s.textContent = "@wup-include useArrow"; // WARN: it's replaced with css of the mixin from popupArrowElement.scss via stylesLoader.js
       document.head.prepend(s);
     }
   }

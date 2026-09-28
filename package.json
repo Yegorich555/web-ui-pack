@@ -21,6 +21,7 @@
     "lint-md": ".\\node_modules\\.bin\\markdownlint --fix **/*.md --ignore node_modules --ignore dist",
     "lint": "npm run lint-code && npm run lint-styles && npm run lint-md",
     "build-dev": "node ./build.pre.js && tsc --listEmittedFiles",
+    "postbuild-dev": "node ./stylesLoader.js",
     "build": "npm run build-dev -- --removeComments && tsc --emitDeclarationOnly",
     "release": "node ./release.js",
     "go-publish": "cd ./dist && npm publish"

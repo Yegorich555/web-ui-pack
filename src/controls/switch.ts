@@ -1,6 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
 import { inheritDefaults } from "../baseElement";
-import { WUPCssIconHover, WUPcssHidden } from "../styles";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-switch";
@@ -77,88 +76,11 @@ export default class WUPSwitchControl<
   #ctr = this.constructor as typeof WUPSwitchControl;
 
   static get $styleRoot(): string {
-    return `:root {
-      --ctrl-switch-padding: 1em;
-      --ctrl-switch-on: #fff;
-      --ctrl-switch-off: #fff;
-      --ctrl-switch-off-bg: #9f9f9f;
-      --ctrl-switch-on-bg: #00778d;
-      --ctrl-switch-shadow: #0003;
-      --ctrl-switch-h: var(--ctrl-icon-size);
-      --ctrl-switch-w: calc(var(--ctrl-icon-size) * 2.8);
-      --ctrl-switch-r: calc(var(--ctrl-icon-size) * 1.4);
-     }
-    [wupdark] {
-      --ctrl-switch-on: #e7e7e7;
-      --ctrl-switch-off: #e7e7e7;
-      --ctrl-switch-off-bg: #707070;
-      --ctrl-switch-shadow: #000;
-    }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        background: none;
-        cursor: pointer;
-      }
-      :host[readonly] {
-        cursor: initial;
-      }
-      :host label {
-        display: flex;
-        gap: 0.5em;
-        padding: var(--ctrl-switch-padding);
-      }
-      :host strong {
-        box-sizing: border-box;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        font-weight: normal;
-        text-decoration: none;
-        color: inherit;
-      }
-      :host [bar] {
-        display: inline-flex;
-        align-items: center;
-        overflow: visible;
-        width: var(--ctrl-switch-w);
-        min-width: var(--ctrl-switch-w);
-        height: var(--ctrl-switch-h);
-        border-radius: 999px;
-        color: whitesmoke;
-        background: var(--ctrl-switch-off-bg);
-      }
-      ${WUPCssIconHover(":host", "[thumb]")}
-      :host [thumb] {
-        z-index: 2;
-        display: inline-block;
-        height: var(--ctrl-switch-r);
-        width: var(--ctrl-switch-r);
-        background: var(--ctrl-switch-off);
-        box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
-        border-radius: 50%;
-        transform: translateX(-1px);
-      }
-      :host input { ${WUPcssHidden} }
-      :host[checked] [bar] {
-        background-color: var(--ctrl-switch-on-bg);
-      }
-      :host[checked] [thumb] {
-        background: var(--ctrl-switch-on);
-        transform: translateX(var(--ctrl-switch-w)) translateX(calc(-100% + 1px));
-      }
-      :host[w-reverse] label {
-        flex-direction: row-reverse;
-      }
-      :host[w-reverse] strong {
-        margin-right: auto;
-      }
-      @media not all and (prefers-reduced-motion) {
-        :host [bar] { transition: background-color var(--anim); }
-        :host [thumb] { transition: transform var(--anim); }
-      }`;
+    return super.$style;
   }
 
   static $isEqual(v1: boolean | undefined, v2: boolean | undefined): boolean {

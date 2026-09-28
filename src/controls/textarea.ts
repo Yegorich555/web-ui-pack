@@ -80,12 +80,7 @@ export default class WUPTextareaControl<
   // #ctr = this.constructor as typeof WUPTextareaControl;
 
   static get $style(): string {
-    return `${super.$style}
-        :host strong { top: 1.6em; }
-        :host [contenteditable=true] {
-          min-height: 4em;
-          max-height: 4em;
-        }`;
+    return super.$style;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */

@@ -1,0 +1,11 @@
+@import "styles";
+
+:root {
+  --sort-active-color: #25a1b6;
+  --sort-active-shadow: #25a1b6;
+}
+
+:host {
+  display: block;
+  @include wup-sortable;
+}
