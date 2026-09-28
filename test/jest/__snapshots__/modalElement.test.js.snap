@@ -293,7 +293,7 @@ WUP-MODAL footer &gt; button[disabled] {
   opacity: 0.3;
   cursor: not-allowed;
   -webkit-user-select: none;
-  user-select: none;
+          user-select: none;
 }
 WUP-MODAL footer &gt; button[aria-busy] {
   cursor: wait;

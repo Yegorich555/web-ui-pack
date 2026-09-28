@@ -58,13 +58,9 @@
     height: 100%;
     background: var(--icon, #000);
     /* stylelint-disable plugin/no-unsupported-browser-features */
-    -webkit-mask-size: var(--icon-size, 1em);
     mask-size: var(--icon-size, 1em);
-    -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
-    -webkit-mask-position: center;
     mask-position: center;
-    -webkit-mask-image: var(--icon-img);
     mask-image: var(--icon-img);
     /* stylelint-enable plugin/no-unsupported-browser-features */
   }
@@ -125,7 +121,6 @@
   &[disabled] {
     opacity: 0.3;
     cursor: not-allowed;
-    -webkit-user-select: none;
     user-select: none;
   }
 
@@ -162,6 +157,128 @@
 
     100% {
       transform: translateX(-50%) scaleX(40%);
+    }
+  }
+}
+
+/// Style for visually hidden but accessible for screenReaders
+/// @example :host input { @include wup-hidden; }
+@mixin wup-hidden {
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  min-width: initial;
+  padding: 0;
+}
+
+/// Style for icons; vars --ctrl-icon, --ctrl-icon-size, --ctrl-icon-img to customize styling
+/// @example :host button:after { @include wup-icon; }
+@mixin wup-icon {
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  /* stylelint-disable plugin/no-unsupported-browser-features */
+  mask-size: var(--ctrl-icon-size);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-image: var(--ctrl-icon-img);
+  /* stylelint-enable plugin/no-unsupported-browser-features */
+}
+
+/// Default style for popup menu
+/// @example :host [menu] { @include wup-menu; }
+@mixin wup-menu {
+  padding: 0;
+  overflow: hidden;
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    cursor: pointer;
+    overflow: auto;
+    max-height: 300px;
+    @include wup-scrollSmall;
+  }
+
+  li {
+    padding: 1em;
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        color: var(--menu-hover-text);
+        background: var(--menu-hover-bg);
+      }
+    }
+
+    &[aria-selected="true"] {
+      color: var(--ctrl-selected);
+      display: flex;
+
+      &:after {
+        content: "";
+        --ctrl-icon-img: var(--wup-icon-check);
+        @include wup-icon;
+        background: var(--ctrl-selected);
+        margin-left: auto;
+        padding: 0;
+      }
+    }
+
+    &[focused] {
+      box-shadow: inset 0 0 4px 0 var(--base-focus);
+    }
+  }
+}
+
+/// Add hover & focus style on pointed item (via :before)
+/// @param $icon selector of the icon inside the parent
+/// @param $size size of the hover circle
+/// @param $color color of the hover circle
+/// @example :host label { @include wup-iconHover("strong"); }
+@mixin wup-iconHover($icon, $size: var(--icon-hover-r, 2.4em), $color: var(--icon-hover, #0001)) {
+  #{$icon} {
+    transform-style: preserve-3d;
+
+    &:before {
+      z-index: -1;
+      position: absolute;
+      transform: translate(-50%, -50%) translateZ(-1px);
+      left: 50%;
+      top: 50%;
+      width: $size;
+      height: $size;
+      background: $color;
+      border-radius: 50%;
+    }
+  }
+
+  &:focus-within #{$icon} {
+    position: relative;
+
+    &:before {
+      content: "";
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover #{$icon} {
+      position: relative;
+
+      &:before {
+        content: "";
+        opacity: 0.8;
+      }
     }
   }
 }
