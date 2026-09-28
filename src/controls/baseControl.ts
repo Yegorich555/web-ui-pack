@@ -182,6 +182,10 @@ declare global {
        * @see {@link WUP.BaseControl.Options.storekey}
        * @defaultValue "local" */
       storage?: "local" | "session" | "url";
+      /** Fire `$change` event on init (with reason `initValue`) even if value is empty;
+       *  by default `$change` fires on init only if value is restored from storage (then reason `storage` is used)
+       * @defaultValue false */
+      enableInitOnChange: boolean;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -223,6 +227,7 @@ declare global {
       /** Expected 'true' for getting from w-name or another string to override default */
       "w-storageKey"?: boolean | string;
       "w-storage"?: "local" | "session" | "url";
+      "w-enableInitOnChange"?: boolean | "";
       /** @deprecated Use [required] for styling */
       readonly required?: "";
       /** @readonly Use [invalid] for styling */
@@ -482,6 +487,7 @@ export default abstract class WUPBaseControl<
     name: null,
     storage: "local",
     storageKey: "",
+    enableInitOnChange: false,
   };
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
@@ -740,9 +746,11 @@ export default abstract class WUPBaseControl<
       }
     }
 
-    // retrieve value from store
-    if (!propsChanged && this._opts.storageKey) {
-      this.setValue(this.storageGet(), SetValueReasons.storage);
+    if (!propsChanged) {
+      // retrieve value from store
+      const isStored = !!this._opts.storageKey && this.setValue(this.storageGet(), SetValueReasons.storage);
+      // otherwise $change is fired with reason storage
+      !isStored && this._opts.enableInitOnChange && this.fireChange(SetValueReasons.initValue);
     }
   }
 
@@ -1178,11 +1186,15 @@ export default abstract class WUPBaseControl<
     if (reason !== SetValueReasons.initValue) {
       // save to storage
       reason !== SetValueReasons.storage && this._opts.storageKey && this.storageSet(v);
-      // todo figure out case when localStorage is defined but $change not called since value in localStorage is null, but and probably need to use onReady
-      setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: { reason } }));
+      this.fireChange(reason);
     }
 
     return true;
+  }
+
+  /** Fires `$change` event (async) */
+  protected fireChange(reason: SetValueReasons): void {
+    setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: { reason } }));
   }
 
   /** Called after value is changed */

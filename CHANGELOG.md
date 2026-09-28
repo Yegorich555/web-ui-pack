@@ -8,21 +8,23 @@
 
 - **Global**. Changing parent `$defaults` now affects inherited components (ex. `WUPBaseControl.$defaults.validateDebounceMs = 300` affects every control)
 - **Controls**. Fixed validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)
-- helper [exportToExcel](src/helpers/files/exportToExcel.ts).
+- helper [exportToExcel](src/helpers/files/exportToExcel.ts)
   - Added prop **isSorted** for headers
   - Added props **freezeRows** & **freezeColumns** for sheets
   - Added arg **sheetIndex** for cellCallback
   - Added numberFormat into settings
   - Added dateFormat types into TS
-- **Global**. Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (use able to see formats in TS)
+- **Global**. Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (user able to see formats in TS)
 
 ### New Features
 
 - helper [imageConvert](src/helpers/files/imageConvert.ts)
 - helper [selectFiles](src/helpers/files/selectFiles.ts)
 - [PopupElement](src/popup/popupElement.ts). Added `WUPPopupElement.$useTooltip()` to show tooltip on hover for elements with attribute `[w-tooltip]`
-- **Controls**. Options `disabled` & `readOnly` (attrs `[disabled]` & `[readonly]`) accept string (reason) that is shown via tooltip
-- **Combobox controls** (Select, SelectMany, Date, Time). Added options **popupOffsetFitElement** & **popupMinWidthByTarget** to configure popup-menu (via `$defaults` or per element)
+- **Controls**
+  - Added option **enableInitOnChange** to fire `$change` event on init (with reason `initValue`) even if value is empty
+  - Added Options `disabled` & `readOnly` (attrs `[disabled]` & `[readonly]`) accept string (reason) that is shown via tooltip
+  - **Combobox controls** (Select, SelectMany, Date, Time). Added options **popupOffsetFitElement** & **popupMinWidthByTarget** to configure popup-menu (via `$defaults` or per element)
 
 ---
 

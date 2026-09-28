@@ -133,6 +133,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -208,6 +212,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -328,6 +336,18 @@
               "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
             },
             {
+              "name": "w-popupoffsetfitelement",
+              "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+              "value": {
+                "kind": "plain",
+                "type": "'window.offset'"
+              }
+            },
+            {
+              "name": "w-popupminwidthbytarget",
+              "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `false`"
+            },
+            {
               "name": "w-debouncems",
               "description": "Time to wait for user finishes typing to start validate and provide $change event"
             },
@@ -418,6 +438,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -673,6 +697,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -783,6 +811,10 @@
             {
               "name": "w-validationshowall",
               "description": "Show all validation-rules with checkpoints as list instead of single error"
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -862,6 +894,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -889,6 +925,18 @@
             {
               "name": "w-readonlyinput",
               "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+            },
+            {
+              "name": "w-popupoffsetfitelement",
+              "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+              "value": {
+                "kind": "plain",
+                "type": "'window.offset'"
+              }
+            },
+            {
+              "name": "w-popupminwidthbytarget",
+              "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `true`"
             },
             {
               "name": "w-debouncems",
@@ -981,6 +1029,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -1014,6 +1066,18 @@
               "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
             },
             {
+              "name": "w-popupoffsetfitelement",
+              "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+              "value": {
+                "kind": "plain",
+                "type": "'window.offset'"
+              }
+            },
+            {
+              "name": "w-popupminwidthbytarget",
+              "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `true`"
+            },
+            {
               "name": "w-debouncems",
               "description": "Time to wait for user finishes typing to start validate and provide $change event"
             },
@@ -1104,6 +1168,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -1229,6 +1297,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -1328,6 +1400,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -1407,6 +1483,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -1458,6 +1538,18 @@
             {
               "name": "w-readonlyinput",
               "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+            },
+            {
+              "name": "w-popupoffsetfitelement",
+              "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+              "value": {
+                "kind": "plain",
+                "type": "'window.offset'"
+              }
+            },
+            {
+              "name": "w-popupminwidthbytarget",
+              "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `false`"
             },
             {
               "name": "w-debouncems",
@@ -1550,6 +1642,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         }

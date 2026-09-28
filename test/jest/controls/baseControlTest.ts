@@ -107,6 +107,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       "w-focusdebouncems": { value: 12 },
       "w-storagekey": { value: "strg" },
       "w-storage": { value: "session" },
+      "w-enableinitonchange": { value: true },
 
       "w-initvalue": { skip: true }, // manual testing
       ...cfg.attrs,
@@ -593,6 +594,64 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait(1);
       expect(el.$value).toStrictEqual(cfg.initValues[1].urlValue === null ? cfg.emptyValue : testValues.value);
       expect(onThrowErr).not.toBeCalled();
+    });
+
+    test("enableInitOnChange", async () => {
+      const spyChange = jest.fn();
+      const create = () => {
+        spyChange.mockClear();
+        el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+        cfg.onCreateNew?.call(cfg, el);
+        el.$onChange = spyChange;
+      };
+
+      // disabled by default
+      create();
+      el.$initValue = cfg.initValues[0].value;
+      await h.wait();
+      expect(spyChange).not.toBeCalled();
+
+      // empty value
+      create();
+      el.$options.enableInitOnChange = true;
+      await h.wait();
+      expect(el.$value).toStrictEqual(cfg.emptyValue);
+      expect(spyChange).toBeCalledTimes(1);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.initValue });
+
+      // with $initValue
+      create();
+      el.$options.enableInitOnChange = true;
+      el.$initValue = cfg.initValues[0].value;
+      await h.wait();
+      expect(el.$value).toStrictEqual(cfg.initValues[0].value);
+      expect(spyChange).toBeCalledTimes(1);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.initValue });
+      // fired only on init
+      el.$initValue = cfg.initValues[1].value;
+      el.$options.enableInitOnChange = false;
+      await h.wait();
+      el.$options.enableInitOnChange = true;
+      await h.wait();
+      expect(spyChange).toBeCalledTimes(1);
+
+      if (cfg.attrs?.["w-storagekey"]?.skip || cfg.attrs?.["w-storagekey"] === null) {
+        return; // for password isn't allowed
+      }
+      // with value from storage: fired single time with reason storage
+      create();
+      el.$options.storageKey = "initCh";
+      await h.wait();
+      el.$value = cfg.initValues[2].value;
+      await h.wait();
+      create();
+      el.$options.storageKey = "initCh";
+      el.$options.enableInitOnChange = true;
+      await h.wait();
+      expect(el.$value).toStrictEqual(cfg.initValues[2].value);
+      expect(spyChange).toBeCalledTimes(1);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.storage });
+      window.localStorage.clear();
     });
   });
 

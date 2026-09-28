@@ -237,6 +237,16 @@
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         }
       ]
     },
@@ -356,6 +366,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -567,6 +587,31 @@
           "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
         },
         {
+          "name": "w-popupoffsetfitelement",
+          "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+          "values": [
+            {
+              "name": "window.offset"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Popup.Options[offsetFitElement]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-popupminwidthbytarget",
+          "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `false`",
+          "references": [
+            {
+              "name": "WUP.Popup.Options[minWidthByTarget]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
           "name": "w-debouncems",
           "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
@@ -711,6 +756,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -1118,6 +1173,16 @@
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         }
       ]
     },
@@ -1302,6 +1367,16 @@
         {
           "name": "w-validationshowall",
           "description": "Show all validation-rules with checkpoints as list instead of single error"
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         }
       ]
     },
@@ -1431,6 +1506,16 @@
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         }
       ]
     },
@@ -1475,6 +1560,31 @@
         {
           "name": "w-readonlyinput",
           "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+        },
+        {
+          "name": "w-popupoffsetfitelement",
+          "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+          "values": [
+            {
+              "name": "window.offset"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Popup.Options[offsetFitElement]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-popupminwidthbytarget",
+          "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `true`",
+          "references": [
+            {
+              "name": "WUP.Popup.Options[minWidthByTarget]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
         },
         {
           "name": "w-debouncems",
@@ -1621,6 +1731,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -1674,6 +1794,31 @@
           "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
         },
         {
+          "name": "w-popupoffsetfitelement",
+          "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+          "values": [
+            {
+              "name": "window.offset"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Popup.Options[offsetFitElement]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-popupminwidthbytarget",
+          "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `true`",
+          "references": [
+            {
+              "name": "WUP.Popup.Options[minWidthByTarget]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
           "name": "w-debouncems",
           "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
@@ -1818,6 +1963,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -2036,6 +2191,16 @@
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         }
       ]
     },
@@ -2197,6 +2362,16 @@
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         }
       ]
     },
@@ -2319,6 +2494,16 @@
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         }
       ]
     },
@@ -2411,6 +2596,31 @@
         {
           "name": "w-readonlyinput",
           "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+        },
+        {
+          "name": "w-popupoffsetfitelement",
+          "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+          "values": [
+            {
+              "name": "window.offset"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Popup.Options[offsetFitElement]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-popupminwidthbytarget",
+          "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `false`",
+          "references": [
+            {
+              "name": "WUP.Popup.Options[minWidthByTarget]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
         },
         {
           "name": "w-debouncems",
@@ -2557,6 +2767,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
