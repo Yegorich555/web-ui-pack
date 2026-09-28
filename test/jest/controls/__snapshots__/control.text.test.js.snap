@@ -577,18 +577,10 @@ WUP-TEXT [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-TEXT input:-webkit-autofill,
-WUP-TEXT textarea:-webkit-autofill,
-WUP-TEXT [contenteditable=true]:-webkit-autofill {
-  font: inherit;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: var(--ctrl-autofill);
-  caret-color: var(--ctrl-autofill-caret, auto);
-}
 WUP-TEXT input:-webkit-autofill, WUP-TEXT textarea:-webkit-autofill, WUP-TEXT [contenteditable=true]:-webkit-autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-TEXT input:autofill,
@@ -596,7 +588,7 @@ WUP-TEXT textarea:autofill,
 WUP-TEXT [contenteditable=true]:autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-TEXT strong {
@@ -623,8 +615,8 @@ WUP-TEXT strong {
     transition: top var(--anim), transform var(--anim), color var(--anim);
   }
 }
-WUP-TEXT input:not(:focus):placeholder,
-WUP-TEXT textarea:not(:focus):placeholder {
+WUP-TEXT input:not(:focus)::placeholder,
+WUP-TEXT textarea:not(:focus)::placeholder {
   color: transparent;
 }
 WUP-TEXT:focus-within strong,

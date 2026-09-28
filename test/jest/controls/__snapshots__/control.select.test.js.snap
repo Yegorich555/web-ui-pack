@@ -605,18 +605,10 @@ WUP-SELECT [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-SELECT input:-webkit-autofill,
-WUP-SELECT textarea:-webkit-autofill,
-WUP-SELECT [contenteditable=true]:-webkit-autofill {
-  font: inherit;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: var(--ctrl-autofill);
-  caret-color: var(--ctrl-autofill-caret, auto);
-}
 WUP-SELECT input:-webkit-autofill, WUP-SELECT textarea:-webkit-autofill, WUP-SELECT [contenteditable=true]:-webkit-autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-SELECT input:autofill,
@@ -624,7 +616,7 @@ WUP-SELECT textarea:autofill,
 WUP-SELECT [contenteditable=true]:autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-SELECT strong {
@@ -651,8 +643,8 @@ WUP-SELECT strong {
     transition: top var(--anim), transform var(--anim), color var(--anim);
   }
 }
-WUP-SELECT input:not(:focus):placeholder,
-WUP-SELECT textarea:not(:focus):placeholder {
+WUP-SELECT input:not(:focus)::placeholder,
+WUP-SELECT textarea:not(:focus)::placeholder {
   color: transparent;
 }
 WUP-SELECT:focus-within strong,

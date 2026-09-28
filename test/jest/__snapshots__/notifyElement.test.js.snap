@@ -178,7 +178,7 @@ WUP-NOTIFY {
   min-height: 64px;
   max-height: 80vh;
   width: var(--notify-w);
-  max-width: 80wv;
+  max-width: 80vw;
   margin: var(--notify-margin);
   color: var(--notify-text);
   background: var(--notify-bg);

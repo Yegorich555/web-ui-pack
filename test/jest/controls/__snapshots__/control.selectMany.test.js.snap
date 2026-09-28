@@ -618,18 +618,10 @@ WUP-SELECTMANY [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-SELECTMANY input:-webkit-autofill,
-WUP-SELECTMANY textarea:-webkit-autofill,
-WUP-SELECTMANY [contenteditable=true]:-webkit-autofill {
-  font: inherit;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: var(--ctrl-autofill);
-  caret-color: var(--ctrl-autofill-caret, auto);
-}
 WUP-SELECTMANY input:-webkit-autofill, WUP-SELECTMANY textarea:-webkit-autofill, WUP-SELECTMANY [contenteditable=true]:-webkit-autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-SELECTMANY input:autofill,
@@ -637,7 +629,7 @@ WUP-SELECTMANY textarea:autofill,
 WUP-SELECTMANY [contenteditable=true]:autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-SELECTMANY strong {
@@ -664,8 +656,8 @@ WUP-SELECTMANY strong {
     transition: top var(--anim), transform var(--anim), color var(--anim);
   }
 }
-WUP-SELECTMANY input:not(:focus):placeholder,
-WUP-SELECTMANY textarea:not(:focus):placeholder {
+WUP-SELECTMANY input:not(:focus)::placeholder,
+WUP-SELECTMANY textarea:not(:focus)::placeholder {
   color: transparent;
 }
 WUP-SELECTMANY:focus-within strong,

@@ -617,18 +617,10 @@ WUP-TIME [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-TIME input:-webkit-autofill,
-WUP-TIME textarea:-webkit-autofill,
-WUP-TIME [contenteditable=true]:-webkit-autofill {
-  font: inherit;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: var(--ctrl-autofill);
-  caret-color: var(--ctrl-autofill-caret, auto);
-}
 WUP-TIME input:-webkit-autofill, WUP-TIME textarea:-webkit-autofill, WUP-TIME [contenteditable=true]:-webkit-autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-TIME input:autofill,
@@ -636,7 +628,7 @@ WUP-TIME textarea:autofill,
 WUP-TIME [contenteditable=true]:autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-TIME strong {
@@ -663,8 +655,8 @@ WUP-TIME strong {
     transition: top var(--anim), transform var(--anim), color var(--anim);
   }
 }
-WUP-TIME input:not(:focus):placeholder,
-WUP-TIME textarea:not(:focus):placeholder {
+WUP-TIME input:not(:focus)::placeholder,
+WUP-TIME textarea:not(:focus)::placeholder {
   color: transparent;
 }
 WUP-TIME:focus-within strong,

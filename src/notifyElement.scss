@@ -20,8 +20,7 @@
   min-height: 64px;
   max-height: 80vh;
   width: var(--notify-w);
-  /* stylelint-disable-next-line unit-no-unknown */
-  max-width: 80wv; // WARN: invalid unit so the rule is ignored by browsers; 80vw is expected?
+  max-width: 80vw;
   margin: var(--notify-margin);
   color: var(--notify-text);
   background: var(--notify-bg);

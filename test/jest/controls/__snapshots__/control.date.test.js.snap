@@ -605,18 +605,10 @@ WUP-DATE [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-DATE input:-webkit-autofill,
-WUP-DATE textarea:-webkit-autofill,
-WUP-DATE [contenteditable=true]:-webkit-autofill {
-  font: inherit;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: var(--ctrl-autofill);
-  caret-color: var(--ctrl-autofill-caret, auto);
-}
 WUP-DATE input:-webkit-autofill, WUP-DATE textarea:-webkit-autofill, WUP-DATE [contenteditable=true]:-webkit-autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-DATE input:autofill,
@@ -624,7 +616,7 @@ WUP-DATE textarea:autofill,
 WUP-DATE [contenteditable=true]:autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-DATE strong {
@@ -651,8 +643,8 @@ WUP-DATE strong {
     transition: top var(--anim), transform var(--anim), color var(--anim);
   }
 }
-WUP-DATE input:not(:focus):placeholder,
-WUP-DATE textarea:not(:focus):placeholder {
+WUP-DATE input:not(:focus)::placeholder,
+WUP-DATE textarea:not(:focus)::placeholder {
   color: transparent;
 }
 WUP-DATE:focus-within strong,

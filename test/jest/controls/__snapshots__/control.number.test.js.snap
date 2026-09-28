@@ -584,18 +584,10 @@ WUP-NUM [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-NUM input:-webkit-autofill,
-WUP-NUM textarea:-webkit-autofill,
-WUP-NUM [contenteditable=true]:-webkit-autofill {
-  font: inherit;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: var(--ctrl-autofill);
-  caret-color: var(--ctrl-autofill-caret, auto);
-}
 WUP-NUM input:-webkit-autofill, WUP-NUM textarea:-webkit-autofill, WUP-NUM [contenteditable=true]:-webkit-autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-NUM input:autofill,
@@ -603,7 +595,7 @@ WUP-NUM textarea:autofill,
 WUP-NUM [contenteditable=true]:autofill {
   font: inherit;
   background-clip: text;
-  text-fill-color: var(--ctrl-autofill);
+  -webkit-text-fill-color: var(--ctrl-autofill);
   caret-color: var(--ctrl-autofill-caret, auto);
 }
 WUP-NUM strong {
@@ -630,8 +622,8 @@ WUP-NUM strong {
     transition: top var(--anim), transform var(--anim), color var(--anim);
   }
 }
-WUP-NUM input:not(:focus):placeholder,
-WUP-NUM textarea:not(:focus):placeholder {
+WUP-NUM input:not(:focus)::placeholder,
+WUP-NUM textarea:not(:focus)::placeholder {
   color: transparent;
 }
 WUP-NUM:focus-within strong,

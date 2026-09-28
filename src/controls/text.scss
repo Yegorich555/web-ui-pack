@@ -85,22 +85,13 @@
     white-space: pre;
   }
 
-  input:-webkit-autofill,
-  textarea:-webkit-autofill,
-  [contenteditable="true"]:-webkit-autofill {
-    font: inherit;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: var(--ctrl-autofill);
-    caret-color: var(--ctrl-autofill-caret, auto);
-  }
-
+  // `:-webkit-autofill` is added by autoprefixer
   input:autofill,
   textarea:autofill,
   [contenteditable="true"]:autofill {
     font: inherit;
     background-clip: text;
-    /* stylelint-disable-next-line property-no-unknown */
-    text-fill-color: var(--ctrl-autofill);
+    -webkit-text-fill-color: var(--ctrl-autofill);
     caret-color: var(--ctrl-autofill-caret, auto);
   }
 
@@ -127,13 +118,10 @@
     }
   }
 
-  // WARN: `:placeholder` is invalid so the rule is ignored by browsers; `::placeholder` is expected?
-  /* stylelint-disable selector-pseudo-class-no-unknown */
-  input:not(:focus):placeholder,
-  textarea:not(:focus):placeholder {
+  input:not(:focus)::placeholder,
+  textarea:not(:focus)::placeholder {
     color: transparent;
   }
-  /* stylelint-enable selector-pseudo-class-no-unknown */
 
   &:focus-within strong,
   input:not(:placeholder-shown) + strong,
