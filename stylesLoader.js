@@ -66,22 +66,28 @@ async function compileStyles(scssPath) {
   };
 }
 
-/** Returns code where `static get $style() { return ""; }` & `static get $styleRoot() { return ""; }` return pointed styles */
+/** Returns code where `static get $style() { return ""; }` & `static get $styleRoot() { return ""; }` return pointed styles;
+ * `return super.$style;` gets pointed styles appended: `return super.$style + "\n...";` */
 function injectStyles(code, styles, filePath) {
   const injected = new Set();
   const result = code.replace(
-    /(static\s+get\s+(\$style(?:Root)?)\s*\(\)[^{;]*\{(?:\s|\/\/.*|\/\*[\s\S]*?\*\/)*return\s*)(?:""|''|``)/g,
-    (_, head, name) => {
+    /(static\s+get\s+(\$style(?:Root)?)\s*\(\)[^{;]*\{(?:\s|\/\/.*|\/\*[\s\S]*?\*\/)*return\s*)(?:""|''|``|(super\.\2(?![\w$])))/g,
+    (_, head, name, superCall) => {
       if (injected.has(name)) {
         throw new Error(`${filePath}: getter ${name} is defined several times`);
       }
       injected.add(name);
+      if (superCall) {
+        return head + (styles[name] ? `${superCall} + ${JSON.stringify(`\n${styles[name]}`)}` : superCall);
+      }
       return head + JSON.stringify(styles[name]);
     }
   );
   Object.keys(styles).forEach((name) => {
     if (styles[name] && !injected.has(name)) {
-      throw new Error(`${filePath}: getter 'static get ${name}() { return ""; }' is required to inject styles`);
+      throw new Error(
+        `${filePath}: getter 'static get ${name}() { return ""; }' or 'return super.${name};' is required to inject styles`
+      );
     }
   });
   return result;
