@@ -108,19 +108,19 @@ padding:0;}
   --modal-anim-t: 400ms;
 }
   :root {
-        --notify-anim-t: 400ms;
-        --notify-margin: 1em 0;
-        --notify-w: 300px;
-        --notify-text: #fff;
-        --notify-bg: rgba(16,70,82,0.9);
-        --notify-shadow: #0003;
-        --notify-progress: #009fbc;
-      }
-      [wupdark] {
-        --notify-text: #d8d8d8;
-        --notify-bg: rgba(16,70,82,0.9);
-        --notify-shadow: #0006;
-      }
+  --notify-anim-t: 400ms;
+  --notify-margin: 1em 0;
+  --notify-w: 300px;
+  --notify-text: #fff;
+  --notify-bg: rgba(16, 70, 82, 0.9);
+  --notify-shadow: #0003;
+  --notify-progress: #009fbc;
+}
+[wupdark] {
+  --notify-text: #d8d8d8;
+  --notify-bg: rgba(16, 70, 82, 0.9);
+  --notify-shadow: #0006;
+}
   
 WUP-NOTIFY {
   --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -172,67 +172,62 @@ WUP-NOTIFY::-webkit-scrollbar-track-piece:vertical:start, WUP-NOTIFY::-webkit-sc
     transition: opacity var(--modal-anim), transform var(--modal-anim);
   }
 }
-      WUP-NOTIFY {
-        --modal-anim: var(--notify-anim-t) cubic-bezier(0,0,0.2,1) 0ms;
-        z-index: 9010;
-        min-height: 64px;
-        max-height: 80vh;
-        width: var(--notify-w);
-        max-width: 80wv;
-        margin: var(--notify-margin);
-        color: var(--notify-text);
-        background: var(--notify-bg);
-        box-shadow: 0 1px 4px 0 var(--notify-shadow);
-      }
-      WUP-NOTIFY[w-placement=top-left],
-      WUP-NOTIFY[w-placement=bottom-left] {
-        border-radius: 0 var(--border-radius) var(--border-radius) 0;
-        left: 0;
-        transform: translateX(-100%);
-      }
-      WUP-NOTIFY[w-placement=top-right],
-      WUP-NOTIFY[w-placement=bottom-right] {
-        border-radius: var(--border-radius) 0 0 var(--border-radius);
-        right: 0;
-        transform: translateX(100%);
-      }
-      WUP-NOTIFY[w-placement=top-middle],
-      WUP-NOTIFY[w-placement="bottom-middle"] {
-        margin-left: auto;
-        margin-right: auto;
-        left:0; right:0;
-        transform: translateY(-100%);
-      }
-      WUP-NOTIFY[w-placement=top-left],
-      WUP-NOTIFY[w-placement=top-middle],
-      WUP-NOTIFY[w-placement=top-right] {
-        top:0;
-      }
-      WUP-NOTIFY[w-placement=bottom-left],
-      WUP-NOTIFY[w-placement=bottom-middle],
-      WUP-NOTIFY[w-placement=bottom-right] {
-        bottom:0;
-      }
-      WUP-NOTIFY[show] {
-        transform: none;
-      }
-      WUP-NOTIFY &gt; button[close] {
-        --icon-img: var(--wup-icon-cross);
-        --icon: var(--notify-text);
-        z-index: 10;
-        position: absolute;
-        right:0; top:0;
-        margin: 0.4em;
-      }
-      WUP-NOTIFY &gt; [progress] {
-        position: absolute;
-        bottom:0; left:0;
-        width: 100%;
-        height: 5px;
-        background: var(--notify-progress);
-        transform-origin: left;
-      }
-    
+WUP-NOTIFY {
+  --modal-anim: var(--notify-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  z-index: 9010;
+  min-height: 64px;
+  max-height: 80vh;
+  width: var(--notify-w);
+  max-width: 80wv;
+  margin: var(--notify-margin);
+  color: var(--notify-text);
+  background: var(--notify-bg);
+  box-shadow: 0 1px 4px 0 var(--notify-shadow);
+}
+WUP-NOTIFY[w-placement=top-left], WUP-NOTIFY[w-placement=bottom-left] {
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  left: 0;
+  transform: translateX(-100%);
+}
+WUP-NOTIFY[w-placement=top-right], WUP-NOTIFY[w-placement=bottom-right] {
+  border-radius: var(--border-radius) 0 0 var(--border-radius);
+  right: 0;
+  transform: translateX(100%);
+}
+WUP-NOTIFY[w-placement=top-middle], WUP-NOTIFY[w-placement=bottom-middle] {
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  transform: translateY(-100%);
+}
+WUP-NOTIFY[w-placement=top-left], WUP-NOTIFY[w-placement=top-middle], WUP-NOTIFY[w-placement=top-right] {
+  top: 0;
+}
+WUP-NOTIFY[w-placement=bottom-left], WUP-NOTIFY[w-placement=bottom-middle], WUP-NOTIFY[w-placement=bottom-right] {
+  bottom: 0;
+}
+WUP-NOTIFY[show] {
+  transform: none;
+}
+WUP-NOTIFY &gt; button[close] {
+  --icon-img: var(--wup-icon-cross);
+  --icon: var(--notify-text);
+  z-index: 10;
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 0.4em;
+}
+WUP-NOTIFY &gt; [progress] {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: var(--notify-progress);
+  transform-origin: left;
+}
 </style>
 `;
 

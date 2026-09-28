@@ -357,603 +357,594 @@ padding:0;}
 }
 
   :root {
-        --ctrl-padding: 1.5em 1em 0.5em 1em;
-        --ctrl-focus: var(--base-focus);
-        --ctrl-focus-label: var(--ctrl-focus);
-        --ctrl-selected: var(--ctrl-focus);
-        --ctrl-label: #5e5e5e;
-        --ctrl-icon: var(--ctrl-label);
-        --ctrl-icon-size: 1em;
-        --ctrl-text: inherit;
-        --ctrl-bg: #fff;
-        --ctrl-border: #e6e6e6;
-        --ctrl-border-radius: var(--border-radius);
-        --ctrl-err: #ad0000;
-        --ctrl-err-bg: #fff4fa;
-        --ctrl-err-valid: green;
-        --ctrl-invalid-border: red;
-      }
-      [wupdark] {
-        --ctrl-bg: none;
-        --ctrl-border: #104652;
-        --ctrl-label: #919191;
-        --ctrl-icon: var(--ctrl-label);
-        --ctrl-focus-label: #25a1b6;
-        --ctrl-selected: #25a1b6;
-        --ctrl-err: #ff6666;
-        --ctrl-err-bg: #000;
-        --ctrl-err-valid: #54d754;
-      }
+  --ctrl-padding: 1.5em 1em 0.5em 1em;
+  --ctrl-focus: var(--base-focus);
+  --ctrl-focus-label: var(--ctrl-focus);
+  --ctrl-selected: var(--ctrl-focus);
+  --ctrl-label: #5e5e5e;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-icon-size: 1em;
+  --ctrl-text: inherit;
+  --ctrl-bg: #fff;
+  --ctrl-border: #e6e6e6;
+  --ctrl-border-radius: var(--border-radius);
+  --ctrl-err: #ad0000;
+  --ctrl-err-bg: #fff4fa;
+  --ctrl-err-valid: green;
+  --ctrl-invalid-border: red;
+}
+[wupdark] {
+  --ctrl-bg: none;
+  --ctrl-border: #104652;
+  --ctrl-label: #919191;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-focus-label: #25a1b6;
+  --ctrl-selected: #25a1b6;
+  --ctrl-err: #ff6666;
+  --ctrl-err-bg: #000;
+  --ctrl-err-valid: #54d754;
+}
   :root {
-      --ctrl-autofill: #00869e;
-      --ctrl-clear: red;
-      --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
-     }
-     [wupdark] {
-        --ctrl-clear-hover: rgba(255,0,0,0.2);
-        --ctrl-autofill: #89bc55;
-        --ctrl-autofill-caret: #fff;
-      }
+  --ctrl-autofill: #00869e;
+  --ctrl-clear: red;
+  --ctrl-clear-hover: rgba(255, 0, 0, 0.1);
+  --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
+}
+[wupdark] {
+  --ctrl-clear-hover: rgba(255, 0, 0, 0.2);
+  --ctrl-autofill: #89bc55;
+  --ctrl-autofill-caret: #fff;
+}
   :root {
-        --ctrl-time-current: #000;
-        --ctrl-time-current-bg: #d9f7fd;
-        --ctrl-time-off-text: var(--ctrl-err);
-        --ctrl-time-off-bg: none;
-      }
-      [wupdark] {
-        --ctrl-time-current: #25a1b6;
-        --ctrl-time-current-bg: #fff1;
-        --ctrl-time-off-text: var(--ctrl-err);
-        --ctrl-time-off-bg: none;
-      }
+  --ctrl-time-current: #000;
+  --ctrl-time-current-bg: #d9f7fd;
+  --ctrl-time-off-text: var(--ctrl-err);
+  --ctrl-time-off-bg: none;
+}
+[wupdark] {
+  --ctrl-time-current: #25a1b6;
+  --ctrl-time-current-bg: #fff1;
+  --ctrl-time-off-text: var(--ctrl-err);
+  --ctrl-time-off-bg: none;
+}
   
-      WUP-TIME {
-        --ctrl-focus-border: var(--ctrl-focus);
-        contain: style;
-        display: block;
-        flex: 1;
-        margin: var(--base-margin) 0;
-        box-shadow: 0 0 0 1px var(--ctrl-border);
-        border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl-text);
-        background: var(--ctrl-bg);
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-      }
-      WUP-TIME strong,
-      WUP-TIME legend {
-        color: var(--ctrl-label);
-        pointer-events: none;
-      }
-      WUP-TIME[invalid],
-      WUP-TIME[invalid] &gt; [menu] {
-        --ctrl-focus-border: var( --ctrl-invalid-border);
-        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
-      }
-      WUP-TIME:focus-within,
-      WUP-TIME:focus-within &gt; [menu] {
-        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
-      }
-      WUP-TIME:focus-within strong,
-      WUP-TIME:focus-within legend {
-        color: var(--ctrl-focus-label);
-        pointer-events: initial;
-      }
-      [disabled] WUP-TIME,
-      WUP-TIME[disabled] {
-        opacity: 0.6;
-        cursor: not-allowed;
-        -webkit-user-select: none;
-        user-select: none;
-      }
-      WUP-TIME[busy] {
-        opacity: 0.8;
-        cursor: inherit;
-       -webkit-user-select: none;
-        user-select: none;
-      }
-      [disabled] WUP-TIME &gt; label,
-      WUP-TIME[disabled] &gt; label,
-      WUP-TIME[busy] &gt; label {
-        pointer-events: none;
-      }
-      WUP-TIME label {
-        display: flex;
-        align-items: center;
-        box-sizing: border-box;
-        font: inherit;
-        cursor: inherit;
-        padding: var(--ctrl-padding);
-        padding-top: 0;
-        padding-bottom: 0;
-      }
-      WUP-TIME input,
-      WUP-TIME textarea {
-        padding: 0;
-        margin: 0;
-        cursor: inherit;
-      }
-      WUP-TIME [contenteditable=true] {
-        margin: var(--ctrl-padding);
-        margin-left: 0;
-        margin-right: 0;
-        cursor: inherit;
-      }
-      WUP-TIME strong {
-        cursor: inherit;
-      }
-      WUP-TIME strong:empty {
-        display: none;
-      }
-      WUP-TIME [aria-required=true] + strong:after,
-      WUP-TIME fieldset[aria-required=true] &gt; legend:after {
-        content: "*";
-        font-size: larger;
-        font-weight: bolder;
-        line-height: 0;
-      }
-      WUP-TIME [error] {
-        cursor: pointer;
-        font-size: small;
-        color: var(--ctrl-err);
-        background: var(--ctrl-err-bg);
-        overflow: auto;
-        overflow: overlay;
-        // text-shadow: 0 0 0 var(--ctrl-err);
-      }
-      WUP-TIME [error] ul {
-        margin:0; padding:2px 4px 2px;
-      }
-      WUP-TIME [error] li {
-        display: flex;
-        align-items: center;
-        margin-left: -5px;
-      }
-      WUP-TIME [error] li:before {
-        content: '';
-        --ctrl-icon-img: var(--wup-icon-dot);
-        --ctrl-icon: var(--ctrl-err);
-        
-display: inline-block;
-width: var(--ctrl-icon-size);
-min-height: var(--ctrl-icon-size);
-box-sizing: content-box;
-margin: 0;
-padding: 5px;
-flex: 0 0 auto;
-align-self: stretch;
-border: none;
-box-shadow: none;
-background: var(--ctrl-icon);
--webkit-mask-size: var(--ctrl-icon-size);
-mask-size: var(--ctrl-icon-size);
--webkit-mask-repeat: no-repeat;
-mask-repeat: no-repeat;
--webkit-mask-position: center;
-mask-position: center;
--webkit-mask-image: var(--ctrl-icon-img);
-mask-image: var(--ctrl-icon-img);
-      }
-      WUP-TIME [error] li[valid] {
-        color: var(--ctrl-err-valid);
-      }
-      WUP-TIME [error] li[valid]:before {
-        content: '';
-        --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-valid);
-      }
-      WUP-TIME:focus-within [error] {
-        max-height: none;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        WUP-TIME:hover strong,
-        WUP-TIME[hovered] strong{
-          color: var(--ctrl-focus-label);
-        }
-        WUP-TIME:hover,
-        WUP-TIME:hover&gt;[menu],
-        WUP-TIME[hovered],
-        WUP-TIME[hovered]&gt;[menu] {
-          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
-        }
-      }
-      @media not all and (prefers-reduced-motion) {
-        WUP-TIME {
-          transition: box-shadow var(--anim);
-        }
-      }
-        WUP-TIME {
-          cursor: text;
-          text-align: start;
-        }
-        WUP-TIME label &gt; span {
-          width: 100%;
-          position: relative;
-          display: flex;
-          flex-direction: row-reverse;
-        }
-        WUP-TIME input,
-        WUP-TIME textarea,
-        WUP-TIME [maskholder],
-        WUP-TIME [prefix],
-        WUP-TIME [postfix] {
-          padding: var(--ctrl-padding);
-          padding-left: 0;
-          padding-right: 0;
-          font: inherit;
-          text-align: inherit;
-          color: inherit;
-          margin: 0;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: nowrap;
-        }
-        WUP-TIME input,
-        WUP-TIME textarea,
-        WUP-TIME [contenteditable=true],
-        WUP-TIME [maskholder],
-        WUP-TIME [postfix] {
-          width: 100%;
-          box-sizing: border-box;
-          border: none;
-          background: none;
-          outline: none;
-        }
-        WUP-TIME [prefix],
-        WUP-TIME [postfix] {
-          color: inherit;
-          flex-shrink: 0;
-        }
-        WUP-TIME [maskholder],
-        WUP-TIME [prefix],
-        WUP-TIME [postfix] {
-          display: none;
-          opacity: 0;
-          pointer-events: none;
-          text-overflow: initial;
-          white-space: pre;
-        }
-        WUP-TIME [postfix] {
-          position: absolute;
-        }
-        WUP-TIME [maskholder] {
-          position: absolute;
-          opacity: 0.65;
-        }
-        WUP-TIME [maskholder]&gt;i,
-        WUP-TIME [postfix]&gt;i {
-          visibility: hidden;
-          font: inherit;
-          white-space: pre;
-        }
-        WUP-TIME input:-webkit-autofill,
-        WUP-TIME textarea:-webkit-autofill,
-        WUP-TIME [contenteditable=true]:-webkit-autofill {
-          font: inherit;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: var(--ctrl-autofill);
-          caret-color: var(--ctrl-autofill-caret, auto);
-        }
-        WUP-TIME input:autofill,
-        WUP-TIME textarea:autofill,
-        WUP-TIME [contenteditable=true]:autofill {
-          font: inherit;
-          background-clip: text;
-          text-fill-color: var(--ctrl-autofill);
-          caret-color: var(--ctrl-autofill-caret, auto);
-        }
-        WUP-TIME strong {
-          display: block;
-          position: absolute;
-          top: 50%;
-          left: 0;
-          padding: 0;
-          margin: 0;
-          box-sizing: border-box;
-          max-width: 100%;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: nowrap;
-          transform-origin: top left;
-          transform: translateY(-50%);
-          font-weight: normal;
-          text-decoration: none;
-          -webkit-backface-visibility: hidden;
-          backface-visibility: hidden; 
-        }
-        @media not all and (prefers-reduced-motion) {
-          WUP-TIME strong {
-            transition: top var(--anim), transform var(--anim), color var(--anim);
-          }
-        }
-        WUP-TIME input:not(:focus):placeholder,
-        WUP-TIME textarea:not(:focus):placeholder {
-          color: transparent;
-        }
-        WUP-TIME:focus-within strong,
-        WUP-TIME input:not(:placeholder-shown) + strong,
-        WUP-TIME textarea:not(:placeholder-shown) + strong,
-        WUP-TIME [contenteditable=true]:not(:empty) + strong,
-        WUP-TIME legend {
-          transform: var(--ctrl-label-active-pos);
-        }
-        WUP-TIME input:-webkit-autofill + strong
-        WUP-TIME textarea:-webkit-autofill + strong
-        WUP-TIME [contenteditable=true]:-webkit-autofill + strong {
-          transform: var(--ctrl-label-active-pos);
-        }
-        WUP-TIME input:autofill + strong,
-        WUP-TIME textarea:autofill + strong,
-        WUP-TIME [contenteditable=true]:autofill + strong {
-          transform: var(--ctrl-label-active-pos);
-        }
-        WUP-TIME:focus-within [maskholder],
-        WUP-TIME:focus-within [prefix],
-        WUP-TIME:focus-within [postfix],
-        WUP-TIME input:not(:placeholder-shown) ~ [prefix],
-        WUP-TIME input:not(:placeholder-shown) ~ [postfix],
-        WUP-TIME textarea:not(:placeholder-shown) ~ [prefix],
-        WUP-TIME textarea:not(:placeholder-shown) ~ [postfix] {
-          display: inline-block;
-          opacity: 1;
-        }
-        /* style for icons */
-        WUP-TIME label:after,
-        WUP-TIME label:before {
-          
-display: inline-block;
-width: var(--ctrl-icon-size);
-min-height: var(--ctrl-icon-size);
-box-sizing: content-box;
-margin: 0;
-padding: 5px;
-flex: 0 0 auto;
-align-self: stretch;
-border: none;
-box-shadow: none;
-background: var(--ctrl-icon);
--webkit-mask-size: var(--ctrl-icon-size);
-mask-size: var(--ctrl-icon-size);
--webkit-mask-repeat: no-repeat;
-mask-repeat: no-repeat;
--webkit-mask-position: center;
-mask-position: center;
--webkit-mask-image: var(--ctrl-icon-img);
-mask-image: var(--ctrl-icon-img);
-          cursor: pointer;
-          -webkit-mask-image: none;
+WUP-TIME {
+  --ctrl-focus-border: var(--ctrl-focus);
+  contain: style;
+  display: block;
+  flex: 1;
+  margin: var(--base-margin) 0;
+  box-shadow: 0 0 0 1px var(--ctrl-border);
+  border-radius: var(--ctrl-border-radius);
+  color: var(--ctrl-text);
+  background: var(--ctrl-bg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+WUP-TIME strong,
+WUP-TIME legend {
+  color: var(--ctrl-label);
+  pointer-events: none;
+}
+WUP-TIME[invalid], WUP-TIME[invalid] &gt; [menu] {
+  --ctrl-focus-border: var(--ctrl-invalid-border);
+  box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+}
+WUP-TIME:focus-within, WUP-TIME:focus-within &gt; [menu] {
+  box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+}
+WUP-TIME:focus-within strong,
+WUP-TIME:focus-within legend {
+  color: var(--ctrl-focus-label);
+  pointer-events: initial;
+}
+[disabled] WUP-TIME, WUP-TIME[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  -webkit-user-select: none;
+          user-select: none;
+}
+WUP-TIME[busy] {
+  opacity: 0.8;
+  cursor: inherit;
+  -webkit-user-select: none;
+          user-select: none;
+}
+[disabled] WUP-TIME &gt; label, WUP-TIME[disabled] &gt; label, WUP-TIME[busy] &gt; label {
+  pointer-events: none;
+}
+WUP-TIME label {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  font: inherit;
+  cursor: inherit;
+  padding: var(--ctrl-padding);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+WUP-TIME input,
+WUP-TIME textarea {
+  padding: 0;
+  margin: 0;
+  cursor: inherit;
+}
+WUP-TIME [contenteditable=true] {
+  margin: var(--ctrl-padding);
+  margin-left: 0;
+  margin-right: 0;
+  cursor: inherit;
+}
+WUP-TIME strong {
+  cursor: inherit;
+}
+WUP-TIME strong:empty {
+  display: none;
+}
+WUP-TIME [aria-required=true] + strong:after,
+WUP-TIME fieldset[aria-required=true] &gt; legend:after {
+  content: "*";
+  font-size: larger;
+  font-weight: bolder;
+  line-height: 0;
+}
+WUP-TIME [error] {
+  cursor: pointer;
+  font-size: small;
+  color: var(--ctrl-err);
+  background: var(--ctrl-err-bg);
+  overflow: auto;
+  overflow: overlay;
+}
+WUP-TIME [error] ul {
+  margin: 0;
+  padding: 2px 4px 2px;
+}
+WUP-TIME [error] li {
+  display: flex;
+  align-items: center;
+  margin-left: -5px;
+}
+WUP-TIME [error] li:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-dot);
+  --ctrl-icon: var(--ctrl-err);
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+}
+WUP-TIME [error] li[valid] {
+  color: var(--ctrl-err-valid);
+}
+WUP-TIME [error] li[valid]:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  --ctrl-icon: var(--ctrl-err-valid);
+}
+WUP-TIME:focus-within [error] {
+  max-height: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-TIME:hover strong, WUP-TIME[hovered] strong {
+    color: var(--ctrl-focus-label);
+  }
+  WUP-TIME:hover, WUP-TIME:hover &gt; [menu], WUP-TIME[hovered], WUP-TIME[hovered] &gt; [menu] {
+    box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+  }
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-TIME {
+    transition: box-shadow var(--anim);
+  }
+}
+WUP-TIME {
+  cursor: text;
+  text-align: start;
+}
+WUP-TIME label &gt; span {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: row-reverse;
+}
+WUP-TIME input,
+WUP-TIME textarea,
+WUP-TIME [maskholder],
+WUP-TIME [prefix],
+WUP-TIME [postfix] {
+  padding: var(--ctrl-padding);
+  padding-left: 0;
+  padding-right: 0;
+  font: inherit;
+  text-align: inherit;
+  color: inherit;
+  margin: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+WUP-TIME input,
+WUP-TIME textarea,
+WUP-TIME [contenteditable=true],
+WUP-TIME [maskholder],
+WUP-TIME [postfix] {
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  background: none;
+  outline: none;
+}
+WUP-TIME [prefix],
+WUP-TIME [postfix] {
+  color: inherit;
+  flex-shrink: 0;
+}
+WUP-TIME [maskholder],
+WUP-TIME [prefix],
+WUP-TIME [postfix] {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+  text-overflow: initial;
+  white-space: pre;
+}
+WUP-TIME [postfix] {
+  position: absolute;
+}
+WUP-TIME [maskholder] {
+  position: absolute;
+  opacity: 0.65;
+}
+WUP-TIME [maskholder] &gt; i,
+WUP-TIME [postfix] &gt; i {
+  visibility: hidden;
+  font: inherit;
+  white-space: pre;
+}
+WUP-TIME input:-webkit-autofill,
+WUP-TIME textarea:-webkit-autofill,
+WUP-TIME [contenteditable=true]:-webkit-autofill {
+  font: inherit;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: var(--ctrl-autofill);
+  caret-color: var(--ctrl-autofill-caret, auto);
+}
+WUP-TIME input:-webkit-autofill, WUP-TIME textarea:-webkit-autofill, WUP-TIME [contenteditable=true]:-webkit-autofill {
+  font: inherit;
+  background-clip: text;
+  text-fill-color: var(--ctrl-autofill);
+  caret-color: var(--ctrl-autofill-caret, auto);
+}
+WUP-TIME input:autofill,
+WUP-TIME textarea:autofill,
+WUP-TIME [contenteditable=true]:autofill {
+  font: inherit;
+  background-clip: text;
+  text-fill-color: var(--ctrl-autofill);
+  caret-color: var(--ctrl-autofill-caret, auto);
+}
+WUP-TIME strong {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  transform-origin: top left;
+  transform: translateY(-50%);
+  font-weight: normal;
+  text-decoration: none;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-TIME strong {
+    transition: top var(--anim), transform var(--anim), color var(--anim);
+  }
+}
+WUP-TIME input:not(:focus):placeholder,
+WUP-TIME textarea:not(:focus):placeholder {
+  color: transparent;
+}
+WUP-TIME:focus-within strong,
+WUP-TIME input:not(:placeholder-shown) + strong,
+WUP-TIME textarea:not(:placeholder-shown) + strong,
+WUP-TIME [contenteditable=true]:not(:empty) + strong,
+WUP-TIME legend {
+  transform: var(--ctrl-label-active-pos);
+}
+WUP-TIME input:-webkit-autofill + strong, WUP-TIME textarea:-webkit-autofill + strong, WUP-TIME [contenteditable=true]:-webkit-autofill + strong {
+  transform: var(--ctrl-label-active-pos);
+}
+WUP-TIME input:autofill + strong,
+WUP-TIME textarea:autofill + strong,
+WUP-TIME [contenteditable=true]:autofill + strong {
+  transform: var(--ctrl-label-active-pos);
+}
+WUP-TIME:focus-within [maskholder], WUP-TIME:focus-within [prefix], WUP-TIME:focus-within [postfix],
+WUP-TIME input:not(:placeholder-shown) ~ [prefix],
+WUP-TIME input:not(:placeholder-shown) ~ [postfix],
+WUP-TIME textarea:not(:placeholder-shown) ~ [prefix],
+WUP-TIME textarea:not(:placeholder-shown) ~ [postfix] {
+  display: inline-block;
+  opacity: 1;
+}
+WUP-TIME label:after,
+WUP-TIME label:before {
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  cursor: pointer;
+  -webkit-mask-image: none;
           mask-image: none;
-        }
-        WUP-TIME label:after {
-          margin-right: calc(var(--ctrl-icon-size) / -2);
-        }
-        WUP-TIME label:before {
-          margin-left: calc(var(--ctrl-icon-size) / -2);
-        }
-        WUP-TIME label&gt;button {
-          z-index: 1;
-          contain: strict;
-          font-size: inherit;
-          flex: 0 0 auto;
-          align-self: center;
-        }
-        WUP-TIME button[clear] {
-          --icon-size: var(--ctrl-icon-size);
-          --icon-hover-r: 24px;
-          --icon-img: var(--wup-icon-cross);
-          --icon: var(--ctrl-label);
-          --icon-hover: var(--ctrl-clear);
-          --icon-hover-bg: var(--ctrl-clear-hover);
-          display: none;
-          opacity: 0;
-          margin-right: -0.5em;
-        }
-        WUP-TIME button[clear=back] {
-          --icon-img: var(--wup-icon-back);
-        }
-        WUP-TIME:focus-within button[clear] {
-          display: inline-block;
-          opacity: 1;
-        }
-        @media (hover: hover) and (pointer: fine) {
-          WUP-TIME:hover button[clear] {
-            display: inline-block;
-            opacity: 1;
-          }
-        }
-        WUP-TIME[disabled] button[clear],
-        WUP-TIME[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }
-      WUP-TIME {
-        cursor: pointer;
-      }
-      WUP-TIME input {
-        cursor: text;
-      }
-      WUP-TIME input:placeholder-shown,
-      WUP-TIME input:read-only {
-        cursor: pointer;
-      }
-      WUP-TIME label:after {
-        content: "";
-        -webkit-mask-image: var(--ctrl-icon-img);
-        mask-image: var(--ctrl-icon-img);
-      }
-      @media not all and (prefers-reduced-motion) {
-        WUP-TIME label:after {
-          transition: transform var(--anim);
-        }
-      }
-      WUP-TIME button[clear] {
-        margin: 0;
-      }
-      WUP-TIME &gt; [menu] {
-        padding: 0;
-        max-height: 300px;
-        z-index: 8010;
-      }
-      WUP-TIME {
-        --ctrl-icon-img:  var(--wup-icon-time-lg);
-        --ctrl-icon-img: var(--wup-icon-time);
-      }
-      WUP-TIME &gt; [menu] {
-        overflow: hidden;
-      }
-      WUP-TIME &gt; [menu] &gt; div:first-child {
-        position: relative;
-      }
-      WUP-TIME &gt; [menu] ul {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-        cursor: pointer;
-        overflow: auto;
-        text-align: center;
-        display: inline-block;
-        vertical-align: middle;
-      }
-      WUP-TIME &gt; [menu] li,
-      WUP-TIME &gt; [menu] mark,
-      WUP-TIME &gt; [menu] ul:after {
-        padding: 1em;
-        line-height: 1em;
-      }
-      WUP-TIME &gt; [menu] mark {
-        z-index: -1;
-        position: absolute;
-        display: block;
-        top:50%; left:0; right:0;
-        transform: translateY(-50%);
-        margin: 0; padding-left: 2.8em;
-        font: inherit;
-        background: var(--ctrl-time-current-bg);
-      }
-      WUP-TIME &gt; [menu] ul:after {
-        content: "99";
-        height: 0;
-        margin:0; padding-top:0; padding-bottom:0;
-        visibility: hidden;
-        overflow: hidden;
-        user-select: none;
-        pointer-events: none;
-        display: block;
-      }
-      WUP-TIME &gt; [menu] ul:nth-child(3):after {
-         content: "AM";
-      }
-      WUP-TIME &gt; [menu] li[aria-selected=true],
-      WUP-TIME &gt; [menu] mark,
-      WUP-TIME &gt; [menu] ul:after {
-        font-weight: bold;
-        color: var(--ctrl-time-current);
-      }
-      WUP-TIME &gt; [menu] li[focused] {
-        position: relative;
-      }
-      WUP-TIME &gt; [menu] li[focused]:after {
-        
-          content: " ";
-          position: absolute;
-          display: block;
-          top: 50%; left: 50%;
-          transform: translate(-50%,-50%);
-          width: 2em;
-          height: 2em;
-          border-radius: 50%;
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-    
-      }
-      WUP-TIME &gt; [menu] li[aria-hidden] {
-        pointer-events: none;
-        touch-action: none;
-        opacity: 0;
-      }
-      WUP-TIME &gt; [menu] li[disabled] {
-        border-radius: 999px;
-        color: var(--ctrl-time-off-text);
-        --ctrl-focus: var(--ctrl-time-off-text);
-        background-color: var(--ctrl-time-off-bg);
-      }
-      WUP-TIME [group] {
-        display: flex;
-        border-top: 1px solid var(--base-sep);
-      }
-      WUP-TIME [group] &gt; button {
-        cursor: pointer;
-        flex: 1 1 50%;
-        display: inline-flex;
-        align-content: center;
-        justify-content: center;
-        height: 2.4em;
-        border: none;
-        border-radius: 0;
-        padding: 0; margin: 0;
-        background: var(--popup-bg);
-      }
-      WUP-TIME [group] &gt; button:first-child {
-        --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-valid);
-        border-bottom-left-radius: var(--border-radius);
-        border-right: 1px solid var(--base-sep);
-      }
-      WUP-TIME [group] &gt; button:last-child {
-        --ctrl-icon-img: var(--wup-icon-cross);
-        --ctrl-icon: var(--ctrl-err);
-        border-bottom-right-radius: var(--border-radius);
-      }
-      WUP-TIME [group] &gt; button:after {
-        
-display: inline-block;
-width: var(--ctrl-icon-size);
-min-height: var(--ctrl-icon-size);
-box-sizing: content-box;
-margin: 0;
-padding: 5px;
-flex: 0 0 auto;
-align-self: stretch;
-border: none;
-box-shadow: none;
-background: var(--ctrl-icon);
--webkit-mask-size: var(--ctrl-icon-size);
-mask-size: var(--ctrl-icon-size);
--webkit-mask-repeat: no-repeat;
-mask-repeat: no-repeat;
--webkit-mask-position: center;
-mask-position: center;
--webkit-mask-image: var(--ctrl-icon-img);
-mask-image: var(--ctrl-icon-img);
-        content: "";
-        padding:0;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        WUP-TIME &gt; [menu] li:hover {
-          position: relative;
-        }
-        WUP-TIME &gt; [menu] li:hover:after {
-         
-          content: " ";
-          position: absolute;
-          display: block;
-          top: 50%; left: 50%;
-          transform: translate(-50%,-50%);
-          width: 2em;
-          height: 2em;
-          border-radius: 50%;
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-    
-        }
-        WUP-TIME &gt; [menu] button:hover {
-          box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
-        }
-      }
-      WUP-TIME &gt; [menu] button[disabled] {
-         box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
-         cursor: not-allowed;
-         --ctrl-icon: inherit;
-      }
+}
+WUP-TIME label:after {
+  margin-right: calc(var(--ctrl-icon-size) / -2);
+}
+WUP-TIME label:before {
+  margin-left: calc(var(--ctrl-icon-size) / -2);
+}
+WUP-TIME label &gt; button {
+  z-index: 1;
+  contain: strict;
+  font-size: inherit;
+  flex: 0 0 auto;
+  align-self: center;
+}
+WUP-TIME button[clear] {
+  --icon-size: var(--ctrl-icon-size);
+  --icon-hover-r: 24px;
+  --icon-img: var(--wup-icon-cross);
+  --icon: var(--ctrl-label);
+  --icon-hover: var(--ctrl-clear);
+  --icon-hover-bg: var(--ctrl-clear-hover);
+  display: none;
+  opacity: 0;
+  margin-right: -0.5em;
+}
+WUP-TIME button[clear=back] {
+  --icon-img: var(--wup-icon-back);
+}
+WUP-TIME:focus-within button[clear] {
+  display: inline-block;
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-TIME:hover button[clear] {
+    display: inline-block;
+    opacity: 1;
+  }
+}
+WUP-TIME[disabled] button[clear], WUP-TIME[readonly] button[clear] {
+  display: none;
+  pointer-events: none;
+}
+WUP-TIME {
+  cursor: pointer;
+}
+WUP-TIME input {
+  cursor: text;
+}
+WUP-TIME input:placeholder-shown, WUP-TIME input:read-only {
+  cursor: pointer;
+}
+WUP-TIME label:after {
+  content: "";
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-TIME label:after {
+    transition: transform var(--anim);
+  }
+}
+WUP-TIME button[clear] {
+  margin: 0;
+}
+WUP-TIME &gt; [menu] {
+  padding: 0;
+  max-height: 300px;
+  z-index: 8010;
+}
+WUP-TIME {
+  --ctrl-icon-img: var(--wup-icon-time);
+}
+WUP-TIME &gt; [menu] {
+  overflow: hidden;
+}
+WUP-TIME &gt; [menu] &gt; div:first-child {
+  position: relative;
+}
+WUP-TIME &gt; [menu] ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  cursor: pointer;
+  overflow: auto;
+  text-align: center;
+  display: inline-block;
+  vertical-align: middle;
+}
+WUP-TIME &gt; [menu] li,
+WUP-TIME &gt; [menu] mark,
+WUP-TIME &gt; [menu] ul:after {
+  padding: 1em;
+  line-height: 1em;
+}
+WUP-TIME &gt; [menu] mark {
+  z-index: -1;
+  position: absolute;
+  display: block;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  margin: 0;
+  padding-left: 2.8em;
+  font: inherit;
+  background: var(--ctrl-time-current-bg);
+}
+WUP-TIME &gt; [menu] ul:after {
+  content: "99";
+  height: 0;
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  visibility: hidden;
+  overflow: hidden;
+  -webkit-user-select: none;
+          user-select: none;
+  pointer-events: none;
+  display: block;
+}
+WUP-TIME &gt; [menu] ul:nth-child(3):after {
+  content: "AM";
+}
+WUP-TIME &gt; [menu] li[aria-selected=true],
+WUP-TIME &gt; [menu] mark,
+WUP-TIME &gt; [menu] ul:after {
+  font-weight: bold;
+  color: var(--ctrl-time-current);
+}
+WUP-TIME &gt; [menu] li[focused] {
+  position: relative;
+}
+WUP-TIME &gt; [menu] li[focused]:after {
+  content: " ";
+  position: absolute;
+  display: block;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  box-shadow: 0 0 3px 1px var(--ctrl-focus);
+}
+WUP-TIME &gt; [menu] li[aria-hidden] {
+  pointer-events: none;
+  touch-action: none;
+  opacity: 0;
+}
+WUP-TIME &gt; [menu] li[disabled] {
+  border-radius: 999px;
+  color: var(--ctrl-time-off-text);
+  --ctrl-focus: var(--ctrl-time-off-text);
+  background-color: var(--ctrl-time-off-bg);
+}
+WUP-TIME [group] {
+  display: flex;
+  border-top: 1px solid var(--base-sep);
+}
+WUP-TIME [group] &gt; button {
+  cursor: pointer;
+  flex: 1 1 50%;
+  display: inline-flex;
+  align-content: center;
+  justify-content: center;
+  height: 2.4em;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  background: var(--popup-bg);
+}
+WUP-TIME [group] &gt; button:first-child {
+  --ctrl-icon-img: var(--wup-icon-check);
+  --ctrl-icon: var(--ctrl-err-valid);
+  border-bottom-left-radius: var(--border-radius);
+  border-right: 1px solid var(--base-sep);
+}
+WUP-TIME [group] &gt; button:last-child {
+  --ctrl-icon-img: var(--wup-icon-cross);
+  --ctrl-icon: var(--ctrl-err);
+  border-bottom-right-radius: var(--border-radius);
+}
+WUP-TIME [group] &gt; button:after {
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  content: "";
+  padding: 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-TIME &gt; [menu] li:hover {
+    position: relative;
+  }
+  WUP-TIME &gt; [menu] li:hover:after {
+    content: " ";
+    position: absolute;
+    display: block;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    box-shadow: 0 0 3px 1px var(--ctrl-focus);
+  }
+  WUP-TIME &gt; [menu] button:hover {
+    box-shadow: inset 0 0 0 99999px rgba(0, 0, 0, 0.05);
+  }
+}
+WUP-TIME &gt; [menu] button[disabled] {
+  box-shadow: inset 0 0 0 99999px rgba(0, 0, 0, 0.05);
+  cursor: not-allowed;
+  --ctrl-icon: inherit;
+}
 </style>
 `;
 

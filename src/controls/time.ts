@@ -5,7 +5,6 @@ import WUPScrolled from "../helpers/scrolled";
 import localeInfo, { WUPTimeFormat } from "../objects/localeInfo";
 import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
-import { WUPcssIcon } from "../styles";
 import WUPBaseComboControl, { MenuCloseCases, MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 
@@ -146,154 +145,11 @@ export default class WUPTimeControl<
 
   // --ctrl-time-icon-img-png-20: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAABiAAAAYgH4krHQAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAYJJREFUOI2l1L9qVUEQBvCf5+JFUBBbJQi2SSW+gLFV88ck2tmaBJE8gen8h/gCWklInzZ5h4BKIkkUtFD7BDGF91jsHLJe7tl70Q+GPTvzzcfOnJ1lMLq4h3V8xFHYLtawEJyRMI/PqIfYAWZKQh28zBLe4RHGcTZsPHzvM95zVIMEG7FfWGwjBSos4ThynvUT5jKx66Uy+jCZiU43zi4+hfNBS2KN1ZbYcsT3Q8tdJz1rK7Mk2MGH4MxX2VFfo9eSVMJvvInvqQpXY7P1D2INNmO9VuFibL7+h+CXWC9VUu1wakjSTUwM4dQVvsdmrEC8hQvYxiuc74tfjvUbaTZraQJKOIPH+IkfuJ/FVkLjLWnQa2mcOkNE4Qo24iD8fW3mSJfxIBxLIwg2aF6bh5G7h9NNcDacx9I4jYobkdPD7f7gi0x0Wbn8TpysmeMng0hVJlpLfVmRrsq5sInwNT3r4anyy2TWSU9LtoepklCOrvT316Rn/wiH2JGuxh3ZD8jxB6xmcQf6l8SZAAAAAElFTkSuQmCC');
   static get $styleRoot(): string {
-    return `:root {
-        --ctrl-time-current: #000;
-        --ctrl-time-current-bg: #d9f7fd;
-        --ctrl-time-off-text: var(--ctrl-err);
-        --ctrl-time-off-bg: none;
-      }
-      [wupdark] {
-        --ctrl-time-current: #25a1b6;
-        --ctrl-time-current-bg: #fff1;
-        --ctrl-time-off-text: var(--ctrl-err);
-        --ctrl-time-off-bg: none;
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    // WARN: "99" & "AM" in ul:after required to fix width changing by font-bold: https://codepen.io/hexagoncircle/pen/WNrYPLo
-    const focusStyle = `
-          content: " ";
-          position: absolute;
-          display: block;
-          top: 50%; left: 50%;
-          transform: translate(-50%,-50%);
-          width: 2em;
-          height: 2em;
-          border-radius: 50%;
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-    `;
-    return `${super.$style}
-      :host {
-        --ctrl-icon-img:  var(--wup-icon-time-lg);
-        --ctrl-icon-img: var(--wup-icon-time);
-      }
-      :host > [menu] {
-        overflow: hidden;
-      }
-      :host > [menu] > div:first-child {
-        position: relative;
-      }
-      :host > [menu] ul {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-        cursor: pointer;
-        overflow: auto;
-        text-align: center;
-        display: inline-block;
-        vertical-align: middle;
-      }
-      :host > [menu] li,
-      :host > [menu] mark,
-      :host > [menu] ul:after {
-        padding: 1em;
-        line-height: 1em;
-      }
-      :host > [menu] mark {
-        z-index: -1;
-        position: absolute;
-        display: block;
-        top:50%; left:0; right:0;
-        transform: translateY(-50%);
-        margin: 0; padding-left: 2.8em;
-        font: inherit;
-        background: var(--ctrl-time-current-bg);
-      }
-      :host > [menu] ul:after {
-        content: "99";
-        height: 0;
-        margin:0; padding-top:0; padding-bottom:0;
-        visibility: hidden;
-        overflow: hidden;
-        user-select: none;
-        pointer-events: none;
-        display: block;
-      }
-      :host > [menu] ul:nth-child(3):after {
-         content: "AM";
-      }
-      :host > [menu] li[aria-selected=true],
-      :host > [menu] mark,
-      :host > [menu] ul:after {
-        font-weight: bold;
-        color: var(--ctrl-time-current);
-      }
-      :host > [menu] li[focused] {
-        position: relative;
-      }
-      :host > [menu] li[focused]:after {
-        ${focusStyle}
-      }
-      :host > [menu] li[aria-hidden] {
-        pointer-events: none;
-        touch-action: none;
-        opacity: 0;
-      }
-      :host > [menu] li[disabled] {
-        border-radius: 999px;
-        color: var(--ctrl-time-off-text);
-        --ctrl-focus: var(--ctrl-time-off-text);
-        background-color: var(--ctrl-time-off-bg);
-      }
-      :host [group] {
-        display: flex;
-        border-top: 1px solid var(--base-sep);
-      }
-      :host [group] > button {
-        cursor: pointer;
-        flex: 1 1 50%;
-        display: inline-flex;
-        align-content: center;
-        justify-content: center;
-        height: 2.4em;
-        border: none;
-        border-radius: 0;
-        padding: 0; margin: 0;
-        background: var(--popup-bg);
-      }
-      :host [group] > button:first-child {
-        --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-valid);
-        border-bottom-left-radius: var(--border-radius);
-        border-right: 1px solid var(--base-sep);
-      }
-      :host [group] > button:last-child {
-        --ctrl-icon-img: var(--wup-icon-cross);
-        --ctrl-icon: var(--ctrl-err);
-        border-bottom-right-radius: var(--border-radius);
-      }
-      :host [group] > button:after {
-        ${WUPcssIcon}
-        content: "";
-        padding:0;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        :host > [menu] li:hover {
-          position: relative;
-        }
-        :host > [menu] li:hover:after {
-         ${focusStyle}
-        }
-        :host > [menu] button:hover {
-          box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
-        }
-      }
-      :host > [menu] button[disabled] {
-         box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
-         cursor: not-allowed;
-         --ctrl-icon: inherit;
-      }`;
+    return super.$style;
   }
 
   static get mappedAttributes(): Record<string, AttributeMap> {

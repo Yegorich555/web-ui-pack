@@ -1,0 +1,34 @@
+:host {
+  cursor: pointer;
+
+  input {
+    cursor: text;
+
+    &:placeholder-shown,
+    &:read-only {
+      cursor: pointer;
+    }
+  }
+
+  label:after {
+    content: "";
+    /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+    mask-image: var(--ctrl-icon-img);
+  }
+
+  @media not all and (prefers-reduced-motion) {
+    label:after {
+      transition: transform var(--anim);
+    }
+  }
+
+  button[clear] {
+    margin: 0;
+  }
+
+  > [menu] {
+    padding: 0;
+    max-height: 300px;
+    z-index: 8010;
+  }
+}

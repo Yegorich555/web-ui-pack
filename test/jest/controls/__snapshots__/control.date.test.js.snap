@@ -357,441 +357,429 @@ padding:0;}
 }
 
   :root {
-        --ctrl-padding: 1.5em 1em 0.5em 1em;
-        --ctrl-focus: var(--base-focus);
-        --ctrl-focus-label: var(--ctrl-focus);
-        --ctrl-selected: var(--ctrl-focus);
-        --ctrl-label: #5e5e5e;
-        --ctrl-icon: var(--ctrl-label);
-        --ctrl-icon-size: 1em;
-        --ctrl-text: inherit;
-        --ctrl-bg: #fff;
-        --ctrl-border: #e6e6e6;
-        --ctrl-border-radius: var(--border-radius);
-        --ctrl-err: #ad0000;
-        --ctrl-err-bg: #fff4fa;
-        --ctrl-err-valid: green;
-        --ctrl-invalid-border: red;
-      }
-      [wupdark] {
-        --ctrl-bg: none;
-        --ctrl-border: #104652;
-        --ctrl-label: #919191;
-        --ctrl-icon: var(--ctrl-label);
-        --ctrl-focus-label: #25a1b6;
-        --ctrl-selected: #25a1b6;
-        --ctrl-err: #ff6666;
-        --ctrl-err-bg: #000;
-        --ctrl-err-valid: #54d754;
-      }
+  --ctrl-padding: 1.5em 1em 0.5em 1em;
+  --ctrl-focus: var(--base-focus);
+  --ctrl-focus-label: var(--ctrl-focus);
+  --ctrl-selected: var(--ctrl-focus);
+  --ctrl-label: #5e5e5e;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-icon-size: 1em;
+  --ctrl-text: inherit;
+  --ctrl-bg: #fff;
+  --ctrl-border: #e6e6e6;
+  --ctrl-border-radius: var(--border-radius);
+  --ctrl-err: #ad0000;
+  --ctrl-err-bg: #fff4fa;
+  --ctrl-err-valid: green;
+  --ctrl-invalid-border: red;
+}
+[wupdark] {
+  --ctrl-bg: none;
+  --ctrl-border: #104652;
+  --ctrl-label: #919191;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-focus-label: #25a1b6;
+  --ctrl-selected: #25a1b6;
+  --ctrl-err: #ff6666;
+  --ctrl-err-bg: #000;
+  --ctrl-err-valid: #54d754;
+}
   :root {
-      --ctrl-autofill: #00869e;
-      --ctrl-clear: red;
-      --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
-     }
-     [wupdark] {
-        --ctrl-clear-hover: rgba(255,0,0,0.2);
-        --ctrl-autofill: #89bc55;
-        --ctrl-autofill-caret: #fff;
-      }
+  --ctrl-autofill: #00869e;
+  --ctrl-clear: red;
+  --ctrl-clear-hover: rgba(255, 0, 0, 0.1);
+  --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
+}
+[wupdark] {
+  --ctrl-clear-hover: rgba(255, 0, 0, 0.2);
+  --ctrl-autofill: #89bc55;
+  --ctrl-autofill-caret: #fff;
+}
   
-      WUP-DATE {
-        --ctrl-focus-border: var(--ctrl-focus);
-        contain: style;
-        display: block;
-        flex: 1;
-        margin: var(--base-margin) 0;
-        box-shadow: 0 0 0 1px var(--ctrl-border);
-        border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl-text);
-        background: var(--ctrl-bg);
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-      }
-      WUP-DATE strong,
-      WUP-DATE legend {
-        color: var(--ctrl-label);
-        pointer-events: none;
-      }
-      WUP-DATE[invalid],
-      WUP-DATE[invalid] &gt; [menu] {
-        --ctrl-focus-border: var( --ctrl-invalid-border);
-        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
-      }
-      WUP-DATE:focus-within,
-      WUP-DATE:focus-within &gt; [menu] {
-        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
-      }
-      WUP-DATE:focus-within strong,
-      WUP-DATE:focus-within legend {
-        color: var(--ctrl-focus-label);
-        pointer-events: initial;
-      }
-      [disabled] WUP-DATE,
-      WUP-DATE[disabled] {
-        opacity: 0.6;
-        cursor: not-allowed;
-        -webkit-user-select: none;
-        user-select: none;
-      }
-      WUP-DATE[busy] {
-        opacity: 0.8;
-        cursor: inherit;
-       -webkit-user-select: none;
-        user-select: none;
-      }
-      [disabled] WUP-DATE &gt; label,
-      WUP-DATE[disabled] &gt; label,
-      WUP-DATE[busy] &gt; label {
-        pointer-events: none;
-      }
-      WUP-DATE label {
-        display: flex;
-        align-items: center;
-        box-sizing: border-box;
-        font: inherit;
-        cursor: inherit;
-        padding: var(--ctrl-padding);
-        padding-top: 0;
-        padding-bottom: 0;
-      }
-      WUP-DATE input,
-      WUP-DATE textarea {
-        padding: 0;
-        margin: 0;
-        cursor: inherit;
-      }
-      WUP-DATE [contenteditable=true] {
-        margin: var(--ctrl-padding);
-        margin-left: 0;
-        margin-right: 0;
-        cursor: inherit;
-      }
-      WUP-DATE strong {
-        cursor: inherit;
-      }
-      WUP-DATE strong:empty {
-        display: none;
-      }
-      WUP-DATE [aria-required=true] + strong:after,
-      WUP-DATE fieldset[aria-required=true] &gt; legend:after {
-        content: "*";
-        font-size: larger;
-        font-weight: bolder;
-        line-height: 0;
-      }
-      WUP-DATE [error] {
-        cursor: pointer;
-        font-size: small;
-        color: var(--ctrl-err);
-        background: var(--ctrl-err-bg);
-        overflow: auto;
-        overflow: overlay;
-        // text-shadow: 0 0 0 var(--ctrl-err);
-      }
-      WUP-DATE [error] ul {
-        margin:0; padding:2px 4px 2px;
-      }
-      WUP-DATE [error] li {
-        display: flex;
-        align-items: center;
-        margin-left: -5px;
-      }
-      WUP-DATE [error] li:before {
-        content: '';
-        --ctrl-icon-img: var(--wup-icon-dot);
-        --ctrl-icon: var(--ctrl-err);
-        
-display: inline-block;
-width: var(--ctrl-icon-size);
-min-height: var(--ctrl-icon-size);
-box-sizing: content-box;
-margin: 0;
-padding: 5px;
-flex: 0 0 auto;
-align-self: stretch;
-border: none;
-box-shadow: none;
-background: var(--ctrl-icon);
--webkit-mask-size: var(--ctrl-icon-size);
-mask-size: var(--ctrl-icon-size);
--webkit-mask-repeat: no-repeat;
-mask-repeat: no-repeat;
--webkit-mask-position: center;
-mask-position: center;
--webkit-mask-image: var(--ctrl-icon-img);
-mask-image: var(--ctrl-icon-img);
-      }
-      WUP-DATE [error] li[valid] {
-        color: var(--ctrl-err-valid);
-      }
-      WUP-DATE [error] li[valid]:before {
-        content: '';
-        --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-valid);
-      }
-      WUP-DATE:focus-within [error] {
-        max-height: none;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        WUP-DATE:hover strong,
-        WUP-DATE[hovered] strong{
-          color: var(--ctrl-focus-label);
-        }
-        WUP-DATE:hover,
-        WUP-DATE:hover&gt;[menu],
-        WUP-DATE[hovered],
-        WUP-DATE[hovered]&gt;[menu] {
-          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
-        }
-      }
-      @media not all and (prefers-reduced-motion) {
-        WUP-DATE {
-          transition: box-shadow var(--anim);
-        }
-      }
-        WUP-DATE {
-          cursor: text;
-          text-align: start;
-        }
-        WUP-DATE label &gt; span {
-          width: 100%;
-          position: relative;
-          display: flex;
-          flex-direction: row-reverse;
-        }
-        WUP-DATE input,
-        WUP-DATE textarea,
-        WUP-DATE [maskholder],
-        WUP-DATE [prefix],
-        WUP-DATE [postfix] {
-          padding: var(--ctrl-padding);
-          padding-left: 0;
-          padding-right: 0;
-          font: inherit;
-          text-align: inherit;
-          color: inherit;
-          margin: 0;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: nowrap;
-        }
-        WUP-DATE input,
-        WUP-DATE textarea,
-        WUP-DATE [contenteditable=true],
-        WUP-DATE [maskholder],
-        WUP-DATE [postfix] {
-          width: 100%;
-          box-sizing: border-box;
-          border: none;
-          background: none;
-          outline: none;
-        }
-        WUP-DATE [prefix],
-        WUP-DATE [postfix] {
-          color: inherit;
-          flex-shrink: 0;
-        }
-        WUP-DATE [maskholder],
-        WUP-DATE [prefix],
-        WUP-DATE [postfix] {
-          display: none;
-          opacity: 0;
-          pointer-events: none;
-          text-overflow: initial;
-          white-space: pre;
-        }
-        WUP-DATE [postfix] {
-          position: absolute;
-        }
-        WUP-DATE [maskholder] {
-          position: absolute;
-          opacity: 0.65;
-        }
-        WUP-DATE [maskholder]&gt;i,
-        WUP-DATE [postfix]&gt;i {
-          visibility: hidden;
-          font: inherit;
-          white-space: pre;
-        }
-        WUP-DATE input:-webkit-autofill,
-        WUP-DATE textarea:-webkit-autofill,
-        WUP-DATE [contenteditable=true]:-webkit-autofill {
-          font: inherit;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: var(--ctrl-autofill);
-          caret-color: var(--ctrl-autofill-caret, auto);
-        }
-        WUP-DATE input:autofill,
-        WUP-DATE textarea:autofill,
-        WUP-DATE [contenteditable=true]:autofill {
-          font: inherit;
-          background-clip: text;
-          text-fill-color: var(--ctrl-autofill);
-          caret-color: var(--ctrl-autofill-caret, auto);
-        }
-        WUP-DATE strong {
-          display: block;
-          position: absolute;
-          top: 50%;
-          left: 0;
-          padding: 0;
-          margin: 0;
-          box-sizing: border-box;
-          max-width: 100%;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: nowrap;
-          transform-origin: top left;
-          transform: translateY(-50%);
-          font-weight: normal;
-          text-decoration: none;
-          -webkit-backface-visibility: hidden;
-          backface-visibility: hidden; 
-        }
-        @media not all and (prefers-reduced-motion) {
-          WUP-DATE strong {
-            transition: top var(--anim), transform var(--anim), color var(--anim);
-          }
-        }
-        WUP-DATE input:not(:focus):placeholder,
-        WUP-DATE textarea:not(:focus):placeholder {
-          color: transparent;
-        }
-        WUP-DATE:focus-within strong,
-        WUP-DATE input:not(:placeholder-shown) + strong,
-        WUP-DATE textarea:not(:placeholder-shown) + strong,
-        WUP-DATE [contenteditable=true]:not(:empty) + strong,
-        WUP-DATE legend {
-          transform: var(--ctrl-label-active-pos);
-        }
-        WUP-DATE input:-webkit-autofill + strong
-        WUP-DATE textarea:-webkit-autofill + strong
-        WUP-DATE [contenteditable=true]:-webkit-autofill + strong {
-          transform: var(--ctrl-label-active-pos);
-        }
-        WUP-DATE input:autofill + strong,
-        WUP-DATE textarea:autofill + strong,
-        WUP-DATE [contenteditable=true]:autofill + strong {
-          transform: var(--ctrl-label-active-pos);
-        }
-        WUP-DATE:focus-within [maskholder],
-        WUP-DATE:focus-within [prefix],
-        WUP-DATE:focus-within [postfix],
-        WUP-DATE input:not(:placeholder-shown) ~ [prefix],
-        WUP-DATE input:not(:placeholder-shown) ~ [postfix],
-        WUP-DATE textarea:not(:placeholder-shown) ~ [prefix],
-        WUP-DATE textarea:not(:placeholder-shown) ~ [postfix] {
-          display: inline-block;
-          opacity: 1;
-        }
-        /* style for icons */
-        WUP-DATE label:after,
-        WUP-DATE label:before {
-          
-display: inline-block;
-width: var(--ctrl-icon-size);
-min-height: var(--ctrl-icon-size);
-box-sizing: content-box;
-margin: 0;
-padding: 5px;
-flex: 0 0 auto;
-align-self: stretch;
-border: none;
-box-shadow: none;
-background: var(--ctrl-icon);
--webkit-mask-size: var(--ctrl-icon-size);
-mask-size: var(--ctrl-icon-size);
--webkit-mask-repeat: no-repeat;
-mask-repeat: no-repeat;
--webkit-mask-position: center;
-mask-position: center;
--webkit-mask-image: var(--ctrl-icon-img);
-mask-image: var(--ctrl-icon-img);
-          cursor: pointer;
-          -webkit-mask-image: none;
+WUP-DATE {
+  --ctrl-focus-border: var(--ctrl-focus);
+  contain: style;
+  display: block;
+  flex: 1;
+  margin: var(--base-margin) 0;
+  box-shadow: 0 0 0 1px var(--ctrl-border);
+  border-radius: var(--ctrl-border-radius);
+  color: var(--ctrl-text);
+  background: var(--ctrl-bg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+WUP-DATE strong,
+WUP-DATE legend {
+  color: var(--ctrl-label);
+  pointer-events: none;
+}
+WUP-DATE[invalid], WUP-DATE[invalid] &gt; [menu] {
+  --ctrl-focus-border: var(--ctrl-invalid-border);
+  box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+}
+WUP-DATE:focus-within, WUP-DATE:focus-within &gt; [menu] {
+  box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+}
+WUP-DATE:focus-within strong,
+WUP-DATE:focus-within legend {
+  color: var(--ctrl-focus-label);
+  pointer-events: initial;
+}
+[disabled] WUP-DATE, WUP-DATE[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  -webkit-user-select: none;
+          user-select: none;
+}
+WUP-DATE[busy] {
+  opacity: 0.8;
+  cursor: inherit;
+  -webkit-user-select: none;
+          user-select: none;
+}
+[disabled] WUP-DATE &gt; label, WUP-DATE[disabled] &gt; label, WUP-DATE[busy] &gt; label {
+  pointer-events: none;
+}
+WUP-DATE label {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  font: inherit;
+  cursor: inherit;
+  padding: var(--ctrl-padding);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+WUP-DATE input,
+WUP-DATE textarea {
+  padding: 0;
+  margin: 0;
+  cursor: inherit;
+}
+WUP-DATE [contenteditable=true] {
+  margin: var(--ctrl-padding);
+  margin-left: 0;
+  margin-right: 0;
+  cursor: inherit;
+}
+WUP-DATE strong {
+  cursor: inherit;
+}
+WUP-DATE strong:empty {
+  display: none;
+}
+WUP-DATE [aria-required=true] + strong:after,
+WUP-DATE fieldset[aria-required=true] &gt; legend:after {
+  content: "*";
+  font-size: larger;
+  font-weight: bolder;
+  line-height: 0;
+}
+WUP-DATE [error] {
+  cursor: pointer;
+  font-size: small;
+  color: var(--ctrl-err);
+  background: var(--ctrl-err-bg);
+  overflow: auto;
+  overflow: overlay;
+}
+WUP-DATE [error] ul {
+  margin: 0;
+  padding: 2px 4px 2px;
+}
+WUP-DATE [error] li {
+  display: flex;
+  align-items: center;
+  margin-left: -5px;
+}
+WUP-DATE [error] li:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-dot);
+  --ctrl-icon: var(--ctrl-err);
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+}
+WUP-DATE [error] li[valid] {
+  color: var(--ctrl-err-valid);
+}
+WUP-DATE [error] li[valid]:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  --ctrl-icon: var(--ctrl-err-valid);
+}
+WUP-DATE:focus-within [error] {
+  max-height: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-DATE:hover strong, WUP-DATE[hovered] strong {
+    color: var(--ctrl-focus-label);
+  }
+  WUP-DATE:hover, WUP-DATE:hover &gt; [menu], WUP-DATE[hovered], WUP-DATE[hovered] &gt; [menu] {
+    box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+  }
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-DATE {
+    transition: box-shadow var(--anim);
+  }
+}
+WUP-DATE {
+  cursor: text;
+  text-align: start;
+}
+WUP-DATE label &gt; span {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: row-reverse;
+}
+WUP-DATE input,
+WUP-DATE textarea,
+WUP-DATE [maskholder],
+WUP-DATE [prefix],
+WUP-DATE [postfix] {
+  padding: var(--ctrl-padding);
+  padding-left: 0;
+  padding-right: 0;
+  font: inherit;
+  text-align: inherit;
+  color: inherit;
+  margin: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+WUP-DATE input,
+WUP-DATE textarea,
+WUP-DATE [contenteditable=true],
+WUP-DATE [maskholder],
+WUP-DATE [postfix] {
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  background: none;
+  outline: none;
+}
+WUP-DATE [prefix],
+WUP-DATE [postfix] {
+  color: inherit;
+  flex-shrink: 0;
+}
+WUP-DATE [maskholder],
+WUP-DATE [prefix],
+WUP-DATE [postfix] {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+  text-overflow: initial;
+  white-space: pre;
+}
+WUP-DATE [postfix] {
+  position: absolute;
+}
+WUP-DATE [maskholder] {
+  position: absolute;
+  opacity: 0.65;
+}
+WUP-DATE [maskholder] &gt; i,
+WUP-DATE [postfix] &gt; i {
+  visibility: hidden;
+  font: inherit;
+  white-space: pre;
+}
+WUP-DATE input:-webkit-autofill,
+WUP-DATE textarea:-webkit-autofill,
+WUP-DATE [contenteditable=true]:-webkit-autofill {
+  font: inherit;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: var(--ctrl-autofill);
+  caret-color: var(--ctrl-autofill-caret, auto);
+}
+WUP-DATE input:-webkit-autofill, WUP-DATE textarea:-webkit-autofill, WUP-DATE [contenteditable=true]:-webkit-autofill {
+  font: inherit;
+  background-clip: text;
+  text-fill-color: var(--ctrl-autofill);
+  caret-color: var(--ctrl-autofill-caret, auto);
+}
+WUP-DATE input:autofill,
+WUP-DATE textarea:autofill,
+WUP-DATE [contenteditable=true]:autofill {
+  font: inherit;
+  background-clip: text;
+  text-fill-color: var(--ctrl-autofill);
+  caret-color: var(--ctrl-autofill-caret, auto);
+}
+WUP-DATE strong {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  transform-origin: top left;
+  transform: translateY(-50%);
+  font-weight: normal;
+  text-decoration: none;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-DATE strong {
+    transition: top var(--anim), transform var(--anim), color var(--anim);
+  }
+}
+WUP-DATE input:not(:focus):placeholder,
+WUP-DATE textarea:not(:focus):placeholder {
+  color: transparent;
+}
+WUP-DATE:focus-within strong,
+WUP-DATE input:not(:placeholder-shown) + strong,
+WUP-DATE textarea:not(:placeholder-shown) + strong,
+WUP-DATE [contenteditable=true]:not(:empty) + strong,
+WUP-DATE legend {
+  transform: var(--ctrl-label-active-pos);
+}
+WUP-DATE input:-webkit-autofill + strong, WUP-DATE textarea:-webkit-autofill + strong, WUP-DATE [contenteditable=true]:-webkit-autofill + strong {
+  transform: var(--ctrl-label-active-pos);
+}
+WUP-DATE input:autofill + strong,
+WUP-DATE textarea:autofill + strong,
+WUP-DATE [contenteditable=true]:autofill + strong {
+  transform: var(--ctrl-label-active-pos);
+}
+WUP-DATE:focus-within [maskholder], WUP-DATE:focus-within [prefix], WUP-DATE:focus-within [postfix],
+WUP-DATE input:not(:placeholder-shown) ~ [prefix],
+WUP-DATE input:not(:placeholder-shown) ~ [postfix],
+WUP-DATE textarea:not(:placeholder-shown) ~ [prefix],
+WUP-DATE textarea:not(:placeholder-shown) ~ [postfix] {
+  display: inline-block;
+  opacity: 1;
+}
+WUP-DATE label:after,
+WUP-DATE label:before {
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  cursor: pointer;
+  -webkit-mask-image: none;
           mask-image: none;
-        }
-        WUP-DATE label:after {
-          margin-right: calc(var(--ctrl-icon-size) / -2);
-        }
-        WUP-DATE label:before {
-          margin-left: calc(var(--ctrl-icon-size) / -2);
-        }
-        WUP-DATE label&gt;button {
-          z-index: 1;
-          contain: strict;
-          font-size: inherit;
-          flex: 0 0 auto;
-          align-self: center;
-        }
-        WUP-DATE button[clear] {
-          --icon-size: var(--ctrl-icon-size);
-          --icon-hover-r: 24px;
-          --icon-img: var(--wup-icon-cross);
-          --icon: var(--ctrl-label);
-          --icon-hover: var(--ctrl-clear);
-          --icon-hover-bg: var(--ctrl-clear-hover);
-          display: none;
-          opacity: 0;
-          margin-right: -0.5em;
-        }
-        WUP-DATE button[clear=back] {
-          --icon-img: var(--wup-icon-back);
-        }
-        WUP-DATE:focus-within button[clear] {
-          display: inline-block;
-          opacity: 1;
-        }
-        @media (hover: hover) and (pointer: fine) {
-          WUP-DATE:hover button[clear] {
-            display: inline-block;
-            opacity: 1;
-          }
-        }
-        WUP-DATE[disabled] button[clear],
-        WUP-DATE[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }
-      WUP-DATE {
-        cursor: pointer;
-      }
-      WUP-DATE input {
-        cursor: text;
-      }
-      WUP-DATE input:placeholder-shown,
-      WUP-DATE input:read-only {
-        cursor: pointer;
-      }
-      WUP-DATE label:after {
-        content: "";
-        -webkit-mask-image: var(--ctrl-icon-img);
-        mask-image: var(--ctrl-icon-img);
-      }
-      @media not all and (prefers-reduced-motion) {
-        WUP-DATE label:after {
-          transition: transform var(--anim);
-        }
-      }
-      WUP-DATE button[clear] {
-        margin: 0;
-      }
-      WUP-DATE &gt; [menu] {
-        padding: 0;
-        max-height: 300px;
-        z-index: 8010;
-      }
-      WUP-DATE {
-        --ctrl-icon-img: var(--wup-icon-date);
-      }
-      WUP-DATE &gt; [menu] {
-        overflow: hidden;
-      }
-      WUP-DATE &gt; [menu] &gt; wup-calendar {
-        margin: 0;
-      }
+}
+WUP-DATE label:after {
+  margin-right: calc(var(--ctrl-icon-size) / -2);
+}
+WUP-DATE label:before {
+  margin-left: calc(var(--ctrl-icon-size) / -2);
+}
+WUP-DATE label &gt; button {
+  z-index: 1;
+  contain: strict;
+  font-size: inherit;
+  flex: 0 0 auto;
+  align-self: center;
+}
+WUP-DATE button[clear] {
+  --icon-size: var(--ctrl-icon-size);
+  --icon-hover-r: 24px;
+  --icon-img: var(--wup-icon-cross);
+  --icon: var(--ctrl-label);
+  --icon-hover: var(--ctrl-clear);
+  --icon-hover-bg: var(--ctrl-clear-hover);
+  display: none;
+  opacity: 0;
+  margin-right: -0.5em;
+}
+WUP-DATE button[clear=back] {
+  --icon-img: var(--wup-icon-back);
+}
+WUP-DATE:focus-within button[clear] {
+  display: inline-block;
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-DATE:hover button[clear] {
+    display: inline-block;
+    opacity: 1;
+  }
+}
+WUP-DATE[disabled] button[clear], WUP-DATE[readonly] button[clear] {
+  display: none;
+  pointer-events: none;
+}
+WUP-DATE {
+  cursor: pointer;
+}
+WUP-DATE input {
+  cursor: text;
+}
+WUP-DATE input:placeholder-shown, WUP-DATE input:read-only {
+  cursor: pointer;
+}
+WUP-DATE label:after {
+  content: "";
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-DATE label:after {
+    transition: transform var(--anim);
+  }
+}
+WUP-DATE button[clear] {
+  margin: 0;
+}
+WUP-DATE &gt; [menu] {
+  padding: 0;
+  max-height: 300px;
+  z-index: 8010;
+}
+WUP-DATE {
+  --ctrl-icon-img: var(--wup-icon-date);
+}
+WUP-DATE &gt; [menu] {
+  overflow: hidden;
+}
+WUP-DATE &gt; [menu] &gt; wup-calendar {
+  margin: 0;
+}
 </style>
 `;
 

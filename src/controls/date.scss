@@ -1,0 +1,11 @@
+:host {
+  --ctrl-icon-img: var(--wup-icon-date);
+
+  > [menu] {
+    overflow: hidden;
+
+    > wup-calendar {
+      margin: 0;
+    }
+  }
+}

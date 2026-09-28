@@ -1057,363 +1057,390 @@ padding:0;}
 }
 
   :root {
-        --ctrl-padding: 1.5em 1em 0.5em 1em;
-        --ctrl-focus: var(--base-focus);
-        --ctrl-focus-label: var(--ctrl-focus);
-        --ctrl-selected: var(--ctrl-focus);
-        --ctrl-label: #5e5e5e;
-        --ctrl-icon: var(--ctrl-label);
-        --ctrl-icon-size: 1em;
-        --ctrl-text: inherit;
-        --ctrl-bg: #fff;
-        --ctrl-border: #e6e6e6;
-        --ctrl-border-radius: var(--border-radius);
-        --ctrl-err: #ad0000;
-        --ctrl-err-bg: #fff4fa;
-        --ctrl-err-valid: green;
-        --ctrl-invalid-border: red;
-      }
-      [wupdark] {
-        --ctrl-bg: none;
-        --ctrl-border: #104652;
-        --ctrl-label: #919191;
-        --ctrl-icon: var(--ctrl-label);
-        --ctrl-focus-label: #25a1b6;
-        --ctrl-selected: #25a1b6;
-        --ctrl-err: #ff6666;
-        --ctrl-err-bg: #000;
-        --ctrl-err-valid: #54d754;
-      }
+  --ctrl-padding: 1.5em 1em 0.5em 1em;
+  --ctrl-focus: var(--base-focus);
+  --ctrl-focus-label: var(--ctrl-focus);
+  --ctrl-selected: var(--ctrl-focus);
+  --ctrl-label: #5e5e5e;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-icon-size: 1em;
+  --ctrl-text: inherit;
+  --ctrl-bg: #fff;
+  --ctrl-border: #e6e6e6;
+  --ctrl-border-radius: var(--border-radius);
+  --ctrl-err: #ad0000;
+  --ctrl-err-bg: #fff4fa;
+  --ctrl-err-valid: green;
+  --ctrl-invalid-border: red;
+}
+[wupdark] {
+  --ctrl-bg: none;
+  --ctrl-border: #104652;
+  --ctrl-label: #919191;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-focus-label: #25a1b6;
+  --ctrl-selected: #25a1b6;
+  --ctrl-err: #ff6666;
+  --ctrl-err-bg: #000;
+  --ctrl-err-valid: #54d754;
+}
   :root {
-      --ctrl-clr-selected: #fff;
-      --ctrl-clr-selected-bg: #009fbc;
-      --ctrl-clr-w: 17em;
-      --ctrl-clr-cell-gap: 0px;
-      --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
-      --ctrl-clr-off: var(--ctrl-err);
-      --ctrl-clr-off-bg: var(--ctrl-err-bg);
-    }
-    [wupdark] {
-      --ctrl-clr-off: var(--ctrl-err);
-      --ctrl-clr-off-bg: none;
-    }
+  --ctrl-clr-selected: #fff;
+  --ctrl-clr-selected-bg: #009fbc;
+  --ctrl-clr-w: 17em;
+  --ctrl-clr-cell-gap: 0px;
+  --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
+  --ctrl-clr-off: var(--ctrl-err);
+  --ctrl-clr-off-bg: var(--ctrl-err-bg);
+}
+[wupdark] {
+  --ctrl-clr-off: var(--ctrl-err);
+  --ctrl-clr-off-bg: none;
+}
   
-      WUP-CALENDAR {
-        --ctrl-focus-border: var(--ctrl-focus);
-        contain: style;
-        display: block;
-        flex: 1;
-        margin: var(--base-margin) 0;
-        box-shadow: 0 0 0 1px var(--ctrl-border);
-        border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl-text);
-        background: var(--ctrl-bg);
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-      }
-      WUP-CALENDAR strong,
-      WUP-CALENDAR legend {
-        color: var(--ctrl-label);
-        pointer-events: none;
-      }
-      WUP-CALENDAR[invalid],
-      WUP-CALENDAR[invalid] &gt; [menu] {
-        --ctrl-focus-border: var( --ctrl-invalid-border);
-        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
-      }
-      WUP-CALENDAR:focus-within,
-      WUP-CALENDAR:focus-within &gt; [menu] {
-        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
-      }
-      WUP-CALENDAR:focus-within strong,
-      WUP-CALENDAR:focus-within legend {
-        color: var(--ctrl-focus-label);
-        pointer-events: initial;
-      }
-      [disabled] WUP-CALENDAR,
-      WUP-CALENDAR[disabled] {
-        opacity: 0.6;
-        cursor: not-allowed;
-        -webkit-user-select: none;
-        user-select: none;
-      }
-      WUP-CALENDAR[busy] {
-        opacity: 0.8;
-        cursor: inherit;
-       -webkit-user-select: none;
-        user-select: none;
-      }
-      [disabled] WUP-CALENDAR &gt; label,
-      WUP-CALENDAR[disabled] &gt; label,
-      WUP-CALENDAR[busy] &gt; label {
-        pointer-events: none;
-      }
-      WUP-CALENDAR label {
-        display: flex;
-        align-items: center;
-        box-sizing: border-box;
-        font: inherit;
-        cursor: inherit;
-        padding: var(--ctrl-padding);
-        padding-top: 0;
-        padding-bottom: 0;
-      }
-      WUP-CALENDAR input,
-      WUP-CALENDAR textarea {
-        padding: 0;
-        margin: 0;
-        cursor: inherit;
-      }
-      WUP-CALENDAR [contenteditable=true] {
-        margin: var(--ctrl-padding);
-        margin-left: 0;
-        margin-right: 0;
-        cursor: inherit;
-      }
-      WUP-CALENDAR strong {
-        cursor: inherit;
-      }
-      WUP-CALENDAR strong:empty {
-        display: none;
-      }
-      WUP-CALENDAR [aria-required=true] + strong:after,
-      WUP-CALENDAR fieldset[aria-required=true] &gt; legend:after {
-        content: "*";
-        font-size: larger;
-        font-weight: bolder;
-        line-height: 0;
-      }
-      WUP-CALENDAR [error] {
-        cursor: pointer;
-        font-size: small;
-        color: var(--ctrl-err);
-        background: var(--ctrl-err-bg);
-        overflow: auto;
-        overflow: overlay;
-        // text-shadow: 0 0 0 var(--ctrl-err);
-      }
-      WUP-CALENDAR [error] ul {
-        margin:0; padding:2px 4px 2px;
-      }
-      WUP-CALENDAR [error] li {
-        display: flex;
-        align-items: center;
-        margin-left: -5px;
-      }
-      WUP-CALENDAR [error] li:before {
-        content: '';
-        --ctrl-icon-img: var(--wup-icon-dot);
-        --ctrl-icon: var(--ctrl-err);
-        
-display: inline-block;
-width: var(--ctrl-icon-size);
-min-height: var(--ctrl-icon-size);
-box-sizing: content-box;
-margin: 0;
-padding: 5px;
-flex: 0 0 auto;
-align-self: stretch;
-border: none;
-box-shadow: none;
-background: var(--ctrl-icon);
--webkit-mask-size: var(--ctrl-icon-size);
-mask-size: var(--ctrl-icon-size);
--webkit-mask-repeat: no-repeat;
-mask-repeat: no-repeat;
--webkit-mask-position: center;
-mask-position: center;
--webkit-mask-image: var(--ctrl-icon-img);
-mask-image: var(--ctrl-icon-img);
-      }
-      WUP-CALENDAR [error] li[valid] {
-        color: var(--ctrl-err-valid);
-      }
-      WUP-CALENDAR [error] li[valid]:before {
-        content: '';
-        --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-valid);
-      }
-      WUP-CALENDAR:focus-within [error] {
-        max-height: none;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        WUP-CALENDAR:hover strong,
-        WUP-CALENDAR[hovered] strong{
-          color: var(--ctrl-focus-label);
-        }
-        WUP-CALENDAR:hover,
-        WUP-CALENDAR:hover&gt;[menu],
-        WUP-CALENDAR[hovered],
-        WUP-CALENDAR[hovered]&gt;[menu] {
-          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
-        }
-      }
-      @media not all and (prefers-reduced-motion) {
-        WUP-CALENDAR {
-          transition: box-shadow var(--anim);
-        }
-      }
-      WUP-CALENDAR {
-        max-width: fit-content;
-        margin: auto auto 20px;
-        box-shadow: 0 0 0 1px var(--ctrl-border);
-        border-radius: var(--ctrl-border-radius);
-        background: none;
-        text-transform: capitalize;
-      }
-      WUP-CALENDAR label {
-        max-width: var(--ctrl-clr-w);
-        display: block;
-        padding-right: 0;
-      }
-      WUP-CALENDAR strong {
-        display: block;
-        box-sizing: border-box;
-        max-width: 100%;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-      WUP-CALENDAR input {
-position: absolute;
-height:1px; width:1px;
-overflow:hidden;
-clip:rect(1px,1px,1px,1px);
-min-width:initial;
-padding:0;}
-      WUP-CALENDAR [calendar] {
-        --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-w) / 7 - var(--ctrl-clr-cell-gap));
-        --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
-        width: var(--ctrl-clr-w);
-        padding: var(--ctrl-clr-padding);
-        border-radius: var(--ctrl-border-radius);
-        background: var(--ctrl-bg);
-        box-sizing: content-box;
-      }
-      WUP-CALENDAR [calendar="day"] {
-        --ctrl-clr-cell-w: var(--ctrl-clr-cell-day-w);
-        --ctrl-clr-cell-h: var(--ctrl-clr-cell-day-w);
-      }
-      WUP-CALENDAR [calendar="month"],
-      WUP-CALENDAR [calendar="year"] {
-        --ctrl-clr-cell-w: calc(var(--ctrl-clr-w) / 4 - var(--ctrl-clr-cell-gap));
-        --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
-      }
-      WUP-CALENDAR [calendar="month"] ul,
-      WUP-CALENDAR [calendar="year"] ul {
-        display: none;
-      }
-      WUP-CALENDAR header,
-      WUP-CALENDAR ol,
-      WUP-CALENDAR ul {
-        display: flex;
-        flex-wrap: wrap;
-        margin:0; padding:0;
-      }
-      WUP-CALENDAR header &gt; button {
-        box-sizing: border-box;
-        cursor: pointer;
-        margin: auto;
-        padding: 4px 1em;
-        font-size: larger;
-        font-weight: initial;
-        border: none;
-        border-radius: 2em;
-        color: inherit;
-        background: none;
-        box-shadow: none;
-        text-transform: inherit;
-      }
-      WUP-CALENDAR header &gt; button[disabled] {
-        pointer-events: none;
-      }
-      WUP-CALENDAR ol,
-      WUP-CALENDAR ul {
-        margin-top: var(--ctrl-clr-padding);
-        list-style: none;
-      }
-      WUP-CALENDAR ul {
-        color: var(--ctrl-label);
-      }
-      WUP-CALENDAR li {
-        height: var(--ctrl-clr-cell-h);
-        width: var(--ctrl-clr-cell-w);
-        padding: 0;
-        margin: calc(var(--ctrl-clr-cell-gap) / 2);
-        font: inherit;
-        line-height: var(--ctrl-clr-cell-h);
-        text-align: center;
-        border-radius: 50%;
-      }
-      WUP-CALENDAR ul&gt;li {
-        margin: 0 calc(var(--ctrl-clr-cell-gap) / 2);
-        height: 1em;
-        line-height: 1em;
-      }
-      WUP-CALENDAR li[prev],
-      WUP-CALENDAR li[next] {
-        opacity: 0.6;
-      }
-      WUP-CALENDAR li[aria-current] {
-        color: var(--ctrl-clr-selected-bg);
-        font-weight: bold;
-        opacity: 1;
-      }
-      WUP-CALENDAR li[aria-selected] {
-        background-color: var(--ctrl-clr-selected-bg);
-        color: var(--ctrl-clr-selected);
-        opacity: 1;
-      }
-      WUP-CALENDAR li[focused] {
-        box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-        opacity: 1;
-      }
-      WUP-CALENDAR li[focused][aria-selected] {
-        text-decoration: underline;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        WUP-CALENDAR header&gt;button:hover {
-          background-color: var(--ctrl-clr-selected-bg);
-          color: var(--ctrl-clr-selected);
-        }
-        WUP-CALENDAR ol&gt;li:hover:not([disabled]) {
-          box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-          opacity: 1;
-        }
-      }
-      WUP-CALENDAR li[disabled] {
-        color: var(--ctrl-clr-off);
-        background-color: var(--ctrl-clr-off-bg);
-      }
-      WUP-CALENDAR li[disabled][aria-selected] {
-        font-weight: bold;
-      }
-      @media not all and (prefers-reduced-motion) {
-        @keyframes WUP-ZOOM-OUT-1 {
-          0% { transform: scale(1); opacity: 1; }
-          100% { transform: scale(0); opacity: 0; }
-        }
-        @keyframes WUP-ZOOM-OUT-2 {
-          0% { transform: scale(5); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes WUP-ZOOM-IN-1 {
-          0% { transform: scale(1); opacity: 1; }
-          100% { transform: scale(5); opacity: 0; }
-        }
-        @keyframes WUP-ZOOM-IN-2 {
-          0% { transform: scale(0); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        WUP-CALENDAR [calendar]&gt;div {
-          overflow: hidden;
-        }
-        WUP-CALENDAR [zoom] { animation: none var(--anim-t) linear forwards; }
-        WUP-CALENDAR [zoom="out"] { animation-name: WUP-ZOOM-OUT-1; }
-        WUP-CALENDAR [zoom="out2"] { animation-name: WUP-ZOOM-OUT-2; }
-        WUP-CALENDAR [zoom="in"] { animation-name: WUP-ZOOM-IN-1; }
-        WUP-CALENDAR [zoom="in2"] { animation-name: WUP-ZOOM-IN-2; }
-      }
+WUP-CALENDAR {
+  --ctrl-focus-border: var(--ctrl-focus);
+  contain: style;
+  display: block;
+  flex: 1;
+  margin: var(--base-margin) 0;
+  box-shadow: 0 0 0 1px var(--ctrl-border);
+  border-radius: var(--ctrl-border-radius);
+  color: var(--ctrl-text);
+  background: var(--ctrl-bg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+WUP-CALENDAR strong,
+WUP-CALENDAR legend {
+  color: var(--ctrl-label);
+  pointer-events: none;
+}
+WUP-CALENDAR[invalid], WUP-CALENDAR[invalid] &gt; [menu] {
+  --ctrl-focus-border: var(--ctrl-invalid-border);
+  box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+}
+WUP-CALENDAR:focus-within, WUP-CALENDAR:focus-within &gt; [menu] {
+  box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+}
+WUP-CALENDAR:focus-within strong,
+WUP-CALENDAR:focus-within legend {
+  color: var(--ctrl-focus-label);
+  pointer-events: initial;
+}
+[disabled] WUP-CALENDAR, WUP-CALENDAR[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  -webkit-user-select: none;
+          user-select: none;
+}
+WUP-CALENDAR[busy] {
+  opacity: 0.8;
+  cursor: inherit;
+  -webkit-user-select: none;
+          user-select: none;
+}
+[disabled] WUP-CALENDAR &gt; label, WUP-CALENDAR[disabled] &gt; label, WUP-CALENDAR[busy] &gt; label {
+  pointer-events: none;
+}
+WUP-CALENDAR label {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  font: inherit;
+  cursor: inherit;
+  padding: var(--ctrl-padding);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+WUP-CALENDAR input,
+WUP-CALENDAR textarea {
+  padding: 0;
+  margin: 0;
+  cursor: inherit;
+}
+WUP-CALENDAR [contenteditable=true] {
+  margin: var(--ctrl-padding);
+  margin-left: 0;
+  margin-right: 0;
+  cursor: inherit;
+}
+WUP-CALENDAR strong {
+  cursor: inherit;
+}
+WUP-CALENDAR strong:empty {
+  display: none;
+}
+WUP-CALENDAR [aria-required=true] + strong:after,
+WUP-CALENDAR fieldset[aria-required=true] &gt; legend:after {
+  content: "*";
+  font-size: larger;
+  font-weight: bolder;
+  line-height: 0;
+}
+WUP-CALENDAR [error] {
+  cursor: pointer;
+  font-size: small;
+  color: var(--ctrl-err);
+  background: var(--ctrl-err-bg);
+  overflow: auto;
+  overflow: overlay;
+}
+WUP-CALENDAR [error] ul {
+  margin: 0;
+  padding: 2px 4px 2px;
+}
+WUP-CALENDAR [error] li {
+  display: flex;
+  align-items: center;
+  margin-left: -5px;
+}
+WUP-CALENDAR [error] li:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-dot);
+  --ctrl-icon: var(--ctrl-err);
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+}
+WUP-CALENDAR [error] li[valid] {
+  color: var(--ctrl-err-valid);
+}
+WUP-CALENDAR [error] li[valid]:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  --ctrl-icon: var(--ctrl-err-valid);
+}
+WUP-CALENDAR:focus-within [error] {
+  max-height: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-CALENDAR:hover strong, WUP-CALENDAR[hovered] strong {
+    color: var(--ctrl-focus-label);
+  }
+  WUP-CALENDAR:hover, WUP-CALENDAR:hover &gt; [menu], WUP-CALENDAR[hovered], WUP-CALENDAR[hovered] &gt; [menu] {
+    box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+  }
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-CALENDAR {
+    transition: box-shadow var(--anim);
+  }
+}
+WUP-CALENDAR {
+  max-width: fit-content;
+  margin: auto auto 20px;
+  box-shadow: 0 0 0 1px var(--ctrl-border);
+  border-radius: var(--ctrl-border-radius);
+  background: none;
+  text-transform: capitalize;
+}
+WUP-CALENDAR label {
+  max-width: var(--ctrl-clr-w);
+  display: block;
+  padding-right: 0;
+}
+WUP-CALENDAR strong {
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+WUP-CALENDAR input {
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  min-width: initial;
+  padding: 0;
+}
+WUP-CALENDAR [calendar] {
+  --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-w) / 7 - var(--ctrl-clr-cell-gap));
+  --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
+  width: var(--ctrl-clr-w);
+  padding: var(--ctrl-clr-padding);
+  border-radius: var(--ctrl-border-radius);
+  background: var(--ctrl-bg);
+  box-sizing: content-box;
+}
+WUP-CALENDAR [calendar=day] {
+  --ctrl-clr-cell-w: var(--ctrl-clr-cell-day-w);
+  --ctrl-clr-cell-h: var(--ctrl-clr-cell-day-w);
+}
+WUP-CALENDAR [calendar=month],
+WUP-CALENDAR [calendar=year] {
+  --ctrl-clr-cell-w: calc(var(--ctrl-clr-w) / 4 - var(--ctrl-clr-cell-gap));
+  --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
+}
+WUP-CALENDAR [calendar=month] ul,
+WUP-CALENDAR [calendar=year] ul {
+  display: none;
+}
+WUP-CALENDAR header,
+WUP-CALENDAR ol,
+WUP-CALENDAR ul {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+}
+WUP-CALENDAR header &gt; button {
+  box-sizing: border-box;
+  cursor: pointer;
+  margin: auto;
+  padding: 4px 1em;
+  font-size: larger;
+  font-weight: initial;
+  border: none;
+  border-radius: 2em;
+  color: inherit;
+  background: none;
+  box-shadow: none;
+  text-transform: inherit;
+}
+WUP-CALENDAR header &gt; button[disabled] {
+  pointer-events: none;
+}
+WUP-CALENDAR ol,
+WUP-CALENDAR ul {
+  margin-top: var(--ctrl-clr-padding);
+  list-style: none;
+}
+WUP-CALENDAR ul {
+  color: var(--ctrl-label);
+}
+WUP-CALENDAR li {
+  height: var(--ctrl-clr-cell-h);
+  width: var(--ctrl-clr-cell-w);
+  padding: 0;
+  margin: calc(var(--ctrl-clr-cell-gap) / 2);
+  font: inherit;
+  line-height: var(--ctrl-clr-cell-h);
+  text-align: center;
+  border-radius: 50%;
+}
+WUP-CALENDAR ul &gt; li {
+  margin: 0 calc(var(--ctrl-clr-cell-gap) / 2);
+  height: 1em;
+  line-height: 1em;
+}
+WUP-CALENDAR li[prev],
+WUP-CALENDAR li[next] {
+  opacity: 0.6;
+}
+WUP-CALENDAR li[aria-current] {
+  color: var(--ctrl-clr-selected-bg);
+  font-weight: bold;
+  opacity: 1;
+}
+WUP-CALENDAR li[aria-selected] {
+  background-color: var(--ctrl-clr-selected-bg);
+  color: var(--ctrl-clr-selected);
+  opacity: 1;
+}
+WUP-CALENDAR li[focused] {
+  box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+  opacity: 1;
+}
+WUP-CALENDAR li[focused][aria-selected] {
+  text-decoration: underline;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-CALENDAR header &gt; button:hover {
+    background-color: var(--ctrl-clr-selected-bg);
+    color: var(--ctrl-clr-selected);
+  }
+  WUP-CALENDAR ol &gt; li:hover:not([disabled]) {
+    box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+    opacity: 1;
+  }
+}
+WUP-CALENDAR li[disabled] {
+  color: var(--ctrl-clr-off);
+  background-color: var(--ctrl-clr-off-bg);
+}
+WUP-CALENDAR li[disabled][aria-selected] {
+  font-weight: bold;
+}
+@media not all and (prefers-reduced-motion) {
+  @keyframes WUP-ZOOM-OUT-1 {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0);
+      opacity: 0;
+    }
+  }
+  @keyframes WUP-ZOOM-OUT-2 {
+    0% {
+      transform: scale(5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes WUP-ZOOM-IN-1 {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(5);
+      opacity: 0;
+    }
+  }
+  @keyframes WUP-ZOOM-IN-2 {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  WUP-CALENDAR [calendar] &gt; div {
+    overflow: hidden;
+  }
+  WUP-CALENDAR [zoom] {
+    animation: none var(--anim-t) linear forwards;
+  }
+  WUP-CALENDAR [zoom=out] {
+    animation-name: WUP-ZOOM-OUT-1;
+  }
+  WUP-CALENDAR [zoom=out2] {
+    animation-name: WUP-ZOOM-OUT-2;
+  }
+  WUP-CALENDAR [zoom=in] {
+    animation-name: WUP-ZOOM-IN-1;
+  }
+  WUP-CALENDAR [zoom=in2] {
+    animation-name: WUP-ZOOM-IN-2;
+  }
+}
 </style>
 `;
 

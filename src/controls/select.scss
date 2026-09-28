@@ -1,0 +1,19 @@
+@import "../styles";
+
+:host {
+  --ctrl-icon-img: var(--wup-icon-chevron);
+
+  label:after {
+    height: 100%;
+    align-self: center;
+  }
+
+  &[opened] label:after {
+    transform: rotate(180deg);
+  }
+
+  // WARN: scroll sets for ul otherwise animation broken scroll to selectItem because animation affects on scrollSize
+  [menu] {
+    @include wup-menu;
+  }
+}

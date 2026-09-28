@@ -4,7 +4,6 @@ import onEvent from "../helpers/onEvent";
 import promiseWait from "../helpers/promiseWait";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
-import { WUPcssMenu } from "../styles";
 import WUPBaseComboControl, { MenuOpenCases } from "./baseCombo";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
@@ -161,18 +160,7 @@ export default class WUPSelectControl<
 
   // WARN: scroll sets for ul otherwise animation broken scroll to selectItem because animation affects on scrollSize
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        --ctrl-icon-img: var(--wup-icon-chevron);
-      }
-      :host label:after {
-        height: 100%;
-        align-self: center;
-      }
-      :host[opened] label:after {
-        transform: rotate(180deg);
-      }
-      ${WUPcssMenu(":host [menu]")}`;
+    return super.$style;
   }
 
   /** Text for listbox when no items are displayed */

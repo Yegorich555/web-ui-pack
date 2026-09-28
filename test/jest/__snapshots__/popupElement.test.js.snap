@@ -107,24 +107,23 @@ padding:0;}
   :root {
   --modal-anim-t: 400ms;
 }
-  
-      :root {
-        --popup-anim-t: 300ms;
-        --popup-text: inherit;
-        --popup-bg: #fff;
-        --popup-shadow: #0003;
-        --tooltip-text: inherit;
-        --tooltip-bg: rgba(255,255,255,0.9);
-        --tooltip-shadow: #0003;
-      }
-      [wupdark] {
-        --popup-text: #d8d8d8;
-        --popup-bg: #2b3645;
-        --popup-shadow: #0006;
-        --tooltip-text: #d8d8d8;
-        --tooltip-bg: rgba(16,70,82,0.9);
-        --tooltip-shadow: #0006;
-      }
+  :root {
+  --popup-anim-t: 300ms;
+  --popup-text: inherit;
+  --popup-bg: #fff;
+  --popup-shadow: #0003;
+  --tooltip-text: inherit;
+  --tooltip-bg: rgba(255, 255, 255, 0.9);
+  --tooltip-shadow: #0003;
+}
+[wupdark] {
+  --popup-text: #d8d8d8;
+  --popup-bg: #2b3645;
+  --popup-shadow: #0006;
+  --tooltip-text: #d8d8d8;
+  --tooltip-bg: rgba(16, 70, 82, 0.9);
+  --tooltip-shadow: #0006;
+}
   
 WUP-POPUP {
   --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -176,42 +175,44 @@ WUP-POPUP::-webkit-scrollbar-track-piece:vertical:start, WUP-POPUP::-webkit-scro
     transition: opacity var(--modal-anim), transform var(--modal-anim);
   }
 }
-      WUP-POPUP,
-      WUP-POPUP-arrow {
-        --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        opacity: 0;
-      }
-      WUP-POPUP {
-        top:0;left:0;
-        padding: 4px; margin: 0;
-        box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup-text);
-        background: var(--popup-bg);
-        text-overflow: ellipsis;
-      }
-      WUP-POPUP[tooltip] {
-         z-index: 99999;
-      }
-      WUP-POPUP[tooltip],
-      WUP-POPUP[tooltip]+WUP-POPUP-arrow {
-        --popup: var(--tooltip-text);
-        --popup-bg: var(--tooltip-bg);
-        --popup-shadow: var(--tooltip-shadow);
-      }
-      WUP-POPUP[show]+WUP-POPUP-arrow { opacity: 1; }
-      @media not all and (prefers-reduced-motion) {
-        WUP-POPUP,
-        WUP-POPUP+WUP-POPUP-arrow {
-          transition: opacity var(--popup-anim);
-        }
-      }
-      WUP-POPUP[w-animation] {
-        transition-property: none;
-        opacity: 1;
-      }
-      WUP-POPUP[w-animation=stack] {
-        overflow: visible;
-      }
+WUP-POPUP,
+WUP-POPUP-arrow {
+  --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  opacity: 0;
+}
+WUP-POPUP {
+  top: 0;
+  left: 0;
+  padding: 4px;
+  margin: 0;
+  box-shadow: 0 1px 4px 0 var(--popup-shadow);
+  color: var(--popup-text);
+  background: var(--popup-bg);
+  text-overflow: ellipsis;
+}
+WUP-POPUP[tooltip] {
+  z-index: 99999;
+}
+WUP-POPUP[tooltip], WUP-POPUP[tooltip] + WUP-POPUP-arrow {
+  --popup: var(--tooltip-text);
+  --popup-bg: var(--tooltip-bg);
+  --popup-shadow: var(--tooltip-shadow);
+}
+WUP-POPUP[show] + WUP-POPUP-arrow {
+  opacity: 1;
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-POPUP, WUP-POPUP + WUP-POPUP-arrow {
+    transition: opacity var(--popup-anim);
+  }
+}
+WUP-POPUP[w-animation] {
+  transition-property: none;
+  opacity: 1;
+}
+WUP-POPUP[w-animation=stack] {
+  overflow: visible;
+}
   
 TEST-EL {
   --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -263,42 +264,44 @@ TEST-EL::-webkit-scrollbar-track-piece:vertical:start, TEST-EL::-webkit-scrollba
     transition: opacity var(--modal-anim), transform var(--modal-anim);
   }
 }
-      TEST-EL,
-      TEST-EL-arrow {
-        --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        opacity: 0;
-      }
-      TEST-EL {
-        top:0;left:0;
-        padding: 4px; margin: 0;
-        box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup-text);
-        background: var(--popup-bg);
-        text-overflow: ellipsis;
-      }
-      TEST-EL[tooltip] {
-         z-index: 99999;
-      }
-      TEST-EL[tooltip],
-      TEST-EL[tooltip]+TEST-EL-arrow {
-        --popup: var(--tooltip-text);
-        --popup-bg: var(--tooltip-bg);
-        --popup-shadow: var(--tooltip-shadow);
-      }
-      TEST-EL[show]+TEST-EL-arrow { opacity: 1; }
-      @media not all and (prefers-reduced-motion) {
-        TEST-EL,
-        TEST-EL+TEST-EL-arrow {
-          transition: opacity var(--popup-anim);
-        }
-      }
-      TEST-EL[w-animation] {
-        transition-property: none;
-        opacity: 1;
-      }
-      TEST-EL[w-animation=stack] {
-        overflow: visible;
-      }
+TEST-EL,
+TEST-EL-arrow {
+  --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  opacity: 0;
+}
+TEST-EL {
+  top: 0;
+  left: 0;
+  padding: 4px;
+  margin: 0;
+  box-shadow: 0 1px 4px 0 var(--popup-shadow);
+  color: var(--popup-text);
+  background: var(--popup-bg);
+  text-overflow: ellipsis;
+}
+TEST-EL[tooltip] {
+  z-index: 99999;
+}
+TEST-EL[tooltip], TEST-EL[tooltip] + TEST-EL-arrow {
+  --popup: var(--tooltip-text);
+  --popup-bg: var(--tooltip-bg);
+  --popup-shadow: var(--tooltip-shadow);
+}
+TEST-EL[show] + TEST-EL-arrow {
+  opacity: 1;
+}
+@media not all and (prefers-reduced-motion) {
+  TEST-EL, TEST-EL + TEST-EL-arrow {
+    transition: opacity var(--popup-anim);
+  }
+}
+TEST-EL[w-animation] {
+  transition-property: none;
+  opacity: 1;
+}
+TEST-EL[w-animation=stack] {
+  overflow: visible;
+}
 </style>
 `;
 
@@ -450,24 +453,23 @@ padding:0;}
   :root {
   --modal-anim-t: 400ms;
 }
-  
-      :root {
-        --popup-anim-t: 300ms;
-        --popup-text: inherit;
-        --popup-bg: #fff;
-        --popup-shadow: #0003;
-        --tooltip-text: inherit;
-        --tooltip-bg: rgba(255,255,255,0.9);
-        --tooltip-shadow: #0003;
-      }
-      [wupdark] {
-        --popup-text: #d8d8d8;
-        --popup-bg: #2b3645;
-        --popup-shadow: #0006;
-        --tooltip-text: #d8d8d8;
-        --tooltip-bg: rgba(16,70,82,0.9);
-        --tooltip-shadow: #0006;
-      }
+  :root {
+  --popup-anim-t: 300ms;
+  --popup-text: inherit;
+  --popup-bg: #fff;
+  --popup-shadow: #0003;
+  --tooltip-text: inherit;
+  --tooltip-bg: rgba(255, 255, 255, 0.9);
+  --tooltip-shadow: #0003;
+}
+[wupdark] {
+  --popup-text: #d8d8d8;
+  --popup-bg: #2b3645;
+  --popup-shadow: #0006;
+  --tooltip-text: #d8d8d8;
+  --tooltip-bg: rgba(16, 70, 82, 0.9);
+  --tooltip-shadow: #0006;
+}
   
 WUP-POPUP {
   --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -519,42 +521,44 @@ WUP-POPUP::-webkit-scrollbar-track-piece:vertical:start, WUP-POPUP::-webkit-scro
     transition: opacity var(--modal-anim), transform var(--modal-anim);
   }
 }
-      WUP-POPUP,
-      WUP-POPUP-arrow {
-        --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        opacity: 0;
-      }
-      WUP-POPUP {
-        top:0;left:0;
-        padding: 4px; margin: 0;
-        box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup-text);
-        background: var(--popup-bg);
-        text-overflow: ellipsis;
-      }
-      WUP-POPUP[tooltip] {
-         z-index: 99999;
-      }
-      WUP-POPUP[tooltip],
-      WUP-POPUP[tooltip]+WUP-POPUP-arrow {
-        --popup: var(--tooltip-text);
-        --popup-bg: var(--tooltip-bg);
-        --popup-shadow: var(--tooltip-shadow);
-      }
-      WUP-POPUP[show]+WUP-POPUP-arrow { opacity: 1; }
-      @media not all and (prefers-reduced-motion) {
-        WUP-POPUP,
-        WUP-POPUP+WUP-POPUP-arrow {
-          transition: opacity var(--popup-anim);
-        }
-      }
-      WUP-POPUP[w-animation] {
-        transition-property: none;
-        opacity: 1;
-      }
-      WUP-POPUP[w-animation=stack] {
-        overflow: visible;
-      }
+WUP-POPUP,
+WUP-POPUP-arrow {
+  --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  opacity: 0;
+}
+WUP-POPUP {
+  top: 0;
+  left: 0;
+  padding: 4px;
+  margin: 0;
+  box-shadow: 0 1px 4px 0 var(--popup-shadow);
+  color: var(--popup-text);
+  background: var(--popup-bg);
+  text-overflow: ellipsis;
+}
+WUP-POPUP[tooltip] {
+  z-index: 99999;
+}
+WUP-POPUP[tooltip], WUP-POPUP[tooltip] + WUP-POPUP-arrow {
+  --popup: var(--tooltip-text);
+  --popup-bg: var(--tooltip-bg);
+  --popup-shadow: var(--tooltip-shadow);
+}
+WUP-POPUP[show] + WUP-POPUP-arrow {
+  opacity: 1;
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-POPUP, WUP-POPUP + WUP-POPUP-arrow {
+    transition: opacity var(--popup-anim);
+  }
+}
+WUP-POPUP[w-animation] {
+  transition-property: none;
+  opacity: 1;
+}
+WUP-POPUP[w-animation=stack] {
+  overflow: visible;
+}
   
 TEST-EL {
   --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -606,42 +610,44 @@ TEST-EL::-webkit-scrollbar-track-piece:vertical:start, TEST-EL::-webkit-scrollba
     transition: opacity var(--modal-anim), transform var(--modal-anim);
   }
 }
-      TEST-EL,
-      TEST-EL-arrow {
-        --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        opacity: 0;
-      }
-      TEST-EL {
-        top:0;left:0;
-        padding: 4px; margin: 0;
-        box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup-text);
-        background: var(--popup-bg);
-        text-overflow: ellipsis;
-      }
-      TEST-EL[tooltip] {
-         z-index: 99999;
-      }
-      TEST-EL[tooltip],
-      TEST-EL[tooltip]+TEST-EL-arrow {
-        --popup: var(--tooltip-text);
-        --popup-bg: var(--tooltip-bg);
-        --popup-shadow: var(--tooltip-shadow);
-      }
-      TEST-EL[show]+TEST-EL-arrow { opacity: 1; }
-      @media not all and (prefers-reduced-motion) {
-        TEST-EL,
-        TEST-EL+TEST-EL-arrow {
-          transition: opacity var(--popup-anim);
-        }
-      }
-      TEST-EL[w-animation] {
-        transition-property: none;
-        opacity: 1;
-      }
-      TEST-EL[w-animation=stack] {
-        overflow: visible;
-      }
+TEST-EL,
+TEST-EL-arrow {
+  --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  opacity: 0;
+}
+TEST-EL {
+  top: 0;
+  left: 0;
+  padding: 4px;
+  margin: 0;
+  box-shadow: 0 1px 4px 0 var(--popup-shadow);
+  color: var(--popup-text);
+  background: var(--popup-bg);
+  text-overflow: ellipsis;
+}
+TEST-EL[tooltip] {
+  z-index: 99999;
+}
+TEST-EL[tooltip], TEST-EL[tooltip] + TEST-EL-arrow {
+  --popup: var(--tooltip-text);
+  --popup-bg: var(--tooltip-bg);
+  --popup-shadow: var(--tooltip-shadow);
+}
+TEST-EL[show] + TEST-EL-arrow {
+  opacity: 1;
+}
+@media not all and (prefers-reduced-motion) {
+  TEST-EL, TEST-EL + TEST-EL-arrow {
+    transition: opacity var(--popup-anim);
+  }
+}
+TEST-EL[w-animation] {
+  transition-property: none;
+  opacity: 1;
+}
+TEST-EL[w-animation=stack] {
+  overflow: visible;
+}
 </style>
 `;
 
