@@ -20,6 +20,7 @@
 
 - helper [imageConvert](src/helpers/files/imageConvert.ts)
 - helper [selectFiles](src/helpers/files/selectFiles.ts)
+- helper [isScrollable](src/helpers/findScrollParent.ts)
 - [PopupElement](src/popup/popupElement.ts). Added `WUPPopupElement.$useTooltip()` to show tooltip on hover for elements with attribute `[w-tooltip]`
 - **Controls**
   - Added option **enableInitOnChange** to fire `$change` event on init (with reason `initValue`) even if value is empty
