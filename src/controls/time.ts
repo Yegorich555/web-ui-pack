@@ -47,7 +47,11 @@ declare global {
       /** User can't select time in excluded range */
       exclude: { test: (v: WUPTimeObject, c: WUPTimeControl) => boolean } | null;
     }
-    interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions {}
+    interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions {
+      /** Sets minWidth of popup-menu 100% of control width (option `minWidthByTarget` of `<wup-popup/>`)
+       * @defaultValue false */
+      popupMinWidthByTarget: boolean;
+    }
     interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** Default value in format hh:mm or hh:mm a */
       "w-initValue"?: string;
@@ -316,6 +320,7 @@ export default class WUPTimeControl<
     max: null,
     exclude: null,
     menuButtonsOff: false,
+    popupMinWidthByTarget: false,
   });
 
   constructor() {
@@ -416,7 +421,6 @@ export default class WUPTimeControl<
   /** Value before menu is opened */
   #valueBeforeMenu?: ValueType;
   protected override renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): HTMLElement {
-    popup.$options.minWidthByTarget = false;
     this.#isMenuInitPhase = true;
     const append = (ul: HTMLElement, v: number | string, twoDigs: boolean, savedV?: number): HTMLElement => {
       const li = ul.appendChild(document.createElement("li"));

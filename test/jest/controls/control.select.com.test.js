@@ -649,6 +649,31 @@ describe("control.select common", () => {
       expect(el.$isReadOnly).toBe(false);
       expect(el.$refInput.readOnly).toBe(false);
     });
+
+    test("popupOffsetFitElement & popupMinWidthByTarget", async () => {
+      el.focus();
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      expect(el.$refPopup.$options.offsetFitElement).toEqual([1, 1]);
+      expect(el.$refPopup.$options.minWidthByTarget).toBe(true);
+      el.blur();
+      await h.wait();
+      expect(el.$refPopup).toBeFalsy();
+
+      el.$options.popupOffsetFitElement = [2, 3, 4, 5];
+      el.$options.popupMinWidthByTarget = false;
+      el.focus();
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      expect(el.$refPopup.$options.offsetFitElement).toEqual([2, 3, 4, 5]);
+      expect(el.$refPopup.$options.minWidthByTarget).toBe(false);
+
+      // disabled via $defaults
+      const was = WUPSelectControl.$defaults.popupOffsetFitElement;
+      WUPSelectControl.$defaults.popupOffsetFitElement = undefined;
+      expect(WUPSelectControl.cloneDefaults().popupOffsetFitElement).toBe(undefined);
+      WUPSelectControl.$defaults.popupOffsetFitElement = was;
+    });
   });
 
   test("tryScroll", async () => {

@@ -49,6 +49,8 @@ describe("control.select", () => {
       "w-allownewvalue": { value: true },
       "w-opencase": { value: 1 },
       "w-readonlyinput": { value: true },
+      "w-popupoffsetfitelement": { value: [2, 3] },
+      "w-popupminwidthbytarget": { value: false },
       "w-multiple": { value: true },
       "w-items": { value: getItems() },
     },

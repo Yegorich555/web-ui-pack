@@ -77,6 +77,8 @@ describe("control.date", () => {
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       "w-readonlyinput": { value: true },
+      "w-popupoffsetfitelement": { value: [2, 3] },
+      "w-popupminwidthbytarget": { value: true },
       "w-opencase": { value: 1 },
 
       "w-mask": { value: "#0-#0-0000", nullValue: "0000-00-00" },

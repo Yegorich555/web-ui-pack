@@ -57,6 +57,8 @@ describe("control.selectMany", () => {
       "w-allownewvalue": { value: true },
       "w-opencase": { value: 1 },
       "w-readonlyinput": { value: true },
+      "w-popupoffsetfitelement": { value: [2, 3] },
+      "w-popupminwidthbytarget": { value: false },
       "w-multiple": { skip: true },
       "w-items": { value: getItems() },
       "w-sortable": { value: true },

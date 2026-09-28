@@ -22,6 +22,7 @@
 - helper [selectFiles](src/helpers/files/selectFiles.ts)
 - [PopupElement](src/popup/popupElement.ts). Added `WUPPopupElement.$useTooltip()` to show tooltip on hover for elements with attribute `[w-tooltip]`
 - **Controls**. Options `disabled` & `readOnly` (attrs `[disabled]` & `[readonly]`) accept string (reason) that is shown via tooltip
+- **Combobox controls** (Select, SelectMany, Date, Time). Added options **popupOffsetFitElement** & **popupMinWidthByTarget** to configure popup-menu (via `$defaults` or per element)
 
 ---
 

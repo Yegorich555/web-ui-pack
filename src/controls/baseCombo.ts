@@ -55,11 +55,26 @@ declare global {
       openCase: MenuOpenCases;
       /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode) */
       readOnlyInput: boolean | number;
+      /** Virtual padding of fitElement applied to popup-menu (option `offsetFitElement` of `<wup-popup/>`)
+       *  [top, right, bottom, left] or [top/bottom, right/left] in px
+       * @defaultValue [1, 1] */
+      popupOffsetFitElement?: [number, number, number, number] | [number, number];
+      /** Sets minWidth of popup-menu 100% of control width (option `minWidthByTarget` of `<wup-popup/>`)
+       * @defaultValue true */
+      popupMinWidthByTarget: boolean;
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       "w-openCase"?: MenuOpenCases | number;
       "w-readOnlyInput"?: boolean | number;
+      /** Virtual padding of fitElement applied to popup-menu
+       * @example
+       * ```js
+       * window.offset = [2, 2];
+       * <wup-select w-popupOffsetFitElement="window.offset"></wup-select>
+       * ``` */
+      "w-popupOffsetFitElement"?: string;
+      "w-popupMinWidthByTarget"?: boolean | "";
     }
   }
 }
@@ -109,7 +124,16 @@ export default abstract class WUPBaseComboControl<
     validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {}),
     openCase: MenuOpenCases.onClick | MenuOpenCases.onFocus | MenuOpenCases.onPressArrowKey,
     readOnlyInput: false,
+    popupOffsetFitElement: [1, 1],
+    popupMinWidthByTarget: true,
   });
+
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.BaseCombo.Options;
+    // clone array otherwise changing $options.popupOffsetFitElement[i] mutates $defaults (shared between all elements)
+    d.popupOffsetFitElement = d.popupOffsetFitElement?.slice() as WUP.BaseCombo.Options["popupOffsetFitElement"];
+    return d as unknown as T;
+  }
 
   /** Fires after popup-menu is opened (after animation finishes) */
   $onOpenMenu?: (e: Event) => void;
@@ -205,8 +229,8 @@ export default abstract class WUPBaseComboControl<
     this.$refPopup = p;
     p.$options.openCase = PopupOpenCases.onManualCall;
     p.$options.target = this;
-    p.$options.offsetFitElement = [1, 1];
-    p.$options.minWidthByTarget = true; // todo allow change it from $defaults
+    p.$options.offsetFitElement = this._opts.popupOffsetFitElement;
+    p.$options.minWidthByTarget = this._opts.popupMinWidthByTarget;
     p.$options.keepPosition = true; // avoid changing position when control-height is changed (ex. selectMany collapses items on focusOut)
     p.$options.placement = [
       WUPPopupElement.$placements.$bottom.$start,

@@ -48,7 +48,11 @@ declare global {
     interface Options<T = Date, VM = ValidityMap>
       extends WUP.Calendar.Options<T, VM>,
         WUP.BaseCombo.Options<T, VM>,
-        NewOptions {}
+        NewOptions {
+      /** Sets minWidth of popup-menu 100% of control width (option `minWidthByTarget` of `<wup-popup/>`)
+       * @defaultValue false */
+      popupMinWidthByTarget: boolean;
+    }
     interface JSXProps<C = WUPDateControl>
       extends WUP.BaseCombo.JSXProps<C>,
         WUP.Calendar.JSXProps<C>,
@@ -159,6 +163,7 @@ export default class WUPDateControl<
     }),
     format: "",
     sync: null,
+    popupMinWidthByTarget: false,
     // firstWeekDay: 1,
     // format: localeInfo.date.toLowerCase()
   });
@@ -245,8 +250,6 @@ export default class WUPDateControl<
   }
 
   protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
-    popup.$options.minWidthByTarget = false;
-
     const el = document.createElement("wup-calendar");
     el.renderInput = () => {
       el.$refLabel.remove();
