@@ -1,10 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`baseElement me common tests render + styles 1`] = `<test-base-el />`;
-
-exports[`baseElement me common tests render + styles 2`] = `
-<style>
-  :root {
+:root {
   --base-focus: #00778d;
   --base-btn-bg: #009fbc;
   --base-btn-text: #fff;
@@ -34,83 +28,20 @@ exports[`baseElement me common tests render + styles 2`] = `
   --wup-icon-date: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M652.801 76.8c42.24 0 76.8 34.56 76.8 76.8v537.601c0 42.24-34.56 76.8-76.8 76.8H115.2c-42.624 0-76.8-34.56-76.8-76.8l.384-537.601c0-42.24 33.792-76.8 76.416-76.8h38.4V0h76.8v76.8h307.2V0h76.8v76.8h38.4zM192 345.6h76.8v76.8H192v-76.8zm230.4 0v76.8h-76.8v-76.8h76.8zm153.601 0h-76.8v76.8h76.8v-76.8zM115.2 691.2h537.601V268.8H115.2v422.4z'/%3E%3C/svg%3E");
   --wup-icon-time-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
   --wup-icon-time: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==");
-}
-[wupdark] {
-  --base-btn-focus: #bdbdbd;
-  --base-sep: #141414;
-  --icon: #fff;
-  --icon-hover-bg: #fff1;
-  --icon-focus-bg: #fff2;
-  --scroll: #fff2;
-  --scroll-hover: #fff3;
-  --menu-hover-text: inherit;
-  --menu-hover-bg: #222a36;
-}
 
-  .wup-hidden, [wup-hidden] {
-position: absolute;
-height:1px; width:1px;
-overflow:hidden;
-clip:rect(1px,1px,1px,1px);
-min-width:initial;
-padding:0;}
-
-  
-[wup-icon] {
-  display: inline-block;
-  cursor: pointer;
-  box-shadow: none;
-  border: none;
-  margin: 0;
-  padding: 0;
-  width: var(--icon-hover-r, 2em);
-  height: var(--icon-hover-r, 2em);
-  background: none;
-  outline: none;
-  border-radius: 50%;
-}
-[wup-icon]:after {
-  content: "";
-  display: inline-block;
-  border-radius: 50%;
-  width: 100%;
-  height: 100%;
-  background: var(--icon, #000);
-  -webkit-mask-size: var(--icon-size, 1em);
-  mask-size: var(--icon-size, 1em);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-
-  -webkit-mask-image: var(--icon-img);
-  mask-image: var(--icon-img);
-}
-[wup-icon]:focus {
-   box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
-}
-[wup-icon]:focus:after {
-   background: var(--icon-hover, var(--icon, #000));
-}
-@media (hover: hover) and (pointer: fine) {
-  [wup-icon]:hover {
-    box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
-  }
-  [wup-icon]:hover:after {
-    background: var(--icon-hover, var(--icon, #000));
-  }
-  [wup-icon]:focus:hover {
-   opacity: 0.9;
+  [wupdark] {
+    --base-btn-focus: #bdbdbd;
+    --base-sep: #141414;
+    --icon: #fff;
+    --icon-hover-bg: #fff1;
+    --icon-focus-bg: #fff2;
+    --scroll: #fff2;
+    --scroll-hover: #fff3;
+    --menu-hover-text: inherit;
+    --menu-hover-bg: #222a36;
   }
 }
 
-  
-  
-</style>
-`;
-
-exports[`baseElement me common tests snapshot of $defaults 1`] = `{}`;
-
-exports[`baseElement me common tests snapshot of $defaults 2`] = `undefined`;
-
-exports[`baseElement me common tests snapshot of $defaults 3`] = `[]`;
+:host {
+  /* nothing here right now */
+}
