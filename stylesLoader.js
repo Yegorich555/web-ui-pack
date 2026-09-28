@@ -10,6 +10,12 @@ const compressStyles = false;
 
 // For development styles are defined in `{fileName}.scss`; the built result gets them compiled inside `{fileName}.ts`:
 // `static get $styleRoot()` returns rules defined in `:root {...}`, `static get $style()` returns other rules
+// string `"@wup-include someMixin"` in `{fileName}.ts` is replaced with css compiled from mixin defined in `{fileName}.scss`
+
+/** Matches strings `"@wup-include someMixin"` in the code */
+const includeRegex = /(["'`])@wup-include\s+([\w-]+);?\1/g;
+/** Separates css of each `@include` in the single compilation */
+const includeSplitter = "/*! wup-include */";
 
 /** Moves rules defined in `:root {...}` from `from` into `to`; at-rules (`@media` etc.) are split between both */
 function extractRootRules(from, to) {
@@ -29,11 +35,9 @@ function extractRootRules(from, to) {
   });
 }
 
-/** Compiles scss into css in the same way as webpack does it via sass-loader + postcss-loader
- * @returns styles per getter & files included into compilation */
-async function compileStyles(scssPath) {
-  const { css, stats } = sass.renderSync({ file: scssPath, outputStyle: compressStyles ? "compressed" : "expanded" });
-  const result = await postcss(plugins).process(css.toString(), { from: scssPath });
+/** Processes css compiled by sass in the same way as webpack does it via postcss-loader & removes comments */
+async function processCss(css, from) {
+  const result = await postcss(plugins).process(css, { from });
   result.warnings().forEach((w) => console.warn(w.toString()));
   const { root } = result;
   root.walkAtRules("charset", (n) => n.remove()); // sass adds it for non-ASCII chars but it's useless inside <style>
@@ -56,29 +60,71 @@ async function compileStyles(scssPath) {
       n.nodes && (n.raws.semicolon = true); // keep the last `;` in blocks since demo/src/helpers/parseCssVars.ts expects it
     });
   }
+  return root;
+}
 
+const toCss = (container) => container.nodes.join(compressStyles ? "" : "\n"); // raws.before of moved nodes isn't reliable
+
+/** Compiles scss into css in the same way as webpack does it via sass-loader + postcss-loader
+ * @param includes mixin names to compile separately: `@include someMixin`
+ * @returns styles per getter, css per mixin & files included into compilation */
+async function compileStyles(scssPath, includes) {
+  const outputStyle = compressStyles ? "compressed" : "expanded";
+  const { css, stats } = sass.renderSync({ file: scssPath, outputStyle });
+  const root = await processCss(css.toString(), scssPath);
   const rootRules = postcss.root();
   extractRootRules(root, rootRules);
-  const toCss = (container) => container.nodes.join(compressStyles ? "" : "\n"); // raws.before of moved nodes isn't reliable
+
+  const mixins = {};
+  if (includes.length) {
+    // single compilation for all mixins: `@import "file"; /*! splitter */ @include a; /*! splitter */ @include b;`
+    const data = [`@import "${path.basename(scssPath)}";`, ...includes.map((name) => `@include ${name};`)];
+    const parts = sass
+      .renderSync({ data: data.join(`\n${includeSplitter}\n`), includePaths: [path.dirname(scssPath)], outputStyle })
+      .css.toString()
+      .split(includeSplitter);
+    await Promise.all(
+      includes.map(async (name, i) => {
+        mixins[name] = toCss(await processCss(parts[i + 1], scssPath)); // WARN: `:root {...}` isn't extracted here
+      })
+    );
+  }
+
   return {
     styles: { $styleRoot: toCss(rootRules), $style: toCss(root) },
+    mixins,
     files: stats.includedFiles,
   };
 }
 
+/** Returns unique mixin names pointed in the code via strings `"@wup-include someMixin"` */
+function findIncludes(code) {
+  return [...new Set(Array.from(code.matchAll(includeRegex), (m) => m[2]))];
+}
+
+/** Returns code where strings `"@wup-include someMixin"` are replaced with compiled css */
+function injectIncludes(code, mixins) {
+  return code.replace(includeRegex, (_, _q, name) => JSON.stringify(mixins[name]));
+}
+
 /** Returns code where `static get $style() { return ""; }` & `static get $styleRoot() { return ""; }` return pointed styles;
- * `return super.$style;` gets pointed styles appended: `return super.$style + "\n...";` */
+ * `return super.$style;` gets pointed styles appended: `return super.$style + "\n...";`
+ * `` return `${super.$style}...`; `` gets pointed styles inserted after super: `` return `${super.$style}${"\n..."}...`; `` */
 function injectStyles(code, styles, filePath) {
   const injected = new Set();
   const result = code.replace(
-    /(static\s+get\s+(\$style(?:Root)?)\s*\(\)[^{;]*\{(?:\s|\/\/.*|\/\*[\s\S]*?\*\/)*return\s*)(?:""|''|``|(super\.\2(?![\w$])))/g,
-    (_, head, name, superCall) => {
+    /(static\s+get\s+(\$style(?:Root)?)\s*\(\)[^{;]*\{(?:\s|\/\/.*|\/\*[\s\S]*?\*\/)*return\s*)(?:""|''|``|(super\.\2(?![\w$]))|(`\$\{\s*super\.\2\s*\}))/g,
+    (_, head, name, superCall, superTemplate) => {
       if (injected.has(name)) {
         throw new Error(`${filePath}: getter ${name} is defined several times`);
       }
       injected.add(name);
+      const css = styles[name] && JSON.stringify(`\n${styles[name]}`);
       if (superCall) {
-        return head + (styles[name] ? `${superCall} + ${JSON.stringify(`\n${styles[name]}`)}` : superCall);
+        return head + (css ? `${superCall} + ${css}` : superCall);
+      }
+      if (superTemplate) {
+        return head + superTemplate + (css ? `\${${css}}` : "");
       }
       return head + JSON.stringify(styles[name]);
     }
@@ -86,7 +132,7 @@ function injectStyles(code, styles, filePath) {
   Object.keys(styles).forEach((name) => {
     if (styles[name] && !injected.has(name)) {
       throw new Error(
-        `${filePath}: getter 'static get ${name}() { return ""; }' or 'return super.${name};' is required to inject styles`
+        `${filePath}: getter 'static get ${name}() { return ""; }', 'return super.${name};' or 'return \`\${super.${name}}...\`;' is required to inject styles`
       );
     }
   });
@@ -105,8 +151,9 @@ async function injectIntoDist() {
         return;
       }
       const jsPath = path.join(distDir, f);
-      const { styles } = await compileStyles(scssPath);
-      fs.writeFileSync(jsPath, injectStyles(fs.readFileSync(jsPath, "utf8"), styles, jsPath));
+      const code = fs.readFileSync(jsPath, "utf8");
+      const { styles, mixins } = await compileStyles(scssPath, findIncludes(code));
+      fs.writeFileSync(jsPath, injectIncludes(injectStyles(code, styles, jsPath), mixins));
       console.log(`Styles injected: ${path.relative(__dirname, scssPath)} => ${path.relative(__dirname, jsPath)}`);
     })
   );
@@ -121,10 +168,10 @@ module.exports = function stylesLoader(code) {
     return;
   }
   this.addDependency(scssPath); // before compiling to re-compile after fixing scss-errors
-  compileStyles(scssPath)
-    .then(({ styles, files }) => {
+  compileStyles(scssPath, findIncludes(code))
+    .then(({ styles, mixins, files }) => {
       files.forEach((f) => this.addDependency(f));
-      return injectStyles(code, styles, this.resourcePath);
+      return injectIncludes(injectStyles(code, styles, this.resourcePath), mixins);
     })
     .then((result) => done(null, result), done);
 };

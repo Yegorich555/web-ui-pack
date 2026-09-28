@@ -177,51 +177,58 @@ describe("spinElement", () => {
         }
       }
       :root {
-                --spin-1: #ffa500;
-                --spin-2: #fff;
-                --spin-t: 1.2s;
-                --spin-size: 3em;
-                --spin-item-size: calc(var(--spin-size) / 8);
-                --spin-fade: rgba(255,255,255,0.43);
-              }
-            @keyframes WUP-SPIN-1 {
-              100% { transform: rotate(360deg); }
-            }
-            WUP-SPIN {
-              contain: style;
-              z-index: 100;
-              width: var(--spin-size);
-              height: var(--spin-size);
-              top:0; left:0;
-              pointer-events: none;
-            }
-            WUP-SPIN,
-            WUP-SPIN>div {
-              display: inline-block;
-              box-sizing: border-box;
-              border-radius: 50%;
-            }
-            WUP-SPIN>div {
-              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
-              width: 100%; height: 100%;
-              left:0; top:0;
-            }
-            WUP-SPIN>div[fade] {
-               display: block;
-               position: absolute;
-               left:0; top:0;
-               animation: none;
-               border: none;
-               border-radius: var(--border-radius);
-               transform: none;
-               z-index: -1;
-               background: var(--spin-fade);
-            }
-            WUP-SPIN>div[fade]:after { content: none; }
-            WUP-SPIN>div {
-              border: var(--spin-item-size) solid var(--spin-1);
-              border-top-color: var(--spin-2);
-            }</style>"
+        --spin-1: #ffa500;
+        --spin-2: #fff;
+        --spin-t: 1.2s;
+        --spin-size: 3em;
+        --spin-item-size: calc(var(--spin-size) / 8);
+        --spin-fade: rgba(255, 255, 255, 0.43);
+      }
+      @keyframes WUP-SPIN-1 {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      WUP-SPIN {
+        contain: style;
+        z-index: 100;
+        width: var(--spin-size);
+        height: var(--spin-size);
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      WUP-SPIN,
+      WUP-SPIN > div {
+        display: inline-block;
+        box-sizing: border-box;
+        border-radius: 50%;
+      }
+      WUP-SPIN > div {
+        animation: WUP-SPIN-1 var(--spin-t) linear infinite;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+      }
+      WUP-SPIN > div[fade] {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        animation: none;
+        border: none;
+        border-radius: var(--border-radius);
+        transform: none;
+        z-index: -1;
+        background: var(--spin-fade);
+      }
+      WUP-SPIN > div[fade]:after {
+        content: none;
+      } WUP-SPIN > div {
+        border: var(--spin-item-size) solid var(--spin-1);
+        border-top-color: var(--spin-2);
+      }</style>"
     `);
   });
 
@@ -372,45 +379,54 @@ describe("spinElement", () => {
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
-            @keyframes WUP-SPIN-1 {
-              100% { transform: rotate(360deg); }
-            }
-            SPIN-A {
-              contain: style;
-              z-index: 100;
-              width: var(--spin-size);
-              height: var(--spin-size);
-              top:0; left:0;
-              pointer-events: none;
-            }
-            SPIN-A,
-            SPIN-A>div {
-              display: inline-block;
-              box-sizing: border-box;
-              border-radius: 50%;
-            }
-            SPIN-A>div {
-              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
-              width: 100%; height: 100%;
-              left:0; top:0;
-            }
-            SPIN-A>div[fade] {
-               display: block;
-               position: absolute;
-               left:0; top:0;
-               animation: none;
-               border: none;
-               border-radius: var(--border-radius);
-               transform: none;
-               z-index: -1;
-               background: var(--spin-fade);
-            }
-            SPIN-A>div[fade]:after { content: none; }
-            :root { --spin-2: transparent; }
-             SPIN-A>div {
-               border: var(--spin-item-size) solid;
-               border-color: var(--spin-2) var(--spin-1) var(--spin-2) var(--spin-1);
-            }</style>"
+      @keyframes WUP-SPIN-1 {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      SPIN-A {
+        contain: style;
+        z-index: 100;
+        width: var(--spin-size);
+        height: var(--spin-size);
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      SPIN-A,
+      SPIN-A > div {
+        display: inline-block;
+        box-sizing: border-box;
+        border-radius: 50%;
+      }
+      SPIN-A > div {
+        animation: WUP-SPIN-1 var(--spin-t) linear infinite;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+      }
+      SPIN-A > div[fade] {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        animation: none;
+        border: none;
+        border-radius: var(--border-radius);
+        transform: none;
+        z-index: -1;
+        background: var(--spin-fade);
+      }
+      SPIN-A > div[fade]:after {
+        content: none;
+      } :root {
+        --spin-2: transparent;
+      }
+      SPIN-A > div {
+        border: var(--spin-item-size) solid;
+        border-color: var(--spin-2) var(--spin-1) var(--spin-2) var(--spin-1);
+      }</style>"
     `);
   });
 
@@ -428,63 +444,77 @@ describe("spinElement", () => {
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
-            @keyframes WUP-SPIN-1 {
-              100% { transform: rotate(360deg); }
-            }
-            SPIN-B {
-              contain: style;
-              z-index: 100;
-              width: var(--spin-size);
-              height: var(--spin-size);
-              top:0; left:0;
-              pointer-events: none;
-            }
-            SPIN-B,
-            SPIN-B>div {
-              display: inline-block;
-              box-sizing: border-box;
-              border-radius: 50%;
-            }
-            SPIN-B>div {
-              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
-              width: 100%; height: 100%;
-              left:0; top:0;
-            }
-            SPIN-B>div[fade] {
-               display: block;
-               position: absolute;
-               left:0; top:0;
-               animation: none;
-               border: none;
-               border-radius: var(--border-radius);
-               transform: none;
-               z-index: -1;
-               background: var(--spin-fade);
-            }
-            SPIN-B>div[fade]:after { content: none; }
-            @keyframes WUP-SPIN-2-2 {
-                0% { transform: translate(-50%, -50%) rotate(360deg); }
-                100% { transform: translate(-50%, -50%) rotate(0deg); }
-             }
-             :root {
-                --spin-2: #b35e03;
-                --spin-item-size: max(1px, calc(var(--spin-size) / 12));
-             }
-             SPIN-B { position: relative; }
-             SPIN-B>div:nth-child(1) {
-                border: var(--spin-item-size) solid;
-                border-color: transparent var(--spin-1) transparent var(--spin-1);
-             }
-             SPIN-B>div:nth-child(2) {
-                border: var(--spin-item-size) solid;
-                border-color: var(--spin-2) transparent var(--spin-2) transparent;
-                position: absolute;
-                width: calc(100% - var(--spin-item-size) * 3);
-                height: calc(100% - var(--spin-item-size) * 3);
-                left: 50%; top: 50%;
-                transform: translate(-50%,-50%);
-                animation: WUP-SPIN-2-2 var(--spin-t) linear infinite;
-             }</style>"
+      @keyframes WUP-SPIN-1 {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      SPIN-B {
+        contain: style;
+        z-index: 100;
+        width: var(--spin-size);
+        height: var(--spin-size);
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      SPIN-B,
+      SPIN-B > div {
+        display: inline-block;
+        box-sizing: border-box;
+        border-radius: 50%;
+      }
+      SPIN-B > div {
+        animation: WUP-SPIN-1 var(--spin-t) linear infinite;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+      }
+      SPIN-B > div[fade] {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        animation: none;
+        border: none;
+        border-radius: var(--border-radius);
+        transform: none;
+        z-index: -1;
+        background: var(--spin-fade);
+      }
+      SPIN-B > div[fade]:after {
+        content: none;
+      } @keyframes WUP-SPIN-2-2 {
+        0% {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+      }
+      :root {
+        --spin-2: #b35e03;
+        --spin-item-size: max(1px, calc(var(--spin-size) / 12));
+      }
+      SPIN-B {
+        position: relative;
+      }
+      SPIN-B > div:nth-child(1) {
+        border: var(--spin-item-size) solid;
+        border-color: transparent var(--spin-1) transparent var(--spin-1);
+      }
+      SPIN-B > div:nth-child(2) {
+        border: var(--spin-item-size) solid;
+        border-color: var(--spin-2) transparent var(--spin-2) transparent;
+        position: absolute;
+        width: calc(100% - var(--spin-item-size) * 3);
+        height: calc(100% - var(--spin-item-size) * 3);
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        animation: WUP-SPIN-2-2 var(--spin-t) linear infinite;
+      }</style>"
     `);
   });
 
@@ -502,51 +532,65 @@ describe("spinElement", () => {
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
-            @keyframes WUP-SPIN-1 {
-              100% { transform: rotate(360deg); }
-            }
-            SPIN-C {
-              contain: style;
-              z-index: 100;
-              width: var(--spin-size);
-              height: var(--spin-size);
-              top:0; left:0;
-              pointer-events: none;
-            }
-            SPIN-C,
-            SPIN-C>div {
-              display: inline-block;
-              box-sizing: border-box;
-              border-radius: 50%;
-            }
-            SPIN-C>div {
-              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
-              width: 100%; height: 100%;
-              left:0; top:0;
-            }
-            SPIN-C>div[fade] {
-               display: block;
-               position: absolute;
-               left:0; top:0;
-               animation: none;
-               border: none;
-               border-radius: var(--border-radius);
-               transform: none;
-               z-index: -1;
-               background: var(--spin-fade);
-            }
-            SPIN-C>div[fade]:after { content: none; }
-            SPIN-C { position: relative; }
-                  SPIN-C>div {
-                    animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
-                    position: absolute;
-                    border: var(--spin-item-size) solid;
-                    border-color: var(--spin-1) transparent transparent transparent;
-                  }
-                  SPIN-C>div:nth-child(1) { animation-delay: -0.45s }
-              SPIN-C>div:nth-child(2) { animation-delay: -0.30s }
-              SPIN-C>div:nth-child(3) { animation-delay: -0.15s }
-              </style>"
+      @keyframes WUP-SPIN-1 {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      SPIN-C {
+        contain: style;
+        z-index: 100;
+        width: var(--spin-size);
+        height: var(--spin-size);
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      SPIN-C,
+      SPIN-C > div {
+        display: inline-block;
+        box-sizing: border-box;
+        border-radius: 50%;
+      }
+      SPIN-C > div {
+        animation: WUP-SPIN-1 var(--spin-t) linear infinite;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+      }
+      SPIN-C > div[fade] {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        animation: none;
+        border: none;
+        border-radius: var(--border-radius);
+        transform: none;
+        z-index: -1;
+        background: var(--spin-fade);
+      }
+      SPIN-C > div[fade]:after {
+        content: none;
+      } SPIN-C {
+        position: relative;
+      }
+      SPIN-C > div {
+        animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+        position: absolute;
+        border: var(--spin-item-size) solid;
+        border-color: var(--spin-1) transparent transparent transparent;
+      }
+      SPIN-C > div:nth-child(1) {
+        animation-delay: -0.45s;
+      }
+      SPIN-C > div:nth-child(2) {
+        animation-delay: -0.3s;
+      }
+      SPIN-C > div:nth-child(3) {
+        animation-delay: -0.15s;
+      }</style>"
     `);
   });
 
@@ -564,73 +608,111 @@ describe("spinElement", () => {
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
-            @keyframes WUP-SPIN-1 {
-              100% { transform: rotate(360deg); }
-            }
-            SPIN-D {
-              contain: style;
-              z-index: 100;
-              width: var(--spin-size);
-              height: var(--spin-size);
-              top:0; left:0;
-              pointer-events: none;
-            }
-            SPIN-D,
-            SPIN-D>div {
-              display: inline-block;
-              box-sizing: border-box;
-              border-radius: 50%;
-            }
-            SPIN-D>div {
-              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
-              width: 100%; height: 100%;
-              left:0; top:0;
-            }
-            SPIN-D>div[fade] {
-               display: block;
-               position: absolute;
-               left:0; top:0;
-               animation: none;
-               border: none;
-               border-radius: var(--border-radius);
-               transform: none;
-               z-index: -1;
-               background: var(--spin-fade);
-            }
-            SPIN-D>div[fade]:after { content: none; }
-            :root { --spin-step: 24deg; }
-                  SPIN-D { position: relative; }
-                  SPIN-D>div {
-                    animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
-                    position: absolute;
-                  }
-                  SPIN-D>div:after {
-                    content: " ";
-                    display: block;
-                    position: absolute;
-                    left: 0;
-                    top: calc(50% - var(--spin-item-size) / 2);
-                    transform-origin: calc(var(--spin-size) / 2);
-                    width: var(--spin-item-size);
-                    height: var(--spin-item-size);
-                    border-radius: 50%;
-                    background: var(--spin-1);
-                  }
-                  SPIN-D>div:nth-child(1) { animation-delay: -0.036s; }
-                  SPIN-D>div:nth-child(1):after { transform: rotate(calc(45deg + var(--spin-step) * 0)); }
-                  SPIN-D>div:nth-child(2) { animation-delay: -0.072s; }
-                  SPIN-D>div:nth-child(2):after { transform: rotate(calc(45deg + var(--spin-step) * 1)); }
-                  SPIN-D>div:nth-child(3) { animation-delay: -0.10799999999999998s; }
-                  SPIN-D>div:nth-child(3):after { transform: rotate(calc(45deg + var(--spin-step) * 2)); }
-                  SPIN-D>div:nth-child(4) { animation-delay: -0.144s; }
-                  SPIN-D>div:nth-child(4):after { transform: rotate(calc(45deg + var(--spin-step) * 3)); }
-                  SPIN-D>div:nth-child(5) { animation-delay: -0.18s; }
-                  SPIN-D>div:nth-child(5):after { transform: rotate(calc(45deg + var(--spin-step) * 4)); }
-                  SPIN-D>div:nth-child(6) { animation-delay: -0.21599999999999997s; }
-                  SPIN-D>div:nth-child(6):after { transform: rotate(calc(45deg + var(--spin-step) * 5)); }
-                  SPIN-D>div:nth-child(7) { animation-delay: -0.252s; }
-                  SPIN-D>div:nth-child(7):after { transform: rotate(calc(45deg + var(--spin-step) * 6)); }
-                  </style>"
+      @keyframes WUP-SPIN-1 {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      SPIN-D {
+        contain: style;
+        z-index: 100;
+        width: var(--spin-size);
+        height: var(--spin-size);
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      SPIN-D,
+      SPIN-D > div {
+        display: inline-block;
+        box-sizing: border-box;
+        border-radius: 50%;
+      }
+      SPIN-D > div {
+        animation: WUP-SPIN-1 var(--spin-t) linear infinite;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+      }
+      SPIN-D > div[fade] {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        animation: none;
+        border: none;
+        border-radius: var(--border-radius);
+        transform: none;
+        z-index: -1;
+        background: var(--spin-fade);
+      }
+      SPIN-D > div[fade]:after {
+        content: none;
+      } :root {
+        --spin-step: 24deg;
+      }
+      SPIN-D {
+        position: relative;
+      }
+      SPIN-D > div {
+        animation-timing-function: cubic-bezier(0.5, 0, 0.5, 1);
+        position: absolute;
+      }
+      SPIN-D > div:after {
+        content: " ";
+        display: block;
+        position: absolute;
+        left: 0;
+        top: calc(50% - var(--spin-item-size) / 2);
+        transform-origin: calc(var(--spin-size) / 2);
+        width: var(--spin-item-size);
+        height: var(--spin-item-size);
+        border-radius: 50%;
+        background: var(--spin-1);
+      }
+      SPIN-D > div:nth-child(1) {
+        animation-delay: -0.036s;
+      }
+      SPIN-D > div:nth-child(1):after {
+        transform: rotate(calc(45deg + var(--spin-step) * 0));
+      }
+      SPIN-D > div:nth-child(2) {
+        animation-delay: -0.072s;
+      }
+      SPIN-D > div:nth-child(2):after {
+        transform: rotate(calc(45deg + var(--spin-step) * 1));
+      }
+      SPIN-D > div:nth-child(3) {
+        animation-delay: -0.108s;
+      }
+      SPIN-D > div:nth-child(3):after {
+        transform: rotate(calc(45deg + var(--spin-step) * 2));
+      }
+      SPIN-D > div:nth-child(4) {
+        animation-delay: -0.144s;
+      }
+      SPIN-D > div:nth-child(4):after {
+        transform: rotate(calc(45deg + var(--spin-step) * 3));
+      }
+      SPIN-D > div:nth-child(5) {
+        animation-delay: -0.18s;
+      }
+      SPIN-D > div:nth-child(5):after {
+        transform: rotate(calc(45deg + var(--spin-step) * 4));
+      }
+      SPIN-D > div:nth-child(6) {
+        animation-delay: -0.216s;
+      }
+      SPIN-D > div:nth-child(6):after {
+        transform: rotate(calc(45deg + var(--spin-step) * 5));
+      }
+      SPIN-D > div:nth-child(7) {
+        animation-delay: -0.252s;
+      }
+      SPIN-D > div:nth-child(7):after {
+        transform: rotate(calc(45deg + var(--spin-step) * 6));
+      }</style>"
     `);
   });
 
@@ -648,83 +730,140 @@ describe("spinElement", () => {
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
-            @keyframes WUP-SPIN-1 {
-              100% { transform: rotate(360deg); }
-            }
-            SPIN-E {
-              contain: style;
-              z-index: 100;
-              width: var(--spin-size);
-              height: var(--spin-size);
-              top:0; left:0;
-              pointer-events: none;
-            }
-            SPIN-E,
-            SPIN-E>div {
-              display: inline-block;
-              box-sizing: border-box;
-              border-radius: 50%;
-            }
-            SPIN-E>div {
-              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
-              width: 100%; height: 100%;
-              left:0; top:0;
-            }
-            SPIN-E>div[fade] {
-               display: block;
-               position: absolute;
-               left:0; top:0;
-               animation: none;
-               border: none;
-               border-radius: var(--border-radius);
-               transform: none;
-               z-index: -1;
-               background: var(--spin-fade);
-            }
-            SPIN-E>div[fade]:after { content: none; }
-            @keyframes WUP-SPIN-2 {
-                    0%,20%,80%,100% { transform: scale(1); background: var(--spin-1) }
-                    50% { transform: scale(1.4); background: var(--spin-2) }
-                  }
-                  :root { --spin-2: #ff5200; }
-                  SPIN-E { position: relative; }
-                  SPIN-E>div {
-                    position: absolute;
-                    width: calc(100% / 1.4142135623730951);
-                    height: calc(100% / 1.4142135623730951);
-                    animation: none;
-                    top:50%; left:50%;
-                  }
-                  SPIN-E>div:after {
-                    animation: WUP-SPIN-2 var(--spin-t) linear infinite;
-                    content: " ";
-                    display: block;
-                    width: var(--spin-item-size);
-                    height: var(--spin-item-size);
-                    border-radius: 50%;
-                    background: var(--spin-1);
-                  }
-                  SPIN-E>div:nth-child(1):after { animation-delay: 0s; }
-                  SPIN-E>div:nth-child(1) { transform: translate(-50%,-50%) rotate(0deg) }
-                  SPIN-E>div:nth-child(2):after { animation-delay: 0.1s; }
-                  SPIN-E>div:nth-child(2) { transform: translate(-50%,-50%) rotate(36deg) }
-                  SPIN-E>div:nth-child(3):after { animation-delay: 0.2s; }
-                  SPIN-E>div:nth-child(3) { transform: translate(-50%,-50%) rotate(72deg) }
-                  SPIN-E>div:nth-child(4):after { animation-delay: 0.30000000000000004s; }
-                  SPIN-E>div:nth-child(4) { transform: translate(-50%,-50%) rotate(108deg) }
-                  SPIN-E>div:nth-child(5):after { animation-delay: 0.4s; }
-                  SPIN-E>div:nth-child(5) { transform: translate(-50%,-50%) rotate(144deg) }
-                  SPIN-E>div:nth-child(6):after { animation-delay: 0.5s; }
-                  SPIN-E>div:nth-child(6) { transform: translate(-50%,-50%) rotate(180deg) }
-                  SPIN-E>div:nth-child(7):after { animation-delay: 0.6000000000000001s; }
-                  SPIN-E>div:nth-child(7) { transform: translate(-50%,-50%) rotate(216deg) }
-                  SPIN-E>div:nth-child(8):after { animation-delay: 0.7000000000000001s; }
-                  SPIN-E>div:nth-child(8) { transform: translate(-50%,-50%) rotate(252deg) }
-                  SPIN-E>div:nth-child(9):after { animation-delay: 0.8s; }
-                  SPIN-E>div:nth-child(9) { transform: translate(-50%,-50%) rotate(288deg) }
-                  SPIN-E>div:nth-child(10):after { animation-delay: 0.9s; }
-                  SPIN-E>div:nth-child(10) { transform: translate(-50%,-50%) rotate(324deg) }
-                  </style>"
+      @keyframes WUP-SPIN-1 {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      SPIN-E {
+        contain: style;
+        z-index: 100;
+        width: var(--spin-size);
+        height: var(--spin-size);
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      SPIN-E,
+      SPIN-E > div {
+        display: inline-block;
+        box-sizing: border-box;
+        border-radius: 50%;
+      }
+      SPIN-E > div {
+        animation: WUP-SPIN-1 var(--spin-t) linear infinite;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+      }
+      SPIN-E > div[fade] {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        animation: none;
+        border: none;
+        border-radius: var(--border-radius);
+        transform: none;
+        z-index: -1;
+        background: var(--spin-fade);
+      }
+      SPIN-E > div[fade]:after {
+        content: none;
+      } @keyframes WUP-SPIN-2 {
+        0%, 20%, 80%, 100% {
+          transform: scale(1);
+          background: var(--spin-1);
+        }
+        50% {
+          transform: scale(1.4);
+          background: var(--spin-2);
+        }
+      }
+      :root {
+        --spin-2: #ff5200;
+      }
+      SPIN-E {
+        position: relative;
+      }
+      SPIN-E > div {
+        position: absolute;
+        width: calc(100% / 1.4142135623730951);
+        height: calc(100% / 1.4142135623730951);
+        animation: none;
+        top: 50%;
+        left: 50%;
+      }
+      SPIN-E > div:after {
+        animation: WUP-SPIN-2 var(--spin-t) linear infinite;
+        content: " ";
+        display: block;
+        width: var(--spin-item-size);
+        height: var(--spin-item-size);
+        border-radius: 50%;
+        background: var(--spin-1);
+      }
+      SPIN-E > div:nth-child(1) {
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
+      SPIN-E > div:nth-child(1):after {
+        animation-delay: 0s;
+      }
+      SPIN-E > div:nth-child(2) {
+        transform: translate(-50%, -50%) rotate(36deg);
+      }
+      SPIN-E > div:nth-child(2):after {
+        animation-delay: 0.1s;
+      }
+      SPIN-E > div:nth-child(3) {
+        transform: translate(-50%, -50%) rotate(72deg);
+      }
+      SPIN-E > div:nth-child(3):after {
+        animation-delay: 0.2s;
+      }
+      SPIN-E > div:nth-child(4) {
+        transform: translate(-50%, -50%) rotate(108deg);
+      }
+      SPIN-E > div:nth-child(4):after {
+        animation-delay: 0.3s;
+      }
+      SPIN-E > div:nth-child(5) {
+        transform: translate(-50%, -50%) rotate(144deg);
+      }
+      SPIN-E > div:nth-child(5):after {
+        animation-delay: 0.4s;
+      }
+      SPIN-E > div:nth-child(6) {
+        transform: translate(-50%, -50%) rotate(180deg);
+      }
+      SPIN-E > div:nth-child(6):after {
+        animation-delay: 0.5s;
+      }
+      SPIN-E > div:nth-child(7) {
+        transform: translate(-50%, -50%) rotate(216deg);
+      }
+      SPIN-E > div:nth-child(7):after {
+        animation-delay: 0.6s;
+      }
+      SPIN-E > div:nth-child(8) {
+        transform: translate(-50%, -50%) rotate(252deg);
+      }
+      SPIN-E > div:nth-child(8):after {
+        animation-delay: 0.7s;
+      }
+      SPIN-E > div:nth-child(9) {
+        transform: translate(-50%, -50%) rotate(288deg);
+      }
+      SPIN-E > div:nth-child(9):after {
+        animation-delay: 0.8s;
+      }
+      SPIN-E > div:nth-child(10) {
+        transform: translate(-50%, -50%) rotate(324deg);
+      }
+      SPIN-E > div:nth-child(10):after {
+        animation-delay: 0.9s;
+      }</style>"
     `);
   });
 
@@ -742,105 +881,118 @@ describe("spinElement", () => {
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
-            @keyframes WUP-SPIN-1 {
-              100% { transform: rotate(360deg); }
-            }
-            SPIN-F {
-              contain: style;
-              z-index: 100;
-              width: var(--spin-size);
-              height: var(--spin-size);
-              top:0; left:0;
-              pointer-events: none;
-            }
-            SPIN-F,
-            SPIN-F>div {
-              display: inline-block;
-              box-sizing: border-box;
-              border-radius: 50%;
-            }
-            SPIN-F>div {
-              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
-              width: 100%; height: 100%;
-              left:0; top:0;
-            }
-            SPIN-F>div[fade] {
-               display: block;
-               position: absolute;
-               left:0; top:0;
-               animation: none;
-               border: none;
-               border-radius: var(--border-radius);
-               transform: none;
-               z-index: -1;
-               background: var(--spin-fade);
-            }
-            SPIN-F>div[fade]:after { content: none; }
-            @keyframes WUP-SPIN-3 {
-                    100% { opacity: 0; background: var(--spin-2); }
-                  }
-                  :root { --spin-item-size: calc(var(--spin-size) / 10); }
-                  SPIN-F { position: relative; }
-                  SPIN-F>div {
-                    animation: WUP-SPIN-3 var(--spin-t) linear infinite;
-                    position: absolute;
-                    width: calc(var(--spin-size) / 4);
-                    height: var(--spin-item-size);
-                    left: 0;
-                    top: calc(50% - var(--spin-item-size) / 2);
-                    transform-origin: calc(var(--spin-size) / 2);
-                    background: var(--spin-1);
-                    border-radius: calc(var(--spin-item-size) / 2);
-                  }
-                  SPIN-F>div:nth-child(1) {
-                      animation-delay: -1.1s;
-                      transform: rotate(0deg);
-                    }
-                  SPIN-F>div:nth-child(2) {
-                      animation-delay: -1s;
-                      transform: rotate(30deg);
-                    }
-                  SPIN-F>div:nth-child(3) {
-                      animation-delay: -0.9s;
-                      transform: rotate(60deg);
-                    }
-                  SPIN-F>div:nth-child(4) {
-                      animation-delay: -0.8s;
-                      transform: rotate(90deg);
-                    }
-                  SPIN-F>div:nth-child(5) {
-                      animation-delay: -0.7000000000000001s;
-                      transform: rotate(120deg);
-                    }
-                  SPIN-F>div:nth-child(6) {
-                      animation-delay: -0.6000000000000001s;
-                      transform: rotate(150deg);
-                    }
-                  SPIN-F>div:nth-child(7) {
-                      animation-delay: -0.5s;
-                      transform: rotate(180deg);
-                    }
-                  SPIN-F>div:nth-child(8) {
-                      animation-delay: -0.4s;
-                      transform: rotate(210deg);
-                    }
-                  SPIN-F>div:nth-child(9) {
-                      animation-delay: -0.30000000000000004s;
-                      transform: rotate(240deg);
-                    }
-                  SPIN-F>div:nth-child(10) {
-                      animation-delay: -0.2s;
-                      transform: rotate(270deg);
-                    }
-                  SPIN-F>div:nth-child(11) {
-                      animation-delay: -0.1s;
-                      transform: rotate(300deg);
-                    }
-                  SPIN-F>div:nth-child(12) {
-                      animation-delay: -0s;
-                      transform: rotate(330deg);
-                    }
-                  </style>"
+      @keyframes WUP-SPIN-1 {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      SPIN-F {
+        contain: style;
+        z-index: 100;
+        width: var(--spin-size);
+        height: var(--spin-size);
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      SPIN-F,
+      SPIN-F > div {
+        display: inline-block;
+        box-sizing: border-box;
+        border-radius: 50%;
+      }
+      SPIN-F > div {
+        animation: WUP-SPIN-1 var(--spin-t) linear infinite;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+      }
+      SPIN-F > div[fade] {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        animation: none;
+        border: none;
+        border-radius: var(--border-radius);
+        transform: none;
+        z-index: -1;
+        background: var(--spin-fade);
+      }
+      SPIN-F > div[fade]:after {
+        content: none;
+      } @keyframes WUP-SPIN-3 {
+        100% {
+          opacity: 0;
+          background: var(--spin-2);
+        }
+      }
+      :root {
+        --spin-item-size: calc(var(--spin-size) / 10);
+      }
+      SPIN-F {
+        position: relative;
+      }
+      SPIN-F > div {
+        animation: WUP-SPIN-3 var(--spin-t) linear infinite;
+        position: absolute;
+        width: calc(var(--spin-size) / 4);
+        height: var(--spin-item-size);
+        left: 0;
+        top: calc(50% - var(--spin-item-size) / 2);
+        transform-origin: calc(var(--spin-size) / 2);
+        background: var(--spin-1);
+        border-radius: calc(var(--spin-item-size) / 2);
+      }
+      SPIN-F > div:nth-child(1) {
+        animation-delay: -1.1s;
+        transform: rotate(0deg);
+      }
+      SPIN-F > div:nth-child(2) {
+        animation-delay: -1s;
+        transform: rotate(30deg);
+      }
+      SPIN-F > div:nth-child(3) {
+        animation-delay: -0.9s;
+        transform: rotate(60deg);
+      }
+      SPIN-F > div:nth-child(4) {
+        animation-delay: -0.8s;
+        transform: rotate(90deg);
+      }
+      SPIN-F > div:nth-child(5) {
+        animation-delay: -0.7s;
+        transform: rotate(120deg);
+      }
+      SPIN-F > div:nth-child(6) {
+        animation-delay: -0.6s;
+        transform: rotate(150deg);
+      }
+      SPIN-F > div:nth-child(7) {
+        animation-delay: -0.5s;
+        transform: rotate(180deg);
+      }
+      SPIN-F > div:nth-child(8) {
+        animation-delay: -0.4s;
+        transform: rotate(210deg);
+      }
+      SPIN-F > div:nth-child(9) {
+        animation-delay: -0.3s;
+        transform: rotate(240deg);
+      }
+      SPIN-F > div:nth-child(10) {
+        animation-delay: -0.2s;
+        transform: rotate(270deg);
+      }
+      SPIN-F > div:nth-child(11) {
+        animation-delay: -0.1s;
+        transform: rotate(300deg);
+      }
+      SPIN-F > div:nth-child(12) {
+        animation-delay: 0s;
+        transform: rotate(330deg);
+      }</style>"
     `);
   });
 
@@ -858,96 +1010,108 @@ describe("spinElement", () => {
     );
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>
-            @keyframes WUP-SPIN-1 {
-              100% { transform: rotate(360deg); }
-            }
-            SPIN-G {
-              contain: style;
-              z-index: 100;
-              width: var(--spin-size);
-              height: var(--spin-size);
-              top:0; left:0;
-              pointer-events: none;
-            }
-            SPIN-G,
-            SPIN-G>div {
-              display: inline-block;
-              box-sizing: border-box;
-              border-radius: 50%;
-            }
-            SPIN-G>div {
-              animation: WUP-SPIN-1 var(--spin-t) linear infinite;
-              width: 100%; height: 100%;
-              left:0; top:0;
-            }
-            SPIN-G>div[fade] {
-               display: block;
-               position: absolute;
-               left:0; top:0;
-               animation: none;
-               border: none;
-               border-radius: var(--border-radius);
-               transform: none;
-               z-index: -1;
-               background: var(--spin-fade);
-            }
-            SPIN-G>div[fade]:after { content: none; }
-            @keyframes WUP-SPIN-4-1 {
-                  0% {
-                    width: var(--spin-item-size);
-                    box-shadow: var(--spin-1) var(--spin-end) var(--spin-pad2), var(--spin-1) var(--spin-start) var(--spin-pad);
-                  }
-                  35% {
-                    width: var(--spin-size);
-                    box-shadow: var(--spin-1) 0 var(--spin-pad2), var(--spin-1) 0 var(--spin-pad);
-                  }
-                  70% {
-                    width: var(--spin-item-size);
-                    box-shadow: var(--spin-1) var(--spin-start) var(--spin-pad2), var(--spin-1) var(--spin-end) var(--spin-pad);
-                  }
-                  100% { box-shadow: var(--spin-1) var(--spin-end) var(--spin-pad2), var(--spin-1) var(--spin-start) var(--spin-pad); }
-                }
-                @keyframes WUP-SPIN-4-2 {
-                  0% {
-                    height: var(--spin-item-size);
-                    box-shadow: var(--spin-2) var(--spin-pad) var(--spin-end), var(--spin-2) var(--spin-pad2) var(--spin-start);
-                  }
-                  35% {
-                    height: var(--spin-size);
-                    box-shadow: var(--spin-2) var(--spin-pad) 0, var(--spin-2) var(--spin-pad2) 0;
-                  }
-                  70% {
-                    height: var(--spin-item-size);
-                    box-shadow: var(--spin-2) var(--spin-pad) var(--spin-start), var(--spin-2) var(--spin-pad2) var(--spin-end);
-                  }
-                  100% { box-shadow: var(--spin-2) var(--spin-pad) var(--spin-end), var(--spin-2) var(--spin-pad2) var(--spin-start); }
-                }
-                :root {
-                  --spin-2: #b35e03;
-                  --spin-item-size: calc(var(--spin-size) / 8);
-                  --spin-end: calc((var(--spin-size) - var(--spin-item-size)) / 2);
-                  --spin-start: calc((var(--spin-end)) * -1);
-                  --spin-pad: calc(var(--spin-size) / 2 - var(--spin-size) / 3 + var(--spin-item-size) / 3);
-                  --spin-pad2: calc(-1 * var(--spin-pad));
-                }
-                SPIN-G {
-                  position: relative;
-                  padding: 3px;
-                }
-                SPIN-G>div {
-                  position: absolute;
-                  transform: translate(-50%, -50%) rotate(165deg);
-                  top:50%; left:50%;
-                  width: var(--spin-item-size);
-                  height: var(--spin-item-size);
-                  border-radius: calc(var(--spin-item-size) / 2);
-                }
-                SPIN-G>div:nth-child(1) {
-                  animation: var(--spin-t) ease 0s infinite normal none running WUP-SPIN-4-1;
-                }
-                SPIN-G>div:nth-child(2) {
-                  animation: var(--spin-t) ease 0s infinite normal none running WUP-SPIN-4-2;
-                }</style>"
+      @keyframes WUP-SPIN-1 {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      SPIN-G {
+        contain: style;
+        z-index: 100;
+        width: var(--spin-size);
+        height: var(--spin-size);
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      SPIN-G,
+      SPIN-G > div {
+        display: inline-block;
+        box-sizing: border-box;
+        border-radius: 50%;
+      }
+      SPIN-G > div {
+        animation: WUP-SPIN-1 var(--spin-t) linear infinite;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+      }
+      SPIN-G > div[fade] {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        animation: none;
+        border: none;
+        border-radius: var(--border-radius);
+        transform: none;
+        z-index: -1;
+        background: var(--spin-fade);
+      }
+      SPIN-G > div[fade]:after {
+        content: none;
+      } @keyframes WUP-SPIN-4-1 {
+        0% {
+          width: var(--spin-item-size);
+          box-shadow: var(--spin-1) var(--spin-end) var(--spin-pad2), var(--spin-1) var(--spin-start) var(--spin-pad);
+        }
+        35% {
+          width: var(--spin-size);
+          box-shadow: var(--spin-1) 0 var(--spin-pad2), var(--spin-1) 0 var(--spin-pad);
+        }
+        70% {
+          width: var(--spin-item-size);
+          box-shadow: var(--spin-1) var(--spin-start) var(--spin-pad2), var(--spin-1) var(--spin-end) var(--spin-pad);
+        }
+        100% {
+          box-shadow: var(--spin-1) var(--spin-end) var(--spin-pad2), var(--spin-1) var(--spin-start) var(--spin-pad);
+        }
+      }
+      @keyframes WUP-SPIN-4-2 {
+        0% {
+          height: var(--spin-item-size);
+          box-shadow: var(--spin-2) var(--spin-pad) var(--spin-end), var(--spin-2) var(--spin-pad2) var(--spin-start);
+        }
+        35% {
+          height: var(--spin-size);
+          box-shadow: var(--spin-2) var(--spin-pad) 0, var(--spin-2) var(--spin-pad2) 0;
+        }
+        70% {
+          height: var(--spin-item-size);
+          box-shadow: var(--spin-2) var(--spin-pad) var(--spin-start), var(--spin-2) var(--spin-pad2) var(--spin-end);
+        }
+        100% {
+          box-shadow: var(--spin-2) var(--spin-pad) var(--spin-end), var(--spin-2) var(--spin-pad2) var(--spin-start);
+        }
+      }
+      :root {
+        --spin-2: #b35e03;
+        --spin-item-size: calc(var(--spin-size) / 8);
+        --spin-end: calc((var(--spin-size) - var(--spin-item-size)) / 2);
+        --spin-start: calc((var(--spin-end)) * -1);
+        --spin-pad: calc(var(--spin-size) / 2 - var(--spin-size) / 3 + var(--spin-item-size) / 3);
+        --spin-pad2: calc(-1 * var(--spin-pad));
+      }
+      SPIN-G {
+        position: relative;
+        padding: 3px;
+      }
+      SPIN-G > div {
+        position: absolute;
+        transform: translate(-50%, -50%) rotate(165deg);
+        top: 50%;
+        left: 50%;
+        width: var(--spin-item-size);
+        height: var(--spin-item-size);
+        border-radius: calc(var(--spin-item-size) / 2);
+      }
+      SPIN-G > div:nth-child(1) {
+        animation: var(--spin-t) ease 0s infinite normal none running WUP-SPIN-4-1;
+      }
+      SPIN-G > div:nth-child(2) {
+        animation: var(--spin-t) ease 0s infinite normal none running WUP-SPIN-4-2;
+      }</style>"
     `);
   });
 });
