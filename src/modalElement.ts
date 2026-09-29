@@ -248,7 +248,11 @@ export default class WUPModalElement<
     let isConfirmed = false;
     if (btnConfirm) {
       (btnConfirm as HTMLElement).onclick = (ev) => {
-        // todo need await here
+        /* NiceToHave possible issue: - resolve only if it's real case issue and required to fix
+         confirm modal shows: Do you want to update data?
+         user clicks Confirm > this event is fired & modal with form is closed
+         BUT api-request failed and user unable to Confirm this again, since the main modal is closed
+         To resolve this - need to some promiseBased onClick event, so we can wait for it and only on .then to close modal */
         isConfirmed = true;
         setTimeout(() => (isConfirmed = false), 1);
         (window as any).__wupFixCycleClick = true;
@@ -588,5 +592,3 @@ export default class WUPModalElement<
 const __openedItems: Array<WUPModalElement> = [];
 
 customElements.define(tagName, WUPModalElement);
-
-// NiceToHave: handle Ctrl+S, Meta+S for submit & close ???
