@@ -333,6 +333,10 @@ WUP-MODAL footer &gt; button[data-close=modal] {
   background: var(--base-btn2-bg);
   color: var(--base-btn2-text);
 }
+.wup-modal-open {
+  -webkit-user-select: none;
+          user-select: none;
+}
 .wup-modal-fade {
   --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
   z-index: 9000;
