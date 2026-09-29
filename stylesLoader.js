@@ -5,8 +5,8 @@ const sass = require("sass");
 const postcss = require("postcss");
 const { plugins } = require("./postcss.config");
 
-/** Switch it manually: `true` - injected css is minified, `false` - formatted as in scss */
-const compressStyles = false;
+/** `node ./stylesLoader.js --compress`: injected css is minified; otherwise it's formatted as in scss (webpack loader as well) */
+const compressStyles = process.argv.includes("--compress");
 
 // For development styles are defined in `{fileName}.scss`; the built result gets them compiled inside `{fileName}.ts`:
 // `static get $styleRoot()` returns rules defined in `:root {...}`, `static get $style()` returns other rules

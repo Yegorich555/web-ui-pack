@@ -9,6 +9,8 @@
 - **Global**.
   - Changing parent `$defaults` now affects inherited components (ex. `WUPBaseControl.$defaults.validateDebounceMs = 300` affects every control)
   - Fixed some styles bugs (hardly ever user noticed once)
+  - Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (user able to see formats in TS)
+  - Compressed built-in styles
 - **Controls**. Fixed validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts)
   - Added prop **isSorted** for headers
@@ -16,7 +18,6 @@
   - Added arg **sheetIndex** for cellCallback
   - Added numberFormat into settings
   - Added dateFormat types into TS
-- **Global**. Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (user able to see formats in TS)
 
 ### New Features
 
