@@ -274,9 +274,11 @@ export default class WUPModalElement<
     return "wup-modal-fade";
   }
 
-  /** Default class that appended to body when modal opened (required to hide body scroll)
-   * @defaultValue "wup-modal-open" */
-  static $classOpened = "wup-modal-open";
+  /** Class appended to body when modal opened (required to hide body scroll & prevent selection outside modal)
+   * @defaultValue "wup-modal-open" - can't be changed */
+  static get $classOpened(): string {
+    return "wup-modal-open";
+  }
 
   // WARN: modal-anim shouldn't affect on animation of nested
   static get $styleRoot(): string {
@@ -444,6 +446,7 @@ export default class WUPModalElement<
       const b = document.body;
       b.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everything must returned to prev state
       !b.className && b.removeAttribute("class");
+      window.getSelection()?.removeAllRanges(); // otherwise selection made inside modal (Ctrl+A) becomes visible on the page
     } else {
       this.$refFade!.remove(); // immediately hide if opened 2+ modals
       this.$refFade = undefined;
@@ -587,4 +590,3 @@ const __openedItems: Array<WUPModalElement> = [];
 customElements.define(tagName, WUPModalElement);
 
 // NiceToHave: handle Ctrl+S, Meta+S for submit & close ???
-// todo user can select outside via Ctrl + A

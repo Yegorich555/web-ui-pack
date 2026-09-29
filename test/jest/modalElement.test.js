@@ -98,7 +98,9 @@ describe("modalElement", () => {
 
     // closing
     jest.clearAllMocks();
+    window.getSelection().selectAllChildren(document.body); // simulate Ctrl+A
     el.$close().then(thenClose);
+    expect(window.getSelection().rangeCount).toBe(0); // selection must be cleared otherwise it becomes visible on the page
     expect(el.$isOpening).toBe(false);
     expect(el.$isClosing).toBe(true);
     expect(el.$isClosed).toBe(false);
