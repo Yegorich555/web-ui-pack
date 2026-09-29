@@ -204,5 +204,3 @@ export default class WUPDropdownElement<
 }
 
 customElements.define(tagName, WUPDropdownElement);
-
-// todo issue: animation:stack-right. If target is partially hidden in scrollable parent popup changes Y to be full visible but it's not ok; In this case popup must be also partially visible and listen only target

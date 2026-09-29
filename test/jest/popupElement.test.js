@@ -1400,6 +1400,78 @@ describe("popupElement", () => {
     );
   });
 
+  test("position with scroll: animation stack", () => {
+    // make body as scrollable
+    jest.spyOn(document.body, "scrollTop", "set").mockRestore();
+    el.$options.animation = PopupAnimations.stack;
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(50);
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(60);
+
+    const bodyRect = { ...document.body.getBoundingClientRect() };
+    const trgRect = { ...trg.getBoundingClientRect() };
+    jest.spyOn(trg, "getBoundingClientRect").mockImplementation(() => ({ ...trgRect }));
+    const moveTo = (x, y) => {
+      trgRect.x = x;
+      trgRect.y = y;
+      trgRect.left = x;
+      trgRect.top = y;
+      trgRect.right = trgRect.left + trgRect.width;
+      trgRect.bottom = trgRect.top + trgRect.height;
+      jest.advanceTimersByTime(1); // because getBoundingInternalRect is cached
+    };
+
+    const expectIt = (placement) => {
+      el.$options.placement = [placement];
+      jest.advanceTimersByTime(10);
+      // eslint-disable-next-line jest/valid-expect
+      return expect(el.outerHTML);
+    };
+
+    // target is fully visible - nothing to clip
+    moveTo(100, 100);
+    expectIt(WUPPopupElement.$placements.$right.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(200px, 100px);" position="right" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // partially hidden at the top: popup is aligned to the whole target & clipped the same way as target
+    moveTo(100, bodyRect.top - trgRect.height / 2);
+    expectIt(WUPPopupElement.$placements.$right.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(200px, -25px); clip-path: inset(25px -100vmax -100vmax -100vmax);" position="right" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // partially hidden at the bottom
+    moveTo(100, bodyRect.bottom - trgRect.height / 2);
+    expectIt(WUPPopupElement.$placements.$left.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="clip-path: inset(-100vmax -100vmax 25px -100vmax); transform: translate(40px, 375px);" position="left" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // partially hidden at the left
+    moveTo(bodyRect.left - trgRect.width / 2, 100);
+    expectIt(WUPPopupElement.$placements.$bottom.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="clip-path: inset(-100vmax -100vmax -100vmax 30px); transform: translate(-30px, 150px);" position="bottom" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // partially hidden at the right
+    moveTo(bodyRect.right - trgRect.width / 2, 100);
+    expectIt(WUPPopupElement.$placements.$top.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="clip-path: inset(-100vmax 30px -100vmax -100vmax); transform: translate(570px, 50px);" position="top" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // clipping is removed when target is fully visible again
+    moveTo(100, 100);
+    expectIt(WUPPopupElement.$placements.$right.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(200px, 100px);" position="right" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // clipping is removed on close
+    moveTo(100, bodyRect.top - trgRect.height / 2);
+    expectIt(WUPPopupElement.$placements.$right.$middle);
+    expect(el.style.clipPath).toBeTruthy();
+    el.$close();
+    jest.advanceTimersByTime(1000);
+    expect(el.style.clipPath).toBe("");
+  });
+
   test("arrow", () => {
     expect(el.$isOpened).toBe(true); // checking prev-state
     expect(el.$refArrow).toBeFalsy();

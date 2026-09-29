@@ -7,13 +7,13 @@
 ### Fixes & Improvements
 
 - **Global**
-  - Changing parent `$defaults` now affects inherited components (ex. `WUPBaseControl.$defaults.validateDebounceMs = 300` affects every control)
+  - Changing parent `$defaults` now affects on inherited components (ex. `WUPBaseControl.$defaults.validateDebounceMs = 300` affects every control)
   - Fixed some styles bugs (hardly ever user noticed once)
   - Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (user able to see formats in TS)
   - Compressed built-in styles
-- **Controls**. Fixed validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)
-- [ModalElement](src/modalElement.ts.ts)
-  - Fix Ctrl+A selects behind modal
+- **Controls**. _Validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)_
+- [DropdownElement](src/dropdownElement.ts). _Fix popup position on animation when item is partially visible_
+- [ModalElement](src/modalElement.ts.ts). _Ctrl+A selects behind modal_
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts)
   - Added prop **isSorted** for headers
   - Added props **freezeRows** & **freezeColumns** for sheets

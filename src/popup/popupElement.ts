@@ -799,6 +799,8 @@ export default class WUPPopupElement<
       width: 0,
     };
 
+    /** Edges of scrollParent that cut the target; for animation stack popup is cut the same way; Infinity means edge doesn't cut */
+    let cut: WUP.Popup.Place.PositionRect | null = null;
     // check if target hidden by scrollParent
     if (this.#state!.scrollParents) {
       const viewResult = isIntoView(t.el, { scrollParents: this.#state!.scrollParents, elRect: t });
@@ -817,10 +819,34 @@ export default class WUPPopupElement<
       /* istanbul ignore next */
       sp = sp === document.documentElement ? document.body : sp; // when scrollParent is html element then rect.top can be negative: to test place target at bottom body+margin target+html vert.scroll
       const scrollRect = getBoundingInternalRect(sp); // warn: it's important to fit only first parent
-      t.top = Math.max(scrollRect.top, t.top);
-      t.bottom = Math.min(scrollRect.bottom, t.bottom);
-      t.left = Math.max(scrollRect.left, t.left);
-      t.right = Math.min(scrollRect.right, t.right);
+      if (this._opts.animation === PopupAnimations.stack) {
+        /* stack-items must be aligned to the whole target: so popup isn't shifted to the visible part of target
+           but is hidden by the same edges of scrollParent (so it can overflow fitElement there) */
+        cut = { top: -Infinity, right: Infinity, bottom: Infinity, left: -Infinity };
+        if (tdef.top < scrollRect.top) {
+          cut.top = scrollRect.top;
+          fit.top = -Infinity;
+        }
+        if (tdef.bottom > scrollRect.bottom) {
+          cut.bottom = scrollRect.bottom;
+          fit.bottom = Infinity;
+        }
+        if (tdef.left < scrollRect.left) {
+          cut.left = scrollRect.left;
+          fit.left = -Infinity;
+        }
+        if (tdef.right > scrollRect.right) {
+          cut.right = scrollRect.right;
+          fit.right = Infinity;
+        }
+        fit.width = fit.right - fit.left;
+        fit.height = fit.bottom - fit.top;
+      } else {
+        t.top = Math.max(scrollRect.top, t.top);
+        t.bottom = Math.min(scrollRect.bottom, t.bottom);
+        t.left = Math.max(scrollRect.left, t.left);
+        t.right = Math.min(scrollRect.right, t.right);
+      }
     }
     t.height = t.bottom - t.top;
     t.width = t.right - t.left;
@@ -931,6 +957,18 @@ export default class WUPPopupElement<
       styleTransform(this, "translate", `${pos.left - dx}px, ${pos.top - dy}px`);
       this.$refArrow && styleTransform(this.$refArrow, "translate", `${pos.arrowLeft - dx}px, ${pos.arrowTop - dy}px`);
     }
+    const insets = cut && [
+      cut.top - pos.top,
+      pos.left + this.offsetWidth - cut.right,
+      pos.top + this.offsetHeight - cut.bottom,
+      cut.left - pos.left,
+    ];
+    if (insets?.some(Number.isFinite)) {
+      // negative inset: side isn't clipped (stack-items are moved outside popup during the animation)
+      this.style.clipPath = `inset(${insets.map((v) => (Number.isFinite(v) ? `${v}px` : "-100vmax")).join(" ")})`;
+    } else if (this.style.clipPath) {
+      this.style.clipPath = "";
+    }
     if (was) {
       // otherwise getBoundingClientRect returns element position according to scale applied from dropdownAnimation
       this.style.transform += ` ${was}`; // rollback scale transformation
@@ -945,6 +983,7 @@ export default class WUPPopupElement<
     super.resetState();
     delete this._stopAnimation;
     this.style.display = "";
+    this.style.clipPath = "";
     this.#state && window.cancelAnimationFrame(this.#state.frameId);
     this.#state = undefined;
 
