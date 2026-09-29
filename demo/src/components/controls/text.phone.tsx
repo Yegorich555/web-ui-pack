@@ -40,8 +40,8 @@ export class WUPPhoneControl extends WUPTextControl {
       :host wup-dropdown > button:after {
         content: "";
         --ctrl-icon-img: var(--wup-icon-chevron);
-        ${WUPcssIcon}
       }
+      ${WUPcssIcon(":host wup-dropdown > button:after")}
       :host wup-dropdown > button[aria-expanded=true]:after {
         transform: rotate(180deg);
       }

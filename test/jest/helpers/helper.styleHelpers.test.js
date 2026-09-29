@@ -1,5 +1,13 @@
 import { getBoundingInternalRect, px2Number, styleTransform } from "web-ui-pack/helpers/styleHelpers";
-import { useBuiltinStyle, WUPcssScrollSmall, WUPcssButton } from "web-ui-pack/styles";
+import {
+  useBuiltinStyle,
+  WUPcssHidden,
+  WUPcssIcon,
+  WUPcssBtnIcon,
+  WUPcssScrollSmall,
+  WUPcssButton,
+  WUPcssMenu,
+} from "web-ui-pack/styles";
 
 /** @type HTMLElement */
 let el;
@@ -75,9 +83,9 @@ describe("helper.styleHelpers", () => {
   test("useBuiltinStyle", () => {
     useBuiltinStyle(WUPcssScrollSmall(".scrolled"));
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
-      "<style>
-      .scrolled::-webkit-scrollbar {
-        width: 10px; height: 10px;
+      "<style>.scrolled::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
         cursor: pointer;
       }
       .scrolled::-webkit-scrollbar-corner {
@@ -85,32 +93,29 @@ describe("helper.styleHelpers", () => {
         cursor: pointer;
       }
       .scrolled::-webkit-scrollbar-thumb {
-        border: 3px solid rgba(0,0,0,0);
+        border: 3px solid rgba(0, 0, 0, 0);
         background-clip: padding-box;
-        background-color: var(--scroll, rgba(0,0,0,0.2));
+        background-color: var(--scroll, rgba(0, 0, 0, 0.2));
         border-radius: 999px;
         cursor: pointer;
       }
-      .scrolled::-webkit-scrollbar-track-piece:vertical:start,
-      .scrolled::-webkit-scrollbar-track-piece:vertical:end,
-      .scrolled::-webkit-scrollbar-track-piece:horizontal:start,
-      .scrolled::-webkit-scrollbar-track-piece:horizontal:end {
-        margin: 0;
+      @media (hover: hover) {
+      .scrolled::-webkit-scrollbar-thumb:hover {
+        background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
         cursor: pointer;
       }
-      @media (hover) {
-        .scrolled::-webkit-scrollbar-thumb:hover {
-          background-color: var(--scroll-hover, rgba(0,0,0,0.5));
-          cursor: pointer;
-        }
+      }
+      .scrolled::-webkit-scrollbar-track-piece:vertical:start, .scrolled::-webkit-scrollbar-track-piece:vertical:end, .scrolled::-webkit-scrollbar-track-piece:horizontal:start, .scrolled::-webkit-scrollbar-track-piece:horizontal:end {
+        margin: 0;
+        cursor: pointer;
       }</style>"
     `);
 
     useBuiltinStyle(WUPcssButton(".btn"));
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
-      "<style>
-      .scrolled::-webkit-scrollbar {
-        width: 10px; height: 10px;
+      "<style>.scrolled::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
         cursor: pointer;
       }
       .scrolled::-webkit-scrollbar-corner {
@@ -118,26 +123,22 @@ describe("helper.styleHelpers", () => {
         cursor: pointer;
       }
       .scrolled::-webkit-scrollbar-thumb {
-        border: 3px solid rgba(0,0,0,0);
+        border: 3px solid rgba(0, 0, 0, 0);
         background-clip: padding-box;
-        background-color: var(--scroll, rgba(0,0,0,0.2));
+        background-color: var(--scroll, rgba(0, 0, 0, 0.2));
         border-radius: 999px;
         cursor: pointer;
       }
-      .scrolled::-webkit-scrollbar-track-piece:vertical:start,
-      .scrolled::-webkit-scrollbar-track-piece:vertical:end,
-      .scrolled::-webkit-scrollbar-track-piece:horizontal:start,
-      .scrolled::-webkit-scrollbar-track-piece:horizontal:end {
-        margin: 0;
+      @media (hover: hover) {
+      .scrolled::-webkit-scrollbar-thumb:hover {
+        background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
         cursor: pointer;
       }
-      @media (hover) {
-        .scrolled::-webkit-scrollbar-thumb:hover {
-          background-color: var(--scroll-hover, rgba(0,0,0,0.5));
-          cursor: pointer;
-        }
       }
-      .btn {
+      .scrolled::-webkit-scrollbar-track-piece:vertical:start, .scrolled::-webkit-scrollbar-track-piece:vertical:end, .scrolled::-webkit-scrollbar-track-piece:horizontal:start, .scrolled::-webkit-scrollbar-track-piece:horizontal:end {
+        margin: 0;
+        cursor: pointer;
+      }.btn {
         box-shadow: none;
         border: none;
         border-radius: var(--border-radius);
@@ -157,14 +158,14 @@ describe("helper.styleHelpers", () => {
       }
       @media (hover: hover) and (pointer: fine) {
         .btn:hover {
-          box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.2);
+          box-shadow: inset 0 0 0 99999px rgba(0, 0, 0, 0.2);
         }
       }
       .btn[disabled] {
         opacity: 0.3;
         cursor: not-allowed;
         -webkit-user-select: none;
-        user-select: none;
+                user-select: none;
       }
       .btn[aria-busy] {
         cursor: wait;
@@ -173,22 +174,46 @@ describe("helper.styleHelpers", () => {
         position: relative;
       }
       .btn[busy]:after {
-          content: "";
-          display: block;
-          position: absolute;
-          height: 3px;
-          width: 90%;
-          width: calc(100% - calc(var(--base-margin) * 2));
-          background-color: #fff;
-          animation: BTN-BUSY 3s cubic-bezier(0, 0, 0.2, 1) infinite;
-          opacity: 0.3;
-          left: 50%;
+        content: "";
+        display: block;
+        position: absolute;
+        height: 3px;
+        width: 90%;
+        width: calc(100% - calc(var(--base-margin) * 2));
+        background-color: #fff;
+        animation: BTN-BUSY 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+        opacity: 0.3;
+        left: 50%;
+      }
+      @keyframes BTN-BUSY {
+        0% {
+          transform: translateX(-50%) scaleX(40%);
         }
-        @keyframes BTN-BUSY {
-          0% { transform: translateX(-50%) scaleX(40%); }
-          50% { transform: translateX(-50%) scaleX(100%); }
-          100% { transform: translateX(-50%) scaleX(40%); }
-        }</style>"
+        50% {
+          transform: translateX(-50%) scaleX(100%);
+        }
+        100% {
+          transform: translateX(-50%) scaleX(40%);
+        }
+      }</style>"
     `);
+  });
+
+  test("WUPcss...", () => {
+    [WUPcssHidden, WUPcssIcon, WUPcssBtnIcon, WUPcssScrollSmall, WUPcssButton, WUPcssMenu].forEach((f) => {
+      const css = f(".my-tag");
+      expect(css).toContain(".my-tag");
+      expect(css).not.toContain(":host");
+    });
+
+    expect(WUPcssButton(".btn")).toContain("var(--base-btn-bg)");
+    [2, 3].forEach((type) => {
+      const css = WUPcssButton(".btn", type);
+      expect(css).toContain(`var(--base-btn${type}-bg)`);
+      expect(css).toContain(`var(--base-btn${type}-text)`);
+      expect(css).not.toContain("var(--base-btn-bg)");
+      expect(css).not.toContain("var(--base-btn-text)");
+      expect(css).toContain("var(--base-btn-focus)"); // focus is the same for every type
+    });
   });
 });

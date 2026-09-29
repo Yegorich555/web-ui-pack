@@ -121,14 +121,16 @@ describe("spinElement", () => {
         --menu-hover-text: inherit;
         --menu-hover-bg: #222a36;
       }
-      .wup-hidden, [wup-hidden] {
-      position: absolute;
-      height:1px; width:1px;
-      overflow:hidden;
-      clip:rect(1px,1px,1px,1px);
-      min-width:initial;
-      padding:0;}
-
+      .wup-hidden,
+      [wup-hidden] {
+        position: absolute;
+        height: 1px;
+        width: 1px;
+        overflow: hidden;
+        clip: rect(1px, 1px, 1px, 1px);
+        min-width: initial;
+        padding: 0;
+      }
       [wup-icon] {
         display: inline-block;
         cursor: pointer;
@@ -150,20 +152,19 @@ describe("spinElement", () => {
         height: 100%;
         background: var(--icon, #000);
         -webkit-mask-size: var(--icon-size, 1em);
-        mask-size: var(--icon-size, 1em);
+                mask-size: var(--icon-size, 1em);
         -webkit-mask-repeat: no-repeat;
-        mask-repeat: no-repeat;
+                mask-repeat: no-repeat;
         -webkit-mask-position: center;
-        mask-position: center;
-
+                mask-position: center;
         -webkit-mask-image: var(--icon-img);
-        mask-image: var(--icon-img);
+                mask-image: var(--icon-img);
       }
       [wup-icon]:focus {
-         box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+        box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
       }
       [wup-icon]:focus:after {
-         background: var(--icon-hover, var(--icon, #000));
+        background: var(--icon-hover, var(--icon, #000));
       }
       @media (hover: hover) and (pointer: fine) {
         [wup-icon]:hover {
@@ -173,7 +174,7 @@ describe("spinElement", () => {
           background: var(--icon-hover, var(--icon, #000));
         }
         [wup-icon]:focus:hover {
-         opacity: 0.9;
+          opacity: 0.9;
         }
       }
       :root {

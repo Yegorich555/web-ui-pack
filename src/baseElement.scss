@@ -1,3 +1,5 @@
+@import "styles";
+
 :root {
   --base-focus: #00778d;
   --base-btn-bg: #009fbc;
@@ -44,4 +46,19 @@
 
 :host {
   /* nothing here right now */
+}
+
+// Styles below are applied once on the first init: `$refStyle.append("@wup-include useCommon")`
+
+/// Common styles for WUPBaseElement.classNameHidden & WUPBaseElement.classNameBtnIcon
+@mixin useCommon {
+  // from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility
+  .wup-hidden,
+  [wup-hidden] {
+    @include wup-hidden;
+  }
+
+  [wup-icon] {
+    @include wup-btnIcon;
+  }
 }

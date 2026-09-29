@@ -323,3 +323,47 @@
     }
   }
 }
+
+// Styles below are exported via styles.ts: `"@wup-include useHidden"` where `:host` is replaced with the pointed tag
+
+/// Exported via `WUPcssHidden(tag)`
+@mixin useHidden {
+  :host {
+    @include wup-hidden;
+  }
+}
+
+/// Exported via `WUPcssIcon(tag)`
+@mixin useIcon {
+  :host {
+    @include wup-icon;
+  }
+}
+
+/// Exported via `WUPcssBtnIcon(tag)`
+@mixin useBtnIcon {
+  :host {
+    @include wup-btnIcon;
+  }
+}
+
+/// Exported via `WUPcssScrollSmall(tag)`
+@mixin useScrollSmall {
+  :host {
+    @include wup-scrollSmall;
+  }
+}
+
+/// Exported via `WUPcssButton(tag, type)`
+@mixin useButton {
+  :host {
+    @include wup-button;
+  }
+}
+
+/// Exported via `WUPcssMenu(tag)`
+@mixin useMenu {
+  :host {
+    @include wup-menu;
+  }
+}

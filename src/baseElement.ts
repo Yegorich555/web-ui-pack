@@ -5,7 +5,6 @@ import focusFirst from "./helpers/focusFirst";
 import nestedProperty from "./helpers/nestedProperty";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
-import { WUPcssHidden, WUPcssBtnIcon } from "./styles";
 
 // theoretically such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
@@ -105,12 +104,12 @@ export default abstract class WUPBaseElement<
     return `wup${++lastUniqueNum}`;
   }
 
-  /** Returns default class name for visually hidden element */
+  /** Returns default class name for visually hidden element; WARN: related styles are defined in baseElement.scss */
   static get classNameHidden(): string {
     return "wup-hidden";
   }
 
-  /** Returns default class name for buttons with icons */
+  /** Returns default class name for buttons with icons; WARN: related styles are defined in baseElement.scss */
   static get classNameBtnIcon(): string {
     return "wup-icon";
   }
@@ -290,11 +289,9 @@ export default abstract class WUPBaseElement<
   /** Add common styles */
   static firstInit(): void {
     this.$refStyle = document.createElement("style");
-    /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
     this.$refStyle.append(`${this.$styleRoot}\r\n`);
     appendedRootStyles.add(WUPBaseElement);
-    this.$refStyle.append(`.${this.classNameHidden}, [${this.classNameHidden}] {${WUPcssHidden}}\r\n`);
-    this.$refStyle.append(`${WUPcssBtnIcon(`[${this.classNameBtnIcon}]`)}\r\n`);
+    this.$refStyle.append("@wup-include useCommon", "\r\n"); // WARN: it's replaced with css of the mixin from baseElement.scss via stylesLoader.js
 
     document.head.prepend(this.$refStyle);
   }

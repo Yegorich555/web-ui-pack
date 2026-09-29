@@ -314,7 +314,7 @@ WUPRadioControl.prototype.parse = function parse(stringValue: string) {
 };`;
 
 const codeSharedStyles = `js
-import { useBuiltinStyle, WUPcssScrollSmall } from "web-ui-pack/styles";
+import { useBuiltinStyle, WUPcssScrollSmall, WUPcssButton } from "web-ui-pack/styles";
 // prepend scroll style for class '.scrolled' into document.head
 useBuiltinStyle(WUPcssScrollSmall(".scrolled"));
 // prepend button style for class '.btn' into document.head
