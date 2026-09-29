@@ -139,7 +139,8 @@ export default function AppContainer() {
           w-storageKey="darkmode"
           ref={(el) => {
             if (el) {
-              // NiceToHave: prevent toggle animation on init
+              // WARN: value from storage applies in gotReady (after timeout) so pre-set attr to prevent toggle animation on init
+              el.toggleAttribute("checked", !!window.isDark);
               el.$refInput.ariaLabel = "toggle between light and darkmode";
               el.$onChange = () => changeDarkMode(el.$value);
             }
