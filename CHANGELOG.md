@@ -12,6 +12,7 @@
   - Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (user able to see formats in TS)
   - Compressed built-in styles
 - **Controls**. _Validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)_
+- [Form](src/formElement.ts). Added $onChange callback: form.$onChange = ()=>{...}
 - [DropdownElement](src/dropdownElement.ts). _Fix popup position on animation when item is partially visible_
 - [ModalElement](src/modalElement.ts.ts). _Ctrl+A selects behind modal_
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts)

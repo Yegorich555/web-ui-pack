@@ -48,6 +48,11 @@ declare global {
        * @tutorial
        * call `e.preventDefault()` to prevent closing modal (if form in modal) */
       $submitEnd: CustomEvent<{ success: boolean }>;
+      /** Fires when value of any nested control is changed (bubbles from control so `e.target` is the control);
+       * @tutorial Troubleshooting
+       * * fires for detached controls also (with empty $options.name) - check `e.target.$options.name` if needed
+       * * fires for other nested elements with the `$change` event also (like `<wup-sort>`) */
+      $change: WUP.BaseControl.EventMap["$change"];
     }
 
     interface Options {
@@ -89,7 +94,7 @@ declare global {
       readonly?: boolean | "";
 
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      onChange?: never; // NiceToHave: controls doesn't fire form.$onChange method - need to implement chaining
+      onChange?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */
       onWillSubmit?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead */
@@ -273,6 +278,12 @@ export default class WUPFormElement<
    * @tutorial
    * call `e.preventDefault()` to prevent closing modal (if form in modal) */
   $onSubmitEnd?: (ev: WUP.Form.EventMap["$submitEnd"]) => void;
+  /** Fires when value of any nested control is changed (bubbles from control so `e.target` is the control);
+   * @tutorial Troubleshooting
+   * * fires for detached controls also (with empty $options.name) - check `e.target.$options.name` if needed
+   * * fires for other nested elements with the `$change` event also (like `<wup-sort>`)
+   * * fires after listeners added via `form.addEventListener("$change")` before the form is ready */
+  $onChange?: (ev: WUP.Form.EventMap["$change"]) => void;
   /** Dispatched on submit */
   // It's not required but called: $onsubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void;
 
@@ -601,6 +612,8 @@ export default class WUPFormElement<
       },
       { passive: false }
     );
+    // WARN: bubbling phase instead of capture - otherwise it's fired before control stops propagation
+    this.appendEvent(this, "$change", (e) => this.$onChange?.call(this, e as WUP.Form.EventMap["$change"]));
   }
 
   protected override connectedCallback(): void {
