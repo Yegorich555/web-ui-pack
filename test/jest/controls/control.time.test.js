@@ -98,6 +98,7 @@ describe("control.time", () => {
       "w-popupminwidthbytarget": { value: true },
       "w-opencase": { value: 1 },
       "w-menubuttonsoff": { value: true },
+      "w-menuescrollback": { value: true },
 
       "w-mask": { value: "00:00 am", nullValue: "00:00 //[AP]//M" },
       "w-maskholder": { value: "00:00 am", nullValue: "hh:mm *M" },

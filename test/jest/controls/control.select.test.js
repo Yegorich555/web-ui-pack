@@ -51,6 +51,7 @@ describe("control.select", () => {
       "w-readonlyinput": { value: true },
       "w-popupoffsetfitelement": { value: [2, 3] },
       "w-popupminwidthbytarget": { value: false },
+      "w-menuescrollback": { value: true },
       "w-multiple": { value: true },
       "w-items": { value: getItems() },
     },

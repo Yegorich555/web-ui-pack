@@ -62,6 +62,13 @@ declare global {
       /** Sets minWidth of popup-menu 100% of control width (option `minWidthByTarget` of `<wup-popup/>`)
        * @defaultValue true */
       popupMinWidthByTarget: boolean;
+      /** Set `true` to rollback value to that was before menu opened when user presses Escape (menu is closed in any case)
+       * @tutorial Troubleshooting
+       * * affects only if value is changed while menu is opened: by typing or via menu that stays opened
+       * (Select with `multiple: true`, SelectMany, Time with `menuButtonsOff: true`)
+       * * Time with `menuButtonsOff: true` always rollbacks value on Escape
+       * @defaultValue false */
+      menuEscRollback: boolean;
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
@@ -75,6 +82,7 @@ declare global {
        * ``` */
       "w-popupOffsetFitElement"?: string;
       "w-popupMinWidthByTarget"?: boolean | "";
+      "w-menuEscRollback"?: boolean | "";
     }
   }
 }
@@ -98,6 +106,7 @@ export default abstract class WUPBaseComboControl<
     readOnlyInput: false,
     popupOffsetFitElement: [1, 1],
     popupMinWidthByTarget: true,
+    menuEscRollback: false,
   });
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
@@ -237,6 +246,7 @@ export default abstract class WUPBaseComboControl<
       return null;
     }
     this.#isOpened = true;
+    this.#valueBeforeMenu = this.$value;
 
     // this.$hideError(); // it resolves overflow menu vs error
 
@@ -290,6 +300,13 @@ export default abstract class WUPBaseComboControl<
     return true;
   }
 
+  /** Override to change rollback-behavior on pressing Escape */
+  canRollbackOnEsc(): boolean {
+    return !!this._opts.menuEscRollback;
+  }
+
+  /** Value before menu is opened */
+  #valueBeforeMenu?: ValueType;
   protected _isClosing?: true;
   protected async goCloseMenu(closeCase: MenuCloseCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
     if (!this.#isOpened || this._isClosing) {
@@ -299,6 +316,10 @@ export default abstract class WUPBaseComboControl<
       return false;
     }
     this.#isOpened = false;
+    closeCase === MenuCloseCases.OnPressEsc &&
+      this.canRollbackOnEsc() &&
+      !this.#ctr.$isEqual(this.#valueBeforeMenu, this.$value, this) &&
+      this.setValue(this.#valueBeforeMenu, SetValueReasons.clear);
     this._isClosing = true;
     await this.$refPopup?.$close();
     delete this._isClosing;
@@ -551,5 +572,3 @@ export default abstract class WUPBaseComboControl<
  >>> console.warn('done')
  close-event
  */
-
-// NiceToHave: option for press-Escape: hideMenu + rollback value to that was before showing OR only hideMenu; now WUPTime.$options.menuButtons changes such behavior

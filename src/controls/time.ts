@@ -274,8 +274,6 @@ export default class WUPTimeControl<
   }
 
   #isMenuInitPhase?: boolean;
-  /** Value before menu is opened */
-  #valueBeforeMenu?: ValueType;
   protected override renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): HTMLElement {
     this.#isMenuInitPhase = true;
     const append = (ul: HTMLElement, v: number | string, twoDigs: boolean, savedV?: number): HTMLElement => {
@@ -469,10 +467,9 @@ export default class WUPTimeControl<
     const wasOpened = this.$isOpened;
     const r = await super.goOpenMenu(openCase, e);
     if (!r || wasOpened) {
-      return r; // otherwise #valueBeforeMenu is overridden by value changed via menu
+      return r; // otherwise menu is re-initialized when it's already opened
     }
 
-    this.#valueBeforeMenu = this.$value;
     this.#lastInputChanged = false;
     const v = this.$value;
     if (this.$refMenuLists && v) {
@@ -524,14 +521,8 @@ export default class WUPTimeControl<
     next !== null && this.trySetValue();
   }
 
-  protected override goCloseMenu(
-    closeCase: MenuCloseCases,
-    e?: MouseEvent | FocusEvent | null | undefined
-  ): Promise<boolean> {
-    closeCase === MenuCloseCases.OnPressEsc &&
-      this._opts.menuButtonsOff &&
-      this.setValue(this.#valueBeforeMenu, SetValueReasons.clear);
-    return super.goCloseMenu(closeCase, e);
+  override canRollbackOnEsc(): boolean {
+    return this._opts.menuButtonsOff || super.canRollbackOnEsc();
   }
 
   protected override valueToInput(v: ValueType | undefined): string {

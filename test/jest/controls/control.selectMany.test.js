@@ -59,6 +59,7 @@ describe("control.selectMany", () => {
       "w-readonlyinput": { value: true },
       "w-popupoffsetfitelement": { value: [2, 3] },
       "w-popupminwidthbytarget": { value: false },
+      "w-menuescrollback": { value: true },
       "w-multiple": { skip: true },
       "w-items": { value: getItems() },
       "w-sortable": { value: true },
