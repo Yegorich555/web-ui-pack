@@ -5,6 +5,7 @@ import { ClearActions } from "web-ui-pack/controls/baseControl";
 import { spinUseDualRing } from "web-ui-pack/spinElement";
 import FAQ from "src/elements/faq";
 import stylesCom from "./controls.scss";
+import SelectControlDesc from "./select.desc";
 
 WUPSelectControl.$use();
 
@@ -240,6 +241,7 @@ export default function SelectControlView() {
             }
           }}
         />
+        <SelectControlDesc />
         <FAQ
           endString=""
           items={[
