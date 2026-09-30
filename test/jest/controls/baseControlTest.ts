@@ -596,6 +596,82 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(onThrowErr).not.toBeCalled();
     });
 
+    test("storageKey: sync controls with the same storage & key", async () => {
+      if (cfg.attrs?.["w-storagekey"]?.skip || cfg.attrs?.["w-storagekey"] === null) {
+        return; // for password isn't allowed
+      }
+      const onThrowErr = jest.spyOn(WUPBaseControl.prototype, "throwError");
+      const create = (storageKey: string, storage?: "session") => {
+        const c = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+        cfg.onCreateNew?.call(cfg, c);
+        c.$options.storageKey = storageKey;
+        storage && (c.$options.storage = storage);
+        return c;
+      };
+      el.$options.name = "sync";
+      el.$options.storageKey = true; // key from name
+      const el2 = create("sync");
+      const el3 = create("sync");
+      const elSession = create("sync", "session"); // the same key but another storage
+      await h.wait(1);
+      const spyChange = jest.fn();
+      el2.$onChange = spyChange;
+      const sSet = jest.spyOn(Storage.prototype, "setItem");
+      // WARN: every next value must differ from the previous one: for switch `false` equals `undefined`
+      const [v0, v1, v2] = cfg.initValues.map((a) => a.value);
+
+      el.$value = v0;
+      await h.wait(1);
+      expect(el2.$value).toStrictEqual(v0);
+      expect(el3.$value).toStrictEqual(v0);
+      typeof v0 === "object" && expect(el2.$value).not.toBe(el.$value); // each control parses own value
+      expect(el2.$isDirty).toBe(false);
+      expect(spyChange).toBeCalledTimes(1);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.storage });
+      expect(sSet).toBeCalledTimes(1); // synced controls don't save value again
+
+      // clearing
+      el.$value = undefined;
+      await h.wait(1);
+      expect(el2.$value).toStrictEqual(cfg.emptyValue);
+      expect(el3.$value).toStrictEqual(cfg.emptyValue);
+
+      // sync back from another control
+      el3.$value = v2;
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(v2);
+      expect(el2.$value).toStrictEqual(v2);
+
+      // re-registered on key changes
+      el.$options.name = "sync2"; // storageKey is true so inherited from name
+      el3.$options.storageKey = "sync2";
+      await h.wait(1);
+      el2.$value = v1;
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(v2);
+      expect(el3.$value).toStrictEqual(v2);
+      el.$value = v1;
+      await h.wait(1);
+      expect(el3.$value).toStrictEqual(v1);
+
+      // removed control isn't synced
+      el3.remove();
+      el.$value = v0;
+      await h.wait(1);
+      expect(el3.$value).toStrictEqual(v1);
+      // re-appended control is synced again
+      document.body.appendChild(el3);
+      await h.wait(1);
+      expect(el3.$value).toStrictEqual(v0); // from storage on init
+      el.$value = v1;
+      await h.wait(1);
+      expect(el3.$value).toStrictEqual(v1);
+
+      expect(elSession.$value).toStrictEqual(cfg.emptyValue); // the same key but another storage
+      expect(onThrowErr).not.toBeCalled();
+      window.localStorage.clear();
+    });
+
     test("enableInitOnChange", async () => {
       const spyChange = jest.fn();
       const create = () => {

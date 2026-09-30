@@ -221,6 +221,7 @@ describe("control.select", () => {
     expect(el.$refInput.value).toBe("D");
 
     // when items is function with promise
+    el.$options.storageKey = "s2"; // otherwise value is synced with prev. controls with the same key & items without this value
     el.$options.items = getItems();
     el.$value = getItems()[3].value;
     await setItems(() => Promise.resolve(getItems()));

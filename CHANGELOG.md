@@ -33,6 +33,7 @@
 - **Controls**
   - Added option **enableInitOnChange** to fire `$change` event on init (with reason `initValue`) even if value is empty
   - Added Options `disabled` & `readOnly` (attrs `[disabled]` & `[readonly]`) accept string (reason) that is shown via tooltip
+  - Option **storageKey** syncs value between controls with the same `storage` & `storageKey` (ex. changing value in one control `personType` updates all others with the same key; `$change` is fired with reason `storage`)
 -**Combobox controls** (Select, SelectMany, Date, Time).
   - Added options **popupOffsetFitElement** & **popupMinWidthByTarget** to configure popup-menu (via `$defaults` or per element)
   - Added option **menuEscRollback** to rollback value to that was before menu opened on pressing Escape

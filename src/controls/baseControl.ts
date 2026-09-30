@@ -237,6 +237,9 @@ declare global {
   }
 }
 
+/** Controls grouped by `storage:storageKey`: to sync value between controls pointed to the same storage & key */
+const storageSyncMap = new Map<string, Set<WUPBaseControl>>();
+
 /** Base abstract form-control */
 export default abstract class WUPBaseControl<
     ValueType = any,
@@ -527,6 +530,7 @@ export default abstract class WUPBaseControl<
     this.setAttr.call(this.$refInput, "aria-required", isReq);
 
     this.setupInitValue(propsChanged);
+    this.setupStorageSync();
 
     propsChanged?.includes("clearActions") && this.setClearState();
     this.gotFormChanges(propsChanged);
@@ -584,6 +588,29 @@ export default abstract class WUPBaseControl<
       // otherwise $change is fired with reason storage
       !isStored && this._opts.enableInitOnChange && this.fireChange(SetValueReasons.initValue);
     }
+  }
+
+  /** Key of storageSyncMap where control is registered */
+  #storageSyncKey?: string;
+  /** Called on Init and options/attributes changes to (re)register control in the group of controls pointed to the same storage & key
+   *  (to sync value between them); Point `true` to unregister */
+  setupStorageSync(isRemoved?: boolean): void {
+    const key = this.storageKey;
+    const next = !isRemoved && key ? `${this._opts.storage}:${key}` : undefined;
+    const prev = this.#storageSyncKey;
+    if (next === prev) {
+      return;
+    }
+    if (prev) {
+      const s = storageSyncMap.get(prev)!;
+      s.delete(this);
+      !s.size && storageSyncMap.delete(prev);
+    }
+    if (next) {
+      const s = storageSyncMap.get(next);
+      s ? s.add(this) : storageSyncMap.set(next, new Set([this]));
+    }
+    this.#storageSyncKey = next;
   }
 
   /** Returns true on !$isDisabled */
@@ -659,6 +686,7 @@ export default abstract class WUPBaseControl<
   protected override gotRemoved(): void {
     super.gotRemoved();
     this.$form?.$controls.splice(this.$form.$controls.indexOf(this), 1);
+    this.setupStorageSync(true);
   }
 
   /** Returns validations enabled by user & defaults */
@@ -946,13 +974,14 @@ export default abstract class WUPBaseControl<
     return this.$initValue;
   }
 
-  /** Save value to storage storage according to options `storageKey`, `storage` and `name` */
+  /** Save value to storage storage according to options `storageKey`, `storage` and `name`
+   *  & sync value with other controls pointed to the same storage & key */
   protected storageSet(v: ValueType | undefined): void {
-    // NiceToHave: option to sync ctrls with same storage & key: if 'personType` is changed need to update all ctrls with same key `personType`
     const key = this.storageKey;
     if (!key) {
       return; // possible when _opts.name is empty
     }
+    let sv: string | null = null;
     try {
       let strg: Storage | Pick<Storage, "removeItem" | "setItem">;
       switch (this._opts.storage) {
@@ -979,15 +1008,18 @@ export default abstract class WUPBaseControl<
           break;
       }
 
-      if (this.#ctr.$isEmpty(v)) {
-        strg.removeItem(key);
-      } else {
-        const sv = this.valueToStorage(v!);
-        sv === null ? strg.removeItem(key) : strg.setItem(key, sv);
-      }
+      sv = this.#ctr.$isEmpty(v) ? null : this.valueToStorage(v!);
+      sv === null ? strg.removeItem(key) : strg.setItem(key, sv);
     } catch (err) {
       this.throwError(err); // re-throw error when storage is full
     }
+
+    // sync with other controls: key is taken from current options because the control can be not re-registered yet
+    // WARN: each control parses own value from string to avoid sharing the same object (Date is mutated by dateControl etc.)
+    // reason `storage` prevents looping because storageSet isn't called for it
+    storageSyncMap
+      .get(`${this._opts.storage}:${key}`)
+      ?.forEach((c) => c !== this && c.setValue(sv === null ? v : c.valueFromStorage(sv), SetValueReasons.storage));
   }
 
   /** Fire this method to update value & validate; returns null when not $isReady, true if changed */
