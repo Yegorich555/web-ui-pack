@@ -311,6 +311,37 @@ describe("helper.animateDropdown", () => {
     expect(el.outerHTML).toMatchInlineSnapshot(`"<ul position="right"><ul><li>Some text here</li></ul></ul>"`);
   });
 
+  test("open/hide animate when [position='center']", async () => {
+    el.setAttribute("position", "center");
+    el.style.transform = "translate(10px, 20px)";
+    let p = animateDropdown(el, step * 2, false);
+    let isResolved = false;
+    p.then((v) => (isResolved = v)).catch(() => null);
+
+    await nextFrame();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<ul position="center" style="transform: translate(10px, 20px) translateY(-150%); opacity: 0;"><ul><li>Some text here</li></ul></ul>"`
+    );
+    await nextFrame();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<ul position="center" style="transform: translate(10px, 20px) translateY(-75%); opacity: 0.5;"><ul><li>Some text here</li></ul></ul>"`
+    );
+
+    // hide during the opening: continue from the current state
+    p.stop(false);
+    p = animateDropdown(el, step * 2, true);
+    p.then((v) => (isResolved = v)).catch(() => null);
+    await nextFrame();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<ul position="center" style="transform: translate(10px, 20px) translateY(-75%); opacity: 0.5;"><ul><li>Some text here</li></ul></ul>"`
+    );
+    await nextFrame();
+    expect(isResolved).toBe(true);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<ul position="center" style="transform: translate(10px, 20px);"><ul><li>Some text here</li></ul></ul>"`
+    );
+  });
+
   test("affect on style.transform", async () => {
     el.style.transform = "translate(-50%,-50%)";
     animateDropdown(el, step * 2, false);

@@ -1,7 +1,9 @@
+import viewportSize from "../helpers/viewportSize";
+
 declare global {
   namespace WUP.Popup.Place {
     interface XResult {
-      attr: "left" | "right" | "top" | "bottom";
+      attr: "left" | "right" | "top" | "bottom" | "center";
       left: number;
       /** Size restriction that must be applied to element; calculated in .adjust() and based on userDefined minSize */
       maxW?: number | null;
@@ -11,7 +13,7 @@ declare global {
       arrowAngle: number;
     }
     interface YResult {
-      attr: "left" | "right" | "top" | "bottom";
+      attr: "left" | "right" | "top" | "bottom" | "center";
       top: number;
       /** Size restriction that must be applied to element; calculated in .adjust() and based on userDefined minSize */
       maxH?: number | null;
@@ -211,6 +213,28 @@ $right.$start = $left.$start;
 $right.$middle = $left.$middle;
 $right.$end = $left.$end;
 
+const $centerScreen = <WUP.Popup.Place.PlaceFunc>function centerScreen(_t, me, fit) {
+  // fitElement can be out of viewport (scrolled) or be infinite (animation stack)
+  const { vw, vh } = viewportSize();
+  const top = Math.max(fit.top, 0);
+  const left = Math.max(fit.left, 0);
+  const freeH = Math.min(fit.bottom, vh) - top;
+  const freeW = Math.min(fit.right, vw) - left;
+  return {
+    attr: "center",
+    top: top + Math.round((freeH - Math.min(me.h, freeH)) / 2),
+    left: left + Math.round((freeW - Math.min(me.w, freeW)) / 2),
+    freeH,
+    freeW,
+    maxH: me.h > freeH ? freeH : null, // set null if maxSize doesn't affect on
+    maxW: me.w > freeW ? freeW : null,
+    // arrow is hidden because popup isn't attached to target
+    arrowTop: 0,
+    arrowLeft: 0,
+    arrowAngle: 0,
+  };
+};
+
 export const PopupPlacements = {
   /** place above of target */
   $top,
@@ -220,9 +244,15 @@ export const PopupPlacements = {
   $left,
   /** place at right side of target */
   $right,
+  /** place at the center of visible part of fitElement (as modal) ignoring target; resize to fit layout; attr `position="center"`
+   * @tutorial Troubleshooting
+   * * point it as the last rule: it fits almost always so the next rules are ignored
+   * * it's never applied automatically (as alternative rule) so point it explicitly
+   * * arrow is hidden in this case */
+  $centerScreen,
 };
 
-Object.keys(PopupPlacements).forEach((kp) => {
+(["$top", "$bottom", "$left", "$right"] as const).forEach((kp) => {
   // changing bottom = bottom.middle to avoid user mistakes
   const def = PopupPlacements[kp];
   // eslint-disable-next-line func-names

@@ -164,11 +164,13 @@ el.$options.target = document.querySelector("button");
   Placement can be $top, $right, $bottom, $left (top - above at the target etc.)
   every placement has align options: $start, $middle, $end (left - to align at the start of target)
   also, you can set $adjust to allow Reduce popup to fit layout
+  and $centerScreen to place at the center of screen (as modal) when there is no space around target
 */
 el.$options.placement = [
   WUPPopupElement.$placements.$top.$middle; // place at the top of target and align by vertical line
   WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'ignore align to fit layout`
   WUPPopupElement.$placements.$bottom.$middle.$adjust.$resizeHeight, // resize means 'allow to resize to fit layout'
+  WUPPopupElement.$placements.$centerScreen, // place at the center of screen & resize to fit layout (it must be the last rule)
 ]
 document.body.append(el);
 ```

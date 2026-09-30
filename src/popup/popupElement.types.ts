@@ -137,7 +137,7 @@ declare global {
        * attr `target` has hire priority than ref.options.target */
       "w-target"?: string;
       /** @readonly Result position; use this to restyle animation etc. */
-      readonly position?: "top" | "left" | "bottom" | "right";
+      readonly position?: "top" | "left" | "bottom" | "right" | "center";
       /** @readonly Hide state; use this to hide-animation */
       readonly hide?: "";
       /** Animation applied to popup */

@@ -27,7 +27,9 @@
 - helper [imageConvert](src/helpers/files/imageConvert.ts)
 - helper [selectFiles](src/helpers/files/selectFiles.ts)
 - helper [isScrollable](src/helpers/findScrollParent.ts)
-- [PopupElement](src/popup/popupElement.ts). Added `WUPPopupElement.$useTooltip()` to show tooltip on hover for elements with attribute `[w-tooltip]`
+- [PopupElement](src/popup/popupElement.ts)
+  - Added `WUPPopupElement.$useTooltip()` to show tooltip on hover for elements with attribute `[w-tooltip]`
+  - Added placement `WUPPopupElement.$placements.$centerScreen` to place popup at the center of screen (as modal) when there is no space around target. Animation `drawer` moves it from top to center (like modal)
 - **Controls**
   - Added option **enableInitOnChange** to fire `$change` event on init (with reason `initValue`) even if value is empty
   - Added Options `disabled` & `readOnly` (attrs `[disabled]` & `[readonly]`) accept string (reason) that is shown via tooltip

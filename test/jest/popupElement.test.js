@@ -800,6 +800,45 @@ describe("popupElement", () => {
     expect(el.$options.animation).toBe(PopupAnimations.drawer);
   });
 
+  test("$options.animation: drawer + $centerScreen", async () => {
+    // WARN: there is only integration check. For full animation tests see helpers/animateDropdown
+    const { nextFrame } = h.useFakeAnimation();
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(100);
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(50);
+    h.setupCssCompute(el, { transitionDuration: "0.3s", animationDuration: "0.3s" });
+    el.$options.animation = PopupAnimations.drawer;
+    el.$options.placement = [WUPPopupElement.$placements.$centerScreen];
+    await h.wait(); // options is async
+    expect(el.$isOpened).toBe(true);
+
+    // moving from top to center (like modal) with keeping position of popup
+    await nextFrame();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(250px, 175px) translateY(-150%); opacity: 0;" position="center" w-animation="drawer" show=""></wup-popup>"`
+    );
+    await nextFrame(9);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(250px, 175px) translateY(-74.99999999999999%); opacity: 0.5000000000000001;" position="center" w-animation="drawer" show=""></wup-popup>"`
+    );
+    await nextFrame(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(250px, 175px);" position="center" w-animation="drawer" show=""></wup-popup>"`
+    );
+
+    // moving back on close
+    el.$close();
+    await nextFrame(9);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(250px, 175px) translateY(-66.6666666666667%); opacity: 0.5555555555555554;" position="center" w-animation="drawer"></wup-popup>"`
+    );
+    await nextFrame(10);
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style="transform: translate(250px, 175px);" position="center" w-animation="drawer"></wup-popup>"`
+    );
+  });
+
   test("$options.animation: stack", async () => {
     // WARN: there is only code coverage. For full animation tests see helpers/animateStack
     const { nextFrame } = h.useFakeAnimation();
@@ -1131,6 +1170,59 @@ describe("popupElement", () => {
     );
   });
 
+  test("position: $centerScreen", () => {
+    expect(el.$isOpened).toBe(true); // checking prev-state
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(100);
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(50);
+
+    const expectIt = (placement) => {
+      el.$options.placement = placement;
+      jest.advanceTimersByTime(10);
+      // eslint-disable-next-line jest/valid-expect
+      return expect(el.outerHTML);
+    };
+
+    // placed at the center of fitElement ignoring target
+    expectIt([WUPPopupElement.$placements.$centerScreen]).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(250px, 175px);" position="center" show=""></wup-popup>"`
+    );
+    // skipped if previous rule fits
+    expectIt([
+      WUPPopupElement.$placements.$top.$start,
+      WUPPopupElement.$placements.$centerScreen,
+    ]).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(140px, 50px);" position="top" show=""></wup-popup>"`
+    );
+
+    // popup is bigger than fitElement
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(500);
+    expectIt([WUPPopupElement.$placements.$centerScreen]).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="max-height: 400px; transform: translate(250px, 0px);" position="center" show=""></wup-popup>"`
+    );
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(700);
+    el.$refresh(); // otherwise position isn't re-calculated because target isn't moved
+    expectIt([WUPPopupElement.$placements.$centerScreen]).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="max-width: 600px; max-height: 400px; transform: translate(0px, 0px);" position="center" show=""></wup-popup>"`
+    );
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(100);
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(50);
+
+    // arrow is hidden
+    el.$options.arrowEnable = true;
+    expectIt([WUPPopupElement.$placements.$centerScreen]);
+    expect(el.$refArrow.style.display).toBe("none");
+    expectIt([WUPPopupElement.$placements.$top.$start]);
+    expect(el.$refArrow.style.display).toBe("");
+    el.$options.arrowEnable = false;
+
+    // fitElement is partially out of viewport: placed at the center of visible part
+    h.setupLayout(document.body, { x: -20, y: -100, h: 400, w: 600 });
+    delete document.body._savedBoundingRect; // because getBoundingInternalRect is cached
+    expectIt([WUPPopupElement.$placements.$centerScreen]).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(240px, 125px);" position="center" show=""></wup-popup>"`
+    );
+  });
+
   test("position alt", async () => {
     // checking alt when no space
     expect(el.$isOpened).toBe(true); // checking prev-state
@@ -1437,6 +1529,10 @@ describe("popupElement", () => {
     moveTo(100, bodyRect.top - trgRect.height / 2);
     expectIt(WUPPopupElement.$placements.$right.$middle).toMatchInlineSnapshot(
       `"<wup-popup open="" style="transform: translate(200px, -25px); clip-path: inset(25px -100vmax -100vmax -100vmax);" position="right" w-animation="stack" show=""></wup-popup>"`
+    );
+    // fitElement is infinite at the top but $centerScreen is placed inside viewport
+    expectIt(WUPPopupElement.$placements.$centerScreen).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="clip-path: inset(-175px -100vmax -100vmax -100vmax); transform: translate(270px, 175px);" position="center" w-animation="stack" show=""></wup-popup>"`
     );
 
     // partially hidden at the bottom

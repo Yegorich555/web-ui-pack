@@ -506,13 +506,10 @@ export default class WUPPopupElement<
       .filter((v) => (v as WUP.Popup.Place.AlignFunc).$adjust)
       .map((v) => (v as WUP.Popup.Place.AlignFunc).$adjust);
 
-    const otherRules = Object.keys(PopupPlacements)
-      .filter(
-        (k) =>
-          !this._opts.placement.includes(PopupPlacements[k].$middle) &&
-          !adjustRules.includes(PopupPlacements[k].$middle.$adjust)
-      )
-      .map((k) => PopupPlacements[k].$middle.$adjust);
+    // WARN: $centerScreen is skipped because it's applied only if user pointed it
+    const otherRules = [PopupPlacements.$top, PopupPlacements.$bottom, PopupPlacements.$left, PopupPlacements.$right]
+      .filter((p) => !this._opts.placement.includes(p.$middle) && !adjustRules.includes(p.$middle.$adjust))
+      .map((p) => p.$middle.$adjust);
 
     // init array of possible solutions to position + align popup
     this.#state!.placements = [
@@ -903,7 +900,9 @@ export default class WUPPopupElement<
       }
       !isOk && console.error(`${this.tagName}. Impossible to place without overflow`, this);
 
-      if (this.$refArrow) {
+      if (this.$refArrow && pos.attr === "center") {
+        this.$refArrow.style.display = "none"; // arrow doesn't make sense if popup isn't attached to target
+      } else if (this.$refArrow) {
         // change arrowSize if it's bigger than popup
         const checkSize = (relatedSize: number): void => {
           // if we have border-radius of popup we need to include in offset to prevent overflow between arrow and popup
@@ -1017,6 +1016,5 @@ export default class WUPPopupElement<
 customElements.define(tagName, WUPPopupElement);
 // manual testcase: show as dropdown & scroll parent - blur effect can appear
 
-// NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore
 // NiceToHave 2 popups can overflow each other: need option to try place several popups at once without overflow. Example on wup-pwd page: issue with 2 errors
 // NiceToHave animation.default animates to opacity: 1 but need to animate to opacityFromCss
