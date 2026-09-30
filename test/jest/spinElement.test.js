@@ -7,6 +7,7 @@ import {
   spinUseDotRing,
   spinUseSpliceRing,
   spinUseHash,
+  spinSetStyle,
 } from "web-ui-pack/spinElement";
 import * as h from "../testHelper";
 
@@ -1114,5 +1115,23 @@ describe("spinElement", () => {
         animation: var(--spin-t) ease 0s infinite normal none running WUP-SPIN-4-2;
       }</style>"
     `);
+  });
+
+  test("style > spinSetStyle with getter", () => {
+    document.head.firstChild.textContent = "";
+    document.body.innerHTML = "";
+    class SpinH extends WUPSpinElement {}
+    customElements.define("spin-h", SpinH);
+    const getStyle = jest.fn(() => ":host > div { color: red; }");
+    spinSetStyle(SpinH, 3, getStyle);
+    expect(getStyle).not.toBeCalled(); // getter is called only on render
+    document.body.appendChild(document.createElement("spin-h"));
+    jest.advanceTimersToNextTimer();
+
+    expect(getStyle).toBeCalled();
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<spin-h style="position: absolute; transform: translate(300px,200px);" aria-label="Loading. Please wait"><div></div><div></div><div></div><div fade="" style="transform: translate(-300px,-200px); width: 600px; height: 400px;"></div></spin-h>"`
+    );
+    expect(document.head.firstChild.textContent).toMatch(/\} SPIN-H > div \{ color: red; \}$/);
   });
 });
