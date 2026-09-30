@@ -8,7 +8,7 @@ import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
 import WUPBaseComboControl from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
-import WUPCalendarControl from "./calendar";
+import WUPCalendarControl, { PickersEnum } from "./calendar";
 import WUPTimeControl from "./time";
 
 WUPCalendarControl.$use();
@@ -28,7 +28,7 @@ declare global {
     interface NewOptions {
       /** String representation of displayed date (enables mask, - to disable mask set $options.mask="");
        * @defaultValue localeInfo.date
-       * @example `yyyy-mm-dd` or `dd/mm/yyyy`
+       * @example `yyyy-mm-dd` or `dd/mm/yyyy`; `yyyy-mm` to select only year & month; `yyyy` to select only year (see option `endWith`)
        * @tutorial Troubleshooting
        * * with changing $options.format need to change/reset mask/maskholder also */
       format: WUPDateFormat | (string & {});
@@ -52,6 +52,11 @@ declare global {
       /** Sets minWidth of popup-menu 100% of control width (option `minWidthByTarget` of `<wup-popup/>`)
        * @defaultValue false */
       popupMinWidthByTarget: boolean;
+      /** Picker where user selects value (lower pickers aren't rendered);
+       * @defaultValue based on format: `yyyy-mm` => PickersEnum.Month, `yyyy` => PickersEnum.Year, otherwise PickersEnum.Day
+       * @tutorial
+       * * options `min`, `max` & `exclude` are compared by month/year for PickersEnum.Month/Year */
+      endWith: PickersEnum | null;
     }
     interface JSXProps<C = WUPDateControl>
       extends WUP.BaseCombo.JSXProps<C>,
@@ -135,6 +140,7 @@ export default class WUPDateControl<
     m.max = { type: AttributeTypes.parsedObject };
     m.firstweekday = { type: AttributeTypes.number };
     m.startwith = { type: AttributeTypes.string };
+    m.endwith = { type: AttributeTypes.string };
     m.sync = { type: AttributeTypes.selector };
     return m;
   }
@@ -143,13 +149,13 @@ export default class WUPDateControl<
     // debounceMs: 500,
     validationRules: inheritDefaults(WUPBaseComboControl.$defaults.validationRules, {
       min: (v, setV, c) =>
-        (v === undefined || dateCompareWithoutTime(v, setV, (c as WUPDateControl)._opts.utc) === -1) &&
+        (v === undefined || (c as WUPDateControl).compareDates(v, setV) === -1) &&
         __wupln(`Min value is ${(c as WUPDateControl).valueToInput(setV)}`, "validation"),
       max: (v, setV, c) =>
-        (v === undefined || dateCompareWithoutTime(v, setV, (c as WUPDateControl)._opts.utc) === 1) &&
+        (v === undefined || (c as WUPDateControl).compareDates(v, setV) === 1) &&
         __wupln(`Max value is ${(c as WUPDateControl).valueToInput(setV)}`, "validation"),
       exclude: (v, setV, c) =>
-        (v === undefined || setV.some((d) => dateCompareWithoutTime(v, d, (c as WUPDateControl)._opts.utc) === 0)) &&
+        (v === undefined || setV.some((d) => (c as WUPDateControl).compareDates(v, d) === 0)) &&
         __wupln(`This value is disabled`, "validation"),
     }),
     format: "",
@@ -204,6 +210,27 @@ export default class WUPDateControl<
     return dateToString(v, `yyyy-MM-dd${this._opts.utc ? "Z" : ""}`);
   }
 
+  /** Returns picker where user selects value: $options.endWith or based on $options.format */
+  protected get endWith(): PickersEnum {
+    const { endWith, format } = this._opts;
+    if (endWith != null) return endWith;
+    if (/d/i.test(format)) return PickersEnum.Day;
+    return /m/i.test(format) ? PickersEnum.Month : PickersEnum.Year;
+  }
+
+  /** Compares dates without time by year/month/day according to `endWith` (see $options.endWith)
+   * @returns 1, -1 or 0 */
+  protected compareDates(a: Date, b: Date): number {
+    const p = this.endWith;
+    const { utc } = this._opts;
+    if (!p) {
+      return dateCompareWithoutTime(a, b, utc);
+    }
+    const u = utc ? "UTC" : "";
+    const val = (v: Date): number => v[`get${u}FullYear`]() * 12 + (p === PickersEnum.Month ? v[`get${u}Month`]() : 0);
+    return Math.sign(val(a) - val(b));
+  }
+
   protected override gotChanges(propsChanged: Array<keyof WUP.Date.Options> | null): void {
     WUPCalendarControl.prototype.gotChangesSharable.call(this);
 
@@ -256,6 +283,7 @@ export default class WUPDateControl<
     el.$refInput = this.$refInput;
     el.$options.validations = this.validations!.required ? { required: true } : undefined;
     el.$options.startWith = this._opts.startWith;
+    el.$options.endWith = this.endWith;
     el.$options.exclude = this._opts.exclude;
     el.$options.max = this._opts.max;
     el.$options.min = this._opts.min;
@@ -416,5 +444,4 @@ export default class WUPDateControl<
 
 customElements.define(tagName, WUPDateControl);
 // NiceToHave: role 'spinbutton" + changing input value via scrolling: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/spinbutton_role
-// NiceToHave: allowYear, allowMonth, allowDays based on format: "YYYY-MM" - only for selection year & month
 // NiceToHave: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes

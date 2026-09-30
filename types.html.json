@@ -118,6 +118,21 @@
           ]
         },
         {
+          "name": "w-endwith",
+          "description": "Picker where user selects value (lower pickers aren't rendered); point `month` to select only year & month (value is the 1st day of month) @defaultValue `day`",
+          "values": [
+            {
+              "name": "year"
+            },
+            {
+              "name": "month"
+            },
+            {
+              "name": "day"
+            }
+          ]
+        },
+        {
           "name": "w-min",
           "description": "User can't select date less than min; format `yyyy-MM-dd`"
         },
@@ -546,6 +561,21 @@
             },
             {
               "name": "2012-05-24"
+            }
+          ]
+        },
+        {
+          "name": "w-endwith",
+          "description": "Picker where user selects value (lower pickers aren't rendered) @defaultValue based on [w-format]: `yyyy-mm` => `month`, `yyyy` => `year`, otherwise `day`",
+          "values": [
+            {
+              "name": "year"
+            },
+            {
+              "name": "month"
+            },
+            {
+              "name": "day"
             }
           ]
         },

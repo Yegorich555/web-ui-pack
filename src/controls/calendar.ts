@@ -61,8 +61,16 @@ declare global {
        * * point "2012" to start from year2012
        * * point "2012-05" to start from month5 year2012
        * * point "2012-05-02" to start from day2 month5 year2012
-       * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here) */
+       * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here)
+       * * pickers lower than option `endWith` are skipped */
       startWith: PickersEnum | string | null;
+      /** Picker where user selects value (lower pickers aren't rendered);
+       * @defaultValue PickersEnum.Day
+       * @tutorial
+       * * point `PickersEnum.Month` to select only year & month: value is the 1st day of month
+       * * point `PickersEnum.Year` to select only year: value is the 1st January
+       * * option `exclude` disables the whole month/year if it contains any excluded day */
+      endWith: PickersEnum | null;
       /** Dates that user can't choose (disabled dates) */
       exclude: Date[] | null;
     }
@@ -79,6 +87,8 @@ declare global {
        * * point "2012-05-02" to start from day2 month5 year2012
        * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here) */
       "w-startWith"?: "year" | "month" | "day" | string;
+      /** Picker where user selects value (lower pickers aren't rendered); point `month` to select only year & month */
+      "w-endWith"?: "year" | "month" | "day";
       /** User can't select date less than min; format yyyy-MM-dd */
       "w-min"?: string;
       /** User can't select date more than max; format yyyy-MM-dd  */
@@ -126,6 +136,13 @@ const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) 
   el,
   tag
 ) => el.appendChild(document.createElement(tag));
+
+/** Map attribute value to picker */
+const pickersMap = new Map([
+  ["year", PickersEnum.Year],
+  ["month", PickersEnum.Month],
+  ["day", PickersEnum.Day],
+]);
 
 /** Form-control represented by date picker
  * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/calendar}
@@ -212,6 +229,7 @@ export default class WUPCalendarControl<
     m.max = { type: AttributeTypes.parsedObject };
     m.firstweekday = { type: AttributeTypes.number };
     m.startwith = { type: AttributeTypes.string };
+    m.endwith = { type: AttributeTypes.string };
     return m;
   }
 
@@ -221,6 +239,7 @@ export default class WUPCalendarControl<
     utc: true,
     firstWeekDay: null,
     startWith: null,
+    endWith: null,
     min: null,
     max: null,
     exclude: null,
@@ -328,6 +347,7 @@ export default class WUPCalendarControl<
 
   /** Called when need set/change day/month/year picker */
   protected async changePicker(utcVal: Date, pickerNext: PickersEnum): Promise<void> {
+    pickerNext = Math.max(pickerNext, this._opts.endWith ?? PickersEnum.Day); // lower pickers aren't allowed
     await this.#clearPicker?.call(this, pickerNext - this._picker > 0);
     this._picker = pickerNext;
 
@@ -502,19 +522,22 @@ export default class WUPCalendarControl<
         v.setUTCMonth(v.getUTCMonth() + n);
         return v;
       },
-      onItemClick: ({ target }, v) => {
-        this.selectItem(target);
-        let dt = new Date(v);
-        if (!this._opts.utc) {
-          dt = new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
-        }
-        const prev = this.$value || this.$initValue;
-        prev && dateCopyTime(dt, prev, !!this._opts.utc);
-        this.setValue(dt as ValueType, SetValueReasons.userSelect);
-        this.$ariaSpeak(this.$refInput.value);
-        // this.focusItem(target);
-      },
+      onItemClick: ({ target }, v) => this.selectDate(target, new Date(v)),
     };
+  }
+
+  /** Called when user selects item on the last picker (see $options.endWith) */
+  protected selectDate(item: HTMLElement, utcVal: Date): void {
+    this.selectItem(item);
+    let dt = utcVal;
+    if (!this._opts.utc) {
+      dt = new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
+    }
+    const prev = this.$value || this.$initValue;
+    prev && dateCopyTime(dt, prev, !!this._opts.utc);
+    this.setValue(dt as ValueType, SetValueReasons.userSelect);
+    this.$ariaSpeak(this.$refInput.value);
+    // this.focusItem(item);
   }
 
   /** Returns result to render month picker */
@@ -562,8 +585,10 @@ export default class WUPCalendarControl<
         v.setUTCFullYear(v.getUTCFullYear() + n);
         return v;
       },
-      onItemClick: (_e, v) =>
-        this.changePicker(new Date(Date.UTC(Math.floor(v / pageSize), v % pageSize, 1)), PickersEnum.Day),
+      onItemClick: ({ target }, v) => {
+        const dt = new Date(Date.UTC(Math.floor(v / pageSize), v % pageSize, 1));
+        this._opts.endWith === PickersEnum.Month ? this.selectDate(target, dt) : this.changePicker(dt, PickersEnum.Day);
+      },
     };
   }
 
@@ -601,7 +626,12 @@ export default class WUPCalendarControl<
         v.setUTCFullYear(v.getUTCFullYear() + n * pageSize);
         return v;
       },
-      onItemClick: (_e, v) => this.changePicker(new Date(Date.UTC(v, 0)), PickersEnum.Month),
+      onItemClick: ({ target }, v) => {
+        const dt = new Date(Date.UTC(v, 0));
+        this._opts.endWith === PickersEnum.Year
+          ? this.selectDate(target, dt)
+          : this.changePicker(dt, PickersEnum.Month);
+      },
     };
   }
 
@@ -671,7 +701,7 @@ export default class WUPCalendarControl<
     const years: number[] = [];
 
     // eslint-disable-next-line prefer-const
-    let { min, max, utc } = this._opts;
+    let { min, max, utc, endWith } = this._opts;
     min = this.normalizeToUTC(min);
     max = this.normalizeToUTC(max);
 
@@ -699,11 +729,12 @@ export default class WUPCalendarControl<
           if (ex[i + 1] >= nextM || i === last) {
             const cnt = i - iStart + 1;
             const total = new Date(y, m + 1, 0).getDate(); // WARN: convert to UTC is useless
+            // when user selects month/year then any excluded day disables the whole month/year
             const hasEnabled =
-              (ex[i] as unknown as number) > from && cnt !== total && (ex[i] as unknown as number) < to;
+              !endWith && (ex[i] as unknown as number) > from && cnt !== total && (ex[i] as unknown as number) < to;
             if (!hasEnabled) {
               months.push(y * 12 + m);
-              ++mCnt === 12 && years.push(y);
+              ++mCnt === (endWith === PickersEnum.Year ? 1 : 12) && years.push(y);
             }
             if (i !== last) {
               break;
@@ -808,9 +839,10 @@ export default class WUPCalendarControl<
   setInputValue(v: ValueType | undefined | null): void {
     if (v) {
       const key = this._opts.utc ? "UTC" : "";
-      // prettier-ignore
-      const {namesMonth} = localeInfo
-      this.$refInput.value = `${v[`get${key}Date`]()} ${namesMonth[v[`get${key}Month`]()]} ${v[`get${key}FullYear`]()}`;
+      const p = this._opts.endWith;
+      const d = p ? "" : `${v[`get${key}Date`]()} `;
+      const m = p === PickersEnum.Year ? "" : `${localeInfo.namesMonth[v[`get${key}Month`]()]} `;
+      this.$refInput.value = `${d}${m}${v[`get${key}FullYear`]()}`;
     } else {
       this.$refInput.value = "";
     }
@@ -879,26 +911,28 @@ export default class WUPCalendarControl<
     }
     const isNeedRecalc =
       propsChanged &&
-      (["min", "max", "exclude", "utc"] as Array<keyof WUP.Calendar.Options>).some((a) => propsChanged.includes(a));
+      (["min", "max", "exclude", "utc", "endWith"] as Array<keyof WUP.Calendar.Options>).some((a) =>
+        propsChanged.includes(a)
+      );
     if (!propsChanged || isNeedRecalc) {
       this.#disabled = this.calcDisabled();
     }
-    isNeedRecalc && this.$refreshPicker();
+    if (isNeedRecalc) {
+      this.$refreshPicker();
+      this.setInputValue(this.$value); // text depends on utc & endWith
+    }
   }
 
   gotChangesSharable(): void {
     this._opts.firstWeekDay ??= (this.constructor as typeof WUPCalendarControl).$defaults.firstWeekDay;
 
-    const attr = this.getAttribute("w-startwith");
+    let attr = this.getAttribute("w-startwith");
     if (attr != null) {
-      // prettier-ignore
-      switch (attr.toLowerCase()) {
-        case "year": this._opts.startWith = PickersEnum.Year; break;
-        case "month": this._opts.startWith = PickersEnum.Month; break;
-        case "day": this._opts.startWith = PickersEnum.Day; break;
-        case "": this._opts.startWith = null; break;
-        default: this._opts.startWith = attr; break;
-      }
+      this._opts.startWith = attr ? pickersMap.get(attr.toLowerCase()) ?? attr : null;
+    }
+    attr = this.getAttribute("w-endwith");
+    if (attr != null) {
+      this._opts.endWith = pickersMap.get(attr.toLowerCase()) ?? null;
     }
   }
 

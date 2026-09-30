@@ -34,6 +34,7 @@ export default function DateControlView() {
         "Saves hours. So $value='2022-11-06 23:50' & click on '20 Dec' => '2022-12-20 23:50'",
         "Localized. Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
         "Smart mask. Don't worry about separators (it adds automatically); need only type numbers",
+        "Select only month or year according to format: 'yyyy-mm' or 'yyyy' (see $options.endWith)",
       ]}
     >
       <wup-form
@@ -61,6 +62,10 @@ export default function DateControlView() {
           <wup-date w-name="required" w-validations="window.myDateValidations" />
         </div>
         <wup-date w-name="another" w-label="Another format: yyyy-m-d" w-format="yyyy-m-d" />
+        <div className={stylesCom.group}>
+          <wup-date w-name="month" w-label="Only month: mm/yyyy" w-format="mm/yyyy" w-initValue="2022-03-01" />
+          <wup-date w-name="year" w-label="Only year: yyyy" w-format="yyyy" />
+        </div>
         <wup-date //
           w-name="saveUrl"
           w-label="With saving to URL (see $options.storageKey & storage)"

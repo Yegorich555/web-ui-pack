@@ -12,6 +12,7 @@ import localeInfo from "../objects/localeInfo";
  * "yyyy-MM-ddThh:mm:ss.fffZ" // ISOstring
  * "MMM d/yyyy, hh:mm A" => "Apr 23, 04:09 PM" (depends on localeInfo.namesMonthShort)
  * "YYYYMMDD hhmmss" etc.
+ * "YYYY-MM" => "2022-04" // missed day or month is 1 => "2022-04-01"
  * @tutorial Troubleshooting
  * * AM PM in the middle isn't supported (only at the end): use  'hh:mm, d/m/yyyy A' instead 'hh:mm A, d/m/yyyy'
  */
@@ -53,7 +54,8 @@ export default function dateFromString(
     vLast -= 2;
   }
 
-  const r = { y: 0, M: 0, d: 0, h: 0, m: 0, s: 0, f: 0 };
+  // month & day missed in format are 1: 'YYYY-MM' => 1st day of month
+  const r = { y: 0, M: format.includes("M") ? 0 : 1, d: /d/i.test(format) ? 0 : 1, h: 0, m: 0, s: 0, f: 0 };
 
   let vi = 0;
   let yCnt = 0;

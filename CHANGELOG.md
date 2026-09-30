@@ -21,6 +21,7 @@
   - Added arg **sheetIndex** for cellCallback
   - Added numberFormat into settings
   - Added dateFormat types into TS
+- helper [dateFromString](src/helpers/dateFromString.ts). _Format without day or month (`YYYY-MM`) returns the 1st day/month instead of throwing `Out of range`_
 
 ### New Features
 
@@ -37,6 +38,8 @@
 -**Combobox controls** (Select, SelectMany, Date, Time).
   - Added options **popupOffsetFitElement** & **popupMinWidthByTarget** to configure popup-menu (via `$defaults` or per element)
   - Added option **menuEscRollback** to rollback value to that was before menu opened on pressing Escape
+- [CalendarControl](src/controls/calendar.ts). Added option **endWith** to select only year & month (`endWith: PickersEnum.Month`) or only year
+- [DateControl](src/controls/date.ts). Allowed to select only year & month for format without day (`yyyy-mm`) or only year for `yyyy` (see option **endWith**)
 
 ---
 

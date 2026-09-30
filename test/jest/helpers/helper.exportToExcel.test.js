@@ -359,7 +359,7 @@ describe("helper.exportToExcel", () => {
     const mapping = Array.from({ length: 28 }, (_v, i) => ({ propName: `c${i}`, headerText: `${i}`, width: 3 }));
     await exportToExcel([{ name: "Letters", data: [{ c25: "z", c26: "aa", c27: "ab" }], mapping }]);
     // WARN: no snapshot here: 28 columns produce a huge & useless xml
-    // NiceToKnow: a cell of the default format has no `s` at all (see the 'fonts' tests below)
+    // WARN: a cell of the default format has no `s` at all (see the 'fonts' tests below)
     expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="Z2" s="1" t="inlineStr"><is><t>z</t></is></c>`);
     expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AA2" s="1" t="inlineStr"><is><t>aa</t></is></c>`);
     expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AB2" s="1" t="inlineStr"><is><t>ab</t></is></c>`);
