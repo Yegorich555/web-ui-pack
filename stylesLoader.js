@@ -3,6 +3,8 @@ const fs = require("fs");
 const path = require("path");
 const sass = require("sass");
 const postcss = require("postcss");
+const postcssScss = require("postcss-scss");
+const prettier = require("prettier");
 const { plugins } = require("./postcss.config");
 
 /** `node ./stylesLoader.js --compress`: injected css is minified; otherwise it's formatted as in scss (webpack loader as well) */
@@ -159,6 +161,24 @@ async function injectIntoDist() {
   );
 }
 
+/** Scss-files for end-users (mixins): copied into dist with applied postcss plugins (vendor prefixes etc.) */
+const scssForDist = ["styles.scss"];
+
+/** Copies {@link scssForDist} from `src` into `dist` processed by postcss plugins in the same way as for compiled css */
+async function processScssIntoDist() {
+  await Promise.all(
+    scssForDist.map(async (f) => {
+      const from = path.resolve(__dirname, "src", f);
+      const to = path.resolve(__dirname, "dist", f);
+      const result = await postcss(plugins).process(fs.readFileSync(from, "utf8"), { from, syntax: postcssScss });
+      result.warnings().forEach((w) => console.warn(w.toString()));
+      const options = { ...prettier.resolveConfig.sync(from), filepath: from }; // plugins don't care about indents of wrapped rules
+      fs.writeFileSync(to, prettier.format(result.css, options));
+      console.log(`Styles processed: ${path.relative(__dirname, from)} => ${path.relative(__dirname, to)}`);
+    })
+  );
+}
+
 /** Webpack loader: injects styles from `{fileName}.scss` into `{fileName}.ts` if scss-file exists */
 module.exports = function stylesLoader(code) {
   const done = this.async();
@@ -177,7 +197,7 @@ module.exports = function stylesLoader(code) {
 };
 
 if (require.main === module) {
-  injectIntoDist().catch((err) => {
+  Promise.all([injectIntoDist(), processScssIntoDist()]).catch((err) => {
     console.error(err);
     process.exitCode = 1;
   });

@@ -25,5 +25,4 @@ if (!fs.existsSync(out)) {
 
   fs.copyFileSync("./tsconfig.dist.json", path.resolve(out, "./tsconfig.json"));
   fs.copyFileSync("./src/types.d.ts", path.resolve(out, "./types.d.ts"));
-  fs.copyFileSync("./src/styles.scss", path.resolve(out, "./styles.scss"));
 }
