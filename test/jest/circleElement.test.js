@@ -502,9 +502,40 @@ describe("circleElement", () => {
     await h.wait();
     expect(onTooltip).toBeCalledTimes(1); // only 1 listener must be
 
+    el.useTooltip(true);
+    el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait();
+    el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait();
+    expect(onTooltip).toBeCalledTimes(2); // listener isn't duplicated on 2nd call
+    const getPopups = () => Array.prototype.slice.call(el.querySelectorAll("wup-popup")).map((p) => p.innerHTML);
+    expect(getPopups()).toStrictEqual(["Item 2; 12"]);
+
+    // hover on popup is skipped
+    onTooltip.mockClear();
+    el.querySelector("wup-popup").dispatchEvent(new MouseEvent("mouseenter"));
+    await h.wait();
+    expect(onTooltip).not.toBeCalled();
+    expect(getPopups()).toStrictEqual(["Item 2; 12"]);
+
+    // moving to another segment shows its tooltip at once
+    el.$refItems.children[0].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(1);
+    expect(onTooltip).toBeCalledTimes(1);
+    expect(getPopups()).toStrictEqual(["Item 2; 12", "Item 1; 100"]); // prev is closing
+    await h.wait();
+    expect(getPopups()).toStrictEqual(["Item 1; 100"]);
+
+    // moving to segment without tooltip closes it
     onTooltip.mockClear();
     el.$refItems.children[2].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     expect(onTooltip).not.toBeCalled(); // because no tooltip
+    await h.wait();
+    expect(getPopups()).toStrictEqual([]);
+    // and moving back to segment with tooltip opens it (the group isn't re-entered)
+    el.$refItems.children[0].dispatchEvent(new MouseEvent("mouseenter"));
+    await h.wait();
+    expect(getPopups()).toStrictEqual(["Item 1; 100"]);
 
     // dispose listener
     onTooltip.mockClear();

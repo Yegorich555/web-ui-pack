@@ -35,7 +35,7 @@ export default class PopupListener {
   ) {
     this.options = { ...PopupListener.$defaults, ...options };
     const t = this.options.target;
-    if (!(t instanceof HTMLElement)) {
+    if (!(t instanceof HTMLElement || t instanceof SVGElement)) {
       throw new Error("WUP-Popup. Target is required");
     }
     if (!t.isConnected) {

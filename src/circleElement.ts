@@ -1,6 +1,7 @@
 import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
-import { PopupOpenCases } from "./popup/popupElement.types";
+import { PopupCloseCases, PopupOpenCases } from "./popup/popupElement.types";
+import PopupListener from "./popup/popupListener";
 import animate from "./helpers/animate";
 import { mathScaleValue, mathRotate } from "./helpers/math";
 import { parseMsTime } from "./helpers/styleHelpers";
@@ -299,6 +300,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   _animation?: WUP.PromiseCancel<boolean>;
   protected renderItems(skipAnim?: boolean): void {
     this._animation?.stop(false);
+    this.useTooltip(false);
 
     const angleMin = this._opts.from;
     const angleMax = this._opts.to;
@@ -354,7 +356,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         });
         !skipAnim && (await this._animation.catch().finally(() => delete this._animation));
       }
-      this.useTooltip(hasTooltip);
+      this.useTooltip(hasTooltip && this.$refItems.isConnected); // element can be removed during the animation
     })();
 
     // render/remove label
@@ -430,45 +432,62 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     if (this._tooltipDisposeLst) {
       return;
     }
-    // impossible to use popupListen because it listens for single target but we need per each segment
-    this._tooltipDisposeLst = onEvent(
-      this,
-      "mouseenter", // mouseenter is fired even with touch event (mouseleave fired with touch outside in this case)
-      (e) => {
-        // NiceToHave: rewrite popupListen to use here
-        const t = e.target as WUP.Circle.SVGItem & {
-          _tid?: ReturnType<typeof setTimeout>;
-          _tooltip?: WUPPopupElement;
-        };
-        if (t._hasTooltip) {
-          t._tid && clearTimeout(t._tid); // remove timer for mouseleave
-          t._tid = setTimeout(() => {
-            if (t._tooltip) t._tooltip.$open();
-            else t._tooltip = this.renderTooltip(t);
-          }, this._opts.hoverOpenTimeout);
 
-          onEvent(
-            e.target as HTMLElement,
-            "mouseleave",
-            () => {
-              t._tid && clearTimeout(t._tid); // remove timer for mouseenter
-              t._tid = setTimeout(() => {
-                t._tooltip?.$close().finally(() => {
-                  // popup can be opened when user returns mouse back in a short time
-                  if (t._tooltip && !t._tooltip!.$isOpened) {
-                    t._tooltip!.remove();
-                    t._tooltip = undefined;
-                  }
-                });
-                t._tid = undefined;
-              }, this._opts.hoverCloseTimeout);
-            },
-            { once: true }
-          );
+    let hovered: WUP.Circle.SVGItem | undefined; // segment under the mouse
+    let popup: WUPPopupElement | undefined;
+    const lst = new PopupListener(
+      {
+        target: this.$refItems,
+        openCase: PopupOpenCases.onHover, // mouseenter is fired even with touch event (mouseleave fired with touch outside in this case)
+        hoverOpenTimeout: this._opts.hoverOpenTimeout,
+        hoverCloseTimeout: this._opts.hoverCloseTimeout,
+      },
+      () => {
+        if (!hovered?._hasTooltip) return null;
+        // popup can be closing when user returns mouse back in a short time
+        if (popup?.$options.target === hovered) popup.$open();
+        else popup = this.renderTooltip(hovered);
+        return popup;
+      },
+      () => {
+        const p = popup!;
+        p.$close().finally(() => {
+          if (!p.$isOpened) {
+            p.remove();
+            p === popup && (popup = undefined);
+          }
+        });
+        return true;
+      }
+    );
+
+    // mouseenter isn't bubbled but captured by parent for each segment
+    const r = onEvent(
+      this,
+      "mouseenter",
+      (e) => {
+        if ((e.target as Node).parentNode !== this.$refItems) return; // skip svg, group, popup etc.
+        hovered = e.target as WUP.Circle.SVGItem;
+        if (!lst.openedEl) {
+          lst.handleEvents(e); // group is not re-entered when mouse moves from segment to segment
+        } else if (popup!.$options.target !== hovered) {
+          // show tooltip of another segment at once
+          lst.close(PopupCloseCases.onMouseLeave, e).then(() => lst.open(PopupOpenCases.onHover, e));
         }
       },
       { capture: true, passive: true }
     );
+
+    this._tooltipDisposeLst = () => {
+      r();
+      lst.stopListen();
+      popup?.remove();
+    };
+  }
+
+  protected override dispose(): void {
+    super.dispose();
+    this.useTooltip(false);
   }
 
   /** Called on every changeEvent */
