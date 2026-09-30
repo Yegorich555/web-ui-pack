@@ -849,6 +849,7 @@ describe("control.time", () => {
     await h.wait(1);
     expect(el.$onChange).toBeCalledTimes(1);
     expect(el.$value).toEqual(new WUPTimeObject("15:22"));
+    await el.$openMenu(); // calling open on opened menu must not override value before menu
     expect(isPressKeyPrevented("Escape")).toBe(true);
     await h.wait();
     expect(el.$onChange).toBeCalledTimes(2);

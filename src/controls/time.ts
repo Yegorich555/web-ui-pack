@@ -466,7 +466,11 @@ export default class WUPTimeControl<
     openCase: MenuOpenCases,
     e?: MouseEvent | FocusEvent | null
   ): Promise<WUPPopupElement | null> {
+    const wasOpened = this.$isOpened;
     const r = await super.goOpenMenu(openCase, e);
+    if (!r || wasOpened) {
+      return r; // otherwise #valueBeforeMenu is overridden by value changed via menu
+    }
 
     this.#valueBeforeMenu = this.$value;
     this.#lastInputChanged = false;
