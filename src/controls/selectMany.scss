@@ -1,4 +1,6 @@
 @import "../styles";
+$wup-sort-mixins-only: true; // only mixin wup-sortable is required
+@import "../sortElement";
 
 :root {
   --ctrl-select-item-text: inherit;

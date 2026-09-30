@@ -63,8 +63,12 @@ export default function FAQView() {
             question: "Styles. How to reuse built-in styles",
             answer: (
               <>
-                <i>Some styles (scroll, button submit etc.) are shared and placed in web-ui-pack/styles.js</i>
+                <i>
+                  Some styles (scroll, button submit etc.) are shared and placed in web-ui-pack/styles.js as functions
+                </i>
                 <Code code={codeSharedStyles} />
+                <i>The same styles are placed in web-ui-pack/styles.scss as scss-mixins</i>
+                <Code code={codeSharedStylesScss} />
               </>
             ),
           },
@@ -319,4 +323,26 @@ import { useBuiltinStyle, WUPcssScrollSmall, WUPcssButton } from "web-ui-pack/st
 useBuiltinStyle(WUPcssScrollSmall(".scrolled"));
 // prepend button style for class '.btn' into document.head
 useBuiltinStyle(WUPcssButton(".btn"));
+`;
+
+const codeSharedStylesScss = `scss
+@import "web-ui-pack/styles";
+
+.scrolled {
+  @include wup-scrollSmall;
+}
+.btn {
+  @include wup-button; // primary button
+}
+.btn-secondary {
+  @include wup-button(2); // secondary button via vars --base-btn2-*
+}
+.btn-icon {
+  --icon-img: url("close.svg");
+  @include wup-btnIcon;
+}
+.sr-only {
+  @include wup-hidden; // visually hidden but accessible for screenReaders
+}
+/* also available: wup-icon, wup-menu, wup-iconHover($icon, $size, $color) */
 `;

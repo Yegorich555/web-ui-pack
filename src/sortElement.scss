@@ -1,11 +1,58 @@
 @import "styles";
 
-:root {
-  --sort-active-color: #25a1b6;
-  --sort-active-shadow: #25a1b6;
+/// Dragdrop styles of sortElement: [drag], [drop], [drop-line], [hovered]; vars --sort-active-color, --sort-active-shadow to customize styling
+/// @example :host { @include wup-sortable; }
+/// @see selectMany.scss - it imports the mixin only via `$wup-sort-mixins-only: true; @import "../sortElement";`
+@mixin wup-sortable {
+  [item][drag],
+  [item][drop] {
+    color: var(--sort-active-color);
+    box-shadow: inset 0 0 3px 0 var(--sort-active-shadow);
+    opacity: 0.7;
+  }
+
+  [item][drag] {
+    z-index: 9999;
+    position: fixed;
+    left: 0;
+    top: 0;
+    cursor: grabbing;
+    text-decoration: none;
+    opacity: 0.8;
+
+    &[remove] {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+  }
+
+  [drop-line] {
+    z-index: 9998;
+    position: fixed;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    border-radius: 2px;
+    background: var(--sort-active-color);
+    box-shadow: 0 0 2px 0 var(--sort-active-shadow);
+  }
+
+  &[hovered] {
+    user-select: none;
+  }
 }
 
-:host {
-  display: block;
-  @include wup-sortable;
+// the flag skips styles below when the file is imported only for the mixin above
+$wup-sort-mixins-only: false !default;
+
+@if not $wup-sort-mixins-only {
+  :root {
+    --sort-active-color: #25a1b6;
+    --sort-active-shadow: #25a1b6;
+  }
+
+  :host {
+    display: block;
+    @include wup-sortable;
+  }
 }
