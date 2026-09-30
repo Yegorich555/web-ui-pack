@@ -154,13 +154,16 @@ export default class WUPDropdownElement<
           this.$refPopup.$options[k] = this._opts[k];
         }
       });
+      const p = this.$refPopup;
+      // otherwise popup uses previousElementSibling that isn't 1st element when dropdown has more than 2 children
+      !p.$options.target && !p.hasAttribute("w-target") && (p.$options.target = this.$refTitle);
 
       // WA
       const menu = (this.$refPopup.querySelector("ul,ol,[items]") as HTMLElement) || this.$refPopup;
       menu.id = menu.id || this.#ctr.$uniqueId;
       this.$refMenu = menu;
 
-      const lbl = this.$refTitle;
+      const lbl = p.defineTarget(); // the same element as popup toggles aria-expanded on
       lbl.setAttribute("aria-owns", menu.id);
       lbl.setAttribute("aria-controls", menu.id);
       lbl.setAttribute("aria-haspopup", "listbox");
@@ -176,12 +179,16 @@ export default class WUPDropdownElement<
     super.gotReady();
   }
 
-  /** Custom function to override default `WUPPopupElement.prototype.goClose` */
+  /** Custom function to override default `WUPPopupElement.prototype.goOpen` */
   protected goOpenPopup(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): Promise<boolean> {
-    const p = WUPPopupElement.prototype.goOpen.call(this.$refPopup, openCase, ev);
-    const t = this.$refPopup.$options.target!;
-    t.setAttribute("aria-expanded", true); // NiceToHave: move it to popup side after refactoring ???
-    t.style.zIndex = `${+getComputedStyle(this.$refPopup).zIndex + 2}`; // inc z-index for btn to allow animation-stack works properly
+    const popup = this.$refPopup;
+    const p = WUPPopupElement.prototype.goOpen.call(popup, openCase, ev);
+    // skip if opening is prevented via event $willOpen
+    if (popup.$isOpened) {
+      const t = popup.$options.target!;
+      t.setAttribute("aria-expanded", true);
+      t.style.zIndex = `${+getComputedStyle(popup).zIndex + 2}`; // inc z-index for btn to allow animation-stack works properly
+    }
     return p;
   }
 
@@ -193,12 +200,17 @@ export default class WUPDropdownElement<
     if (closeCase === PopupCloseCases.onPopupClick && !this._opts.closeOnPopupClick) {
       return Promise.resolve(false);
     }
-    const p = WUPPopupElement.prototype.goClose.call(this.$refPopup, closeCase, ev).finally(() => {
-      t.style.zIndex = "";
-      this.removeEmptyStyle.call(t);
+    const popup = this.$refPopup;
+    const t = popup.$options.target!;
+    const p = WUPPopupElement.prototype.goClose.call(popup, closeCase, ev).finally(() => {
+      // skip if closing is prevented or popup is opened again during the closing
+      if (!popup.$isOpened) {
+        t.style.zIndex = "";
+        this.removeEmptyStyle.call(t);
+      }
     });
-    const t = this.$refPopup.$options.target!;
-    t.setAttribute("aria-expanded", false);
+    // skip if closing is prevented via event $willClose
+    (popup.$isClosing || !popup.$isOpened) && t.setAttribute("aria-expanded", false);
     return p;
   }
 }

@@ -181,6 +181,96 @@ describe("dropdownElement", () => {
     expect(el.$refPopup.$isOpened).toBe(false);
   });
 
+  test("prevented opening/closing", async () => {
+    const onWillOpen = jest.fn((e) => e.preventDefault());
+    el.addEventListener("$willOpen", onWillOpen);
+    await h.userClick(trg);
+    await h.wait(1);
+    expect(onWillOpen).toHaveBeenCalledTimes(1);
+    expect(el.$refPopup.$isOpened).toBe(false);
+    expect(trg.getAttribute("aria-expanded")).toBe("false");
+    expect(trg.getAttribute("style")).toBe(null);
+
+    el.removeEventListener("$willOpen", onWillOpen);
+    await h.userClick(trg);
+    await h.wait(1);
+    expect(el.$refPopup.$isOpened).toBe(true);
+    expect(trg.getAttribute("aria-expanded")).toBe("true");
+    expect(trg.style.zIndex).toBe("2");
+
+    const onWillClose = jest.fn((e) => e.preventDefault());
+    el.addEventListener("$willClose", onWillClose);
+    await h.userClick(trg);
+    await h.wait(1);
+    expect(onWillClose).toHaveBeenCalledTimes(1);
+    expect(el.$refPopup.$isOpened).toBe(true);
+    expect(trg.getAttribute("aria-expanded")).toBe("true");
+    expect(trg.style.zIndex).toBe("2");
+
+    el.removeEventListener("$willClose", onWillClose);
+    await h.userClick(trg);
+    await h.wait(1);
+    expect(el.$refPopup.$isOpened).toBe(false);
+    expect(trg.getAttribute("aria-expanded")).toBe("false");
+    expect(trg.getAttribute("style")).toBe(null);
+  });
+
+  test("opening during the closing", async () => {
+    await h.userClick(trg);
+    await h.wait(1);
+    expect(el.$refPopup.$isOpened).toBe(true);
+
+    el.$refPopup.$close();
+    expect(trg.getAttribute("aria-expanded")).toBe("false");
+    el.$refPopup.$open();
+    await h.wait(1);
+    expect(el.$refPopup.$isOpened).toBe(true);
+    expect(trg.getAttribute("aria-expanded")).toBe("true");
+    expect(trg.style.zIndex).toBe("2"); // z-index must not be reset by the closing that is interrupted
+  });
+
+  test("target", async () => {
+    // 1st element is target even when it's not previousSibling of popup
+    document.body.innerHTML = `
+        <wup-dropdown>
+          <button>Click me</button>
+          <span>Some text</span>
+          <wup-popup>
+            <button>A</button>
+          </wup-popup>
+        </wup-dropdown>`;
+    await h.wait(1);
+    el = document.body.querySelector("wup-dropdown");
+    trg = el.firstElementChild;
+    expect(el.$refPopup.$options.target).toBe(trg);
+    expect(trg.getAttribute("aria-controls")).toBe(el.$refMenu.id);
+    expect(el.children[1].outerHTML).toBe("<span>Some text</span>");
+    await h.userClick(trg);
+    await h.wait(1);
+    expect(el.$refPopup.$isOpened).toBe(true);
+    expect(trg.getAttribute("aria-expanded")).toBe("true");
+
+    // attribute [w-target] must be used for aria-attributes
+    document.body.innerHTML = `
+        <button id="ext">Ext</button>
+        <wup-dropdown>
+          <button>Click me</button>
+          <wup-popup w-target="#ext">
+            <button>A</button>
+          </wup-popup>
+        </wup-dropdown>`;
+    await h.wait(1);
+    el = document.body.querySelector("wup-dropdown");
+    trg = document.getElementById("ext");
+    expect(trg.getAttribute("aria-controls")).toBe(el.$refMenu.id);
+    expect(el.firstElementChild.outerHTML).toBe("<button>Click me</button>");
+    await h.userClick(trg);
+    await h.wait(1);
+    expect(el.$refPopup.$isOpened).toBe(true);
+    expect(el.$refPopup.$options.target).toBe(trg);
+    expect(trg.getAttribute("aria-expanded")).toBe("true");
+  });
+
   test("invalid structure", async () => {
     document.body.innerHTML = `
         <wup-dropdown>
