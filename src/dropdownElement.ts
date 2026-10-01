@@ -56,6 +56,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Dropdown element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/dropdown}
        *  @see {@link WUPDropdownElement} */
       [tagName]: WUP.Base.ReactHTML<WUPDropdownElement> & WUP.Dropdown.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -69,6 +70,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Dropdown element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/dropdown}
        *  @see {@link WUPDropdownElement} */
       [tagName]: HTMLAttributes<WUPDropdownElement> & WUP.Dropdown.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

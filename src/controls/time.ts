@@ -88,6 +88,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with timepicker
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/time}
        *  @see {@link WUPTimeControl} */
       [tagName]: WUP.Base.ReactHTML<WUPTimeControl> & WUP.Time.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -101,6 +102,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with timepicker
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/time}
        *  @see {@link WUPTimeControl} */
       [tagName]: HTMLAttributes<WUPTimeControl> & WUP.Time.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

@@ -42,6 +42,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with password input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/password}
        *  @see {@link WUPPasswordControl} */
       [tagName]: WUP.Base.ReactHTML<WUPPasswordControl> & WUP.Password.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -55,6 +56,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with password input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/password}
        *  @see {@link WUPPasswordControl} */
       [tagName]: HTMLAttributes<WUPPasswordControl> & WUP.Password.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

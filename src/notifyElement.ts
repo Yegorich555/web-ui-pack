@@ -72,6 +72,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /**  Notify element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/notify}
        *  @see {@link WUPNotifyElement} */
       [tagName]: WUP.Base.ReactHTML<WUPNotifyElement> & WUP.Notify.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -85,6 +86,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /**  Notify element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/notify}
        *  @see {@link WUPNotifyElement} */
       [tagName]: HTMLAttributes<WUPNotifyElement> & WUP.Notify.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

@@ -44,6 +44,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with radio buttons
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/radio}
        *  @see {@link WUPRadioControl} */
       [tagName]: WUP.Base.ReactHTML<WUPRadioControl> & WUP.Radio.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -57,6 +58,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with radio buttons
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/radio}
        *  @see {@link WUPRadioControl} */
       [tagName]: HTMLAttributes<WUPRadioControl> & WUP.Radio.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

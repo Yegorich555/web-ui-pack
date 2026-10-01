@@ -56,6 +56,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Flexible animated element with ability to place over target element without position relative
+       * @see demo {@link https://yegorich555.github.io/web-ui-pack/spin}
        * @see {@link WUPSpinElement} */
       [tagName]: WUP.Base.ReactHTML<WUPSpinElement> & WUP.Spin.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -69,6 +70,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Flexible animated element with ability to place over target element without position relative
+       * @see demo {@link https://yegorich555.github.io/web-ui-pack/spin}
        * @see {@link WUPSpinElement} */
       [tagName]: HTMLAttributes<WUPSpinElement> & WUP.Spin.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

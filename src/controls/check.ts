@@ -18,6 +18,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with checkbox
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/check}
        *  @see {@link WUPCheckControl} */
       [tagName]: WUP.Base.ReactHTML<WUPCheckControl> & WUP.Check.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -31,6 +32,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with checkbox
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/check}
        *  @see {@link WUPCheckControl} */
       [tagName]: HTMLAttributes<WUPCheckControl> & WUP.Check.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

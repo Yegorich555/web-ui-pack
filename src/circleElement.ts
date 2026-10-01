@@ -124,6 +124,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Arc/circle chart based on SVG
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/circle}
        *  @see {@link WUPCircleElement} */
       [tagName]: WUP.Base.ReactHTML<WUPCircleElement> & WUP.Circle.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -137,6 +138,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Arc/circle chart based on SVG
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/circle}
        *  @see {@link WUPCircleElement} */
       [tagName]: HTMLAttributes<WUPCircleElement> & WUP.Circle.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

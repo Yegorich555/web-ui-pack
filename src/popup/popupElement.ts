@@ -36,6 +36,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /**  Popup element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/popup}
        *  @see {@link WUPPopupElement} */
       [tagName]: WUP.Base.ReactHTML<WUPPopupElement> & WUP.BaseModal.JSXProps & WUP.Popup.Attributes; // add element to tsx/jsx intellisense (react)
     }
@@ -57,6 +58,7 @@ declare module "preact/jsx-runtime" {
     }
     interface IntrinsicElements {
       /**  Popup element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/popup}
        *  @see {@link WUPPopupElement} */
       [tagName]: HTMLAttributes<WUPPopupElement> & WUP.BaseModal.JSXProps & WUP.Popup.Attributes; // add element to tsx/jsx intellisense (preact)
     }

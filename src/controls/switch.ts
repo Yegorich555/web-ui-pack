@@ -29,6 +29,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with toggle button
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/switch}
        *  @see {@link WUPSwitchControl} */
       [tagName]: WUP.Base.ReactHTML<WUPSwitchControl> & WUP.Switch.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -42,6 +43,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with toggle button
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/switch}
        *  @see {@link WUPSwitchControl} */
       [tagName]: HTMLAttributes<WUPSwitchControl> & WUP.Switch.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

@@ -73,6 +73,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with number input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/number}
        *  @see {@link WUPNumberControl} */
       [tagName]: WUP.Base.ReactHTML<WUPNumberControl> & WUP.Number.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -86,6 +87,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with number input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/number}
        *  @see {@link WUPNumberControl} */
       [tagName]: HTMLAttributes<WUPNumberControl> & WUP.Number.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

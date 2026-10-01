@@ -89,6 +89,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with text input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/text}
        *  @see {@link WUPTextControl} */
       [tagName]: WUP.Base.ReactHTML<WUPTextControl> & WUP.Text.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -102,6 +103,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with text input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/text}
        *  @see {@link WUPTextControl} */
       [tagName]: HTMLAttributes<WUPTextControl> & WUP.Text.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

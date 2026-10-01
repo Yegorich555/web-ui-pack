@@ -110,6 +110,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Wrapper of FormHTMLElement that collect values from controls
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/controls}
        *  @see {@link WUPFormElement} */
       [tagName]: WUP.Base.ReactHTML<WUPFormElement> & WUP.Form.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -123,6 +124,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Wrapper of FormHTMLElement that collect values from controls
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/controls}
        *  @see {@link WUPFormElement} */
       [tagName]: HTMLAttributes<WUPFormElement> & WUP.Form.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

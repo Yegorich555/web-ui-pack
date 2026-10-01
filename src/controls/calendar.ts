@@ -113,6 +113,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control represented by date picker
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/calendar}
        *  @see {@link WUPCalendarControl} */
       [tagName]: WUP.Base.ReactHTML<WUPCalendarControl> & WUP.Calendar.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -126,6 +127,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control represented by date picker
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/calendar}
        *  @see {@link WUPCalendarControl} */
       [tagName]: HTMLAttributes<WUPCalendarControl> & WUP.Calendar.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

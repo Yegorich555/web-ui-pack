@@ -99,6 +99,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /**  Modal element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/modal}
        *  @see {@link WUPModalElement} */
       [tagName]: WUP.Base.ReactHTML<WUPModalElement> & WUP.Modal.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -116,6 +117,7 @@ declare module "preact/jsx-runtime" {
     }
     interface IntrinsicElements {
       /**  Modal element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/modal}
        *  @see {@link WUPModalElement} */
       [tagName]: HTMLAttributes<WUPModalElement> & WUP.Modal.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

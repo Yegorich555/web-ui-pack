@@ -93,6 +93,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with dropdown/combobox behavior
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/select}
        *  @see {@link WUPSelectControl} */
       [tagName]: WUP.Base.ReactHTML<WUPSelectControl> & WUP.Select.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -106,6 +107,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with dropdown/combobox behavior
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/select}
        *  @see {@link WUPSelectControl} */
       [tagName]: HTMLAttributes<WUPSelectControl> & WUP.Select.JSXProps; // add element to tsx/jsx intellisense (preact)
     }

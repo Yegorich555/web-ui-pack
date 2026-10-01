@@ -133,6 +133,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Element with sort logic
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/sort}
        *  @see {@link WUPSortElement} */
       [tagName]: WUP.Base.ReactHTML<WUPSortElement> & WUP.Sort.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -150,6 +151,7 @@ declare module "preact/jsx-runtime" {
     }
     interface IntrinsicElements {
       /** Element with sort logic
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/sort}
        *  @see {@link WUPSortElement} */
       [tagName]: HTMLAttributes<WUPSortElement> & WUP.Sort.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
