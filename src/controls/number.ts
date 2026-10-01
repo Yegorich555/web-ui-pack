@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { inheritDefaults } from "../baseElement";
+import { AttributeTypes, inheritDefaults } from "../baseElement";
 import onScroll from "../helpers/onScroll";
 import { mathFixFP, onEvent } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
@@ -33,7 +33,7 @@ declare global {
     }
     interface NewOptions {
       /** String representation of displayed value
-       * @defaultValue no-decimal and separators from localeInfo */
+       * @defaultValue no-decimal and separators from @see {@link localeInfo} */
       format: Format | null;
       /** Multiply value to store value different from text-value
        * @example point 0.01 when need to cast text value `100` to 1 (user sees `100` but stored 1)
@@ -48,14 +48,17 @@ declare global {
     interface Options<T = number, VM extends ValidityMap = ValidityMap> extends TextAnyOptions<T, VM>, NewOptions {}
     interface JSXProps<C = WUPNumberControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** String representation of displayed value
-       * Point Global reference to object @see {@link Format}
+       * Point pattern like `#,##0.00` (@see {@link WUPNumberControl.$parseFormat})
+       * OR global reference to object @see {@link Format}
        * @example
        * ```js
-       * window.format = {};
-       * <wup-number w-items="window.format"></wup-number>
+       * <wup-num w-format="#,##0.0#"></wup-num>
+       * // or
+       * window.format = { maxDecimal: 2 };
+       * <wup-num w-format="window.format"></wup-num>
        * ```
        * @defaultValue no-decimal and separators from localeInfo */
-      "w-format"?: string; // NiceToHave: parse from string
+      "w-format"?: string;
       "w-scale"?: number;
       "w-offset"?: number;
       "w-initValue"?: number;
@@ -168,6 +171,28 @@ export default class WUPNumberControl<
     return v;
   }
 
+  /** Parses pattern like `#,##0.00` into format; actual separators are taken from @see {@link localeInfo}
+   * @tutorial rules
+   * * `,` - enables thousands separator (otherwise disabled)
+   * * `.` - start of decimal part
+   * * `0` after `.` - required decimal digit (minDecimal)
+   * * `#` after `.` - optional decimal digit (maxDecimal)
+   * @example
+   * "#,##0.00" => { minDecimal: 2, maxDecimal: 2 } // 1,234.50
+   * "0.0#" => { sep1000: "", minDecimal: 1, maxDecimal: 2 } // 1234.5
+   * "0.##" => { sep1000: "", minDecimal: 0, maxDecimal: 2 } // 1234 */
+  static $parseFormat(pattern: string): WUP.Number.Format {
+    const [int, dec = ""] = pattern.split(".");
+    const f: WUP.Number.Format = {
+      minDecimal: dec.split("0").length - 1,
+      maxDecimal: dec.length,
+    };
+    if (!int.includes(",")) {
+      f.sep1000 = "";
+    }
+    return f;
+  }
+
   static $stringify(v: number | undefined | null, format: Required<WUP.Number.Format>): string {
     if (v == null) {
       return "";
@@ -209,7 +234,13 @@ export default class WUPNumberControl<
     };
   }
 
-  // WARN usage format #.### impossible because unclear what sepDec/sep100 and what if user wants only limit decimal part
+  override parseAttr(type: AttributeTypes, attrValue: string, propName: string, attrName: string): any {
+    if (propName === "format" && /^[#0,]+(\.[#0]+)?$/.test(attrValue)) {
+      return this.#ctr.$parseFormat(attrValue); // otherwise it's reference to global object
+    }
+    return super.parseAttr(type, attrValue, propName, attrName);
+  }
+
   valueToInput(v: ValueType | undefined, skipScaling?: boolean): string {
     if (v == null) {
       return "";

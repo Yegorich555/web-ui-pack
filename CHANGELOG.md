@@ -47,6 +47,7 @@
   - Added option **menuEscRollback** to rollback value to that was before menu opened on pressing Escape
 - [CalendarControl](src/controls/calendar.ts). Added option **endWith** to select only year & month (`endWith: PickersEnum.Month`) or only year
 - [DateControl](src/controls/date.ts). Allowed to select only year & month for format without day (`yyyy-mm`) or only year for `yyyy` (see option **endWith**)
+- [NumberControl](src/controls/number.ts). Attribute `[w-format]` accepts pattern like `#,##0.0#` (see `WUPNumberControl.$parseFormat`); separators are taken from [localeInfo](src/objects/localeInfo.ts)
 
 ---
 
