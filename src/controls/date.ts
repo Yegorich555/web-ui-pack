@@ -443,5 +443,3 @@ export default class WUPDateControl<
 }
 
 customElements.define(tagName, WUPDateControl);
-// NiceToHave: role 'spinbutton" + changing input value via scrolling: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/spinbutton_role
-// NiceToHave: alt-behavior; when user press Alt allow to use arrowKeys to navigate in input - use logic for all comboboxes
