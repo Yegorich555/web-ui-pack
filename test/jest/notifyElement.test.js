@@ -63,6 +63,8 @@ describe("notifyElement", () => {
       "w-closeonclick": { value: true },
       "w-selfremove": { value: true },
       "w-opencase": { value: 0 },
+      "w-pauseonhover": { value: true },
+      "w-pauseonwinblur": { value: true },
     },
     // onCreateNew: (e) => (e.$options.items = getItems()),
   });
@@ -433,6 +435,14 @@ describe("notifyElement", () => {
     expect(el4.$isPlayed).toBe(true); // no reaction
     await h.wait(1100);
     expect(el4.$isOpened).toBe(false);
+
+    // pauseOnHover: false via attr
+    const el5 = await initNotify(`w-autoclose="1000" w-selfremove="false" w-pauseonhover="false"`);
+    expect(el5.$options.pauseOnHover).toBe(false);
+    el5.dispatchEvent(new MouseEvent("mouseenter"));
+    expect(el5.$isPlayed).toBe(true); // no reaction
+    await h.wait(1100);
+    expect(el5.$isOpened).toBe(false);
   });
 
   test("option: pauseOnWinBlur", async () => {
@@ -471,6 +481,14 @@ describe("notifyElement", () => {
     expect(el4.$isPlayed).toBe(true); // no reaction
     await h.wait(1100);
     expect(el4.$isOpened).toBe(false);
+
+    // pauseOnWinBlur: false via attr
+    const el5 = await initNotify(`w-autoclose="1000" w-selfremove="false" w-pauseonwinblur="false"`);
+    expect(el5.$options.pauseOnWinBlur).toBe(false);
+    window.dispatchEvent(new Event("blur"));
+    expect(el5.$isPlayed).toBe(true); // no reaction
+    await h.wait(1100);
+    expect(el5.$isOpened).toBe(false);
   });
 
   test("option: selfRemove", async () => {

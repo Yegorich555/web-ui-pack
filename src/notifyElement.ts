@@ -114,7 +114,7 @@ export default class WUPNotifyElement<
   #ctr = this.constructor as typeof WUPNotifyElement;
 
   static get observedOptions(): Array<keyof WUP.Notify.Options> {
-    return ["autoClose", "closeOnClick", "openCase", "placement", "selfRemove"];
+    return ["autoClose", "closeOnClick", "openCase", "placement", "selfRemove", "pauseOnHover", "pauseOnWinBlur"];
   }
 
   static get observedAttributes(): Array<string> {

@@ -249,6 +249,8 @@ exports[`notifyElement common tests snapshot of $defaults 2`] = `
   "autoClose",
   "closeOnClick",
   "openCase",
+  "pauseOnHover",
+  "pauseOnWinBlur",
   "placement",
   "selfRemove",
 ]
@@ -259,6 +261,8 @@ exports[`notifyElement common tests snapshot of $defaults 3`] = `
   "w-autoclose",
   "w-closeonclick",
   "w-opencase",
+  "w-pauseonhover",
+  "w-pauseonwinblur",
   "w-placement",
   "w-selfremove",
 ]

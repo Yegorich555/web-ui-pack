@@ -31,6 +31,7 @@
 - [RadioControl](src/controls/radio.ts). _Option **storageKey** doesn't restore value when value is object with numeric `id` (ex. `{ id: 1 }`)_
 - [DropdownElement](src/dropdownElement.ts). _Fix popup position on animation when item is partially visible_
 - [ModalElement](src/modalElement.ts). _Ctrl+A selects behind modal_
+- [NotifyElement](src/notifyElement.ts). _Attributes **w-pauseOnHover** & **w-pauseOnWinBlur** are ignored_
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts)
   - Added prop **isSorted** for headers
   - Added props **freezeRows** & **freezeColumns** for sheets
