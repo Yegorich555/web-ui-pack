@@ -30,6 +30,9 @@
   - Added numberFormat into settings
   - Added dateFormat types into TS
 - helper [dateFromString](src/helpers/dateFromString.ts). _Format without day or month (`YYYY-MM`) returns the 1st day/month instead of throwing `Out of range`_
+- helper [observer](src/helpers/observer.ts)
+  - _`delete observed.prop` fires event but doesn't delete prop_
+  - _`observed.valueOf()` returns function instead of raw object_
 
 ### New Features
 

@@ -281,16 +281,18 @@ function make<T extends object>(
       return isOk;
     },
     deleteProperty(t, prop) {
-      const prev = t[prop as keyof T];
+      const prev = t[prop as keyof T] as any;
+      const isOk = Reflect.deleteProperty(t, prop);
+      if (!isOk) {
+        return false;
+      }
+
       if (!isDateObj && ref.hasListeners()) {
         propChanged({ prev, next: undefined, prop });
       }
 
       // remove parent from this object
-      if (opts?.excludeNested !== true && isRecord(prev)) {
-        const v = proxy[prop as keyof T] as unknown as Observer.Observed;
-        (lstObserved.get(v) as Ref<object>).parentRefs.delete(ref);
-      }
+      lstObserved.get(prev)?.parentRefs.delete(ref);
       return true;
     },
   };
@@ -322,7 +324,7 @@ function make<T extends object>(
   lstObjProxy.set(obj, proxy);
   if (isRecord(obj) && obj.valueOf() === obj) {
     // warn: possible error if object isn't extensible
-    Object.defineProperty(proxy, "valueOf", { value: () => obj.valueOf, enumerable: false });
+    Object.defineProperty(proxy, "valueOf", { value: () => obj, enumerable: false });
   }
 
   // scan recursive

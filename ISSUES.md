@@ -6,7 +6,6 @@ Audit of JSDoc (`src/**`), [README.md](README.md), [CHANGELOG.md](CHANGELOG.md),
 
 Docs (README, CHANGELOG, CODESTYLE, JSDoc) are fixed; JSDoc for the items below describes the intended behavior.
 
-- [ ] [observer.ts:282-294](src/helpers/observer.ts#L282-L294). Trap `deleteProperty` fires the event but never deletes the prop (no `Reflect.deleteProperty`) => after `delete obj.x` the prop is still in raw object
 - [ ] [password.ts:127](src/controls/password.ts#L127). Rule `special` ignores `setV.min`: fails only when count of special chars is 0 => `{ min: 2 }` passes `"a-b"`
 - [ ] [radio.ts:316](src/controls/radio.ts#L316). `valueToStrCompare` returns number for numeric `id` (select.ts wraps with `.toString()`) => `valueFromStorage` (`=== str`) never matches. Fix: `((a.value as any).id ?? a.value).toString()`
 - [ ] [notifyElement.ts:116-117](src/notifyElement.ts#L116-L117). `pauseOnHover` & `pauseOnWinBlur` missed in `observedOptions` => attrs `w-pauseOnHover/w-pauseOnWinBlur` (declared in JSXProps :62-63) are silently ignored
@@ -19,7 +18,6 @@ Docs (README, CHANGELOG, CODESTYLE, JSDoc) are fixed; JSDoc for the items below 
 - [ ] [selectMany.ts:17](src/controls/selectMany.ts#L17). `ValidityMap extends WUP.BaseCombo.ValidityMap` instead of `WUP.Select.ValidityMap` => `minCount/maxCount` missed in TS though inherited at runtime
 - [ ] [select.ts:924](src/controls/select.ts#L924) & [baseCombo.ts:159](src/controls/baseCombo.ts#L159). `readOnlyInput` as number (auto-mode) is treated as plain truthy (skips `", "` delimiter, drops `aria-autocomplete`) even when input is editable
 - [ ] [scrolled.ts:217](src/helpers/scrolled.ts#L217). `Math.min(pi, p.total)` allows `pi === total`; with `cycled` `goTo(total)` from 0 does nothing. Must be `total - 1`
-- [ ] [observer.ts:325](src/helpers/observer.ts#L325). `valueOf` defined as `() => obj.valueOf` returns the function, not the object => `x.valueOf() === y.valueOf()` is `true` for any 2 observed records; assigning a new object with the same content still fires `onPropChanged`
 - [ ] [scrolled.ts:14](src/helpers/scrolled.ts#L14). Type `NextStateRender` is unused
 - [ ] [string.ts:1-4](src/helpers/string.ts#L1-L4). `isSpecialSymbol` uses `c > 123` => `{` counted as letter: `stringLowerCount("a{b") === 3`. Must be `c > 122`
 - [ ] [popupElement.ts:15](src/popup/popupElement.ts#L15). `attachLst` is strong `Map` cleared only by `detach()` => leaks if target removed without `detach()` (JSDoc of `$attach` claims it's not required). Consider `WeakMap` as in sortElement.ts:19
