@@ -1724,13 +1724,20 @@ describe("popupElement", () => {
 
     spy.check(); // checking memory leak
 
-    // checking when canShow = false > popup.removed
+    // checking when opening is prevented > popup.removed
     jest.clearAllMocks();
-    jest.spyOn(WUPPopupElement.prototype, "goOpen").mockImplementationOnce(() => false);
+    const preventOpen = (e) => e.preventDefault();
+    document.addEventListener("$willOpen", preventOpen);
     detach = WUPPopupElement.$attach({ target: trg, openCase: 0b111111, text: "Me" }); // checking without callback
     trg.click();
-    jest.advanceTimersByTime(100); // popup has click-timeouts
+    await h.wait(100); // popup has click-timeouts
     expect(document.body.innerHTML).toMatchInlineSnapshot(`"<div id="targetId">some text</div>"`);
+    document.removeEventListener("$willOpen", preventOpen);
+    trg.click(); // new popup must be created instead of removed one
+    await h.wait();
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<div id="targetId">some text</div><wup-popup open="" style="transform: translate(190px, 100px);" position="top" show="">Me</wup-popup>"`
+    );
     detach();
     spy.check(); // checking memory leak
 
@@ -1826,6 +1833,51 @@ describe("popupElement", () => {
 
     detach();
     spy.check(); // checking memory leak
+  });
+
+  test("opening is prevented during the closing", async () => {
+    h.setupCssCompute((elt) => elt instanceof WUPPopupElement, { transitionDuration: "0.3s" });
+    const preventOpen = (e) => e.preventDefault();
+
+    // with $attach: closing popup must be removed
+    /** @type WUPPopupElement */
+    let popup;
+    const detach = WUPPopupElement.$attach({ target: trg, openCase: PopupOpenCases.onClick, text: "Me" }, (p) => {
+      popup = p;
+    });
+    trg.click(); // to open
+    await h.wait();
+    expect(popup.$isOpened).toBe(true);
+    trg.click(); // to close
+    await h.wait(50);
+    expect(popup.$isClosing).toBe(true);
+    document.addEventListener("$willOpen", preventOpen);
+    trg.click(); // to open during the closing
+    await h.wait();
+    document.removeEventListener("$willOpen", preventOpen);
+    expect(popup.$isOpened).toBe(false);
+    expect(popup.isConnected).toBe(false);
+    detach();
+
+    // without $attach: listener must not treat popup as opened
+    const a = document.body.appendChild(document.createElement("wup-popup"));
+    a.$options.openCase = PopupOpenCases.onClick;
+    a.$options.target = trg;
+    await h.wait();
+    trg.click(); // to open
+    await h.wait();
+    expect(a.$isOpened).toBe(true);
+    trg.click(); // to close
+    await h.wait(50);
+    expect(a.$isClosing).toBe(true);
+    document.addEventListener("$willOpen", preventOpen);
+    trg.click(); // to open during the closing
+    await h.wait();
+    document.removeEventListener("$willOpen", preventOpen);
+    expect(a.$isOpened).toBe(false);
+    trg.click(); // to open again
+    await h.wait();
+    expect(a.$isOpened).toBe(true);
   });
 
   test("custom animation with transform", async () => {

@@ -12,7 +12,7 @@ import viewportSize from "../helpers/viewportSize";
 import WUPBaseModal from "../baseModal";
 import useTooltip from "./popupTooltip";
 
-const attachLst = new Map<HTMLElement | SVGElement, () => void>();
+const attachLst = new WeakMap<HTMLElement | SVGElement, () => void>();
 
 const tagName = "wup-popup";
 declare global {
@@ -267,7 +267,6 @@ export default class WUPPopupElement<
       const lstn = new PopupListener(
         opts,
         (v, e) => {
-          isHiding = false;
           const isCreate = !popup;
           if (!popup) {
             const p = document.body.appendChild(document.createElement(opts.tagName ?? tagName) as T);
@@ -285,15 +284,18 @@ export default class WUPPopupElement<
             callback?.call(this, p);
           }
 
-          if (!popup.goOpen.call(popup, v, e)) {
-            /* istanbul ignore else */
+          popup.goOpen.call(popup, v, e);
+          if (!popup.$isOpened || popup.$isClosing) {
+            // prevented via $willOpen; if popup is closing it's removed by close-callback
             if (isCreate) {
-              popup!._refListener = undefined; // otherwise remove() destroys events
+              popup._refListener = undefined; // otherwise remove() destroys events
               popup.remove.call(popup);
+              popup = undefined;
             }
             return null;
           }
 
+          isHiding = false;
           return popup;
         },
         async (v, e) => {
@@ -364,7 +366,7 @@ export default class WUPPopupElement<
           this._opts as typeof this._opts & { target: HTMLElement },
           (v, e) => {
             this.goOpen(v, e);
-            return this.$isOpened ? this : null;
+            return this.$isOpened && !this.$isClosing ? this : null; // closing is kept if opening is prevented
           },
           (v, e) => {
             this.goClose(v, e);

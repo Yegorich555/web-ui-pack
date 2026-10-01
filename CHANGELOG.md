@@ -32,6 +32,10 @@
 - [DropdownElement](src/dropdownElement.ts). _Fix popup position on animation when item is partially visible_
 - [ModalElement](src/modalElement.ts). _Ctrl+A selects behind modal_
 - [NotifyElement](src/notifyElement.ts). _Attributes **w-pauseOnHover** & **w-pauseOnWinBlur** are ignored_
+- [PopupElement](src/popup/popupElement.ts)
+  - _Method **$attach**: memory leak when target is removed without `detach()`_
+  - _Method **$attach**: popup isn't removed when opening is prevented via event `$willOpen`_
+  - _Opening prevented via event `$willOpen` during the closing breaks next open/close by target_
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts)
   - Added prop **isSorted** for headers
   - Added props **freezeRows** & **freezeColumns** for sheets
