@@ -1,7 +1,7 @@
 /** Returns if string has not-word symbol at pointed char position */
 export function isSpecialSymbol(s: string, i: number): boolean {
   const c = s.charCodeAt(i);
-  return c < 65 || (c > 90 && (c < 97 || (c > 123 && c < 128)));
+  return c < 65 || (c > 90 && (c < 97 || (c > 122 && c < 128)));
 }
 
 /** Returns count of chars in lower case (for any language with ignoring numbers, symbols)

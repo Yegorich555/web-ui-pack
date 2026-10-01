@@ -37,6 +37,7 @@
   - _`delete observed.prop` fires event but doesn't delete prop_
   - _`observed.valueOf()` returns function instead of raw object_
 - helper [scrolled](src/helpers/scrolled.ts). _With option **pages.cycled** `goTo(pages.total)` does nothing instead of going to the last page_
+- helpers [stringLowerCount & stringUpperCount](src/helpers/string.ts). _Symbol `{` is counted as letter_ (PasswordControl validation rules **lower** & **upper** are affected)
 
 ### New Features
 

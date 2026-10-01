@@ -14,6 +14,8 @@ describe("helper.stringCaseCount", () => {
   });
   test("stringLowerCount with special symbols", () => {
     expect(stringLowerCount("w.,\\'\"~!@ #R")).toBe(1);
+    expect(stringLowerCount("a{b")).toBe(2);
+    expect(stringLowerCount("z{|}~[]^_`az")).toBe(3);
   });
 
   test("stringUpperCount", () => {
@@ -28,5 +30,7 @@ describe("helper.stringCaseCount", () => {
   });
   test("stringUpperCount with special symbols", () => {
     expect(stringUpperCount("W.,\\'\"~!@ #r")).toBe(1);
+    expect(stringUpperCount("A{B")).toBe(2);
+    expect(stringUpperCount("Z{|}~[]^_`AZ")).toBe(3);
   });
 });
