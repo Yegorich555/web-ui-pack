@@ -36,6 +36,9 @@
 - helper [observer](src/helpers/observer.ts)
   - _`delete observed.prop` fires event but doesn't delete prop_
   - _`observed.valueOf()` returns function instead of raw object_
+- helper [scrolled](src/helpers/scrolled.ts)
+  - _With option **pages.cycled** `goTo(pages.total)` does nothing instead of going to the last page_
+  - Removed unused type `WUP.Scrolled.NextStateRender`
 
 ### New Features
 

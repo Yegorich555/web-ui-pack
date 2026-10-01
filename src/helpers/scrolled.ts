@@ -10,11 +10,6 @@ declare global {
       /** Items related to page */
       items: HTMLElement[];
     }
-    /** `index` - index of current/centered page, `renderIndex` - index of page that will be added */
-    interface NextStateRender extends State {
-      /** Index of added/rendered page; */
-      renderIndex: number;
-    }
     interface Options extends IScrollOptions {
       /** Scroll to target of click event;
        * @defaultValue false */
@@ -214,7 +209,7 @@ export default class WUPScrolled {
     } else {
       const p = this.options.pages;
       pi = p ? Math.max(0, pi) : pi;
-      pi = p?.total ? Math.min(pi, p.total) : pi; // don't allow goTo outside range
+      pi = p?.total ? Math.min(pi, p.total - 1) : pi; // don't allow goTo outside range
       if (p?.cycled) {
         const r = this.getNearest(this.state.index, pi, p.total!);
         isForward = r.isForward;

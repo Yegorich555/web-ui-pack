@@ -429,6 +429,18 @@ describe("helper.onScrollStop", () => {
       `"<li num="11" prev="11"></li><li num="0" cur="0"></li><li num="1"></li>"`
     );
 
+    // goTo outside range => goTo last page
+    onRender.mockClear();
+    s.goTo(12);
+    expect(onRender).toBeCalledTimes(1);
+    expect(s.state.index).toBe(11);
+    await nextFrame(5);
+    s.goTo(0);
+    await nextFrame(5);
+    expect(ul.innerHTML).toMatchInlineSnapshot(
+      `"<li num="11" prev="11"></li><li num="0" cur="0"></li><li num="1"></li>"`
+    );
+
     onRender.mockClear();
     s.goTo(false);
     expect(onRender).toBeCalledTimes(1);
