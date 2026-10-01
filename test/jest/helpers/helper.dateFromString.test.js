@@ -118,6 +118,8 @@ describe("helper.dateToString", () => {
     expect(getOutOfRange("2022-00-20", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-05-00", "yyyy-MM-dd")).toBe(true);
     expect(() => dateFromString("2022-05-00", "yyyy-MM-dd", { strict: true, throwOutOfRange: true })).toThrow();
+    expect(() => dateFromString("2022-05-00", "yyyy-MM-dd")).toThrow();
+    expect(() => dateFromString("2022-05-00", "yyyy-MM-dd", {})).toThrow(); // defaults are merged
     expect(getOutOfRange("2022-12-50", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-12-50", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-13-20", "yyyy-MM-dd")).toBe(true);

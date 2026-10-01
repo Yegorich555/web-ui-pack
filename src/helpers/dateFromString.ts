@@ -24,11 +24,12 @@ export default function dateFromString(
      *  Disable it to return `null` instead
      * @defaultValue true */
     throwOutOfRange?: boolean;
-  } = { throwOutOfRange: true }
+  } = {}
 ): Date | null {
   if (!v) {
     return null;
   }
+  options = { throwOutOfRange: true, ...options };
 
   // support for MMM format
   format = format.replace(/MMM/, () /* (_s: string, _index: number) */ => {
