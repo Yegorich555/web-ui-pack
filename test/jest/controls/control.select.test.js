@@ -684,8 +684,49 @@ describe("control.select", () => {
       ];
       await h.wait();
       expect(el.$refInput.readOnly).toBe(true);
+      expect(el.$refInput.hasAttribute("aria-autocomplete")).toBe(false);
 
       el.$options.readOnlyInput = 3;
+      await h.wait();
+      expect(el.$refInput.readOnly).toBe(false);
+      expect(el.$refInput.getAttribute("aria-autocomplete")).toBe("list");
+
+      // with multiple delimiter must be added on focus when input is editable
+      el.$options.multiple = true;
+      el.$value = [10];
+      await h.wait();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
+      await h.wait();
+      expect(el.$refInput.value).toBe("Donny, ");
+      el.blur();
+      await h.wait();
+      expect(el.$refInput.value).toBe("Donny");
+      el.$options.readOnlyInput = 5;
+      await h.wait();
+      HTMLInputElement.prototype.focus.call(el.$refInput);
+      await h.wait();
+      expect(el.$refInput.value).toBe("Donny");
+      el.blur();
+      el.$options.multiple = false;
+      el.$value = undefined;
+      await h.wait();
+
+      // aria-autocomplete is updated after async items are fetched
+      el.$options.readOnlyInput = 3;
+      el.$options.items = Promise.resolve(getItems());
+      jest.advanceTimersByTime(1);
+      expect(el.$refInput.hasAttribute("aria-autocomplete")).toBe(false); // no items yet
+      await h.wait();
+      expect(el.$refInput.readOnly).toBe(false);
+      expect(el.$refInput.getAttribute("aria-autocomplete")).toBe("list");
+
+      // input stays readonly while pending
+      el.$options.readOnlyInput = false;
+      el.$options.items = Promise.resolve(getItems());
+      jest.advanceTimersByTime(1);
+      expect(el.$isPending).toBe(true);
+      el.setupInputReadonly();
+      expect(el.$refInput.readOnly).toBe(true);
       await h.wait();
       expect(el.$refInput.readOnly).toBe(false);
 

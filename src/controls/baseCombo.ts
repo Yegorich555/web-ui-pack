@@ -153,14 +153,6 @@ export default abstract class WUPBaseComboControl<
     i.focus = this.inputFocus; // assign custom method to detect how focus called
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUP.BaseCombo.Options> | null): void {
-    super.gotChanges(propsChanged as any);
-
-    this._opts.readOnlyInput
-      ? this.$refInput.removeAttribute("aria-autocomplete")
-      : this.$refInput.setAttribute("aria-autocomplete", "list");
-  }
-
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options | keyof WUP.BaseCombo.Options> | null): void {
     super.gotFormChanges(propsChanged);
 
@@ -168,8 +160,17 @@ export default abstract class WUPBaseComboControl<
     !isMenuEnabled && this.removePopup();
   }
 
+  /** Returns whether input isn't editable because of option `readOnlyInput` */
+  isReadOnlyInput(): boolean {
+    return !!this._opts.readOnlyInput;
+  }
+
   override setupInputReadonly(): void {
-    this.$refInput.readOnly = this.$isReadOnly || !!this._opts.readOnlyInput;
+    const isRO = this.isReadOnlyInput();
+    this.$refInput.readOnly = this.$isReadOnly || isRO;
+    isRO
+      ? this.$refInput.removeAttribute("aria-autocomplete")
+      : this.$refInput.setAttribute("aria-autocomplete", "list");
   }
 
   /** Called when need to create menu in opened popup */

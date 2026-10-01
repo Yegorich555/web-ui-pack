@@ -347,7 +347,6 @@ export default class WUPSelectControl<
       this._onPendingInitValue?.call(this);
       delete this._onPendingInitValue;
       this.setInputValue(this.$value, SetValueReasons.initValue);
-      this.setupInputReadonly(); // call it because opt readonlyInput can depend on items.length
     };
     if (d instanceof Promise) {
       return promiseWait(d, 300, (v) => this.changePending(v))
@@ -358,6 +357,7 @@ export default class WUPSelectControl<
         .finally(() => {
           this._cachedItems ??= [];
           act();
+          this.setupInputReadonly(); // call it because opt readonlyInput can depend on items.length (sync items are handled by gotChanges)
           this.$isFocused && this.goOpenMenu(MenuOpenCases.onFocus, null);
         });
     }
@@ -376,13 +376,14 @@ export default class WUPSelectControl<
     super.gotChanges(propsChanged as any);
   }
 
-  override setupInputReadonly(): void {
+  override isReadOnlyInput(): boolean {
     const r = this._opts.readOnlyInput;
-    this.$refInput.readOnly =
-      this.$isReadOnly ||
-      this.$isPending ||
-      r === true ||
-      (typeof r === "number" && r > (this._cachedItems?.length || 0) && !this._opts.allowNewValue); // WARN: _cached items can be undefined when fetching not started yet
+    return r === true || (typeof r === "number" && r > (this._cachedItems?.length || 0) && !this._opts.allowNewValue); // WARN: _cached items can be undefined when fetching not started yet
+  }
+
+  override setupInputReadonly(): void {
+    super.setupInputReadonly();
+    this.$isPending && (this.$refInput.readOnly = true);
   }
 
   override setupInitValue(propsChanged: Array<keyof WUP.Select.Options> | null): void {
@@ -921,7 +922,7 @@ export default class WUPSelectControl<
   protected override gotFocus(e: FocusEvent): Array<() => void> {
     const r = super.gotFocus(e);
     if (this._opts.multiple) {
-      if (!this.$isDisabled && !this.$isReadOnly && !this._opts.readOnlyInput && this.$refInput.value) {
+      if (!this.$isDisabled && !this.$isReadOnly && !this.isReadOnlyInput() && this.$refInput.value) {
         this.setInputValueDirect(`${this.$refInput.value}, `, SetValueReasons.userInput); // add delimiter at the end
       }
     }

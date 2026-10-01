@@ -18,6 +18,7 @@
 - [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts)
   - With option **allowNewValue** menu shows item `{text} (New option)` at the end when input text doesn't match any item; text is configurable via `WUPSelectControl.$textNewItem` (set `undefined` to hide the item)
   - _With option **multiple** de-selecting an item via menu adds duplicate instead of removing when value is object equal to item by `$isEqual` (ex. `{ id: 1 }`) but not the same reference_
+  - _Option **readOnlyInput** as number (auto-mode) is treated as `true` even when input is editable: delimiter `", "` isn't added on focus with option **multiple** & attr `aria-autocomplete` is missed_
 - [SelectManyControl](src/controls/selectMany.ts)
   - Added Ctrl+Z (history undo/redo) support for the whole control (previously it worked only for text input field)
   - Option **hideSelected**
