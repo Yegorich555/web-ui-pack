@@ -94,7 +94,7 @@ declare global {
       /** User can't select date more than max; format yyyy-MM-dd  */
       "w-max"?: string;
       /** Dates that user can't choose
-      /** Global reference to object with array
+       *  Global reference to object with array
        * @example
        * ```js
        * window.exclude = [...];
@@ -149,7 +149,7 @@ const pickersMap = new Map([
  * @example
   const el = document.createElement("wup-calendar");
   el.$options.name = "dateOfBirthday";
-  el.$initValue = "1990-10-24";
+  el.$initValue = new Date("1990-10-24");
   el.$options.validations = { required: true };
   const form = document.body.appendChild(document.createElement("wup-form"));
   form.appendChild(el);
@@ -251,7 +251,7 @@ export default class WUPCalendarControl<
     this._opts.firstWeekDay ||= this.#ctr.$defaults.firstWeekDay; // init here to depends on localeInfo
   }
 
-  /** Call when need to re-rended picker (min/max changed etc.) */
+  /** Call when need to re-render picker (min/max changed etc.) */
   $refreshPicker(): void {
     this.changePicker(this._pickerValue, this._picker);
   }
@@ -449,8 +449,8 @@ export default class WUPCalendarControl<
     };
   }
 
-  /** Returns result to render day picker */
   #isDayWeeksAdded = false;
+  /** Returns result to render day picker */
   protected getDayPicker(): WUP.Calendar.IPickerResult {
     // render daysOfWeek
     if (!this.#isDayWeeksAdded) {
@@ -822,7 +822,7 @@ export default class WUPCalendarControl<
     return will as HTMLElement;
   }
 
-  /** Select item (set aria-selected and focus) */
+  /** Select item (set aria-selected) */
   protected selectItem(el: HTMLElement | undefined): void {
     this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
     el?.setAttribute("aria-selected", "true");
@@ -853,7 +853,7 @@ export default class WUPCalendarControl<
     this.$isEmpty && this.selectItem(undefined);
   }
 
-  /** Shift pointed date to UTC if $options.utc is false and user pointed localDate; @returns new object-date */
+  /** Shift pointed date to UTC if $options.utc is false and user pointed localDate; @returns new object-date or the same object if $options.utc is true */
   private normalizeToUTC(v: Date | undefined | null): Date;
   private normalizeToUTC(v: Date | undefined | null): Date | undefined | null {
     if (v == null || this._opts.utc) {

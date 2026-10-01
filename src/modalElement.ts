@@ -20,7 +20,7 @@ export const enum ModalCloseCases {
   onOutsideClick,
   /** When user pressed Escape button */
   onPressEsc,
-  /* When on successful wup-form.$onSubmitEnd: @see {@link WUP.Form.EventMap.$submitEnd} */
+  /** When on successful wup-form.$onSubmitEnd: @see {@link WUP.Form.EventMap.$submitEnd} */
   onSubmitEnd,
 }
 
@@ -314,7 +314,7 @@ export default class WUPModalElement<
   /** Reference to button[close] */
   $refClose?: HTMLButtonElement;
 
-  /** Called once on opening */
+  /** Called on every opening */
   protected override gotRender(isOpening = false): void {
     if (!isOpening) {
       return; // empty because component is hidden by default and need to focus on open-phase

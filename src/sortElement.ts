@@ -23,7 +23,7 @@ let addedStyles: Set<string> | undefined;
 const dragOwners = new WeakSet<HTMLElement>();
 
 /** Returns the nearest element that owns the pointed item: items are searched among all the descendants (not only children -
- * {@link WUPSelectManyControl} keeps them in `label > span`) - so an item of a nested container must not be stolen by the outer one */
+ * `WUPSelectManyControl` keeps them in `label > span`) - so an item of a nested container must not be stolen by the outer one */
 function ownerOf(item: HTMLElement): HTMLElement | null {
   for (let p = item.parentElement; p; p = p.parentElement) {
     if (dragOwners.has(p)) {

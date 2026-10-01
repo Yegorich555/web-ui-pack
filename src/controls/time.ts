@@ -14,9 +14,9 @@ declare global {
   namespace WUP.Time {
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {
-      /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min time is {x}` */
+      /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min value is {x}` */
       min: WUPTimeObject;
-      /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max time is {x}` */
+      /** Enabled if option [max] is pointed; if $value > pointed shows message 'Max value is {x}` */
       max: WUPTimeObject;
       /** User can't select time in excluded range */
       exclude: { test: (v: WUPTimeObject, c: WUPTimeControl) => boolean };
@@ -33,7 +33,7 @@ declare global {
        * @tutorial Troubleshooting
        * If set step = 5 user still able to set minutes not divisible step */
       step: number;
-      /** Set `false` to hide menu buttons 'Ok' & 'Cancel'
+      /** Set `true` to hide menu buttons 'Ok' & 'Cancel'
        * @tutorial Troubleshooting
        * in this case any changing selection in menu changes value & input; so user don't need to press Enter
        * but if press escape: menu closed and value reverted to that was before
@@ -57,15 +57,15 @@ declare global {
       "w-format"?: WUPTimeFormat | (string & {});
       "w-step"?: number;
       "w-menuButtonsOff"?: boolean | "";
-      /** User can't select date less than min; format hh:mm */
+      /** User can't select time less than min; format hh:mm */
       "w-min"?: string;
-      /** User can't select date more than max; format hh:mm */
+      /** User can't select time more than max; format hh:mm */
       "w-max"?: string;
       /** Points that user can't choose
-      /** Global reference to object with array
+       *  Global reference to object with function `test`
        * @example
        * ```js
-       * window.exclude = [new WUPTimeObject("02:30"), ...];
+       * window.exclude = { test: (v, c) => v.hours === 12 };
        * <wup-time w-exclude="window.exclude"></wup-time>
        * ``` */
       "w-exclude"?: string;
@@ -111,12 +111,17 @@ declare module "preact/jsx-runtime" {
  * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/time}
  * @tutorial Troubleshooting
  * * $options.format related only to displayed text, to work with other time-options like min/max use strict format 'hh:mm'
- * * if increase `--ctrl-icon-size`: change `ctrl-icon-img` to `--ctrl-icon-img: var(--ctrl-time-icon-img-lg)`: otherwise quality is ugly on larger icon
+ * * if increase `--ctrl-icon-size`: change `ctrl-icon-img` to `--ctrl-icon-img: var(--wup-icon-time-lg)`: otherwise quality is ugly on larger icon
  * @example
   const el = document.createElement("wup-time");
   el.$options.name = "time";
   el.$initValue = new WUPTimeObject(22, 15);
-  el.$options.validations = { required: true, min=new WUPTimeObject(01,05), max=new WUPTimeObject(23,00), exclude= };
+  el.$options.validations = {
+    required: true,
+    min: new WUPTimeObject(1, 5),
+    max: new WUPTimeObject(23, 0),
+    exclude: { test: (v) => v.hours === 12 },
+  };
   el.$options.format = "hh-mm A";
   const form = document.body.appendChild(document.createElement("wup-form"));
   form.appendChild(el);

@@ -642,7 +642,8 @@ export interface AsyncDeflateOptions extends DeflateOptions {
 
 /** A terminable compression/decompression process */
 export interface AsyncTerminable {
-  /** Terminates the worker thread immediately. The callback will not be called. */
+  /** Terminates the worker thread immediately. The callback will not be called
+   * (unless every file is already compressed without a worker: stored, small or Worker isn't supported) */
   (): void;
 }
 
@@ -846,7 +847,7 @@ export interface ZipAttributes {
   comment?: string;
 
   /** When the file was last modified. Defaults to the current time.
-   * Set this to 0 to avoid revealing a modification date entirely. */
+   * It must be in range 1980-2099 (limit of the ZIP format), otherwise an error is thrown. */
   mtime?: Date | string | number;
 }
 

@@ -238,7 +238,7 @@ const $centerScreen = <WUP.Popup.Place.PlaceFunc>function centerScreen(_t, me, f
 export const PopupPlacements = {
   /** place above of target */
   $top,
-  /** place bellow of target */
+  /** place below of target */
   $bottom,
   /** place at left side of target */
   $left,

@@ -12,7 +12,8 @@ function hasFixedPos(el: HTMLElement): boolean {
  * @example ```
  * const el = document.getElementById("someTestElement");
  * isScrollable(el, 'scrollTop') - returns true if possible to scroll such element by Y (vertically)
- * isScrollable(el, 'scrollLeft') - returns true if possible to scroll such element by X (horizontally) */
+ * isScrollable(el, 'scrollLeft') - returns true if possible to scroll such element by X (horizontally)
+ * ``` */
 export function isScrollable(el: HTMLElement, checkScroll: "scrollTop" | "scrollLeft"): boolean {
   const p = checkScroll;
 

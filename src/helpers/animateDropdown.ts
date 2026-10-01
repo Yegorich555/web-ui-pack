@@ -3,7 +3,7 @@ import { styleTransform } from "./styleHelpers";
 
 /** Animate (show/hide) element as dropdown via scale and counter-scale for children
  * @param ms animation time
- * @returns Promise<isFinished> that resolved by animation end;
+ * @returns Promise<isFinished> that resolved by animation end (`false` if `ms` is `0`: nothing is animated);
  * Rules
  * * To define direction set attribute to element position="top" (or "bottom", "left", "right")
  * * For position="center" element is moved from top to center with opacity (like modal)

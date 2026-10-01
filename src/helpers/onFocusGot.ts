@@ -1,10 +1,10 @@
 import onFocusLost from "./onFocusLost";
 
 /** Fires when element or children gotFocus (happens once)
- * Depsite on focusin onFocusGot event isn't called several times on children inside element
+ * Despite on focusin onFocusGot event isn't called several times on children inside element
  * @param {HTMLElement} element HTMLElement to apply `.addEventListener`
  * @param {Function} listener Callback invoked on event
- * @param options OnFocusLostOptions. onFocusGot depends on onFocusLost
+ * @param options onFocusLostOptions. onFocusGot depends on onFocusLost
  * @return dispose() function. Call it to remove listener
  * */
 export default function onFocusGot(

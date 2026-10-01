@@ -12,7 +12,7 @@ Universal web package with high scalable [WebComponents](#components) and [helpe
 
 ## Demo
 
-You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone repo and run `npm i & npm start`
+You can see demo [here](https://yegorich555.github.io/web-ui-pack) or just clone repo and run `npm i && npm start`
 
 Template repos with React: [webpack-must-have](https://github.com/Yegorich555/webpack-must-have), [webpack-react](https://github.com/Yegorich555/webpack-react) (in progress)
 
@@ -71,7 +71,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
     - [x] [ModalElement](src/modalElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
       - [x] Modal in modal
       - [x] Confirm modal
-      - [x] Confirm hook (use WUPModal.$useConfirmHook)
+      - [x] Confirm hook (use WUPModalElement.$useConfirmHook)
       - [x] Modal form
     - [x] [Notify](src/notifyElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/notify)
 
@@ -85,7 +85,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
     - [x] [RadioControl (radioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
       - [x] Full customized
     - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-      - [x] [Mask/pattern for controls](src/controls//text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
+      - [x] [Mask/pattern for controls](src/controls/text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
       - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
         - [ ] TextRichControl
       - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
@@ -122,7 +122,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
    - Public properties/options/events/methods startsWith `$...` (events `$onOpen`, `$onClose`, methods `$open()`, `$close()`, props like `$isOpened` etc.)
    - Every component/class has static `$defaults` (common options for the current class) and personal `$options` (per each component). See details in [example](#example)
    - `$options` are observed. So changing options affects the component immediately after empty timeout (every component has static `observedOptions` as a set of watched options)
-   - all custom `attributes` update `$options` automatically. So `document.querySelector('wup-spin').$options.inline` equal to `<wup-spin inline />`
+   - all custom `attributes` update `$options` automatically. So `document.querySelector('wup-spin').$options.inline` equal to `<wup-spin w-inline />`
 2. **Recommendations**
    - For webpack [sideEffects](https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free) switched on (for optimization). But **if you don't use webpack** don't import from `web-ui-pack` directly (due to tree-shaking can be not smart enough). Instead use `web-ui-pack/path-to-element`
    - Every component has a good JSDoc so go ahead and read details directly during the coding
@@ -145,7 +145,8 @@ More details you can find in [CODESTYLE.md](/CODESTYLE.md) and [FAQ](#faq)
 Typescript
 
 ```typescript
-import WUPPopupElement, { PopupOpenCases } from "web-ui-pack/popup/popupElement";
+import WUPPopupElement from "web-ui-pack/popup/popupElement";
+import { PopupOpenCases } from "web-ui-pack/popup/popupElement.types";
 import "web-ui-pack/popup/popupPlacements"; // just in case if TS doesn't auto-import tied namespace
 
 WUPPopupElement.$use(); // call it to register in the system
@@ -167,8 +168,8 @@ el.$options.target = document.querySelector("button");
   and $centerScreen to place at the center of screen (as modal) when there is no space around target
 */
 el.$options.placement = [
-  WUPPopupElement.$placements.$top.$middle; // place at the top of target and align by vertical line
-  WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'ignore align to fit layout`
+  WUPPopupElement.$placements.$top.$middle, // place at the top of target and align by vertical line
+  WUPPopupElement.$placements.$bottom.$middle.$adjust, // adjust means 'ignore align to fit layout'
   WUPPopupElement.$placements.$bottom.$middle.$adjust.$resizeHeight, // resize means 'allow to resize to fit layout'
   WUPPopupElement.$placements.$centerScreen, // place at the center of screen & resize to fit layout (it must be the last rule)
 ]
@@ -190,22 +191,22 @@ How to extend/override
 
 // you can override via prototypes
 const original = WUPPopupElement.prototype.goOpen;
-WUPPopupElement.prototype.goOpen = function customGoShow() {
+WUPPopupElement.prototype.goOpen = function customGoOpen(...args) {
   if (window.isBusy) {
-    return null;
+    return Promise.resolve(false);
   }
-  return original(...arguments);
+  return original.apply(this, args);
 };
 
 /*** OR create extended class ***/
 
 class Popup extends WUPPopupElement {
   // take a look on definition of WUPPopupElement and you will find internals
-  protected override goOpen(openCase: PopupOpenCases): boolean {
+  override goOpen(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): Promise<boolean> {
     if (openCase === PopupOpenCases.onHover) {
-      return false;
+      return Promise.resolve(false);
     }
-    return super.goOpen(openCase);
+    return super.goOpen(openCase, ev);
   }
 }
 
@@ -236,12 +237,13 @@ declare module "react" {
 ### Helpers
 
 use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
-**WARNING**: avoid using `import { focusFirst } from "web-ui-pack;` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
+**WARNING**: avoid using `import { WUPHelpers } from "web-ui-pack";` because in this case the whole web-ui-pack module traps in compilation of dev-bundle and increases time of compilation
 
 #### Helpers.Animation
 
+- [**animate**](src/helpers/animate.ts) ⇒ `Animation function based on window.requestAnimationFrame (from value to value)`
 - [**animateDropdown**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) element as dropdown via scale and counter-scale for children`
-- [**animateStack**](src/helpers/animateDropdown.ts) ⇒ `Animate (show/hide) every element via moving from target to own position`
+- [**animateStack**](src/helpers/animateStack.ts) ⇒ `Animate (show/hide) every element via moving from target to own position`
 
 #### Helpers.HTML (DOM)
 
@@ -268,6 +270,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
 
 #### Helpers.Object
 
+- [**isEqual**](src/helpers/isEqual.ts) ⇒ `Returns if v1 equal to v2 (compares by valueOf; checks if both NaN)`
 - [**nestedProperty.set**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.set(obj, "value.nestedValue", 1) sets obj.value.nestedValue = 1`
 - [**nestedProperty.get**](src/helpers/nestedProperty.ts) ⇒ `nestedProperty.get(obj, "nested.val2", out?: {hasProp?: boolean} ) returns value from obj.nested.val2`
 - [**objectClone**](src/helpers/objectClone.ts) ⇒ `Deep cloning object`
@@ -278,7 +281,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
 
 - [**onEvent**](src/helpers/onEvent.ts) ⇒ `More strict (for Typescript) wrapper of addEventListener() that returns callback with removeListener()`
 - [**onFocusGot**](src/helpers/onFocusGot.ts) ⇒ `Fires when element/children takes focus once (fires again after onFocusLost on element)`
-- [**onScroll**](src/helpers/onScrollStop.ts) ⇒ `Handles wheel & touch events for custom scrolling`
+- [**onScroll**](src/helpers/onScroll.ts) ⇒ `Handles wheel & touch events for custom scrolling`
 - [**onScrollStop**](src/helpers/onScrollStop.ts) ⇒ `Returns callback when scrolling is stopped (via checking scroll position every frame-render)`
 - [**onFocusLost**](src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
 - [**onSpy**](src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
@@ -291,9 +294,9 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
 
 #### Helpers.Other
 
-- [**promiseWait**](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoding spinner blinking during the very fast API-request in case: pending > waitResponse > resetPending`
+- [**promiseWait**](src/helpers/promiseWait.ts) ⇒ `Produce Promise during for "no less than pointed time"; it helps for avoiding spinner blinking during the very fast API-request in case: pending > waitResponse > resetPending`
 - [**localeInfo**](src/objects/localeInfo.ts) ⇒ `Locale-object with definitions related to user-locale`
-- [**TimeObject**](src/objects/timeObject.ts) ⇒ `Plane time object without date`
+- [**TimeObject**](src/objects/timeObject.ts) ⇒ `Plain time object without date`
 
 #### Helpers. Files
 

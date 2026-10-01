@@ -31,7 +31,7 @@ declare global {
       relatedForm: WUPFormElement;
       /** Event that produced submit event; null if `form.$submit()` is called */
       relatedEvent: MouseEvent | KeyboardEvent | null;
-      /** Element that that produced submit event */
+      /** Element that produced submit event */
       submitter: HTMLElement | null;
       /** Point a promise as callback to allow form show pending state during the promise */
       waitFor?: Promise<unknown>;
@@ -41,7 +41,7 @@ declare global {
       /** Fires before $submit is happened; can be prevented via `e.preventDefault()` */
       $willSubmit: CustomEvent<Pick<SubmitDetails, "relatedEvent" | "relatedForm" | "submitter">>;
       /** Fires by user-submit when validation successful and model is collected
-       *  * @tutorial
+       * @tutorial
        * call `e.preventDefault()` to prevent dispatching `$submitEnd` & closing modal (if form in modal) */
       $submit: CustomEvent<SubmitDetails>;
       /** Fires when submit is end (after http-response);
@@ -57,14 +57,13 @@ declare global {
 
     interface Options {
       /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
-       * @defaultValue goToError | validateUntilFirst | reset | lockOnPending */
+       * @defaultValue goToError | validateUntilFirst | validateChangeable | reset | lockOnPending */
       submitActions: SubmitActions;
       /** Enable to store data in localStorage to prevent losing till submitted;
        * @defaultValue false
        * @tutorial Troubleshooting
        * * It doesn't save values that are complex objects. So `wup-select.$options.items = [{text: "N1",value: {id:1,name:'Nik'} }]` is skipped
-       * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see{@link WUPFormElement.storageKey}
-       * @defaultValue false */
+       * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see {@link WUPFormElement.storageKey} */
       autoStore: boolean | string;
       /** Focus first possible element when it's appended to layout
        * @defaultValue false */
@@ -72,7 +71,7 @@ declare global {
       /** Disallow edit/copy value; adds attr [disabled] for styling
        * @defaultValue false */
       disabled: boolean;
-      /** Disallow copy value; adds attr [readonly] for styling
+      /** Disallow edit value; adds attr [readonly] for styling
        * @defaultValue false */
       readOnly: boolean;
       /** Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherited from form
@@ -89,7 +88,7 @@ declare global {
       /** @deprecated use [disabled] instead since related to CSS-styles */
       "w-disabled"?: boolean | "";
       disabled?: boolean | "";
-      /** @deprecated use [disabled] instead since related to CSS-styles */
+      /** @deprecated use [readonly] instead since related to CSS-styles */
       "w-readonly"?: boolean | "";
       readonly?: boolean | "";
 
@@ -152,8 +151,8 @@ const formStore: WUPFormElement[] = [];
  *  document.body.appendChild(form);
  *  // or HTML
  *  <wup-form w-autocomplete w-autofocus>
- *    <wup-text w-name="email" />
- *    <button type="submit">Submit</submit>
+ *    <wup-text w-name="email"></wup-text>
+ *    <button type="submit">Submit</button>
  *  </wup-form>;
  * @tutorial Troubleshooting/rules:
  * * options like $initModel, $model overrides control.$initValue, control.$value (every control that matches by $options.name)
@@ -178,8 +177,8 @@ const formStore: WUPFormElement[] = [];
             });
           }
         }}
-        <button type="submit">Submit</button>
       />
+      <button type="submit">Submit</button>
   </wup-form>
  */
 export default class WUPFormElement<
@@ -204,7 +203,7 @@ export default class WUPFormElement<
     return m;
   }
 
-  /** Find form related to control,register and apply initModel if initValue undefined */
+  /** Find form related to control and register control */
   static $tryConnect(control: IBaseControl & HTMLElement): WUPFormElement | undefined {
     const form = formStore.find((f) => f.contains(control));
     form?.$controls.push(control);
@@ -297,7 +296,7 @@ export default class WUPFormElement<
 
   _model?: Partial<Model>;
   /** Model related to every control inside (mapped object via control.$options.name);
-   *  @see {@link BaseControl.prototype.$value}
+   *  @see `WUPBaseControl.prototype.$value`
    * @tutorial rules
    * * `form.$model = { firstName: 'Hell' }` updates only control with $options.name==='firstName'
    * * `form.$model = { firstName: undefined }` reset only control with $options.name==='firstName' */
@@ -314,7 +313,7 @@ export default class WUPFormElement<
 
   _initModel?: Partial<Model>;
   /** Default/init model related to every control inside;
-   *  @see {@link BaseControl.prototype.$initValue} */
+   *  @see `WUPBaseControl.prototype.$initValue` */
   get $initModel(): Partial<Model> | undefined {
     // it's required to avoid case when model has more props than controls
     return this.#ctr.$modelFromControls(this._initModel || {}, this.$controls, "$initValue");

@@ -14,11 +14,11 @@ declare global {
   namespace WUP.Text {
     interface EventMap extends WUP.BaseControl.EventMap {}
     interface ValidityMap extends WUP.BaseControl.ValidityMap {
-      /** If textLength < pointed shows message 'Min length is {x} characters` */
+      /** If textLength < pointed shows message 'Min length is {x} characters' */
       min: number;
-      /** If textLength > pointed shows message 'Max length is {x} characters` */
+      /** If textLength > pointed shows message 'Max length is {x} characters' */
       max: number;
-      /** If $value doesn't match email-pattern shows message 'Invalid email address` */
+      /** If $value doesn't match email-pattern shows message 'Invalid email address' */
       email: boolean;
     }
     interface NewOptions {
@@ -33,9 +33,9 @@ declare global {
        * @defaultValue true */
       clearButton: boolean;
       /** Make input masked
-       * @rules when mask is pointed and contains only numeric vars
-       * * inputmode='numeric' so mobile device show numeric-keyboard
-       * * enables validation 'mask' with error message 'Incomplete value'
+       * @rules when mask is pointed
+       * * inputmode='numeric' (if mask contains only numeric vars) so mobile device show numeric-keyboard
+       * * incomplete value is invalid with error message 'Incomplete value' (static `$errorMask`)
        * @example
        * "0000-00-00" // for date in format yyyy-mm-dd
        * "##0.##0.##0.##0" // IPaddress
@@ -265,7 +265,7 @@ export default class WUPTextControl<
     this.renderPostfix(this._opts.postfix);
   }
 
-  /** Add/update or remove prefix part */
+  /** Add/update or remove postfix part */
   protected renderPostfix(text: string | undefined | null): void {
     let el = this.$refPostfix;
     if (!text) {
@@ -383,7 +383,7 @@ export default class WUPTextControl<
 
   _inputError?: string;
   #inputTimer?: ReturnType<typeof setTimeout>;
-  /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
+  /** Called when user types text (on "input" event) */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
     const isBrowserAutofill = e.isTrusted && e.inputType == null;
     if (isBrowserAutofill && !this._refHistory && this.canHandleUndo()) {
@@ -444,7 +444,7 @@ export default class WUPTextControl<
     }
   }
 
-  /** Mask object to proccess mask on input */
+  /** Mask object to process mask on input */
   refMask?: MaskTextInput;
   /** Called to apply mask-behavior (on "input" event) */
   protected maskInputProcess(e: WUP.Text.GotInputEvent | null): string {

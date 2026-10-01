@@ -39,8 +39,8 @@ declare global {
        * * Point querySelector to related element
        * @example
        * ```html
-       * <div id="me"></wup-spin>
-       * <wup-spin "w-overflowTarget="#me"></wup-spin>
+       * <div id="me"></div>
+       * <wup-spin w-overflowTarget="#me"></wup-spin>
        * ```
        * @defaultValue `auto`: parentElement */
       "w-overflowTarget"?: string;

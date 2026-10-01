@@ -16,7 +16,7 @@ declare global {
       minLower: number;
       /** If count of pointed chars < pointed shows message 'Must contain at least {x} special characters' */
       special: { min: number; chars: string };
-      /** If $value != with previous siblint wup-pwd.$value shows message 'Passwords must be equal' */
+      /** If $value != with previous wup-pwd.$value (in document order) shows message 'Passwords must be equal' */
       confirm: boolean;
     }
     interface Options<T = string, VM = ValidityMap>
@@ -94,6 +94,7 @@ declare module "preact/jsx-runtime" {
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
+ *   <button eye/>
  * </label> */
 export default class WUPPasswordControl<
   ValueType extends string = string,
@@ -103,7 +104,7 @@ export default class WUPPasswordControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPasswordControl;
 
-  /** Text announced by screen-readers when input cleared; @defaultValue `input cleared` */
+  /** Text announced by screen-readers about show/hide password; @defaultValue `press Alt + V to show/hide password` */
   static $ariaDescription = __wupln("press Alt + V to show/hide password", "aria");
 
   // static get $styleRoot(): string {

@@ -216,7 +216,7 @@ export default class TextHistory {
     return isUndoRedo;
   }
 
-  /** required to fix custom bubbling with timetout */
+  /** required to fix custom bubbling with timeout */
   #inpBubble?: () => void;
   /* when user types fast beforeInput can be fired stepByStep without timeouts */
   #inpDebounce?: () => void;

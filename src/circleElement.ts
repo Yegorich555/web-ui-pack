@@ -18,7 +18,7 @@ declare global {
   namespace WUP.Circle {
     /** Item object related to */
     interface Item {
-      /** Value of item that will be rendered; depends on @see {@link Options.min}, {@link Options.max}, {@link Options.from}, {@link Options.to} */
+      /** Value of item that will be rendered; depends on @see {@link Options.min}, {@link Options.max} (ignored for several items), {@link Options.from}, {@link Options.to} */
       value: number;
       /** Color for item. Default colors defined in css-variables like `--circle-X: #e4e4e4;` where `X` is number of item */
       color?: string;
@@ -27,13 +27,14 @@ declare global {
        * * set `Item value {#}` to use tooltip where `{#}` is pointed value
        * * point function to use custom logic
        * * override `WUPCircleElement.prototype.renderTooltip` to use custom logic
-       * * to change hover-timeouts see {@link WUPCircleElement.$defaults.hoverOpenTimeout}, {@link WUPCircleElement.$defaults.hoverCloseTimeout}_
+       * * to change hover-timeouts see {@link WUPCircleElement.$defaults.hoverOpenTimeout}, {@link WUPCircleElement.$defaults.hoverCloseTimeout}
        * * use below example to use custom logic @example
        *  items = [{
        *    value: 5,
        *    tooltip: (item, popup) => {
        *     setTimeout(()=>popup.innerHTML=...);
        *     return ""
+       *    }
        *  }] */
       tooltip?: string | ItemTooltipFn;
     }
@@ -43,7 +44,7 @@ declare global {
     interface ItemResult extends Item {
       /** Pointed {@link Item.color} OR defined from css-variable like `--circle-X: #e4e4e4;` where `X` is number of item */
       color: string;
-      /** Value relative to another items where 100% is SUM or difference max-min for single item */
+      /** Value relative to another items where 100% is SUM of all values */
       percentage: number;
     }
 
@@ -54,8 +55,8 @@ declare global {
       _definedColor: string;
     }
     interface Options {
-      /** Width of each segment; expected 1..100 (perecentage)
-       * @defaultValue 10 */
+      /** Width of each segment; expected 1..100 (percentage)
+       * @defaultValue 14 */
       width: number;
       /** Border/corner radius of each segment; expected 0..0.5 where 0.5 == 50% of `$options.width`
        * @defaultValue 0.25 */
@@ -69,10 +70,10 @@ declare global {
       /** Angle to that rendering is finished -360..360 (degrees)
        * @defaultValue 360 */
       to: number;
-      /** Min possible value that fits `options.from`
+      /** Min possible value that fits `options.from`; ignored for several items (0 is used)
        * @defaultValue 0 */
       min: number;
-      /** Max possible value that fits `options.to`
+      /** Max possible value that fits `options.to`; ignored for several items (SUM of values is used)
        * @defaultValue 100 */
       max: number;
       /** Space between segments; expected 0..20 (degrees)
@@ -82,7 +83,7 @@ declare global {
        * @defaultValue 10 */
       minSize: number;
       /** Timeout in ms before popup shows on hover of target;
-       * @defaultValue inherited from WUPPopupElement.$defaults.hoverOpenTimeout */
+       * @defaultValue copied from WUPPopupElement.$defaults.hoverOpenTimeout on module load */
       hoverOpenTimeout: number;
       /** Timeout in ms before popup closes on mouse-leave of target;
        * @defaultValue 0 */
@@ -490,7 +491,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     this.useTooltip(false);
   }
 
-  /** Called on every changeEvent */
+  /** Called once on init */
   protected override gotRender(): void {
     this.$refSVG.setAttribute("viewBox", `0 0 100 100`);
     this.$refSVG.setAttribute("role", "img");

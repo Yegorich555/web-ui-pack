@@ -10,7 +10,7 @@ declare global {
       /** Items related to page */
       items: HTMLElement[];
     }
-    /** @index index of current/centered page, renderIndex - index of page the will be added */
+    /** `index` - index of current/centered page, `renderIndex` - index of page that will be added */
     interface NextStateRender extends State {
       /** Index of added/rendered page; */
       renderIndex: number;
@@ -29,12 +29,12 @@ declare global {
         total?: number;
         /** Whether scrolling must be cycled: when `pageIndex < 0 || pageIndex > last` */
         cycled?: boolean;
-        /** Visible/rendered pages together with current page;
+        /** Count of visible/rendered pages before current page;
          * @tutorial
          * if it's pointed then provide rendering empty-item for pageIndex < 0
          * @see {@link onRender} */
         before?: number;
-        /** Visible/rendered pages together with current page;
+        /** Count of visible/rendered pages after current page;
          * @tutorial if pointed `after` & `total` & missed `cycled` then provide rendering empty-item for pageIndex > last
          * @see {@link onRender} */
         after?: number;

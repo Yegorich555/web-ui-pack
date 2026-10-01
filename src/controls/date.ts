@@ -18,11 +18,11 @@ declare global {
   namespace WUP.Date {
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {
-      /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min date is {x}` */
+      /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min value is {x}` */
       min: Date;
-      /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max date is {x}` */
+      /** Enabled if option [max] is pointed; if $value > pointed shows message 'Max value is {x}` */
       max: Date;
-      /** Enabled if option [exclude] is pointed; If invalid shows "This date is disabled" */
+      /** Enabled if option [exclude] is pointed; If invalid shows "This value is disabled" */
       exclude: Date[];
     }
     interface NewOptions {
@@ -35,9 +35,8 @@ declare global {
       /** Anchor to TimeControl to sync with date
        * @tutorial dateControl is master and it means
        * * DateControl value merged with TimeControl value (don't need to look for timeControl value at all)
-       * * DateControl options/validations `min`, `max` & `required` are applied to TimeControl according to selected data
-       * * Option `exclude` are not sync between control for performance purpose (check demo code to implement custom `exclude` for TimControl)
-       * * Option `
+       * * DateControl options/validations `min`, `max` & `required` are applied to TimeControl according to selected date
+       * * Option `exclude` are not sync between control for performance purpose (check demo code to implement custom `exclude` for TimeControl)
        * @example
        * ```html
        * <wup-date w-sync="next" w-min="2016-01-02 12:40"></wup-date>
@@ -65,7 +64,7 @@ declare global {
       "w-initValue"?: string;
       "w-format"?: WUPDateFormat | (string & {});
       /** Anchor to TimeControl to sync with date
-       *  * Point querySelector (id, `next` or`false`) to related element
+       *  * Point querySelector (`#id`, `prev`, `next` or`false`) to related element
        * @example
        * ```html
        * <wup-date w-sync="next" w-min="2016-01-02 12:40"></wup-date>
@@ -109,7 +108,7 @@ declare module "preact/jsx-runtime" {
  * @example
   const el = document.createElement("wup-date");
   el.$options.name = "dateOfBirthday";
-  el.$initValue = "1990-10-24";
+  el.$initValue = new Date("1990-10-24");
   el.$options.validations = { required: true };
   el.$options.format = "yyyy-MM-dd";
   const form = document.body.appendChild(document.createElement("wup-form"));
@@ -192,9 +191,7 @@ export default class WUPDateControl<
     return WUPCalendarControl.$parse(text, !!this._opts.utc) as ValueType;
   }
 
-  /** Called to parse input text to value (related to locale or pointed format)
-   *  @tutorial Troubleshooting
-   * * for "yyyy-mm-dd" the correct format is "yyyy-MM-dd" */
+  /** Called to parse input text to value (related to locale or pointed format) */
   override parseInput(text: string): ValueType | undefined {
     const format = `${this._opts.format.toUpperCase()} hh:mm:ss.fff${this._opts.utc ? "Z" : ""}`;
     const v = dateFromString(text, format, { throwOutOfRange: true }) ?? undefined;

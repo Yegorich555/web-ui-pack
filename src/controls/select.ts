@@ -20,12 +20,12 @@ declare global {
             value: 2,
             text: (value, li, i, control) => {
               li.innerHTML =
-              `<button class='delete'><button>Item N ${i+1}` // some custom HTML here
+              `<button class='delete'></button>Item N ${i+1}` // some custom HTML here
               // li.textContent = `Item N ${i+1}`; // or use this for fastest render
               const btn = li.querySelector('button')!;
               btn.onclick = (e) => {
                 e.preventDefault();
-                control.$closeMenu();
+                (control as WUPSelectControl).$closeMenu();
               }
               return `Item N ${value}`; // this is text rendered in input when related item selected
             },
@@ -45,9 +45,9 @@ declare global {
 
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {
-      /** Count of minimal values that must be selected (only for option `multi`) */
+      /** Count of minimal values that must be selected (only for option `multiple`) */
       minCount: number;
-      /** Count of minimal values that must be selected (only for option `multi`) */
+      /** Count of maximal values that can be selected (only for option `multiple`) */
       maxCount: number;
     }
     interface NewOptions<T = any> {
@@ -57,7 +57,7 @@ declare global {
        * @defaultValue false */
       allowNewValue: boolean;
       /** Allow to select multiple values; in this case $value & $initValue must contain Array<ValueType>
-       * * @defaultValue false */
+       * @defaultValue false */
       multiple: boolean;
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions<T> {
@@ -66,13 +66,13 @@ declare global {
       openCase: MenuOpenCases;
       /** Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
        * @tutorial
-       * * set number X to enable autoMode where `input.readOnly = items.length < X` */
+       * * set number X to enable autoMode where `input.readOnly = items.length < X` (ignored with option `allowNewValue`) */
       readOnlyInput: boolean | number;
     }
     interface JSXProps<C = WUPSelectControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data!
        * Global reference to object with array
-       * @see  {@link MenuItems}
+       * @see  {@link MenuItem}
        * @example
        * ```js
        * window.myItems = [...];
@@ -136,14 +136,14 @@ declare module "preact/jsx-runtime" {
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
- *   <wup-popup menu>
- *      <ul>
- *          <li>Item 1</li>
- *          <li>Item 2</li>
- *          // etc. /
- *      </ul>
- *   </wup-popup>
  * </label>
+ * <wup-popup menu>
+ *    <ul>
+ *        <li>Item 1</li>
+ *        <li>Item 2</li>
+ *        // etc. /
+ *    </ul>
+ * </wup-popup>
  */
 export default class WUPSelectControl<
   ValueType = any | any[],
@@ -184,7 +184,7 @@ export default class WUPSelectControl<
   /** Function to filter menuItems based on inputValue
    * @param menuItemText textcontent in lowercase
    * @param menuItemValue value related to items[x].value
-   * @param inputValue normalized input value (trimStart + lowercase)
+   * @param inputValue normalized input value (trim + lowercase); with option `multiple` only text after the last comma
    * @param inputRawValue input value without normalization
    * @returns true if menuItem must be visible in menu */
   static $filterMenuItem(
@@ -297,7 +297,7 @@ export default class WUPSelectControl<
     // return super.valueFromStorage(str) as any;
   }
 
-  /** Store value to storage; if item.text is not function then stored text, otherwise value.toString()
+  /** Store value to storage as `(value.id ?? value).toString()` or `$null` for `null`
    *  @see {@link valueToStrCompare} */
   override valueToStorage(v: ValueType, skipMultiple?: boolean): string | null {
     if (this._opts.multiple && !skipMultiple) {
@@ -706,7 +706,7 @@ export default class WUPSelectControl<
     }
   }
 
-  /** Focus item by index or reset is index is null (via aria-activedescendant).
+  /** Focus item by index (via aria-activedescendant).
    *  If menuItems is filtered by input-text than index must point on filtered array */
   protected focusMenuItemByIndex(index: number): void {
     const { filtered } = this._menuItems!;

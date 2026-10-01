@@ -16,15 +16,15 @@ function cutEndString(s: string, length: number): string {
 /** Returns a string representation of a date-time according to pointed format
  * @param format 'yyyy-MM-dd hh:mm:ss.fff AZ'
  * @example
- * "yyyy-MM-dd hh:mm:ss.fff Z" => "2022-04-23 16:09:12.234" // point 'Z' at the end for UTCdate
+ * "yyyy-MM-dd hh:mm:ss.fffZ" => "2022-04-23 16:09:12.234" // point 'Z' at the end for UTCdate
  * "yyyy-MM-dd hh:mm:ss a" => "2022-04-23 04:09:12 pm" // point 'a' or 'A' at the end for 12hour format
- * "yyyy-MM-dd hh:mm:ss.fff aZ" => "2022-04-23 04:09:12 pm" // point 'Z' at the end for UTCdate
+ * "yyyy-MM-dd hh:mm:ss.fff aZ" => "2022-04-23 04:09:12.234 pm" // point 'Z' at the end for UTCdate
  * "yyyy-MM-dd hh:mm:ss" => "2022-04-23 16:09:12"
  * "yy-M-d h:m:s" => "22-4-23 13:9:12"
  * "dd/MM/yyyy" => "23/04/2022"
  * "MMM d, hh:mm A" => "Apr 23, 04:09 PM" (depends on localeInfo.namesMonthShort)
  * @tutorial Troubleshooting
- * * AM PM in the middle isn't supported (only at the end): use  'hh:mm, d/m/yyyy A' instead 'hh:mm A, d/m/yyyy'
+ * * AM PM in the middle isn't supported (only at the end): use  'hh:mm, d/M/yyyy A' instead 'hh:mm A, d/M/yyyy'
  */
 export default function dateToString(v: Date, format: string): string {
   if (Number.isNaN(v.valueOf())) {

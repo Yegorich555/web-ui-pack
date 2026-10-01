@@ -44,7 +44,7 @@ export interface IExcelStyle {
    * @defaultValue `general` of Excel => a text is aligned to the left & a number/date to the right */
   horizontalAlign?: "left" | "center" | "right";
   /** Vertical alignment of the content of the cell
-   * @defaultValue "top" */
+   * @defaultValue {@link exportToExcel.$defaults.style} => "center" */
   verticalAlign?: "top" | "center" | "bottom";
 }
 
@@ -69,7 +69,7 @@ export interface IExcelSettings {
   style?: IExcelStyle;
   /** Style for the header cell of the column; missed options are inherited from the header-style of the sheet
    * ({@link IExcelSheet.headerStyle} + {@link exportToExcel.$defaults.headerStyle} + the style of the sheet)
-   * @defaultValue {@link exportToExcel.$defaults.headerStyle} + {@link exportToExcel.$defaults.style} => `{ fontSize: 11, fontFamily: "Calibri", fontStyle: ExcelFontStyles.bold }` */
+   * @defaultValue {@link exportToExcel.$defaults.headerStyle} + {@link exportToExcel.$defaults.style} => `{ fontSize: 11, fontFamily: "Calibri", verticalAlign: "center", fontStyle: ExcelFontStyles.bold, isSorted: true }` */
   headerStyle?: IExcelHeaderStyle;
   /** Format that a date-cell is rendered by; the both languages are supported:
    * * a {@link dateToString} format ({@link WUPDateTimeFormat}: `YYYY-MM-DD hh:mm:ss A`) - it's converted into
@@ -164,7 +164,7 @@ export type ExcelNumberFormat =
 export interface IExcelColumnMap<T = any> extends IExcelSettings {
   /** Item property name to map on excel cell per column */
   propName: keyof T;
-  /** Text of header, if `undefined` then extacted from propName via stringPrettify() */
+  /** Text of header, if `undefined` then extracted from propName via stringPrettify() */
   headerText?: string;
   /** Width for column; by default it's auto-defined by the longest content */
   width?: number;
@@ -1806,7 +1806,7 @@ interface IExcelDefaults extends IExcelSettings {
    * an array - a multiline {@link ExcelCellTypes.textWrap}, everything else - a plain {@link ExcelCellTypes.text}).
    *
    * Override it to change the format of a value or to force a type, ex. to store an amount as a number:
-   * `getCellValue: (h, v) => ({ type: ExcelCellTypes.number, value: (+v).toFixed(2) })`.
+   * `getCellValue: (v) => ({ type: ExcelCellTypes.number, stringVal: (+v).toFixed(2) })`.
    *
    * WARN: it's called for every single cell (the hottest path of the export), so it must stay small & must
    * never allocate anything besides the returned cell - the render reads the cell right away & drops it */

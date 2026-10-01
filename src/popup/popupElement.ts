@@ -87,7 +87,7 @@ declare module "preact/jsx-runtime" {
  * const detach = WUPPopupElement.$attach(
                     { target: btn, text: "Some text content here", openCase: PopupOpenCases.onFocus | PopupOpenCases.onClick },
                     (popup) => { popup.className = "popup-class-here"; }
-                  )'
+                  )
  *```
  * HTML
  * ```html
@@ -99,11 +99,11 @@ declare module "preact/jsx-runtime" {
  * * You can set minWidth, minHeight to prevent squeezing of popup or don't use rule '.$adjust'
  * * Don't override styles: display, transform (possible to override only for animation)
  * * Don't use inline styles: maxWidth, maxHeight, minWidth, minHeight
- * * If target removed (when popup $isOpened) and appended again you need to update $options.target (because $options.target cleared)
+ * * If target removed (when popup $isOpened) and appended again you need to update $options.target
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
- * * During the closing attr 'hide' is appended only if css-animation-duration is detected
+ * * During the closing attr 'show' is removed but attr 'open' is kept until hide-animation ends
  * * Popup can't be more than 100vw & 100vh (impossible to disable the rule)
- * * known issue: popup can be positioned wrong if parent has transfrom style: https://stackoverflow.com/revisions/15256339/2 this is css-core issue. To fix: place popup outside such parent or remove transform style on parent */
+ * * known issue: popup can be positioned wrong if parent has transform style: https://stackoverflow.com/revisions/15256339/2 this is css-core issue. To fix: place popup outside such parent or remove transform style on parent */
 export default class WUPPopupElement<
   TOptions extends WUP.Popup.Options = WUP.Popup.Options,
   Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
@@ -233,10 +233,10 @@ export default class WUPPopupElement<
    *       text: "Some text here",
    *       openCase: PopupOpenCases.onClick,
    *     },
-   *     // (el) => el.class = "popup-attached"
+   *     // (el) => el.className = "popup-attached"
    *   );
    * @tutorial Troubleshooting:
-   * * $attach doesn't work with openCase.always it doesn't make sense
+   * * $attach doesn't work with `PopupOpenCases.onInit` it doesn't make sense
    * * every new attach on the same target > re-init previous (1 attach per target is possible)
    * * Firing detach() doesn't required if target removed by `target.remove()` or `target.parent.removeChild(target)`;
    * * If popup is hidden and target is removed via `target.parent.innerHTML="another content"` you should fire detach() to avoid memoryLeak
@@ -347,7 +347,7 @@ export default class WUPPopupElement<
 
   _refListener?: PopupListener;
   #attach?: () => PopupListener; // func to use alternative target
-  /** Called after gotReady() and $open() (to re-init according to options) */
+  /** Called from gotReady() and gotChanges() (to re-init according to options) */
   protected init(): void {
     this.disposeListener(); // remove previously added events
 
@@ -385,7 +385,8 @@ export default class WUPPopupElement<
     }
   }
 
-  /** Defines target on show; @returns Element | Error */
+  /** Defines target on show; @returns Element
+   * @throws Error if target isn't found */
   defineTarget(): HTMLElement | SVGElement {
     let el: Element | null;
     const attrTrg = this.getAttribute("w-target"); // NiceToHave: re-use automated parseAttr()

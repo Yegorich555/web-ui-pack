@@ -236,7 +236,8 @@ export class WUPlocaleInfo {
   }
 
   #namesDayShort?: string[] = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-  /** Short names of days (starts with Monday): ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] */
+  /** Short names of days (starts with Monday): ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+   * after `refresh()` it's defined by locale: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] */
   get namesDayShort(): string[] {
     if (this.#namesDayShort) {
       return this.#namesDayShort;
@@ -260,7 +261,7 @@ export class WUPlocaleInfo {
  *  @defaultValue 'en-US' with custom dateTime format;
  * @tutorial Troubleshooting
  * * in JS impossible to define whether user-settings is different from user-locale
- * * there is no way to define firstWeekDay for calendar
+ * * firstWeekDay detection depends on `Intl.Locale.prototype.weekInfo` (see {@link WUPlocaleInfo.firstWeekDay})
  * * you can redefine/set any property if somehow it locale-definitions don't fit your expectations */
 const localeInfo = new WUPlocaleInfo();
 

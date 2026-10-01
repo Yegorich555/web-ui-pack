@@ -49,7 +49,7 @@ function csvFromValue(v: unknown, format: Required<ICsvFormat>): string {
 export interface ICsvColumnMap<T = any> {
   /** Item property name to map on csv column */
   propName: keyof T;
-  /** Text of header, if `undefined` then extacted from propName via stringPrettify() */
+  /** Text of header, if `undefined` then extracted from propName via stringPrettify() */
   headerText?: string;
 }
 
@@ -62,8 +62,9 @@ export interface ICsvOptions {
 }
 
 /** Returns csv string from pointed data
- * @param mapping columns of the result; by default every own prop of every item becomes a column & the header-row
- * contains the property names as they are, so such a result can be parsed back by {@link csvToData}
+ * @param mapping columns of the result in the pointed order & the text of their header-cells (by default it's
+ * `stringPrettify(propName)`); to parse such a result back by {@link csvToData} with the same keys,
+ * set `headerText` to the property name
  * @tutorial Troubleshooting
  * * a value is never escaped/quoted, so a value that contains the delimiter or a new-line breaks the structure
  * of the file: pick a delimiter that the data doesn't contain */

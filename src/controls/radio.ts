@@ -9,12 +9,12 @@ declare global {
     interface NewOptions<T = any> {
       /** Items showed as radio-buttons
        * @tutorial Troubleshooting
-       * * array items is converted to Proxy (observer) so
+       * * array items isn't converted to Proxy (observer) so changing array in place doesn't re-render items; reassign it instead
        * ```js
-       * const items = [text: "1", value: {name: "Jenny"}]
+       * const items = [{ text: "1", value: { name: "Jenny" } }];
        * el.$options.items = items;
-       * setTimeout(()=> console.warn(el.$options.items === items)},1) // returns 'false'
-       * setTimeout(()=> console.warn(el.$options.items[0].value === items[0].value)},1) // returns 'true'
+       * setTimeout(() => console.warn(el.$options.items === items), 1); // returns 'true'
+       * el.$options.items = [...items, { text: "2", value: { name: "Bob" } }]; // re-render items
        * ``` */
       items: WUP.Select.MenuItem<T>[] | (() => WUP.Select.MenuItem<T>[]);
       /** Reversed-style (radio+label for true vs label+radio)
@@ -25,11 +25,11 @@ declare global {
     interface JSXProps<C = WUPRadioControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       "w-reverse"?: boolean | "";
       /** Global reference to object with array
-       * @see  {@link WUP.Select.MenuItems}
+       * @see  {@link WUP.Select.MenuItem}
        * @example
        * ```js
        * window.myItems = [...];
-       * <wup-radio w-items="window.myItems"></wup-circle>
+       * <wup-radio w-items="window.myItems"></wup-radio>
        * ``` */
       "w-items"?: string;
     }
@@ -338,7 +338,7 @@ export default class WUPRadioControl<
     // return super.valueFromStorage(str) as any;
   }
 
-  /** Store value to storage; if item.text is not function then stored text, otherwise value.toString()
+  /** Store value to storage as `value.id ?? value.toString()` or `$null` for `null`
    *  @see {@link valueToStrCompare} */
   override valueToStorage(v: ValueType): string | null {
     if (v == null) {

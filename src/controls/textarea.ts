@@ -63,7 +63,7 @@ declare module "preact/jsx-runtime" {
  * @tutorial innerHTML @example
  * <label>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
- *      <span contenteditable="true" />
+ *      <wup-areainput contenteditable="true" role="textbox" aria-multiline="true" />
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>

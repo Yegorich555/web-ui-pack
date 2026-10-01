@@ -11,7 +11,7 @@ export const enum MenuOpenCases {
   /** When control got focus via user interaction; ignores case when user changed value by click on item on clearButton
    * to change such behavior update WUPBaseComboControl.prototype.canOpenMenu */
   onFocus = 1 << 1,
-  /** When control got focus programmatically (via option `autofocus` or when called method 'focus()') */
+  /** When control got focus programmatically (via option `autoFocus` or when called method 'focus()') */
   onFocusAuto = 1 << 2,
   /** When user clicks on control (beside editable not-empty input) */
   onClick = 1 << 3,
@@ -50,7 +50,7 @@ declare global {
     }
     interface ValidityMap extends Omit<WUP.Text.ValidityMap, "min" | "max" | "email"> {}
     interface NewOptions {
-      /** Case when menu-popup to open; WARN MenuOpenCases.inputClick doesn't work without MenuOpenCases.click
+      /** Case when menu-popup to open; WARN MenuOpenCases.onClickInput doesn't work without MenuOpenCases.onClick
        * @defaultValue onPressArrowKey | onClick | onFocus */
       openCase: MenuOpenCases;
       /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode) */
@@ -134,7 +134,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   /** Open popup-menu
-   * @returns Promise resolved resolved by animation time */
+   * @returns Promise resolved by animation time */
   async $openMenu(): Promise<void> {
     await this.goOpenMenu(MenuOpenCases.onManualCall);
     this.#isOpened && (await this.$refPopup!.$open()); // wait for popup open-end

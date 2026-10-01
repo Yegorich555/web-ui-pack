@@ -83,7 +83,7 @@ export default abstract class WUPBaseModal<
   }
 
   #isClosing?: true;
-  /** Returns if element is opening (only if animation enabled) */
+  /** Returns if element is closing (only if animation enabled) */
   get $isClosing(): boolean {
     return this.#isClosing === true;
   }

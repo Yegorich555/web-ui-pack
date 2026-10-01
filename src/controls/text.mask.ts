@@ -217,7 +217,7 @@ export default class MaskTextInput {
   }
 
   /** Converts pointed value to masked-value and update internal state
-   * @returns new input-carret position */
+   * @returns new input-caret position */
   parse(value: string, lazy?: boolean, caret?: number): number {
     const chunks = MaskTextInput.parsePattern(this.pattern);
     lazy ??= this.options!.lazy;
@@ -323,7 +323,7 @@ export default class MaskTextInput {
     this.isCompletedFull = this.isCompleted && last.index === endIndex;
   }
 
-  /* Call it on 'beforeinput' event to improve logic */
+  /** Call it on 'beforeinput' event to improve logic */
   handleBeforeInput(e: InputEvent): void {
     const el = e.target as WUP.Text.Mask.HandledInput;
     if (el.selectionStart !== el.selectionEnd) {
@@ -347,7 +347,7 @@ export default class MaskTextInput {
     };
   }
 
-  /* Call it on 'input' event */
+  /** Call it on 'input' event */
   handleInput(e: InputEvent): { declinedAdd: number; position: number } {
     const el = e.target as WUP.Text.Mask.HandledInput;
     const v = el.value;

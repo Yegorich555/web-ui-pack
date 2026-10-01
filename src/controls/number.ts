@@ -18,17 +18,17 @@ declare global {
        *  @see {@link localeInfo.sep1000} */
       sep1000?: string;
       /** Maximum displayed fraction digits; for 123.45 it's 2
-       * @defaultValue 0 */
+       * @defaultValue minDecimal ?? 0 */
       maxDecimal?: number;
-      /** Minimun displayed fraction digits; if pointed 2 then 123.4 goes to 123.40
+      /** Minimum displayed fraction digits; if pointed 2 then 123.4 goes to 123.40
        * @defaultValue 0 */
       minDecimal?: number;
     }
     interface EventMap extends WUP.BaseControl.EventMap {}
     interface ValidityMap extends WUP.Text.ValidityMap {
-      /** If $value < pointed shows message 'Min value {x}` */
+      /** If $value < pointed shows message 'Min value is {x}' */
       min: number;
-      /** If $value < pointed shows message 'Max value {x}` */
+      /** If $value > pointed shows message 'Max value is {x}' */
       max: number;
     }
     interface NewOptions {
@@ -40,7 +40,7 @@ declare global {
        * @defaultValue 1 */
       scale: number;
       /** Shift value to store value different from text-value
-       * @example point 20 when need to cast text value `100` to 120 (user sees `100` but stored 120)
+       * @example point 20 when need to cast text value `100` to 80 (user sees `100` but stored 80)
        * @defaultValue 0 */
       offset: number;
     }

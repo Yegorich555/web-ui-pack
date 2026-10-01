@@ -1,6 +1,6 @@
 /** Apply el.addEventListener and return el.removeEventListener function; use passive:true by default;
  * @tutorial Troubleshooting
- * * don't change argument `options` after the function call otherwise removineListener can be skipped */
+ * * don't change argument `options` after the function call otherwise removeEventListener can be skipped */
 export default function onEvent<
   T extends keyof E,
   K extends HTMLElement | Document,

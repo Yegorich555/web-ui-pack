@@ -46,7 +46,7 @@ export default class WUPTextareaInput extends HTMLElement {
     sel.addRange(range);
   }
 
-  /* Get/set readonly */
+  /** Get/set readonly */
   get readOnly(): boolean {
     return this.hasAttribute("aria-readonly");
   }
@@ -56,7 +56,7 @@ export default class WUPTextareaInput extends HTMLElement {
   }
 
   _cached?: string;
-  /** Get/set innerHTML (br converted into '\n') */
+  /** Get/set innerHTML (getter converts br into '\n'; setter assigns raw innerHTML) */
   get value(): string {
     if (this._cached == null) {
       this._cached = this.innerHTML

@@ -19,7 +19,7 @@ declare global {
       /** Hide items in menu that selected
        * @defaultValue false */
       hideSelected: boolean;
-      /** Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position;
+      /** Allow user to change ordering of items; Use drag&drop or keyboard Shift + ArrowLeft/ArrowRight on focused item to change its position;
        * dragging an item outside the control removes it
        * @defaultValue false */
       sortable: boolean;
@@ -29,7 +29,7 @@ declare global {
       multiple: true;
       /** @deprecated Not supported in SelectManyControl */
       prefix?: string | null | undefined;
-      /** @deprecated Not supported in SelectManControl */
+      /** @deprecated Not supported in SelectManyControl */
       postfix?: string | null | undefined;
     }
     interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
@@ -93,22 +93,22 @@ declare module "preact/jsx-runtime" {
    Solution not found (using contenteditable fixes this but provides more other bugs)
  * @tutorial innerHTML @example
  * <label>
+ *   <strong>{$options.label}</strong>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
  *      <span [item]>Item 1</span>
  *      <span [item]>Item 2</span>
  *      // etc/
  *      <input/>
- *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
- *   <wup-popup menu>
- *      <ul>
- *          <li>Item 1</li>
- *          <li>Item 2</li>
- *          // etc/
- *      </ul>
- *   </wup-popup>
  * </label>
+ * <wup-popup menu>
+ *    <ul>
+ *        <li>Item 1</li>
+ *        <li>Item 2</li>
+ *        // etc/
+ *    </ul>
+ * </wup-popup>
  */
 export default class WUPSelectManyControl<
   ValueType = any,

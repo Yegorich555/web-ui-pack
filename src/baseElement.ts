@@ -18,7 +18,7 @@ const allMappedAttrs = new WeakMap<typeof WUPBaseElement, Record<string, Attribu
 export interface AttributeMap {
   /** One of default types with defined parse */
   type: AttributeTypes;
-  /** Option[name] realted to related attribute. Point if attrName !== propName */
+  /** Option[name] related to related attribute. Point if attrName !== propName */
   prop?: string;
   /** Custom parser for related attribute */
   parse?: (attrValue: string) => any;
@@ -95,7 +95,7 @@ export default abstract class WUPBaseElement<
 
   /** StyleContent related to component & inherited components */
   static get $styleRoot(): string {
-    // NiceToHave: currently $styleRoot inheritted automatically so init WUPSortElement adds WUPBaseElement.$styleRoot and WUPSortElement.$styleRoot, but expected only WUPSortElement.$styleRoot
+    // NiceToHave: currently $styleRoot inherited automatically so init WUPSortElement adds WUPBaseElement.$styleRoot and WUPSortElement.$styleRoot, but expected only WUPSortElement.$styleRoot
     return ""; // WARN: it's injected from baseElement.scss via stylesLoader.js
   }
 
@@ -148,8 +148,8 @@ export default abstract class WUPBaseElement<
     return o;
   }
 
-  /** Array of options names to listen for changes; @returns `undefined` if need to observe for every option
-   * @defaultValue every option from $defaults` */
+  /** Array of options names to listen for changes; @returns `null` if need to observe for every option
+   * @defaultValue every option from $defaults */
   static get observedOptions(): Array<string> | null {
     return null;
   }
@@ -575,16 +575,12 @@ export default abstract class WUPBaseElement<
     this.disposeLst.length = 0;
   }
 
-  /** Returns true if el is instance of Node and contains pointed element
-   * @tutorial Troubleshooting
-   * * if element has position `fixed` or `absolute` then returns false */
+  /** Returns true if el is instance of Node and contains pointed element */
   includes(el: unknown): boolean {
     return el instanceof Node && this.contains(el);
   }
 
-  /** Returns true if element contains eventTarget or it's eventTarget
-   * @tutorial Troubleshooting
-   * * if element has position `fixed` or `absolute` then returns false */
+  /** Returns true if element contains eventTarget or it's eventTarget */
   includesTarget(e: Event): boolean {
     return this.itsMe(e.target);
   }
@@ -612,9 +608,7 @@ export default abstract class WUPBaseElement<
     return null;
   }
 
-  /** Returns true if contains pointed element or has itself
-   * @tutorial Troubleshooting
-   * * if element has position `fixed` or `absolute` then returns false */
+  /** Returns true if contains pointed element or has itself */
   itsMe(el: Element | EventTarget | null): boolean {
     return this === el || (el instanceof Node && this.contains(el));
   }

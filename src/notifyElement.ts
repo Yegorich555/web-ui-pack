@@ -71,7 +71,7 @@ declare global {
 declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
-      /**  Modal element
+      /**  Notify element
        *  @see {@link WUPNotifyElement} */
       [tagName]: WUP.Base.ReactHTML<WUPNotifyElement> & WUP.Notify.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -84,7 +84,7 @@ declare module "preact/jsx-runtime" {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
-      /**  Modal element
+      /**  Notify element
        *  @see {@link WUPNotifyElement} */
       [tagName]: HTMLAttributes<WUPNotifyElement> & WUP.Notify.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -181,7 +181,7 @@ export default class WUPNotifyElement<
   };
 
   #isPlayed = false;
-  /** Returns whethere element in play mode and will be closed after a time */
+  /** Returns whether element in play mode and will be closed after a time */
   get $isPlayed(): boolean {
     return this.#isPlayed;
   }
@@ -221,7 +221,7 @@ export default class WUPNotifyElement<
     };
   }
 
-  /** Called once on opening */
+  /** Called on every opening */
   protected override gotRender(isOpening = false): void {
     if (!isOpening) {
       return; // empty because component is hidden by default and need to focus on open-phase

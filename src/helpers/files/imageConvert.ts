@@ -43,7 +43,7 @@ export interface IImageConvertOptions {
    * @defaultValue the format of the pointed file; `png` when a canvas can't write it (`heic`, `gif`, `avif`...) */
   format?: WUPImageEncodeFormat;
   /** Quality of the lossy formats (`jpg` & `webp`) in range `0..1`; it's ignored by `png`
-   * @defaultValue `0.92` (the browser default) */
+   * @defaultValue the browser default: `0.92` for `jpg`; browser-specific for `webp` */
   quality?: number;
   /** Css-color that fills the transparent parts of the image
    * @defaultValue `#fff` for `jpg` (it has no alpha-channel, so without the fill it becomes black); none for others */

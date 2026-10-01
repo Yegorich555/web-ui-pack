@@ -81,7 +81,7 @@ declare global {
     }
 
     interface ValidityMap {
-      /** If $value is empty shows message 'This field is required` */
+      /** If $value is empty shows message 'This field is required' */
       required: boolean;
     }
     type ValidityFunction<T> = (
@@ -109,10 +109,10 @@ declare global {
       /** Disallow edit/copy value; adds attr [disabled] for styling
        * * point string (reason) to show it via tooltip (`WUPPopupElement.$useTooltip({ attr: "disabled" })` is applied automatically; call it before to customize) */
       disabled: boolean | string;
-      /** Disallow copy value; adds attr [readonly] for styling @defaultValue false
+      /** Disallow edit value; adds attr [readonly] for styling @defaultValue false
        * * point string (reason) to show it via tooltip (`WUPPopupElement.$useTooltip({ attr: "readonly" })` is applied automatically; call it before to customize) */
       readOnly: boolean | string;
-      /** Debounce option for onFocusLost event (for validationCases.onFocusLost);
+      /** Debounce option for onFocusGot event (passed to helpers/onFocusGot); WARN: onFocusLost event (for validationCases.onFocusLost) uses helper default 100ms
        * @see {@link onFocusLostOptions.debounceMs} in helpers/onFocusLost;
        * @defaultValue 100ms */
       focusDebounceMs: number;
@@ -125,7 +125,7 @@ declare global {
        * * value can be undefined only when a rule named as 'required' or need to collect error-messages @see {@link Options.validationShowAll}
        * @example
        * ```
-       * WUPTextControl.$defaults.validationRules.isNumber = (v === undefined || !/^[0-9]*$/.test(v)) && "Please enter a valid number";
+       * WUPTextControl.$defaults.validationRules.isNumber = (v) => (v === undefined || !/^[0-9]*$/.test(v)) && "Please enter a valid number";
        *
        * const el = document.body.appendChild(document.createElement("wup-text"));
        * el.$options.validations = {
@@ -145,32 +145,32 @@ declare global {
        * ```
        * const el = document.body.appendChild(document.createElement("wup-text"));
          el.$options.validations = {
-           min: 10, // set min 10symbols for $default.validationRules.min
-           custom: (value: string | undefined) => (value === un\defined || value === "test-me") && "This is custom error", // custom validation for single element
+           min: 10, // set min 10symbols for $defaults.validationRules.min
+           custom: (value: string | undefined) => (value === undefined || value === "test-me") && "This is custom error", // custom validation for single element
          };
        * ```
        * @tutorial Troubleshooting
-       ** If setup validations via attr it doesn't affect on $options.validations directly. Instead use el.validations getter instead */
+       ** Validations defined via attr [w-validations] are applied to $options.validations; final rules are merged with `$defaults.validations` */
       validations:
         | { [K in keyof VM]?: VM[K] | ValidityFunction<T> }
         | { [k: string]: ValidityFunction<T> }
         | null
         | undefined;
       /** When to validate control and show error. Validation by onSubmit impossible to disable
-       *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue | onSubmit */
+       *  @defaultValue onChangeSmart | onFocusLost | onFocusWithValue */
       validationCase: ValidationCases;
-      /** Wait for pointed time after valueChange before showError (it's summarized with $options.debounce); WARN: hide error without debounce
+      /** Wait for pointed time after valueChange before showError (it's summarized with debounce of control, e.g. `$options.debounceMs` for Text); WARN: hide error without debounce
        *  @defaultValue 500 */
       validateDebounceMs: number;
       /** Show all validation-rules with checkpoints as list instead of single error @defaultValue false;
        * @tutorial rules
-       * * All listed rules must return error-message when value === undefined OR
+       * * All listed rules must return error-message when value === undefined
        * * To skip rule from listing name with underscore, for example `_old: (v,c) => ...` */
       validationShowAll: boolean;
       /** Storage key for auto saving value in storage;
        * @tutorial rules
        * * On init value from storage applies to `$value` and triggers onChange event
-       * * Point empty string or `true` to inherit from $options.name
+       * * Point `true` to inherit from $options.name
        * * Expected value can be converted toString & parsed from string itself.
        * * Override `valueFromStorage` & `valueToStorage` to change serializing (for complex objects, arrays etc.)
        * * Before API-call gather form.$model on init OR use $onChange event
@@ -178,7 +178,7 @@ declare global {
        * @defaultValue emptyString (means `false`) */
       storageKey?: boolean | string | null;
       /** Type of storage for saving value (if pointed storageKey)
-       * @see {@link WUP.BaseControl.Options.storekey}
+       * @see {@link WUP.BaseControl.Options.storageKey}
        * @defaultValue "local" */
       storage?: "local" | "session" | "url";
       /** Fire `$change` event on init (with reason `initValue`) even if value is empty;
@@ -200,7 +200,7 @@ declare global {
       "w-disabled"?: boolean | "";
       /** Point string (reason) to show it via tooltip */
       disabled?: boolean | string;
-      /** @deprecated use [disabled] instead since related to CSS-styles */
+      /** @deprecated use [readonly] instead since related to CSS-styles */
       "w-readonly"?: boolean | "";
       /** Point string (reason) to show it via tooltip */
       readonly?: boolean | string;
@@ -208,9 +208,9 @@ declare global {
       "w-clearActions"?: ClearActions | number;
       /** @deprecated use static `.$defaults.validationCase` instead */
       "w-validationCase"?: never;
-      /** @deprecated use static `.$defaults.validationCase` instead */
+      /** @deprecated use static `.$defaults.focusDebounceMs` instead */
       "w-focusDebounceMs"?: never;
-      /** @deprecated use static `.$defaults.validationCase` instead */
+      /** @deprecated use static `.$defaults.validationRules` instead */
       "w-validationRules"?: never;
       /** Rules enabled for current control (related to $defaults.validationRules);
        * * Point Global reference to object
@@ -219,7 +219,7 @@ declare global {
        * window.someRules = { required: true };
        * <wup-text w-validations="window.someRules"></wup-text>
        * ```
-       * @defaultValue [4,4] */
+       * @defaultValue null */
       "w-validations"?: string;
       "w-validateDebounceMs"?: number;
       "w-validationShowAll"?: boolean | "";
@@ -227,7 +227,7 @@ declare global {
       "w-storageKey"?: boolean | string;
       "w-storage"?: "local" | "session" | "url";
       "w-enableInitOnChange"?: boolean | "";
-      /** @deprecated Use [required] for styling */
+      /** @readonly Use [required] for styling */
       readonly required?: "";
       /** @readonly Use [invalid] for styling */
       readonly invalid?: boolean;
@@ -383,7 +383,7 @@ export default abstract class WUPBaseControl<
     return this.#ctr.$isEmpty(this.#value);
   }
 
-  /** Returns if value changed (by comparisson with $initValue via static.isEqual option)
+  /** Returns if value changed (by comparison with $initValue via static $isEqual method)
    *  By default values compared by valueOf if it's possible */
   get $isChanged(): boolean {
     return !this.#ctr.$isEqual(this.$value, this.#initValue, this);
@@ -868,7 +868,7 @@ export default abstract class WUPBaseControl<
   /** Current error message */
   _errMsg?: string;
   #refErrTarget?: HTMLElement;
-  /** Method called to show error and set invalid state on input; point null to show all validation rules with checkpoints */
+  /** Method called to show error and set invalid state on input */
   protected goShowError(err: string, target: HTMLElement): void {
     if (!err) {
       this.throwError("Error message missed");
@@ -924,7 +924,7 @@ export default abstract class WUPBaseControl<
     }
   }
 
-  /** Called to serialize value from URL/storage; override it if you have object */
+  /** Called to deserialize value from URL/storage; override it if you have object */
   valueFromStorage(str: string): ValueType | undefined {
     return str === "$null" ? (null as ValueType) : this.parse(str);
   }
@@ -1095,7 +1095,7 @@ export default abstract class WUPBaseControl<
     return this._nextClearValue;
   }
 
-  /* Called when user pressed Esc-key or button-clear */
+  /** Called when user pressed Esc-key or button-clear */
   clearValue(): void {
     const next = this._nextClearValue;
     this._nextClearValue = this.#value;

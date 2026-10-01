@@ -35,7 +35,7 @@ declare global {
       /** Sets minWidth 100% of targetWidth; it can't be more than css-style min-width
        * @defaultValue true */
       minWidthByTarget: boolean;
-      /** Sets minHeight 100% of targetWidth; it can't be more than css-style min-height
+      /** Sets minHeight 100% of targetHeight; it can't be more than css-style min-height
        *  @defaultValue true */
       minHeightByTarget: boolean;
     }
@@ -102,7 +102,7 @@ export default class WUPDropdownElement<
   }
 
   /** Default options applied to every element. Change it to configure default behavior
-   * * @tutorial Troubleshooting
+   * @tutorial Troubleshooting
    * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` directly */
   static $defaults: WUP.Dropdown.Options = inheritDefaults(WUPPopupElement.$defaults, {
     animation: PopupAnimations.drawer,
@@ -122,7 +122,7 @@ export default class WUPDropdownElement<
     ],
   });
 
-  /** Reference to nested HTMLElement tied with $options.label */
+  /** Reference to the first nested HTMLElement (default target of popup) */
   $refTitle = this.firstElementChild as HTMLElement;
   /** Reference to popupMenu */
   $refPopup = this.lastElementChild as WUPPopupElement;

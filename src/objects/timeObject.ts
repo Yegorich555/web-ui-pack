@@ -3,7 +3,7 @@ import localeInfo from "./localeInfo";
 
 // watch: deprecate in favor of PlainTime: https://caniuse.com/?search=Temporal.PlainTime
 
-/** Plane time-object without date */
+/** Plain time-object without date */
 export default class WUPTimeObject {
   hours: number;
   minutes: number;
