@@ -21,6 +21,9 @@
     - _Menu keeps text-filter on re-opening after Escape (shows filtered items when input is empty)_
     - _Selected item is hidden with delay (blinks)_
     - _Selected items are not hidden when value is object equal by `$isEqual` (ex. `{ id: 1 }`) but not the same reference_
+- [PasswordControl](src/controls/password.ts)
+  - _Validation rule **special** ignores `min` (fails only when no special chars at all)_
+  - _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-storageKey`, `w-storage`_
 - [DropdownElement](src/dropdownElement.ts). _Fix popup position on animation when item is partially visible_
 - [ModalElement](src/modalElement.ts). _Ctrl+A selects behind modal_
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts)

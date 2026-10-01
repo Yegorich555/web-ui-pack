@@ -26,7 +26,7 @@ declare global {
       reverse: boolean;
     }
     interface JSXProps<C = WUPPasswordControl>
-      extends Omit<WUP.Text.JSXProps<C>, "mask" | "maskholder" | "prefix" | "postfix"> {
+      extends Omit<WUP.Text.JSXProps<C>, "w-mask" | "w-maskholder" | "w-storageKey" | "w-storage"> {
       /** Reversed-style for button-eye
        * @defaultValue false */
       "w-reverse"?: boolean | string;
@@ -126,7 +126,7 @@ export default class WUPPasswordControl<
       minLower: (v, setV) =>
         (!v || stringLowerCount(v, setV) < setV) && __wupln(`Must contain at least ${setV} lower case`, "validation"),
       special: (v, setV) =>
-        (!v || ![...setV.chars].reduce((prev, c) => (v.includes(c) ? ++prev : prev), 0)) &&
+        (!v || [...v].reduce((prev, c) => (setV.chars.includes(c) ? ++prev : prev), 0) < setV.min) &&
         __wupln(
           `Must contain at least ${setV.min} special character${setV.min === 1 ? "" : "s"}: ${setV.chars}`,
           "validation"

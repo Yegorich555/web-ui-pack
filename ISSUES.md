@@ -6,13 +6,11 @@ Audit of JSDoc (`src/**`), [README.md](README.md), [CHANGELOG.md](CHANGELOG.md),
 
 Docs (README, CHANGELOG, CODESTYLE, JSDoc) are fixed; JSDoc for the items below describes the intended behavior.
 
-- [ ] [password.ts:127](src/controls/password.ts#L127). Rule `special` ignores `setV.min`: fails only when count of special chars is 0 => `{ min: 2 }` passes `"a-b"`
 - [ ] [radio.ts:316](src/controls/radio.ts#L316). `valueToStrCompare` returns number for numeric `id` (select.ts wraps with `.toString()`) => `valueFromStorage` (`=== str`) never matches. Fix: `((a.value as any).id ?? a.value).toString()`
 - [ ] [notifyElement.ts:116-117](src/notifyElement.ts#L116-L117). `pauseOnHover` & `pauseOnWinBlur` missed in `observedOptions` => attrs `w-pauseOnHover/w-pauseOnWinBlur` (declared in JSXProps :62-63) are silently ignored
 - [ ] [baseControl.ts:579](src/controls/baseControl.ts#L579). `hasAttribute("initvalue")` must be `"w-initvalue"` (always false now)
 - [ ] [popupElement.ts:61](src/popup/popupElement.ts#L61). Preact `IntrinsicElements["wup-popup"]` uses `WUP.Modal.JSXProps` (copy-paste) => Preact gets modal attrs (`w-autoClose`, modal `w-placement`) and loses `w-animation`. React (:40) uses `WUP.BaseModal.JSXProps & WUP.Popup.Attributes`
 - [ ] [number.ts:28](src/controls/number.ts#L28). `WUP.Number.ValidityMap extends WUP.Text.ValidityMap` exposes `email`, but runtime rules have only `required/min/max` => `validations={{ email: true }}` compiles & throws `Validation rule [email] is not found`. Fix: `Omit<..., "email">` (as baseCombo does)
-- [ ] [password.ts:23 vs :29](src/controls/password.ts#L23-L29). Options omit `mask|maskholder|storageKey|storage`; JSXProps omit `mask|maskholder|prefix|postfix` => JSX offers unsupported `w-storageKey/w-storage`, hides working `w-prefix/w-postfix`
 - [ ] [circleElement.ts:94](src/circleElement.ts#L94). JSXProps omit `w-hoverOpenTimeout/w-hoverCloseTimeout` though they're observed & parsed as numbers
 - [ ] [popupElement.types.ts:141-142](src/popup/popupElement.types.ts#L141-L142). Readonly attr `hide` is declared but popup never sets it (uses `[show]`/`[open]`)
 - [ ] [selectMany.ts:17](src/controls/selectMany.ts#L17). `ValidityMap extends WUP.BaseCombo.ValidityMap` instead of `WUP.Select.ValidityMap` => `minCount/maxCount` missed in TS though inherited at runtime
