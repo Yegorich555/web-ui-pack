@@ -7,6 +7,7 @@ import WUPSortElement from "../sortElement";
 import { MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 import WUPSelectControl from "./select";
+import TextHistory from "./text.history";
 
 const tagName = "wup-selectmany";
 
@@ -157,7 +158,7 @@ export default class WUPSelectManyControl<
   }
 
   protected override canHandleUndo(): boolean {
-    return false; // custom history not required for this control
+    return false; // custom input-history not required for this control: browser handles it itself & value-history is handled via historyValue()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -349,9 +350,44 @@ export default class WUPSelectManyControl<
   }
 
   protected override setValue(v: ValueType[] | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
+    const prev = this.$value;
     const isChanged = super.setValue(v, reason, skipInput);
     isChanged !== false && this.setAttr("filled", !this.$isEmpty, true);
+    if (isChanged && !this.#isHistAction) {
+      if (
+        reason === SetValueReasons.userInput ||
+        reason === SetValueReasons.userSelect ||
+        reason === SetValueReasons.clear
+      ) {
+        (this._histUndo ??= []).push(prev);
+        this._histRedo = [];
+      } else {
+        // the same as native input: history is reset when value is changed programmatically
+        delete this._histUndo;
+        delete this._histRedo;
+      }
+    }
     return isChanged;
+  }
+
+  /** Undo-history of value (input-text history is handled by browser itself) */
+  _histUndo?: Array<ValueType[] | undefined>;
+  /** Redo-history of value */
+  _histRedo?: Array<ValueType[] | undefined>;
+  #isHistAction?: true;
+  /** Called on Ctrl+Z / Ctrl+Shift+Z when input is empty to undo/redo changes of selected items
+   * @returns true if history exists & value is changed */
+  protected historyValue(isRedo: boolean): boolean {
+    const from = isRedo ? this._histRedo : this._histUndo;
+    if (!from?.length) {
+      return false;
+    }
+    (isRedo ? (this._histUndo ??= []) : (this._histRedo ??= [])).push(this.$value);
+    this.focusItemByIndex(null);
+    this.#isHistAction = true;
+    this.setValue(from.pop(), SetValueReasons.userInput); // userInput: to fire validation & $change as for user action
+    this.#isHistAction = undefined;
+    return true;
   }
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
@@ -399,6 +435,12 @@ export default class WUPSelectManyControl<
 
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
+
+    const histKey = !this.$refInput.value && TextHistory.getUndoRedoKey(e); // otherwise browser undo/redo for input-text
+    if (histKey) {
+      this.historyValue(histKey === "redo") && e.preventDefault();
+      return;
+    }
 
     if (!(this.$refInput.selectionEnd === 0 && this.$refItems?.length)) {
       return;
@@ -513,5 +555,3 @@ customElements.define(tagName, WUPSelectManyControl);
  * 2. Firefox. Caret position is missed if no empty spans between items
  * 3. Without contenteditalbe='false' browser moves cursor into item, but it should be outside
  */
-
-// NiceToHave: Ctrl+Z must should work for the whole control. Not only for `input`

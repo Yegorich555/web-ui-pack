@@ -12,6 +12,7 @@
   - Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (user able to see formats in TS)
   - Compressed built-in styles
 - **Controls**. _Validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)_
+- [SelectManyControl](src/controls/selectMany.ts). Add Ctrl+Z (history undo/redo) support for the whole control (previously it worked only for text input field)
 - [Form](src/formElement.ts). Added $onChange callback: form.$onChange = ()=>{...}
 - [DropdownElement](src/dropdownElement.ts). _Fix popup position on animation when item is partially visible_
 - [ModalElement](src/modalElement.ts.ts). _Ctrl+A selects behind modal_
@@ -63,7 +64,7 @@
 
 - **Global**. Fix `el.cloneNode(true)` produces duplicates of the internal content
 - **Security**. helper [nestedProperty](src/helpers/nestedProperty.ts). Fix prototype pollution: `set()` throws now if path contains `__proto__`, `constructor` or `prototype`
-- **SelectManyControl**. Fix `Internal bug. No cached items` when value is changed right after `$options.items` is assigned to a `Promise`
+- [SelectManyControl](src/controls/selectMany.ts. Fix `Internal bug. No cached items` when value is changed right after `$options.items` is assigned to a `Promise`
 - [PopupElement](src/popup/popupElement.ts). Added `$options.keepPosition` to lock position-priority (`bottom` <=> `top`) while target isn't moved. Enabled for menus of [comboControls](src/controls/baseCombo.ts) so menu doesn't jump when height of popup/control is changed (ex. when [SelectManyControl](src/controls/selectMany.ts) collapses items on focus lost)
 - [NotifyElement](src/notifyElement.ts). Fixed position when $open-$close-$open fired before completely closing
 

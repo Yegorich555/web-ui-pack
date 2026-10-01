@@ -730,6 +730,108 @@ describe("control.selectMany", () => {
     expect(handledKeydown("W", { shiftKey: true })).toBe(false);
   });
 
+  test("undo/redo for value", async () => {
+    const undo = () => handledKeydown("z", { code: "KeyZ", ctrlKey: true });
+    const redo = () => handledKeydown("z", { code: "KeyZ", ctrlKey: true, shiftKey: true });
+    const onChanged = jest.fn();
+    el.$value = [10];
+    el.$options.sortable = true;
+    el.$options.clearButton = true;
+    await h.wait(10);
+    el.addEventListener("$change", onChanged);
+    HTMLInputElement.prototype.focus.call(el.$refInput);
+    await h.wait();
+    expect(undo()).toBe(false); // no history
+    expect(redo()).toBe(false);
+
+    // select items
+    await h.userClick(el.$refPopup.querySelectorAll("li")[1]);
+    await h.userClick(el.$refPopup.querySelectorAll("li")[2]);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 30]);
+    onChanged.mockClear();
+
+    expect(undo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(el.$refItems.map((a) => a.textContent)).toStrictEqual(["Donny", "Mikky"]);
+    expect(onChanged).toBeCalledTimes(1);
+    expect(onChanged.mock.lastCall[0].detail.reason).toBe(3); // SetValueReasons.userInput
+    expect(undo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10]);
+    expect(undo()).toBe(false); // end of history: value [10] is set programmatically
+
+    expect(redo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(handledKeydown("y", { code: "KeyY", ctrlKey: true })).toBe(true); // redo
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 30]);
+    expect(redo()).toBe(false); // end of history
+    expect(handledKeydown("z", { code: "KeyZ", metaKey: true })).toBe(true); // undo on MacOS
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(handledKeydown("z", { code: "KeyZ", ctrlKey: true, altKey: true })).toBe(false); // ignored
+    expect(el.$value).toStrictEqual([10, 20]);
+
+    // new change clears redo-history
+    await h.userClick(el.$refPopup.querySelectorAll("li")[3]);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+    expect(redo()).toBe(false);
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+
+    // remove item via keyboard
+    el.$refInput.selectionStart = 0;
+    el.$refInput.selectionEnd = 0;
+    expect(handledKeydown("ArrowLeft")).toBe(true); // focus last item
+    expect(handledKeydown("Backspace")).toBe(true); // remove focused item
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(undo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+    expect(el.$refItems.map((a) => a.textContent)).toStrictEqual(["Donny", "Mikky", "Splinter"]);
+    expect(el.$refItems.some((a) => a.hasAttribute("focused"))).toBe(false); // focused item is reset
+
+    // sorting via keyboard
+    expect(handledKeydown("ArrowLeft")).toBe(true); // focus last item
+    expect(handledKeydown("ArrowLeft", { shiftKey: true })).toBe(true); // move to left
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 40, 20]);
+    expect(undo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+    expect(el.$refItems.map((a) => a.textContent)).toStrictEqual(["Donny", "Mikky", "Splinter"]);
+
+    // clear button
+    el.$refBtnClear.click();
+    await h.wait();
+    expect(el.$value).toBe(undefined);
+    expect(undo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+
+    // input has text: browser handles undo itself
+    await h.userTypeText(el.$refInput, "mi");
+    expect(undo()).toBe(false);
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+    await h.userRemove(el.$refInput, { removeCount: 2 });
+    await h.wait();
+    expect(el.$refInput.value).toBe("");
+
+    // value changed programmatically: history is reset
+    expect(redo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toBe(undefined);
+    el.$value = [20];
+    await h.wait();
+    expect(undo()).toBe(false);
+    expect(redo()).toBe(false);
+    expect(el.$value).toStrictEqual([20]);
+  });
+
   test("sortable: drag&drop", async () => {
     const onChanged = jest.fn();
     el.$value = [10, 20, 30, 40];
