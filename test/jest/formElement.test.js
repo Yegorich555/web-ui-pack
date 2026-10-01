@@ -121,6 +121,14 @@ describe("formElement", () => {
     inputs[0].setAttribute("w-name", "Address");
     jest.advanceTimersByTime(1);
     expect(inputs[0].$initValue).toBe("some date"); // stay same because prev. $initValue is defined
+
+    // attr [w-initvalue] has priority over $initModel even if empty
+    const ctrl = document.createElement("wup-text");
+    ctrl.setAttribute("w-name", "DOB");
+    ctrl.setAttribute("w-initvalue", "");
+    el.appendChild(ctrl);
+    jest.advanceTimersByTime(1);
+    expect(ctrl.$initValue).toBe(undefined);
   });
 
   test("$initModel from controls", () => {
