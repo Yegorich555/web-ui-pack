@@ -16,7 +16,7 @@
   - With option **allowNewValue** menu shows item `{text} (New option)` at the end when input text doesn't match any item; text is configurable via `WUPSelectControl.$textNewItem` (set `undefined` to hide the item)
   - _With option **multiple** de-selecting an item via menu adds duplicate instead of removing when value is object equal to item by `$isEqual` (ex. `{ id: 1 }`) but not the same reference_
 - [SelectManyControl](src/controls/selectMany.ts)
-  - Add Ctrl+Z (history undo/redo) support for the whole control (previously it worked only for text input field)
+  - Added Ctrl+Z (history undo/redo) support for the whole control (previously it worked only for text input field)
   - Option **hideSelected**
     - _Menu keeps text-filter on re-opening after Escape (shows filtered items when input is empty)_
     - _Selected item is hidden with delay (blinks)_
@@ -36,9 +36,7 @@
 - helper [observer](src/helpers/observer.ts)
   - _`delete observed.prop` fires event but doesn't delete prop_
   - _`observed.valueOf()` returns function instead of raw object_
-- helper [scrolled](src/helpers/scrolled.ts)
-  - _With option **pages.cycled** `goTo(pages.total)` does nothing instead of going to the last page_
-  - Removed unused type `WUP.Scrolled.NextStateRender`
+- helper [scrolled](src/helpers/scrolled.ts). _With option **pages.cycled** `goTo(pages.total)` does nothing instead of going to the last page_
 
 ### New Features
 
