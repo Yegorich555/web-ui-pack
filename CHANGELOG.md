@@ -26,6 +26,7 @@
 - [PasswordControl](src/controls/password.ts)
   - _Validation rule **special** ignores `min` (fails only when no special chars at all)_
   - _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-storageKey`, `w-storage`_
+- [RadioControl](src/controls/radio.ts). _Option **storageKey** doesn't restore value when value is object with numeric `id` (ex. `{ id: 1 }`)_
 - [DropdownElement](src/dropdownElement.ts). _Fix popup position on animation when item is partially visible_
 - [ModalElement](src/modalElement.ts). _Ctrl+A selects behind modal_
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts)

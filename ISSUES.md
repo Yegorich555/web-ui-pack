@@ -1,6 +1,5 @@
 # Issues
 
-- [radio.ts:316](src/controls/radio.ts#L316). `valueToStrCompare` returns number for numeric `id` (select.ts wraps with `.toString()`) => `valueFromStorage` (`=== str`) never matches. Fix: `((a.value as any).id ?? a.value).toString()`
 - [notifyElement.ts:116-117](src/notifyElement.ts#L116-L117). `pauseOnHover` & `pauseOnWinBlur` missed in `observedOptions` => attrs `w-pauseOnHover/w-pauseOnWinBlur` (declared in JSXProps :62-63) are silently ignored
 - [baseControl.ts:579](src/controls/baseControl.ts#L579). `hasAttribute("initvalue")` must be `"w-initvalue"` (always false now)
 - [select.ts:924](src/controls/select.ts#L924) & [baseCombo.ts:159](src/controls/baseCombo.ts#L159). `readOnlyInput` as number (auto-mode) is treated as plain truthy (skips `", "` delimiter, drops `aria-autocomplete`) even when input is editable

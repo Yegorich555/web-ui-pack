@@ -313,7 +313,7 @@ export default class WUPRadioControl<
   valueToStrCompare(a: WUP.Select.MenuItem<ValueType>): string | null {
     let at = null;
     if (a.value != null) {
-      at = (a.value as any).id ?? a.value.toString();
+      at = ((a.value as any).id ?? a.value).toString();
     } else {
       at = typeof a.text === "function" ? a.value?.toString() : a.text;
     }
@@ -338,7 +338,7 @@ export default class WUPRadioControl<
     // return super.valueFromStorage(str) as any;
   }
 
-  /** Store value to storage as `value.id ?? value.toString()` or `$null` for `null`
+  /** Store value to storage as `(value.id ?? value).toString()` or `$null` for `null`
    *  @see {@link valueToStrCompare} */
   override valueToStorage(v: ValueType): string | null {
     if (v == null) {

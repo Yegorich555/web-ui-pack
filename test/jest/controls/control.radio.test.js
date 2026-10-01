@@ -356,6 +356,23 @@ describe("control.radio", () => {
       })
     ).not.toThrow(); // case impossible in live but better to check
 
+    // when value is object with numeric id
+    const objItems = [
+      { value: { id: 1, name: "Dark Men" }, text: "Dark Men" },
+      { value: { id: 2, name: "Lucy" }, text: "Lucy" },
+    ];
+    el = document.body.appendChild(document.createElement(testEl.tagName));
+    el.$options.storageKey = "rdObj";
+    el.$options.items = objItems;
+    await h.wait();
+    el.$value = objItems[1].value;
+    expect(sSet).lastCalledWith("rdObj", "2");
+    el = document.body.appendChild(document.createElement(testEl.tagName));
+    el.$options.storageKey = "rdObj";
+    el.$options.items = objItems;
+    await h.wait();
+    expect(el.$value).toBe(objItems[1].value);
+
     // when item not found
     h.mockConsoleError();
     el = document.body.appendChild(document.createElement(el.tagName));
