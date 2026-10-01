@@ -13,6 +13,7 @@
   - Compressed built-in styles
 - **Controls**. _Validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)_
 - [SelectManyControl](src/controls/selectMany.ts). Add Ctrl+Z (history undo/redo) support for the whole control (previously it worked only for text input field)
+- [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts). With option **allowNewValue** menu shows item `{text} (New option)` at the end when input text doesn't match any item; text is configurable via `WUPSelectControl.$textNewItem` (set `undefined` to hide the item)
 - [Form](src/formElement.ts). Added $onChange callback: form.$onChange = ()=>{...}
 - [DropdownElement](src/dropdownElement.ts). _Fix popup position on animation when item is partially visible_
 - [ModalElement](src/modalElement.ts.ts). _Ctrl+A selects behind modal_

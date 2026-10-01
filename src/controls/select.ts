@@ -167,6 +167,9 @@ export default class WUPSelectControl<
   static $textNoItems: string | undefined = __wupln("No Items", "content");
   /** Text for aria-label of <ul> element */
   static $ariaLabelItems = __wupln("Items", "aria");
+  /** Text appended to menu item `{inputText} (New option)` that is shown with option `allowNewValue` when input doesn't match any item;
+   * set `undefined` to hide such item */
+  static $textNewItem: string | undefined = __wupln("(New option)", "content");
 
   static $isEqual(v1: unknown, v2: unknown, c: WUPSelectControl): boolean {
     let isEq = super.$isEqual(v1, v2, c);
@@ -417,10 +420,12 @@ export default class WUPSelectControl<
   /** All items of current menu */
   _menuItems?: {
     all: WUP.Select.MenuItemElement[];
-    /** Index of items filtered by input */
+    /** Index of items filtered by input; `-1` points on `refNew` */
     filtered?: Array<number>;
     /** Index (in 'filtered' otherwise in 'all' array) of item that has virtual-focus; */
     focused: number;
+    /** Menu item `{inputText} (New option)` rendered with option `allowNewValue` */
+    refNew?: WUP.Select.MenuItemElement;
   };
 
   /** Items resolved from options */
@@ -449,6 +454,26 @@ export default class WUPSelectControl<
       }
     } else {
       popup.hidden = true;
+    }
+  }
+
+  /** Called to show/hide menu item `{text} (New option)` at the end of menu (only with option `allowNewValue`)
+   * @param text input text for new value; `null` to hide item */
+  protected renderMenuNewItem(text: string | null): void {
+    let li = this._menuItems!.refNew;
+    if (!li) {
+      if (text == null) {
+        return;
+      }
+      li = this.$refPopup!.firstElementChild!.appendChild(document.createElement("li")) as WUP.Select.MenuItemElement;
+      li.setAttribute("role", "option");
+      li.setAttribute("new", "");
+      this._menuItems!.refNew = li;
+    }
+    this.filterMenuItem(li, text == null);
+    if (text != null) {
+      li._value = text;
+      li.textContent = `${text} ${this.#ctr.$textNewItem}`;
     }
   }
 
@@ -567,17 +592,16 @@ export default class WUPSelectControl<
 
   /** Called when need to setValue & close base on clicked item */
   protected gotMenuItemClick(e: MouseEvent, li: WUP.Select.MenuItemElement): void {
-    const i = this._menuItems!.all.indexOf(li);
-    const o = this._cachedItems![i];
-    o.onClick?.call(e.target, e, o);
+    const o = this._cachedItems![this._menuItems!.all.indexOf(li)]; // undefined for item `(New option)`
+    o?.onClick?.call(e.target, e, o);
     if (e.defaultPrevented) {
       return;
     }
     const canOff = this._opts.multiple && li.getAttribute("aria-selected") === "true";
-    this.selectMenuItem(canOff ? null : li); // select/deselect
+    this.selectMenuItem(canOff || !o ? null : li); // select/deselect; item `(New option)` must not keep aria-selected
     canOff && li.setAttribute("aria-selected", "false");
 
-    this.selectValue(o.value, !this._opts.multiple);
+    this.selectValue(li._value, !this._opts.multiple);
   }
 
   protected override selectValue(v: ValueType, canCloseMenu = true): void {
@@ -687,7 +711,7 @@ export default class WUPSelectControl<
   protected focusMenuItemByIndex(index: number): void {
     const { filtered } = this._menuItems!;
     const trueIndex = filtered ? filtered[index] : index;
-    const next = this._menuItems!.all[trueIndex];
+    const next = trueIndex === -1 ? this._menuItems!.refNew! : this._menuItems!.all[trueIndex];
     this.focusMenuItem(next);
     this._menuItems!.focused = index;
   }
@@ -745,7 +769,10 @@ export default class WUPSelectControl<
     // if (this.$isPending) {return;} // pending event disables gotKeyDown so case impossible
     if (this._opts.allowNewValue && e.key === "Enter" && !this._focusedMenuItem) {
       this.setValue(this.parseInput(this.$refInput.value), SetValueReasons.userInput);
-      this._opts.multiple && e.preventDefault(); // prevent closing by keydown
+      if (this._opts.multiple) {
+        e.preventDefault(); // prevent closing by keydown
+        this.tryUpdateMenu(); // re-filter by updated input otherwise item `(New option)` stays visible
+      }
     }
     !e.defaultPrevented && super.gotKeyDown(e);
   }
@@ -757,7 +784,8 @@ export default class WUPSelectControl<
     if (this._opts.multiple) {
       v = rawV.substring(rawV.lastIndexOf(",") + 1, rawV.length);
     }
-    v = v.trim().toLowerCase();
+    const text = v.trim();
+    v = text.toLowerCase();
 
     const filtered: number[] = [];
     this._menuItems!.all.forEach((li, i) => {
@@ -766,7 +794,15 @@ export default class WUPSelectControl<
       this.filterMenuItem(li, !isOk);
     });
     const hasFiltered = filtered.length !== this._menuItems!.all.length;
-    this._menuItems!.filtered = hasFiltered ? filtered : undefined;
+    const isNew =
+      !!text &&
+      this._opts.allowNewValue &&
+      !!this.#ctr.$textNewItem &&
+      this.findValueByText(text) === undefined &&
+      !this.#ctr.$isEqual(this.parseInput(rawV), this.$value, this); // only if it changes value: no-duplicates
+    isNew && filtered.push(-1);
+    this._menuItems!.filtered = hasFiltered || isNew ? filtered : undefined;
+    this.renderMenuNewItem(isNew ? text : null);
     const hasVisible = filtered.length !== 0;
     this.renderMenuNoItems(this.$refPopup!, hasVisible);
     hasVisible && rawV !== "" && !this._opts.allowNewValue && this.focusMenuItemByIndex(0);
@@ -775,6 +811,7 @@ export default class WUPSelectControl<
   /** Called on showMenu when user opened it without input-change */
   protected clearFilterMenuItems(): void {
     this._menuItems!.all.forEach((li) => this.filterMenuItem(li, false)); // reset styles after filtering
+    this.renderMenuNewItem(null);
     delete this._menuItems!.filtered;
     const hasVisible = this._menuItems!.all.length !== 0;
     this.renderMenuNoItems(this.$refPopup!, hasVisible); // remove NoItems
@@ -917,9 +954,8 @@ export default class WUPSelectControl<
 customElements.define(tagName, WUPSelectControl);
 
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
-// WARN label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check
+// WARN label for="" in Chrome sometimes enables autosuggestion - need to remove it for select & selectMany
 
 // NiceToHave: add support custom items rendering when it's already appended to DOM like it works with dropdown
 // NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
 // NiceToHave: color differently text-chunk that matches in menu
-// NiceToHave: for allowNewValue add at the end of menu `[text] (New option)` like it works in JIRA. `label` dropdown on ticket

@@ -616,6 +616,31 @@ describe("control.selectMany", () => {
     await h.wait(1);
     expect(el.$value).toStrictEqual(["grey"]); // cover case when $value is undefined
     expect(onChange).toBeCalledTimes(1);
+
+    // menu item (New option)
+    onChange.mockClear();
+    await h.userTypeText(el.$refInput, "grey");
+    await h.wait(1);
+    expect(el.querySelector("[new]").style.display).toBe("none"); // no-duplicates
+    await h.userTypeText(el.$refInput, "Le");
+    await h.wait(1);
+    expect(el.querySelector("[new]").outerHTML).toMatchInlineSnapshot(
+      `"<li role="option" new="" style="">Le (New option)</li>"`
+    );
+    await h.userClick(el.querySelector("[new]"));
+    await h.wait();
+    expect(el.$value).toStrictEqual(["grey", "Le"]);
+    expect(onChange).toBeCalledTimes(1);
+    expect(el.$refInput.value).toBe("");
+    expect(el.$isOpened).toBe(true); // menu stays opened for multiple
+    expect(el.querySelector("[new]").style.display).toBe("none");
+    expect(el._menuItems.filtered).toBe(undefined);
+
+    el.$value = undefined;
+    await h.wait(1);
+    await h.userTypeText(el.$refInput, "Le");
+    await h.wait(1);
+    expect(el.querySelector("[new]").style.display).toBe(""); // cover case when $value is undefined
   });
 
   test("sortable: keyboard", async () => {
