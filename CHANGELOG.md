@@ -14,6 +14,11 @@
 - **Controls**. _Validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)_
 - [SelectManyControl](src/controls/selectMany.ts). Add Ctrl+Z (history undo/redo) support for the whole control (previously it worked only for text input field)
 - [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts). With option **allowNewValue** menu shows item `{text} (New option)` at the end when input text doesn't match any item; text is configurable via `WUPSelectControl.$textNewItem` (set `undefined` to hide the item)
+- [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts). _With option **multiple** de-selecting an item via menu adds duplicate instead of removing when value is object equal to item by `$isEqual` (ex. `{ id: 1 }`) but not the same reference_
+- [SelectManyControl](src/controls/selectMany.ts). Option **hideSelected**
+  - _Menu keeps text-filter on re-opening after Escape (shows filtered items when input is empty)_
+  - _Selected item is hidden with delay (blinks)_
+  - _Selected items are not hidden when value is object equal by `$isEqual` (ex. `{ id: 1 }`) but not the same reference_
 - [Form](src/formElement.ts). Added $onChange callback: form.$onChange = ()=>{...}
 - [DropdownElement](src/dropdownElement.ts). _Fix popup position on animation when item is partially visible_
 - [ModalElement](src/modalElement.ts.ts). _Ctrl+A selects behind modal_

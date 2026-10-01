@@ -202,8 +202,55 @@ describe("control.selectMany", () => {
     document.body.focus();
     await h.wait();
     expect(el.$refInput.value).toBe(" ");
+  });
 
-    expect(() => el.clearFilterMenuItems()).not.toThrow(); // for coverage
+  test("option [hideSelected]: menu filtering", async () => {
+    el.$options.hideSelected = true;
+    el.$value = [10];
+    await h.wait(10);
+    HTMLInputElement.prototype.focus.call(el.$refInput);
+    await h.wait();
+    const visible = () => el._menuItems.all.filter((li) => li.style.display !== "none").map((li) => li.textContent);
+    expect(visible()).toStrictEqual(["Mikky", "Leo", "Splinter"]);
+
+    // selected item is hidden immediately (without timeout)
+    el._menuItems.all[1].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(visible()).toStrictEqual(["Leo", "Splinter"]);
+    await h.wait();
+
+    // text-filter is reset on re-opening after Escape
+    await h.userTypeText(el.$refInput, "s");
+    expect(visible()).toStrictEqual(["Splinter"]);
+    expect(handledKeydown("Escape")).toBe(true);
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    expect(el.$refInput.value).toBe("");
+    await h.userClick(el);
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    expect(visible()).toStrictEqual(["Leo", "Splinter"]);
+    el.blur();
+    await h.wait();
+
+    // values are compared via $isEqual
+    el.$options.items = [
+      { value: { id: 1 }, text: "A" },
+      { value: { id: 2 }, text: "B" },
+    ];
+    await h.wait(10);
+    el.$value = [{ id: 1 }]; // another object but equal to item.value
+    await h.wait(10);
+    HTMLInputElement.prototype.focus.call(el.$refInput);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.textContent)).toStrictEqual(["A"]);
+    expect(visible()).toStrictEqual(["B"]);
+
+    // de-selecting via menu-click also compares via $isEqual
+    el.$options.hideSelected = false;
+    await h.wait(1);
+    el._menuItems.all[0].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(el.$value).toStrictEqual(undefined);
   });
 
   test("animation for removed item", async () => {

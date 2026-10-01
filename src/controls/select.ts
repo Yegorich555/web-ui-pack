@@ -610,7 +610,7 @@ export default class WUPSelectControl<
       if (!arr?.length) {
         v = [v] as any;
       } else {
-        const i = arr.indexOf(v);
+        const i = arr.findIndex((vi) => this.#ctr.$isEqual(vi, v, this));
         if (i !== -1) {
           if (arr.length === 1) {
             arr = undefined as any;

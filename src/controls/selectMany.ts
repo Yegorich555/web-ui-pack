@@ -136,7 +136,7 @@ export default class WUPSelectManyControl<
     inputValue: string,
     inputRawValue: string
   ): boolean {
-    if (this._opts.hideSelected && this.$value?.includes(menuItemValue)) {
+    if (this._opts.hideSelected && this.$value?.some((v) => this.#ctr.$isEqual(v, menuItemValue, this))) {
       return false;
     }
     return super.$filterMenuItem.call(this, menuItemText, menuItemValue, inputValue, inputRawValue);
@@ -256,7 +256,9 @@ export default class WUPSelectManyControl<
 
     const toRemove = refs.length - v.length;
     toRemove > 0 && refs.splice(v.length, toRemove).forEach((el) => !el.hasAttribute("removed") && el.remove()); // remove previous items
-    this.$refPopup && this.filterMenuItems(); // NiceToHave it can be optimized because on Remove/Select we can hide/show specific item
+    // WARN: full re-filter is required (not hide/show specific item): value-change resets input-text (so text-filter)
+    // and option hideSelected, `_menuItems.filtered` & item `(New option)` depend on value as well
+    this.$refPopup && this.filterMenuItems();
     this.$refItems = refs;
 
     this.ariaSpeakValue();
@@ -325,7 +327,8 @@ export default class WUPSelectManyControl<
   }
 
   protected override clearFilterMenuItems(): void {
-    !this._opts.hideSelected && super.clearFilterMenuItems(); // skip this because default filtering doesn't reset after re-opening menu
+    // with hideSelected the menu can't be unfiltered: selected items must stay hidden
+    this._opts.hideSelected ? this.filterMenuItems() : super.clearFilterMenuItems();
   }
 
   /** Called to remove item with animation */
