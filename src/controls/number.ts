@@ -25,7 +25,7 @@ declare global {
       minDecimal?: number;
     }
     interface EventMap extends WUP.BaseControl.EventMap {}
-    interface ValidityMap extends WUP.Text.ValidityMap {
+    interface ValidityMap extends WUP.BaseControl.ValidityMap {
       /** If $value < pointed shows message 'Min value is {x}' */
       min: number;
       /** If $value > pointed shows message 'Max value is {x}' */

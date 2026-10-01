@@ -11,7 +11,9 @@
   - Fixed some styles bugs (hardly ever user noticed once)
   - Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (user able to see formats in TS)
   - Compressed built-in styles
-- **Controls**. _Validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)_
+- **Controls**
+  - Fixed TypeScript issues
+  - _Validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)_
 - [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts)
   - With option **allowNewValue** menu shows item `{text} (New option)` at the end when input text doesn't match any item; text is configurable via `WUPSelectControl.$textNewItem` (set `undefined` to hide the item)
   - _With option **multiple** de-selecting an item via menu adds duplicate instead of removing when value is object equal to item by `$isEqual` (ex. `{ id: 1 }`) but not the same reference_

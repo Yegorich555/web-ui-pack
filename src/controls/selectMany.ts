@@ -14,7 +14,7 @@ const tagName = "wup-selectmany";
 declare global {
   namespace WUP.SelectMany {
     interface EventMap extends WUP.BaseCombo.EventMap {}
-    interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
+    interface ValidityMap extends WUP.Select.ValidityMap {}
     interface NewOptions {
       /** Hide items in menu that selected
        * @defaultValue false */

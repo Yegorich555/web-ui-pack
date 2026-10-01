@@ -138,8 +138,6 @@ declare global {
       "w-target"?: string;
       /** @readonly Result position; use this to restyle animation etc. */
       readonly position?: "top" | "left" | "bottom" | "right" | "center";
-      /** @readonly Hide state; use this to hide-animation */
-      readonly hide?: "";
       /** Animation applied to popup */
       "w-animation"?: "" | "default" | "drawer" | "stack";
       /* Custom attribute used for internal behavior */

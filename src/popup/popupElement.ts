@@ -58,7 +58,7 @@ declare module "preact/jsx-runtime" {
     interface IntrinsicElements {
       /**  Popup element
        *  @see {@link WUPPopupElement} */
-      [tagName]: HTMLAttributes<WUPPopupElement> & WUP.Modal.JSXProps; // add element to tsx/jsx intellisense (preact)
+      [tagName]: HTMLAttributes<WUPPopupElement> & WUP.BaseModal.JSXProps & WUP.Popup.Attributes; // add element to tsx/jsx intellisense (preact)
     }
   }
 }

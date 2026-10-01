@@ -92,7 +92,7 @@ declare global {
        * If pointed single item then label will be auto created. For other label-details @see {@link WUPCircleElement.prototype.$refLabel}  */
       items: Item[];
     }
-    interface JSXProps extends WUP.Base.OnlyNames<Omit<Options, "hoverOpenTimeout" | "hoverCloseTimeout" | "items">> {
+    interface JSXProps extends WUP.Base.OnlyNames<Omit<Options, "items">> {
       "w-width"?: number;
       "w-corner"?: number;
       "w-back"?: boolean | "";
@@ -102,6 +102,8 @@ declare global {
       "w-max"?: number;
       "w-space"?: number;
       "w-minSize"?: number;
+      "w-hoverOpenTimeout"?: number;
+      "w-hoverCloseTimeout"?: number;
       /** Global reference to object with array
        * @see {@link Item}
        * @example
