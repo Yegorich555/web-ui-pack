@@ -84,7 +84,7 @@ export default function SelectControlView() {
           w-name="select"
           w-label="Select"
           w-initValue={items[items.length - 3].value!.toString()}
-          w-multiple={false}
+          w-multiple="false"
         />
         <div className={stylesCom.group}>
           <wup-select

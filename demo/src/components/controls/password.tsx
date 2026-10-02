@@ -36,7 +36,7 @@ export default function PasswordControlView() {
             el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
           }
         }}
-        w-autoFocus={false}
+        w-autoFocus="false"
       >
         <wup-pwd
           w-name="pwd"

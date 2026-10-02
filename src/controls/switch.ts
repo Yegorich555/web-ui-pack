@@ -14,7 +14,7 @@ declare global {
     }
     interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      "w-reverse"?: boolean | "";
+      "w-reverse"?: boolean | "" | "true" | "false";
       /** @deprecated use `w-initValue` instead */
       defaultChecked?: boolean;
     }

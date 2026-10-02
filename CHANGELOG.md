@@ -12,7 +12,7 @@
   - Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (user able to see formats in TS)
   - Compressed built-in styles
 - **Controls**
-  - Fixed TypeScript issues
+  - Fixed TypeScript issues (including bool attributes in React 19 - expected string-value "true" instead of bool {true} )
   - _Validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)_
   - _Attribute **w-initvalue** doesn't prevent taking value from `form.$initModel` when attr parsed as empty (ex. `w-initvalue=""`)_
 - [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts)

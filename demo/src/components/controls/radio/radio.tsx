@@ -67,8 +67,8 @@ export default function RadioControlView() {
           w-initValue={items[1].value.toString()}
           w-items="storedRadioItems.items"
           w-validations="window._someRadioValidations"
-          w-reverse={false}
-          w-autoFocus={false}
+          w-reverse="false"
+          w-autoFocus="false"
         />
         <div className={stylesCom.group}>
           <wup-radio
