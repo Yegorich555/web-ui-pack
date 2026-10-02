@@ -53,6 +53,7 @@ export default function Example3() {
               { value: 15 },
               { value: 23 },
               { value: 23 },
+              { value: Number.NaN },
             ];
           }
         }}

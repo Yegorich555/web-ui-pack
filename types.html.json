@@ -409,7 +409,7 @@
       "attributes": [
         {
           "name": "w-items",
-          "description": "Global reference to object with array where `item: {value: any, text: string, items?: item[], expanded?: boolean}`",
+          "description": "Global reference to object with array where `item: {value: any, text: string, items?: item[], expanded?: boolean, checkable?: boolean, disabled?: boolean | string, readOnly?: boolean | string}`",
           "values": [
             {
               "name": "window.checkTreeItems"
@@ -425,6 +425,10 @@
         {
           "name": "w-collapsible",
           "description": "Allow user to expand/collapse nested items @defaultValue `false`"
+        },
+        {
+          "name": "w-checkable",
+          "description": "Show the main checkbox that checks/unchecks every item; point `false` to render label as title of the tree (the same as `item.checkable: false`) @defaultValue `true`"
         },
         {
           "name": "w-initvalue",

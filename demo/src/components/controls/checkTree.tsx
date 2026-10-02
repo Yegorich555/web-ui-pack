@@ -60,6 +60,43 @@ bigItems[0].expanded = true;
   items,
   initValue: ["users", "reports.sales.daily"], // parent value checks every nested item
 };
+/** Parents without checkboxes (titles) on several levels */
+const titleItems: WUP.CheckTree.Item[] = [
+  {
+    text: "Notifications",
+    value: undefined,
+    checkable: false,
+    items: [
+      {
+        text: "Email",
+        value: undefined,
+        checkable: false,
+        items: [
+          { text: "News", value: "email.news" },
+          { text: "Security alerts", value: "email.security" },
+        ],
+      },
+      {
+        text: "SMS (parent with checkbox)",
+        value: "sms",
+        items: [
+          { text: "Reminders", value: "sms.reminders" },
+          { text: "Promotions", value: "sms.promotions" },
+        ],
+      },
+    ],
+  },
+  {
+    text: "Privacy",
+    value: undefined,
+    checkable: false,
+    items: [
+      { text: "Show profile", value: "privacy.profile" },
+      { text: "Show activity", value: "privacy.activity" },
+    ],
+  },
+];
+
 /** Items bound to custom HTML by index in depth-first order (text is ignored) */
 const customItems: WUP.CheckTree.Item[] = [
   {
@@ -68,6 +105,14 @@ const customItems: WUP.CheckTree.Item[] = [
     items: [
       { text: "", value: "users.read" },
       { text: "", value: "users.create" },
+    ],
+  },
+  {
+    text: "",
+    value: undefined, // parent without [icon] in HTML is title (ignored value)
+    items: [
+      { text: "", value: "notifications.email" },
+      { text: "", value: "notifications.sms" },
     ],
   },
   { text: "", value: "settings" },
@@ -110,6 +155,8 @@ export default function CheckTreeControlView() {
           w-items="window.inputCheckTree.items"
           w-initValue="window.inputCheckTree.initValue"
           w-validations="window._someCheckTreeValidations"
+          w-collapsible="false"
+          w-checkable="true"
           ref={(el) => {
             if (el) {
               el.$onChange = (e) => console.warn("$change", { reason: e.detail.reason, value: el.$value });
@@ -141,14 +188,20 @@ export default function CheckTreeControlView() {
             }
           }}
         />
-        <wup-checktree
-          w-name="saveUrlCheckTree"
-          w-label="With saving to URL (see $options.storageKey & storage)"
-          w-storageKey="true"
-          w-storage="url"
-          w-collapsible
-          w-items="window.inputCheckTree.items"
-        />
+        <Example
+          header="Without checkboxes for parents (option checkable & item.checkable: false)"
+          link="demo/src/components/controls/checkTree.tsx"
+        >
+          <wup-checktree
+            w-name="titles"
+            w-checkable="false"
+            ref={(el) => {
+              if (el) {
+                el.$options.items = titleItems;
+              }
+            }}
+          />
+        </Example>
         <Example header="Customized via HTML" link="demo/src/components/controls/checkTree.tsx">
           <wup-checktree
             w-name="customViewHtml"
@@ -173,9 +226,29 @@ export default function CheckTreeControlView() {
                     </span>
                   </li>
                   <li>
+                    {/* spread because React doesn't declare [readonly] & [disabled] for <span> (and renders [disabled] without value) */}
+                    <span item="" {...{ readonly: "" }}>
+                      <span icon="" />
+                      Create (readonly via HTML)
+                    </span>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span item="">
+                  <b>Notifications</b> <small>(title via HTML: without icon)</small>
+                </span>
+                <ul>
+                  <li>
                     <span item="">
                       <span icon="" />
-                      Create
+                      Email
+                    </span>
+                  </li>
+                  <li>
+                    <span item="" {...{ disabled: true }}>
+                      <span icon="" />
+                      SMS (disabled via HTML)
                     </span>
                   </li>
                 </ul>
@@ -205,7 +278,16 @@ const codeHtml = `html
       <span item><span icon></span><b>Users</b> <small>(manage accounts)</small></span>
       <ul>
         <li><span item><span icon></span>Read</span></li>
-        <li><span item><span icon></span>Create</span></li>
+        <li><span item readonly><span icon></span>Create (readonly via HTML)</span></li>
+      </ul>
+    </li>
+    <li>
+      <!-- parent without [icon] is title: the same as item.checkable: false -->
+      <span item><b>Notifications</b> <small>(title via HTML: without icon)</small></span>
+      <ul>
+        <li><span item><span icon></span>Email</span></li>
+        <!-- the same as item.disabled: true; point value as reason for tooltip: [disabled="Only for admins"] -->
+        <li><span item disabled><span icon></span>SMS (disabled via HTML)</span></li>
       </ul>
     </li>
     <li><span item><span icon></span><b>Settings</b></span></li>
@@ -220,6 +302,8 @@ const el = document.querySelector("wup-checktree");
 // items are bound to <li> by index in depth-first order: nesting must be the same
 el.$options.items = [
   { text: "", value: "users", items: [{ text: "", value: "users.read" }, { text: "", value: "users.create" }] },
+  { text: "", value: undefined, items: [{ text: "", value: "notifications.email" }, { text: "", value: "notifications.sms" }] },
   { text: "", value: "settings" },
 ];
+// item.checkable, item.disabled & item.readOnly have priority over HTML attrs if they're defined
 // WARN: it's important to update .$options.items with html-changes`;

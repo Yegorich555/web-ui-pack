@@ -17,6 +17,7 @@ declare global {
       /** Show checkbox for parent; point `false` to render it as title of nested items:
        *  its value is ignored, Space does nothing, click expands/collapses nested items (only with option `collapsible`)
        * * ignored for item without nested items
+       * * with custom HTML: parent without [icon] isn't checkable when it's undefined
        * @defaultValue true */
       checkable?: boolean;
       /** Expanded state on init (only with option `collapsible`)
@@ -24,10 +25,12 @@ declare global {
       expanded?: boolean;
       /** Disallow user to check item & nested items and to focus them (the same as option `disabled` of the control)
        * * point string (reason) to show it via tooltip (`WUPPopupElement.$useTooltip({ attr: "disabled" })` is applied automatically; call it before to customize)
+       * * with custom HTML: attr [disabled] of [item] is used when it's undefined
        * @defaultValue false */
       disabled?: boolean | string;
       /** Disallow user to check item & nested items (the same as option `readOnly` of the control)
        * * point string (reason) to show it via tooltip (`WUPPopupElement.$useTooltip({ attr: "readonly" })` is applied automatically; call it before to customize)
+       * * with custom HTML: attr [readonly] of [item] is used when it's undefined
        * @defaultValue false */
       readOnly?: boolean | string;
     }
@@ -50,6 +53,10 @@ declare global {
        *  nested items are rendered only on first expanding
        * @defaultValue false */
       collapsible: boolean;
+      /** Show the main checkbox that checks/unchecks every item; point `false` to render label as title of the tree
+       *  (the same as `item.checkable: false`): click on label expands/collapses the tree (only with option `collapsible`)
+       * @defaultValue true */
+      checkable: boolean;
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.Check.Options<T, VM>, NewOptions<T> {
       /** @readonly Constant value that impossible to change: checkbox is placed before label for every item */
@@ -66,7 +73,9 @@ declare global {
        * <wup-checktree w-items="window.myItems"></wup-checktree>
        * ``` */
       "w-items"?: string;
-      "w-collapsible"?: boolean | "";
+      "w-collapsible"?: boolean | "" | "true" | "false";
+      /** Point `"false"` to hide the main checkbox (React skips attr with boolean `false`) */
+      "w-checkable"?: boolean | "" | "true" | "false";
     }
   }
 
@@ -116,7 +125,13 @@ function setReason(row: Element, attr: string, isOn: boolean, reason?: boolean |
   typeof reason === "string" && useTooltipOnce(attr);
 }
 
-type NodeElement = HTMLLIElement & { _index: number };
+/** Props of item that can be pointed via attrs of custom HTML */
+type HtmlProps = Pick<WUP.CheckTree.Item, "checkable" | "disabled" | "readOnly">;
+type NodeElement = HTMLLIElement & {
+  _index: number;
+  /** Props pointed via custom HTML: attrs are read once on the first binding (since the control changes them later) */
+  _html?: HtmlProps;
+};
 interface TreeNode<T> {
   item: WUP.CheckTree.Item<T>;
   /** Item has checkbox; otherwise it's parent with `item.checkable: false`: check-state is calculated but isn't rendered & value is ignored */
@@ -136,6 +151,15 @@ interface TreeNode<T> {
 
 /** Returns true if value of item can be included in $value */
 const hasValue = <T>(n: TreeNode<T>): boolean => n.isCheckable && n.item.value !== undefined;
+
+/** Returns prop of item or the same pointed via custom HTML (if prop of item is undefined) */
+const propOf = <T, K extends keyof HtmlProps>(n: TreeNode<T>, k: K): HtmlProps[K] => n.item[k] ?? n.li?._html?.[k];
+
+/** Returns attr value as item prop: `true` for empty string, reason for string, `undefined` if attr is missed */
+function attrOf(el: Element, attr: string): boolean | string | undefined {
+  const v = el.getAttribute(attr);
+  return v === "" || (v ?? undefined);
+}
 
 /** Form-control with tree of checkboxes; the main checkbox checks/unchecks all items
  * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/checkTree}
@@ -164,7 +188,7 @@ const hasValue = <T>(n: TreeNode<T>): boolean => n.isCheckable && n.item.value !
  * <label>
  *    <input type='checkbox'/>
  *    <strong>{$options.label}</strong>
- *    <span icon></span>
+ *    <span icon></span> // hidden with option checkable: false (attr [w-checkable="false"] is added to the control)
  *    <span expand></span> // only with option collapsible
  * </label>
  * <ul role="tree">
@@ -186,16 +210,18 @@ const hasValue = <T>(n: TreeNode<T>): boolean => n.isCheckable && n.item.value !
  * // place `<ul>` with items inside the control: it isn't re-rendered but bound to $options.items by index in depth-first order;
  * // so nesting must be the same as for items (item.text is ignored); roles, aria-attrs and [expand] are added by the control
  * // otherwise error is logged and HTML is replaced by default rendering
+ * // item.checkable, item.disabled & item.readOnly can be pointed via HTML (props of item have priority if they're defined):
+ * // parent without [icon] isn't checkable, [disabled]/[readonly] of [item] (value is reason for tooltip); attrs are read only once
  * <wup-checktree w-items="window.myItems">
  *    <ul>
  *      <li>
- *        <span item><span icon></span><b>Users</b></span>
+ *        <span item><b>Users</b></span> // without [icon]: the same as `checkable: false`
  *        <ul>
  *          <li><span item><span icon></span>Read</span></li>
- *          <li><span item><span icon></span>Write</span></li>
+ *          <li><span item readonly><span icon></span>Write</span></li> // the same as `readOnly: true`
  *        </ul>
  *      </li>
- *      <li><span item><span icon></span>Reports</span></li>
+ *      <li><span item disabled="Only for admins"><span icon></span>Reports</span></li> // the same as `disabled: "Only for admins"`
  *    </ul>
  * </wup-checktree>; */
 export default class WUPCheckTreeControl<
@@ -240,6 +266,7 @@ export default class WUPCheckTreeControl<
     }),
     items: [],
     collapsible: false,
+    checkable: true,
     reverse: true,
   });
 
@@ -331,6 +358,17 @@ export default class WUPCheckTreeControl<
       },
       { passive: false }
     );
+    this.appendEvent(
+      this.$refLabel,
+      "click",
+      (e) => {
+        if (this._opts.checkable === false && !e.defaultPrevented) {
+          e.preventDefault(); // otherwise label or Space toggles the main checkbox
+          e.target !== this.$refInput && this.toggleExpand(-1); // click on input is possible only via Space
+        }
+      },
+      { passive: false }
+    );
   }
 
   /** Called to (re)build & render tree based on $options.items */
@@ -338,38 +376,46 @@ export default class WUPCheckTreeControl<
     this._nodes && this.setActive(-1); // remove tabindex from the previous active item (custom HTML isn't re-rendered)
     const { items, collapsible } = this._opts;
     const nodes: TreeNode<ValueType>[] = [];
-    const index = new Map<unknown, number>();
     const add = (arr: WUP.CheckTree.Item<ValueType>[], parent: number): void => {
-      const p = nodes[parent] as TreeNode<ValueType> | undefined;
       arr.forEach((item) => {
         const i =
           nodes.push({
             item,
-            isCheckable: item.checkable !== false || !item.items?.length,
+            isCheckable: true,
             parent,
             end: 0,
             expanded: !collapsible || !!item.expanded,
-            isDisabled: !!item.disabled || !!p?.isDisabled,
-            isReadOnly: !!item.readOnly || !!p?.isReadOnly,
+            isDisabled: false,
+            isReadOnly: false,
           }) - 1;
-        const k = keyOf(item.value);
-        hasValue(nodes[i]) && !index.has(k) && index.set(k, i);
         item.items?.length && add(item.items, i);
         nodes[i].end = nodes.length;
       });
     };
     add(typeof items === "function" ? items() : items, -1);
-
     this._nodes = nodes;
+
+    if (this._isCustomRendered && nodes.length && !this.bindNodes()) {
+      this._isCustomRendered = false; // custom HTML is replaced by default rendering
+    }
+    // props are calculated after binding because they can be pointed via custom HTML
+    const index = new Map<unknown, number>();
+    nodes.forEach((n, i) => {
+      const p = nodes[n.parent] as TreeNode<ValueType> | undefined; // parent is placed before nested items
+      n.isCheckable = propOf(n, "checkable") !== false || n.end === i + 1;
+      n.isDisabled = !!propOf(n, "disabled") || !!p?.isDisabled;
+      n.isReadOnly = !!propOf(n, "readOnly") || !!p?.isReadOnly;
+      const k = keyOf(n.item.value);
+      hasValue(n) && !index.has(k) && index.set(k, i);
+    });
     this.#index = index;
     this._states = new Uint8Array(nodes.length);
     // apply current value to new items: value is normalized silently because check-states are the same (see $isEqual)
     this.setValue(this.#value, SetValueReasons.initValue);
 
-    if (this._isCustomRendered && nodes.length && !this.bindNodes()) {
-      this._isCustomRendered = false; // custom HTML is replaced by default rendering
-    }
-    if (!this._isCustomRendered) {
+    if (this._isCustomRendered) {
+      nodes.forEach(({ li }, i) => this.setupNode(i, li!, li!.querySelector(":scope > [item]")!));
+    } else {
       const t = this.$refTree;
       this.removeChildren.call(t);
       t.appendChild(this.renderNodes(document.createDocumentFragment(), 0, nodes.length));
@@ -406,7 +452,8 @@ export default class WUPCheckTreeControl<
     return li;
   }
 
-  /** Called to bind items to the tree rendered via HTML: `<li>` elements are matched to items by index in depth-first order
+  /** Called to bind items to the tree rendered via HTML: `<li>` elements are matched to items by index in depth-first order;
+   *  on the first binding props of item are read from attrs of [item]: [disabled], [readonly] & [icon] (parent without it isn't checkable)
    * @returns false if HTML doesn't match items (nothing is bound) */
   protected bindNodes(): boolean {
     const nodes = this._nodes!;
@@ -432,7 +479,12 @@ export default class WUPCheckTreeControl<
       const li = arr[i];
       const ul = li.parentElement!;
       ul !== t && ul.setAttribute("role", "group");
-      this.setupNode(i, li, row);
+      li._html ??= {
+        checkable: !!row.querySelector(":scope > [icon]"),
+        disabled: attrOf(row, "disabled"),
+        readOnly: attrOf(row, "readonly"),
+      };
+      nodes[i].li = li;
       // otherwise text of nested items is included in the name
       nodes[i].end > i + 1 && !li.hasAttribute("aria-label") && li.setAttribute("aria-label", row.textContent!.trim());
     });
@@ -442,7 +494,6 @@ export default class WUPCheckTreeControl<
   /** Called to update element of item (rendered by control or via HTML) according to item & options */
   protected setupNode(i: number, li: NodeElement, row: Element): void {
     const n = this._nodes![i];
-    const { disabled, readOnly } = n.item;
     li._index = i;
     li.setAttribute("role", "treeitem");
     this.setAttr.call(li, "aria-checked", n.isCheckable && ariaChecked[this._states![i]]);
@@ -456,9 +507,9 @@ export default class WUPCheckTreeControl<
       li.removeAttribute("aria-expanded");
       ex?.remove();
     }
-    setReason(row, "disabled", n.isDisabled, disabled);
-    setReason(row, "readonly", n.isReadOnly, readOnly);
     n.li = li;
+    setReason(row, "disabled", n.isDisabled, propOf(n, "disabled"));
+    setReason(row, "readonly", n.isReadOnly, propOf(n, "readOnly"));
   }
 
   /** Called to render nested items of pointed parent */
@@ -739,6 +790,7 @@ export default class WUPCheckTreeControl<
     super.gotChanges(propsChanged as any);
     const isCollapsible = this._opts.collapsible;
     this.setAttr("w-collapsible", isCollapsible, true);
+    this.setAttr("w-checkable", this._opts.checkable === false && "false");
     if (isCollapsible) {
       if (!this.$refExpand.isConnected) {
         this.$refLabel.appendChild(this.$refExpand);
@@ -754,6 +806,7 @@ export default class WUPCheckTreeControl<
 
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options> | null): void {
     super.gotFormChanges(propsChanged);
+    this.setAttr.call(this.$refInput, "aria-readonly", this.$isReadOnly || this._opts.checkable === false); // option checkable: false
     this.setAttr.call(this.$refTree, "aria-disabled", this.$isDisabled);
     this._nodes && this.setActive(this._activeIndex); // disabled item must not be focusable
   }

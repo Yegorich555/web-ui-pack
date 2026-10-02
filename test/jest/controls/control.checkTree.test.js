@@ -78,6 +78,7 @@ describe("control.checkTree", () => {
     attrs: {
       "w-items": { value: getItems() },
       "w-collapsible": { value: true, equalValue: "" },
+      "w-checkable": { value: false },
       "w-reverse": { skip: true }, // constant value
       defaultchecked: { skip: true },
     },
@@ -306,6 +307,44 @@ describe("control.checkTree", () => {
     await h.userClick(getRows()[0]);
     expect(getStates()[0]).toBe("Group:null:expanded=true:tab");
     h.unMockConsoleError();
+  });
+
+  test("option checkable: false - label is title", async () => {
+    el.$value = [11];
+    el.$options.checkable = false;
+    jest.advanceTimersByTime(1);
+    expect(el.getAttribute("w-checkable")).toBe("false");
+    expect(el.$refInput.getAttribute("aria-readonly")).toBe("true");
+    expect(getMainState()).toBe("mixed"); // state is calculated anyway
+
+    // click on label & Space don't change items
+    await h.userClick(el.$refTitle);
+    expect(el.$value).toStrictEqual([11]);
+    expect(el.$refTree.hidden).toBe(false); // because option collapsible is disabled
+    el.$refInput.click(); // the same as Space
+    expect(el.$value).toStrictEqual([11]);
+    expect(getMainState()).toBe("mixed");
+
+    // option collapsible: click on label expands/collapses the tree
+    el.$options.collapsible = true;
+    jest.advanceTimersByTime(1);
+    await h.userClick(el.$refTitle);
+    expect(el.$refTree.hidden).toBe(true);
+    el.$refInput.click(); // Space doesn't collapse the tree
+    expect(el.$refTree.hidden).toBe(true);
+    await h.userClick(el.$refExpand);
+    expect(el.$refTree.hidden).toBe(false); // the tree isn't toggled twice
+    expect(el.$value).toStrictEqual([11]);
+    el.$refInput.focus();
+    expect(pressKey("Enter")).toBe(true);
+    expect(el.$refTree.hidden).toBe(true);
+
+    el.$options.checkable = true;
+    jest.advanceTimersByTime(1);
+    expect(el.hasAttribute("w-checkable")).toBe(false);
+    expect(el.$refInput.hasAttribute("aria-readonly")).toBe(false);
+    el.$refInput.click();
+    expect(el.$value).toStrictEqual([1, 11, 12, 2, 3]);
   });
 
   test("complex values", () => {
@@ -876,7 +915,7 @@ describe("control.checkTree", () => {
     expect(el.$refTree.id).toBe("myTree"); // id isn't overridden
     expect(el.lastElementChild).toBe(el.$refTree); // the main label is placed before the tree
     expect(el.$refTree.outerHTML.replace(/\n\s*/g, "")).toMatchInlineSnapshot(
-      `"<ul id="myTree" role="tree" aria-multiselectable="true" aria-labelledby="txt5"><li role="treeitem" aria-checked="false" aria-label="Users" tabindex="0"><span item=""><span icon=""></span><b>Users</b></span><ul role="group"><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Read</span></li><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Write</span></li></ul></li><li aria-label="Custom aria" role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Reports</span></li><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Settings</span></li></ul>"`
+      `"<ul id="myTree" role="tree" aria-multiselectable="true" aria-labelledby="txt5"><li aria-label="Users" role="treeitem" aria-checked="false" tabindex="0"><span item=""><span icon=""></span><b>Users</b></span><ul role="group"><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Read</span></li><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Write</span></li></ul></li><li aria-label="Custom aria" role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Reports</span></li><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Settings</span></li></ul>"`
     );
 
     // value & user clicks
@@ -945,6 +984,110 @@ describe("control.checkTree", () => {
     el.$options.items = getItems();
     jest.advanceTimersByTime(1);
     expect(lis[0].getAttribute("aria-checked")).toBe("true");
+  });
+
+  test("customization with html - item props via attrs", async () => {
+    createCustom(
+      `<ul>
+        <li>
+          <span item><b>Users</b></span>
+          <ul>
+            <li><span item>Read</span></li>
+            <li><span item readonly><span icon></span>Write</span></li>
+          </ul>
+        </li>
+        <li>
+          <span item disabled="Reason"><span icon></span>Reports</span>
+          <ul><li><span item><span icon></span>Daily</span></li></ul>
+        </li>
+        <li><span item><span icon></span>Settings</span></li>
+      </ul>`,
+      [
+        {
+          text: "",
+          value: 1,
+          items: [
+            { text: "", value: 11 },
+            { text: "", value: 12 },
+          ],
+        },
+        { text: "", value: 2, items: [{ text: "", value: 21 }] },
+        { text: "", value: 3 },
+      ]
+    );
+    // parent without [icon] isn't checkable; leaf is checkable anyway
+    expect(getStates()).toStrictEqual([
+      "Users:null:tab",
+      "Read:false",
+      "Write:false",
+      "Reports:false",
+      "Daily:false",
+      "Settings:false",
+    ]);
+    const lis = el.querySelectorAll("li");
+    expect(lis[2].firstElementChild.getAttribute("readonly")).toBe("");
+    expect(lis[3].getAttribute("aria-disabled")).toBe("true");
+    expect(lis[3].firstElementChild.getAttribute("disabled")).toBe("Reason");
+    expect(lis[4].getAttribute("aria-disabled")).toBe("true"); // nested item of disabled parent
+    expect(lis[4].firstElementChild.getAttribute("disabled")).toBe("");
+
+    el.$refInput.click(); // readonly & disabled items aren't changed
+    expect(el.$value).toStrictEqual([11, 3]);
+    await h.userClick(getRows()[0]); // title doesn't check nested items
+    expect(el.$value).toStrictEqual([11, 3]);
+    el.$value = [1];
+    expect(el.$value).toBe(undefined); // value of title is ignored
+
+    // props of item have priority; attrs are read only once (the control changes them)
+    el.$options.items = [
+      {
+        text: "",
+        value: 1,
+        checkable: true,
+        items: [
+          { text: "", value: 11 },
+          { text: "", value: 12, readOnly: false },
+        ],
+      },
+      { text: "", value: 2, disabled: false, items: [{ text: "", value: 21 }] },
+      { text: "", value: 3, disabled: "Other" },
+    ];
+    jest.advanceTimersByTime(1);
+    expect(getStates()).toStrictEqual([
+      "Users:false:tab",
+      "Read:false",
+      "Write:false",
+      "Reports:false",
+      "Daily:false",
+      "Settings:false",
+    ]);
+    expect(el.$refTree.querySelectorAll("[disabled],[readonly],[aria-disabled]").length).toBe(2);
+    expect(lis[5].firstElementChild.getAttribute("disabled")).toBe("Other");
+    el.$options.items = [
+      {
+        text: "",
+        value: 1,
+        checkable: false,
+        items: [
+          { text: "", value: 11 },
+          { text: "", value: 12 },
+        ],
+      },
+      { text: "", value: 2, items: [{ text: "", value: 21 }] },
+      { text: "", value: 3 },
+    ];
+    jest.advanceTimersByTime(1);
+    expect(getStates()).toStrictEqual([
+      "Users:null:tab",
+      "Read:false",
+      "Write:false",
+      "Reports:false",
+      "Daily:false",
+      "Settings:false",
+    ]);
+    expect(lis[2].firstElementChild.getAttribute("readonly")).toBe("");
+    expect(lis[3].firstElementChild.getAttribute("disabled")).toBe("Reason");
+    expect(lis[5].firstElementChild.hasAttribute("disabled")).toBe(false);
   });
 
   test("customization with html - not matched to items", async () => {

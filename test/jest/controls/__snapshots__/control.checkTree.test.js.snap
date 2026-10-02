@@ -1386,8 +1386,20 @@ WUP-CHECKTREE [role=treeitem]:focus &gt; [item] {
 WUP-CHECKTREE:not([w-collapsible]) [role=treeitem]:not([aria-checked]) &gt; [item] {
   cursor: initial;
 }
+WUP-CHECKTREE [role=treeitem]:not([aria-checked]) &gt; [item] &gt; [icon] {
+  display: none;
+}
 WUP-CHECKTREE &gt; label &gt; strong {
   pointer-events: auto;
+}
+WUP-CHECKTREE[w-checkable=false] &gt; label &gt; [icon] {
+  display: none;
+}
+WUP-CHECKTREE[w-checkable=false]:not([w-collapsible]) &gt; label {
+  cursor: initial;
+}
+WUP-CHECKTREE[w-checkable=false] &gt; label:focus-within &gt; strong {
+  color: var(--ctrl-selected);
 }
 @media (hover: hover) and (pointer: fine) {
   WUP-CHECKTREE &gt; label &gt; [icon]:hover:before,
@@ -1417,6 +1429,7 @@ exports[`control.checkTree common tests snapshot of $defaults 1`] = `
 {
   "autoComplete": null,
   "autoFocus": false,
+  "checkable": true,
   "clearActions": 2,
   "collapsible": false,
   "disabled": false,
@@ -1452,6 +1465,7 @@ exports[`control.checkTree common tests snapshot of $defaults 3`] = `
   "readonly",
   "w-autocomplete",
   "w-autofocus",
+  "w-checkable",
   "w-clearactions",
   "w-collapsible",
   "w-disabled",

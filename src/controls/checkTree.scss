@@ -124,8 +124,29 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
     cursor: initial;
   }
 
+  // item.checkable: false hides [icon] of custom HTML
+  [role="treeitem"]:not([aria-checked]) > [item] > [icon] {
+    display: none;
+  }
+
   > label > strong {
     pointer-events: auto; // to show hover-effect of the main checkbox only on label (but not on [expand] inside the label)
+  }
+
+  // option checkable: false - label is title of the tree (the same as item.checkable: false)
+  &[w-checkable="false"] {
+    /* stylelint-disable-next-line no-descending-specificity */
+    > label > [icon] {
+      display: none;
+    }
+
+    &:not([w-collapsible]) > label {
+      cursor: initial;
+    }
+
+    > label:focus-within > strong {
+      color: var(--ctrl-selected); // focus can't be shown via hidden [icon]
+    }
   }
 
   @media (hover: hover) and (pointer: fine) {
