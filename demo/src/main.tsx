@@ -21,6 +21,7 @@ import PasswordControlView from "./components/controls/password";
 import SelectControlView from "./components/controls/select";
 import SwitchControlView from "./components/controls/switch";
 import CheckControlView from "./components/controls/check";
+import CheckTreeControlView from "./components/controls/checkTree";
 import RadioControlView from "./components/controls/radio/radio";
 import CalendarControlView from "./components/controls/calendar";
 import DateControlView from "./components/controls/date";
@@ -71,6 +72,7 @@ const routes: IRoute[] = [
   { path: "control/number", el: NumberControlView, isNested: true },
   { path: "control/switch", el: SwitchControlView, isNested: true },
   { path: "control/check", el: CheckControlView, isNested: true },
+  { path: "control/checkTree", el: CheckTreeControlView, isNested: true },
   { path: "control/radio", el: RadioControlView, isNested: true },
   { path: "control/select", el: SelectControlView, isNested: true },
   { path: "control/selectMany", el: SelectManyControlView, isNested: true },

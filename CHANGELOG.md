@@ -53,6 +53,7 @@
 
 ### New Features
 
+- [CheckTreeControl](src/controls/checkTree.ts)
 - helper [imageConvert](src/helpers/files/imageConvert.ts)
 - helper [selectFiles](src/helpers/files/selectFiles.ts)
 - helper [isScrollable](src/helpers/findScrollParent.ts)

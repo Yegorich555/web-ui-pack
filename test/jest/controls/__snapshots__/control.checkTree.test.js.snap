@@ -1,0 +1,2446 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`control.checkTree $ariaDetails 1`] = `
+<wup-checktree
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    />
+    <span
+      icon=""
+    />
+    <span
+      class="wup-hidden"
+    >
+      Some details for screen-readers
+    </span>
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="false"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+</wup-checktree>
+`;
+
+exports[`control.checkTree $ariaDetails 2`] = `
+<wup-checktree
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    />
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="false"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+</wup-checktree>
+`;
+
+exports[`control.checkTree $ariaSpeak 1`] = `
+<wup-checktree
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      aria-describedby="my-test-id txt4 my-test-id2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    />
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="false"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt4"
+  >
+    Hello
+  </section>
+</wup-checktree>
+`;
+
+exports[`control.checkTree $ariaSpeak 2`] = `
+<wup-checktree
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      aria-describedby="my-test-id my-test-id2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    />
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="false"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+</wup-checktree>
+`;
+
+exports[`control.checkTree $show/$hide error 1`] = `
+<wup-checktree
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    />
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="false"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+</wup-checktree>
+`;
+
+exports[`control.checkTree $show/$hide error 2`] = `
+<wup-checktree
+  invalid=""
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      aria-describedby="txt4"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    />
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="false"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    role="alert"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
+</wup-checktree>
+`;
+
+exports[`control.checkTree $show/$hide error 3`] = `
+<wup-checktree
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    />
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="false"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
+</wup-checktree>
+`;
+
+exports[`control.checkTree common tests render + styles 1`] = `<wup-checktree />`;
+
+exports[`control.checkTree common tests render + styles 2`] = `
+<style>
+  :root {
+  --base-focus: #00778d;
+  --base-btn-bg: #009fbc;
+  --base-btn-text: #fff;
+  --base-btn-focus: #005766;
+  --base-btn2-bg: #6c757d;
+  --base-btn2-text: #fff;
+  --base-btn3-bg: none;
+  --base-btn3-text: inherit;
+  --base-sep: #e4e4e4;
+  --base-margin: 20px;
+  --border-radius: 6px;
+  --anim-t: 200ms;
+  --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  --icon-hover-r: 30px;
+  --icon-hover-bg: #0001;
+  --icon-focus-bg: #0000001a;
+  --icon-size: 14px;
+  --menu-hover-text: inherit;
+  --menu-hover-bg: #f1f1f1;
+  --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
+  --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
+  --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
+  --wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
+  --wup-icon-eye: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 122.182C209.455 122.182 60.392 230.749 0 384c60.392 153.251 209.455 261.818 384 261.818S707.608 537.251 768 384c-60.392-153.251-209.455-261.818-384-261.818zm0 436.363c-96.35 0-174.545-78.197-174.545-174.545S287.651 209.455 384 209.455 558.545 287.651 558.545 384 480.348 558.545 384 558.545zm0-279.272c-57.95 0-104.727 46.778-104.727 104.727S326.051 488.727 384 488.727 488.727 441.949 488.727 384 441.949 279.273 384 279.273z'/%3E%3C/svg%3E");
+  --wup-icon-eye-off: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 209.375c96.393 0 174.625 78.232 174.625 174.625 0 22.701-4.54 44.005-12.573 63.913l101.981 101.981C700.77 505.889 742.331 448.961 767.826 384c-60.42-153.321-209.55-261.938-384.174-261.938-48.895 0-95.695 8.731-139.001 24.448l75.438 75.438c19.907-8.032 41.212-12.573 63.913-12.573zM34.75 114.03l95.695 95.695C72.469 254.778 27.067 314.85-.174 384.001 60.246 537.322 209.376 645.938 384 645.938c54.133 0 105.823-10.477 152.971-29.337l14.668 14.668 102.33 101.981 44.355-44.355L79.105 69.676 34.75 114.031zm193.135 193.135 54.133 54.133c-1.746 7.334-2.794 15.018-2.794 22.701 0 57.976 46.799 104.775 104.775 104.775 7.684 0 15.367-1.048 22.701-2.794l54.134 54.134c-23.4 11.525-49.244 18.51-76.835 18.51-96.393 0-174.625-78.232-174.625-174.625 0-27.591 6.985-53.435 18.51-76.835zm150.527-27.242 110.014 110.014.698-5.588c0-57.976-46.799-104.775-104.775-104.775l-5.937.349z'/%3E%3C/svg%3E");
+  --wup-icon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
+  --wup-icon-date: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M652.801 76.8c42.24 0 76.8 34.56 76.8 76.8v537.601c0 42.24-34.56 76.8-76.8 76.8H115.2c-42.624 0-76.8-34.56-76.8-76.8l.384-537.601c0-42.24 33.792-76.8 76.416-76.8h38.4V0h76.8v76.8h307.2V0h76.8v76.8h38.4zM192 345.6h76.8v76.8H192v-76.8zm230.4 0v76.8h-76.8v-76.8h76.8zm153.601 0h-76.8v76.8h76.8v-76.8zM115.2 691.2h537.601V268.8H115.2v422.4z'/%3E%3C/svg%3E");
+  --wup-icon-time-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
+  --wup-icon-time: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==");
+}
+[wupdark] {
+  --base-btn-focus: #bdbdbd;
+  --base-sep: #141414;
+  --icon: #fff;
+  --icon-hover-bg: #fff1;
+  --icon-focus-bg: #fff2;
+  --scroll: #fff2;
+  --scroll-hover: #fff3;
+  --menu-hover-text: inherit;
+  --menu-hover-bg: #222a36;
+}
+
+  .wup-hidden,
+[wup-hidden] {
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  min-width: initial;
+  padding: 0;
+}
+[wup-icon] {
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+}
+[wup-icon]:after {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: var(--icon, #000);
+  -webkit-mask-size: var(--icon-size, 1em);
+          mask-size: var(--icon-size, 1em);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--icon-img);
+          mask-image: var(--icon-img);
+}
+[wup-icon]:focus {
+  box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+[wup-icon]:focus:after {
+  background: var(--icon-hover, var(--icon, #000));
+}
+@media (hover: hover) and (pointer: fine) {
+  [wup-icon]:hover {
+    box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  [wup-icon]:hover:after {
+    background: var(--icon-hover, var(--icon, #000));
+  }
+  [wup-icon]:focus:hover {
+    opacity: 0.9;
+  }
+}
+  
+
+  :root {
+  --ctrl-padding: 1.5em 1em 0.5em 1em;
+  --ctrl-focus: var(--base-focus);
+  --ctrl-focus-label: var(--ctrl-focus);
+  --ctrl-selected: var(--ctrl-focus);
+  --ctrl-label: #5e5e5e;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-icon-size: 1em;
+  --ctrl-text: inherit;
+  --ctrl-bg: #fff;
+  --ctrl-border: #e6e6e6;
+  --ctrl-border-radius: var(--border-radius);
+  --ctrl-err: #ad0000;
+  --ctrl-err-bg: #fff4fa;
+  --ctrl-err-valid: green;
+  --ctrl-invalid-border: red;
+}
+[wupdark] {
+  --ctrl-bg: none;
+  --ctrl-border: #104652;
+  --ctrl-label: #919191;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-focus-label: #25a1b6;
+  --ctrl-selected: #25a1b6;
+  --ctrl-err: #ff6666;
+  --ctrl-err-bg: #000;
+  --ctrl-err-valid: #54d754;
+}
+  :root {
+  --ctrl-switch-padding: 1em;
+  --ctrl-switch-on: #fff;
+  --ctrl-switch-off: #fff;
+  --ctrl-switch-off-bg: #9f9f9f;
+  --ctrl-switch-on-bg: #00778d;
+  --ctrl-switch-shadow: #0003;
+  --ctrl-switch-h: var(--ctrl-icon-size);
+  --ctrl-switch-w: calc(var(--ctrl-icon-size) * 2.8);
+  --ctrl-switch-r: calc(var(--ctrl-icon-size) * 1.4);
+}
+[wupdark] {
+  --ctrl-switch-on: #e7e7e7;
+  --ctrl-switch-off: #e7e7e7;
+  --ctrl-switch-off-bg: #707070;
+  --ctrl-switch-shadow: #000;
+}
+  :root {
+  --ctrl-check-off-bg: #fff;
+  --ctrl-check-on-bg: #00778d;
+  --ctrl-check-on: #fff;
+  --ctrl-check-border-r: 3px;
+  --ctrl-check-shadow: #0003;
+  --ctrl-check-size: 16px;
+}
+[wupdark] {
+  --ctrl-check-off-bg: #e7e7e7;
+  --ctrl-check-shadow: #000;
+}
+  :root {
+  --ctrl-checktree-padding: 0 1em 0.5em;
+  --ctrl-checktree-item-padding: 0.3em 0;
+  --ctrl-checktree-gap: 0.5em;
+  --ctrl-checktree-indent: 1.5em;
+  --ctrl-checktree-mixed: var(--ctrl-check-on);
+}
+  
+WUP-CHECKTREE {
+  --ctrl-focus-border: var(--ctrl-focus);
+  contain: style;
+  display: block;
+  flex: 1;
+  margin: var(--base-margin) 0;
+  box-shadow: 0 0 0 1px var(--ctrl-border);
+  border-radius: var(--ctrl-border-radius);
+  color: var(--ctrl-text);
+  background: var(--ctrl-bg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+WUP-CHECKTREE strong,
+WUP-CHECKTREE legend {
+  color: var(--ctrl-label);
+  pointer-events: none;
+}
+WUP-CHECKTREE[invalid], WUP-CHECKTREE[invalid] &gt; [menu] {
+  --ctrl-focus-border: var(--ctrl-invalid-border);
+  box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+}
+WUP-CHECKTREE:focus-within, WUP-CHECKTREE:focus-within &gt; [menu] {
+  box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+}
+WUP-CHECKTREE:focus-within strong,
+WUP-CHECKTREE:focus-within legend {
+  color: var(--ctrl-focus-label);
+  pointer-events: initial;
+}
+[disabled] WUP-CHECKTREE, WUP-CHECKTREE[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  -webkit-user-select: none;
+          user-select: none;
+}
+WUP-CHECKTREE[busy] {
+  opacity: 0.8;
+  cursor: inherit;
+  -webkit-user-select: none;
+          user-select: none;
+}
+[disabled] WUP-CHECKTREE &gt; label, WUP-CHECKTREE[disabled] &gt; label, WUP-CHECKTREE[busy] &gt; label {
+  pointer-events: none;
+}
+WUP-CHECKTREE label {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  font: inherit;
+  cursor: inherit;
+  padding: var(--ctrl-padding);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+WUP-CHECKTREE input,
+WUP-CHECKTREE textarea {
+  padding: 0;
+  margin: 0;
+  cursor: inherit;
+}
+WUP-CHECKTREE [contenteditable=true] {
+  margin: var(--ctrl-padding);
+  margin-left: 0;
+  margin-right: 0;
+  cursor: inherit;
+}
+WUP-CHECKTREE strong {
+  cursor: inherit;
+}
+WUP-CHECKTREE strong:empty {
+  display: none;
+}
+WUP-CHECKTREE [aria-required=true] + strong:after,
+WUP-CHECKTREE fieldset[aria-required=true] &gt; legend:after {
+  content: "*";
+  font-size: larger;
+  font-weight: bolder;
+  line-height: 0;
+}
+WUP-CHECKTREE [error] {
+  cursor: pointer;
+  font-size: small;
+  color: var(--ctrl-err);
+  background: var(--ctrl-err-bg);
+  overflow: auto;
+  overflow: overlay;
+}
+WUP-CHECKTREE [error] ul {
+  margin: 0;
+  padding: 2px 4px 2px;
+}
+WUP-CHECKTREE [error] li {
+  display: flex;
+  align-items: center;
+  margin-left: -5px;
+}
+WUP-CHECKTREE [error] li:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-dot);
+  --ctrl-icon: var(--ctrl-err);
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+}
+WUP-CHECKTREE [error] li[valid] {
+  color: var(--ctrl-err-valid);
+}
+WUP-CHECKTREE [error] li[valid]:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  --ctrl-icon: var(--ctrl-err-valid);
+}
+WUP-CHECKTREE:focus-within [error] {
+  max-height: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-CHECKTREE:hover strong, WUP-CHECKTREE[hovered] strong {
+    color: var(--ctrl-focus-label);
+  }
+  WUP-CHECKTREE:hover, WUP-CHECKTREE:hover &gt; [menu], WUP-CHECKTREE[hovered], WUP-CHECKTREE[hovered] &gt; [menu] {
+    box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+  }
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-CHECKTREE {
+    transition: box-shadow var(--anim);
+  }
+}
+WUP-CHECKTREE {
+  background: none;
+  cursor: pointer;
+}
+WUP-CHECKTREE[readonly] {
+  cursor: initial;
+}
+WUP-CHECKTREE label {
+  display: flex;
+  gap: 0.5em;
+  padding: var(--ctrl-switch-padding);
+}
+WUP-CHECKTREE strong {
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  font-weight: normal;
+  text-decoration: none;
+  color: inherit;
+}
+WUP-CHECKTREE [bar] {
+  display: inline-flex;
+  align-items: center;
+  overflow: visible;
+  width: var(--ctrl-switch-w);
+  min-width: var(--ctrl-switch-w);
+  height: var(--ctrl-switch-h);
+  border-radius: 999px;
+  color: whitesmoke;
+  background: var(--ctrl-switch-off-bg);
+}
+WUP-CHECKTREE [thumb] {
+  transform-style: preserve-3d;
+}
+WUP-CHECKTREE [thumb]:before {
+  z-index: -1;
+  position: absolute;
+  transform: translate(-50%, -50%) translateZ(-1px);
+  left: 50%;
+  top: 50%;
+  width: var(--icon-hover-r, 2.4em);
+  height: var(--icon-hover-r, 2.4em);
+  background: var(--icon-hover, #0001);
+  border-radius: 50%;
+}
+WUP-CHECKTREE:focus-within [thumb] {
+  position: relative;
+}
+WUP-CHECKTREE:focus-within [thumb]:before {
+  content: "";
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-CHECKTREE:hover [thumb] {
+    position: relative;
+  }
+  WUP-CHECKTREE:hover [thumb]:before {
+    content: "";
+    opacity: 0.8;
+  }
+}
+WUP-CHECKTREE [thumb] {
+  z-index: 2;
+  display: inline-block;
+  height: var(--ctrl-switch-r);
+  width: var(--ctrl-switch-r);
+  background: var(--ctrl-switch-off);
+  box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
+  border-radius: 50%;
+  transform: translateX(-1px);
+}
+WUP-CHECKTREE input {
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  min-width: initial;
+  padding: 0;
+}
+WUP-CHECKTREE[checked] [bar] {
+  background-color: var(--ctrl-switch-on-bg);
+}
+WUP-CHECKTREE[checked] [thumb] {
+  background: var(--ctrl-switch-on);
+  transform: translateX(var(--ctrl-switch-w)) translateX(calc(-100% + 1px));
+}
+WUP-CHECKTREE[w-reverse] label {
+  flex-direction: row-reverse;
+}
+WUP-CHECKTREE[w-reverse] strong {
+  margin-right: auto;
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-CHECKTREE [bar] {
+    transition: background-color var(--anim);
+  }
+  WUP-CHECKTREE [thumb] {
+    transition: transform var(--anim);
+  }
+}
+WUP-CHECKTREE [icon] {
+  position: initial;
+  height: var(--ctrl-check-size);
+  width: var(--ctrl-check-size);
+  min-width: var(--ctrl-check-size);
+  border-radius: var(--ctrl-check-border-r);
+  background: var(--ctrl-check-off-bg);
+  box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);
+}
+WUP-CHECKTREE[checked] [icon] {
+  background: var(--ctrl-check-on-bg);
+}
+WUP-CHECKTREE[checked] [icon]:after {
+  --ctrl-icon: var(--ctrl-check-on);
+  --ctrl-icon-img: var(--wup-icon-check);
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  content: "";
+  top: 0;
+  left: 0;
+  padding: 0;
+  border-radius: 0;
+  height: 100%;
+  width: 100%;
+}
+WUP-CHECKTREE [icon] {
+  transform-style: preserve-3d;
+}
+WUP-CHECKTREE [icon]:before {
+  z-index: -1;
+  position: absolute;
+  transform: translate(-50%, -50%) translateZ(-1px);
+  left: 50%;
+  top: 50%;
+  width: var(--icon-hover-r, 2.4em);
+  height: var(--icon-hover-r, 2.4em);
+  background: var(--icon-hover, #0001);
+  border-radius: 50%;
+}
+WUP-CHECKTREE:focus-within [icon] {
+  position: relative;
+}
+WUP-CHECKTREE:focus-within [icon]:before {
+  content: "";
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-CHECKTREE:hover [icon] {
+    position: relative;
+  }
+  WUP-CHECKTREE:hover [icon]:before {
+    content: "";
+    opacity: 0.8;
+  }
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-CHECKTREE [icon] {
+    transition: background-color var(--anim);
+  }
+}
+WUP-CHECKTREE [role=tree],
+WUP-CHECKTREE [role=group] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+WUP-CHECKTREE [role=tree] {
+  padding: var(--ctrl-checktree-padding);
+  margin-left: var(--ctrl-checktree-indent);
+}
+WUP-CHECKTREE [role=group] {
+  padding-left: var(--ctrl-checktree-indent);
+}
+WUP-CHECKTREE [role=treeitem] {
+  outline: none;
+}
+WUP-CHECKTREE [aria-expanded=false] &gt; [role=group] {
+  display: none;
+}
+WUP-CHECKTREE [item] {
+  display: flex;
+  align-items: center;
+  gap: var(--ctrl-checktree-gap);
+  padding: var(--ctrl-checktree-item-padding);
+}
+WUP-CHECKTREE [expand] {
+  --ctrl-icon-img: var(--wup-icon-chevron);
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  padding: 0;
+  transform: rotate(-90deg);
+}
+WUP-CHECKTREE [aria-expanded=true] &gt; [expand],
+WUP-CHECKTREE &gt; label &gt; [aria-expanded=true] ~ [expand] {
+  transform: none;
+}
+WUP-CHECKTREE[w-collapsible] [role=treeitem] {
+  display: grid;
+  grid-template-columns: var(--ctrl-icon-size) minmax(0, 1fr);
+  gap: 0 var(--ctrl-checktree-gap);
+}
+WUP-CHECKTREE[w-collapsible] [role=treeitem] &gt; [item] {
+  grid-column: 2;
+}
+WUP-CHECKTREE[w-collapsible] [role=treeitem] &gt; [role=group] {
+  grid-column: 1/-1;
+}
+WUP-CHECKTREE [aria-checked=true] &gt; [item] &gt; [icon] {
+  background: var(--ctrl-check-on-bg);
+}
+WUP-CHECKTREE [aria-checked=true] &gt; [item] &gt; [icon]:after {
+  --ctrl-icon: var(--ctrl-check-on);
+  --ctrl-icon-img: var(--wup-icon-check);
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  content: "";
+  top: 0;
+  left: 0;
+  padding: 0;
+  border-radius: 0;
+  height: 100%;
+  width: 100%;
+}
+WUP-CHECKTREE &gt; label &gt; input:indeterminate ~ [icon],
+WUP-CHECKTREE [aria-checked=mixed] &gt; [item] &gt; [icon] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ctrl-check-on-bg);
+}
+WUP-CHECKTREE &gt; label &gt; input:indeterminate ~ [icon]:after,
+WUP-CHECKTREE [aria-checked=mixed] &gt; [item] &gt; [icon]:after {
+  content: "";
+  width: 50%;
+  height: 2px;
+  background: var(--ctrl-checktree-mixed);
+}
+WUP-CHECKTREE:focus-within [icon]:before {
+  content: none;
+}
+@media (hover: hover) {
+WUP-CHECKTREE:hover [icon]:before {
+  content: none;
+}
+}
+WUP-CHECKTREE &gt; label:focus-within [icon]:before,
+WUP-CHECKTREE [role=treeitem]:focus &gt; [item] [icon]:before {
+  content: "";
+}
+WUP-CHECKTREE [role=treeitem]:focus &gt; [item] {
+  color: var(--ctrl-selected);
+}
+WUP-CHECKTREE &gt; label &gt; strong {
+  pointer-events: auto;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-CHECKTREE &gt; label &gt; [icon]:hover:before,
+WUP-CHECKTREE &gt; label &gt; strong:hover ~ [icon]:before,
+WUP-CHECKTREE [item]:hover [icon]:before {
+    content: "";
+  }
+  WUP-CHECKTREE [item]:hover {
+    color: var(--ctrl-selected);
+  }
+  WUP-CHECKTREE [expand]:hover {
+    --ctrl-icon: var(--ctrl-selected);
+  }
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-CHECKTREE [item] {
+    transition: color var(--anim);
+  }
+  WUP-CHECKTREE [expand] {
+    transition: transform var(--anim), background-color var(--anim);
+  }
+}
+</style>
+`;
+
+exports[`control.checkTree common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "collapsible": false,
+  "disabled": false,
+  "enableInitOnChange": false,
+  "focusDebounceMs": 100,
+  "items": [],
+  "label": null,
+  "name": null,
+  "readOnly": false,
+  "reverse": true,
+  "storage": "local",
+  "storageKey": "",
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "maxCount": [Function],
+    "minCount": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.checkTree common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.checkTree common tests snapshot of $defaults 3`] = `
+[
+  "defaultchecked",
+  "disabled",
+  "readonly",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-collapsible",
+  "w-disabled",
+  "w-enableinitonchange",
+  "w-focusdebouncems",
+  "w-initvalue",
+  "w-items",
+  "w-label",
+  "w-name",
+  "w-readonly",
+  "w-reverse",
+  "w-storage",
+  "w-storagekey",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
+]
+`;
+
+exports[`control.checkTree validations $options.validationShowAll 1`] = `
+<wup-checktree
+  invalid=""
+  required=""
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      aria-describedby="txt4"
+      aria-required="true"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    />
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    aria-required="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="false"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      This field is required
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li>
+        Min count is 2
+      </li>
+      <li>
+        Max count is 2
+      </li>
+    </ul>
+  </wup-popup>
+</wup-checktree>
+`;
+
+exports[`control.checkTree validations $options.validationShowAll 2`] = `
+<wup-checktree
+  invalid=""
+  required=""
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      aria-describedby="txt4"
+      aria-required="true"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    />
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    aria-required="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="mixed"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="true"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span
+      class="wup-hidden"
+    >
+      Min count is 2
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li>
+        Min count is 2
+      </li>
+      <li
+        valid=""
+      >
+        Max count is 2
+      </li>
+    </ul>
+  </wup-popup>
+</wup-checktree>
+`;
+
+exports[`control.checkTree validations $options.validationShowAll 3`] = `
+<wup-checktree
+  invalid=""
+  required=""
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      aria-describedby="txt7"
+      aria-required="true"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    >
+      First Name
+    </strong>
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    aria-required="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="false"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt7"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Name:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-checktree>
+`;
+
+exports[`control.checkTree validations options.validationCase 1`] = `
+<wup-checktree
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    />
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="mixed"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="true"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+</wup-checktree>
+`;
+
+exports[`control.checkTree validations options.validationCase 2`] = `
+<wup-checktree
+  invalid=""
+  required=""
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      aria-describedby="txt5"
+      aria-required="true"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    >
+      First Input
+    </strong>
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    aria-required="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="false"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-checktree>
+`;
+
+exports[`control.checkTree validations options.validationCase 3`] = `
+<wup-checktree
+  invalid=""
+  required=""
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      aria-describedby="txt6"
+      aria-required="true"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    >
+      First Input
+    </strong>
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    aria-required="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="mixed"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="true"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt6"
+    open=""
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-checktree>
+`;
+
+exports[`control.checkTree validations options.validationCase 4`] = `
+<wup-checktree
+  invalid=""
+  required=""
+  w-reverse=""
+>
+  <label
+    for="txt1"
+  >
+    <input
+      aria-controls="txt2"
+      aria-describedby="txt7"
+      aria-required="true"
+      autocomplete="off"
+      id="txt1"
+      type="checkbox"
+    />
+    <strong
+      id="txt3"
+    >
+      First Input
+    </strong>
+    <span
+      icon=""
+    />
+  </label>
+  <ul
+    aria-labelledby="txt3"
+    aria-multiselectable="true"
+    aria-required="true"
+    id="txt2"
+    role="tree"
+  >
+    <li
+      aria-checked="false"
+      aria-label="Users"
+      role="treeitem"
+      tabindex="0"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Users
+      </span>
+      <ul
+        role="group"
+      >
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Read
+          </span>
+        </li>
+        <li
+          aria-checked="false"
+          role="treeitem"
+        >
+          <span
+            item=""
+          >
+            <span
+              icon=""
+            />
+            Write
+          </span>
+        </li>
+      </ul>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Reports
+      </span>
+    </li>
+    <li
+      aria-checked="false"
+      role="treeitem"
+    >
+      <span
+        item=""
+      >
+        <span
+          icon=""
+        />
+        Settings
+      </span>
+    </li>
+  </ul>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt7"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-checktree>
+`;
+
+exports[`control.checkTree with form 1`] = `
+<wup-form
+  role="form"
+>
+  <wup-checktree
+    w-reverse=""
+  >
+    <label
+      for="txt1"
+    >
+      <input
+        aria-controls="txt2"
+        autocomplete="off"
+        id="txt1"
+        type="checkbox"
+      />
+      <strong
+        id="txt3"
+      >
+        First Input
+      </strong>
+      <span
+        icon=""
+      />
+    </label>
+    <ul
+      aria-labelledby="txt3"
+      aria-multiselectable="true"
+      id="txt2"
+      role="tree"
+    >
+      <li
+        aria-checked="false"
+        aria-label="Users"
+        role="treeitem"
+        tabindex="0"
+      >
+        <span
+          item=""
+        >
+          <span
+            icon=""
+          />
+          Users
+        </span>
+        <ul
+          role="group"
+        >
+          <li
+            aria-checked="false"
+            role="treeitem"
+          >
+            <span
+              item=""
+            >
+              <span
+                icon=""
+              />
+              Read
+            </span>
+          </li>
+          <li
+            aria-checked="false"
+            role="treeitem"
+          >
+            <span
+              item=""
+            >
+              <span
+                icon=""
+              />
+              Write
+            </span>
+          </li>
+        </ul>
+      </li>
+      <li
+        aria-checked="false"
+        role="treeitem"
+      >
+        <span
+          item=""
+        >
+          <span
+            icon=""
+          />
+          Reports
+        </span>
+      </li>
+      <li
+        aria-checked="false"
+        role="treeitem"
+      >
+        <span
+          item=""
+        >
+          <span
+            icon=""
+          />
+          Settings
+        </span>
+      </li>
+    </ul>
+  </wup-checktree>
+</wup-form>
+`;

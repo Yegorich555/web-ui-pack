@@ -1,52 +1,64 @@
 @import "../styles";
 
-:root {
-  --ctrl-check-off-bg: #fff;
-  --ctrl-check-on-bg: #00778d;
-  --ctrl-check-on: #fff;
-  --ctrl-check-border-r: 3px;
-  --ctrl-check-shadow: #0003;
-  --ctrl-check-size: 16px;
+/// Checked state of the checkbox-icon [icon]
+/// @example :host[checked] [icon] { @include wup-check-icon-on; }
+/// @see checkTree.scss - it imports the mixin only via `$wup-check-mixins-only: true; @import "check";`
+@mixin wup-check-icon-on {
+  background: var(--ctrl-check-on-bg);
 
-  [wupdark] {
-    --ctrl-check-off-bg: #e7e7e7;
-    --ctrl-check-shadow: #000;
+  &:after {
+    --ctrl-icon: var(--ctrl-check-on);
+    --ctrl-icon-img: var(--wup-icon-check);
+    @include wup-icon;
+    content: "";
+    top: 0;
+    left: 0;
+    padding: 0;
+    border-radius: 0;
+    height: 100%;
+    width: 100%;
   }
 }
 
-:host {
-  [icon] {
-    position: initial;
-    height: var(--ctrl-check-size);
-    width: var(--ctrl-check-size);
-    min-width: var(--ctrl-check-size);
-    border-radius: var(--ctrl-check-border-r);
-    background: var(--ctrl-check-off-bg);
-    box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);
-  }
+// the flag skips styles below when the file is imported only for the mixin above
+$wup-check-mixins-only: false !default;
 
-  &[checked] [icon] {
-    background: var(--ctrl-check-on-bg);
+@if not $wup-check-mixins-only {
+  :root {
+    --ctrl-check-off-bg: #fff;
+    --ctrl-check-on-bg: #00778d;
+    --ctrl-check-on: #fff;
+    --ctrl-check-border-r: 3px;
+    --ctrl-check-shadow: #0003;
+    --ctrl-check-size: 16px;
 
-    &:after {
-      --ctrl-icon: var(--ctrl-check-on);
-      --ctrl-icon-img: var(--wup-icon-check);
-      @include wup-icon;
-      content: "";
-      top: 0;
-      left: 0;
-      padding: 0;
-      border-radius: 0;
-      height: 100%;
-      width: 100%;
+    [wupdark] {
+      --ctrl-check-off-bg: #e7e7e7;
+      --ctrl-check-shadow: #000;
     }
   }
 
-  @include wup-iconHover("[icon]");
-
-  @media not all and (prefers-reduced-motion) {
+  :host {
     [icon] {
-      transition: background-color var(--anim);
+      position: initial;
+      height: var(--ctrl-check-size);
+      width: var(--ctrl-check-size);
+      min-width: var(--ctrl-check-size);
+      border-radius: var(--ctrl-check-border-r);
+      background: var(--ctrl-check-off-bg);
+      box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);
+    }
+
+    &[checked] [icon] {
+      @include wup-check-icon-on;
+    }
+
+    @include wup-iconHover("[icon]");
+
+    @media not all and (prefers-reduced-motion) {
+      [icon] {
+        transition: background-color var(--anim);
+      }
     }
   }
 }

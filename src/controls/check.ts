@@ -60,8 +60,9 @@ declare module "preact/jsx-runtime" {
  * </label> */
 export default class WUPCheckControl<
   TOptions extends WUP.Check.Options = WUP.Check.Options,
-  EventMap extends WUP.Check.EventMap = WUP.Check.EventMap
-> extends WUPSwitchControl<TOptions, EventMap> {
+  EventMap extends WUP.Check.EventMap = WUP.Check.EventMap,
+  ValueType = boolean
+> extends WUPSwitchControl<TOptions, EventMap, ValueType> {
   #ctr = this.constructor as typeof WUPCheckControl;
 
   static get $styleRoot(): string {

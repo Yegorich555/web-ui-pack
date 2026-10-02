@@ -81,7 +81,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
 
     - [x] [SwitchControl (toggler)](src/controls/switch.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/switch)
       - [x] [CheckControl (checkbox)](src/controls/check.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/check)
-        - [ ] CheckTreeControl
+        - [x] [CheckTreeControl](src/controls/checkTree.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/checkTree)
     - [x] [RadioControl (radioGroup)](src/controls/radio.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/radio)
       - [x] Full customized
     - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)

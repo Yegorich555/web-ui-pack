@@ -1,0 +1,139 @@
+@import "../styles";
+$wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
+@import "check";
+
+:root {
+  --ctrl-checktree-padding: 0 1em 0.5em;
+  --ctrl-checktree-item-padding: 0.3em 0;
+  --ctrl-checktree-gap: 0.5em;
+  --ctrl-checktree-indent: 1.5em;
+  --ctrl-checktree-mixed: var(--ctrl-check-on);
+}
+
+:host {
+  [role="tree"],
+  [role="group"] {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  [role="tree"] {
+    padding: var(--ctrl-checktree-padding);
+    // the main checkbox is parent of root-level items: shift them as nested items
+    margin-left: var(--ctrl-checktree-indent);
+  }
+
+  [role="group"] {
+    padding-left: var(--ctrl-checktree-indent);
+  }
+
+  [role="treeitem"] {
+    outline: none; // focus is shown via [item]
+  }
+
+  [aria-expanded="false"] > [role="group"] {
+    display: none;
+  }
+
+  [item] {
+    display: flex;
+    align-items: center;
+    gap: var(--ctrl-checktree-gap);
+    padding: var(--ctrl-checktree-item-padding);
+  }
+
+  [expand] {
+    --ctrl-icon-img: var(--wup-icon-chevron);
+    @include wup-icon;
+    padding: 0;
+    transform: rotate(-90deg);
+  }
+
+  [aria-expanded="true"] > [expand],
+  > label > [aria-expanded="true"] ~ [expand] {
+    transform: none;
+  }
+
+  // [expand] is placed outside [item] to have own hover-state
+  &[w-collapsible] [role="treeitem"] {
+    display: grid;
+    /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+    grid-template-columns: var(--ctrl-icon-size) minmax(0, 1fr); // false positive: it's detected as "multicolumn"
+    gap: 0 var(--ctrl-checktree-gap);
+
+    > [item] {
+      grid-column: 2; // items without nested items are aligned with neighbors that have [expand]
+    }
+
+    > [role="group"] {
+      grid-column: 1 / -1;
+    }
+  }
+
+  [aria-checked="true"] > [item] > [icon] {
+    @include wup-check-icon-on;
+  }
+
+  /* stylelint-disable-next-line no-descending-specificity */
+  > label > input:indeterminate ~ [icon],
+  [aria-checked="mixed"] > [item] > [icon] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ctrl-check-on-bg);
+
+    &:after {
+      content: "";
+      width: 50%;
+      height: 2px;
+      background: var(--ctrl-checktree-mixed);
+    }
+  }
+
+  // hover & focus effects inherited from CheckControl must be applied only to the hovered/focused item
+  &:focus-within [icon]:before,
+  &:hover [icon]:before {
+    content: none;
+  }
+
+  /* stylelint-disable-next-line no-descending-specificity */
+  > label:focus-within [icon]:before,
+  [role="treeitem"]:focus > [item] [icon]:before {
+    content: "";
+  }
+
+  [role="treeitem"]:focus > [item] {
+    color: var(--ctrl-selected);
+  }
+
+  > label > strong {
+    pointer-events: auto; // to show hover-effect of the main checkbox only on label (but not on [expand] inside the label)
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    > label > [icon]:hover:before,
+    > label > strong:hover ~ [icon]:before,
+    [item]:hover [icon]:before {
+      content: "";
+    }
+
+    [item]:hover {
+      color: var(--ctrl-selected);
+    }
+
+    [expand]:hover {
+      --ctrl-icon: var(--ctrl-selected);
+    }
+  }
+
+  @media not all and (prefers-reduced-motion) {
+    [item] {
+      transition: color var(--anim);
+    }
+
+    [expand] {
+      transition: transform var(--anim), background-color var(--anim);
+    }
+  }
+}
