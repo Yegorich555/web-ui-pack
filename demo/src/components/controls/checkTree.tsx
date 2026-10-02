@@ -5,6 +5,7 @@ import Example from "src/elements/example";
 import Page from "src/elements/page";
 import { WUPCheckTreeControl } from "web-ui-pack";
 import stylesCom from "./controls.scss";
+import styles from "./checkTree.scss";
 
 WUPCheckTreeControl.$use();
 
@@ -143,6 +144,7 @@ export default function CheckTreeControlView() {
       ]}
     >
       <wup-form
+        className={styles.form}
         ref={(el) => {
           if (el) {
             el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
