@@ -777,4 +777,140 @@ describe("control.checkTree", () => {
     expect(c.$refTree.getAttribute("aria-disabled")).toBe("true");
     expect(c.$refTree.querySelector("[tabindex]")).toBe(null);
   });
+
+  /** Creates control with custom HTML, assigns it to `el` & returns it */
+  function createCustom(html, items) {
+    el = document.createElement("wup-checktree");
+    el.innerHTML = html;
+    el.$options.items = items;
+    document.body.appendChild(el);
+    jest.advanceTimersByTime(1);
+    return el;
+  }
+
+  test("customization with html", async () => {
+    createCustom(
+      `
+      <ul id="myTree">
+        <li>
+          <span item><span icon></span><b>Users</b></span>
+          <ul>
+            <li><span item><span icon></span>Read</span></li>
+            <li><span item><span icon></span>Write</span></li>
+          </ul>
+        </li>
+        <li aria-label="Custom aria"><span item><span icon></span>Reports</span></li>
+        <li><span item><span icon></span>Settings</span></li>
+      </ul>`,
+      getItems()
+    );
+    const lis = Array.from(el.querySelectorAll("li"));
+    expect(el._isCustomRendered).toBe(true);
+    expect(el.$refTree).toBe(el.querySelector("ul"));
+    expect(el.$refTree.id).toBe("myTree"); // id isn't overridden
+    expect(el.lastElementChild).toBe(el.$refTree); // the main label is placed before the tree
+    expect(el.$refTree.outerHTML.replace(/\n\s*/g, "")).toMatchInlineSnapshot(
+      `"<ul id="myTree" role="tree" aria-multiselectable="true" aria-labelledby="txt5"><li role="treeitem" aria-checked="false" aria-label="Users" tabindex="0"><span item=""><span icon=""></span><b>Users</b></span><ul role="group"><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Read</span></li><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Write</span></li></ul></li><li aria-label="Custom aria" role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Reports</span></li><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Settings</span></li></ul>"`
+    );
+
+    // value & user clicks
+    el.$value = [11];
+    expect(getStates()).toStrictEqual([
+      "Users:mixed:tab",
+      "Read:true",
+      "Write:false",
+      "Reports:false",
+      "Settings:false",
+    ]);
+    await h.userClick(el.querySelector("b")); // custom content inside [item]
+    expect(el.$value).toStrictEqual([1, 11, 12]);
+    expect(getFocused()).toBe("Users");
+    el.$refInput.click();
+    expect(el.$value).toStrictEqual([1, 11, 12, 2, 3]);
+    await h.userClick(getRows()[4]);
+    expect(el.$value).toStrictEqual([1, 11, 12, 2]);
+    expect(getFocused()).toBe("Settings");
+
+    // elements aren't re-rendered on items changing
+    const items = getItems();
+    items[1].disabled = "Reason";
+    el.$options.items = items;
+    jest.advanceTimersByTime(1);
+    expect(Array.from(el.querySelectorAll("li")).every((li, i) => li === lis[i])).toBe(true);
+    expect(el.$value).toStrictEqual([1, 11, 12, 2]);
+    expect(getStates()).toStrictEqual(["Users:true:tab", "Read:true", "Write:true", "Reports:true", "Settings:false"]);
+    expect(el.$refTree.querySelectorAll("[tabindex]").length).toBe(1); // tabindex is removed from the previous active item
+    expect(lis[3].getAttribute("aria-disabled")).toBe("true");
+    expect(getRows()[3].getAttribute("disabled")).toBe("Reason");
+    el.$options.items = getItems();
+    jest.advanceTimersByTime(1);
+    expect(lis[3].hasAttribute("aria-disabled")).toBe(false);
+    expect(getRows()[3].hasAttribute("disabled")).toBe(false);
+
+    // option collapsible: [expand] is added by the control
+    el.$options.collapsible = true;
+    jest.advanceTimersByTime(1);
+    expect(getStates()).toStrictEqual([
+      "Users:true:expanded=false:tab",
+      "Read:true",
+      "Write:true",
+      "Reports:true",
+      "Settings:false",
+    ]);
+    expect(el.$refTree.querySelectorAll("[expand]").length).toBe(1);
+    await h.userClick(el.$refTree.querySelector("[expand]"));
+    expect(getStates()[0]).toBe("Users:true:expanded=true:tab");
+    expect(el.querySelectorAll("ul").length).toBe(2); // nested items aren't rendered again
+    el.$options.items = getItems();
+    jest.advanceTimersByTime(1);
+    expect(el.$refTree.querySelectorAll("[expand]").length).toBe(1); // existed [expand] is reused
+    el.$options.collapsible = false;
+    jest.advanceTimersByTime(1);
+    expect(el.$refTree.querySelector("[expand],[aria-expanded]")).toBe(null);
+    expect(lis.every((li, i) => li === el.querySelectorAll("li")[i])).toBe(true);
+  });
+
+  test("customization with html - not matched to items", async () => {
+    const spy = h.mockConsoleError();
+    const tree = (s) => `<ul>${s}</ul>`;
+    const li = (s = "") => `<li><span item><span icon></span>${s}</span></li>`;
+
+    // without items: nothing to bind
+    createCustom(tree(li("A")), []);
+    expect(spy).not.toBeCalled();
+    expect(el.$refTree.id).toBeTruthy();
+    await h.userClick(getRows()[0]);
+    expect(el.$value).toBe(undefined);
+    // elements fewer than items: HTML is replaced by default rendering
+    const ul = el.$refTree;
+    el.$options.items = getItems();
+    jest.advanceTimersByTime(1);
+    expect(spy).toBeCalledTimes(1);
+    expect(spy.mock.lastCall[0]).toMatch("Custom HTML doesn't match items");
+    expect(el._isCustomRendered).toBe(false);
+    expect(el.$refTree).toBe(ul);
+    expect(getStates()).toStrictEqual([
+      "Users:false:tab",
+      "Read:false",
+      "Write:false",
+      "Reports:false",
+      "Settings:false",
+    ]);
+    // elements more than items
+    const items = [{ text: "Default", value: 1, items: [{ text: "Nested", value: 11 }] }];
+    createCustom(tree(li("A") + li("B") + li("C")), items);
+    expect(spy).toBeCalledTimes(2);
+    expect(getStates()).toStrictEqual(["Default:false:tab", "Nested:false"]);
+    await h.userClick(getRows()[1]);
+    expect(el.$value).toStrictEqual([1, 11]);
+    // nesting isn't the same
+    createCustom(tree(li("A") + li("B")), items);
+    expect(spy).toBeCalledTimes(3);
+    expect(getStates()).toStrictEqual(["Default:false:tab", "Nested:false"]);
+    // element without [item]
+    createCustom(tree("<li>A</li>"), [items[0].items[0]]);
+    expect(spy).toBeCalledTimes(4);
+    expect(getStates()).toStrictEqual(["Nested:false:tab"]);
+    h.unMockConsoleError();
+  });
 });

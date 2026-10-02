@@ -33,8 +33,9 @@ declare global {
       maxCount: number;
     }
     interface NewOptions<T = any> {
-      /** Items showed as tree of checkboxes
+      /** Items showed as tree of checkboxes; with custom HTML (`<ul>` inside the control) items are bound to `<li>` elements in depth-first order
        * @see {@link Item}
+       * @see {@link WUPCheckTreeControl} customization via HTML
        * @tutorial Troubleshooting
        * * array items isn't converted to Proxy (observer) so changing array in place doesn't re-render items; reassign it instead */
       items: Item<T>[] | (() => Item<T>[]);
@@ -103,6 +104,12 @@ const ariaChecked = ["false", "true", "mixed"];
 /** Returns key to find item by value (the same as WUPBaseControl.$isEqual compares: by id or valueOf) */
 const keyOf = (v: any): unknown => (v != null && typeof v === "object" ? v.id ?? v.valueOf() : v);
 
+/** Sets/removes attr of item row: string is reason that is shown via tooltip; nested items of disabled/readonly parent get empty attr */
+function setReason(row: Element, attr: string, isOn: boolean, reason?: boolean | string): void {
+  isOn ? row.setAttribute(attr, typeof reason === "string" ? reason : "") : row.removeAttribute(attr);
+  typeof reason === "string" && useTooltipOnce(attr);
+}
+
 type NodeElement = HTMLLIElement & { _index: number };
 interface TreeNode<T> {
   item: WUP.CheckTree.Item<T>;
@@ -115,7 +122,7 @@ interface TreeNode<T> {
   isDisabled: boolean;
   /** Item or some of parents is readonly */
   isReadOnly: boolean;
-  /** Rendered element (with option `collapsible` nested items are rendered only on first expanding) */
+  /** Rendered element (with option `collapsible` nested items are rendered only on first expanding if HTML isn't custom) */
   li?: NodeElement;
 }
 
@@ -159,7 +166,23 @@ interface TreeNode<T> {
  *      </ul>
  *    </li>
  *    // etc.
- * </ul> */
+ * </ul>
+ * @tutorial Customization via HTML @example
+ * // place `<ul>` with items inside the control: it isn't re-rendered but bound to $options.items by index in depth-first order;
+ * // so nesting must be the same as for items (item.text is ignored); roles, aria-attrs and [expand] are added by the control
+ * // otherwise error is logged and HTML is replaced by default rendering
+ * <wup-checktree w-items="window.myItems">
+ *    <ul>
+ *      <li>
+ *        <span item><span icon></span><b>Users</b></span>
+ *        <ul>
+ *          <li><span item><span icon></span>Read</span></li>
+ *          <li><span item><span icon></span>Write</span></li>
+ *        </ul>
+ *      </li>
+ *      <li><span item><span icon></span>Reports</span></li>
+ *    </ul>
+ * </wup-checktree>; */
 export default class WUPCheckTreeControl<
   ValueType = any,
   TOptions extends WUP.CheckTree.Options = WUP.CheckTree.Options,
@@ -234,6 +257,8 @@ export default class WUPCheckTreeControl<
   #index?: Map<unknown, number>;
   /** Index of item that is focusable via Tab (roving tabindex) */
   _activeIndex = 0;
+  /** It's true when items was added as children in manual way */
+  _isCustomRendered = false;
 
   /** Called when need to parse attr [initValue]: global reference to array of values is expected */
   override parse(attrValue: string): ValueType[] | undefined {
@@ -259,9 +284,14 @@ export default class WUPCheckTreeControl<
   }
 
   protected override renderControl(): void {
+    const ul = this.querySelector<HTMLUListElement>(":scope > ul");
+    if (ul) {
+      this.$refTree = ul;
+      this._isCustomRendered = true;
+    }
     super.renderControl();
     const t = this.$refTree;
-    t.id = this.#ctr.$uniqueId;
+    t.id ||= this.#ctr.$uniqueId;
     t.setAttribute("role", "tree");
     t.setAttribute("aria-multiselectable", true);
     this.$refTitle.id = this.#ctr.$uniqueId;
@@ -292,6 +322,7 @@ export default class WUPCheckTreeControl<
 
   /** Called to (re)build & render tree based on $options.items */
   protected renderItems(): void {
+    this._nodes && this.setActive(-1); // remove tabindex from the previous active item (custom HTML isn't re-rendered)
     const { items, collapsible } = this._opts;
     const nodes: TreeNode<ValueType>[] = [];
     const index = new Map<unknown, number>();
@@ -321,9 +352,14 @@ export default class WUPCheckTreeControl<
     // apply current value to new items: value is normalized silently because check-states are the same (see $isEqual)
     this.setValue(this.#value, SetValueReasons.initValue);
 
-    const t = this.$refTree;
-    this.removeChildren.call(t);
-    t.appendChild(this.renderNodes(document.createDocumentFragment(), 0, nodes.length));
+    if (this._isCustomRendered && nodes.length && !this.bindNodes()) {
+      this._isCustomRendered = false; // custom HTML is replaced by default rendering
+    }
+    if (!this._isCustomRendered) {
+      const t = this.$refTree;
+      this.removeChildren.call(t);
+      t.appendChild(this.renderNodes(document.createDocumentFragment(), 0, nodes.length));
+    }
     this.setActive(this.nextEnabled(0));
   }
 
@@ -341,23 +377,10 @@ export default class WUPCheckTreeControl<
     const { item } = n;
     const isParent = n.end > i + 1;
     const li = document.createElement("li") as NodeElement;
-    li._index = i;
-    li.setAttribute("role", "treeitem");
-    li.setAttribute("aria-checked", ariaChecked[this._states![i]]);
-    n.isDisabled && li.setAttribute("aria-disabled", true);
-    if (isParent && this._opts.collapsible) {
-      li.setAttribute("aria-expanded", n.expanded);
-      li.appendChild(document.createElement("span")).setAttribute("expand", ""); // outside [item] to have own hover-state
-    }
     const row = li.appendChild(document.createElement("span"));
     row.setAttribute("item", "");
-    // string is reason that is shown via tooltip; nested items of disabled/readonly parent get empty attr
-    const { disabled, readOnly } = item;
-    n.isDisabled && row.setAttribute("disabled", typeof disabled === "string" ? disabled : "");
-    n.isReadOnly && row.setAttribute("readonly", typeof readOnly === "string" ? readOnly : "");
-    typeof disabled === "string" && useTooltipOnce("disabled");
-    typeof readOnly === "string" && useTooltipOnce("readonly");
     row.appendChild(document.createElement("span")).setAttribute("icon", "");
+    this.setupNode(i, li, row);
     const s = item.text;
     if (typeof s === "function") {
       this.setAttr.call(li, "aria-label", s(item.value, row.appendChild(document.createElement("span")), i, this));
@@ -365,9 +388,63 @@ export default class WUPCheckTreeControl<
       row.appendChild(document.createTextNode(s));
       isParent && li.setAttribute("aria-label", s); // otherwise text of nested items can be included in the name
     }
-    n.li = li;
     isParent && n.expanded && this.renderGroup(i);
     return li;
+  }
+
+  /** Called to bind items to the tree rendered via HTML: `<li>` elements are matched to items by index in depth-first order
+   * @returns false if HTML doesn't match items (nothing is bound) */
+  protected bindNodes(): boolean {
+    const nodes = this._nodes!;
+    const t = this.$refTree;
+    const arr = t.querySelectorAll("li") as NodeListOf<NodeElement>;
+    const rows: Element[] = [];
+    if (arr.length === nodes.length) {
+      for (let i = 0; i < nodes.length; ++i) {
+        const li = arr[i];
+        const row = li.querySelector(":scope > [item]");
+        // nesting of elements must be the same as for items: the tree is placed directly in the control
+        if (!row || li.parentElement!.parentElement !== (arr[nodes[i].parent] ?? this)) {
+          break;
+        }
+        rows.push(row);
+      }
+    }
+    if (rows.length !== nodes.length) {
+      this.throwError("Custom HTML doesn't match items", { items: this._opts.items, tree: t }, true);
+      return false;
+    }
+    rows.forEach((row, i) => {
+      const li = arr[i];
+      const ul = li.parentElement!;
+      ul !== t && ul.setAttribute("role", "group");
+      this.setupNode(i, li, row);
+      // otherwise text of nested items is included in the name
+      nodes[i].end > i + 1 && !li.hasAttribute("aria-label") && li.setAttribute("aria-label", row.textContent!.trim());
+    });
+    return true;
+  }
+
+  /** Called to update element of item (rendered by control or via HTML) according to item & options */
+  protected setupNode(i: number, li: NodeElement, row: Element): void {
+    const n = this._nodes![i];
+    const { disabled, readOnly } = n.item;
+    li._index = i;
+    li.setAttribute("role", "treeitem");
+    li.setAttribute("aria-checked", ariaChecked[this._states![i]]);
+    this.setAttr.call(li, "aria-disabled", n.isDisabled);
+    const prev = row.previousElementSibling;
+    const ex = prev?.hasAttribute("expand") ? prev : null; // [expand] is placed right before [item]
+    if (n.end > i + 1 && this._opts.collapsible) {
+      li.setAttribute("aria-expanded", n.expanded);
+      !ex && li.insertBefore(document.createElement("span"), row).setAttribute("expand", ""); // outside [item] to have own hover-state
+    } else {
+      li.removeAttribute("aria-expanded");
+      ex?.remove();
+    }
+    setReason(row, "disabled", n.isDisabled, disabled);
+    setReason(row, "readonly", n.isReadOnly, readOnly);
+    n.li = li;
   }
 
   /** Called to render nested items of pointed parent */
@@ -509,7 +586,7 @@ export default class WUPCheckTreeControl<
     n.expanded = !n.expanded;
     n.li!.setAttribute("aria-expanded", n.expanded);
     if (n.expanded) {
-      n.li!.lastElementChild!.hasAttribute("item") && this.renderGroup(i); // nested items are rendered on first expanding
+      !this._nodes![i + 1].li && this.renderGroup(i); // nested items are rendered on first expanding
     } else if (this._activeIndex > i && this._activeIndex < n.end) {
       this.setActive(i, this.$isFocused); // active item is hidden
     }
@@ -576,7 +653,8 @@ export default class WUPCheckTreeControl<
   protected findItem(e: MouseEvent): NodeElement | null {
     const el = !e.button && !this.$isDisabled ? (e.target as Element).closest?.("[item],[expand]") : null;
     const li = el && this.$refTree.contains(el) ? (el.parentElement as NodeElement) : null;
-    return li && !this._nodes![li._index].isDisabled ? li : null;
+    const n = li && this._nodes![li._index];
+    return n && !n.isDisabled ? li : null; // custom HTML isn't bound when items are empty
   }
 
   /** Called when user clicks on the tree */
