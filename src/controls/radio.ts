@@ -23,7 +23,7 @@ declare global {
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions<T> {}
     interface JSXProps<C = WUPRadioControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      "w-reverse"?: boolean | "";
+      "w-reverse"?: boolean | "" | "true" | "false";
       /** Global reference to object with array
        * @see  {@link WUP.Select.MenuItem}
        * @example

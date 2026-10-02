@@ -80,7 +80,7 @@ declare global {
        * ``` */
       "w-items"?: string;
       "w-allowNewValue"?: boolean | "";
-      "w-multiple"?: boolean | "";
+      "w-multiple"?: boolean | "" | "true" | "false";
     }
   }
 

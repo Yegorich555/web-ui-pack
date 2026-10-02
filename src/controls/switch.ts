@@ -14,7 +14,7 @@ declare global {
     }
     interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      "w-reverse"?: boolean | "";
+      "w-reverse"?: boolean | "" | "true" | "false";
       /** @deprecated use `w-initValue` instead */
       defaultChecked?: boolean;
     }
@@ -73,8 +73,9 @@ declare module "preact/jsx-runtime" {
  * </label> */
 export default class WUPSwitchControl<
   TOptions extends WUP.Switch.Options = WUP.Switch.Options,
-  EventMap extends WUP.Switch.EventMap = WUP.Switch.EventMap
-> extends WUPBaseControl<boolean, TOptions, EventMap> {
+  EventMap extends WUP.Switch.EventMap = WUP.Switch.EventMap,
+  ValueType = boolean
+> extends WUPBaseControl<ValueType, TOptions, EventMap> {
   #ctr = this.constructor as typeof WUPSwitchControl;
 
   static get $styleRoot(): string {
@@ -85,7 +86,8 @@ export default class WUPSwitchControl<
     return super.$style;
   }
 
-  static $isEqual(v1: boolean | undefined, v2: boolean | undefined): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static $isEqual(v1: unknown, v2: unknown, control: WUPBaseControl): boolean {
     return !!v1 === !!v2;
   }
 
@@ -100,19 +102,19 @@ export default class WUPSwitchControl<
     reverse: false,
   });
 
-  get $value(): boolean {
-    return !!super.$value as boolean;
+  get $value(): ValueType {
+    return !!super.$value as ValueType;
   }
 
-  set $value(v: boolean) {
-    super.$value = !!v;
+  set $value(v: ValueType) {
+    super.$value = !!v as ValueType;
   }
 
-  override parse(text: string): boolean | undefined {
-    return text === "" || text === "1" || text.toLowerCase() === "true";
+  override parse(text: string): ValueType | undefined {
+    return (text === "" || text === "1" || text.toLowerCase() === "true") as ValueType;
   }
 
-  override valueToStorage(v: boolean): string | null {
+  override valueToStorage(v: ValueType): string | null {
     return v ? "1" : null;
   }
 
@@ -137,18 +139,22 @@ export default class WUPSwitchControl<
 
   /** Called when user changes value via click or keyboard */
   protected gotInput(e: Event): void {
-    const el = e.target as HTMLInputElement;
     if (this.$isReadOnly) {
-      el.checked = !el.checked;
+      this.checkInput(!!this.$value); // rollback changes of browser
     } else {
-      this.setValue(el.checked, SetValueReasons.userInput);
+      this.setValue((e.target as HTMLInputElement).checked as ValueType, SetValueReasons.userInput);
     }
   }
 
-  protected override setValue(v: boolean, reason: SetValueReasons): boolean | null {
+  /** Called when need to update check-state of input */
+  protected checkInput(isChecked: boolean): void {
+    this.$refInput.checked = isChecked;
+    this.setAttr("checked", isChecked, true);
+  }
+
+  protected override setValue(v: ValueType, reason: SetValueReasons): boolean | null {
     const r = super.setValue(v, reason);
-    this.$refInput.checked = !!v;
-    this.setAttr("checked", this.$refInput.checked, true);
+    this.checkInput(!!v);
     return r;
   }
 

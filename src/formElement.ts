@@ -82,7 +82,7 @@ declare global {
     interface JSXProps extends WUP.Base.OnlyNames<Options> {
       "w-submitActions"?: SubmitActions | number;
       "w-autoStore"?: boolean | string;
-      "w-autoFocus"?: boolean | "";
+      "w-autoFocus"?: boolean | "" | "true" | "false";
       "w-autoComplete"?: boolean | "";
 
       /** @deprecated use [disabled] instead since related to CSS-styles */

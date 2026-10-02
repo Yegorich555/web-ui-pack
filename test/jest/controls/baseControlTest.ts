@@ -74,6 +74,8 @@ interface TestOptions<T> extends BaseTestOptions {
   autoCompleteOff?: "off" | "new-password";
   /** Set true to ignore select in input text */
   noInputSelection?: boolean;
+  /** Set true if control normalizes value so `$value` is a new instance: then it's compared via `toStrictEqual` instead of `toBe` */
+  isValueNormalized?: boolean;
   onCreateNew: (el: WUPBaseControl) => void;
   testReadonly: { true: (el: WUPBaseControl) => void; false: (el: WUPBaseControl) => void };
   $options?: {
@@ -87,6 +89,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   cfg.autoCompleteOff = cfg.autoCompleteOff || "off";
   cfg.emptyValue = "emptyValue" in cfg ? cfg.emptyValue : undefined;
   const hasVldRequired = !cfg.validationsSkip?.includes("required");
+  /** Checks $value by reference (or by content if control normalizes value) */
+  const expectValue = (v: unknown, expected: unknown): void => {
+    if (cfg.isValueNormalized) {
+      expect(v).toStrictEqual(expected);
+    } else {
+      expect(v).toBe(expected);
+    }
+  };
 
   h.baseTestComponent(() => document.createElement(tagName), {
     attrs: {
@@ -160,7 +170,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.addEventListener("$change", spyChange);
 
       el.$initValue = cfg.initValues[0].value;
-      expect(el.$value).toBe(cfg.initValues[0].value);
+      expectValue(el.$value, cfg.initValues[0].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
       jest.advanceTimersByTime(1);
@@ -168,7 +178,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.initValue });
 
       el.$initValue = cfg.initValues[1].value;
-      expect(el.$value).toBe(cfg.initValues[1].value);
+      expectValue(el.$value, cfg.initValues[1].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
       jest.advanceTimersByTime(1);
@@ -176,7 +186,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
       el.$value = cfg.initValues[2].value;
       expect(el.$initValue).toBe(cfg.initValues[1].value);
-      expect(el.$value).toBe(cfg.initValues[2].value);
+      expectValue(el.$value, cfg.initValues[2].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(true);
       jest.advanceTimersByTime(1);
@@ -184,7 +194,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.manual });
 
       el.$initValue = cfg.initValues[1].value;
-      expect(el.$value).toBe(cfg.initValues[2].value);
+      expectValue(el.$value, cfg.initValues[2].value);
       expect(el.$isChanged).toBe(true);
       jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(1);
@@ -212,7 +222,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$value = cfg.initValues[0].value;
       el.$initValue = cfg.initValues[1].value;
       jest.advanceTimersByTime(1);
-      expect(el.$value).toBe(cfg.initValues[0].value);
+      expectValue(el.$value, cfg.initValues[0].value);
       // $initValue is changeable
       el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
       cfg.onCreateNew?.call(cfg, el);
@@ -220,7 +230,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$initValue = cfg.initValues[1].value;
       jest.advanceTimersByTime(1);
       expect(el.$initValue).toBe(cfg.initValues[1].value);
-      expect(el.$value).toBe(el.$initValue);
+      expectValue(el.$value, el.$initValue);
     });
   });
 
@@ -290,7 +300,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$initValue = cfg.initValues[1].value;
       el.$options.clearActions = ClearActions.clear as any;
       await h.wait(1);
-      expect(el.$value).toBe(cfg.initValues[0].value);
+      expectValue(el.$value, cfg.initValues[0].value);
 
       el.focus();
       await h.wait(1);
@@ -317,7 +327,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$value).toBe(cfg.emptyValue);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
-      expect(el.$value).toBe(val);
+      expectValue(el.$value, val);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
@@ -333,13 +343,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
-      expect(el.$value).toBe(initVal);
+      expectValue(el.$value, initVal);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
-      expect(el.$value).toBe(initVal);
+      expectValue(el.$value, initVal);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);

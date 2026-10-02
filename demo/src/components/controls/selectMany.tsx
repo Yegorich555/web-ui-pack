@@ -59,8 +59,8 @@ export default function SelectManyControlView() {
           w-initValue="window.inputSelectMany.initValue"
           w-validations="window._someSelectValidations2"
           w-autoComplete="off"
-          w-sortable={false}
-          w-autoFocus={false}
+          w-sortable="false"
+          w-autoFocus="false"
         />
         <div className={`${stylesCom.group} ${styles.sameHeight}`}>
           <wup-selectmany

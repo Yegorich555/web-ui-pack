@@ -193,7 +193,7 @@ declare global {
       "w-initValue"?: string | boolean | number;
       "w-label"?: string;
       "w-name"?: string;
-      "w-autoFocus"?: boolean;
+      "w-autoFocus"?: boolean | "" | "true" | "false";
       "w-autoComplete"?: string | boolean;
 
       /** @deprecated use [disabled] instead since related to CSS-styles */

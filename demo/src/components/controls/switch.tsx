@@ -35,8 +35,8 @@ export default function SwitchControlView() {
         <wup-switch //
           w-name="switch"
           w-label="Switch"
-          w-initValue={false}
-          w-reverse={false}
+          w-initValue="false"
+          w-reverse="false"
         />
         <div className={stylesCom.group}>
           <wup-switch w-name="readonly" readonly />

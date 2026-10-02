@@ -12,7 +12,7 @@
   - Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (user able to see formats in TS)
   - Compressed built-in styles
 - **Controls**
-  - Fixed TypeScript issues
+  - Fixed TypeScript issues (including bool attributes in React 19 - expected string-value "true" instead of bool {true} )
   - _Validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)_
   - _Attribute **w-initvalue** doesn't prevent taking value from `form.$initModel` when attr parsed as empty (ex. `w-initvalue=""`)_
 - [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts)
@@ -29,6 +29,7 @@
   - _Validation rule **special** ignores `min` (fails only when no special chars at all)_
   - _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-storageKey`, `w-storage`_
 - [RadioControl](src/controls/radio.ts). _Option **storageKey** doesn't restore value when value is object with numeric `id` (ex. `{ id: 1 }`)_
+- [CircleElement](src/circleElement.ts). _Item with value `NaN` throws infinite exceptions (now `NaN` & `Infinity` are handled as `0`)_
 - [DropdownElement](src/dropdownElement.ts). _Fix popup position on animation when item is partially visible_
 - [ModalElement](src/modalElement.ts). _Ctrl+A selects behind modal_
 - [NotifyElement](src/notifyElement.ts). _Attributes **w-pauseOnHover** & **w-pauseOnWinBlur** are ignored_
@@ -36,6 +37,7 @@
   - _Method **$attach**: memory leak when target is removed without `detach()`_
   - _Method **$attach**: popup isn't removed when opening is prevented via event `$willOpen`_
   - _Opening prevented via event `$willOpen` during the closing breaks next open/close by target_
+- helper [animate](src/helpers/animate.ts). _Animation is infinite when `ms` is `NaN`_
 - helper [exportToExcel](src/helpers/files/exportToExcel.ts)
   - Added prop **isSorted** for headers
   - Added props **freezeRows** & **freezeColumns** for sheets
@@ -53,6 +55,7 @@
 
 ### New Features
 
+- [CheckTreeControl](src/controls/checkTree.ts)
 - helper [imageConvert](src/helpers/files/imageConvert.ts)
 - helper [selectFiles](src/helpers/files/selectFiles.ts)
 - helper [isScrollable](src/helpers/findScrollParent.ts)

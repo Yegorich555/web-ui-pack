@@ -26,7 +26,7 @@ export default function CheckControlView() {
         }}
         w-autoFocus
       >
-        <wup-check w-name="check" w-label="Check" w-initValue={false} w-reverse={false} />
+        <wup-check w-name="check" w-label="Check" w-initValue="false" w-reverse="false" />
         <div className={stylesCom.group}>
           <wup-check w-name="readonly" readonly />
           <wup-check w-name="disabled" disabled />
