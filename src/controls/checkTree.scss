@@ -50,6 +50,18 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
     transform: rotate(-90deg);
   }
 
+  // the same as for disabled/readonly control
+  [item][disabled],
+  [aria-disabled="true"] > [expand] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    user-select: none;
+  }
+
+  [item][readonly] {
+    cursor: initial;
+  }
+
   [aria-expanded="true"] > [expand],
   > label > [aria-expanded="true"] ~ [expand] {
     transform: none;
@@ -114,15 +126,15 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
   @media (hover: hover) and (pointer: fine) {
     > label > [icon]:hover:before,
     > label > strong:hover ~ [icon]:before,
-    [item]:hover [icon]:before {
+    [item]:not([disabled]):hover [icon]:before {
       content: "";
     }
 
-    [item]:hover {
+    [item]:not([disabled]):hover {
       color: var(--ctrl-selected);
     }
 
-    [expand]:hover {
+    :not([aria-disabled]) > [expand]:hover {
       --ctrl-icon: var(--ctrl-selected);
     }
   }

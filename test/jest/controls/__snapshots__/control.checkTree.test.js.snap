@@ -1296,6 +1296,16 @@ WUP-CHECKTREE [expand] {
   padding: 0;
   transform: rotate(-90deg);
 }
+WUP-CHECKTREE [item][disabled],
+WUP-CHECKTREE [aria-disabled=true] &gt; [expand] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  -webkit-user-select: none;
+          user-select: none;
+}
+WUP-CHECKTREE [item][readonly] {
+  cursor: initial;
+}
 WUP-CHECKTREE [aria-expanded=true] &gt; [expand],
 WUP-CHECKTREE &gt; label &gt; [aria-expanded=true] ~ [expand] {
   transform: none;
@@ -1379,13 +1389,13 @@ WUP-CHECKTREE &gt; label &gt; strong {
 @media (hover: hover) and (pointer: fine) {
   WUP-CHECKTREE &gt; label &gt; [icon]:hover:before,
 WUP-CHECKTREE &gt; label &gt; strong:hover ~ [icon]:before,
-WUP-CHECKTREE [item]:hover [icon]:before {
+WUP-CHECKTREE [item]:not([disabled]):hover [icon]:before {
     content: "";
   }
-  WUP-CHECKTREE [item]:hover {
+  WUP-CHECKTREE [item]:not([disabled]):hover {
     color: var(--ctrl-selected);
   }
-  WUP-CHECKTREE [expand]:hover {
+  WUP-CHECKTREE :not([aria-disabled]) &gt; [expand]:hover {
     --ctrl-icon: var(--ctrl-selected);
   }
 }

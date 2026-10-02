@@ -11,7 +11,7 @@ const items: WUP.CheckTree.Item[] = [
     items: [
       { text: "Read", value: "users.read" },
       { text: "Create", value: "users.create" },
-      { text: "Delete", value: "users.delete" },
+      { text: "Delete (disabled with reason)", value: "users.delete", disabled: "Only for admins" },
     ],
   },
   {
@@ -26,7 +26,7 @@ const items: WUP.CheckTree.Item[] = [
           { text: "Monthly", value: "reports.sales.monthly" },
         ],
       },
-      { text: "Finance", value: "reports.finance" },
+      { text: "Finance (readonly)", value: "reports.finance", readOnly: true },
     ],
   },
   { text: "Settings", value: "settings" },
@@ -64,6 +64,7 @@ export default function CheckTreeControlView() {
         "The main checkbox checks/unchecks every item",
         "Parent is checked when every nested item is checked and partially checked when some of them",
         "Value of checked parent is included in $value (point item.value: undefined to exclude it)",
+        "Disabled & readonly items (item.disabled, item.readOnly): the same as options of the control but for item with nested items",
         "Expand/collapse via option collapsible (nested items are rendered on first expanding)",
         "Keyboard support (role tree): Arrows (as for RadioControl), Space (check), Enter (expand/collapse)",
       ]}

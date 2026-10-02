@@ -1,5 +1,6 @@
 import { inheritDefaults } from "../baseElement";
 import nestedProperty from "../helpers/nestedProperty";
+import { useTooltipOnce } from "../popup/popupTooltip";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import WUPCheckControl from "./check";
 
@@ -15,6 +16,14 @@ declare global {
       /** Expanded state on init (only with option `collapsible`)
        * @defaultValue false */
       expanded?: boolean;
+      /** Disallow user to check item & nested items and to focus them (the same as option `disabled` of the control)
+       * * point string (reason) to show it via tooltip (`WUPPopupElement.$useTooltip({ attr: "disabled" })` is applied automatically; call it before to customize)
+       * @defaultValue false */
+      disabled?: boolean | string;
+      /** Disallow user to check item & nested items (the same as option `readOnly` of the control)
+       * * point string (reason) to show it via tooltip (`WUPPopupElement.$useTooltip({ attr: "readonly" })` is applied automatically; call it before to customize)
+       * @defaultValue false */
+      readOnly?: boolean | string;
     }
     interface EventMap extends WUP.Check.EventMap {}
     interface ValidityMap extends WUP.Check.ValidityMap {
@@ -102,6 +111,10 @@ interface TreeNode<T> {
   /** Index next to the last nested node: nested nodes are placed in range [index + 1, end) */
   end: number;
   expanded: boolean;
+  /** Item or some of parents is disabled */
+  isDisabled: boolean;
+  /** Item or some of parents is readonly */
+  isReadOnly: boolean;
   /** Rendered element (with option `collapsible` nested items are rendered only on first expanding) */
   li?: NodeElement;
 }
@@ -137,9 +150,9 @@ interface TreeNode<T> {
  *    <span expand></span> // only with option collapsible
  * </label>
  * <ul role="tree">
- *    <li role="treeitem" aria-checked="mixed" aria-expanded="true">
+ *    <li role="treeitem" aria-checked="mixed" aria-expanded="true"> // [aria-disabled] if item or some of parents is disabled
  *      <span expand></span> // only with option collapsible
- *      <span item><span icon></span>Users</span>
+ *      <span item><span icon></span>Users</span> // [disabled]/[readonly] if item or some of parents is disabled/readonly
  *      <ul role="group">
  *        <li role="treeitem" aria-checked="true"><span item><span icon></span>Read</span></li>
  *        // etc.
@@ -283,8 +296,17 @@ export default class WUPCheckTreeControl<
     const nodes: TreeNode<ValueType>[] = [];
     const index = new Map<unknown, number>();
     const add = (arr: WUP.CheckTree.Item<ValueType>[], parent: number): void => {
+      const p = nodes[parent] as TreeNode<ValueType> | undefined;
       arr.forEach((item) => {
-        const i = nodes.push({ item, parent, end: 0, expanded: !collapsible || !!item.expanded }) - 1;
+        const i =
+          nodes.push({
+            item,
+            parent,
+            end: 0,
+            expanded: !collapsible || !!item.expanded,
+            isDisabled: !!item.disabled || !!p?.isDisabled,
+            isReadOnly: !!item.readOnly || !!p?.isReadOnly,
+          }) - 1;
         const k = keyOf(item.value);
         item.value !== undefined && !index.has(k) && index.set(k, i);
         item.items?.length && add(item.items, i);
@@ -302,7 +324,7 @@ export default class WUPCheckTreeControl<
     const t = this.$refTree;
     this.removeChildren.call(t);
     t.appendChild(this.renderNodes(document.createDocumentFragment(), 0, nodes.length));
-    this.setActive(0);
+    this.setActive(this.nextEnabled(0));
   }
 
   /** Called to render direct nested items placed in range [from, to) */
@@ -322,12 +344,19 @@ export default class WUPCheckTreeControl<
     li._index = i;
     li.setAttribute("role", "treeitem");
     li.setAttribute("aria-checked", ariaChecked[this._states![i]]);
+    n.isDisabled && li.setAttribute("aria-disabled", true);
     if (isParent && this._opts.collapsible) {
       li.setAttribute("aria-expanded", n.expanded);
       li.appendChild(document.createElement("span")).setAttribute("expand", ""); // outside [item] to have own hover-state
     }
     const row = li.appendChild(document.createElement("span"));
     row.setAttribute("item", "");
+    // string is reason that is shown via tooltip; nested items of disabled/readonly parent get empty attr
+    const { disabled, readOnly } = item;
+    n.isDisabled && row.setAttribute("disabled", typeof disabled === "string" ? disabled : "");
+    n.isReadOnly && row.setAttribute("readonly", typeof readOnly === "string" ? readOnly : "");
+    typeof disabled === "string" && useTooltipOnce("disabled");
+    typeof readOnly === "string" && useTooltipOnce("readonly");
     row.appendChild(document.createElement("span")).setAttribute("icon", "");
     const s = item.text;
     if (typeof s === "function") {
@@ -439,20 +468,25 @@ export default class WUPCheckTreeControl<
 
   /** Called when user changes the main checkbox: checks/unchecks every item */
   protected override gotInput(): void {
-    const n = this._nodes!.length;
-    if (this.$isReadOnly || !n) {
-      this.checkInput(); // rollback changes of browser
-    } else {
-      // browser has already toggled the input (indeterminate => checked)
-      const st = new Uint8Array(n).fill(this.$refInput.checked ? CheckStates.on : CheckStates.off);
-      this.setValue(this.statesToValue(st), SetValueReasons.userInput);
-    }
+    this.$isReadOnly ? this.checkInput() : this.toggleCheck(0, this._nodes!.length); // checkInput rollbacks changes of browser
   }
 
-  /** Called when user toggles item: checks item with nested items or unchecks if it's checked */
-  protected toggleCheck(i: number): void {
+  /** Called when user toggles items placed in range [from, to): checks them or unchecks if they're checked;
+   *  disabled & readonly items aren't changed */
+  protected toggleCheck(from: number, to: number): void {
+    const nodes = this._nodes!;
+    const leaves: number[] = []; // states of parents are calculated based on nested items
+    for (let i = from; i < to; ++i) {
+      const n = nodes[i];
+      n.end === i + 1 && !n.isDisabled && !n.isReadOnly && leaves.push(i);
+    }
+    if (!leaves.length) {
+      this.checkInput(); // rollback changes of browser for the main checkbox
+      return;
+    }
     const st = this._states!.slice();
-    st.fill(st[i] === CheckStates.on ? CheckStates.off : CheckStates.on, i, this._nodes![i].end);
+    const s = leaves.every((i) => st[i] === CheckStates.on) ? CheckStates.off : CheckStates.on;
+    leaves.forEach((i) => (st[i] = s));
     this.setValue(this.statesToValue(this.calcParents(st)), SetValueReasons.userInput);
   }
 
@@ -494,23 +528,38 @@ export default class WUPCheckTreeControl<
     }
   }
 
-  /** Returns index of next visible item; `-1` is the main checkbox (it's next to the last item) */
-  protected nextVisible(i: number): number {
+  /** Returns pointed index or index of the next item that isn't disabled (nested items of disabled parent are skipped); `-1` if not found */
+  protected nextEnabled(i: number): number {
     const nodes = this._nodes!;
-    if (i === -1) {
-      return this.$refTree.hidden || !nodes.length ? -1 : 0;
+    for (; i < nodes.length; i = nodes[i].end) {
+      if (!nodes[i].isDisabled) {
+        return i;
+      }
     }
-    const n = nodes[i];
-    const next = n.expanded ? i + 1 : n.end; // for item without nested items `i + 1 === end`
-    return next < nodes.length ? next : -1;
+    return -1;
   }
 
-  /** Returns index of previous visible item; `-1` is the main checkbox (it's previous to the first item) */
+  /** Returns index of next visible & enabled item; `-1` is the main checkbox (it's next to the last item) */
+  protected nextVisible(i: number): number {
+    if (i === -1) {
+      return this.$refTree.hidden ? -1 : this.nextEnabled(0);
+    }
+    const n = this._nodes![i];
+    return this.nextEnabled(n.expanded ? i + 1 : n.end); // for item without nested items `i + 1 === end`
+  }
+
+  /** Returns index of previous visible & enabled item; `-1` is the main checkbox (it's previous to the first item) */
   protected prevVisible(i: number): number {
     if (i === -1) {
       i = this.$refTree.hidden ? 0 : this._nodes!.length; // the last item is previous to the main checkbox
     }
-    return i ? this.visibleOf(i - 1) : -1;
+    while (i) {
+      i = this.visibleOf(i - 1);
+      if (!this._nodes![i].isDisabled) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   /** Returns index of pointed item or the top collapsed parent (if item is hidden) */
@@ -523,10 +572,11 @@ export default class WUPCheckTreeControl<
     return r;
   }
 
-  /** Returns tree item related to mouse event (row or expand-icon) or null if it's not the main button or control is disabled */
+  /** Returns tree item related to mouse event (row or expand-icon) or null if it's not the main button or control/item is disabled */
   protected findItem(e: MouseEvent): NodeElement | null {
     const el = !e.button && !this.$isDisabled ? (e.target as Element).closest?.("[item],[expand]") : null;
-    return el && this.$refTree.contains(el) ? (el.parentElement as NodeElement) : null;
+    const li = el && this.$refTree.contains(el) ? (el.parentElement as NodeElement) : null;
+    return li && !this._nodes![li._index].isDisabled ? li : null;
   }
 
   /** Called when user clicks on the tree */
@@ -540,9 +590,9 @@ export default class WUPCheckTreeControl<
       this.toggleExpand(i);
       return;
     }
-    const { item } = this._nodes![i];
+    const { item, end } = this._nodes![i];
     item.onClick?.call(li, e, item);
-    !e.defaultPrevented && !this.$isReadOnly && this.toggleCheck(i);
+    !e.defaultPrevented && !this.$isReadOnly && this.toggleCheck(i, end);
   }
 
   /** Called when user presses key on focused item or the main checkbox (it's item with index `-1`):
@@ -567,7 +617,7 @@ export default class WUPCheckTreeControl<
         if (i === -1) {
           return; // browser toggles the main checkbox itself: see gotInput
         }
-        this.toggleCheck(i);
+        this.toggleCheck(i, this._nodes![i].end);
         break;
       case "Enter":
         if (!this.toggleExpand(i)) {

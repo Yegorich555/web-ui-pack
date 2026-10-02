@@ -413,6 +413,131 @@ describe("control.checkTree", () => {
     expect(getStates()[0]).toBe("Users:mixed:tab");
   });
 
+  test("item.disabled & item.readOnly", async () => {
+    el.$options.collapsible = true;
+    el.$options.items = [
+      {
+        text: "Users",
+        value: 1,
+        expanded: true,
+        items: [
+          { text: "Read", value: 11 },
+          { text: "Write", value: 12, readOnly: "Reason RO" },
+          { text: "Delete", value: 13, disabled: true },
+        ],
+      },
+      // nested items of disabled/readonly parent are disabled/readonly also
+      {
+        text: "Reports",
+        value: 2,
+        disabled: "Reason",
+        expanded: true,
+        items: [{ text: "Daily", value: 21, disabled: false }],
+      },
+      { text: "Settings", value: 3, readOnly: true, expanded: true, items: [{ text: "Theme", value: 31 }] },
+    ];
+    jest.advanceTimersByTime(1);
+    el.$value = [13];
+    expect(el.$refTree.innerHTML).toMatchInlineSnapshot(
+      `"<li role="treeitem" aria-checked="mixed" aria-expanded="true" aria-label="Users" tabindex="0"><span expand=""></span><span item=""><span icon=""></span>Users</span><ul role="group"><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>Read</span></li><li role="treeitem" aria-checked="false"><span item="" readonly="Reason RO"><span icon=""></span>Write</span></li><li role="treeitem" aria-checked="true" aria-disabled="true"><span item="" disabled=""><span icon=""></span>Delete</span></li></ul></li><li role="treeitem" aria-checked="false" aria-disabled="true" aria-expanded="true" aria-label="Reports"><span expand=""></span><span item="" disabled="Reason"><span icon=""></span>Reports</span><ul role="group"><li role="treeitem" aria-checked="false" aria-disabled="true"><span item="" disabled=""><span icon=""></span>Daily</span></li></ul></li><li role="treeitem" aria-checked="false" aria-expanded="true" aria-label="Settings"><span expand=""></span><span item="" readonly=""><span icon=""></span>Settings</span><ul role="group"><li role="treeitem" aria-checked="false"><span item="" readonly=""><span icon=""></span>Theme</span></li></ul></li>"`
+    );
+
+    jest.advanceTimersByTime(1); // skip $change event of $value
+    const spyChange = jest.fn();
+    el.$onChange = spyChange;
+    // parent toggles only editable items
+    await h.userClick(getRows()[0]);
+    expect(el.$value).toStrictEqual([11, 13]);
+    expect(getStates()[0]).toBe("Users:mixed:expanded=true:tab");
+    await h.userClick(getRows()[0]); // every editable item is checked => uncheck them
+    expect(el.$value).toStrictEqual([13]);
+    jest.advanceTimersByTime(1);
+    expect(spyChange).toBeCalledTimes(2);
+
+    // readonly item is focusable but isn't changed
+    await h.userClick(getRows()[2]); // Write
+    expect(el.$value).toStrictEqual([13]);
+    expect(getFocused()).toBe("Write");
+    await h.userClick(getRows()[7]); // Theme: nested item of readonly parent
+    expect(el.$value).toStrictEqual([13]);
+    expect(getFocused()).toBe("Theme");
+    await h.userClick(getRows()[6]); // Settings: readonly parent
+    expect(el.$value).toStrictEqual([13]);
+    // disabled item isn't focusable & isn't changed
+    await h.userClick(getRows()[3]); // Delete
+    await h.userClick(getRows()[4]); // Reports
+    await h.userClick(getRows()[5]); // Daily: nested item of disabled parent
+    expect(el.$value).toStrictEqual([13]);
+    expect(getFocused()).toBe("Settings");
+    jest.advanceTimersByTime(1);
+    expect(spyChange).toBeCalledTimes(2);
+
+    // expand: possible for readonly but not for disabled
+    const getExpanded = () =>
+      Array.from(el.$refTree.querySelectorAll("[aria-expanded]")).map((li) => li.getAttribute("aria-expanded"));
+    await h.userClick(el.$refTree.querySelectorAll("[expand]")[1]); // Reports
+    await h.userClick(el.$refTree.querySelectorAll("[expand]")[2]); // Settings
+    expect(getExpanded()).toStrictEqual(["true", "true", "false"]);
+    await h.userClick(el.$refTree.querySelectorAll("[expand]")[2]);
+
+    // the main checkbox toggles only editable items
+    el.$refInput.click();
+    expect(el.$value).toStrictEqual([11, 13]);
+    expect(getMainState()).toBe("mixed");
+    el.$refInput.click();
+    expect(el.$value).toStrictEqual([13]);
+    expect(getMainState()).toBe("mixed");
+
+    // keyboard skips disabled items
+    el.$refInput.focus();
+    const order = [];
+    for (let i = 0; i < 6; ++i) {
+      pressKey("ArrowDown");
+      order.push(getFocused());
+    }
+    expect(order).toStrictEqual(["Users", "Read", "Write", "Settings", "Theme", "main"]);
+    order.length = 0;
+    for (let i = 0; i < 6; ++i) {
+      pressKey("ArrowUp");
+      order.push(getFocused());
+    }
+    expect(order).toStrictEqual(["Theme", "Settings", "Write", "Read", "Users", "main"]);
+    pressKey("ArrowUp");
+    pressKey("ArrowUp");
+    pressKey("ArrowUp");
+    expect(getFocused()).toBe("Write");
+    expect(pressKey(" ")).toBe(true); // readonly item isn't changed
+    expect(el.$value).toStrictEqual([13]);
+    jest.advanceTimersByTime(1);
+    expect(spyChange).toBeCalledTimes(4);
+
+    // every item is locked: the main checkbox isn't changed
+    el.$value = undefined;
+    jest.advanceTimersByTime(1);
+    spyChange.mockClear();
+    el.$options.items = [
+      { text: "A", value: 1, disabled: true },
+      { text: "B", value: 2, readOnly: true },
+    ];
+    jest.advanceTimersByTime(1);
+    expect(getStates()).toStrictEqual(["A:false", "B:false:tab"]); // the 1st item isn't focusable since disabled
+    el.$refInput.click();
+    expect(el.$value).toBe(undefined);
+    expect(getMainState()).toBe(false);
+    // the previous item to the 1st enabled one is the main checkbox
+    el.$refTree.querySelector("[tabindex]").focus();
+    expect(pressKey("ArrowUp")).toBe(true);
+    expect(getFocused()).toBe("main");
+
+    el.$options.items = [{ text: "A", value: 1, disabled: true }];
+    jest.advanceTimersByTime(1);
+    expect(el.$refTree.querySelector("[tabindex]")).toBe(null);
+    expect(pressKey("ArrowDown")).toBe(true);
+    expect(getFocused()).toBe("main");
+    jest.advanceTimersByTime(1);
+    expect(spyChange).not.toBeCalled();
+  });
+
   test("user clicks on the main checkbox", () => {
     el.$refInput.click();
     expect(el.$value).toStrictEqual([1, 11, 12, 2, 3]);
