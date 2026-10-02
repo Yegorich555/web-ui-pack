@@ -101,7 +101,9 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
       content: "";
       width: 50%;
       height: 2px;
-      background: var(--ctrl-checktree-mixed);
+      background: var(
+        --ctrl-checktree-mixed
+      ); // NiceToHave: use wup-icon mixin so later user can change icon via changing image
     }
   }
 
