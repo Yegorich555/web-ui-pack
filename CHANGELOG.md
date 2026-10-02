@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 1.2.9 (\_\_\_)
+## 1.2.9 (Oct 2, 2026)
 
 ### Fixes & Improvements
 
