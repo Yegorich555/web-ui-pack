@@ -26,6 +26,10 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
 
   [role="group"] {
     padding-left: var(--ctrl-checktree-indent);
+    // skips style/layout/paint of offscreen items: otherwise any :hover/:focus change in a big tree restyles every item
+    content-visibility: auto;
+    contain-intrinsic-size: auto 300px;
+    overflow-clip-margin: 0.5em; // otherwise hover-effect of the first item is clipped by paint containment
   }
 
   [role="treeitem"] {
@@ -52,7 +56,7 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
 
   // the same as for disabled/readonly control
   [item][disabled],
-  [aria-disabled="true"] > [expand] {
+  [aria-disabled] > [expand] {
     opacity: 0.6;
     cursor: not-allowed;
     user-select: none;
@@ -65,6 +69,66 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
   [aria-expanded="true"] > [expand],
   > label > [aria-expanded="true"] ~ [expand] {
     transform: none;
+  }
+
+  // title (item.checkable: false) is clickable only with option collapsible (then it has [aria-expanded])
+  :not([aria-checked], [aria-expanded]) > [item] {
+    cursor: initial;
+  }
+
+  // option checkable: false - label is title of the tree (the same as item.checkable: false)
+  &[w-checkable="false"] {
+    > label > [icon] {
+      display: none;
+    }
+
+    &:not([w-collapsible]) > label {
+      cursor: initial;
+    }
+
+    > label:focus-within > strong {
+      color: var(--ctrl-selected); // focus can't be shown via hidden [icon]
+    }
+  }
+
+  > label > input:indeterminate ~ [icon],
+  [aria-checked="mixed"] > [item] > [icon] {
+    display: grid;
+    place-items: center;
+    background: var(--ctrl-check-on-bg);
+
+    &:after {
+      content: "";
+      width: 50%;
+      height: 2px;
+      background: var(--ctrl-checktree-mixed);
+    }
+  }
+
+  [aria-checked="true"] > [item] > [icon] {
+    @include wup-check-icon-on;
+  }
+
+  // item.checkable: false hides [icon] of custom HTML
+  :not([aria-checked]) > [item] > [icon] {
+    display: none;
+  }
+
+  // hover & focus effects of CheckControl applied per item (inherited ones are scoped to the main checkbox)
+  [item]:not([disabled]) {
+    @include wup-iconHover("> [icon]");
+  }
+
+  [role="treeitem"]:focus > [item] {
+    color: var(--ctrl-selected);
+
+    > [icon] {
+      position: relative;
+
+      &:before {
+        content: "";
+      }
+    }
   }
 
   // [expand] is placed outside [item] to have own hover-state
@@ -83,81 +147,13 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
     }
   }
 
-  [aria-checked="true"] > [item] > [icon] {
-    @include wup-check-icon-on;
-  }
-
-  /* stylelint-disable-next-line no-descending-specificity */
-  > label > input:indeterminate ~ [icon],
-  [aria-checked="mixed"] > [item] > [icon] {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--ctrl-check-on-bg);
-
-    &:after {
-      content: "";
-      width: 50%;
-      height: 2px;
-      background: var(--ctrl-checktree-mixed);
-    }
-  }
-
-  // hover & focus effects inherited from CheckControl must be applied only to the hovered/focused item
-  &:focus-within [icon]:before,
-  &:hover [icon]:before {
-    content: none;
-  }
-
-  /* stylelint-disable-next-line no-descending-specificity */
-  > label:focus-within [icon]:before,
-  [role="treeitem"]:focus > [item] [icon]:before {
-    content: "";
-  }
-
-  [role="treeitem"]:focus > [item] {
-    color: var(--ctrl-selected);
-  }
-
-  // title (item.checkable: false) is clickable only with option collapsible
-  &:not([w-collapsible]) [role="treeitem"]:not([aria-checked]) > [item] {
-    cursor: initial;
-  }
-
-  // item.checkable: false hides [icon] of custom HTML
-  [role="treeitem"]:not([aria-checked]) > [item] > [icon] {
-    display: none;
-  }
-
-  > label > strong {
-    pointer-events: auto; // to show hover-effect of the main checkbox only on label (but not on [expand] inside the label)
-  }
-
-  // option checkable: false - label is title of the tree (the same as item.checkable: false)
-  &[w-checkable="false"] {
-    /* stylelint-disable-next-line no-descending-specificity */
-    > label > [icon] {
-      display: none;
-    }
-
-    &:not([w-collapsible]) > label {
-      cursor: initial;
-    }
-
-    > label:focus-within > strong {
-      color: var(--ctrl-selected); // focus can't be shown via hidden [icon]
-    }
-  }
-
   @media (hover: hover) and (pointer: fine) {
-    > label > [icon]:hover:before,
-    > label > strong:hover ~ [icon]:before,
-    [item]:not([disabled]):hover [icon]:before {
-      content: "";
+    // [expand] is placed inside the label: its hover must not affect the main checkbox
+    > label:has(> [expand]:hover) > [icon]:before {
+      content: none;
     }
 
-    [aria-checked] > [item]:not([disabled]):hover,
-    &[w-collapsible] [item]:not([disabled]):hover {
+    :is([aria-checked], [aria-expanded]) > [item]:not([disabled]):hover {
       color: var(--ctrl-selected);
     }
 

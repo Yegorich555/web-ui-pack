@@ -664,13 +664,15 @@ export default class WUPCheckTreeControl<
   /** Called to change item that is focusable via Tab (roving tabindex) */
   protected setActive(i: number, isFocus?: boolean): void {
     const nodes = this._nodes!;
-    nodes[this._activeIndex]?.li?.removeAttribute("tabindex");
+    const prev = nodes[this._activeIndex]?.li;
     this._activeIndex = i;
     const li = nodes[i]?.li;
     if (li) {
       this.$isDisabled ? li.removeAttribute("tabindex") : (li.tabIndex = 0);
       isFocus && li.focus();
     }
+    // WARN: after focus() otherwise focus goes to body and :focus-within of the whole tree is toggled twice
+    prev !== li && prev?.removeAttribute("tabindex");
   }
 
   /** Returns pointed index or index of the next item that isn't disabled (nested items of disabled parent are skipped); `-1` if not found */

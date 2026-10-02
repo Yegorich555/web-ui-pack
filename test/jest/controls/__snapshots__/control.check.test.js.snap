@@ -593,10 +593,10 @@ WUP-CHECK [icon] {
   background: var(--ctrl-check-off-bg);
   box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);
 }
-WUP-CHECK[checked] [icon] {
+WUP-CHECK[checked] &gt; label &gt; [icon] {
   background: var(--ctrl-check-on-bg);
 }
-WUP-CHECK[checked] [icon]:after {
+WUP-CHECK[checked] &gt; label &gt; [icon]:after {
   --ctrl-icon: var(--ctrl-check-on);
   --ctrl-icon-img: var(--wup-icon-check);
   display: inline-block;
@@ -626,10 +626,10 @@ WUP-CHECK[checked] [icon]:after {
   height: 100%;
   width: 100%;
 }
-WUP-CHECK [icon] {
+WUP-CHECK &gt; label &gt; [icon] {
   transform-style: preserve-3d;
 }
-WUP-CHECK [icon]:before {
+WUP-CHECK &gt; label &gt; [icon]:before {
   z-index: -1;
   position: absolute;
   transform: translate(-50%, -50%) translateZ(-1px);
@@ -640,17 +640,17 @@ WUP-CHECK [icon]:before {
   background: var(--icon-hover, #0001);
   border-radius: 50%;
 }
-WUP-CHECK:focus-within [icon] {
+WUP-CHECK &gt; label:focus-within &gt; [icon] {
   position: relative;
 }
-WUP-CHECK:focus-within [icon]:before {
+WUP-CHECK &gt; label:focus-within &gt; [icon]:before {
   content: "";
 }
 @media (hover: hover) and (pointer: fine) {
-  WUP-CHECK:hover [icon] {
+  WUP-CHECK &gt; label:hover &gt; [icon] {
     position: relative;
   }
-  WUP-CHECK:hover [icon]:before {
+  WUP-CHECK &gt; label:hover &gt; [icon]:before {
     content: "";
     opacity: 0.8;
   }

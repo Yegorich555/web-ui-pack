@@ -49,11 +49,14 @@ $wup-check-mixins-only: false !default;
       box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);
     }
 
-    &[checked] [icon] {
+    // scoped to the label so nested [icon] of inherited controls (CheckTree) aren't restyled on hover/focus/check of the whole control
+    &[checked] > label > [icon] {
       @include wup-check-icon-on;
     }
 
-    @include wup-iconHover("[icon]");
+    > label {
+      @include wup-iconHover("> [icon]");
+    }
 
     @media not all and (prefers-reduced-motion) {
       [icon] {

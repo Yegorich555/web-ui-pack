@@ -1180,10 +1180,10 @@ WUP-CHECKTREE [icon] {
   background: var(--ctrl-check-off-bg);
   box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);
 }
-WUP-CHECKTREE[checked] [icon] {
+WUP-CHECKTREE[checked] &gt; label &gt; [icon] {
   background: var(--ctrl-check-on-bg);
 }
-WUP-CHECKTREE[checked] [icon]:after {
+WUP-CHECKTREE[checked] &gt; label &gt; [icon]:after {
   --ctrl-icon: var(--ctrl-check-on);
   --ctrl-icon-img: var(--wup-icon-check);
   display: inline-block;
@@ -1213,10 +1213,10 @@ WUP-CHECKTREE[checked] [icon]:after {
   height: 100%;
   width: 100%;
 }
-WUP-CHECKTREE [icon] {
+WUP-CHECKTREE &gt; label &gt; [icon] {
   transform-style: preserve-3d;
 }
-WUP-CHECKTREE [icon]:before {
+WUP-CHECKTREE &gt; label &gt; [icon]:before {
   z-index: -1;
   position: absolute;
   transform: translate(-50%, -50%) translateZ(-1px);
@@ -1227,17 +1227,17 @@ WUP-CHECKTREE [icon]:before {
   background: var(--icon-hover, #0001);
   border-radius: 50%;
 }
-WUP-CHECKTREE:focus-within [icon] {
+WUP-CHECKTREE &gt; label:focus-within &gt; [icon] {
   position: relative;
 }
-WUP-CHECKTREE:focus-within [icon]:before {
+WUP-CHECKTREE &gt; label:focus-within &gt; [icon]:before {
   content: "";
 }
 @media (hover: hover) and (pointer: fine) {
-  WUP-CHECKTREE:hover [icon] {
+  WUP-CHECKTREE &gt; label:hover &gt; [icon] {
     position: relative;
   }
-  WUP-CHECKTREE:hover [icon]:before {
+  WUP-CHECKTREE &gt; label:hover &gt; [icon]:before {
     content: "";
     opacity: 0.8;
   }
@@ -1259,6 +1259,9 @@ WUP-CHECKTREE [role=tree] {
 }
 WUP-CHECKTREE [role=group] {
   padding-left: var(--ctrl-checktree-indent);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
+  overflow-clip-margin: 0.5em;
 }
 WUP-CHECKTREE [role=treeitem] {
   outline: none;
@@ -1297,7 +1300,7 @@ WUP-CHECKTREE [expand] {
   transform: rotate(-90deg);
 }
 WUP-CHECKTREE [item][disabled],
-WUP-CHECKTREE [aria-disabled=true] &gt; [expand] {
+WUP-CHECKTREE [aria-disabled] &gt; [expand] {
   opacity: 0.6;
   cursor: not-allowed;
   -webkit-user-select: none;
@@ -1310,16 +1313,30 @@ WUP-CHECKTREE [aria-expanded=true] &gt; [expand],
 WUP-CHECKTREE &gt; label &gt; [aria-expanded=true] ~ [expand] {
   transform: none;
 }
-WUP-CHECKTREE[w-collapsible] [role=treeitem] {
+WUP-CHECKTREE :not([aria-checked], [aria-expanded]) &gt; [item] {
+  cursor: initial;
+}
+WUP-CHECKTREE[w-checkable=false] &gt; label &gt; [icon] {
+  display: none;
+}
+WUP-CHECKTREE[w-checkable=false]:not([w-collapsible]) &gt; label {
+  cursor: initial;
+}
+WUP-CHECKTREE[w-checkable=false] &gt; label:focus-within &gt; strong {
+  color: var(--ctrl-selected);
+}
+WUP-CHECKTREE &gt; label &gt; input:indeterminate ~ [icon],
+WUP-CHECKTREE [aria-checked=mixed] &gt; [item] &gt; [icon] {
   display: grid;
-  grid-template-columns: var(--ctrl-icon-size) minmax(0, 1fr);
-  gap: 0 var(--ctrl-checktree-gap);
+  place-items: center;
+  background: var(--ctrl-check-on-bg);
 }
-WUP-CHECKTREE[w-collapsible] [role=treeitem] &gt; [item] {
-  grid-column: 2;
-}
-WUP-CHECKTREE[w-collapsible] [role=treeitem] &gt; [role=group] {
-  grid-column: 1/-1;
+WUP-CHECKTREE &gt; label &gt; input:indeterminate ~ [icon]:after,
+WUP-CHECKTREE [aria-checked=mixed] &gt; [item] &gt; [icon]:after {
+  content: "";
+  width: 50%;
+  height: 2px;
+  background: var(--ctrl-checktree-mixed);
 }
 WUP-CHECKTREE [aria-checked=true] &gt; [item] &gt; [icon] {
   background: var(--ctrl-check-on-bg);
@@ -1354,60 +1371,63 @@ WUP-CHECKTREE [aria-checked=true] &gt; [item] &gt; [icon]:after {
   height: 100%;
   width: 100%;
 }
-WUP-CHECKTREE &gt; label &gt; input:indeterminate ~ [icon],
-WUP-CHECKTREE [aria-checked=mixed] &gt; [item] &gt; [icon] {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--ctrl-check-on-bg);
+WUP-CHECKTREE :not([aria-checked]) &gt; [item] &gt; [icon] {
+  display: none;
 }
-WUP-CHECKTREE &gt; label &gt; input:indeterminate ~ [icon]:after,
-WUP-CHECKTREE [aria-checked=mixed] &gt; [item] &gt; [icon]:after {
+WUP-CHECKTREE [item]:not([disabled]) &gt; [icon] {
+  transform-style: preserve-3d;
+}
+WUP-CHECKTREE [item]:not([disabled]) &gt; [icon]:before {
+  z-index: -1;
+  position: absolute;
+  transform: translate(-50%, -50%) translateZ(-1px);
+  left: 50%;
+  top: 50%;
+  width: var(--icon-hover-r, 2.4em);
+  height: var(--icon-hover-r, 2.4em);
+  background: var(--icon-hover, #0001);
+  border-radius: 50%;
+}
+WUP-CHECKTREE [item]:not([disabled]):focus-within &gt; [icon] {
+  position: relative;
+}
+WUP-CHECKTREE [item]:not([disabled]):focus-within &gt; [icon]:before {
   content: "";
-  width: 50%;
-  height: 2px;
-  background: var(--ctrl-checktree-mixed);
 }
-WUP-CHECKTREE:focus-within [icon]:before {
-  content: none;
-}
-@media (hover: hover) {
-WUP-CHECKTREE:hover [icon]:before {
-  content: none;
-}
-}
-WUP-CHECKTREE &gt; label:focus-within [icon]:before,
-WUP-CHECKTREE [role=treeitem]:focus &gt; [item] [icon]:before {
-  content: "";
+@media (hover: hover) and (pointer: fine) {
+  WUP-CHECKTREE [item]:not([disabled]):hover &gt; [icon] {
+    position: relative;
+  }
+  WUP-CHECKTREE [item]:not([disabled]):hover &gt; [icon]:before {
+    content: "";
+    opacity: 0.8;
+  }
 }
 WUP-CHECKTREE [role=treeitem]:focus &gt; [item] {
   color: var(--ctrl-selected);
 }
-WUP-CHECKTREE:not([w-collapsible]) [role=treeitem]:not([aria-checked]) &gt; [item] {
-  cursor: initial;
+WUP-CHECKTREE [role=treeitem]:focus &gt; [item] &gt; [icon] {
+  position: relative;
 }
-WUP-CHECKTREE [role=treeitem]:not([aria-checked]) &gt; [item] &gt; [icon] {
-  display: none;
+WUP-CHECKTREE [role=treeitem]:focus &gt; [item] &gt; [icon]:before {
+  content: "";
 }
-WUP-CHECKTREE &gt; label &gt; strong {
-  pointer-events: auto;
+WUP-CHECKTREE[w-collapsible] [role=treeitem] {
+  display: grid;
+  grid-template-columns: var(--ctrl-icon-size) minmax(0, 1fr);
+  gap: 0 var(--ctrl-checktree-gap);
 }
-WUP-CHECKTREE[w-checkable=false] &gt; label &gt; [icon] {
-  display: none;
+WUP-CHECKTREE[w-collapsible] [role=treeitem] &gt; [item] {
+  grid-column: 2;
 }
-WUP-CHECKTREE[w-checkable=false]:not([w-collapsible]) &gt; label {
-  cursor: initial;
-}
-WUP-CHECKTREE[w-checkable=false] &gt; label:focus-within &gt; strong {
-  color: var(--ctrl-selected);
+WUP-CHECKTREE[w-collapsible] [role=treeitem] &gt; [role=group] {
+  grid-column: 1/-1;
 }
 @media (hover: hover) and (pointer: fine) {
-  WUP-CHECKTREE &gt; label &gt; [icon]:hover:before,
-WUP-CHECKTREE &gt; label &gt; strong:hover ~ [icon]:before,
-WUP-CHECKTREE [item]:not([disabled]):hover [icon]:before {
-    content: "";
+  WUP-CHECKTREE &gt; label:has(&gt; [expand]:hover) &gt; [icon]:before {
+    content: none;
   }
-  WUP-CHECKTREE [aria-checked] &gt; [item]:not([disabled]):hover, WUP-CHECKTREE[w-collapsible] [item]:not([disabled]):hover {
+  WUP-CHECKTREE :is([aria-checked], [aria-expanded]) &gt; [item]:not([disabled]):hover {
     color: var(--ctrl-selected);
   }
   WUP-CHECKTREE :not([aria-disabled]) &gt; [expand]:hover {
