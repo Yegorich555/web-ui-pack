@@ -164,4 +164,15 @@ describe("helper.animate", () => {
       ]
     `);
   });
+
+  test("ms is NaN", async () => {
+    const spy = jest.fn();
+    const spyThen = jest.fn();
+    animate(0, 100, Number.NaN, spy, true).then(spyThen); // finished at once instead of infinite animation
+    await nextFrame();
+    expect(spyThen).toBeCalledTimes(1);
+    expect(spy).toBeCalledTimes(1);
+    expect(spy.mock.lastCall[0]).toBe(100);
+    expect(spy.mock.lastCall[2]).toBe(true);
+  });
 });

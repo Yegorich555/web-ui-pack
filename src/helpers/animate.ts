@@ -28,7 +28,7 @@ export default function animate(
   callback: (v: number, ms: number, isLast: boolean, timeStamp: number) => void,
   force?: boolean
 ): WUP.PromiseCancel<boolean> {
-  let isFinished = ms < 10 || (!force && !isAnimEnabled());
+  let isFinished = !(ms >= 10) || (!force && !isAnimEnabled()); // !(>=) to finish at once for NaN also, otherwise animation is infinite
 
   let frameId: number | undefined;
   let resMe: (isEnd: boolean) => void;

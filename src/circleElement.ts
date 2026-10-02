@@ -241,7 +241,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   ): Array<{ angleFrom: number; angleTo: number; ms: number }> {
     if (items.length > 1) {
       valueMin = 0;
-      valueMax = items.reduce((v, item) => item.value + v, 0);
+      valueMax = items.reduce((v, item) => itemValue(item) + v, 0);
       angleMax -= (items.length - (angleMax - angleMin === 360 ? 0 : 1)) * space;
     }
     let angleFrom = angleMin;
@@ -251,7 +251,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     type MappedItem = { angleFrom: number; angleTo: number; ms: number; v: number };
     // calc angle-value per item
     const arr: MappedItem[] = items.map((s) => {
-      const v = mathScaleValue(s.value, valueMin, valueMax, angleMin, angleMax) - angleMin;
+      const v = mathScaleValue(itemValue(s), valueMin, valueMax, angleMin, angleMax) - angleMin || 0; // NaN when valueMin === valueMax
       const a = { angleFrom: 0, angleTo: 0, ms: 0, v };
       if (v !== 0 && v < minSizeDeg) {
         diff += minSizeDeg - v; // gather sum of difference to apply later
@@ -285,7 +285,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         );
         // assign values without minSize
         items.forEach((s, i) => {
-          arr[i].v = mathScaleValue(s.value, valueMin, valueMax, angleMin, angleMax) - angleMin;
+          arr[i].v = mathScaleValue(itemValue(s), valueMin, valueMax, angleMin, angleMax) - angleMin;
         });
       }
     }
@@ -379,7 +379,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       if (!isCustomLabel) {
         this.$refLabel ??= this.appendChild(document.createElement("strong"));
         const rawV = items[0].value;
-        const perc = mathScaleValue(rawV, vMin, vMax, 0, 100);
+        const perc = mathScaleValue(itemValue(items[0]), vMin, vMax, 0, 100);
         this.renderLabel(this.$refLabel, perc, rawV);
         ariaLbl = this.$refLabel.textContent!;
       }
@@ -406,11 +406,11 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       const y = r.y + segment._center.y * scale;
       return DOMRect.fromRect({ x, y, width: 0.01, height: 0.01 });
     };
-    const total = this.$options.items!.reduce((sum, a) => sum + a.value, 0);
+    const total = this.$options.items!.reduce((sum, a) => sum + itemValue(a), 0);
     const item: WUP.Circle.ItemResult = {
       ...segment._relatedItem,
       color: segment._definedColor,
-      percentage: mathScaleValue(segment._relatedItem.value, 0, total, 0, 100),
+      percentage: mathScaleValue(itemValue(segment._relatedItem), 0, total, 0, 100),
     };
 
     const lbl = item.tooltip!;
@@ -532,6 +532,11 @@ export function drawCircle(center: [number, number], r: number, width: number): 
     `A${inR} ${inR} 0 1 0 ${x - inR} ${y}`,
     "Z",
   ].join(" ");
+}
+
+/** Returns item value or 0 if value is NaN, Infinity etc. */
+function itemValue(item: WUP.Circle.Item): number {
+  return Number.isFinite(item.value) ? item.value : 0;
 }
 
 /** Returns x,y for point in the circle */
