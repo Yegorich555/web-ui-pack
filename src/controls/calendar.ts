@@ -1,9 +1,8 @@
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
-import { WUPcssHidden } from "../styles";
 import WUPScrolled from "../helpers/scrolled";
 import { dateCopyTime, dateFromString, dateToString } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
-import { AttributeMap, AttributeTypes } from "../baseElement";
+import { AttributeMap, AttributeTypes, inheritDefaults } from "../baseElement";
 
 const tagName = "wup-calendar";
 
@@ -62,8 +61,16 @@ declare global {
        * * point "2012" to start from year2012
        * * point "2012-05" to start from month5 year2012
        * * point "2012-05-02" to start from day2 month5 year2012
-       * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here) */
+       * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here)
+       * * pickers lower than option `endWith` are skipped */
       startWith: PickersEnum | string | null;
+      /** Picker where user selects value (lower pickers aren't rendered);
+       * @defaultValue PickersEnum.Day
+       * @tutorial
+       * * point `PickersEnum.Month` to select only year & month: value is the 1st day of month
+       * * point `PickersEnum.Year` to select only year: value is the 1st January
+       * * option `exclude` disables the whole month/year if it contains any excluded day */
+      endWith: PickersEnum | null;
       /** Dates that user can't choose (disabled dates) */
       exclude: Date[] | null;
     }
@@ -80,12 +87,14 @@ declare global {
        * * point "2012-05-02" to start from day2 month5 year2012
        * * shows picker according to pointed but range according to $value ($value has higher priority then pointed date here) */
       "w-startWith"?: "year" | "month" | "day" | string;
+      /** Picker where user selects value (lower pickers aren't rendered); point `month` to select only year & month */
+      "w-endWith"?: "year" | "month" | "day";
       /** User can't select date less than min; format yyyy-MM-dd */
       "w-min"?: string;
       /** User can't select date more than max; format yyyy-MM-dd  */
       "w-max"?: string;
       /** Dates that user can't choose
-      /** Global reference to object with array
+       *  Global reference to object with array
        * @example
        * ```js
        * window.exclude = [...];
@@ -104,6 +113,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control represented by date picker
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/calendar}
        *  @see {@link WUPCalendarControl} */
       [tagName]: WUP.Base.ReactHTML<WUPCalendarControl> & WUP.Calendar.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -117,6 +127,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control represented by date picker
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/calendar}
        *  @see {@link WUPCalendarControl} */
       [tagName]: HTMLAttributes<WUPCalendarControl> & WUP.Calendar.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -128,12 +139,19 @@ const add: <K extends keyof HTMLElementTagNameMap>(el: HTMLElement, tagName: K) 
   tag
 ) => el.appendChild(document.createElement(tag));
 
+/** Map attribute value to picker */
+const pickersMap = new Map([
+  ["year", PickersEnum.Year],
+  ["month", PickersEnum.Month],
+  ["day", PickersEnum.Day],
+]);
+
 /** Form-control represented by date picker
  * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/calendar}
  * @example
   const el = document.createElement("wup-calendar");
   el.$options.name = "dateOfBirthday";
-  el.$initValue = "1990-10-24";
+  el.$initValue = new Date("1990-10-24");
   el.$options.validations = { required: true };
   const form = document.body.appendChild(document.createElement("wup-form"));
   form.appendChild(el);
@@ -151,178 +169,11 @@ export default class WUPCalendarControl<
   #ctr = this.constructor as typeof WUPCalendarControl;
 
   static get $styleRoot(): string {
-    return `:root {
-      --ctrl-clr-selected: #fff;
-      --ctrl-clr-selected-bg: #009fbc;
-      --ctrl-clr-w: 17em;
-      --ctrl-clr-cell-gap: 0px;
-      --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
-      --ctrl-clr-off: var(--ctrl-err);
-      --ctrl-clr-off-bg: var(--ctrl-err-bg);
-    }
-    [wupdark] {
-      --ctrl-clr-off: var(--ctrl-err);
-      --ctrl-clr-off-bg: none;
-    }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        max-width: fit-content;
-        margin: auto auto 20px;
-        box-shadow: 0 0 0 1px var(--ctrl-border);
-        border-radius: var(--ctrl-border-radius);
-        background: none;
-        text-transform: capitalize;
-      }
-      :host label {
-        max-width: var(--ctrl-clr-w);
-        display: block;
-        padding-right: 0;
-      }
-      :host strong {
-        display: block;
-        box-sizing: border-box;
-        max-width: 100%;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-      :host input {${WUPcssHidden}}
-      :host [calendar] {
-        --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-w) / 7 - var(--ctrl-clr-cell-gap));
-        --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
-        width: var(--ctrl-clr-w);
-        padding: var(--ctrl-clr-padding);
-        border-radius: var(--ctrl-border-radius);
-        background: var(--ctrl-bg);
-        box-sizing: content-box;
-      }
-      :host [calendar="day"] {
-        --ctrl-clr-cell-w: var(--ctrl-clr-cell-day-w);
-        --ctrl-clr-cell-h: var(--ctrl-clr-cell-day-w);
-      }
-      :host [calendar="month"],
-      :host [calendar="year"] {
-        --ctrl-clr-cell-w: calc(var(--ctrl-clr-w) / 4 - var(--ctrl-clr-cell-gap));
-        --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
-      }
-      :host [calendar="month"] ul,
-      :host [calendar="year"] ul {
-        display: none;
-      }
-      :host header,
-      :host ol,
-      :host ul {
-        display: flex;
-        flex-wrap: wrap;
-        margin:0; padding:0;
-      }
-      :host header > button {
-        box-sizing: border-box;
-        cursor: pointer;
-        margin: auto;
-        padding: 4px 1em;
-        font-size: larger;
-        font-weight: initial;
-        border: none;
-        border-radius: 2em;
-        color: inherit;
-        background: none;
-        box-shadow: none;
-        text-transform: inherit;
-      }
-      :host header > button[disabled] {
-        pointer-events: none;
-      }
-      :host ol,
-      :host ul {
-        margin-top: var(--ctrl-clr-padding);
-        list-style: none;
-      }
-      :host ul {
-        color: var(--ctrl-label);
-      }
-      :host li {
-        height: var(--ctrl-clr-cell-h);
-        width: var(--ctrl-clr-cell-w);
-        padding: 0;
-        margin: calc(var(--ctrl-clr-cell-gap) / 2);
-        font: inherit;
-        line-height: var(--ctrl-clr-cell-h);
-        text-align: center;
-        border-radius: 50%;
-      }
-      :host ul>li {
-        margin: 0 calc(var(--ctrl-clr-cell-gap) / 2);
-        height: 1em;
-        line-height: 1em;
-      }
-      :host li[prev],
-      :host li[next] {
-        opacity: 0.6;
-      }
-      :host li[aria-current] {
-        color: var(--ctrl-clr-selected-bg);
-        font-weight: bold;
-        opacity: 1;
-      }
-      :host li[aria-selected] {
-        background-color: var(--ctrl-clr-selected-bg);
-        color: var(--ctrl-clr-selected);
-        opacity: 1;
-      }
-      :host li[focused] {
-        box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-        opacity: 1;
-      }
-      :host li[focused][aria-selected] {
-        text-decoration: underline;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        :host header>button:hover {
-          background-color: var(--ctrl-clr-selected-bg);
-          color: var(--ctrl-clr-selected);
-        }
-        :host ol>li:hover:not([disabled]) {
-          box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-          opacity: 1;
-        }
-      }
-      :host li[disabled] {
-        color: var(--ctrl-clr-off);
-        background-color: var(--ctrl-clr-off-bg);
-      }
-      :host li[disabled][aria-selected] {
-        font-weight: bold;
-      }
-      @media not all and (prefers-reduced-motion) {
-        @keyframes WUP-ZOOM-OUT-1 {
-          0% { transform: scale(1); opacity: 1; }
-          100% { transform: scale(0); opacity: 0; }
-        }
-        @keyframes WUP-ZOOM-OUT-2 {
-          0% { transform: scale(5); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes WUP-ZOOM-IN-1 {
-          0% { transform: scale(1); opacity: 1; }
-          100% { transform: scale(5); opacity: 0; }
-        }
-        @keyframes WUP-ZOOM-IN-2 {
-          0% { transform: scale(0); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        :host [calendar]>div {
-          overflow: hidden;
-        }
-        :host [zoom] { animation: none var(--anim-t) linear forwards; }
-        :host [zoom="out"] { animation-name: WUP-ZOOM-OUT-1; }
-        :host [zoom="out2"] { animation-name: WUP-ZOOM-OUT-2; }
-        :host [zoom="in"] { animation-name: WUP-ZOOM-IN-1; }
-        :host [zoom="in2"] { animation-name: WUP-ZOOM-IN-2; }
-      }`;
+    return super.$style;
   }
 
   /** Returns days of pointed number-of-month with placeholders of prev, next months
@@ -380,22 +231,21 @@ export default class WUPCalendarControl<
     m.max = { type: AttributeTypes.parsedObject };
     m.firstweekday = { type: AttributeTypes.number };
     m.startwith = { type: AttributeTypes.string };
+    m.endwith = { type: AttributeTypes.string };
     return m;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Calendar.Options = {
-    ...WUPBaseControl.$defaults,
-    validationRules: {
-      ...WUPBaseControl.$defaults.validationRules,
-    },
+  static $defaults: WUP.Calendar.Options = inheritDefaults(WUPBaseControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {}),
     utc: true,
     firstWeekDay: null,
     startWith: null,
+    endWith: null,
     min: null,
     max: null,
     exclude: null,
-  };
+  });
 
   constructor() {
     super();
@@ -403,7 +253,7 @@ export default class WUPCalendarControl<
     this._opts.firstWeekDay ||= this.#ctr.$defaults.firstWeekDay; // init here to depends on localeInfo
   }
 
-  /** Call when need to re-rended picker (min/max changed etc.) */
+  /** Call when need to re-render picker (min/max changed etc.) */
   $refreshPicker(): void {
     this.changePicker(this._pickerValue, this._picker);
   }
@@ -499,6 +349,7 @@ export default class WUPCalendarControl<
 
   /** Called when need set/change day/month/year picker */
   protected async changePicker(utcVal: Date, pickerNext: PickersEnum): Promise<void> {
+    pickerNext = Math.max(pickerNext, this._opts.endWith ?? PickersEnum.Day); // lower pickers aren't allowed
     await this.#clearPicker?.call(this, pickerNext - this._picker > 0);
     this._picker = pickerNext;
 
@@ -600,8 +451,8 @@ export default class WUPCalendarControl<
     };
   }
 
-  /** Returns result to render day picker */
   #isDayWeeksAdded = false;
+  /** Returns result to render day picker */
   protected getDayPicker(): WUP.Calendar.IPickerResult {
     // render daysOfWeek
     if (!this.#isDayWeeksAdded) {
@@ -673,19 +524,22 @@ export default class WUPCalendarControl<
         v.setUTCMonth(v.getUTCMonth() + n);
         return v;
       },
-      onItemClick: ({ target }, v) => {
-        this.selectItem(target);
-        let dt = new Date(v);
-        if (!this._opts.utc) {
-          dt = new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
-        }
-        const prev = this.$value || this.$initValue;
-        prev && dateCopyTime(dt, prev, !!this._opts.utc);
-        this.setValue(dt as ValueType, SetValueReasons.userSelect);
-        this.$ariaSpeak(this.$refInput.value);
-        // this.focusItem(target);
-      },
+      onItemClick: ({ target }, v) => this.selectDate(target, new Date(v)),
     };
+  }
+
+  /** Called when user selects item on the last picker (see $options.endWith) */
+  protected selectDate(item: HTMLElement, utcVal: Date): void {
+    this.selectItem(item);
+    let dt = utcVal;
+    if (!this._opts.utc) {
+      dt = new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
+    }
+    const prev = this.$value || this.$initValue;
+    prev && dateCopyTime(dt, prev, !!this._opts.utc);
+    this.setValue(dt as ValueType, SetValueReasons.userSelect);
+    this.$ariaSpeak(this.$refInput.value);
+    // this.focusItem(item);
   }
 
   /** Returns result to render month picker */
@@ -733,8 +587,10 @@ export default class WUPCalendarControl<
         v.setUTCFullYear(v.getUTCFullYear() + n);
         return v;
       },
-      onItemClick: (_e, v) =>
-        this.changePicker(new Date(Date.UTC(Math.floor(v / pageSize), v % pageSize, 1)), PickersEnum.Day),
+      onItemClick: ({ target }, v) => {
+        const dt = new Date(Date.UTC(Math.floor(v / pageSize), v % pageSize, 1));
+        this._opts.endWith === PickersEnum.Month ? this.selectDate(target, dt) : this.changePicker(dt, PickersEnum.Day);
+      },
     };
   }
 
@@ -772,7 +628,12 @@ export default class WUPCalendarControl<
         v.setUTCFullYear(v.getUTCFullYear() + n * pageSize);
         return v;
       },
-      onItemClick: (_e, v) => this.changePicker(new Date(Date.UTC(v, 0)), PickersEnum.Month),
+      onItemClick: ({ target }, v) => {
+        const dt = new Date(Date.UTC(v, 0));
+        this._opts.endWith === PickersEnum.Year
+          ? this.selectDate(target, dt)
+          : this.changePicker(dt, PickersEnum.Month);
+      },
     };
   }
 
@@ -842,7 +703,7 @@ export default class WUPCalendarControl<
     const years: number[] = [];
 
     // eslint-disable-next-line prefer-const
-    let { min, max, utc } = this._opts;
+    let { min, max, utc, endWith } = this._opts;
     min = this.normalizeToUTC(min);
     max = this.normalizeToUTC(max);
 
@@ -870,11 +731,12 @@ export default class WUPCalendarControl<
           if (ex[i + 1] >= nextM || i === last) {
             const cnt = i - iStart + 1;
             const total = new Date(y, m + 1, 0).getDate(); // WARN: convert to UTC is useless
+            // when user selects month/year then any excluded day disables the whole month/year
             const hasEnabled =
-              (ex[i] as unknown as number) > from && cnt !== total && (ex[i] as unknown as number) < to;
+              !endWith && (ex[i] as unknown as number) > from && cnt !== total && (ex[i] as unknown as number) < to;
             if (!hasEnabled) {
               months.push(y * 12 + m);
-              ++mCnt === 12 && years.push(y);
+              ++mCnt === (endWith === PickersEnum.Year ? 1 : 12) && years.push(y);
             }
             if (i !== last) {
               break;
@@ -962,7 +824,7 @@ export default class WUPCalendarControl<
     return will as HTMLElement;
   }
 
-  /** Select item (set aria-selected and focus) */
+  /** Select item (set aria-selected) */
   protected selectItem(el: HTMLElement | undefined): void {
     this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
     el?.setAttribute("aria-selected", "true");
@@ -979,9 +841,10 @@ export default class WUPCalendarControl<
   setInputValue(v: ValueType | undefined | null): void {
     if (v) {
       const key = this._opts.utc ? "UTC" : "";
-      // prettier-ignore
-      const {namesMonth} = localeInfo
-      this.$refInput.value = `${v[`get${key}Date`]()} ${namesMonth[v[`get${key}Month`]()]} ${v[`get${key}FullYear`]()}`;
+      const p = this._opts.endWith;
+      const d = p ? "" : `${v[`get${key}Date`]()} `;
+      const m = p === PickersEnum.Year ? "" : `${localeInfo.namesMonth[v[`get${key}Month`]()]} `;
+      this.$refInput.value = `${d}${m}${v[`get${key}FullYear`]()}`;
     } else {
       this.$refInput.value = "";
     }
@@ -992,7 +855,7 @@ export default class WUPCalendarControl<
     this.$isEmpty && this.selectItem(undefined);
   }
 
-  /** Shift pointed date to UTC if $options.utc is false and user pointed localDate; @returns new object-date */
+  /** Shift pointed date to UTC if $options.utc is false and user pointed localDate; @returns new object-date or the same object if $options.utc is true */
   private normalizeToUTC(v: Date | undefined | null): Date;
   private normalizeToUTC(v: Date | undefined | null): Date | undefined | null {
     if (v == null || this._opts.utc) {
@@ -1050,26 +913,28 @@ export default class WUPCalendarControl<
     }
     const isNeedRecalc =
       propsChanged &&
-      (["min", "max", "exclude", "utc"] as Array<keyof WUP.Calendar.Options>).some((a) => propsChanged.includes(a));
+      (["min", "max", "exclude", "utc", "endWith"] as Array<keyof WUP.Calendar.Options>).some((a) =>
+        propsChanged.includes(a)
+      );
     if (!propsChanged || isNeedRecalc) {
       this.#disabled = this.calcDisabled();
     }
-    isNeedRecalc && this.$refreshPicker();
+    if (isNeedRecalc) {
+      this.$refreshPicker();
+      this.setInputValue(this.$value); // text depends on utc & endWith
+    }
   }
 
   gotChangesSharable(): void {
     this._opts.firstWeekDay ??= (this.constructor as typeof WUPCalendarControl).$defaults.firstWeekDay;
 
-    const attr = this.getAttribute("w-startwith");
+    let attr = this.getAttribute("w-startwith");
     if (attr != null) {
-      // prettier-ignore
-      switch (attr.toLowerCase()) {
-        case "year": this._opts.startWith = PickersEnum.Year; break;
-        case "month": this._opts.startWith = PickersEnum.Month; break;
-        case "day": this._opts.startWith = PickersEnum.Day; break;
-        case "": this._opts.startWith = null; break;
-        default: this._opts.startWith = attr; break;
-      }
+      this._opts.startWith = attr ? pickersMap.get(attr.toLowerCase()) ?? attr : null;
+    }
+    attr = this.getAttribute("w-endwith");
+    if (attr != null) {
+      this._opts.endWith = pickersMap.get(attr.toLowerCase()) ?? null;
     }
   }
 

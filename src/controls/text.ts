@@ -1,7 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
+import { inheritDefaults } from "../baseElement";
 import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
-import { WUPcssIcon } from "../styles";
 import WUPBaseControl, { SetValueReasons, ValidateFromCases } from "./baseControl";
 import TextHistory from "./text.history";
 
@@ -14,11 +14,11 @@ declare global {
   namespace WUP.Text {
     interface EventMap extends WUP.BaseControl.EventMap {}
     interface ValidityMap extends WUP.BaseControl.ValidityMap {
-      /** If textLength < pointed shows message 'Min length is {x} characters` */
+      /** If textLength < pointed shows message 'Min length is {x} characters' */
       min: number;
-      /** If textLength > pointed shows message 'Max length is {x} characters` */
+      /** If textLength > pointed shows message 'Max length is {x} characters' */
       max: number;
-      /** If $value doesn't match email-pattern shows message 'Invalid email address` */
+      /** If $value doesn't match email-pattern shows message 'Invalid email address' */
       email: boolean;
     }
     interface NewOptions {
@@ -33,9 +33,9 @@ declare global {
        * @defaultValue true */
       clearButton: boolean;
       /** Make input masked
-       * @rules when mask is pointed and contains only numeric vars
-       * * inputmode='numeric' so mobile device show numeric-keyboard
-       * * enables validation 'mask' with error message 'Incomplete value'
+       * @rules when mask is pointed
+       * * inputmode='numeric' (if mask contains only numeric vars) so mobile device show numeric-keyboard
+       * * incomplete value is invalid with error message 'Incomplete value' (static `$errorMask`)
        * @example
        * "0000-00-00" // for date in format yyyy-mm-dd
        * "##0.##0.##0.##0" // IPaddress
@@ -89,6 +89,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with text input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/text}
        *  @see {@link WUPTextControl} */
       [tagName]: WUP.Base.ReactHTML<WUPTextControl> & WUP.Text.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -102,6 +103,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with text input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/text}
        *  @see {@link WUPTextControl} */
       [tagName]: HTMLAttributes<WUPTextControl> & WUP.Text.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -138,229 +140,32 @@ export default class WUPTextControl<
   #ctr = this.constructor as typeof WUPTextControl;
 
   static get $styleRoot(): string {
-    return `:root {
-      --ctrl-autofill: #00869e;
-      --ctrl-clear: red;
-      --ctrl-clear-hover: rgba(255,0,0,0.1);
-      --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
-     }
-     [wupdark] {
-        --ctrl-clear-hover: rgba(255,0,0,0.2);
-        --ctrl-autofill: #89bc55;
-        --ctrl-autofill-caret: #fff;
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-        :host {
-          cursor: text;
-          text-align: start;
-        }
-        :host label > span {
-          width: 100%;
-          position: relative;${/* to position <strong /> relative to input */ ""}
-          display: flex;
-          flex-direction: row-reverse;${/* WA: required for reading <strong /> 1st */ ""}
-        }
-        :host input,
-        :host textarea,
-        :host [maskholder],
-        :host [prefix],
-        :host [postfix] {
-          padding: var(--ctrl-padding);
-          padding-left: 0;
-          padding-right: 0;
-          font: inherit;
-          text-align: inherit;
-          color: inherit;
-          margin: 0;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: nowrap;
-        }
-        :host input,
-        :host textarea,
-        :host [contenteditable=true],
-        :host [maskholder],
-        :host [postfix] {
-          width: 100%;
-          box-sizing: border-box;
-          border: none;
-          background: none;
-          outline: none;
-        }
-        :host [prefix],
-        :host [postfix] {
-          color: inherit;
-          flex-shrink: 0;
-        }
-        :host [maskholder],
-        :host [prefix],
-        :host [postfix] {
-          display: none;
-          opacity: 0;
-          pointer-events: none;
-          text-overflow: initial;
-          white-space: pre;
-        }
-        :host [postfix] {
-          position: absolute;
-        }
-        :host [maskholder] {
-          position: absolute;
-          opacity: 0.65;
-        }
-        :host [maskholder]>i,
-        :host [postfix]>i {
-          visibility: hidden;
-          font: inherit;
-          white-space: pre;
-        }
-        :host input:-webkit-autofill,
-        :host textarea:-webkit-autofill,
-        :host [contenteditable=true]:-webkit-autofill {
-          font: inherit;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: var(--ctrl-autofill);
-          caret-color: var(--ctrl-autofill-caret, auto);
-        }
-        :host input:autofill,
-        :host textarea:autofill,
-        :host [contenteditable=true]:autofill {
-          font: inherit;
-          background-clip: text;
-          text-fill-color: var(--ctrl-autofill);
-          caret-color: var(--ctrl-autofill-caret, auto);
-        }
-        :host strong {
-          display: block;
-          position: absolute;
-          top: 50%;
-          left: 0;
-          padding: 0;
-          margin: 0;
-          box-sizing: border-box;
-          max-width: 100%;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: nowrap;
-          transform-origin: top left;
-          transform: translateY(-50%);
-          font-weight: normal;
-          text-decoration: none;
-          -webkit-backface-visibility: hidden;
-          backface-visibility: hidden; ${/* to fix sometimes blink during the animation */ ""}
-        }
-        @media not all and (prefers-reduced-motion) {
-          :host strong {
-            transition: top var(--anim), transform var(--anim), color var(--anim);
-          }
-        }
-        :host input:not(:focus):placeholder,
-        :host textarea:not(:focus):placeholder {
-          color: transparent;
-        }
-        :host:focus-within strong,
-        :host input:not(:placeholder-shown) + strong,
-        :host textarea:not(:placeholder-shown) + strong,
-        :host [contenteditable=true]:not(:empty) + strong,
-        :host legend {
-          transform: var(--ctrl-label-active-pos);
-        }
-        :host input:-webkit-autofill + strong
-        :host textarea:-webkit-autofill + strong
-        :host [contenteditable=true]:-webkit-autofill + strong {
-          transform: var(--ctrl-label-active-pos);
-        }
-        :host input:autofill + strong,
-        :host textarea:autofill + strong,
-        :host [contenteditable=true]:autofill + strong {
-          transform: var(--ctrl-label-active-pos);
-        }
-        :host:focus-within [maskholder],
-        :host:focus-within [prefix],
-        :host:focus-within [postfix],
-        :host input:not(:placeholder-shown) ~ [prefix],
-        :host input:not(:placeholder-shown) ~ [postfix],
-        :host textarea:not(:placeholder-shown) ~ [prefix],
-        :host textarea:not(:placeholder-shown) ~ [postfix] {
-          display: inline-block;
-          opacity: 1;
-        }
-        /* style for icons */
-        :host label:after,
-        :host label:before {
-          ${WUPcssIcon}
-          cursor: pointer;
-          -webkit-mask-image: none;
-          mask-image: none;
-        }
-        :host label:after {
-          margin-right: calc(var(--ctrl-icon-size) / -2);
-        }
-        :host label:before {
-          margin-left: calc(var(--ctrl-icon-size) / -2);
-        }
-        :host label>button {
-          z-index: 1;
-          contain: strict;
-          font-size: inherit;
-          flex: 0 0 auto;
-          align-self: center;
-        }
-        :host button[clear] {
-          --icon-size: var(--ctrl-icon-size);
-          --icon-hover-r: 24px;
-          --icon-img: var(--wup-icon-cross);
-          --icon: var(--ctrl-label);
-          --icon-hover: var(--ctrl-clear);
-          --icon-hover-bg: var(--ctrl-clear-hover);
-          display: none;
-          opacity: 0;
-          margin-right: -0.5em;
-        }
-        :host button[clear=back] {
-          --icon-img: var(--wup-icon-back);
-        }
-        :host:focus-within button[clear] {
-          display: inline-block;
-          opacity: 1;
-        }
-        @media (hover: hover) and (pointer: fine) {
-          :host:hover button[clear] {
-            display: inline-block;
-            opacity: 1;
-          }
-        }
-        :host[disabled] button[clear],
-        :host[readonly] button[clear] {
-          display: none;
-          pointer-events: none;
-        }`;
+    return super.$style;
   }
 
   static $errorParse = __wupln("Invalid value", "validation");
   static $errorMask = __wupln("Incomplete value", "validation");
 
-  static $defaults: WUP.Text.Options = {
-    ...WUPBaseControl.$defaults,
+  static $defaults: WUP.Text.Options = inheritDefaults(WUPBaseControl.$defaults, {
     selectOnFocus: false,
     clearButton: true,
-    validationRules: {
-      ...WUPBaseControl.$defaults.validationRules,
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {
       min: (v, setV) =>
         (v === undefined || v.length < setV) && __wupln(`Min length is ${setV} characters`, "validation"),
       max: (v, setV) =>
         (v === undefined || v.length > setV) && __wupln(`Max length is ${setV} characters`, "validation"),
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && __wupln("Invalid email address", "validation"),
-    },
+    }),
     debounceMs: 0,
     mask: "",
     maskholder: "",
     prefix: "",
     postfix: "",
-  };
+  });
 
   $refBtnClear?: HTMLButtonElement;
   $refMaskholder?: HTMLSpanElement;
@@ -462,7 +267,7 @@ export default class WUPTextControl<
     this.renderPostfix(this._opts.postfix);
   }
 
-  /** Add/update or remove prefix part */
+  /** Add/update or remove postfix part */
   protected renderPostfix(text: string | undefined | null): void {
     let el = this.$refPostfix;
     if (!text) {
@@ -580,7 +385,7 @@ export default class WUPTextControl<
 
   _inputError?: string;
   #inputTimer?: ReturnType<typeof setTimeout>;
-  /** Called when user types text OR when need to apply/reset mask (on focusGot, focusLost) */
+  /** Called when user types text (on "input" event) */
   protected gotInput(e: WUP.Text.GotInputEvent): void {
     const isBrowserAutofill = e.isTrusted && e.inputType == null;
     if (isBrowserAutofill && !this._refHistory && this.canHandleUndo()) {
@@ -641,7 +446,7 @@ export default class WUPTextControl<
     }
   }
 
-  /** Mask object to proccess mask on input */
+  /** Mask object to process mask on input */
   refMask?: MaskTextInput;
   /** Called to apply mask-behavior (on "input" event) */
   protected maskInputProcess(e: WUP.Text.GotInputEvent | null): string {
@@ -771,5 +576,4 @@ export default class WUPTextControl<
 }
 
 customElements.define(tagName, WUPTextControl);
-// todo example how to create built-in dropdown before the main input (like phone-number with ability to select countryCode)
 // gotInput > setMask > parseValue >... setValue ....> toString > setInput > setMask

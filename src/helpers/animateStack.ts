@@ -6,7 +6,7 @@ import { isAnimEnabled } from "./animate";
  * @param ms animation time
  * @returns Promise<isFinished> that resolved by animation end;
  * Rules
- * * To define direction set attribute to element position="top" (or "bottom", "left", "right")
+ * * To define direction use `isVertical`: items are moved from/to target along Y-axis (`true`) or X-axis (`false`)
  * * Before call it again on the same element don't forget to call stop(false) to cancel prev animation
  * * Check if every parent up to target has overflow: visible (otherwise it doesn't work) */
 export default function animateStack(

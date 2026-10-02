@@ -1,4 +1,4 @@
-import { WUPcssHidden } from "../styles";
+import { inheritDefaults } from "../baseElement";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-radio";
@@ -9,12 +9,12 @@ declare global {
     interface NewOptions<T = any> {
       /** Items showed as radio-buttons
        * @tutorial Troubleshooting
-       * * array items is converted to Proxy (observer) so
+       * * array items isn't converted to Proxy (observer) so changing array in place doesn't re-render items; reassign it instead
        * ```js
-       * const items = [text: "1", value: {name: "Jenny"}]
+       * const items = [{ text: "1", value: { name: "Jenny" } }];
        * el.$options.items = items;
-       * setTimeout(()=> console.warn(el.$options.items === items)},1) // returns 'false'
-       * setTimeout(()=> console.warn(el.$options.items[0].value === items[0].value)},1) // returns 'true'
+       * setTimeout(() => console.warn(el.$options.items === items), 1); // returns 'true'
+       * el.$options.items = [...items, { text: "2", value: { name: "Bob" } }]; // re-render items
        * ``` */
       items: WUP.Select.MenuItem<T>[] | (() => WUP.Select.MenuItem<T>[]);
       /** Reversed-style (radio+label for true vs label+radio)
@@ -23,13 +23,13 @@ declare global {
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions<T> {}
     interface JSXProps<C = WUPRadioControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      "w-reverse"?: boolean | "";
+      "w-reverse"?: boolean | "" | "true" | "false";
       /** Global reference to object with array
-       * @see  {@link WUP.Select.MenuItems}
+       * @see  {@link WUP.Select.MenuItem}
        * @example
        * ```js
        * window.myItems = [...];
-       * <wup-radio w-items="window.myItems"></wup-circle>
+       * <wup-radio w-items="window.myItems"></wup-radio>
        * ``` */
       "w-items"?: string;
     }
@@ -44,6 +44,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with radio buttons
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/radio}
        *  @see {@link WUPRadioControl} */
       [tagName]: WUP.Base.ReactHTML<WUPRadioControl> & WUP.Radio.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -57,6 +58,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with radio buttons
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/radio}
        *  @see {@link WUPRadioControl} */
       [tagName]: HTMLAttributes<WUPRadioControl> & WUP.Radio.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -103,118 +105,18 @@ export default class WUPRadioControl<
   static $ariaReadonly = __wupln("readonly", "aria");
 
   static get $styleRoot(): string {
-    return `:root {
-      --ctrl-radio-item-r: 14px;
-      --ctrl-radio-item-r-on: 8px;
-      --ctrl-radio-item-bg: none;
-      --ctrl-radio-item-on: var(--ctrl-focus);
-      --ctrl-radio-item-border: #0003;
-      --ctrl-radio-item-border-w: 2px;
-      --ctrl-radio-gap: 7px;
-     }
-     [wupdark] {
-        --ctrl-radio-item-border: var(--ctrl-label);
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    // :host input + [icon]:after >> not relative because 1.2em of 14px provides round-pixel-issue and not always rounded items
-    return `${super.$style}
-      :host {
-        position: relative;
-        padding: var(--ctrl-padding);
-      }
-      :host fieldset {
-        border: none;
-        padding: 0;
-        margin: calc(var(--ctrl-radio-gap) * -0.5) calc(var(--ctrl-radio-gap) * -1);
-        display: flex;
-        flex-wrap: wrap;
-      }
-      :host legend {
-        display: block;
-        position: absolute;
-        top: 0.2em;
-        transform-origin: top left;
-        transform: scale(0.9);
-        margin: 0 var(--ctrl-radio-gap);
-        padding: 0;
-        box-sizing: border-box;
-        max-width: 100%;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        font-weight: normal;
-        text-decoration: none;
-      }
-      :host strong {
-        font: inherit;
-      }
-      :host label {
-        padding: var(--ctrl-radio-gap);
-        gap: var(--ctrl-radio-gap);
-      }
-      :host[w-reverse] label {
-        flex-direction: row-reverse;
-      }
-      :host input {${WUPcssHidden}}
-      :host[readonly],
-      :host[readonly] legend,
-      :host[readonly] label {
-         cursor: default;
-      }
-      :host [icon] {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: var(--ctrl-radio-item-r);
-        height: var(--ctrl-radio-item-r);
-        box-sizing: border-box;
-        background: var(--ctrl-radio-item-bg);
-        box-shadow: 0 0 1px var(--ctrl-radio-item-border-w) var(--ctrl-radio-item-border);
-        border-radius: 50%;
-      }
-      :host [icon]:after {
-        content: "";
-        display: inline-block;
-        width: var(--ctrl-radio-item-r-on);
-        height: var(--ctrl-radio-item-r-on);
-        border-radius: 50%;
-        transition: background-color var(--anim);
-       }
-      :host input:checked + [icon]:after {
-        background: var(--ctrl-radio-item-on);
-      }
-      @media not all and (prefers-reduced-motion) {
-        :host label {
-          transition: color var(--anim);
-        }
-        :host [icon] {
-          transition: background-color var(--anim);
-        }
-      }
-      :host label:focus-within {
-        color: var(--ctrl-selected);
-      }
-      :host label:focus-within [icon] {
-        --ctrl-radio-item-border: var(--ctrl-selected);
-      }
-      @media (hover: hover) and (pointer: fine) {
-        :host label:hover {
-          color: var(--ctrl-selected);
-        }
-        :host label:hover [icon] {
-          --ctrl-radio-item-border: var(--ctrl-selected);
-        }
-      }`;
+    return super.$style;
   }
 
-  static $defaults: WUP.Radio.Options = {
-    ...WUPBaseControl.$defaults,
-    validationRules: { ...WUPBaseControl.$defaults.validationRules },
+  static $defaults: WUP.Radio.Options = inheritDefaults(WUPBaseControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {}),
     items: [],
     reverse: false,
-  };
+  });
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
     const d = super.cloneDefaults() as WUP.Radio.Options;
@@ -413,7 +315,7 @@ export default class WUPRadioControl<
   valueToStrCompare(a: WUP.Select.MenuItem<ValueType>): string | null {
     let at = null;
     if (a.value != null) {
-      at = (a.value as any).id ?? a.value.toString();
+      at = ((a.value as any).id ?? a.value).toString();
     } else {
       at = typeof a.text === "function" ? a.value?.toString() : a.text;
     }
@@ -438,7 +340,7 @@ export default class WUPRadioControl<
     // return super.valueFromStorage(str) as any;
   }
 
-  /** Store value to storage; if item.text is not function then stored text, otherwise value.toString()
+  /** Store value to storage as `(value.id ?? value).toString()` or `$null` for `null`
    *  @see {@link valueToStrCompare} */
   override valueToStorage(v: ValueType): string | null {
     if (v == null) {

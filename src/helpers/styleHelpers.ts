@@ -23,7 +23,7 @@ type TransformFunctions =
 
 /** Replaces [translate] in el.style.transform
  * @example
- * el.style.transform('translate(-10px, 20%)');
+ * el.style.transform = 'translate(-10px, 20%)';
  * styleTransform(el, 'translate', '-10px, 20%' )
  * @returns el.style.transform */
 export function styleTransform(el: HTMLElement, prop: TransformFunctions, value: string | number): string {
@@ -86,7 +86,7 @@ export function getBoundingInternalRect(
   return r;
 }
 
-/** Parse '0.2s' to 200, '200ms' to '200'
+/** Parse '0.2s' to 200, '200ms' to 200
  * If parsing is wrong returns 0 */
 export function parseMsTime(v: string): number {
   let t = Number.parseFloat(v);

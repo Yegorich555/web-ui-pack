@@ -1,7 +1,6 @@
-import WUPBaseElement from "./baseElement";
+import WUPBaseElement, { inheritDefaults } from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
 import { PopupAnimations, PopupCloseCases, PopupOpenCases } from "./popup/popupElement.types";
-import { WUPcssButton, WUPcssMenu } from "./styles";
 
 const tagName = "wup-dropdown";
 declare global {
@@ -36,7 +35,7 @@ declare global {
       /** Sets minWidth 100% of targetWidth; it can't be more than css-style min-width
        * @defaultValue true */
       minWidthByTarget: boolean;
-      /** Sets minHeight 100% of targetWidth; it can't be more than css-style min-height
+      /** Sets minHeight 100% of targetHeight; it can't be more than css-style min-height
        *  @defaultValue true */
       minHeightByTarget: boolean;
     }
@@ -57,6 +56,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Dropdown element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/dropdown}
        *  @see {@link WUPDropdownElement} */
       [tagName]: WUP.Base.ReactHTML<WUPDropdownElement> & WUP.Dropdown.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -70,6 +70,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Dropdown element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/dropdown}
        *  @see {@link WUPDropdownElement} */
       [tagName]: HTMLAttributes<WUPDropdownElement> & WUP.Dropdown.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -99,23 +100,13 @@ export default class WUPDropdownElement<
   #ctr = this.constructor as typeof WUPDropdownElement;
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        contain: style;
-        display: inline-block;
-      }${WUPcssButton(":host button")}
-      :host button {
-        min-width: initial;
-        margin: 0;
-        padding: 0.7em;
-      }${WUPcssMenu(":host>[menu]")}`;
+    return super.$style;
   }
 
   /** Default options applied to every element. Change it to configure default behavior
-   * * @tutorial Troubleshooting
+   * @tutorial Troubleshooting
    * * Popup-related options are not observed so to change it use `WUPDropdownElement.$defaults` or `element.$refPopup.$options` directly */
-  static $defaults: WUP.Dropdown.Options = {
-    ...WUPPopupElement.$defaults,
+  static $defaults: WUP.Dropdown.Options = inheritDefaults(WUPPopupElement.$defaults, {
     animation: PopupAnimations.drawer,
     openCase: PopupOpenCases.onClick | PopupOpenCases.onFocus,
     closeOnPopupClick: true,
@@ -131,9 +122,9 @@ export default class WUPDropdownElement<
       WUPPopupElement.$placements.$top.$start.$resizeHeight,
       WUPPopupElement.$placements.$top.$end.$resizeHeight,
     ],
-  };
+  });
 
-  /** Reference to nested HTMLElement tied with $options.label */
+  /** Reference to the first nested HTMLElement (default target of popup) */
   $refTitle = this.firstElementChild as HTMLElement;
   /** Reference to popupMenu */
   $refPopup = this.lastElementChild as WUPPopupElement;
@@ -165,13 +156,16 @@ export default class WUPDropdownElement<
           this.$refPopup.$options[k] = this._opts[k];
         }
       });
+      const p = this.$refPopup;
+      // otherwise popup uses previousElementSibling that isn't 1st element when dropdown has more than 2 children
+      !p.$options.target && !p.hasAttribute("w-target") && (p.$options.target = this.$refTitle);
 
       // WA
       const menu = (this.$refPopup.querySelector("ul,ol,[items]") as HTMLElement) || this.$refPopup;
       menu.id = menu.id || this.#ctr.$uniqueId;
       this.$refMenu = menu;
 
-      const lbl = this.$refTitle;
+      const lbl = p.defineTarget(); // the same element as popup toggles aria-expanded on
       lbl.setAttribute("aria-owns", menu.id);
       lbl.setAttribute("aria-controls", menu.id);
       lbl.setAttribute("aria-haspopup", "listbox");
@@ -187,12 +181,16 @@ export default class WUPDropdownElement<
     super.gotReady();
   }
 
-  /** Custom function to override default `WUPPopupElement.prototype.goClose` */
+  /** Custom function to override default `WUPPopupElement.prototype.goOpen` */
   protected goOpenPopup(openCase: PopupOpenCases, ev: MouseEvent | FocusEvent | null): Promise<boolean> {
-    const p = WUPPopupElement.prototype.goOpen.call(this.$refPopup, openCase, ev);
-    const t = this.$refPopup.$options.target!;
-    t.setAttribute("aria-expanded", true); // NiceToHave: move it to popup side after refactoring ???
-    t.style.zIndex = `${+getComputedStyle(this.$refPopup).zIndex + 2}`; // inc z-index for btn to allow animation-stack works properly
+    const popup = this.$refPopup;
+    const p = WUPPopupElement.prototype.goOpen.call(popup, openCase, ev);
+    // skip if opening is prevented via event $willOpen
+    if (popup.$isOpened) {
+      const t = popup.$options.target!;
+      t.setAttribute("aria-expanded", true);
+      t.style.zIndex = `${+getComputedStyle(popup).zIndex + 2}`; // inc z-index for btn to allow animation-stack works properly
+    }
     return p;
   }
 
@@ -204,16 +202,19 @@ export default class WUPDropdownElement<
     if (closeCase === PopupCloseCases.onPopupClick && !this._opts.closeOnPopupClick) {
       return Promise.resolve(false);
     }
-    const p = WUPPopupElement.prototype.goClose.call(this.$refPopup, closeCase, ev).finally(() => {
-      t.style.zIndex = "";
-      this.removeEmptyStyle.call(t);
+    const popup = this.$refPopup;
+    const t = popup.$options.target!;
+    const p = WUPPopupElement.prototype.goClose.call(popup, closeCase, ev).finally(() => {
+      // skip if closing is prevented or popup is opened again during the closing
+      if (!popup.$isOpened) {
+        t.style.zIndex = "";
+        this.removeEmptyStyle.call(t);
+      }
     });
-    const t = this.$refPopup.$options.target!;
-    t.setAttribute("aria-expanded", false);
+    // skip if closing is prevented via event $willClose
+    (popup.$isClosing || !popup.$isOpened) && t.setAttribute("aria-expanded", false);
     return p;
   }
 }
 
 customElements.define(tagName, WUPDropdownElement);
-
-// todo issue: animation:stack-right. If target is partially hidden in scrollable parent popup changes Y to be full visible but it's not ok; In this case popup must be also partially visible and listen only target

@@ -3,15 +3,19 @@ import { styleTransform } from "./styleHelpers";
 
 /** Animate (show/hide) element as dropdown via scale and counter-scale for children
  * @param ms animation time
- * @returns Promise<isFinished> that resolved by animation end;
+ * @returns Promise<isFinished> that resolved by animation end (`false` if `ms` is `0`: nothing is animated);
  * Rules
  * * To define direction set attribute to element position="top" (or "bottom", "left", "right")
+ * * For position="center" element is moved from top to center with opacity (like modal)
  * * Before call it again on the same element don't forget to call stop(false) to cancel prev animation */
 export default function animateDropdown(el: HTMLElement, ms: number, isHide = false): WUP.PromiseCancel<boolean> {
   if (!ms) {
     const p = Promise.resolve(false);
     return Object.assign(p, { stop: () => p });
   }
+  const moveY = -150; // translateY in % for position="center" (the same as modal does)
+  const moved = /translateY\(([^)%]+)%\)/.exec(el.style.transform); // possible if prev animation is stopped; value can be 1e-14
+  let isMoved = !!moved;
   // get previous scaleY and extract transform without scaleY
   const reg = / *scale[YX]\(([%\d \w.-]+)\) */;
   const parseScale = (e: HTMLElement): { prev: string; from: number } => {
@@ -41,6 +45,10 @@ export default function animateDropdown(el: HTMLElement, ms: number, isHide = fa
   const reset = (): void => {
     styleTransform(el, "scaleY", "");
     styleTransform(el, "scaleX", "");
+    if (isMoved) {
+      styleTransform(el, "translateY", "");
+      el.style.opacity = "";
+    }
     el.style.transformOrigin = "";
     nested.forEach((e) => {
       e.el.style.transform = e.prev.trimEnd();
@@ -57,7 +65,10 @@ export default function animateDropdown(el: HTMLElement, ms: number, isHide = fa
 
   // define from-to ranges
   const to = isHide ? 0 : 1;
-  const { from } = parseScale(el);
+  let { from } = parseScale(el);
+  if (moved) {
+    from = 1 - Number.parseFloat(moved[1]) / moveY;
+  }
   ms *= Math.abs(to - from); // re-calc left-animTime (if element is partially opened and need to hide it)
 
   const p = animate(from, to, ms, (v, _t, isLast) => {
@@ -69,6 +80,12 @@ export default function animateDropdown(el: HTMLElement, ms: number, isHide = fa
       return;
     }
     const pos = el.getAttribute("position");
+    if (pos === "center") {
+      isMoved = true;
+      styleTransform(el, "translateY", `${(1 - v) * moveY}%`);
+      el.style.opacity = `${v}`;
+      return;
+    }
     let tmo = "bottom";
     let tmo2 = "top";
     let scale: "scaleY" | "scaleX" = "scaleY";

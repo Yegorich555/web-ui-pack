@@ -62,7 +62,7 @@ declare global {
       /** Case when popup need to show;
        * @defaultValue `PopupOpenCases.onClick`
        * @example
-       * // use `|` to to join cases
+       * // use `|` to join cases
        * openCase=PopupOpenCases.onFocus | PopupOpenCases.onClick;  */
       openCase: PopupOpenCases;
       /** Timeout in ms before popup shows on hover of target (for PopupOpenCases.onHover);
@@ -90,14 +90,14 @@ declare global {
       minWidthByTarget?: boolean;
       /** Sets maxWidth 100% of targetWidth; it can't be more than css-style max-width */
       maxWidthByTarget?: boolean;
-      /** Sets minHeight 100% of targetWidth; it can't be more than css-style min-height */
+      /** Sets minHeight 100% of targetHeight; it can't be more than css-style min-height */
       minHeightByTarget?: boolean;
       /** Prevents changing position-priority (attribute `position`: top/bottom/left/right) when only sizes of popup or target are changed;
        * In this case position can be changed only when target is moved (scrolling, resizing of the screen etc.);
        * Use it to avoid unexpected jumping (bottom <=> top) when content of popup or target is changed */
       keepPosition?: boolean;
       /** Set true to show arrow with popup; @false by default;
-       *  Arrow is placed after popup so it's easy to access (via style @see {@link arrowClass} or @see {@link WUPPopupElement.$refArrow) */
+       *  Arrow is placed after popup so it's easy to access (via style @see {@link arrowClass} or @see {@link WUPPopupElement.$refArrow} */
       arrowEnable?: boolean;
       /** Setup arrow class and use :before to add background-image or content;
        * Limitation: arrow developed with ratio 2:1(w:h). You can't change it directly. Use only :before, :after to reach you goal
@@ -134,12 +134,10 @@ declare global {
        * If attr.target and $options.target are empty previousSibling will be attached.
        * Popup defines target on show()
        *
-       * attr `target` has hire priority than ref.options.target */
+       * attr `w-target` has higher priority than ref.options.target */
       "w-target"?: string;
       /** @readonly Result position; use this to restyle animation etc. */
-      readonly position?: "top" | "left" | "bottom" | "right";
-      /** @readonly Hide state; use this to hide-animation */
-      readonly hide?: "";
+      readonly position?: "top" | "left" | "bottom" | "right" | "center";
       /** Animation applied to popup */
       "w-animation"?: "" | "default" | "drawer" | "stack";
       /* Custom attribute used for internal behavior */
@@ -148,13 +146,29 @@ declare global {
       tooltip?: "";
     }
 
+    interface EventMap extends WUP.BaseModal.EventMap<PopupOpenCases, PopupCloseCases> {}
+
+    /** Options for {@link WUPPopupElement.$attach} */
     interface AttachOptions extends Partial<Omit<Options, "target">> {
       target: HTMLElement | SVGElement;
       text: string | undefined | null;
       tagName?: string;
     }
 
-    interface EventMap extends WUP.BaseModal.EventMap<PopupOpenCases, PopupCloseCases> {}
+    /** Options for {@link WUPPopupElement.$useTooltip}; `target` & `openCase` are defined by the hook itself */
+    interface TooltipOptions extends Partial<Omit<Options, "target" | "openCase">> {
+      /** Wait for pointed time before show tooltip
+       * @defaultValue 1000 */
+      delayMs?: number;
+      /** Show tooltip on keyboard focus also (`:focus-visible`)
+       * @defaultValue false */
+      showOnFocus?: boolean;
+      /** Attribute to enable tooltip on HTMLElements (also used as text source)
+       * @defaultValue "w-tooltip" */
+      attr?: string;
+      /** CSS className for <wup-popup/> */
+      className?: string;
+    }
   }
 }
 

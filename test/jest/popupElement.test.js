@@ -800,6 +800,45 @@ describe("popupElement", () => {
     expect(el.$options.animation).toBe(PopupAnimations.drawer);
   });
 
+  test("$options.animation: drawer + $centerScreen", async () => {
+    // WARN: there is only integration check. For full animation tests see helpers/animateDropdown
+    const { nextFrame } = h.useFakeAnimation();
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(100);
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(50);
+    h.setupCssCompute(el, { transitionDuration: "0.3s", animationDuration: "0.3s" });
+    el.$options.animation = PopupAnimations.drawer;
+    el.$options.placement = [WUPPopupElement.$placements.$centerScreen];
+    await h.wait(); // options is async
+    expect(el.$isOpened).toBe(true);
+
+    // moving from top to center (like modal) with keeping position of popup
+    await nextFrame();
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(250px, 175px) translateY(-150%); opacity: 0;" position="center" w-animation="drawer" show=""></wup-popup>"`
+    );
+    await nextFrame(9);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(250px, 175px) translateY(-74.99999999999999%); opacity: 0.5000000000000001;" position="center" w-animation="drawer" show=""></wup-popup>"`
+    );
+    await nextFrame(10);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(250px, 175px);" position="center" w-animation="drawer" show=""></wup-popup>"`
+    );
+
+    // moving back on close
+    el.$close();
+    await nextFrame(9);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(250px, 175px) translateY(-66.6666666666667%); opacity: 0.5555555555555554;" position="center" w-animation="drawer"></wup-popup>"`
+    );
+    await nextFrame(10);
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    expect(el.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup style="transform: translate(250px, 175px);" position="center" w-animation="drawer"></wup-popup>"`
+    );
+  });
+
   test("$options.animation: stack", async () => {
     // WARN: there is only code coverage. For full animation tests see helpers/animateStack
     const { nextFrame } = h.useFakeAnimation();
@@ -1131,6 +1170,59 @@ describe("popupElement", () => {
     );
   });
 
+  test("position: $centerScreen", () => {
+    expect(el.$isOpened).toBe(true); // checking prev-state
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(100);
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(50);
+
+    const expectIt = (placement) => {
+      el.$options.placement = placement;
+      jest.advanceTimersByTime(10);
+      // eslint-disable-next-line jest/valid-expect
+      return expect(el.outerHTML);
+    };
+
+    // placed at the center of fitElement ignoring target
+    expectIt([WUPPopupElement.$placements.$centerScreen]).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(250px, 175px);" position="center" show=""></wup-popup>"`
+    );
+    // skipped if previous rule fits
+    expectIt([
+      WUPPopupElement.$placements.$top.$start,
+      WUPPopupElement.$placements.$centerScreen,
+    ]).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(140px, 50px);" position="top" show=""></wup-popup>"`
+    );
+
+    // popup is bigger than fitElement
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(500);
+    expectIt([WUPPopupElement.$placements.$centerScreen]).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="max-height: 400px; transform: translate(250px, 0px);" position="center" show=""></wup-popup>"`
+    );
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(700);
+    el.$refresh(); // otherwise position isn't re-calculated because target isn't moved
+    expectIt([WUPPopupElement.$placements.$centerScreen]).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="max-width: 600px; max-height: 400px; transform: translate(0px, 0px);" position="center" show=""></wup-popup>"`
+    );
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(100);
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(50);
+
+    // arrow is hidden
+    el.$options.arrowEnable = true;
+    expectIt([WUPPopupElement.$placements.$centerScreen]);
+    expect(el.$refArrow.style.display).toBe("none");
+    expectIt([WUPPopupElement.$placements.$top.$start]);
+    expect(el.$refArrow.style.display).toBe("");
+    el.$options.arrowEnable = false;
+
+    // fitElement is partially out of viewport: placed at the center of visible part
+    h.setupLayout(document.body, { x: -20, y: -100, h: 400, w: 600 });
+    delete document.body._savedBoundingRect; // because getBoundingInternalRect is cached
+    expectIt([WUPPopupElement.$placements.$centerScreen]).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(240px, 125px);" position="center" show=""></wup-popup>"`
+    );
+  });
+
   test("position alt", async () => {
     // checking alt when no space
     expect(el.$isOpened).toBe(true); // checking prev-state
@@ -1400,6 +1492,82 @@ describe("popupElement", () => {
     );
   });
 
+  test("position with scroll: animation stack", () => {
+    // make body as scrollable
+    jest.spyOn(document.body, "scrollTop", "set").mockRestore();
+    el.$options.animation = PopupAnimations.stack;
+    jest.spyOn(el, "offsetHeight", "get").mockReturnValue(50);
+    jest.spyOn(el, "offsetWidth", "get").mockReturnValue(60);
+
+    const bodyRect = { ...document.body.getBoundingClientRect() };
+    const trgRect = { ...trg.getBoundingClientRect() };
+    jest.spyOn(trg, "getBoundingClientRect").mockImplementation(() => ({ ...trgRect }));
+    const moveTo = (x, y) => {
+      trgRect.x = x;
+      trgRect.y = y;
+      trgRect.left = x;
+      trgRect.top = y;
+      trgRect.right = trgRect.left + trgRect.width;
+      trgRect.bottom = trgRect.top + trgRect.height;
+      jest.advanceTimersByTime(1); // because getBoundingInternalRect is cached
+    };
+
+    const expectIt = (placement) => {
+      el.$options.placement = [placement];
+      jest.advanceTimersByTime(10);
+      // eslint-disable-next-line jest/valid-expect
+      return expect(el.outerHTML);
+    };
+
+    // target is fully visible - nothing to clip
+    moveTo(100, 100);
+    expectIt(WUPPopupElement.$placements.$right.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(200px, 100px);" position="right" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // partially hidden at the top: popup is aligned to the whole target & clipped the same way as target
+    moveTo(100, bodyRect.top - trgRect.height / 2);
+    expectIt(WUPPopupElement.$placements.$right.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(200px, -25px); clip-path: inset(25px -100vmax -100vmax -100vmax);" position="right" w-animation="stack" show=""></wup-popup>"`
+    );
+    // fitElement is infinite at the top but $centerScreen is placed inside viewport
+    expectIt(WUPPopupElement.$placements.$centerScreen).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="clip-path: inset(-175px -100vmax -100vmax -100vmax); transform: translate(270px, 175px);" position="center" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // partially hidden at the bottom
+    moveTo(100, bodyRect.bottom - trgRect.height / 2);
+    expectIt(WUPPopupElement.$placements.$left.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="clip-path: inset(-100vmax -100vmax 25px -100vmax); transform: translate(40px, 375px);" position="left" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // partially hidden at the left
+    moveTo(bodyRect.left - trgRect.width / 2, 100);
+    expectIt(WUPPopupElement.$placements.$bottom.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="clip-path: inset(-100vmax -100vmax -100vmax 30px); transform: translate(-30px, 150px);" position="bottom" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // partially hidden at the right
+    moveTo(bodyRect.right - trgRect.width / 2, 100);
+    expectIt(WUPPopupElement.$placements.$top.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="clip-path: inset(-100vmax 30px -100vmax -100vmax); transform: translate(570px, 50px);" position="top" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // clipping is removed when target is fully visible again
+    moveTo(100, 100);
+    expectIt(WUPPopupElement.$placements.$right.$middle).toMatchInlineSnapshot(
+      `"<wup-popup open="" style="transform: translate(200px, 100px);" position="right" w-animation="stack" show=""></wup-popup>"`
+    );
+
+    // clipping is removed on close
+    moveTo(100, bodyRect.top - trgRect.height / 2);
+    expectIt(WUPPopupElement.$placements.$right.$middle);
+    expect(el.style.clipPath).toBeTruthy();
+    el.$close();
+    jest.advanceTimersByTime(1000);
+    expect(el.style.clipPath).toBe("");
+  });
+
   test("arrow", () => {
     expect(el.$isOpened).toBe(true); // checking prev-state
     expect(el.$refArrow).toBeFalsy();
@@ -1556,13 +1724,20 @@ describe("popupElement", () => {
 
     spy.check(); // checking memory leak
 
-    // checking when canShow = false > popup.removed
+    // checking when opening is prevented > popup.removed
     jest.clearAllMocks();
-    jest.spyOn(WUPPopupElement.prototype, "goOpen").mockImplementationOnce(() => false);
+    const preventOpen = (e) => e.preventDefault();
+    document.addEventListener("$willOpen", preventOpen);
     detach = WUPPopupElement.$attach({ target: trg, openCase: 0b111111, text: "Me" }); // checking without callback
     trg.click();
-    jest.advanceTimersByTime(100); // popup has click-timeouts
+    await h.wait(100); // popup has click-timeouts
     expect(document.body.innerHTML).toMatchInlineSnapshot(`"<div id="targetId">some text</div>"`);
+    document.removeEventListener("$willOpen", preventOpen);
+    trg.click(); // new popup must be created instead of removed one
+    await h.wait();
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<div id="targetId">some text</div><wup-popup open="" style="transform: translate(190px, 100px);" position="top" show="">Me</wup-popup>"`
+    );
     detach();
     spy.check(); // checking memory leak
 
@@ -1658,6 +1833,51 @@ describe("popupElement", () => {
 
     detach();
     spy.check(); // checking memory leak
+  });
+
+  test("opening is prevented during the closing", async () => {
+    h.setupCssCompute((elt) => elt instanceof WUPPopupElement, { transitionDuration: "0.3s" });
+    const preventOpen = (e) => e.preventDefault();
+
+    // with $attach: closing popup must be removed
+    /** @type WUPPopupElement */
+    let popup;
+    const detach = WUPPopupElement.$attach({ target: trg, openCase: PopupOpenCases.onClick, text: "Me" }, (p) => {
+      popup = p;
+    });
+    trg.click(); // to open
+    await h.wait();
+    expect(popup.$isOpened).toBe(true);
+    trg.click(); // to close
+    await h.wait(50);
+    expect(popup.$isClosing).toBe(true);
+    document.addEventListener("$willOpen", preventOpen);
+    trg.click(); // to open during the closing
+    await h.wait();
+    document.removeEventListener("$willOpen", preventOpen);
+    expect(popup.$isOpened).toBe(false);
+    expect(popup.isConnected).toBe(false);
+    detach();
+
+    // without $attach: listener must not treat popup as opened
+    const a = document.body.appendChild(document.createElement("wup-popup"));
+    a.$options.openCase = PopupOpenCases.onClick;
+    a.$options.target = trg;
+    await h.wait();
+    trg.click(); // to open
+    await h.wait();
+    expect(a.$isOpened).toBe(true);
+    trg.click(); // to close
+    await h.wait(50);
+    expect(a.$isClosing).toBe(true);
+    document.addEventListener("$willOpen", preventOpen);
+    trg.click(); // to open during the closing
+    await h.wait();
+    document.removeEventListener("$willOpen", preventOpen);
+    expect(a.$isOpened).toBe(false);
+    trg.click(); // to open again
+    await h.wait();
+    expect(a.$isOpened).toBe(true);
   });
 
   test("custom animation with transform", async () => {
@@ -1966,5 +2186,453 @@ describe("popupElement", () => {
     await h.userClick(trg); // open by listener
     await h.wait();
     expect(el.$isOpened).toBe(false);
+  });
+
+  test("static.$useTooltip", async () => {
+    el.remove();
+    trg.setAttribute("w-tooltip", "Some tooltip");
+    const spy = h.spyEventListeners();
+    /** Simulate pointer event: jsdom has no PointerEvent - so pointerType must be defined manually */
+    const pointer = (t, type, pointerType = "mouse") => {
+      const ev = new MouseEvent(type);
+      Object.defineProperty(ev, "pointerType", { get: () => pointerType });
+      t.dispatchEvent(ev);
+    };
+    const hover = (t = trg, pointerType = "mouse") => pointer(t, "pointerenter", pointerType);
+    const leave = (t = trg) => pointer(t, "pointerleave");
+    /** @returns {WUPPopupElement | null} */
+    const getPopup = () => document.body.querySelector("wup-popup");
+
+    let r = WUPPopupElement.$useTooltip();
+    hover();
+    await h.wait(999);
+    expect(getPopup()).toBeNull(); // because waiting for delayMs: 1000 by default
+    await h.wait(1);
+    let p = getPopup();
+    expect(p).toBeTruthy();
+    await h.wait();
+    expect(p.$isOpened).toBe(true);
+    expect(p.$options.openCase).toBe(PopupOpenCases.onInit);
+    expect(p.$options.target).toBe(trg);
+    expect(p.$options.placement).toEqual([WUPPopupElement.$placements.$top.$start]);
+    expect(p.$options.offset).toEqual([4, 4]);
+    expect(p.outerHTML).toMatchInlineSnapshot(
+      `"<wup-popup tooltip="" open="" style="transform: translate(136px, 96px);" position="top" show="">Some tooltip</wup-popup>"`
+    );
+
+    leave();
+    await h.wait();
+    expect(p.isConnected).toBe(false); // popup is removed after closing
+    expect(getPopup()).toBeNull();
+
+    // leaving before delay: popup isn't rendered
+    hover();
+    await h.wait(500);
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // other events also hide tooltip
+    const checkHideBy = async (ev, pointerType) => {
+      hover();
+      await h.wait();
+      expect(getPopup()).toBeTruthy();
+      pointer(trg, ev, pointerType);
+      await h.wait();
+      expect(getPopup()).toBeNull();
+    };
+    await checkHideBy("pointerdown");
+    await checkHideBy("pointerdown", "pen");
+    await checkHideBy("click");
+    await checkHideBy("pointerup");
+    await checkHideBy("pointercancel");
+    // events without active tooltip are skipped
+    ["pointerdown", "pointerup", "pointercancel", "click", "pointerleave"].forEach((ev) => pointer(trg, ev));
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // touch: tooltip is visible during the long-press & hidden by release
+    hover(trg, "touch");
+    pointer(trg, "pointerdown", "touch");
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    pointer(trg, "pointerup", "touch");
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // leaving child of target doesn't hide tooltip
+    const child = trg.appendChild(document.createElement("span"));
+    hover();
+    hover(child); // skipped because without [w-tooltip]
+    leave(child);
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    child.remove();
+
+    // repeated pointerenter on the same target doesn't duplicate tooltip
+    hover();
+    await h.wait(500);
+    hover();
+    await h.wait(500);
+    expect(document.body.querySelectorAll("wup-popup").length).toBe(1);
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // only 1 tooltip at once: new target replaces previous
+    const trg2 = document.body.appendChild(document.createElement("button"));
+    trg2.setAttribute("w-tooltip", "Tooltip 2");
+    hover();
+    await h.wait();
+    expect(getPopup().textContent).toBe("Some tooltip");
+    hover(trg2);
+    await h.wait();
+    expect(document.body.querySelectorAll("wup-popup").length).toBe(1);
+    expect(getPopup().textContent).toBe("Tooltip 2");
+    expect(getPopup().$options.target).toBe(trg2);
+    leave(trg); // leaving not current target is skipped
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    leave(trg2);
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // WCAG 1.4.13 hoverable: pointer can be moved from target to tooltip
+    hover();
+    await h.wait();
+    p = getPopup();
+    leave();
+    await h.wait(400);
+    expect(p.isConnected).toBe(true); // because waiting for hoverCloseTimeout: 500 by default
+    hover(p);
+    await h.wait();
+    expect(p.isConnected).toBe(true); // hiding is canceled
+    leave(p);
+    hover(); // back to target
+    await h.wait();
+    expect(p.isConnected).toBe(true);
+    leave();
+    await h.wait(100);
+    hover(p);
+    leave(p);
+    await h.wait();
+    expect(p.isConnected).toBe(false);
+
+    // WCAG 1.4.13 dismissible: by Escape
+    hover();
+    await h.wait();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+    await h.wait();
+    expect(getPopup()).toBeTruthy(); // other keys are skipped
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    leave();
+
+    // WCAG 1.4.13 persistent: tooltip is shown on keyboard focus & visible until focusout
+    const focus = (t = trg) => t.dispatchEvent(new FocusEvent("focusin"));
+    const blur = (t = trg) => t.dispatchEvent(new FocusEvent("focusout"));
+    let isFocusVisible = true;
+    // jsdom doesn't support :focus-visible
+    const spyMatches = [trg, trg2].map((a) => jest.spyOn(a, "matches").mockImplementation(() => isFocusVisible));
+    focus(); // keyboard focus is skipped by default
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    blur();
+    r.dispose();
+
+    r = WUPPopupElement.$useTooltip({ showOnFocus: true });
+    isFocusVisible = false;
+    focus(); // focus by pointer is skipped
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    isFocusVisible = true;
+    focus(document.body); // element without [w-tooltip] is skipped
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    focus();
+    await h.wait(999);
+    expect(getPopup()).toBeNull(); // because waiting for delayMs
+    await h.wait(1);
+    expect(getPopup()).toBeTruthy();
+    hover();
+    leave(); // pointer leaving doesn't hide when target is focused
+    blur(trg2); // focusout of other element is skipped
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    blur();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // focusout doesn't hide when target is hovered
+    hover();
+    focus();
+    await h.wait();
+    blur();
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // focusin cancels hiding after pointerleave
+    hover();
+    await h.wait();
+    leave();
+    await h.wait(100);
+    focus();
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    focus(trg2); // other target replaces previous
+    await h.wait();
+    expect(getPopup().textContent).toBe("Tooltip 2");
+    blur(trg2);
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    spyMatches.forEach((a) => a.mockRestore());
+    r.dispose();
+    r = WUPPopupElement.$useTooltip();
+
+    // target is removed before delay: popup isn't rendered
+    hover(trg2);
+    trg2.remove();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // empty [w-tooltip] uses [aria-label]
+    trg.setAttribute("w-tooltip", "");
+    trg.setAttribute("aria-label", "Aria text");
+    hover();
+    await h.wait();
+    expect(getPopup().innerHTML).toBe("Aria text");
+    leave();
+    await h.wait();
+
+    // empty [w-tooltip] uses content of elements pointed by [aria-describedby] (many targets can refer to the same element)
+    document.body.insertAdjacentHTML("beforeend", `<p id="tip1" hidden>Shared <b>text</b></p><p id="tip2">Text 2</p>`);
+    trg.setAttribute("aria-describedby", "tip1");
+    hover();
+    await h.wait();
+    expect(getPopup().innerHTML).toBe("Shared text"); // [aria-describedby] has priority over [aria-label]
+    leave();
+    await h.wait();
+    trg.setAttribute("aria-describedby", "tip1 missed tip2"); // not found elements are skipped
+    hover();
+    await h.wait();
+    expect(getPopup().innerHTML).toBe("Shared text Text 2");
+    leave();
+    await h.wait();
+    trg.setAttribute("aria-describedby", "missed");
+    hover();
+    await h.wait();
+    expect(getPopup().innerHTML).toBe("Aria text"); // fallback to [aria-label]
+    leave();
+    await h.wait();
+    document.getElementById("tip1").remove();
+    document.getElementById("tip2").remove();
+    trg.removeAttribute("aria-describedby");
+
+    // text is rendered as text (not parsed as HTML) to prevent XSS
+    trg.setAttribute("w-tooltip", `<img src="x" onerror="alert(1)"><b>Bold</b>`);
+    hover();
+    await h.wait();
+    expect(getPopup().children.length).toBe(0);
+    expect(getPopup().textContent).toBe(`<img src="x" onerror="alert(1)"><b>Bold</b>`);
+    leave();
+    await h.wait();
+    trg.setAttribute("w-tooltip", "");
+
+    // without text tooltip isn't rendered
+    trg.removeAttribute("aria-label");
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    leave();
+    await h.wait();
+
+    // elements without [w-tooltip] are skipped
+    trg.removeAttribute("w-tooltip");
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    hover(document); // target without hasAttribute
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    // dispose hides opened tooltip
+    trg.setAttribute("w-tooltip", "Some tooltip");
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    r.dispose();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    spy.check(); // checking memory leak
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeNull(); // because listeners are removed
+
+    // options
+    r = WUPPopupElement.$useTooltip({
+      delayMs: 200,
+      className: "my-tooltip",
+      arrowEnable: true,
+      hoverCloseTimeout: 50,
+      placement: [WUPPopupElement.$placements.$bottom.$middle],
+      offset: [1, 2],
+      openCase: PopupOpenCases.onClick, // not allowed to override
+      target: document.body, // not allowed to override
+    });
+    hover();
+    await h.wait(200);
+    p = getPopup();
+    expect(p).toBeTruthy();
+    await h.wait();
+    expect(p.className).toBe("my-tooltip");
+    expect(p.$options.arrowEnable).toBe(true);
+    expect(p.$refArrow).toBeTruthy();
+    expect(p.$options.placement).toEqual([WUPPopupElement.$placements.$bottom.$middle]);
+    expect(p.$options.offset).toEqual([1, 2]);
+    expect(p.$options.openCase).toBe(PopupOpenCases.onInit);
+    expect(p.$options.target).toBe(trg);
+    // arrow is part of tooltip
+    leave();
+    await h.wait(40);
+    hover(p.$refArrow);
+    await h.wait();
+    expect(p.isConnected).toBe(true);
+    leave(p.$refArrow);
+    await h.wait(40);
+    expect(p.$isClosing).toBe(false);
+    await h.wait(10);
+    expect(p.$isClosing).toBe(true); // hidden by custom hoverCloseTimeout
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    r.dispose();
+
+    // delayMs: 0 shows tooltip without delay
+    r = WUPPopupElement.$useTooltip({ delayMs: 0 });
+    hover();
+    jest.advanceTimersByTime(0);
+    expect(getPopup()).toBeTruthy();
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    r.dispose();
+
+    // custom attr instead of [w-tooltip]
+    r = WUPPopupElement.$useTooltip({ attr: "data-tip", showOnFocus: true });
+    hover(); // [w-tooltip] is skipped
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    leave();
+    trg.removeAttribute("w-tooltip");
+    trg.setAttribute("data-tip", "Custom tip");
+    hover();
+    await h.wait();
+    expect(getPopup().textContent).toBe("Custom tip");
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    const spyFocusVisible = jest.spyOn(trg, "matches").mockImplementation(() => true);
+    focus();
+    await h.wait();
+    expect(getPopup().textContent).toBe("Custom tip");
+    blur();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    spyFocusVisible.mockRestore();
+    r.dispose();
+    r.dispose(); // repeated dispose is skipped
+    spy.check(); // checking memory leak
+
+    // several calls with different attrs share a single set of listeners
+    trg.removeAttribute("data-tip");
+    const spyOn = jest.spyOn(document, "addEventListener");
+    const r1 = WUPPopupElement.$useTooltip({ attr: "readonly", className: "tip-1" });
+    const cnt = spyOn.mock.calls.length;
+    expect(cnt).toBeGreaterThan(0);
+    const r2 = WUPPopupElement.$useTooltip({ attr: "disabled", className: "tip-2", delayMs: 0 });
+    expect(spyOn.mock.calls.length).toBe(cnt); // listeners aren't duplicated
+    spyOn.mockRestore();
+
+    trg.setAttribute("aria-label", "Aria text");
+    trg.setAttribute("disabled", "");
+    hover();
+    jest.advanceTimersByTime(0);
+    expect(getPopup().className).toBe("tip-2"); // options related to attr are applied
+    expect(getPopup().textContent).toBe("Aria text");
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+
+    trg.setAttribute("readonly", "Readonly text");
+    hover();
+    await h.wait();
+    expect(getPopup().className).toBe("tip-1"); // 1st registered attr has priority
+    expect(getPopup().textContent).toBe("Readonly text");
+
+    r2.dispose(); // dispose of other attr doesn't hide current tooltip
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    leave();
+    await h.wait();
+    trg.removeAttribute("readonly");
+    hover(); // [disabled] isn't registered anymore
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    leave();
+
+    // nested element with empty attr doesn't replace tooltip of parent: ex. <wup-text readonly="Reason"><input readonly/>
+    const nested = trg.appendChild(document.createElement("input"));
+    nested.setAttribute("readonly", "");
+    nested.setAttribute("aria-label", "Nested aria");
+    trg.setAttribute("readonly", "Readonly text");
+    hover();
+    hover(nested);
+    await h.wait();
+    expect(getPopup().textContent).toBe("Readonly text");
+    expect(getPopup().$options.target).toBe(trg);
+    leave(nested); // pointer moved from nested to parent
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    leave();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    nested.setAttribute("readonly", "Nested text"); // nested element with own text replaces tooltip of parent
+    hover();
+    hover(nested);
+    await h.wait();
+    expect(getPopup().textContent).toBe("Nested text");
+    leave(nested);
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    leave();
+    hover(nested); // without parent target nested element with empty attr is processed as usual
+    nested.setAttribute("readonly", "");
+    await h.wait();
+    expect(getPopup().textContent).toBe("Nested aria");
+    leave(nested);
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    nested.remove();
+
+    trg.setAttribute("readonly", "");
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeTruthy();
+    r1.dispose(); // dispose of the last attr hides tooltip & removes listeners
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    hover();
+    await h.wait();
+    expect(getPopup()).toBeNull();
+    trg.removeAttribute("readonly");
+    trg.removeAttribute("disabled");
+    trg.removeAttribute("aria-label");
+    spy.check(); // checking memory leak
   });
 });

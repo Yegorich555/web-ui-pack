@@ -5,7 +5,6 @@ import focusFirst from "./helpers/focusFirst";
 import nestedProperty from "./helpers/nestedProperty";
 import observer, { Observer } from "./helpers/observer";
 import onEvent, { onEventType } from "./helpers/onEvent";
-import { WUPcssHidden, WUPcssBtnIcon, WUPcssIconSet } from "./styles";
 
 // theoretically such single appending is faster than using :host inside shadowComponent
 const appendedStyles = new Set<string>();
@@ -19,7 +18,7 @@ const allMappedAttrs = new WeakMap<typeof WUPBaseElement, Record<string, Attribu
 export interface AttributeMap {
   /** One of default types with defined parse */
   type: AttributeTypes;
-  /** Option[name] realted to related attribute. Point if attrName !== propName */
+  /** Option[name] related to related attribute. Point if attrName !== propName */
   prop?: string;
   /** Custom parser for related attribute */
   parse?: (attrValue: string) => any;
@@ -34,6 +33,37 @@ export const enum AttributeTypes {
   parseCustom,
   /** Element accessed via `document.querySelector` */
   selector,
+}
+
+/** Returns `$defaults` linked to parent: every option is read from parent until it's overridden,
+ * so changing parent `$defaults` affects inherited classes too
+ * * options added to parent later are accessible via prototype (of the first parent only) but aren't enumerable;
+ *   it's enough for `validationRules` because rules are read by key
+ * @param parent `$defaults` of parent; pass array for several parents: every option is read from the first parent that has it
+ * @param own options of inherited class: override parent ones and aren't affected by parent anymore
+ * @example
+ * static $defaults: WUP.Text.Options = inheritDefaults(WUPBaseControl.$defaults, { clearButton: true });
+ * WUPBaseControl.$defaults.validateDebounceMs = 300; // affects WUPTextControl.$defaults too
+ * WUPTextControl.$defaults.validateDebounceMs = 100; // from now on changing WUPBaseControl doesn't affect it */
+export function inheritDefaults<T extends Record<string, any>>(
+  parent: Record<string, any> | Array<Record<string, any>>,
+  own: NoInfer<Partial<T>>
+): T {
+  const parents: Array<Record<string, any>> = Array.isArray(parent) ? parent : [parent];
+  const o = Object.create(parents[0]);
+  const overridden = new Map<string, any>();
+  parents.forEach((p) =>
+    Object.keys(p).forEach((k) => {
+      !Object.hasOwn(o, k) &&
+        Object.defineProperty(o, k, {
+          configurable: true,
+          enumerable: true,
+          get: () => (overridden.has(k) ? overridden.get(k) : p[k]),
+          set: (v) => overridden.set(k, v),
+        });
+    })
+  );
+  return Object.assign(o, own);
 }
 
 /** Basic abstract class for every component in web-ui-pack */
@@ -60,45 +90,13 @@ export default abstract class WUPBaseElement<
 
   /** StyleContent related to component */
   static get $style(): string {
-    return "";
+    return ""; // WARN: it's injected from baseElement.scss via stylesLoader.js
   }
 
   /** StyleContent related to component & inherited components */
   static get $styleRoot(): string {
-    // NiceToHave: currently $styleRoot inheritted automatically so init WUPSortElement adds WUPBaseElement.$styleRoot and WUPSortElement.$styleRoot, but expected only WUPSortElement.$styleRoot
-    return `:root {
-          --base-focus: #00778d;
-          --base-btn-bg: #009fbc;
-          --base-btn-text: #fff;
-          --base-btn-focus: #005766;
-          --base-btn2-bg: #6c757d;
-          --base-btn2-text: #fff;
-          --base-btn3-bg: none;
-          --base-btn3-text: inherit;
-          --base-sep: #e4e4e4;
-          --base-margin: 20px;
-          --border-radius: 6px;
-          --anim-t: 200ms;
-          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-          --icon-hover-r: 30px;
-          --icon-hover-bg: #0001;
-          --icon-focus-bg: #0000001a;
-          --icon-size: 14px;
-          --menu-hover-text: inherit;
-          --menu-hover-bg: #f1f1f1;
-          ${WUPcssIconSet}
-        }
-        [wupdark] {
-          --base-btn-focus: #bdbdbd;
-          --base-sep: #141414;
-          --icon: #fff;
-          --icon-hover-bg: #fff1;
-          --icon-focus-bg: #fff2;
-          --scroll: #fff2;
-          --scroll-hover: #fff3;
-          --menu-hover-text: inherit;
-          --menu-hover-bg: #222a36;
-        }`;
+    // NiceToHave: currently $styleRoot inherited automatically so init WUPSortElement adds WUPBaseElement.$styleRoot and WUPSortElement.$styleRoot, but expected only WUPSortElement.$styleRoot
+    return ""; // WARN: it's injected from baseElement.scss via stylesLoader.js
   }
 
   /** Get unique id for html elements; Every getter returns new id */
@@ -106,12 +104,12 @@ export default abstract class WUPBaseElement<
     return `wup${++lastUniqueNum}`;
   }
 
-  /** Returns default class name for visually hidden element */
+  /** Returns default class name for visually hidden element; WARN: related styles are defined in baseElement.scss */
   static get classNameHidden(): string {
     return "wup-hidden";
   }
 
-  /** Returns default class name for buttons with icons */
+  /** Returns default class name for buttons with icons; WARN: related styles are defined in baseElement.scss */
   static get classNameBtnIcon(): string {
     return "wup-icon";
   }
@@ -150,8 +148,8 @@ export default abstract class WUPBaseElement<
     return o;
   }
 
-  /** Array of options names to listen for changes; @returns `undefined` if need to observe for every option
-   * @defaultValue every option from $defaults` */
+  /** Array of options names to listen for changes; @returns `null` if need to observe for every option
+   * @defaultValue every option from $defaults */
   static get observedOptions(): Array<string> | null {
     return null;
   }
@@ -291,11 +289,9 @@ export default abstract class WUPBaseElement<
   /** Add common styles */
   static firstInit(): void {
     this.$refStyle = document.createElement("style");
-    /* from https://snook.ca/archives/html_and_css/hiding-content-for-accessibility  */
     this.$refStyle.append(`${this.$styleRoot}\r\n`);
     appendedRootStyles.add(WUPBaseElement);
-    this.$refStyle.append(`.${this.classNameHidden}, [${this.classNameHidden}] {${WUPcssHidden}}\r\n`);
-    this.$refStyle.append(`${WUPcssBtnIcon(`[${this.classNameBtnIcon}]`)}\r\n`);
+    this.$refStyle.append("@wup-include useCommon", "\r\n"); // WARN: it's replaced with css of the mixin from baseElement.scss via stylesLoader.js
 
     document.head.prepend(this.$refStyle);
   }
@@ -579,16 +575,12 @@ export default abstract class WUPBaseElement<
     this.disposeLst.length = 0;
   }
 
-  /** Returns true if el is instance of Node and contains pointed element
-   * @tutorial Troubleshooting
-   * * if element has position `fixed` or `absolute` then returns false */
+  /** Returns true if el is instance of Node and contains pointed element */
   includes(el: unknown): boolean {
     return el instanceof Node && this.contains(el);
   }
 
-  /** Returns true if element contains eventTarget or it's eventTarget
-   * @tutorial Troubleshooting
-   * * if element has position `fixed` or `absolute` then returns false */
+  /** Returns true if element contains eventTarget or it's eventTarget */
   includesTarget(e: Event): boolean {
     return this.itsMe(e.target);
   }
@@ -616,9 +608,7 @@ export default abstract class WUPBaseElement<
     return null;
   }
 
-  /** Returns true if contains pointed element or has itself
-   * @tutorial Troubleshooting
-   * * if element has position `fixed` or `absolute` then returns false */
+  /** Returns true if contains pointed element or has itself */
   itsMe(el: Element | EventTarget | null): boolean {
     return this === el || (el instanceof Node && this.contains(el));
   }
@@ -825,6 +815,5 @@ declare global {
   }
 }
 
-// NiceToHave: HTML attrs-events like 'onsubmit' & 'onchange'
 // @ts-ignore
 console[`${String.fromCharCode(105)}nfo`]("Powered by https://github.com/Yegorich555/web-ui-pack");

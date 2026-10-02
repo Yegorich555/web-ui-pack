@@ -649,6 +649,85 @@ describe("control.select common", () => {
       expect(el.$isReadOnly).toBe(false);
       expect(el.$refInput.readOnly).toBe(false);
     });
+
+    test("popupOffsetFitElement & popupMinWidthByTarget", async () => {
+      el.focus();
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      expect(el.$refPopup.$options.offsetFitElement).toEqual([1, 1]);
+      expect(el.$refPopup.$options.minWidthByTarget).toBe(true);
+      el.blur();
+      await h.wait();
+      expect(el.$refPopup).toBeFalsy();
+
+      el.$options.popupOffsetFitElement = [2, 3, 4, 5];
+      el.$options.popupMinWidthByTarget = false;
+      el.focus();
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      expect(el.$refPopup.$options.offsetFitElement).toEqual([2, 3, 4, 5]);
+      expect(el.$refPopup.$options.minWidthByTarget).toBe(false);
+
+      // disabled via $defaults
+      const was = WUPSelectControl.$defaults.popupOffsetFitElement;
+      WUPSelectControl.$defaults.popupOffsetFitElement = undefined;
+      expect(WUPSelectControl.cloneDefaults().popupOffsetFitElement).toBe(undefined);
+      WUPSelectControl.$defaults.popupOffsetFitElement = was;
+    });
+
+    test("menuEscRollback", async () => {
+      const pressEsc = () =>
+        el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+      el.$options.multiple = true;
+      el.$initValue = [10];
+      el.$onChange = jest.fn();
+      await h.wait(1);
+
+      // by default Esc only closes menu
+      HTMLInputElement.prototype.focus.call(el.$refInput);
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      await h.userClick(el.$refPopup.querySelectorAll("li")[1]);
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      expect(el.$value).toEqual([10, 20]);
+      expect(el.$onChange).toBeCalledTimes(1);
+      pressEsc();
+      await h.wait();
+      expect(el.$isOpened).toBe(false);
+      expect(el.$value).toEqual([10, 20]);
+      expect(el.$onChange).toBeCalledTimes(1);
+
+      // rollback to value before menu opened
+      el.$options.menuEscRollback = true;
+      await h.wait(1);
+      jest.clearAllMocks();
+      await h.userClick(el);
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      await h.userClick(el.$refPopup.querySelectorAll("li")[2]);
+      await h.userClick(el.$refPopup.querySelectorAll("li")[0]);
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      expect(el.$value).toEqual([20, 30]);
+      expect(el.$onChange).toBeCalledTimes(2);
+      pressEsc();
+      await h.wait();
+      expect(el.$isOpened).toBe(false);
+      expect(el.$value).toEqual([10, 20]);
+      expect(el.$onChange).toBeCalledTimes(3);
+
+      // no changes while menu opened => no extra change event
+      jest.clearAllMocks();
+      await h.userClick(el);
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      pressEsc();
+      await h.wait();
+      expect(el.$isOpened).toBe(false);
+      expect(el.$value).toEqual([10, 20]);
+      expect(el.$onChange).toBeCalledTimes(0);
+    });
   });
 
   test("tryScroll", async () => {

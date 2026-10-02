@@ -109,20 +109,27 @@ export default class TextHistory {
     };
   }
 
+  /** Returns history action pointed by keyboard shortcut: Ctrl/Meta+Z => undo; Ctrl/Meta+Shift+Z, Ctrl+Y => redo */
+  static getUndoRedoKey(e: KeyboardEvent): "undo" | "redo" | null {
+    if (e.altKey) {
+      return null;
+    }
+    const isUndo = (e.ctrlKey || e.metaKey) && e.code === "KeyZ";
+    if ((isUndo && e.shiftKey) || (e.ctrlKey && e.code === "KeyY" && !e.metaKey)) {
+      return "redo";
+    }
+    return isUndo ? "undo" : null;
+  }
+
   /** Call this handler on input.on('keydown');
    * @returns "true" if was undo/redo action & history exists */
   handleKeyDown(e: KeyboardEvent): boolean {
-    if (e.altKey) {
-      return false;
-    }
     // WARN: issue: click btnClear + shake iPhone to call undo - undo isn't called in this case (because no history saved into browser itself)
     // WARN: need handle only redo because undo works from browser-side itself but undo - doesn't still beforeInput.preventDefault()
-    let isUndo = (e.ctrlKey || e.metaKey) && e.code === "KeyZ"; // 1st browser undo doesn't work after btnClear
-    const isRedo = (isUndo && e.shiftKey) || (e.ctrlKey && e.code === "KeyY" && !e.metaKey);
-    isUndo &&= !isRedo;
-    if (isUndo || isRedo) {
+    const act = TextHistory.getUndoRedoKey(e); // 1st browser undo doesn't work after btnClear
+    if (act) {
       e.preventDefault(); // prevent original onInput and call manually
-      if (!this.canUndoRedo(isRedo)) {
+      if (!this.canUndoRedo(act === "redo")) {
         return false;
       }
       setTimeout(() => {
@@ -130,7 +137,7 @@ export default class TextHistory {
           new InputEvent("beforeinput", {
             cancelable: true,
             bubbles: true,
-            inputType: isUndo ? "historyUndo" : "historyRedo", //  synthetic event otherwise default can be ignored by browser itself if browser-history is empty
+            inputType: act === "undo" ? "historyUndo" : "historyRedo", //  synthetic event otherwise default can be ignored by browser itself if browser-history is empty
           })
         );
       }); // fire it after empty timeout so keyDown can bubble to top at first
@@ -209,7 +216,7 @@ export default class TextHistory {
     return isUndoRedo;
   }
 
-  /** required to fix custom bubbling with timetout */
+  /** required to fix custom bubbling with timeout */
   #inpBubble?: () => void;
   /* when user types fast beforeInput can be fired stepByStep without timeouts */
   #inpDebounce?: () => void;

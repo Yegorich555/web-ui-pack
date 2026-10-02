@@ -1,4 +1,4 @@
-/** Return whether to elements overlaps each other or not; use HTMLElement.getBoundingClientRect() */
+/** Return whether two elements overlaps each other or not; use HTMLElement.getBoundingClientRect() */
 export default function isOverlap(
   elRect1: Pick<DOMRect, "top" | "right" | "bottom" | "left">,
   elRect2: Pick<DOMRect, "top" | "right" | "bottom" | "left">

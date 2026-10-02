@@ -1,0 +1,92 @@
+.toolbar,
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+
+  > button {
+    margin: 0;
+  }
+
+  > small {
+    color: $basicTextColor2;
+  }
+}
+
+// pairs of related controls: width/height, maxWidth/maxHeight etc.
+.form {
+  display: grid;
+  /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 0 16px;
+  max-width: 700px;
+  margin-top: 20px;
+
+  > * {
+    margin-bottom: 0;
+  }
+}
+
+.opts {
+  display: block;
+  margin-top: 16px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.status {
+  min-height: 1.4em;
+  margin-top: 14px;
+  font-weight: bold;
+
+  &[data-error] {
+    color: #e74c3c;
+  }
+}
+
+.previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 14px 0 20px;
+}
+
+.imgWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  max-height: 500px;
+  overflow: auto;
+  border: $borderStyle;
+  border-radius: $borderRadius;
+  // checkerboard: to see the transparent parts
+  background: repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50% / 20px 20px;
+
+  > img {
+    display: block;
+    max-width: none; // show the real size
+  }
+
+  > small {
+    color: #999;
+  }
+}
+
+.preview {
+  flex: 1 1 300px;
+  min-width: 0;
+  margin: 0;
+
+  > figcaption {
+    display: flex;
+    flex-flow: column;
+    margin-bottom: 6px;
+
+    > small {
+      color: $basicTextColor2;
+    }
+  }
+}

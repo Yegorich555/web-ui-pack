@@ -23,7 +23,7 @@ let addedStyles: Set<string> | undefined;
 const dragOwners = new WeakSet<HTMLElement>();
 
 /** Returns the nearest element that owns the pointed item: items are searched among all the descendants (not only children -
- * {@link WUPSelectManyControl} keeps them in `label > span`) - so an item of a nested container must not be stolen by the outer one */
+ * `WUPSelectManyControl` keeps them in `label > span`) - so an item of a nested container must not be stolen by the outer one */
 function ownerOf(item: HTMLElement): HTMLElement | null {
   for (let p = item.parentElement; p; p = p.parentElement) {
     if (dragOwners.has(p)) {
@@ -133,6 +133,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Element with sort logic
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/sort}
        *  @see {@link WUPSortElement} */
       [tagName]: WUP.Base.ReactHTML<WUPSortElement> & WUP.Sort.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -150,6 +151,7 @@ declare module "preact/jsx-runtime" {
     }
     interface IntrinsicElements {
       /** Element with sort logic
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/sort}
        *  @see {@link WUPSortElement} */
       [tagName]: HTMLAttributes<WUPSortElement> & WUP.Sort.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -184,49 +186,11 @@ declare module "preact/jsx-runtime" {
  * @see attr `wup-sort="false"` on a parent - to accept dropped items without ordering them (see {@link WUPSortElement.$attach}) */
 export default class WUPSortElement extends WUPBaseElement<WUP.Sort.Options, WUP.Sort.EventMap> {
   static get $styleRoot(): string {
-    return `:root {
-        --sort-active-color: #25a1b6;
-        --sort-active-shadow: #25a1b6;
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    return `:host {
-        display: block;
-      }
-      :host [item][drag],
-      :host [item][drop] {
-        color: var(--sort-active-color);
-        box-shadow: inset 0 0 3px 0 var(--sort-active-shadow);
-        opacity: 0.7;
-      }
-      :host [item][drag] {
-        z-index: 9999;
-        position: fixed;
-        left:0; top:0;
-        cursor: grabbing;
-        text-decoration: none;
-        opacity: 0.8;
-      }
-      :host [item][drag][remove] {
-        text-decoration: line-through;
-        opacity: 0.5;
-      }
-      :host [drop-line] {
-        z-index: 9998;
-        position: fixed;
-        left:0; top:0;
-        pointer-events: none;
-        border-radius: 2px;
-        background: var(--sort-active-color);
-        box-shadow: 0 0 2px 0 var(--sort-active-shadow);
-      }
-      :host[hovered] {
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-         user-select: none;
-      }`;
+    return "";
   }
 
   static $defaults: WUP.Sort.Options = {

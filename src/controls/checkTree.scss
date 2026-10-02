@@ -1,0 +1,176 @@
+@import "../styles";
+$wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
+@import "check";
+
+:root {
+  --ctrl-checktree-padding: 0 1em 0.5em;
+  --ctrl-checktree-item-padding: 0.3em 0;
+  --ctrl-checktree-gap: 0.5em;
+  --ctrl-checktree-indent: 1.5em;
+  --ctrl-checktree-mixed: var(--ctrl-check-on);
+}
+
+:host {
+  [role="tree"],
+  [role="group"] {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  [role="tree"] {
+    padding: var(--ctrl-checktree-padding);
+    // the main checkbox is parent of root-level items: shift them as nested items
+    margin-left: var(--ctrl-checktree-indent);
+  }
+
+  [role="group"] {
+    padding-left: var(--ctrl-checktree-indent);
+    // skips style/layout/paint of offscreen items: otherwise any :hover/:focus change in a big tree restyles every item
+    content-visibility: auto;
+    contain-intrinsic-size: auto 300px;
+    overflow-clip-margin: 0.5em; // otherwise hover-effect of the first item is clipped by paint containment
+  }
+
+  [role="treeitem"] {
+    outline: none; // focus is shown via [item]
+  }
+
+  [aria-expanded="false"] > [role="group"] {
+    display: none;
+  }
+
+  [item] {
+    display: flex;
+    align-items: center;
+    gap: var(--ctrl-checktree-gap);
+    padding: var(--ctrl-checktree-item-padding);
+  }
+
+  [expand] {
+    --ctrl-icon-img: var(--wup-icon-chevron);
+    @include wup-icon;
+    padding: 0;
+    transform: rotate(-90deg);
+  }
+
+  // the same as for disabled/readonly control
+  [item][disabled],
+  [aria-disabled] > [expand] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    user-select: none;
+  }
+
+  [item][readonly] {
+    cursor: initial;
+  }
+
+  [aria-expanded="true"] > [expand],
+  > label > [aria-expanded="true"] ~ [expand] {
+    transform: none;
+  }
+
+  // title (item.checkable: false) is clickable only with option collapsible (then it has [aria-expanded])
+  :not([aria-checked], [aria-expanded]) > [item] {
+    cursor: initial;
+  }
+
+  // option checkable: false - label is title of the tree (the same as item.checkable: false)
+  &[w-checkable="false"] {
+    > label > [icon] {
+      display: none;
+    }
+
+    &:not([w-collapsible]) > label {
+      cursor: initial;
+    }
+
+    > label:focus-within > strong {
+      color: var(--ctrl-selected); // focus can't be shown via hidden [icon]
+    }
+  }
+
+  > label > input:indeterminate ~ [icon],
+  [aria-checked="mixed"] > [item] > [icon] {
+    display: grid;
+    place-items: center;
+    background: var(--ctrl-check-on-bg);
+
+    &:after {
+      content: "";
+      width: 50%;
+      height: 2px;
+      background: var(
+        --ctrl-checktree-mixed
+      ); // NiceToHave: use wup-icon mixin so later user can change icon via changing image
+    }
+  }
+
+  [aria-checked="true"] > [item] > [icon] {
+    @include wup-check-icon-on;
+  }
+
+  // item.checkable: false hides [icon] of custom HTML
+  :not([aria-checked]) > [item] > [icon] {
+    display: none;
+  }
+
+  // hover & focus effects of CheckControl applied per item (inherited ones are scoped to the main checkbox)
+  [item]:not([disabled]) {
+    @include wup-iconHover("> [icon]");
+  }
+
+  [role="treeitem"]:focus > [item] {
+    color: var(--ctrl-selected);
+
+    > [icon] {
+      position: relative;
+
+      &:before {
+        content: "";
+      }
+    }
+  }
+
+  // [expand] is placed outside [item] to have own hover-state
+  &[w-collapsible] [role="treeitem"] {
+    display: grid;
+    /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+    grid-template-columns: var(--ctrl-icon-size) minmax(0, 1fr); // false positive: it's detected as "multicolumn"
+    gap: 0 var(--ctrl-checktree-gap);
+
+    > [item] {
+      grid-column: 2; // items without nested items are aligned with neighbors that have [expand]
+    }
+
+    > [role="group"] {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    // [expand] is placed inside the label: its hover must not affect the main checkbox
+    > label:has(> [expand]:hover) > [icon]:before {
+      content: none;
+    }
+
+    :is([aria-checked], [aria-expanded]) > [item]:not([disabled]):hover {
+      color: var(--ctrl-selected);
+    }
+
+    :not([aria-disabled]) > [expand]:hover {
+      --ctrl-icon: var(--ctrl-selected);
+    }
+  }
+
+  @media not all and (prefers-reduced-motion) {
+    [item] {
+      transition: color var(--anim);
+    }
+
+    [expand] {
+      transition: transform var(--anim), background-color var(--anim);
+    }
+  }
+}

@@ -4,12 +4,12 @@ interface FormDataOptions {
   includeNulls?: boolean;
   /** Point TRUE for bracket-notation, otherwise dot-notation by default
    * * For NodeJS use bracket-notation `options[slots][0][isEnabled]: "true"`
-   * * For .NET use dot-notation `"options.slots[0].isEnabled": "true"
+   * * For .NET use dot-notation `"options.slots[0].isEnabled": "true"`
    * @defaultValue false */
   bracketNotation?: boolean;
   /** Point true for array-notation for plain types (inside arrays): primitives | Date | File
-   * * If TRUE -  optionIds[0]: "1", optionIds[1]: "2" but items[0].Id = "15" or items[0]Id = "1"
-   * * If FALSE - optionIds: "1",    optionIds:    "2"  but items[0].Id = "15" or items[0]Id = "1"
+   * * If TRUE -  optionIds[0]: "1", optionIds[1]: "2" but items[0].Id = "15" or items[0][Id] = "15"
+   * * If FALSE - optionIds: "1",    optionIds:    "2"  but items[0].Id = "15" or items[0][Id] = "15"
    * * For NodeJS it depends on handling library
    * * For .NET use FALSE
    * @defaultValue false */

@@ -1,9 +1,9 @@
+import { inheritDefaults } from "../baseElement";
 import nestedProperty from "../helpers/nestedProperty";
 import onEvent from "../helpers/onEvent";
 import promiseWait from "../helpers/promiseWait";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSpinElement from "../spinElement";
-import { WUPcssMenu } from "../styles";
 import WUPBaseComboControl, { MenuOpenCases } from "./baseCombo";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
@@ -20,12 +20,12 @@ declare global {
             value: 2,
             text: (value, li, i, control) => {
               li.innerHTML =
-              `<button class='delete'><button>Item N ${i+1}` // some custom HTML here
+              `<button class='delete'></button>Item N ${i+1}` // some custom HTML here
               // li.textContent = `Item N ${i+1}`; // or use this for fastest render
               const btn = li.querySelector('button')!;
               btn.onclick = (e) => {
                 e.preventDefault();
-                control.$closeMenu();
+                (control as WUPSelectControl).$closeMenu();
               }
               return `Item N ${value}`; // this is text rendered in input when related item selected
             },
@@ -45,9 +45,9 @@ declare global {
 
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {
-      /** Count of minimal values that must be selected (only for option `multi`) */
+      /** Count of minimal values that must be selected (only for option `multiple`) */
       minCount: number;
-      /** Count of minimal values that must be selected (only for option `multi`) */
+      /** Count of maximal values that can be selected (only for option `multiple`) */
       maxCount: number;
     }
     interface NewOptions<T = any> {
@@ -57,7 +57,7 @@ declare global {
        * @defaultValue false */
       allowNewValue: boolean;
       /** Allow to select multiple values; in this case $value & $initValue must contain Array<ValueType>
-       * * @defaultValue false */
+       * @defaultValue false */
       multiple: boolean;
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions<T> {
@@ -66,13 +66,13 @@ declare global {
       openCase: MenuOpenCases;
       /** Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode)
        * @tutorial
-       * * set number X to enable autoMode where `input.readOnly = items.length < X` */
+       * * set number X to enable autoMode where `input.readOnly = items.length < X` (ignored with option `allowNewValue`) */
       readOnlyInput: boolean | number;
     }
     interface JSXProps<C = WUPSelectControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data!
        * Global reference to object with array
-       * @see  {@link MenuItems}
+       * @see  {@link MenuItem}
        * @example
        * ```js
        * window.myItems = [...];
@@ -80,7 +80,7 @@ declare global {
        * ``` */
       "w-items"?: string;
       "w-allowNewValue"?: boolean | "";
-      "w-multiple"?: boolean | "";
+      "w-multiple"?: boolean | "" | "true" | "false";
     }
   }
 
@@ -93,6 +93,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with dropdown/combobox behavior
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/select}
        *  @see {@link WUPSelectControl} */
       [tagName]: WUP.Base.ReactHTML<WUPSelectControl> & WUP.Select.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -106,6 +107,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with dropdown/combobox behavior
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/select}
        *  @see {@link WUPSelectControl} */
       [tagName]: HTMLAttributes<WUPSelectControl> & WUP.Select.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -136,14 +138,14 @@ declare module "preact/jsx-runtime" {
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
- *   <wup-popup menu>
- *      <ul>
- *          <li>Item 1</li>
- *          <li>Item 2</li>
- *          // etc. /
- *      </ul>
- *   </wup-popup>
  * </label>
+ * <wup-popup menu>
+ *    <ul>
+ *        <li>Item 1</li>
+ *        <li>Item 2</li>
+ *        // etc. /
+ *    </ul>
+ * </wup-popup>
  */
 export default class WUPSelectControl<
   ValueType = any | any[],
@@ -160,24 +162,16 @@ export default class WUPSelectControl<
 
   // WARN: scroll sets for ul otherwise animation broken scroll to selectItem because animation affects on scrollSize
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        --ctrl-icon-img: var(--wup-icon-chevron);
-      }
-      :host label:after {
-        height: 100%;
-        align-self: center;
-      }
-      :host[opened] label:after {
-        transform: rotate(180deg);
-      }
-      ${WUPcssMenu(":host [menu]")}`;
+    return super.$style;
   }
 
   /** Text for listbox when no items are displayed */
   static $textNoItems: string | undefined = __wupln("No Items", "content");
   /** Text for aria-label of <ul> element */
   static $ariaLabelItems = __wupln("Items", "aria");
+  /** Text appended to menu item `{inputText} (New option)` that is shown with option `allowNewValue` when input doesn't match any item;
+   * set `undefined` to hide such item */
+  static $textNewItem: string | undefined = __wupln("(New option)", "content");
 
   static $isEqual(v1: unknown, v2: unknown, c: WUPSelectControl): boolean {
     let isEq = super.$isEqual(v1, v2, c);
@@ -192,7 +186,7 @@ export default class WUPSelectControl<
   /** Function to filter menuItems based on inputValue
    * @param menuItemText textcontent in lowercase
    * @param menuItemValue value related to items[x].value
-   * @param inputValue normalized input value (trimStart + lowercase)
+   * @param inputValue normalized input value (trim + lowercase); with option `multiple` only text after the last comma
    * @param inputRawValue input value without normalization
    * @returns true if menuItem must be visible in menu */
   static $filterMenuItem(
@@ -206,18 +200,16 @@ export default class WUPSelectControl<
     return !inputValue || menuItemText.startsWith(inputValue) || menuItemText.includes(` ${inputValue}`);
   }
 
-  static $defaults: WUP.Select.Options = {
-    ...WUPBaseComboControl.$defaults,
-    validationRules: {
-      ...WUPBaseComboControl.$defaults.validationRules,
+  static $defaults: WUP.Select.Options = inheritDefaults(WUPBaseComboControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseComboControl.$defaults.validationRules, {
       minCount: (v, setV) => (v == null || v.length < setV) && __wupln(`Min count is ${setV}`, "validation"),
       maxCount: (v, setV) => (v == null || v.length > setV) && __wupln(`Max count is ${setV}`, "validation"),
-    },
+    }),
     openCase: MenuOpenCases.onClick | MenuOpenCases.onFocus | MenuOpenCases.onPressArrowKey | MenuOpenCases.onInput,
     allowNewValue: false,
     multiple: false,
     items: [],
-  };
+  });
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
     const d = super.cloneDefaults() as WUP.Select.Options;
@@ -307,7 +299,7 @@ export default class WUPSelectControl<
     // return super.valueFromStorage(str) as any;
   }
 
-  /** Store value to storage; if item.text is not function then stored text, otherwise value.toString()
+  /** Store value to storage as `(value.id ?? value).toString()` or `$null` for `null`
    *  @see {@link valueToStrCompare} */
   override valueToStorage(v: ValueType, skipMultiple?: boolean): string | null {
     if (this._opts.multiple && !skipMultiple) {
@@ -357,7 +349,6 @@ export default class WUPSelectControl<
       this._onPendingInitValue?.call(this);
       delete this._onPendingInitValue;
       this.setInputValue(this.$value, SetValueReasons.initValue);
-      this.setupInputReadonly(); // call it because opt readonlyInput can depend on items.length
     };
     if (d instanceof Promise) {
       return promiseWait(d, 300, (v) => this.changePending(v))
@@ -368,6 +359,7 @@ export default class WUPSelectControl<
         .finally(() => {
           this._cachedItems ??= [];
           act();
+          this.setupInputReadonly(); // call it because opt readonlyInput can depend on items.length (sync items are handled by gotChanges)
           this.$isFocused && this.goOpenMenu(MenuOpenCases.onFocus, null);
         });
     }
@@ -386,13 +378,14 @@ export default class WUPSelectControl<
     super.gotChanges(propsChanged as any);
   }
 
-  override setupInputReadonly(): void {
+  override isReadOnlyInput(): boolean {
     const r = this._opts.readOnlyInput;
-    this.$refInput.readOnly =
-      this.$isReadOnly ||
-      this.$isPending ||
-      r === true ||
-      (typeof r === "number" && r > (this._cachedItems?.length || 0) && !this._opts.allowNewValue); // WARN: _cached items can be undefined when fetching not started yet
+    return r === true || (typeof r === "number" && r > (this._cachedItems?.length || 0) && !this._opts.allowNewValue); // WARN: _cached items can be undefined when fetching not started yet
+  }
+
+  override setupInputReadonly(): void {
+    super.setupInputReadonly();
+    this.$isPending && (this.$refInput.readOnly = true);
   }
 
   override setupInitValue(propsChanged: Array<keyof WUP.Select.Options> | null): void {
@@ -430,10 +423,12 @@ export default class WUPSelectControl<
   /** All items of current menu */
   _menuItems?: {
     all: WUP.Select.MenuItemElement[];
-    /** Index of items filtered by input */
+    /** Index of items filtered by input; `-1` points on `refNew` */
     filtered?: Array<number>;
     /** Index (in 'filtered' otherwise in 'all' array) of item that has virtual-focus; */
     focused: number;
+    /** Menu item `{inputText} (New option)` rendered with option `allowNewValue` */
+    refNew?: WUP.Select.MenuItemElement;
   };
 
   /** Items resolved from options */
@@ -462,6 +457,26 @@ export default class WUPSelectControl<
       }
     } else {
       popup.hidden = true;
+    }
+  }
+
+  /** Called to show/hide menu item `{text} (New option)` at the end of menu (only with option `allowNewValue`)
+   * @param text input text for new value; `null` to hide item */
+  protected renderMenuNewItem(text: string | null): void {
+    let li = this._menuItems!.refNew;
+    if (!li) {
+      if (text == null) {
+        return;
+      }
+      li = this.$refPopup!.firstElementChild!.appendChild(document.createElement("li")) as WUP.Select.MenuItemElement;
+      li.setAttribute("role", "option");
+      li.setAttribute("new", "");
+      this._menuItems!.refNew = li;
+    }
+    this.filterMenuItem(li, text == null);
+    if (text != null) {
+      li._value = text;
+      li.textContent = `${text} ${this.#ctr.$textNewItem}`;
     }
   }
 
@@ -580,17 +595,16 @@ export default class WUPSelectControl<
 
   /** Called when need to setValue & close base on clicked item */
   protected gotMenuItemClick(e: MouseEvent, li: WUP.Select.MenuItemElement): void {
-    const i = this._menuItems!.all.indexOf(li);
-    const o = this._cachedItems![i];
-    o.onClick?.call(e.target, e, o);
+    const o = this._cachedItems![this._menuItems!.all.indexOf(li)]; // undefined for item `(New option)`
+    o?.onClick?.call(e.target, e, o);
     if (e.defaultPrevented) {
       return;
     }
     const canOff = this._opts.multiple && li.getAttribute("aria-selected") === "true";
-    this.selectMenuItem(canOff ? null : li); // select/deselect
+    this.selectMenuItem(canOff || !o ? null : li); // select/deselect; item `(New option)` must not keep aria-selected
     canOff && li.setAttribute("aria-selected", "false");
 
-    this.selectValue(o.value, !this._opts.multiple);
+    this.selectValue(li._value, !this._opts.multiple);
   }
 
   protected override selectValue(v: ValueType, canCloseMenu = true): void {
@@ -599,7 +613,7 @@ export default class WUPSelectControl<
       if (!arr?.length) {
         v = [v] as any;
       } else {
-        const i = arr.indexOf(v);
+        const i = arr.findIndex((vi) => this.#ctr.$isEqual(vi, v, this));
         if (i !== -1) {
           if (arr.length === 1) {
             arr = undefined as any;
@@ -695,12 +709,12 @@ export default class WUPSelectControl<
     }
   }
 
-  /** Focus item by index or reset is index is null (via aria-activedescendant).
+  /** Focus item by index (via aria-activedescendant).
    *  If menuItems is filtered by input-text than index must point on filtered array */
   protected focusMenuItemByIndex(index: number): void {
     const { filtered } = this._menuItems!;
     const trueIndex = filtered ? filtered[index] : index;
-    const next = this._menuItems!.all[trueIndex];
+    const next = trueIndex === -1 ? this._menuItems!.refNew! : this._menuItems!.all[trueIndex];
     this.focusMenuItem(next);
     this._menuItems!.focused = index;
   }
@@ -758,7 +772,10 @@ export default class WUPSelectControl<
     // if (this.$isPending) {return;} // pending event disables gotKeyDown so case impossible
     if (this._opts.allowNewValue && e.key === "Enter" && !this._focusedMenuItem) {
       this.setValue(this.parseInput(this.$refInput.value), SetValueReasons.userInput);
-      this._opts.multiple && e.preventDefault(); // prevent closing by keydown
+      if (this._opts.multiple) {
+        e.preventDefault(); // prevent closing by keydown
+        this.tryUpdateMenu(); // re-filter by updated input otherwise item `(New option)` stays visible
+      }
     }
     !e.defaultPrevented && super.gotKeyDown(e);
   }
@@ -770,7 +787,8 @@ export default class WUPSelectControl<
     if (this._opts.multiple) {
       v = rawV.substring(rawV.lastIndexOf(",") + 1, rawV.length);
     }
-    v = v.trim().toLowerCase();
+    const text = v.trim();
+    v = text.toLowerCase();
 
     const filtered: number[] = [];
     this._menuItems!.all.forEach((li, i) => {
@@ -779,7 +797,15 @@ export default class WUPSelectControl<
       this.filterMenuItem(li, !isOk);
     });
     const hasFiltered = filtered.length !== this._menuItems!.all.length;
-    this._menuItems!.filtered = hasFiltered ? filtered : undefined;
+    const isNew =
+      !!text &&
+      this._opts.allowNewValue &&
+      !!this.#ctr.$textNewItem &&
+      this.findValueByText(text) === undefined &&
+      !this.#ctr.$isEqual(this.parseInput(rawV), this.$value, this); // only if it changes value: no-duplicates
+    isNew && filtered.push(-1);
+    this._menuItems!.filtered = hasFiltered || isNew ? filtered : undefined;
+    this.renderMenuNewItem(isNew ? text : null);
     const hasVisible = filtered.length !== 0;
     this.renderMenuNoItems(this.$refPopup!, hasVisible);
     hasVisible && rawV !== "" && !this._opts.allowNewValue && this.focusMenuItemByIndex(0);
@@ -788,6 +814,7 @@ export default class WUPSelectControl<
   /** Called on showMenu when user opened it without input-change */
   protected clearFilterMenuItems(): void {
     this._menuItems!.all.forEach((li) => this.filterMenuItem(li, false)); // reset styles after filtering
+    this.renderMenuNewItem(null);
     delete this._menuItems!.filtered;
     const hasVisible = this._menuItems!.all.length !== 0;
     this.renderMenuNoItems(this.$refPopup!, hasVisible); // remove NoItems
@@ -897,7 +924,7 @@ export default class WUPSelectControl<
   protected override gotFocus(e: FocusEvent): Array<() => void> {
     const r = super.gotFocus(e);
     if (this._opts.multiple) {
-      if (!this.$isDisabled && !this.$isReadOnly && !this._opts.readOnlyInput && this.$refInput.value) {
+      if (!this.$isDisabled && !this.$isReadOnly && !this.isReadOnlyInput() && this.$refInput.value) {
         this.setInputValueDirect(`${this.$refInput.value}, `, SetValueReasons.userInput); // add delimiter at the end
       }
     }
@@ -930,10 +957,8 @@ export default class WUPSelectControl<
 customElements.define(tagName, WUPSelectControl);
 
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
-// WARN label for="" in Chrome sometimes enables autosuggestion - need to remove it for all controls - need to double-check
+// WARN label for="" in Chrome sometimes enables autosuggestion - need to remove it for select & selectMany
 
 // NiceToHave: add support custom items rendering when it's already appended to DOM like it works with dropdown
 // NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
 // NiceToHave: color differently text-chunk that matches in menu
-// NiceToHave: for allowNewValue add at the end of menu `[text] (New option)` like it works in JIRA. `label` dropdown on ticket
-// NiceToHave: add example how to modify input result (2 rows where 2nd is description with grayText)

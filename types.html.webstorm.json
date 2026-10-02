@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/JetBrains/web-types/master/schema/web-types.json",
   "name": "web-ui-pack",
-  "version": "1.2.8",
+  "version": "1.2.10",
   "description-markup": "markdown",
   "contributions": {
     "html": {
@@ -13,6 +13,10 @@
             "kind": "plain",
             "type": "'false'"
           }
+        },
+        {
+          "name": "w-tooltip",
+          "description": "Text of custom tooltip that shows on hover (requires WUPPopupElement.$useTooltip): \n\r set empty string to use content of elements pointed by [aria-describedby] or [aria-label]"
         }
       ],
       "elements": [
@@ -55,6 +59,14 @@
               }
             },
             {
+              "name": "w-endwith",
+              "description": "Picker where user selects value (lower pickers aren't rendered); point `month` to select only year & month (value is the 1st day of month) @defaultValue `day`",
+              "value": {
+                "kind": "plain",
+                "type": "'year' | 'month' | 'day'"
+              }
+            },
+            {
               "name": "w-min",
               "description": "User can't select date less than min; format `yyyy-MM-dd`"
             },
@@ -92,11 +104,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -129,6 +141,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -167,11 +183,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -204,6 +220,101 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
+            }
+          ]
+        },
+        {
+          "name": "wup-checktree",
+          "description": "Form-control with tree of checkboxes",
+          "doc-url": "https://yegorich555.github.io/web-ui-pack/control/checkTree",
+          "attributes": [
+            {
+              "name": "w-items",
+              "description": "Global reference to object with array where `item: {value: any, text: string, items?: item[], expanded?: boolean, checkable?: boolean, disabled?: boolean | string, readOnly?: boolean | string}`",
+              "value": {
+                "kind": "plain",
+                "type": "'window.checkTreeItems'"
+              }
+            },
+            {
+              "name": "w-collapsible",
+              "description": "Allow user to expand/collapse nested items @defaultValue `false`"
+            },
+            {
+              "name": "w-checkable",
+              "description": "Show the main checkbox that checks/unchecks every item; point `false` to render label as title of the tree (the same as `item.checkable: false`) @defaultValue `true`"
+            },
+            {
+              "name": "w-initvalue",
+              "description": "Default value: global reference to array of values (checked parent checks every nested item)",
+              "value": {
+                "kind": "plain",
+                "type": "'window.checkTreeValue'"
+              }
+            },
+            {
+              "name": "w-label",
+              "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+            },
+            {
+              "name": "w-name",
+              "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form"
+            },
+            {
+              "name": "w-autofocus",
+              "description": "Focus element when it's appended to layout"
+            },
+            {
+              "name": "w-autocomplete",
+              "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+            },
+            {
+              "name": "disabled",
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
+            },
+            {
+              "name": "readonly",
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
+            },
+            {
+              "name": "w-clearactions",
+              "description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`"
+            },
+            {
+              "name": "w-validations",
+              "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+              "value": {
+                "kind": "plain",
+                "type": "'window.myValidations'"
+              }
+            },
+            {
+              "name": "w-validatedebouncems",
+              "description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+            },
+            {
+              "name": "w-validationshowall",
+              "description": "Show all validation-rules with checkpoints as list instead of single error"
+            },
+            {
+              "name": "w-storagekey",
+              "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key"
+            },
+            {
+              "name": "w-storage",
+              "description": "Type of storage for saving value",
+              "value": {
+                "kind": "plain",
+                "type": "'local' | 'session' | 'url'"
+              }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -300,6 +411,14 @@
               }
             },
             {
+              "name": "w-endwith",
+              "description": "Picker where user selects value (lower pickers aren't rendered) @defaultValue based on [w-format]: `yyyy-mm` => `month`, `yyyy` => `year`, otherwise `day`",
+              "value": {
+                "kind": "plain",
+                "type": "'year' | 'month' | 'day'"
+              }
+            },
+            {
               "name": "w-min",
               "description": "User can't select date less than min; format `yyyy-MM-dd`"
             },
@@ -322,6 +441,22 @@
             {
               "name": "w-readonlyinput",
               "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+            },
+            {
+              "name": "w-popupoffsetfitelement",
+              "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+              "value": {
+                "kind": "plain",
+                "type": "'window.offset'"
+              }
+            },
+            {
+              "name": "w-popupminwidthbytarget",
+              "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `false`"
+            },
+            {
+              "name": "w-menuescrollback",
+              "description": "Set `true` to rollback value to that was before menu opened on pressing Escape (menu is closed in any case) @defaultValue `false`"
             },
             {
               "name": "w-debouncems",
@@ -377,11 +512,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -414,6 +549,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -632,11 +771,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -669,6 +808,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -754,11 +897,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -779,6 +922,10 @@
             {
               "name": "w-validationshowall",
               "description": "Show all validation-rules with checkpoints as list instead of single error"
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -821,11 +968,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -858,6 +1005,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -885,6 +1036,22 @@
             {
               "name": "w-readonlyinput",
               "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+            },
+            {
+              "name": "w-popupoffsetfitelement",
+              "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+              "value": {
+                "kind": "plain",
+                "type": "'window.offset'"
+              }
+            },
+            {
+              "name": "w-popupminwidthbytarget",
+              "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `true`"
+            },
+            {
+              "name": "w-menuescrollback",
+              "description": "Set `true` to rollback value to that was before menu opened on pressing Escape (menu is closed in any case) @defaultValue `false`"
             },
             {
               "name": "w-debouncems",
@@ -940,11 +1107,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -977,6 +1144,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -1010,6 +1181,22 @@
               "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
             },
             {
+              "name": "w-popupoffsetfitelement",
+              "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+              "value": {
+                "kind": "plain",
+                "type": "'window.offset'"
+              }
+            },
+            {
+              "name": "w-popupminwidthbytarget",
+              "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `true`"
+            },
+            {
+              "name": "w-menuescrollback",
+              "description": "Set `true` to rollback value to that was before menu opened on pressing Escape (menu is closed in any case) @defaultValue `false`"
+            },
+            {
               "name": "w-debouncems",
               "description": "Time to wait for user finishes typing to start validate and provide $change event"
             },
@@ -1063,11 +1250,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -1100,6 +1287,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -1188,11 +1379,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -1225,6 +1416,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -1287,11 +1482,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -1324,6 +1519,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -1366,11 +1565,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -1403,6 +1602,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         },
@@ -1454,6 +1657,22 @@
             {
               "name": "w-readonlyinput",
               "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+            },
+            {
+              "name": "w-popupoffsetfitelement",
+              "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+              "value": {
+                "kind": "plain",
+                "type": "'window.offset'"
+              }
+            },
+            {
+              "name": "w-popupminwidthbytarget",
+              "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `false`"
+            },
+            {
+              "name": "w-menuescrollback",
+              "description": "Set `true` to rollback value to that was before menu opened on pressing Escape (menu is closed in any case) @defaultValue `false`; value is always reverted if [w-menubuttonsoff]"
             },
             {
               "name": "w-debouncems",
@@ -1509,11 +1728,11 @@
             },
             {
               "name": "disabled",
-              "description": "Disallow edit/copy value; use attr [disabled] for styling"
+              "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "readonly",
-              "description": "Disallow copy value; use attr [readonly] for styling"
+              "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
             },
             {
               "name": "w-clearactions",
@@ -1546,6 +1765,10 @@
                 "kind": "plain",
                 "type": "'local' | 'session' | 'url'"
               }
+            },
+            {
+              "name": "w-enableinitonchange",
+              "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`"
             }
           ]
         }

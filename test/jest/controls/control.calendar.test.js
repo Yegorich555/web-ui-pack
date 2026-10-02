@@ -52,6 +52,7 @@ describe("control.calendar", () => {
       "w-max": { value: "2022-05-21", parsedValue: new Date("2022-05-21") },
       "w-exclude": { value: [new Date("2009-02-06")] },
       "w-startwith": { skip: true }, // tested manually
+      "w-endwith": { skip: true }, // tested manually
       "w-firstweekday": { value: 1 },
     },
     $options: { readOnly: { ignoreInput: true } },
@@ -80,6 +81,122 @@ describe("control.calendar", () => {
 
     await set("");
     expect(el.$options.startWith).toBeFalsy();
+  });
+
+  test("option endWith", async () => {
+    const onChange = jest.fn();
+    el.addEventListener("$change", onChange);
+    const getDisabled = () => Array.from(el.querySelectorAll("li[disabled]")).map((li) => li.textContent);
+    const pressKey = (key) =>
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true }));
+    const setAttr = async (s) => {
+      el.setAttribute("w-endwith", s);
+      await h.wait();
+    };
+
+    // attr [endWith]
+    await setAttr("month");
+    expect(el.$options.endWith).toBe(PickersEnum.Month);
+    expect(el.querySelector("[calendar='year']")).toBeTruthy(); // because $value is empty
+    await setAttr("Year");
+    expect(el.$options.endWith).toBe(PickersEnum.Year);
+    await setAttr("day");
+    expect(el.$options.endWith).toBe(PickersEnum.Day);
+    await setAttr("");
+    expect(el.$options.endWith).toBe(null);
+    await setAttr("wrong");
+    expect(el.$options.endWith).toBe(null);
+    el.removeAttribute("w-endwith");
+
+    // endWith: month
+    el.remove();
+    el.$options.endWith = PickersEnum.Month;
+    el.$options.startWith = PickersEnum.Day; // ignored because it's lower than endWith
+    el.$initValue = new Date("2022-05-20T23:50:00.000Z");
+    document.body.appendChild(el);
+    await h.wait();
+    expect(el.querySelector("[calendar='month']")).toBeTruthy();
+    expect(el.$refCalendarTitle.textContent).toBe("2022");
+    expect(el.querySelector("[aria-selected]")?.textContent).toBe("May");
+    expect(el.$refInput.value).toBe("May 2022");
+
+    // click on month selects value instead of showing day picker
+    await h.userClick(el.$refCalendarItems.children.item(6)); // Jul
+    await h.wait();
+    expect(el.querySelector("[calendar='month']")).toBeTruthy();
+    expect(el.querySelector("[aria-selected]")?.textContent).toBe("Jul");
+    expect(onChange).toBeCalledTimes(1);
+    expect(el.$value?.toISOString()).toBe("2022-07-01T23:50:00.000Z"); // 1st day of month with saved hours
+    expect(el.$refInput.value).toBe("July 2022");
+
+    // click on year shows month picker
+    await h.userClick(el.$refCalendarTitle);
+    await h.wait();
+    expect(el.querySelector("[calendar='year']")).toBeTruthy();
+    await h.userClick(el.$refCalendarItems.children.item(2)); // 2020
+    await h.wait();
+    expect(el.querySelector("[calendar='month']")).toBeTruthy();
+    expect(el.$refCalendarTitle.textContent).toBe("2020");
+    expect(onChange).toBeCalledTimes(1);
+
+    // keyboard
+    el.focus();
+    pressKey("ArrowRight");
+    expect(el.querySelector("[focused]")?.textContent).toBe("Jan");
+    pressKey("ArrowDown");
+    expect(el.querySelector("[focused]")?.textContent).toBe("May");
+    pressKey("Enter");
+    await h.wait();
+    expect(onChange).toBeCalledTimes(2);
+    expect(el.$value?.toISOString()).toBe("2020-05-01T23:50:00.000Z");
+    expect(el.querySelector("[calendar='month']")).toBeTruthy();
+
+    // any excluded day disables the whole month
+    el.$options.exclude = [new Date("2020-02-10"), new Date("2020-02-11"), new Date("2021-07-01")];
+    await h.wait();
+    expect(getDisabled()).toEqual(["Feb"]);
+
+    // endWith: year
+    onChange.mockClear();
+    el.$options.endWith = PickersEnum.Year;
+    await h.wait();
+    expect(el.querySelector("[calendar='year']")).toBeTruthy(); // lower picker is changed to allowed
+    expect(el.$refCalendarTitle.textContent).toBe("2018 ... 2033");
+    expect(getDisabled()).toEqual(["2020", "2021"]); // any excluded day disables the whole year
+    expect(el.$refInput.value).toBe("2020");
+    await h.userClick(el.$refCalendarItems.children.item(1)); // 2019
+    await h.wait();
+    expect(el.querySelector("[calendar='year']")).toBeTruthy();
+    expect(el.querySelector("[aria-selected]")?.textContent).toBe("2019");
+    expect(onChange).toBeCalledTimes(1);
+    expect(el.$value?.toISOString()).toBe("2019-01-01T23:50:00.000Z"); // 1st January with saved hours
+    expect(el.$refInput.value).toBe("2019");
+    await h.userClick(el.$refCalendarItems.children.item(2)); // 2020 is disabled
+    await h.wait();
+    expect(onChange).toBeCalledTimes(1);
+
+    // without value it starts with year picker
+    el.remove();
+    el.$options.endWith = PickersEnum.Month;
+    el.$options.startWith = null;
+    el.$options.exclude = null;
+    el.$initValue = undefined;
+    el.$value = undefined;
+    document.body.appendChild(el);
+    await h.wait();
+    expect(el.querySelector("[calendar='year']")).toBeTruthy();
+
+    // changing endWith on day picker
+    el.remove();
+    el.$options.endWith = null;
+    el.$value = new Date("2022-05-20");
+    document.body.appendChild(el);
+    await h.wait();
+    expect(el.querySelector("[calendar='day']")).toBeTruthy();
+    el.$options.endWith = PickersEnum.Month;
+    await h.wait();
+    expect(el.querySelector("[calendar='month']")).toBeTruthy();
+    expect(el.querySelector("[aria-selected]")?.textContent).toBe("May");
   });
 
   test("option starWith based on value", async () => {

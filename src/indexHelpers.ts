@@ -5,8 +5,11 @@ export { default as dateCompareWithoutTime } from "./helpers/dateCompareWithoutT
 export { default as dateCopyTime } from "./helpers/dateCopyTime";
 export { default as dateFromString } from "./helpers/dateFromString";
 export { default as dateToString } from "./helpers/dateToString";
+
 export { default as findScrollParent } from "./helpers/findScrollParent";
 export { findScrollParentAll } from "./helpers/findScrollParent";
+export { isScrollable } from "./helpers/findScrollParent";
+
 export { default as focusFirst } from "./helpers/focusFirst";
 export { default as isEqual } from "./helpers/isEqual";
 export { isBothNaN } from "./helpers/isEqual";
@@ -35,3 +38,5 @@ export { default as zip } from "./helpers/files/zip";
 export { default as exportToExcel } from "./helpers/files/exportToExcel";
 export { default as saveAsFile } from "./helpers/files/saveAsFile";
 export { csvFromData, csvToData, csvDefineDelimiter } from "./helpers/files/csv";
+export { default as imageConvert } from "./helpers/files/imageConvert";
+export { default as selectFiles } from "./helpers/files/selectFiles";

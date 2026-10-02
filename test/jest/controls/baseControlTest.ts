@@ -14,6 +14,7 @@ declare global {
     interface ValidityMap {
       $alwaysValid: boolean;
       $alwaysInvalid: boolean;
+      $inheritedRule: boolean;
     }
   }
 }
@@ -73,6 +74,8 @@ interface TestOptions<T> extends BaseTestOptions {
   autoCompleteOff?: "off" | "new-password";
   /** Set true to ignore select in input text */
   noInputSelection?: boolean;
+  /** Set true if control normalizes value so `$value` is a new instance: then it's compared via `toStrictEqual` instead of `toBe` */
+  isValueNormalized?: boolean;
   onCreateNew: (el: WUPBaseControl) => void;
   testReadonly: { true: (el: WUPBaseControl) => void; false: (el: WUPBaseControl) => void };
   $options?: {
@@ -86,6 +89,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   cfg.autoCompleteOff = cfg.autoCompleteOff || "off";
   cfg.emptyValue = "emptyValue" in cfg ? cfg.emptyValue : undefined;
   const hasVldRequired = !cfg.validationsSkip?.includes("required");
+  /** Checks $value by reference (or by content if control normalizes value) */
+  const expectValue = (v: unknown, expected: unknown): void => {
+    if (cfg.isValueNormalized) {
+      expect(v).toStrictEqual(expected);
+    } else {
+      expect(v).toBe(expected);
+    }
+  };
 
   h.baseTestComponent(() => document.createElement(tagName), {
     attrs: {
@@ -106,6 +117,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       "w-focusdebouncems": { value: 12 },
       "w-storagekey": { value: "strg" },
       "w-storage": { value: "session" },
+      "w-enableinitonchange": { value: true },
 
       "w-initvalue": { skip: true }, // manual testing
       ...cfg.attrs,
@@ -158,7 +170,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.addEventListener("$change", spyChange);
 
       el.$initValue = cfg.initValues[0].value;
-      expect(el.$value).toBe(cfg.initValues[0].value);
+      expectValue(el.$value, cfg.initValues[0].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
       jest.advanceTimersByTime(1);
@@ -166,7 +178,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       // expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.initValue });
 
       el.$initValue = cfg.initValues[1].value;
-      expect(el.$value).toBe(cfg.initValues[1].value);
+      expectValue(el.$value, cfg.initValues[1].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(false);
       jest.advanceTimersByTime(1);
@@ -174,7 +186,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
       el.$value = cfg.initValues[2].value;
       expect(el.$initValue).toBe(cfg.initValues[1].value);
-      expect(el.$value).toBe(cfg.initValues[2].value);
+      expectValue(el.$value, cfg.initValues[2].value);
       expect(el.$isDirty).toBe(false);
       expect(el.$isChanged).toBe(true);
       jest.advanceTimersByTime(1);
@@ -182,7 +194,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.manual });
 
       el.$initValue = cfg.initValues[1].value;
-      expect(el.$value).toBe(cfg.initValues[2].value);
+      expectValue(el.$value, cfg.initValues[2].value);
       expect(el.$isChanged).toBe(true);
       jest.advanceTimersByTime(1);
       expect(spyChange).toBeCalledTimes(1);
@@ -210,7 +222,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$value = cfg.initValues[0].value;
       el.$initValue = cfg.initValues[1].value;
       jest.advanceTimersByTime(1);
-      expect(el.$value).toBe(cfg.initValues[0].value);
+      expectValue(el.$value, cfg.initValues[0].value);
       // $initValue is changeable
       el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
       cfg.onCreateNew?.call(cfg, el);
@@ -218,8 +230,29 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$initValue = cfg.initValues[1].value;
       jest.advanceTimersByTime(1);
       expect(el.$initValue).toBe(cfg.initValues[1].value);
-      expect(el.$value).toBe(el.$initValue);
+      expectValue(el.$value, el.$initValue);
     });
+  });
+
+  test("$defaults inherited from WUPBaseControl", () => {
+    const was = WUPBaseControl.$defaults.focusDebounceMs;
+    WUPBaseControl.$defaults.focusDebounceMs = 321;
+    expect(elType.$defaults.focusDebounceMs).toBe(321);
+    expect((document.createElement(tagName) as WUPBaseControl).$options.focusDebounceMs).toBe(321);
+
+    // option overridden by inherited class isn't affected by parent anymore
+    elType.$defaults.focusDebounceMs = 5;
+    WUPBaseControl.$defaults.focusDebounceMs = 322;
+    expect(elType.$defaults.focusDebounceMs).toBe(5);
+    WUPBaseControl.$defaults.focusDebounceMs = was;
+    elType.$defaults.focusDebounceMs = was;
+
+    // rule added to parent later is available for inherited class
+    WUPBaseControl.$defaults.validationRules.$inheritedRule = () => "Inherited error";
+    el.$options.validations = { $inheritedRule: true };
+    el.$value = cfg.initValues[0].value;
+    expect(el.$validate()).toBe("Inherited error");
+    delete WUPBaseControl.$defaults.validationRules.$inheritedRule;
   });
 
   describe("base options", () => {
@@ -267,7 +300,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$initValue = cfg.initValues[1].value;
       el.$options.clearActions = ClearActions.clear as any;
       await h.wait(1);
-      expect(el.$value).toBe(cfg.initValues[0].value);
+      expectValue(el.$value, cfg.initValues[0].value);
 
       el.focus();
       await h.wait(1);
@@ -294,7 +327,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$value).toBe(cfg.emptyValue);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
-      expect(el.$value).toBe(val);
+      expectValue(el.$value, val);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
@@ -310,13 +343,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait();
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
-      expect(el.$value).toBe(initVal);
+      expectValue(el.$value, initVal);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
-      expect(el.$value).toBe(initVal);
+      expectValue(el.$value, initVal);
       el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
@@ -334,6 +367,33 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el.$isDisabled).toBe(false);
       expect(el.getAttribute("disabled")).toBe(null);
       expect(((el as any).$refFieldset || el.$refInput).disabled).toBe(false);
+
+      // string is reason for tooltip
+      el.$options.disabled = "Some reason";
+      jest.advanceTimersByTime(1);
+      expect(el.$isDisabled).toBe(true);
+      expect(el.getAttribute("disabled")).toBe("Some reason");
+      expect(((el as any).$refFieldset || el.$refInput).disabled).toBe(true);
+      // tooltip is registered automatically
+      el.dispatchEvent(new MouseEvent("pointerenter"));
+      jest.advanceTimersByTime(1000);
+      expect(document.body.querySelector("wup-popup[tooltip]")?.textContent).toBe("Some reason");
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // hide tooltip
+
+      el.setAttribute("disabled", "Other reason");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.disabled).toBe("Other reason");
+      expect(el.getAttribute("disabled")).toBe("Other reason");
+      el.setAttribute("disabled", "false");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.disabled).toBe(false);
+      expect(el.$isDisabled).toBe(false);
+      el.setAttribute("disabled", "");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.disabled).toBe(true);
+      el.removeAttribute("disabled");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.disabled).toBe(false);
     });
 
     test("label", () => {
@@ -365,6 +425,35 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
       if (cfg.testReadonly) cfg.testReadonly.false(el);
       else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).not.toBe(true);
+
+      // string is reason for tooltip
+      el.$options.readOnly = "Some reason";
+      jest.advanceTimersByTime(1);
+      expect(el.$isReadOnly).toBe(true);
+      expect(el.getAttribute("readonly")).toBe("Some reason");
+      if (cfg.testReadonly) cfg.testReadonly.true(el);
+      else if (!cfg.$options?.readOnly?.ignoreInput) expect(el.$refInput.readOnly).toBe(true);
+      // tooltip is registered automatically & nested readonly input doesn't replace it
+      el.dispatchEvent(new MouseEvent("pointerenter"));
+      el.$refInput.dispatchEvent(new MouseEvent("pointerenter"));
+      jest.advanceTimersByTime(1000);
+      expect(document.body.querySelector("wup-popup[tooltip]")?.textContent).toBe("Some reason");
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // hide tooltip
+
+      el.setAttribute("readonly", "Other reason");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.readOnly).toBe("Other reason");
+      expect(el.getAttribute("readonly")).toBe("Other reason");
+      el.setAttribute("readonly", "false");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.readOnly).toBe(false);
+      expect(el.$isReadOnly).toBe(false);
+      el.setAttribute("readonly", "");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.readOnly).toBe(true);
+      el.removeAttribute("readonly");
+      jest.advanceTimersByTime(1);
+      expect(el.$options.readOnly).toBe(false);
     });
 
     test("name - without form", () => {
@@ -515,6 +604,140 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       await h.wait(1);
       expect(el.$value).toStrictEqual(cfg.initValues[1].urlValue === null ? cfg.emptyValue : testValues.value);
       expect(onThrowErr).not.toBeCalled();
+    });
+
+    test("storageKey: sync controls with the same storage & key", async () => {
+      if (cfg.attrs?.["w-storagekey"]?.skip || cfg.attrs?.["w-storagekey"] === null) {
+        return; // for password isn't allowed
+      }
+      const onThrowErr = jest.spyOn(WUPBaseControl.prototype, "throwError");
+      const create = (storageKey: string, storage?: "session") => {
+        const c = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+        cfg.onCreateNew?.call(cfg, c);
+        c.$options.storageKey = storageKey;
+        storage && (c.$options.storage = storage);
+        return c;
+      };
+      el.$options.name = "sync";
+      el.$options.storageKey = true; // key from name
+      const el2 = create("sync");
+      const el3 = create("sync");
+      const elSession = create("sync", "session"); // the same key but another storage
+      await h.wait(1);
+      const spyChange = jest.fn();
+      el2.$onChange = spyChange;
+      const sSet = jest.spyOn(Storage.prototype, "setItem");
+      // WARN: every next value must differ from the previous one: for switch `false` equals `undefined`
+      const [v0, v1, v2] = cfg.initValues.map((a) => a.value);
+
+      el.$value = v0;
+      await h.wait(1);
+      expect(el2.$value).toStrictEqual(v0);
+      expect(el3.$value).toStrictEqual(v0);
+      typeof v0 === "object" && expect(el2.$value).not.toBe(el.$value); // each control parses own value
+      expect(el2.$isDirty).toBe(false);
+      expect(spyChange).toBeCalledTimes(1);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.storage });
+      expect(sSet).toBeCalledTimes(1); // synced controls don't save value again
+
+      // clearing
+      el.$value = undefined;
+      await h.wait(1);
+      expect(el2.$value).toStrictEqual(cfg.emptyValue);
+      expect(el3.$value).toStrictEqual(cfg.emptyValue);
+
+      // sync back from another control
+      el3.$value = v2;
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(v2);
+      expect(el2.$value).toStrictEqual(v2);
+
+      // re-registered on key changes
+      el.$options.name = "sync2"; // storageKey is true so inherited from name
+      el3.$options.storageKey = "sync2";
+      await h.wait(1);
+      el2.$value = v1;
+      await h.wait(1);
+      expect(el.$value).toStrictEqual(v2);
+      expect(el3.$value).toStrictEqual(v2);
+      el.$value = v1;
+      await h.wait(1);
+      expect(el3.$value).toStrictEqual(v1);
+
+      // removed control isn't synced
+      el3.remove();
+      el.$value = v0;
+      await h.wait(1);
+      expect(el3.$value).toStrictEqual(v1);
+      // re-appended control is synced again
+      document.body.appendChild(el3);
+      await h.wait(1);
+      expect(el3.$value).toStrictEqual(v0); // from storage on init
+      el.$value = v1;
+      await h.wait(1);
+      expect(el3.$value).toStrictEqual(v1);
+
+      expect(elSession.$value).toStrictEqual(cfg.emptyValue); // the same key but another storage
+      expect(onThrowErr).not.toBeCalled();
+      window.localStorage.clear();
+    });
+
+    test("enableInitOnChange", async () => {
+      const spyChange = jest.fn();
+      const create = () => {
+        spyChange.mockClear();
+        el = document.body.appendChild(document.createElement(tagName)) as WUPBaseControl;
+        cfg.onCreateNew?.call(cfg, el);
+        el.$onChange = spyChange;
+      };
+
+      // disabled by default
+      create();
+      el.$initValue = cfg.initValues[0].value;
+      await h.wait();
+      expect(spyChange).not.toBeCalled();
+
+      // empty value
+      create();
+      el.$options.enableInitOnChange = true;
+      await h.wait();
+      expect(el.$value).toStrictEqual(cfg.emptyValue);
+      expect(spyChange).toBeCalledTimes(1);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.initValue });
+
+      // with $initValue
+      create();
+      el.$options.enableInitOnChange = true;
+      el.$initValue = cfg.initValues[0].value;
+      await h.wait();
+      expect(el.$value).toStrictEqual(cfg.initValues[0].value);
+      expect(spyChange).toBeCalledTimes(1);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.initValue });
+      // fired only on init
+      el.$initValue = cfg.initValues[1].value;
+      el.$options.enableInitOnChange = false;
+      await h.wait();
+      el.$options.enableInitOnChange = true;
+      await h.wait();
+      expect(spyChange).toBeCalledTimes(1);
+
+      if (cfg.attrs?.["w-storagekey"]?.skip || cfg.attrs?.["w-storagekey"] === null) {
+        return; // for password isn't allowed
+      }
+      // with value from storage: fired single time with reason storage
+      create();
+      el.$options.storageKey = "initCh";
+      await h.wait();
+      el.$value = cfg.initValues[2].value;
+      await h.wait();
+      create();
+      el.$options.storageKey = "initCh";
+      el.$options.enableInitOnChange = true;
+      await h.wait();
+      expect(el.$value).toStrictEqual(cfg.initValues[2].value);
+      expect(spyChange).toBeCalledTimes(1);
+      expect(spyChange.mock.lastCall[0].detail).toStrictEqual({ reason: SetValueReasons.storage });
+      window.localStorage.clear();
     });
   });
 

@@ -15,11 +15,15 @@ WUPSelectControl.$defaults.validationRules.isNumber = (v) => !/^[0-9]*$/.test(v)
 // create control for testing
 const el = document.createElement("wup-select");
 el.$options.name = "testMe";
+el.$options.items = [
+  { value: "Some value", text: "Some value" },
+  { value: "123", text: "123" },
+];
 el.$initValue = "Some value";
 el.$options.validations = {
   required: true,
-  min: (v) => v.length > 500 && "This is error",
-  extra: (v) => v.includes(" ") && "Extra rule: spaces are not allowed",
+  min: (v) => v?.length > 500 && "This is error",
+  extra: (v) => v?.includes(" ") && "Extra rule: spaces are not allowed",
   isNumber: true,
 };
 console.warn("try custom validation", { validateResult: el.$validate() });

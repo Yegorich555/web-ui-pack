@@ -1,24 +1,25 @@
+import { inheritDefaults } from "../baseElement";
 import { isAnimEnabled } from "../helpers/animate";
 import { parseMsTime } from "../helpers/styleHelpers";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import WUPSortElement from "../sortElement";
-import { WUPcssIcon, WUPcssScrollSmall } from "../styles";
 import { MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 import WUPSelectControl from "./select";
+import TextHistory from "./text.history";
 
 const tagName = "wup-selectmany";
 
 declare global {
   namespace WUP.SelectMany {
     interface EventMap extends WUP.BaseCombo.EventMap {}
-    interface ValidityMap extends WUP.BaseCombo.ValidityMap {}
+    interface ValidityMap extends WUP.Select.ValidityMap {}
     interface NewOptions {
       /** Hide items in menu that selected
        * @defaultValue false */
       hideSelected: boolean;
-      /** Allow user to change ordering of items; Use drag&drop or keyboard Shift/Ctrl/Meta + arrows to change item position;
+      /** Allow user to change ordering of items; Use drag&drop or keyboard Shift + ArrowLeft/ArrowRight on focused item to change its position;
        * dragging an item outside the control removes it
        * @defaultValue false */
       sortable: boolean;
@@ -28,12 +29,12 @@ declare global {
       multiple: true;
       /** @deprecated Not supported in SelectManyControl */
       prefix?: string | null | undefined;
-      /** @deprecated Not supported in SelectManControl */
+      /** @deprecated Not supported in SelectManyControl */
       postfix?: string | null | undefined;
     }
     interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       "w-hideSelected"?: boolean | "";
-      "w-sortable"?: boolean | "";
+      "w-sortable"?: boolean | "" | "true" | "false";
       /** @deprecated Not supported in SelectManyControl */
       "w-prefix"?: any;
       /** @deprecated Not supported in SelectManyControl */
@@ -50,6 +51,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with dropdown/combobox behavior
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/selectMany}
        *  @see {@link WUPSelectManyControl} */
       [tagName]: WUP.Base.ReactHTML<WUPSelectManyControl> & WUP.SelectMany.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -63,6 +65,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with dropdown/combobox behavior
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/selectMany}
        *  @see {@link WUPSelectManyControl} */
       [tagName]: HTMLAttributes<WUPSelectManyControl> & WUP.SelectMany.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -92,22 +95,22 @@ declare module "preact/jsx-runtime" {
    Solution not found (using contenteditable fixes this but provides more other bugs)
  * @tutorial innerHTML @example
  * <label>
+ *   <strong>{$options.label}</strong>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
  *      <span [item]>Item 1</span>
  *      <span [item]>Item 2</span>
  *      // etc/
  *      <input/>
- *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
- *   <wup-popup menu>
- *      <ul>
- *          <li>Item 1</li>
- *          <li>Item 2</li>
- *          // etc/
- *      </ul>
- *   </wup-popup>
  * </label>
+ * <wup-popup menu>
+ *    <ul>
+ *        <li>Item 1</li>
+ *        <li>Item 2</li>
+ *        // etc/
+ *    </ul>
+ * </wup-popup>
  */
 export default class WUPSelectManyControl<
   ValueType = any,
@@ -117,143 +120,11 @@ export default class WUPSelectManyControl<
   #ctr = this.constructor as typeof WUPSelectManyControl;
 
   static get $styleRoot(): string {
-    return `:root {
-        --ctrl-select-item-text: inherit;
-        --ctrl-select-item-bg: rgba(0,0,0,0.04);
-        --ctrl-select-item-del-display: none;
-        --ctrl-select-item-del: var(--ctrl-icon);
-        --ctrl-select-item-del-img: var(--wup-icon-cross);
-        --ctrl-select-item-del-size: 0.8em;
-        --ctrl-select-gap: 0.5em;
-      }
-      [wupdark] {
-        --ctrl-select-item-bg: #fff2;
-        --ctrl-select-item-del: var(--ctrl-icon);
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host label {
-        position: relative;
-      }
-      ${WUPcssScrollSmall(":host label>span")}
-      :host label > span {
-        position: initial;
-        overflow: auto;
-        gap: var(--ctrl-select-gap);
-        flex-wrap: wrap;
-        flex-direction: row;
-        margin: var(--ctrl-padding);
-        padding: 0;
-        margin-left: 0;
-        margin-right: 0;
-        max-height: 5em;
-      }
-      :host strong {
-        top: 1.6em;
-        margin: var(--ctrl-padding);
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-      :host[filled] strong {
-        transform: var(--ctrl-label-active-pos);
-      }
-      :host [item],
-      :host input {
-        padding: var(--ctrl-select-gap);
-      }
-      :host input {
-        flex: 1 1 auto;
-        width: 0;
-        min-width: 1em;
-        padding-left: 0; padding-right: 0;
-      }
-      :host[filled] input:placeholder-shown,
-      :host[filled] input:not(:focus) {
-        min-width: 0;
-        padding-left: calc(var(--ctrl-select-gap));
-        margin-right: 0;
-        margin-left: calc(-1 * var(--ctrl-select-gap));
-      }
-      :host [item] {
-        --ctrl-icon: var(--ctrl-select-item-del);
-        --ctrl-icon-size: var(--ctrl-select-item-del-size);
-        --ctrl-icon-img: var(--ctrl-select-item-del-img);
-        color: var(--ctrl-select-item-text);
-        background-color: var(--ctrl-select-item-bg);
-        border-radius: var(--ctrl-border-radius);
-        cursor: pointer;
-        box-sizing: border-box;
-        white-space: nowrap;
-        overflow: hidden;
-        flex: 0 0 auto;
-      }
-      :host [item]:after {
-        ${WUPcssIcon}
-        display: var(--ctrl-select-item-del-display);
-        content: "";
-        padding: 0;
-        margin-left: 0.5em;
-      }
-      :host [item][focused] {
-        color: var(--ctrl-focus-label);
-        box-shadow: inset 0 0 3px 0 var(--ctrl-focus);
-      }
-      :host [item][removed],
-      :host [item][drag][remove]  {
-        --ctrl-icon: var(--ctrl-err);
-        text-decoration: line-through;
-        color: var(--ctrl-err);
-        background-color: var(--ctrl-err-bg);
-      }
-      :host[readonly] [item] {
-        pointer-events: none;
-        touch-action: none;
-      }
-      :host button[clear] {
-        display: inline-block;
-        opacity: 0;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        :host [item]:hover {
-          --ctrl-icon: var(--ctrl-err);
-          text-decoration: line-through;
-          color: var(--ctrl-err);
-          background-color: var(--ctrl-err-bg);
-        }
-      }
-      @media not all and (pointer: fine) {
-        :host [item] {
-          -webkit-user-select: none;
-          user-select: none;
-        }${/* don't allow select text on blocks to allow custom touch-logic */ ""}
-      }
-      @media not all and (prefers-reduced-motion) {
-        :host [item][removed] {
-          transition: all var(--anim-t) ease-in-out;
-          transition-property: margin, padding, width, opacity;
-          padding-left: 0; padding-right: 0;
-          margin-left: 0; margin-right: 0;
-          width: 0;
-          opacity: 0;
-        }
-      }
-      ${
-        /* dragdrop styles ([drag], [drop], [drop-line], [hovered]) are reused from the sortElement: see $options.sortable
-            WARN: $styleRoot of the sortElement isn't appended (see $attach with className:null) - so its css-vars are defined here */ ""
-      }
-      :host {
-        --sort-active-color: var(--ctrl-focus-label);
-        --sort-active-shadow: var(--ctrl-focus);
-      }
-      ${WUPSortElement.$style}
-      ${/* WARN: after the styles above - the drag-clone must keep colors of an ordinary item */ ""}
-      :host [item][drag] {
-        --ctrl-icon: var(--ctrl-select-item-del);
-        color: var(--ctrl-select-item-text);
-        background-color: var(--ctrl-select-item-bg);
-      }`;
+    return super.$style;
   }
 
   static override $isEmpty(v: unknown[] | undefined): boolean {
@@ -267,18 +138,17 @@ export default class WUPSelectManyControl<
     inputValue: string,
     inputRawValue: string
   ): boolean {
-    if (this._opts.hideSelected && this.$value?.includes(menuItemValue)) {
+    if (this._opts.hideSelected && this.$value?.some((v) => this.#ctr.$isEqual(v, menuItemValue, this))) {
       return false;
     }
     return super.$filterMenuItem.call(this, menuItemText, menuItemValue, inputValue, inputRawValue);
   }
 
-  static $defaults: WUP.SelectMany.Options = {
-    ...WUPSelectControl.$defaults,
+  static $defaults: WUP.SelectMany.Options = inheritDefaults(WUPSelectControl.$defaults, {
     multiple: true,
     sortable: false,
     hideSelected: false,
-  };
+  });
 
   /** Items selected & rendered on control */
   $refItems?: Array<HTMLElement & { _wupValue: ValueType }>;
@@ -290,7 +160,7 @@ export default class WUPSelectManyControl<
   }
 
   protected override canHandleUndo(): boolean {
-    return false; // custom history not required for this control
+    return false; // custom input-history not required for this control: browser handles it itself & value-history is handled via historyValue()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -388,7 +258,9 @@ export default class WUPSelectManyControl<
 
     const toRemove = refs.length - v.length;
     toRemove > 0 && refs.splice(v.length, toRemove).forEach((el) => !el.hasAttribute("removed") && el.remove()); // remove previous items
-    this.$refPopup && this.filterMenuItems(); // NiceToHave it can be optimized because on Remove/Select we can hide/show specific item
+    // WARN: full re-filter is required (not hide/show specific item): value-change resets input-text (so text-filter)
+    // and option hideSelected, `_menuItems.filtered` & item `(New option)` depend on value as well
+    this.$refPopup && this.filterMenuItems();
     this.$refItems = refs;
 
     this.ariaSpeakValue();
@@ -457,7 +329,8 @@ export default class WUPSelectManyControl<
   }
 
   protected override clearFilterMenuItems(): void {
-    !this._opts.hideSelected && super.clearFilterMenuItems(); // skip this because default filtering doesn't reset after re-opening menu
+    // with hideSelected the menu can't be unfiltered: selected items must stay hidden
+    this._opts.hideSelected ? this.filterMenuItems() : super.clearFilterMenuItems();
   }
 
   /** Called to remove item with animation */
@@ -482,9 +355,44 @@ export default class WUPSelectManyControl<
   }
 
   protected override setValue(v: ValueType[] | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
+    const prev = this.$value;
     const isChanged = super.setValue(v, reason, skipInput);
     isChanged !== false && this.setAttr("filled", !this.$isEmpty, true);
+    if (isChanged && !this.#isHistAction) {
+      if (
+        reason === SetValueReasons.userInput ||
+        reason === SetValueReasons.userSelect ||
+        reason === SetValueReasons.clear
+      ) {
+        (this._histUndo ??= []).push(prev);
+        this._histRedo = [];
+      } else {
+        // the same as native input: history is reset when value is changed programmatically
+        delete this._histUndo;
+        delete this._histRedo;
+      }
+    }
     return isChanged;
+  }
+
+  /** Undo-history of value (input-text history is handled by browser itself) */
+  _histUndo?: Array<ValueType[] | undefined>;
+  /** Redo-history of value */
+  _histRedo?: Array<ValueType[] | undefined>;
+  #isHistAction?: true;
+  /** Called on Ctrl+Z / Ctrl+Shift+Z when input is empty to undo/redo changes of selected items
+   * @returns true if history exists & value is changed */
+  protected historyValue(isRedo: boolean): boolean {
+    const from = isRedo ? this._histRedo : this._histUndo;
+    if (!from?.length) {
+      return false;
+    }
+    (isRedo ? (this._histUndo ??= []) : (this._histRedo ??= [])).push(this.$value);
+    this.focusItemByIndex(null);
+    this.#isHistAction = true;
+    this.setValue(from.pop(), SetValueReasons.userInput); // userInput: to fire validation & $change as for user action
+    this.#isHistAction = undefined;
+    return true;
   }
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
@@ -532,6 +440,12 @@ export default class WUPSelectManyControl<
 
   protected override gotKeyDown(e: KeyboardEvent): void {
     super.gotKeyDown(e);
+
+    const histKey = !this.$refInput.value && TextHistory.getUndoRedoKey(e); // otherwise browser undo/redo for input-text
+    if (histKey) {
+      this.historyValue(histKey === "redo") && e.preventDefault();
+      return;
+    }
 
     if (!(this.$refInput.selectionEnd === 0 && this.$refItems?.length)) {
       return;
@@ -646,5 +560,3 @@ customElements.define(tagName, WUPSelectManyControl);
  * 2. Firefox. Caret position is missed if no empty spans between items
  * 3. Without contenteditalbe='false' browser moves cursor into item, but it should be outside
  */
-
-// NiceToHave: Ctrl+Z must should work for the whole control. Not only for `input`

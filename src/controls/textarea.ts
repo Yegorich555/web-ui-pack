@@ -1,3 +1,4 @@
+import { inheritDefaults } from "../baseElement";
 import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 import WUPTextareaInput from "./textarea.input";
@@ -24,6 +25,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with multiline text-input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textarea}
        *  @see {@link WUPTextareaControl} */
       [tagName]: WUP.Base.ReactHTML<WUPTextareaControl> & WUP.Textarea.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -37,6 +39,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with multiline text-input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textarea}
        *  @see {@link WUPTextareaControl} */
       [tagName]: HTMLAttributes<WUPTextareaControl> & WUP.Textarea.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -62,7 +65,7 @@ declare module "preact/jsx-runtime" {
  * @tutorial innerHTML @example
  * <label>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
- *      <span contenteditable="true" />
+ *      <wup-areainput contenteditable="true" role="textbox" aria-multiline="true" />
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
@@ -79,24 +82,17 @@ export default class WUPTextareaControl<
   // #ctr = this.constructor as typeof WUPTextareaControl;
 
   static get $style(): string {
-    return `${super.$style}
-        :host strong { top: 1.6em; }
-        :host [contenteditable=true] {
-          min-height: 4em;
-          max-height: 4em;
-        }`;
+    return super.$style;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Textarea.Options = {
-    ...WUPTextControl.$defaults,
-    validationRules: {
-      ...WUPTextControl.$defaults.validationRules,
-      // WARN: validations min/max must depends only on visible chars
+  static $defaults: WUP.Textarea.Options = inheritDefaults(WUPTextControl.$defaults, {
+    validationRules: inheritDefaults(WUPTextControl.$defaults.validationRules, {
+      // WARN: validations min/max must depend on visible chars only
       min: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.min!.call!(c, v?.replace(/\n/g, ""), setV, c, r),
       max: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.max!.call!(c, v?.replace(/\n/g, ""), setV, c, r),
-    },
-  };
+    }),
+  });
 
   $refInput = document.createElement("wup-areainput") as HTMLInputElement;
 
@@ -209,5 +205,3 @@ rr.forEach((k) => delete WUPTextareaControl.$defaults[k as keyof WUP.Textarea.Op
 rr = undefined;
 
 customElements.define(tagName, WUPTextareaControl);
-
-// NiceToHave display of btnClear affects on internal width - is it ok ???

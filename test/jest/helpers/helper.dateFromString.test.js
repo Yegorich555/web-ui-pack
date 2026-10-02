@@ -73,6 +73,12 @@ describe("helper.dateToString", () => {
       { v: new Date("2023-07-02 00:00"), txt: "23-07-02" },
       { v: new Date("2025-11-24 00:00"), txt: "25-11-24" },
     ],
+    "YYYY-MM": [
+      { v: new Date("2022-01-01 00:00"), txt: "2022-01" },
+      { v: new Date("2022-11-01 00:00"), txt: "2022-11" },
+    ],
+    "MM/YYYY hh:mm": [{ v: new Date("2022-07-01 13:45"), txt: "07/2022 13:45" }],
+    YYYY: [{ v: new Date("2022-01-01 00:00"), txt: "2022" }],
     "MMM d/yyyy, hh:mm A": [
       { v: new Date("2022-04-23 16:09:00"), txt: "Apr 23/2022, 04:09 PM" }, // 04PM => 16:00
       { v: new Date("2022-04-23 12:09:00"), txt: "Apr 23/2022, 12:09 PM" }, // 12PM => 12:00
@@ -112,6 +118,8 @@ describe("helper.dateToString", () => {
     expect(getOutOfRange("2022-00-20", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-05-00", "yyyy-MM-dd")).toBe(true);
     expect(() => dateFromString("2022-05-00", "yyyy-MM-dd", { strict: true, throwOutOfRange: true })).toThrow();
+    expect(() => dateFromString("2022-05-00", "yyyy-MM-dd")).toThrow();
+    expect(() => dateFromString("2022-05-00", "yyyy-MM-dd", {})).toThrow(); // defaults are merged
     expect(getOutOfRange("2022-12-50", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-12-50", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-13-20", "yyyy-MM-dd")).toBe(true);
@@ -125,6 +133,8 @@ describe("helper.dateToString", () => {
     expect(getOutOfRange("2022-03-103", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-03-0", "yyyy-MM-dd")).toBe(true);
     expect(getOutOfRange("2022-3", "yyyy-MM-dd")).toBe(true);
+    expect(getOutOfRange("2022", "yyyy-MM")).toBe(true); // month is pointed in format but missed in value
+    expect(getOutOfRange("2022-13", "yyyy-MM")).toBe(true);
     h.unMockConsoleWarn();
   });
 });

@@ -4,7 +4,7 @@ Logic below contains best practice for re-using web-ui-pack elements. The main i
 
 ## Bad practice
 
-Code below shows case when developer desides to use WUPTextControl everywhere.
+Code below shows case when developer decides to use WUPTextControl everywhere.
 
 ```jsx
 // main.ts
@@ -48,11 +48,15 @@ useBuiltinStyle(
 ```tsx
 // textControl.tsx
 import { WUPTextControl } from "web-ui-pack";
+import WUPBaseControl from "web-ui-pack/controls/baseControl";
 
 // #1 register control
 WUPTextControl.$use();
 
-// #2 change defaults
+// #2.1 change defaults globally via the main parent (affects every control until a child overrides the option)
+WUPBaseControl.$defaults.validateDebounceMs = 600;
+
+// #2.2 change defaults for WUPTextControl and controls inherited from it (Number, Password, Textarea, Select, SelectMany, Date, Time)
 WUPTextControl.$defaults.clearButton = true;
 
 // #3.0 override messages according to required language
@@ -119,7 +123,7 @@ export class TextControl extends React.Component<Props> {
   }
 
   /* Called every time when properties are changed */
-  shouldComponentUpdate(nextProps: Readonly<P>): boolean {
+  shouldComponentUpdate(nextProps: Readonly<Props>): boolean {
     const isChanged = this.props !== nextProps;
     isChanged && this.updateOptions(nextProps, false);
     // update render only if className is changed otherwise apply props directly for options
@@ -127,14 +131,15 @@ export class TextControl extends React.Component<Props> {
   }
 
   /* Apply React props for $options */
-  updateOptions(nextProps: P, isInit: boolean): void {
-    Object.assign(this.domEl.$options, nextProps, { children: null });
-    this.domEl.$onChange = nextProps.onChange;
-    if (isInit || nextProps.value !== this.props.value) {
-      this.domEl.$value = nextProps.value; // update only if value changed
+  updateOptions(nextProps: Props, isInit: boolean): void {
+    const { className, initValue, value, onChange, ...options } = nextProps; // only options must be applied to $options
+    Object.assign(this.domEl.$options, options);
+    this.domEl.$onChange = onChange;
+    if (isInit || value !== this.props.value) {
+      this.domEl.$value = value; // update only if value changed
     }
-    if (isInit || nextProps.initValue !== this.props.initValue) {
-      this.domEl.$initValue = nextProps.initValue; // update only if value changed
+    if (isInit || initValue !== this.props.initValue) {
+      this.domEl.$initValue = initValue; // update only if value changed
     }
   }
 
@@ -158,8 +163,8 @@ export class TextControl extends React.Component<Props> {
 // login.tsx
 export function LoginComponent() {
   return (
-   {/*... form here*/}
     <>
+      {/*... form here*/}
       <TextControl
         name="email"
         validations={{ email: true }}

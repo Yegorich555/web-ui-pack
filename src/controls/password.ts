@@ -1,6 +1,6 @@
+import { inheritDefaults } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import { stringLowerCount, stringUpperCount } from "../helpers/string";
-import { WUPcssIcon } from "../styles";
 import WUPTextControl from "./text";
 
 const tagName = "wup-pwd";
@@ -16,7 +16,7 @@ declare global {
       minLower: number;
       /** If count of pointed chars < pointed shows message 'Must contain at least {x} special characters' */
       special: { min: number; chars: string };
-      /** If $value != with previous siblint wup-pwd.$value shows message 'Passwords must be equal' */
+      /** If $value != with previous wup-pwd.$value (in document order) shows message 'Passwords must be equal' */
       confirm: boolean;
     }
     interface Options<T = string, VM = ValidityMap>
@@ -26,7 +26,7 @@ declare global {
       reverse: boolean;
     }
     interface JSXProps<C = WUPPasswordControl>
-      extends Omit<WUP.Text.JSXProps<C>, "mask" | "maskholder" | "prefix" | "postfix"> {
+      extends Omit<WUP.Text.JSXProps<C>, "w-mask" | "w-maskholder" | "w-storageKey" | "w-storage"> {
       /** Reversed-style for button-eye
        * @defaultValue false */
       "w-reverse"?: boolean | string;
@@ -42,6 +42,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with password input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/password}
        *  @see {@link WUPPasswordControl} */
       [tagName]: WUP.Base.ReactHTML<WUPPasswordControl> & WUP.Password.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -55,6 +56,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with password input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/password}
        *  @see {@link WUPPasswordControl} */
       [tagName]: HTMLAttributes<WUPPasswordControl> & WUP.Password.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -94,6 +96,7 @@ declare module "preact/jsx-runtime" {
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
+ *   <button eye/>
  * </label> */
 export default class WUPPasswordControl<
   ValueType extends string = string,
@@ -103,7 +106,7 @@ export default class WUPPasswordControl<
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPPasswordControl;
 
-  /** Text announced by screen-readers when input cleared; @defaultValue `input cleared` */
+  /** Text announced by screen-readers about show/hide password; @defaultValue `press Alt + V to show/hide password` */
   static $ariaDescription = __wupln("press Alt + V to show/hide password", "aria");
 
   // static get $styleRoot(): string {
@@ -111,46 +114,12 @@ export default class WUPPasswordControl<
   // }
 
   static get $style(): string {
-    return `${super.$style}
-        :host {
-          --ctrl-icon-img: var(--wup-icon-eye);
-        }
-        :host[w-reverse] {
-          --ctrl-icon-img: var(--wup-icon-eye-off);
-        }
-        :host input[type=password] {
-          font-family: Verdana, sans-serif;
-          letter-spacing: 0.125em;
-        }
-        :host button[eye] {
-          ${WUPcssIcon}
-          cursor: pointer;
-          margin-right: -0.5em;
-          -webkit-mask-size: calc(var(--ctrl-icon-size) * 1.3);
-          mask-size: calc(var(--ctrl-icon-size) * 1.3);
-        }
-        :host button[eye=off] {
-          --ctrl-icon-img: var(--wup-icon-eye-off);
-        }
-        :host[w-reverse] button[eye="off"] {
-          --ctrl-icon-img: var(--wup-icon-eye);
-        }
-        @media (hover: hover) and (pointer: fine) {
-          :host button[eye]:hover {
-            box-shadow: none;
-            background-color: var(--ctrl-focus-label);
-          }
-        }
-        :host button[clear] {
-          margin: 0;
-        }`;
+    return super.$style;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Password.Options = {
-    ...WUPTextControl.$defaults,
-    validationRules: {
-      ...WUPTextControl.$defaults.validationRules,
+  static $defaults: WUP.Password.Options = inheritDefaults(WUPTextControl.$defaults, {
+    validationRules: inheritDefaults(WUPTextControl.$defaults.validationRules, {
       minNumber: (v, setV) =>
         (!v || (v.match(/[0-9]/g)?.length ?? 0) < setV) &&
         __wupln(`Must contain at least ${setV} number${setV === 1 ? "" : "s"}`, "validation"),
@@ -159,7 +128,7 @@ export default class WUPPasswordControl<
       minLower: (v, setV) =>
         (!v || stringLowerCount(v, setV) < setV) && __wupln(`Must contain at least ${setV} lower case`, "validation"),
       special: (v, setV) =>
-        (!v || ![...setV.chars].reduce((prev, c) => (v.includes(c) ? ++prev : prev), 0)) &&
+        (!v || [...v].reduce((prev, c) => (setV.chars.includes(c) ? ++prev : prev), 0) < setV.min) &&
         __wupln(
           `Must contain at least ${setV.min} special character${setV.min === 1 ? "" : "s"}: ${setV.chars}`,
           "validation"
@@ -189,9 +158,9 @@ export default class WUPPasswordControl<
         }
         return __wupln("Passwords must be equal", "validation");
       },
-    },
+    }),
     reverse: false,
-  };
+  });
 
   $refBtnEye = document.createElement("button");
   protected override renderControl(): void {

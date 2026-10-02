@@ -5,15 +5,16 @@ import localeInfo from "../objects/localeInfo";
  * @example
  * "yyyy-MM-dd hh:mm:ss.fff Z" => "2022-04-23 16:09:12.234" // point 'Z' at the end for UTCdate
  * "yyyy-MM-dd hh:mm:ss a" => "2022-04-23 04:09:12 pm" // point 'a' or 'A' at the end for 12hour format
- * "yyyy-MM-dd hh:mm:ss.fff aZ" => "2022-04-23 04:09:12 pm" // point 'Z' at the end for UTCdate
+ * "yyyy-MM-dd hh:mm:ss.fff aZ" => "2022-04-23 04:09:12.234 pm" // point 'Z' at the end for UTCdate
  * "yyyy-MM-dd hh:mm:ss" => "2022-04-23 16:09:12"
  * "yyyy-M-d h:m:s" => "2022-4-23 13:9:12"
  * "dd/MM/yyyy" => "23/04/2022"
  * "yyyy-MM-ddThh:mm:ss.fffZ" // ISOstring
- * "MMM d/yyyy, hh:mm A" => "Apr 23, 04:09 PM" (depends on localeInfo.namesMonthShort)
+ * "MMM d/yyyy, hh:mm A" => "Apr 23/2022, 04:09 PM" (depends on localeInfo.namesMonthShort)
  * "YYYYMMDD hhmmss" etc.
+ * "YYYY-MM" => "2022-04" // missed day or month is 1 => "2022-04-01"
  * @tutorial Troubleshooting
- * * AM PM in the middle isn't supported (only at the end): use  'hh:mm, d/m/yyyy A' instead 'hh:mm A, d/m/yyyy'
+ * * AM PM in the middle isn't supported (only at the end): use  'hh:mm, d/M/yyyy A' instead 'hh:mm A, d/M/yyyy'
  */
 export default function dateFromString(
   v: string,
@@ -23,11 +24,12 @@ export default function dateFromString(
      *  Disable it to return `null` instead
      * @defaultValue true */
     throwOutOfRange?: boolean;
-  } = { throwOutOfRange: true }
+  } = {}
 ): Date | null {
   if (!v) {
     return null;
   }
+  options = { throwOutOfRange: true, ...options };
 
   // support for MMM format
   format = format.replace(/MMM/, () /* (_s: string, _index: number) */ => {
@@ -53,7 +55,8 @@ export default function dateFromString(
     vLast -= 2;
   }
 
-  const r = { y: 0, M: 0, d: 0, h: 0, m: 0, s: 0, f: 0 };
+  // month & day missed in format are 1: 'YYYY-MM' => 1st day of month
+  const r = { y: 0, M: format.includes("M") ? 0 : 1, d: /d/i.test(format) ? 0 : 1, h: 0, m: 0, s: 0, f: 0 };
 
   let vi = 0;
   let yCnt = 0;

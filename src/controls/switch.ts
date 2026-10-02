@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { WUPCssIconHover, WUPcssHidden } from "../styles";
+import { inheritDefaults } from "../baseElement";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 
 const tagName = "wup-switch";
@@ -14,8 +14,8 @@ declare global {
     }
     interface Options<T = boolean, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPSwitchControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      "w-reverse"?: boolean | "";
-      /** @deprecated use `initValue` instead */
+      "w-reverse"?: boolean | "" | "true" | "false";
+      /** @deprecated use `w-initValue` instead */
       defaultChecked?: boolean;
     }
   }
@@ -29,6 +29,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with toggle button
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/switch}
        *  @see {@link WUPSwitchControl} */
       [tagName]: WUP.Base.ReactHTML<WUPSwitchControl> & WUP.Switch.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -42,6 +43,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with toggle button
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/switch}
        *  @see {@link WUPSwitchControl} */
       [tagName]: HTMLAttributes<WUPSwitchControl> & WUP.Switch.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -71,96 +73,21 @@ declare module "preact/jsx-runtime" {
  * </label> */
 export default class WUPSwitchControl<
   TOptions extends WUP.Switch.Options = WUP.Switch.Options,
-  EventMap extends WUP.Switch.EventMap = WUP.Switch.EventMap
-> extends WUPBaseControl<boolean, TOptions, EventMap> {
+  EventMap extends WUP.Switch.EventMap = WUP.Switch.EventMap,
+  ValueType = boolean
+> extends WUPBaseControl<ValueType, TOptions, EventMap> {
   #ctr = this.constructor as typeof WUPSwitchControl;
 
   static get $styleRoot(): string {
-    return `:root {
-      --ctrl-switch-padding: 1em;
-      --ctrl-switch-on: #fff;
-      --ctrl-switch-off: #fff;
-      --ctrl-switch-off-bg: #9f9f9f;
-      --ctrl-switch-on-bg: #00778d;
-      --ctrl-switch-shadow: #0003;
-      --ctrl-switch-h: var(--ctrl-icon-size);
-      --ctrl-switch-w: calc(var(--ctrl-icon-size) * 2.8);
-      --ctrl-switch-r: calc(var(--ctrl-icon-size) * 1.4);
-     }
-    [wupdark] {
-      --ctrl-switch-on: #e7e7e7;
-      --ctrl-switch-off: #e7e7e7;
-      --ctrl-switch-off-bg: #707070;
-      --ctrl-switch-shadow: #000;
-    }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        background: none;
-        cursor: pointer;
-      }
-      :host[readonly] {
-        cursor: initial;
-      }
-      :host label {
-        display: flex;
-        gap: 0.5em;
-        padding: var(--ctrl-switch-padding);
-      }
-      :host strong {
-        box-sizing: border-box;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        font-weight: normal;
-        text-decoration: none;
-        color: inherit;
-      }
-      :host [bar] {
-        display: inline-flex;
-        align-items: center;
-        overflow: visible;
-        width: var(--ctrl-switch-w);
-        min-width: var(--ctrl-switch-w);
-        height: var(--ctrl-switch-h);
-        border-radius: 999px;
-        color: whitesmoke;
-        background: var(--ctrl-switch-off-bg);
-      }
-      ${WUPCssIconHover(":host", "[thumb]")}
-      :host [thumb] {
-        z-index: 2;
-        display: inline-block;
-        height: var(--ctrl-switch-r);
-        width: var(--ctrl-switch-r);
-        background: var(--ctrl-switch-off);
-        box-shadow: 0 1px 4px 0 var(--ctrl-switch-shadow);
-        border-radius: 50%;
-        transform: translateX(-1px);
-      }
-      :host input { ${WUPcssHidden} }
-      :host[checked] [bar] {
-        background-color: var(--ctrl-switch-on-bg);
-      }
-      :host[checked] [thumb] {
-        background: var(--ctrl-switch-on);
-        transform: translateX(var(--ctrl-switch-w)) translateX(calc(-100% + 1px));
-      }
-      :host[w-reverse] label {
-        flex-direction: row-reverse;
-      }
-      :host[w-reverse] strong {
-        margin-right: auto;
-      }
-      @media not all and (prefers-reduced-motion) {
-        :host [bar] { transition: background-color var(--anim); }
-        :host [thumb] { transition: transform var(--anim); }
-      }`;
+    return super.$style;
   }
 
-  static $isEqual(v1: boolean | undefined, v2: boolean | undefined): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static $isEqual(v1: unknown, v2: unknown, control: WUPBaseControl): boolean {
     return !!v1 === !!v2;
   }
 
@@ -170,25 +97,24 @@ export default class WUPSwitchControl<
     return arr;
   }
 
-  static $defaults: WUP.Switch.Options = {
-    ...WUPBaseControl.$defaults,
-    validationRules: { ...WUPBaseControl.$defaults.validationRules },
+  static $defaults: WUP.Switch.Options = inheritDefaults(WUPBaseControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {}),
     reverse: false,
-  };
+  });
 
-  get $value(): boolean {
-    return !!super.$value as boolean;
+  get $value(): ValueType {
+    return !!super.$value as ValueType;
   }
 
-  set $value(v: boolean) {
-    super.$value = !!v;
+  set $value(v: ValueType) {
+    super.$value = !!v as ValueType;
   }
 
-  override parse(text: string): boolean | undefined {
-    return text === "" || text === "1" || text.toLowerCase() === "true";
+  override parse(text: string): ValueType | undefined {
+    return (text === "" || text === "1" || text.toLowerCase() === "true") as ValueType;
   }
 
-  override valueToStorage(v: boolean): string | null {
+  override valueToStorage(v: ValueType): string | null {
     return v ? "1" : null;
   }
 
@@ -213,18 +139,22 @@ export default class WUPSwitchControl<
 
   /** Called when user changes value via click or keyboard */
   protected gotInput(e: Event): void {
-    const el = e.target as HTMLInputElement;
     if (this.$isReadOnly) {
-      el.checked = !el.checked;
+      this.checkInput(!!this.$value); // rollback changes of browser
     } else {
-      this.setValue(el.checked, SetValueReasons.userInput);
+      this.setValue((e.target as HTMLInputElement).checked as ValueType, SetValueReasons.userInput);
     }
   }
 
-  protected override setValue(v: boolean, reason: SetValueReasons): boolean | null {
+  /** Called when need to update check-state of input */
+  protected checkInput(isChecked: boolean): void {
+    this.$refInput.checked = isChecked;
+    this.setAttr("checked", isChecked, true);
+  }
+
+  protected override setValue(v: ValueType, reason: SetValueReasons): boolean | null {
     const r = super.setValue(v, reason);
-    this.$refInput.checked = !!v;
-    this.setAttr("checked", this.$refInput.checked, true);
+    this.checkInput(!!v);
     return r;
   }
 

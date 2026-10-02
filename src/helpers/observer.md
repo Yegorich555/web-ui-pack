@@ -7,20 +7,18 @@ const rawNestedObj = { val: 1 };
 const raw = { date: new Date(), period: 3, nestedObj: rawNestedObj, arr: ["a"] };
 const obj = observer.make(raw);
 const removeListener = observer.onPropChanged(obj, (e) => console.warn("prop changed", e)); // calls per each changing
-const removeListener2 = observer.onChanged(obj, (e) => console.warn("object changed", e)); // calls once after changing of bunch props
+const removeListener2 = observer.onChanged(obj, (e) => console.warn("object changed", e)); // calls once per bunch of changes (after timeout)
 obj.period = 5; // fire onPropChanged
 obj.date.setHours(0, 0, 0, 0); // fire onPropChanged
 obj.nestedObj.val = 2; // fire onPropChanged
 obj.arr.push("b"); // fire onPropChanged
 
-obj.nestedObj = rawNestedObj; // fire onPropChanged
-obj.nestedObj = rawNestedObj; // WARNING: it fire events again because rawNestedObj !== obj.nestedObj
+obj.nestedObj = rawNestedObj; // nothing: rawNestedObj is already converted to the same observed obj.nestedObj
 
-removeListener(); // unsubscribe
-removeListener2(); // unsubscribe
-
-// before timeout will be fired onChanged (single time)
+// before timeout will be fired onChanged: once per observed object => 4 times (obj, obj.date, obj.nestedObj, obj.arr)
 setTimeout(() => {
+  removeListener(); // unsubscribe
+  removeListener2(); // unsubscribe
   console.warn("WARNING: raw vs observable", {
     equal: raw === obj,
     equalByValueOf: raw.valueOf() === obj.valueOf(),

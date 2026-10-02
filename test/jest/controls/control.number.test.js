@@ -149,6 +149,49 @@ describe("control.number", () => {
     expect(el.$refInput.value).toBe("2.13");
   });
 
+  test("attr [format] as pattern", async () => {
+    expect(WUPNumberControl.$parseFormat("#,##0")).toEqual({ minDecimal: 0, maxDecimal: 0 });
+    expect(WUPNumberControl.$parseFormat("0")).toEqual({ sep1000: "", minDecimal: 0, maxDecimal: 0 });
+    expect(WUPNumberControl.$parseFormat("#,##0.00")).toEqual({ minDecimal: 2, maxDecimal: 2 });
+    expect(WUPNumberControl.$parseFormat("0.0#")).toEqual({ sep1000: "", minDecimal: 1, maxDecimal: 2 });
+    expect(WUPNumberControl.$parseFormat("#.##")).toEqual({ sep1000: "", minDecimal: 0, maxDecimal: 2 });
+
+    el.setAttribute("w-format", "#,##0.0#");
+    await h.wait(1);
+    expect(el.$options.format).toEqual({ minDecimal: 1, maxDecimal: 2 });
+    el.$value = 1234;
+    expect(el.$refInput.value).toBe("1,234.0");
+    el.$value = 1234.567;
+    expect(el.$refInput.value).toBe("1,234.56");
+
+    el.setAttribute("w-format", "0.00");
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("1234.56");
+    el.$value = 1234.5;
+    expect(el.$refInput.value).toBe("1234.50");
+
+    // separators depend on locale
+    localeInfo.refresh("de-DE");
+    el.setAttribute("w-format", "#,##0.00");
+    await h.wait(1);
+    expect(el.$refInput.value).toBe("1.234,50");
+    localeInfo.refresh("en-US");
+
+    // otherwise it's reference
+    window.myFormat = { maxDecimal: 1 };
+    el.setAttribute("w-format", "window.myFormat");
+    await h.wait(1);
+    expect(el.$options.format).toBe(window.myFormat);
+    expect(el.$refInput.value).toBe("1,234.5");
+    delete window.myFormat;
+
+    // rollback to default
+    el.removeAttribute("w-format");
+    await h.wait(1);
+    expect(el.$options.format).toBe(null);
+    expect(el.$refInput.value).toBe("1,234");
+  });
+
   test("history undo/redo", async () => {
     el.$options.format = { maxDecimal: 2 };
     el.focus();

@@ -1,4 +1,5 @@
 /* eslint-disable max-classes-per-file */
+import { AttributeTypes, inheritDefaults } from "../baseElement";
 import onScroll from "../helpers/onScroll";
 import { mathFixFP, onEvent } from "../indexHelpers";
 import localeInfo from "../objects/localeInfo";
@@ -17,29 +18,29 @@ declare global {
        *  @see {@link localeInfo.sep1000} */
       sep1000?: string;
       /** Maximum displayed fraction digits; for 123.45 it's 2
-       * @defaultValue 0 */
+       * @defaultValue minDecimal ?? 0 */
       maxDecimal?: number;
-      /** Minimun displayed fraction digits; if pointed 2 then 123.4 goes to 123.40
+      /** Minimum displayed fraction digits; if pointed 2 then 123.4 goes to 123.40
        * @defaultValue 0 */
       minDecimal?: number;
     }
     interface EventMap extends WUP.BaseControl.EventMap {}
-    interface ValidityMap extends WUP.Text.ValidityMap {
-      /** If $value < pointed shows message 'Min value {x}` */
+    interface ValidityMap extends WUP.BaseControl.ValidityMap {
+      /** If $value < pointed shows message 'Min value is {x}' */
       min: number;
-      /** If $value < pointed shows message 'Max value {x}` */
+      /** If $value > pointed shows message 'Max value is {x}' */
       max: number;
     }
     interface NewOptions {
       /** String representation of displayed value
-       * @defaultValue no-decimal and separators from localeInfo */
+       * @defaultValue no-decimal and separators from @see {@link localeInfo} */
       format: Format | null;
       /** Multiply value to store value different from text-value
        * @example point 0.01 when need to cast text value `100` to 1 (user sees `100` but stored 1)
        * @defaultValue 1 */
       scale: number;
       /** Shift value to store value different from text-value
-       * @example point 20 when need to cast text value `100` to 120 (user sees `100` but stored 120)
+       * @example point 20 when need to cast text value `100` to 80 (user sees `100` but stored 80)
        * @defaultValue 0 */
       offset: number;
     }
@@ -47,14 +48,17 @@ declare global {
     interface Options<T = number, VM extends ValidityMap = ValidityMap> extends TextAnyOptions<T, VM>, NewOptions {}
     interface JSXProps<C = WUPNumberControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** String representation of displayed value
-       * Point Global reference to object @see {@link Format}
+       * Point pattern like `#,##0.00` (@see {@link WUPNumberControl.$parseFormat})
+       * OR global reference to object @see {@link Format}
        * @example
        * ```js
-       * window.format = {};
-       * <wup-number w-items="window.format"></wup-number>
+       * <wup-num w-format="#,##0.0#"></wup-num>
+       * // or
+       * window.format = { maxDecimal: 2 };
+       * <wup-num w-format="window.format"></wup-num>
        * ```
        * @defaultValue no-decimal and separators from localeInfo */
-      "w-format"?: string; // NiceToHave: parse from string
+      "w-format"?: string;
       "w-scale"?: number;
       "w-offset"?: number;
       "w-initValue"?: number;
@@ -69,6 +73,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with number input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/number}
        *  @see {@link WUPNumberControl} */
       [tagName]: WUP.Base.ReactHTML<WUPNumberControl> & WUP.Number.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -82,6 +87,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with number input
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/number}
        *  @see {@link WUPNumberControl} */
       [tagName]: HTMLAttributes<WUPNumberControl> & WUP.Number.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -119,19 +125,17 @@ export default class WUPNumberControl<
   #ctr = this.constructor as typeof WUPNumberControl;
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Number.Options = {
-    ...(WUPTextControl.$defaults as WUP.Number.TextAnyOptions<any, any>),
-    validationRules: {
-      ...WUPBaseControl.$defaults.validationRules,
+  static $defaults: WUP.Number.Options = inheritDefaults(WUPTextControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {
       min: (v, setV, c) =>
         (v == null || v < setV) && __wupln(`Min value is ${(c as WUPNumberControl).valueToInput(setV)}`, "validation"),
       max: (v, setV, c) =>
         (v == null || v > setV) && __wupln(`Max value is ${(c as WUPNumberControl).valueToInput(setV)}`, "validation"),
-    },
+    }),
     format: null,
     scale: 1,
     offset: 0,
-  };
+  });
 
   /** Custom number parsing: better Number.parse because ignores wrong chars + depends format */
   static $parse(s: string, format: Required<WUP.Number.Format>): number | undefined {
@@ -167,6 +171,28 @@ export default class WUPNumberControl<
       v *= -1; // case: "-123"
     }
     return v;
+  }
+
+  /** Parses pattern like `#,##0.00` into format; actual separators are taken from @see {@link localeInfo}
+   * @tutorial rules
+   * * `,` - enables thousands separator (otherwise disabled)
+   * * `.` - start of decimal part
+   * * `0` after `.` - required decimal digit (minDecimal)
+   * * `#` after `.` - optional decimal digit (maxDecimal)
+   * @example
+   * "#,##0.00" => { minDecimal: 2, maxDecimal: 2 } // 1,234.50
+   * "0.0#" => { sep1000: "", minDecimal: 1, maxDecimal: 2 } // 1234.5
+   * "0.##" => { sep1000: "", minDecimal: 0, maxDecimal: 2 } // 1234 */
+  static $parseFormat(pattern: string): WUP.Number.Format {
+    const [int, dec = ""] = pattern.split(".");
+    const f: WUP.Number.Format = {
+      minDecimal: dec.split("0").length - 1,
+      maxDecimal: dec.length,
+    };
+    if (!int.includes(",")) {
+      f.sep1000 = "";
+    }
+    return f;
   }
 
   static $stringify(v: number | undefined | null, format: Required<WUP.Number.Format>): string {
@@ -210,7 +236,13 @@ export default class WUPNumberControl<
     };
   }
 
-  // WARN usage format #.### impossible because unclear what sepDec/sep100 and what if user wants only limit decimal part
+  override parseAttr(type: AttributeTypes, attrValue: string, propName: string, attrName: string): any {
+    if (propName === "format" && /^[#0,]+(\.[#0]+)?$/.test(attrValue)) {
+      return this.#ctr.$parseFormat(attrValue); // otherwise it's reference to global object
+    }
+    return super.parseAttr(type, attrValue, propName, attrName);
+  }
+
   valueToInput(v: ValueType | undefined, skipScaling?: boolean): string {
     if (v == null) {
       return "";

@@ -215,6 +215,23 @@ describe("circleElement", () => {
     `);
   });
 
+  test("NaN, Infinity values", async () => {
+    el.$options.items = [{ value: Number.NaN }];
+    await nextFrame();
+    expect(el.$refLabel.textContent).toBe("0%");
+    expect(el.$refItems.innerHTML).not.toContain("NaN");
+
+    el.$options.items = [
+      { value: Number.NaN, tooltip: "{#%}" },
+      { value: 5, tooltip: "{#%}" },
+      { value: Number.POSITIVE_INFINITY },
+    ];
+    await nextFrame(20);
+    expect(el.$refItems.innerHTML).not.toContain("NaN");
+    expect(el.renderTooltip(el.$refItems.children[0]).innerHTML).toBe("0%");
+    expect(el.renderTooltip(el.$refItems.children[1]).innerHTML).toBe("100%");
+  });
+
   test("animation", async () => {
     const orig = window.getComputedStyle;
     jest.spyOn(window, "getComputedStyle").mockImplementation((elem) => {
@@ -348,6 +365,19 @@ describe("circleElement", () => {
       { angleFrom: -65.66331658291458, angleTo: 74, ms: 324.79841065794085, v: 139.66331658291458 },
       { angleFrom: 76, angleTo: 82, ms: 13.953488372093023, v: 6 },
       { angleFrom: 84, angleTo: 90, ms: 13.953488372093023, v: 6 },
+    ]);
+
+    // NaN, Infinity are handled as 0
+    expect(map([Number.NaN, 25, Number.POSITIVE_INFINITY, 25], 10, 0, 180, 0)).toStrictEqual([
+      { angleFrom: 0, angleTo: 0, ms: 0, v: 0 },
+      { angleFrom: 0, angleTo: 90, ms: 200, v: 90 },
+      { angleFrom: 90, angleTo: 90, ms: 0, v: 0 },
+      { angleFrom: 90, angleTo: 180, ms: 200, v: 90 },
+    ]);
+    // all values are 0
+    expect(map([0, 0], 10, 0, 180, 0)).toStrictEqual([
+      { angleFrom: 0, angleTo: 0, ms: 0, v: 0 },
+      { angleFrom: 0, angleTo: 0, ms: 0, v: 0 },
     ]);
 
     // test case when not enough space because minSize is too big - in this case minSize is ignored
@@ -502,9 +532,40 @@ describe("circleElement", () => {
     await h.wait();
     expect(onTooltip).toBeCalledTimes(1); // only 1 listener must be
 
+    el.useTooltip(true);
+    el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+    await h.wait();
+    el.$refItems.children[1].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait();
+    expect(onTooltip).toBeCalledTimes(2); // listener isn't duplicated on 2nd call
+    const getPopups = () => Array.prototype.slice.call(el.querySelectorAll("wup-popup")).map((p) => p.innerHTML);
+    expect(getPopups()).toStrictEqual(["Item 2; 12"]);
+
+    // hover on popup is skipped
+    onTooltip.mockClear();
+    el.querySelector("wup-popup").dispatchEvent(new MouseEvent("mouseenter"));
+    await h.wait();
+    expect(onTooltip).not.toBeCalled();
+    expect(getPopups()).toStrictEqual(["Item 2; 12"]);
+
+    // moving to another segment shows its tooltip at once
+    el.$refItems.children[0].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    await h.wait(1);
+    expect(onTooltip).toBeCalledTimes(1);
+    expect(getPopups()).toStrictEqual(["Item 2; 12", "Item 1; 100"]); // prev is closing
+    await h.wait();
+    expect(getPopups()).toStrictEqual(["Item 1; 100"]);
+
+    // moving to segment without tooltip closes it
     onTooltip.mockClear();
     el.$refItems.children[2].dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
     expect(onTooltip).not.toBeCalled(); // because no tooltip
+    await h.wait();
+    expect(getPopups()).toStrictEqual([]);
+    // and moving back to segment with tooltip opens it (the group isn't re-entered)
+    el.$refItems.children[0].dispatchEvent(new MouseEvent("mouseenter"));
+    await h.wait();
+    expect(getPopups()).toStrictEqual(["Item 1; 100"]);
 
     // dispose listener
     onTooltip.mockClear();

@@ -22,6 +22,7 @@ export { default as WUPSelectControl } from "./controls/select";
 export { default as WUPSelectManyControl } from "./controls/selectMany";
 export { default as WUPSwitchControl } from "./controls/switch";
 export { default as WUPCheckControl } from "./controls/check";
+export { default as WUPCheckTreeControl } from "./controls/checkTree";
 export { default as WUPRadioControl } from "./controls/radio";
 export { default as WUPCalendarControl } from "./controls/calendar";
 export { default as WUPDateControl } from "./controls/date";

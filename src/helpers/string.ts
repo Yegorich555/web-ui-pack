@@ -1,7 +1,7 @@
 /** Returns if string has not-word symbol at pointed char position */
 export function isSpecialSymbol(s: string, i: number): boolean {
   const c = s.charCodeAt(i);
-  return c < 65 || (c > 90 && (c < 97 || (c > 123 && c < 128)));
+  return c < 65 || (c > 90 && (c < 97 || (c > 122 && c < 128)));
 }
 
 /** Returns count of chars in lower case (for any language with ignoring numbers, symbols)
@@ -35,10 +35,11 @@ export function stringUpperCount(s: string, stopWith?: number): number {
 /**
  ** Changes camelCase 'somePropValue' to 'Some Prop Value'
  ** Changes snake_case 'some_prop_value' to 'Some Prop Value'
- ** Changes kebab-case 'some-prop-value' to 'Some Prop Value';
+ ** Changes kebab-case 'some-prop-value' to 'Some Prop Value' (only if `handleKebabCase` is `true`);
  *
  * @param text The string to change
  * @param capitalize Set uppercase 1st letter of every word: `somePropValue` => `Some Prop Value`; @defaultValue `true`
+ * @param handleKebabCase Set `true` to handle `-` as a word-separator (like `_`); @defaultValue `false`
  * @returns Prettified string */
 export function stringPrettify(text: string, capitalize = true, handleKebabCase = false): string {
   let r = "";

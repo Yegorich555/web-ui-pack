@@ -1,7 +1,6 @@
 import { AttributeMap, AttributeTypes } from "./baseElement";
 import WUPBaseModal from "./baseModal";
 import focusFirst from "./helpers/focusFirst";
-import { WUPcssButton } from "./styles";
 
 export const enum ModalOpenCases {
   /** When $open() is called programmatically */
@@ -21,7 +20,7 @@ export const enum ModalCloseCases {
   onOutsideClick,
   /** When user pressed Escape button */
   onPressEsc,
-  /* When on successful wup-form.$onSubmitEnd: @see {@link WUP.Form.EventMap.$submitEnd} */
+  /** When on successful wup-form.$onSubmitEnd: @see {@link WUP.Form.EventMap.$submitEnd} */
   onSubmitEnd,
 }
 
@@ -100,6 +99,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /**  Modal element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/modal}
        *  @see {@link WUPModalElement} */
       [tagName]: WUP.Base.ReactHTML<WUPModalElement> & WUP.Modal.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -117,6 +117,7 @@ declare module "preact/jsx-runtime" {
     }
     interface IntrinsicElements {
       /**  Modal element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/modal}
        *  @see {@link WUPModalElement} */
       [tagName]: HTMLAttributes<WUPModalElement> & WUP.Modal.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -249,7 +250,11 @@ export default class WUPModalElement<
     let isConfirmed = false;
     if (btnConfirm) {
       (btnConfirm as HTMLElement).onclick = (ev) => {
-        // todo need await here
+        /* NiceToHave possible issue: - resolve only if it's real case issue and required to fix
+         confirm modal shows: Do you want to update data?
+         user clicks Confirm > this event is fired & modal with form is closed
+         BUT api-request failed and user unable to Confirm this again, since the main modal is closed
+         To resolve this - need to some promiseBased onClick event, so we can wait for it and only on .then to close modal */
         isConfirmed = true;
         setTimeout(() => (isConfirmed = false), 1);
         (window as any).__wupFixCycleClick = true;
@@ -269,143 +274,25 @@ export default class WUPModalElement<
   // static get observedOptions(): Array<keyof WUP.Modal.Options> { return []; }
   // static get observedAttributes(): Array<string> { return []; }
 
-  /** Default class used for fade - blurring background for main content
-   * @defaultValue "wup-modal-fade" */
-  static $classFade = "wup-modal-fade";
-  /** Default class that appended to body when modal opened (required to hide body scroll)
-   * @defaultValue "wup-modal-open" */
-  static $classOpened = "wup-modal-open";
+  /** Class used for fade - blurring background for main content
+   * @defaultValue "wup-modal-fade" - can't be changed */
+  static get $classFade(): string {
+    return "wup-modal-fade";
+  }
+
+  /** Class appended to body when modal opened (required to hide body scroll & prevent selection outside modal)
+   * @defaultValue "wup-modal-open" - can't be changed */
+  static get $classOpened(): string {
+    return "wup-modal-open";
+  }
 
   // WARN: modal-anim shouldn't affect on animation of nested
   static get $styleRoot(): string {
-    return `:root {
-        --modal-anim-t: 400ms;
-        --modal-text: inherit;
-        --modal-bg: #fff;
-        --modal-fade: #0007;
-        --modal-margin: 2em;
-      }
-      [wupdark] {
-        --modal-bg: #222a36;
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        z-index: 9002;
-        width: 100%;
-        max-width: 600px;
-        min-height: 150px;
-        color: var(--modal-text);
-        background: var(--modal-bg);
-        border: 1px solid #0002;
-        user-select: none;
-        pointer-events: none;
-        touch-action: none;
-        outline: none;
-      }
-      :host[open] {
-        user-select: initial;
-        pointer-events: initial;
-        touch-action: initial;
-       }
-      :host[w-placement="top"] {
-        top:0;left:0;right:0;
-        margin: var(--modal-margin);
-        margin-left: auto;
-        margin-right: auto;
-        max-height: calc(100% - var(--modal-margin) * 2);
-        transform: translateY(-50%);
-      }
-      :host[w-placement="center"] {
-        top:0;left:0;right:0;bottom:0;
-        margin: auto;
-        height: fit-content${
-          /* This is tricky rule. If it will buggy need to rewrite centering logic via js-core like it works with popup  */ ""
-        };
-        max-height: calc(100% - var(--modal-margin) * 2);
-        transform: translateY(-150%);
-      }
-      :host[w-placement="right"] {
-        right:0;top:0;bottom:0;
-        border-radius: 0;
-        transform: translateX(100%);
-      }
-      :host[w-placement="left"] {
-        left:0;top:0;bottom:0;
-        border-radius: 0;
-        transform: translateX(-100%);
-      }
-      :host[show] {
-        transform: none;
-      }
-      :host[hide] {
-        opacity: 0!important;
-        pointer-events: none!important;
-        user-select: none!important;
-        touch-action: none!important;
-      }
-      @media (max-width: 600px) {
-        :host {
-          --modal-margin: 0px;
-          border-radius: 0;
-        }
-      }
-      .${this.$classFade} {
-         --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        z-index: 9000;
-        display: block;
-        position: fixed;
-        top:0;left:0;right:0;bottom:0;
-        background: var(--modal-fade);
-        opacity: 0;
-        pointer-events: none;
-        touch-action: none;
-      }
-      .${this.$classFade}[show] {
-         pointer-events: initial;
-         touch-action: initial;
-         opacity: 1;
-      }
-      @media not all and (prefers-reduced-motion) {
-       .${this.$classFade} {
-          transition: opacity var(--modal-anim), transform var(--modal-anim);
-        }
-      }
-      :host > button[close] {
-        --icon-img: var(--wup-icon-cross);
-        z-index: 10;
-        position: absolute;
-        right: 0;
-        margin: -0.2em 1em 0;
-      }
-      :host h2 {
-        margin: 0 0 1em;
-        padding-right: 1.8em;
-      }
-      :host wup-form {
-        max-width: initial;
-      }
-      :host wup-form button[type=submit] {
-        margin-bottom: 0;
-        margin-left: auto;
-      }
-      :host footer {
-        display: flex;
-        gap: calc(var(--base-margin) / 2);
-        margin-top: var(--base-margin);
-        justify-content: flex-end;
-      }
-      ${WUPcssButton(":host footer>button")}
-      :host footer>button[type] {
-         margin: 0;
-         min-width: 7em;
-      }
-      :host footer>button[data-close=modal] {
-         background: var(--base-btn2-bg);
-         color: var(--base-btn2-text);
-      }`;
+    return super.$style;
   }
 
   static $defaults: WUP.Modal.Options = {
@@ -429,7 +316,7 @@ export default class WUPModalElement<
   /** Reference to button[close] */
   $refClose?: HTMLButtonElement;
 
-  /** Called once on opening */
+  /** Called on every opening */
   protected override gotRender(isOpening = false): void {
     if (!isOpening) {
       return; // empty because component is hidden by default and need to focus on open-phase
@@ -565,6 +452,7 @@ export default class WUPModalElement<
       const b = document.body;
       b.classList.remove(this.#ctr.$classOpened); // testCase: on modal.remove everything must returned to prev state
       !b.className && b.removeAttribute("class");
+      window.getSelection()?.removeAllRanges(); // otherwise selection made inside modal (Ctrl+A) becomes visible on the page
     } else {
       this.$refFade!.remove(); // immediately hide if opened 2+ modals
       this.$refFade = undefined;
@@ -706,6 +594,3 @@ export default class WUPModalElement<
 const __openedItems: Array<WUPModalElement> = [];
 
 customElements.define(tagName, WUPModalElement);
-
-// NiceToHave: handle Ctrl+S, Meta+S for submit & close ???
-// todo user can select outside via Ctrl + A

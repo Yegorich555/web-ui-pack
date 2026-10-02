@@ -1,7 +1,6 @@
 import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
-import { WUPcssButton } from "./styles";
 
 export const enum SubmitActions {
   /** Disable any action */
@@ -32,7 +31,7 @@ declare global {
       relatedForm: WUPFormElement;
       /** Event that produced submit event; null if `form.$submit()` is called */
       relatedEvent: MouseEvent | KeyboardEvent | null;
-      /** Element that that produced submit event */
+      /** Element that produced submit event */
       submitter: HTMLElement | null;
       /** Point a promise as callback to allow form show pending state during the promise */
       waitFor?: Promise<unknown>;
@@ -42,25 +41,29 @@ declare global {
       /** Fires before $submit is happened; can be prevented via `e.preventDefault()` */
       $willSubmit: CustomEvent<Pick<SubmitDetails, "relatedEvent" | "relatedForm" | "submitter">>;
       /** Fires by user-submit when validation successful and model is collected
-       *  * @tutorial
+       * @tutorial
        * call `e.preventDefault()` to prevent dispatching `$submitEnd` & closing modal (if form in modal) */
       $submit: CustomEvent<SubmitDetails>;
       /** Fires when submit is end (after http-response);
        * @tutorial
        * call `e.preventDefault()` to prevent closing modal (if form in modal) */
       $submitEnd: CustomEvent<{ success: boolean }>;
+      /** Fires when value of any nested control is changed (bubbles from control so `e.target` is the control);
+       * @tutorial Troubleshooting
+       * * fires for detached controls also (with empty $options.name) - check `e.target.$options.name` if needed
+       * * fires for other nested elements with the `$change` event also (like `<wup-sort>`) */
+      $change: WUP.BaseControl.EventMap["$change"];
     }
 
     interface Options {
       /** Actions that enabled on submit event; You can point several like: `goToError | collectChanged`
-       * @defaultValue goToError | validateUntilFirst | reset | lockOnPending */
+       * @defaultValue goToError | validateUntilFirst | validateChangeable | reset | lockOnPending */
       submitActions: SubmitActions;
       /** Enable to store data in localStorage to prevent losing till submitted;
        * @defaultValue false
        * @tutorial Troubleshooting
        * * It doesn't save values that are complex objects. So `wup-select.$options.items = [{text: "N1",value: {id:1,name:'Nik'} }]` is skipped
-       * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see{@link WUPFormElement.storageKey}
-       * @defaultValue false */
+       * * Point string-value if default storage-key doesn't fit: based on `url+control.names` @see {@link WUPFormElement.storageKey} */
       autoStore: boolean | string;
       /** Focus first possible element when it's appended to layout
        * @defaultValue false */
@@ -68,7 +71,7 @@ declare global {
       /** Disallow edit/copy value; adds attr [disabled] for styling
        * @defaultValue false */
       disabled: boolean;
-      /** Disallow copy value; adds attr [readonly] for styling
+      /** Disallow edit value; adds attr [readonly] for styling
        * @defaultValue false */
       readOnly: boolean;
       /** Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherited from form
@@ -79,18 +82,18 @@ declare global {
     interface JSXProps extends WUP.Base.OnlyNames<Options> {
       "w-submitActions"?: SubmitActions | number;
       "w-autoStore"?: boolean | string;
-      "w-autoFocus"?: boolean | "";
+      "w-autoFocus"?: boolean | "" | "true" | "false";
       "w-autoComplete"?: boolean | "";
 
       /** @deprecated use [disabled] instead since related to CSS-styles */
       "w-disabled"?: boolean | "";
       disabled?: boolean | "";
-      /** @deprecated use [disabled] instead since related to CSS-styles */
+      /** @deprecated use [readonly] instead since related to CSS-styles */
       "w-readonly"?: boolean | "";
       readonly?: boolean | "";
 
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
-      onChange?: never; // NiceToHave: controls doesn't fire form.$onChange method - need to implement chaining
+      onChange?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$willSubmit') instead */
       onWillSubmit?: never;
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$submit') instead */
@@ -107,6 +110,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Wrapper of FormHTMLElement that collect values from controls
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/controls}
        *  @see {@link WUPFormElement} */
       [tagName]: WUP.Base.ReactHTML<WUPFormElement> & WUP.Form.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -120,6 +124,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Wrapper of FormHTMLElement that collect values from controls
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/controls}
        *  @see {@link WUPFormElement} */
       [tagName]: HTMLAttributes<WUPFormElement> & WUP.Form.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -148,8 +153,8 @@ const formStore: WUPFormElement[] = [];
  *  document.body.appendChild(form);
  *  // or HTML
  *  <wup-form w-autocomplete w-autofocus>
- *    <wup-text w-name="email" />
- *    <button type="submit">Submit</submit>
+ *    <wup-text w-name="email"></wup-text>
+ *    <button type="submit">Submit</button>
  *  </wup-form>;
  * @tutorial Troubleshooting/rules:
  * * options like $initModel, $model overrides control.$initValue, control.$value (every control that matches by $options.name)
@@ -174,8 +179,8 @@ const formStore: WUPFormElement[] = [];
             });
           }
         }}
-        <button type="submit">Submit</button>
       />
+      <button type="submit">Submit</button>
   </wup-form>
  */
 export default class WUPFormElement<
@@ -187,37 +192,11 @@ export default class WUPFormElement<
   #ctr = this.constructor as typeof WUPFormElement;
 
   static get $styleRoot(): string {
-    return `:root {
-      --btn-submit-text: var(--base-btn-text);
-      --btn-submit-bg: var(--base-btn-bg);
-      --btn-submit-focus: var(--base-btn-focus);
-    }
-    [wupdark] {
-      --btn-submit-text: var(--base-btn-text);
-      --btn-submit-bg: var(--base-btn-bg);
-      --btn-submit-focus: var(--base-btn-focus);
-    }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-        :host {
-          position: relative;
-          display: block;
-          max-width: 500px;
-          margin: auto;
-        }
-        ${WUPcssButton(":host button[type=submit]")}
-        :host button[type=submit] {
-          --base-btn-text: var(--btn-submit-text);
-          --base-btn-bg: var(--btn-submit-bg);
-          --base-btn-focus: var(--btn-submit-focus);
-          display: block;
-          position: relative;
-        }
-        :host[aria-busy] {
-          cursor: progress;
-        }`;
+    return super.$style;
   }
 
   static get mappedAttributes(): Record<string, AttributeMap> {
@@ -226,7 +205,7 @@ export default class WUPFormElement<
     return m;
   }
 
-  /** Find form related to control,register and apply initModel if initValue undefined */
+  /** Find form related to control and register control */
   static $tryConnect(control: IBaseControl & HTMLElement): WUPFormElement | undefined {
     const form = formStore.find((f) => f.contains(control));
     form?.$controls.push(control);
@@ -300,6 +279,12 @@ export default class WUPFormElement<
    * @tutorial
    * call `e.preventDefault()` to prevent closing modal (if form in modal) */
   $onSubmitEnd?: (ev: WUP.Form.EventMap["$submitEnd"]) => void;
+  /** Fires when value of any nested control is changed (bubbles from control so `e.target` is the control);
+   * @tutorial Troubleshooting
+   * * fires for detached controls also (with empty $options.name) - check `e.target.$options.name` if needed
+   * * fires for other nested elements with the `$change` event also (like `<wup-sort>`)
+   * * fires after listeners added via `form.addEventListener("$change")` before the form is ready */
+  $onChange?: (ev: WUP.Form.EventMap["$change"]) => void;
   /** Dispatched on submit */
   // It's not required but called: $onsubmit?: (ev: WUP.Form.SubmitEvent<Model>) => void;
 
@@ -313,7 +298,7 @@ export default class WUPFormElement<
 
   _model?: Partial<Model>;
   /** Model related to every control inside (mapped object via control.$options.name);
-   *  @see {@link BaseControl.prototype.$value}
+   *  @see `WUPBaseControl.prototype.$value`
    * @tutorial rules
    * * `form.$model = { firstName: 'Hell' }` updates only control with $options.name==='firstName'
    * * `form.$model = { firstName: undefined }` reset only control with $options.name==='firstName' */
@@ -330,7 +315,7 @@ export default class WUPFormElement<
 
   _initModel?: Partial<Model>;
   /** Default/init model related to every control inside;
-   *  @see {@link BaseControl.prototype.$initValue} */
+   *  @see `WUPBaseControl.prototype.$initValue` */
   get $initModel(): Partial<Model> | undefined {
     // it's required to avoid case when model has more props than controls
     return this.#ctr.$modelFromControls(this._initModel || {}, this.$controls, "$initValue");
@@ -628,6 +613,8 @@ export default class WUPFormElement<
       },
       { passive: false }
     );
+    // WARN: bubbling phase instead of capture - otherwise it's fired before control stops propagation
+    this.appendEvent(this, "$change", (e) => this.$onChange?.call(this, e as WUP.Form.EventMap["$change"]));
   }
 
   protected override connectedCallback(): void {

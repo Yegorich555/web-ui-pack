@@ -1,4 +1,4 @@
-import { WUPCssIconHover, WUPcssIcon } from "../styles";
+import { inheritDefaults } from "../baseElement";
 import WUPSwitchControl from "./switch";
 
 const tagName = "wup-check";
@@ -18,6 +18,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with checkbox
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/check}
        *  @see {@link WUPCheckControl} */
       [tagName]: WUP.Base.ReactHTML<WUPCheckControl> & WUP.Check.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -31,6 +32,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with checkbox
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/check}
        *  @see {@link WUPCheckControl} */
       [tagName]: HTMLAttributes<WUPCheckControl> & WUP.Check.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -58,60 +60,23 @@ declare module "preact/jsx-runtime" {
  * </label> */
 export default class WUPCheckControl<
   TOptions extends WUP.Check.Options = WUP.Check.Options,
-  EventMap extends WUP.Check.EventMap = WUP.Check.EventMap
-> extends WUPSwitchControl<TOptions, EventMap> {
+  EventMap extends WUP.Check.EventMap = WUP.Check.EventMap,
+  ValueType = boolean
+> extends WUPSwitchControl<TOptions, EventMap, ValueType> {
   #ctr = this.constructor as typeof WUPCheckControl;
 
   static get $styleRoot(): string {
-    return `:root {
-        --ctrl-check-off-bg: #fff;
-        --ctrl-check-on-bg: #00778d;
-        --ctrl-check-on: #fff;
-        --ctrl-check-border-r: 3px;
-        --ctrl-check-shadow: #0003;
-        --ctrl-check-size: 16px;
-      }
-      [wupdark] {
-        --ctrl-check-off-bg: #e7e7e7;
-        --ctrl-check-shadow: #000;
-      }`;
+    return "";
   }
 
   /** NiceToHave: split to wup-icheck to result with wup-table etc. */
   static get $style(): string {
-    return `${super.$style}
-       :host [icon] {
-        position: initial;
-        height: var(--ctrl-check-size);
-        width: var(--ctrl-check-size);
-        min-width: var(--ctrl-check-size);
-        border-radius: var(--ctrl-check-border-r);
-        background: var(--ctrl-check-off-bg);
-        box-shadow: 0 0 2px 0 var(--ctrl-check-shadow);
-      }
-      :host[checked] [icon] {
-        background: var(--ctrl-check-on-bg);
-      }
-      :host[checked] [icon]:after {
-        --ctrl-icon: var(--ctrl-check-on);
-        --ctrl-icon-img: var(--wup-icon-check);
-        ${WUPcssIcon}
-        content: "";
-        top: 0; left: 0;
-        padding: 0;
-        border-radius: 0;
-        height: 100%; width: 100%;
-      }
-      ${WUPCssIconHover(":host", "[icon]")}
-      @media not all and (prefers-reduced-motion) {
-        :host [icon] { transition: background-color var(--anim); }
-      }`;
+    return super.$style;
   }
 
-  static $defaults: WUP.Check.Options = {
-    ...WUPSwitchControl.$defaults,
-    // WARN: it's shared =>  validationRules: { ...WUPSwitchControl.$defaults.validationRules },
-  };
+  static $defaults: WUP.Check.Options = inheritDefaults(WUPSwitchControl.$defaults, {
+    // WARN: validationRules are shared with WUPSwitchControl; to add own rules use `validationRules: inheritDefaults(WUPSwitchControl.$defaults.validationRules, {...})`
+  });
 
   protected override renderControl(): void {
     this.$refInput.id = this.#ctr.$uniqueId;

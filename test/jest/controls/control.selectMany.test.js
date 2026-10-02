@@ -57,6 +57,9 @@ describe("control.selectMany", () => {
       "w-allownewvalue": { value: true },
       "w-opencase": { value: 1 },
       "w-readonlyinput": { value: true },
+      "w-popupoffsetfitelement": { value: [2, 3] },
+      "w-popupminwidthbytarget": { value: false },
+      "w-menuescrollback": { value: true },
       "w-multiple": { skip: true },
       "w-items": { value: getItems() },
       "w-sortable": { value: true },
@@ -199,8 +202,55 @@ describe("control.selectMany", () => {
     document.body.focus();
     await h.wait();
     expect(el.$refInput.value).toBe(" ");
+  });
 
-    expect(() => el.clearFilterMenuItems()).not.toThrow(); // for coverage
+  test("option [hideSelected]: menu filtering", async () => {
+    el.$options.hideSelected = true;
+    el.$value = [10];
+    await h.wait(10);
+    HTMLInputElement.prototype.focus.call(el.$refInput);
+    await h.wait();
+    const visible = () => el._menuItems.all.filter((li) => li.style.display !== "none").map((li) => li.textContent);
+    expect(visible()).toStrictEqual(["Mikky", "Leo", "Splinter"]);
+
+    // selected item is hidden immediately (without timeout)
+    el._menuItems.all[1].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(visible()).toStrictEqual(["Leo", "Splinter"]);
+    await h.wait();
+
+    // text-filter is reset on re-opening after Escape
+    await h.userTypeText(el.$refInput, "s");
+    expect(visible()).toStrictEqual(["Splinter"]);
+    expect(handledKeydown("Escape")).toBe(true);
+    await h.wait();
+    expect(el.$isOpened).toBe(false);
+    expect(el.$refInput.value).toBe("");
+    await h.userClick(el);
+    await h.wait();
+    expect(el.$isOpened).toBe(true);
+    expect(visible()).toStrictEqual(["Leo", "Splinter"]);
+    el.blur();
+    await h.wait();
+
+    // values are compared via $isEqual
+    el.$options.items = [
+      { value: { id: 1 }, text: "A" },
+      { value: { id: 2 }, text: "B" },
+    ];
+    await h.wait(10);
+    el.$value = [{ id: 1 }]; // another object but equal to item.value
+    await h.wait(10);
+    HTMLInputElement.prototype.focus.call(el.$refInput);
+    await h.wait();
+    expect(el.$refItems.map((a) => a.textContent)).toStrictEqual(["A"]);
+    expect(visible()).toStrictEqual(["B"]);
+
+    // de-selecting via menu-click also compares via $isEqual
+    el.$options.hideSelected = false;
+    await h.wait(1);
+    el._menuItems.all[0].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(el.$value).toStrictEqual(undefined);
   });
 
   test("animation for removed item", async () => {
@@ -307,6 +357,15 @@ describe("control.selectMany", () => {
     expect(el.querySelector("[focused]").textContent).toBe(getItems()[3].text); // last item
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
     expect(el.querySelector("[focused]").textContent).toBe(getItems()[2].text); // 3rd item
+  });
+
+  test("validation [required] uses static $isEmpty of control", async () => {
+    el.$options.validations = { required: true };
+    await h.wait(1);
+    el.$value = [];
+    expect(el.$validate()).toBe("This field is required");
+    el.$value = [10];
+    expect(el.$validate()).toBeFalsy();
   });
 
   test("option [hideSelected]", async () => {
@@ -604,6 +663,31 @@ describe("control.selectMany", () => {
     await h.wait(1);
     expect(el.$value).toStrictEqual(["grey"]); // cover case when $value is undefined
     expect(onChange).toBeCalledTimes(1);
+
+    // menu item (New option)
+    onChange.mockClear();
+    await h.userTypeText(el.$refInput, "grey");
+    await h.wait(1);
+    expect(el.querySelector("[new]").style.display).toBe("none"); // no-duplicates
+    await h.userTypeText(el.$refInput, "Le");
+    await h.wait(1);
+    expect(el.querySelector("[new]").outerHTML).toMatchInlineSnapshot(
+      `"<li role="option" new="" style="">Le (New option)</li>"`
+    );
+    await h.userClick(el.querySelector("[new]"));
+    await h.wait();
+    expect(el.$value).toStrictEqual(["grey", "Le"]);
+    expect(onChange).toBeCalledTimes(1);
+    expect(el.$refInput.value).toBe("");
+    expect(el.$isOpened).toBe(true); // menu stays opened for multiple
+    expect(el.querySelector("[new]").style.display).toBe("none");
+    expect(el._menuItems.filtered).toBe(undefined);
+
+    el.$value = undefined;
+    await h.wait(1);
+    await h.userTypeText(el.$refInput, "Le");
+    await h.wait(1);
+    expect(el.querySelector("[new]").style.display).toBe(""); // cover case when $value is undefined
   });
 
   test("sortable: keyboard", async () => {
@@ -716,6 +800,108 @@ describe("control.selectMany", () => {
     await h.wait(1);
 
     expect(handledKeydown("W", { shiftKey: true })).toBe(false);
+  });
+
+  test("undo/redo for value", async () => {
+    const undo = () => handledKeydown("z", { code: "KeyZ", ctrlKey: true });
+    const redo = () => handledKeydown("z", { code: "KeyZ", ctrlKey: true, shiftKey: true });
+    const onChanged = jest.fn();
+    el.$value = [10];
+    el.$options.sortable = true;
+    el.$options.clearButton = true;
+    await h.wait(10);
+    el.addEventListener("$change", onChanged);
+    HTMLInputElement.prototype.focus.call(el.$refInput);
+    await h.wait();
+    expect(undo()).toBe(false); // no history
+    expect(redo()).toBe(false);
+
+    // select items
+    await h.userClick(el.$refPopup.querySelectorAll("li")[1]);
+    await h.userClick(el.$refPopup.querySelectorAll("li")[2]);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 30]);
+    onChanged.mockClear();
+
+    expect(undo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(el.$refItems.map((a) => a.textContent)).toStrictEqual(["Donny", "Mikky"]);
+    expect(onChanged).toBeCalledTimes(1);
+    expect(onChanged.mock.lastCall[0].detail.reason).toBe(3); // SetValueReasons.userInput
+    expect(undo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10]);
+    expect(undo()).toBe(false); // end of history: value [10] is set programmatically
+
+    expect(redo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(handledKeydown("y", { code: "KeyY", ctrlKey: true })).toBe(true); // redo
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 30]);
+    expect(redo()).toBe(false); // end of history
+    expect(handledKeydown("z", { code: "KeyZ", metaKey: true })).toBe(true); // undo on MacOS
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(handledKeydown("z", { code: "KeyZ", ctrlKey: true, altKey: true })).toBe(false); // ignored
+    expect(el.$value).toStrictEqual([10, 20]);
+
+    // new change clears redo-history
+    await h.userClick(el.$refPopup.querySelectorAll("li")[3]);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+    expect(redo()).toBe(false);
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+
+    // remove item via keyboard
+    el.$refInput.selectionStart = 0;
+    el.$refInput.selectionEnd = 0;
+    expect(handledKeydown("ArrowLeft")).toBe(true); // focus last item
+    expect(handledKeydown("Backspace")).toBe(true); // remove focused item
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20]);
+    expect(undo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+    expect(el.$refItems.map((a) => a.textContent)).toStrictEqual(["Donny", "Mikky", "Splinter"]);
+    expect(el.$refItems.some((a) => a.hasAttribute("focused"))).toBe(false); // focused item is reset
+
+    // sorting via keyboard
+    expect(handledKeydown("ArrowLeft")).toBe(true); // focus last item
+    expect(handledKeydown("ArrowLeft", { shiftKey: true })).toBe(true); // move to left
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 40, 20]);
+    expect(undo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+    expect(el.$refItems.map((a) => a.textContent)).toStrictEqual(["Donny", "Mikky", "Splinter"]);
+
+    // clear button
+    el.$refBtnClear.click();
+    await h.wait();
+    expect(el.$value).toBe(undefined);
+    expect(undo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+
+    // input has text: browser handles undo itself
+    await h.userTypeText(el.$refInput, "mi");
+    expect(undo()).toBe(false);
+    expect(el.$value).toStrictEqual([10, 20, 40]);
+    await h.userRemove(el.$refInput, { removeCount: 2 });
+    await h.wait();
+    expect(el.$refInput.value).toBe("");
+
+    // value changed programmatically: history is reset
+    expect(redo()).toBe(true);
+    await h.wait();
+    expect(el.$value).toBe(undefined);
+    el.$value = [20];
+    await h.wait();
+    expect(undo()).toBe(false);
+    expect(redo()).toBe(false);
+    expect(el.$value).toStrictEqual([20]);
   });
 
   test("sortable: drag&drop", async () => {

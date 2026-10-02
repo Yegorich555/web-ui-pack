@@ -1,0 +1,33 @@
+@import "styles";
+
+:root {
+  --modal-anim-t: 400ms;
+}
+
+:host {
+  --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  z-index: 8000;
+  display: none;
+  opacity: 0;
+  position: fixed !important;
+  border-radius: var(--border-radius);
+  padding: var(--base-margin);
+  box-sizing: border-box;
+  white-space: pre-line;
+  overflow: auto;
+  overflow: overlay; // overlay doesn't work on some browsers
+
+  &[open] {
+    display: block;
+  }
+
+  &[show] {
+    opacity: 1;
+  }
+
+  @include wup-scrollSmall;
+
+  @media not all and (prefers-reduced-motion) {
+    transition: opacity var(--modal-anim), transform var(--modal-anim);
+  }
+}

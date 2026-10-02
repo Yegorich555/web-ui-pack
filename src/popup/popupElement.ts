@@ -10,8 +10,9 @@ import animateStack from "../helpers/animateStack";
 import isIntoView from "../helpers/isIntoView";
 import viewportSize from "../helpers/viewportSize";
 import WUPBaseModal from "../baseModal";
+import useTooltip from "./popupTooltip";
 
-const attachLst = new Map<HTMLElement | SVGElement, () => void>();
+const attachLst = new WeakMap<HTMLElement | SVGElement, () => void>();
 
 const tagName = "wup-popup";
 declare global {
@@ -22,9 +23,20 @@ declare global {
 
 // details here https://react.dev/blog/2024/04/25/react-19-upgrade-guide#the-jsx-namespace-in-typescript
 declare module "react" {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface HTMLAttributes<T> {
+    /** Enable custom tooltip (shows on hover); requires {@link WUPPopupElement.$useTooltip}
+     * @tutorial
+     * * ```<div w-tooltip="Some text" >...</div>```
+     * * ```<div aria-label="Some text" w-tooltip="" >...</div>```
+     * * ```<div aria-describedby="tip-id" w-tooltip="" >...</div><p id="tip-id" hidden>Same text for many</p>``` */
+    "w-tooltip"?: string;
+  }
+
   namespace JSX {
     interface IntrinsicElements {
       /**  Popup element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/popup}
        *  @see {@link WUPPopupElement} */
       [tagName]: WUP.Base.ReactHTML<WUPPopupElement> & WUP.BaseModal.JSXProps & WUP.Popup.Attributes; // add element to tsx/jsx intellisense (react)
     }
@@ -34,12 +46,21 @@ declare module "react" {
 // @ts-ignore - because Preact & React can't work together
 declare module "preact/jsx-runtime" {
   namespace JSX {
+    // WARN: in opposite to React preact declares HTMLAttributes inside the JSX-namespace
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    interface HTMLAttributes<RefType> {}
+    interface HTMLAttributes<RefType> {
+      /** Enable custom tooltip (shows on hover); requires {@link WUPPopupElement.$useTooltip}
+       * @tutorial
+       * * ```<div w-tooltip="Some text" >...</div>```
+       * * ```<div aria-label="Some text" w-tooltip="" >...</div>```
+       * * ```<div aria-describedby="tip-id" w-tooltip="" >...</div><p id="tip-id" hidden>Same text for many</p>``` */
+      "w-tooltip"?: string;
+    }
     interface IntrinsicElements {
       /**  Popup element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/popup}
        *  @see {@link WUPPopupElement} */
-      [tagName]: HTMLAttributes<WUPPopupElement> & WUP.Modal.JSXProps; // add element to tsx/jsx intellisense (preact)
+      [tagName]: HTMLAttributes<WUPPopupElement> & WUP.BaseModal.JSXProps & WUP.Popup.Attributes; // add element to tsx/jsx intellisense (preact)
     }
   }
 }
@@ -68,7 +89,7 @@ declare module "preact/jsx-runtime" {
  * const detach = WUPPopupElement.$attach(
                     { target: btn, text: "Some text content here", openCase: PopupOpenCases.onFocus | PopupOpenCases.onClick },
                     (popup) => { popup.className = "popup-class-here"; }
-                  )'
+                  )
  *```
  * HTML
  * ```html
@@ -80,11 +101,11 @@ declare module "preact/jsx-runtime" {
  * * You can set minWidth, minHeight to prevent squeezing of popup or don't use rule '.$adjust'
  * * Don't override styles: display, transform (possible to override only for animation)
  * * Don't use inline styles: maxWidth, maxHeight, minWidth, minHeight
- * * If target removed (when popup $isOpened) and appended again you need to update $options.target (because $options.target cleared)
+ * * If target removed (when popup $isOpened) and appended again you need to update $options.target
  * * Popup has overflow 'auto'; If you change to 'visible' it will apply maxWidth/maxHeight to first children (because popup must be restricted by maxSize to avoid layout issues)
- * * During the closing attr 'hide' is appended only if css-animation-duration is detected
+ * * During the closing attr 'show' is removed but attr 'open' is kept until hide-animation ends
  * * Popup can't be more than 100vw & 100vh (impossible to disable the rule)
- * * known issue: popup can be positioned wrong if parent has transfrom style: https://stackoverflow.com/revisions/15256339/2 this is css-core issue. To fix: place popup outside such parent or remove transform style on parent */
+ * * known issue: popup can be positioned wrong if parent has transform style: https://stackoverflow.com/revisions/15256339/2 this is css-core issue. To fix: place popup outside such parent or remove transform style on parent */
 export default class WUPPopupElement<
   TOptions extends WUP.Popup.Options = WUP.Popup.Options,
   Events extends WUP.Popup.EventMap = WUP.Popup.EventMap
@@ -163,61 +184,11 @@ export default class WUPPopupElement<
   };
 
   static get $styleRoot(): string {
-    return `
-      :root {
-        --popup-anim-t: 300ms;
-        --popup-text: inherit;
-        --popup-bg: #fff;
-        --popup-shadow: #0003;
-        --tooltip-text: inherit;
-        --tooltip-bg: rgba(255,255,255,0.9);
-        --tooltip-shadow: #0003;
-      }
-      [wupdark] {
-        --popup-text: #d8d8d8;
-        --popup-bg: #2b3645;
-        --popup-shadow: #0006;
-        --tooltip-text: #d8d8d8;
-        --tooltip-bg: rgba(16,70,82,0.9);
-        --tooltip-shadow: #0006;
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host,
-      :host-arrow {
-        --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-        opacity: 0;
-      }
-      :host {
-        top:0;left:0;
-        padding: 4px; margin: 0;
-        box-shadow: 0 1px 4px 0 var(--popup-shadow);
-        color: var(--popup-text);
-        background: var(--popup-bg);
-        text-overflow: ellipsis;
-      }
-      :host[tooltip],
-      :host[tooltip]+:host-arrow {
-        --popup: var(--tooltip-text);
-        --popup-bg: var(--tooltip-bg);
-        --popup-shadow: var(--tooltip-shadow);
-      }
-      :host[show]+:host-arrow { opacity: 1; }
-      @media not all and (prefers-reduced-motion) {
-        :host,
-        :host+:host-arrow {
-          transition: opacity var(--popup-anim);
-        }
-      }
-      :host[w-animation] {
-        transition-property: none;
-        opacity: 1;
-      }
-      :host[w-animation=stack] {
-        overflow: visible;
-      }`;
+    return super.$style;
   }
 
   /** Default options. Change it to configure default behavior */
@@ -239,6 +210,19 @@ export default class WUPPopupElement<
     return d as unknown as T;
   }
 
+  /** Listen for events to show tooltip; enable attr `[w-tooltip]` (see option `attr`) on HTMLElements
+   * @tutorial Rules (according to WCAG 1.4.13)
+   * * tooltip is shown on hover & keyboard focus (`:focus-visible`; only with option `showOnFocus`)
+   * * hoverable: pointer can be moved from target to tooltip (hides after `hoverCloseTimeout`)
+   * * dismissible: by pressing Escape
+   * * persistent: visible until target is hovered or focused
+   * @tutorial Troubleshooting:
+   * * call it several times with different `attr` to apply different options; all calls share a single set of listeners
+   * * if element has several registered attrs then options of the first call are applied */
+  static $useTooltip(options?: WUP.Popup.TooltipOptions): { dispose: () => void } {
+    return useTooltip(options);
+  }
+
   /** Listen for target according to openCase and create/remove popup when it's required (by open/close).
    *  This helps to avoid tons of hidden popups on HTML;
    *  Firing detach doesn't required if target removed by target.remove() or target.parent.removeChild(target);
@@ -251,10 +235,10 @@ export default class WUPPopupElement<
    *       text: "Some text here",
    *       openCase: PopupOpenCases.onClick,
    *     },
-   *     // (el) => el.class = "popup-attached"
+   *     // (el) => el.className = "popup-attached"
    *   );
    * @tutorial Troubleshooting:
-   * * $attach doesn't work with openCase.always it doesn't make sense
+   * * $attach doesn't work with `PopupOpenCases.onInit` it doesn't make sense
    * * every new attach on the same target > re-init previous (1 attach per target is possible)
    * * Firing detach() doesn't required if target removed by `target.remove()` or `target.parent.removeChild(target)`;
    * * If popup is hidden and target is removed via `target.parent.innerHTML="another content"` you should fire detach() to avoid memoryLeak
@@ -285,7 +269,6 @@ export default class WUPPopupElement<
       const lstn = new PopupListener(
         opts,
         (v, e) => {
-          isHiding = false;
           const isCreate = !popup;
           if (!popup) {
             const p = document.body.appendChild(document.createElement(opts.tagName ?? tagName) as T);
@@ -303,15 +286,18 @@ export default class WUPPopupElement<
             callback?.call(this, p);
           }
 
-          if (!popup.goOpen.call(popup, v, e)) {
-            /* istanbul ignore else */
+          popup.goOpen.call(popup, v, e);
+          if (!popup.$isOpened || popup.$isClosing) {
+            // prevented via $willOpen; if popup is closing it's removed by close-callback
             if (isCreate) {
-              popup!._refListener = undefined; // otherwise remove() destroys events
+              popup._refListener = undefined; // otherwise remove() destroys events
               popup.remove.call(popup);
+              popup = undefined;
             }
             return null;
           }
 
+          isHiding = false;
           return popup;
         },
         async (v, e) => {
@@ -365,7 +351,7 @@ export default class WUPPopupElement<
 
   _refListener?: PopupListener;
   #attach?: () => PopupListener; // func to use alternative target
-  /** Called after gotReady() and $open() (to re-init according to options) */
+  /** Called from gotReady() and gotChanges() (to re-init according to options) */
   protected init(): void {
     this.disposeListener(); // remove previously added events
 
@@ -382,7 +368,7 @@ export default class WUPPopupElement<
           this._opts as typeof this._opts & { target: HTMLElement },
           (v, e) => {
             this.goOpen(v, e);
-            return this.$isOpened ? this : null;
+            return this.$isOpened && !this.$isClosing ? this : null; // closing is kept if opening is prevented
           },
           (v, e) => {
             this.goClose(v, e);
@@ -403,7 +389,8 @@ export default class WUPPopupElement<
     }
   }
 
-  /** Defines target on show; @returns Element | Error */
+  /** Defines target on show; @returns Element
+   * @throws Error if target isn't found */
   defineTarget(): HTMLElement | SVGElement {
     let el: Element | null;
     const attrTrg = this.getAttribute("w-target"); // NiceToHave: re-use automated parseAttr()
@@ -524,13 +511,10 @@ export default class WUPPopupElement<
       .filter((v) => (v as WUP.Popup.Place.AlignFunc).$adjust)
       .map((v) => (v as WUP.Popup.Place.AlignFunc).$adjust);
 
-    const otherRules = Object.keys(PopupPlacements)
-      .filter(
-        (k) =>
-          !this._opts.placement.includes(PopupPlacements[k].$middle) &&
-          !adjustRules.includes(PopupPlacements[k].$middle.$adjust)
-      )
-      .map((k) => PopupPlacements[k].$middle.$adjust);
+    // WARN: $centerScreen is skipped because it's applied only if user pointed it
+    const otherRules = [PopupPlacements.$top, PopupPlacements.$bottom, PopupPlacements.$left, PopupPlacements.$right]
+      .filter((p) => !this._opts.placement.includes(p.$middle) && !adjustRules.includes(p.$middle.$adjust))
+      .map((p) => p.$middle.$adjust);
 
     // init array of possible solutions to position + align popup
     this.#state!.placements = [
@@ -817,6 +801,8 @@ export default class WUPPopupElement<
       width: 0,
     };
 
+    /** Edges of scrollParent that cut the target; for animation stack popup is cut the same way; Infinity means edge doesn't cut */
+    let cut: WUP.Popup.Place.PositionRect | null = null;
     // check if target hidden by scrollParent
     if (this.#state!.scrollParents) {
       const viewResult = isIntoView(t.el, { scrollParents: this.#state!.scrollParents, elRect: t });
@@ -835,10 +821,34 @@ export default class WUPPopupElement<
       /* istanbul ignore next */
       sp = sp === document.documentElement ? document.body : sp; // when scrollParent is html element then rect.top can be negative: to test place target at bottom body+margin target+html vert.scroll
       const scrollRect = getBoundingInternalRect(sp); // warn: it's important to fit only first parent
-      t.top = Math.max(scrollRect.top, t.top);
-      t.bottom = Math.min(scrollRect.bottom, t.bottom);
-      t.left = Math.max(scrollRect.left, t.left);
-      t.right = Math.min(scrollRect.right, t.right);
+      if (this._opts.animation === PopupAnimations.stack) {
+        /* stack-items must be aligned to the whole target: so popup isn't shifted to the visible part of target
+           but is hidden by the same edges of scrollParent (so it can overflow fitElement there) */
+        cut = { top: -Infinity, right: Infinity, bottom: Infinity, left: -Infinity };
+        if (tdef.top < scrollRect.top) {
+          cut.top = scrollRect.top;
+          fit.top = -Infinity;
+        }
+        if (tdef.bottom > scrollRect.bottom) {
+          cut.bottom = scrollRect.bottom;
+          fit.bottom = Infinity;
+        }
+        if (tdef.left < scrollRect.left) {
+          cut.left = scrollRect.left;
+          fit.left = -Infinity;
+        }
+        if (tdef.right > scrollRect.right) {
+          cut.right = scrollRect.right;
+          fit.right = Infinity;
+        }
+        fit.width = fit.right - fit.left;
+        fit.height = fit.bottom - fit.top;
+      } else {
+        t.top = Math.max(scrollRect.top, t.top);
+        t.bottom = Math.min(scrollRect.bottom, t.bottom);
+        t.left = Math.max(scrollRect.left, t.left);
+        t.right = Math.min(scrollRect.right, t.right);
+      }
     }
     t.height = t.bottom - t.top;
     t.width = t.right - t.left;
@@ -895,7 +905,9 @@ export default class WUPPopupElement<
       }
       !isOk && console.error(`${this.tagName}. Impossible to place without overflow`, this);
 
-      if (this.$refArrow) {
+      if (this.$refArrow && pos.attr === "center") {
+        this.$refArrow.style.display = "none"; // arrow doesn't make sense if popup isn't attached to target
+      } else if (this.$refArrow) {
         // change arrowSize if it's bigger than popup
         const checkSize = (relatedSize: number): void => {
           // if we have border-radius of popup we need to include in offset to prevent overflow between arrow and popup
@@ -949,6 +961,18 @@ export default class WUPPopupElement<
       styleTransform(this, "translate", `${pos.left - dx}px, ${pos.top - dy}px`);
       this.$refArrow && styleTransform(this.$refArrow, "translate", `${pos.arrowLeft - dx}px, ${pos.arrowTop - dy}px`);
     }
+    const insets = cut && [
+      cut.top - pos.top,
+      pos.left + this.offsetWidth - cut.right,
+      pos.top + this.offsetHeight - cut.bottom,
+      cut.left - pos.left,
+    ];
+    if (insets?.some(Number.isFinite)) {
+      // negative inset: side isn't clipped (stack-items are moved outside popup during the animation)
+      this.style.clipPath = `inset(${insets.map((v) => (Number.isFinite(v) ? `${v}px` : "-100vmax")).join(" ")})`;
+    } else if (this.style.clipPath) {
+      this.style.clipPath = "";
+    }
     if (was) {
       // otherwise getBoundingClientRect returns element position according to scale applied from dropdownAnimation
       this.style.transform += ` ${was}`; // rollback scale transformation
@@ -963,6 +987,7 @@ export default class WUPPopupElement<
     super.resetState();
     delete this._stopAnimation;
     this.style.display = "";
+    this.style.clipPath = "";
     this.#state && window.cancelAnimationFrame(this.#state.frameId);
     this.#state = undefined;
 
@@ -996,7 +1021,5 @@ export default class WUPPopupElement<
 customElements.define(tagName, WUPPopupElement);
 // manual testcase: show as dropdown & scroll parent - blur effect can appear
 
-// NiceToHave add 'position: centerScreen' to place as modal when content is big and no spaces anymore
 // NiceToHave 2 popups can overflow each other: need option to try place several popups at once without overflow. Example on wup-pwd page: issue with 2 errors
 // NiceToHave animation.default animates to opacity: 1 but need to animate to opacityFromCss
-// todo add tooltip hook + need to figure out to use tooltipTargetId or similar pointer as works with area-describedby="id-of-content" for cases when a lot of tooltips in table must show same message

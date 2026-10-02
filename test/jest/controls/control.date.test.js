@@ -77,7 +77,10 @@ describe("control.date", () => {
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       "w-readonlyinput": { value: true },
+      "w-popupoffsetfitelement": { value: [2, 3] },
+      "w-popupminwidthbytarget": { value: true },
       "w-opencase": { value: 1 },
+      "w-menuescrollback": { value: true },
 
       "w-mask": { value: "#0-#0-0000", nullValue: "0000-00-00" },
       "w-maskholder": { value: "dd-mm-yyyy", nullValue: "YYYY-MM-DD" },
@@ -88,6 +91,7 @@ describe("control.date", () => {
       "w-max": { value: "2022-05-21", parsedValue: new Date("2022-05-21") },
       "w-exclude": { value: [new Date("2009-02-06")] },
       "w-startwith": { skip: true }, // tested manually
+      "w-endwith": { skip: true }, // tested manually
       "w-firstweekday": { value: 1 },
       "w-sync": { skip: true }, // tested manually
     },
@@ -237,6 +241,100 @@ describe("control.date", () => {
       HTMLInputElement.prototype.focus.call(el.$refInput);
       await h.wait();
       expect(el.$refPopup.firstChild.$options.utc).toBe(true);
+    });
+
+    test("endWith based on format", async () => {
+      const reopen = async () => {
+        el.blur();
+        await h.wait();
+        HTMLInputElement.prototype.focus.call(el.$refInput);
+        await h.wait();
+        return el.$refPopup.firstChild;
+      };
+
+      el.$options.format = "yyyy-mm";
+      el.$options.mask = undefined;
+      el.$options.maskholder = undefined;
+      el.$initValue = new Date("2022-05-20T23:50:00.000Z");
+      await h.wait(1);
+      expect(el.$options.mask).toBe("0000-00");
+      expect(el.$options.maskholder).toBe("yyyy-mm");
+      expect(el.$refInput.value).toBe("2022-05");
+
+      let clnd = await reopen();
+      expect(clnd.$options.endWith).toBe(PickersEnum.Month);
+      expect(el.querySelector("[calendar='month']")).toBeTruthy();
+      expect(el.querySelector("[aria-selected]")?.textContent).toBe("May");
+      await h.userClick(clnd.$refCalendarItems.children[6]); // Jul
+      await h.wait();
+      expect(el.$isOpened).toBe(false);
+      expect(el.$value?.toISOString()).toBe("2022-07-01T23:50:00.000Z"); // 1st day of month with saved hours
+      expect(el.$refInput.value).toBe("2022-07");
+
+      // user types value
+      expect(await h.userTypeText(el.$refInput, "202208")).toBe("2022-08|");
+      await h.wait(150);
+      expect(el.$value?.toISOString()).toBe("2022-08-01T23:50:00.000Z");
+      expect(el.$isValid).toBe(true);
+
+      // min/max/exclude are compared by month
+      el.$options.min = new Date("2022-05-20");
+      el.$options.max = new Date("2022-10-10");
+      el.$options.exclude = [new Date("2022-09-15")];
+      el.$value = new Date("2022-05-01");
+      expect(el.$validate()).toBeFalsy();
+      el.$value = new Date("2022-04-30");
+      expect(el.$validate()).toBe("Min value is 2022-05");
+      el.$value = new Date("2022-10-31");
+      expect(el.$validate()).toBeFalsy();
+      el.$value = new Date("2022-11-01");
+      expect(el.$validate()).toBe("Max value is 2022-10");
+      el.$value = new Date("2022-09-01");
+      expect(el.$validate()).toBe("This value is disabled");
+      el.$value = new Date("2022-08-01");
+      expect(el.$validate()).toBeFalsy();
+
+      // format with year only
+      el.$options.format = "yyyy";
+      el.$options.mask = undefined;
+      el.$options.maskholder = undefined;
+      await h.wait(1);
+      expect(el.$options.mask).toBe("0000");
+      expect(el.$validate()).toBe("This value is disabled"); // because excluded 2022-09-15 is in the same year
+      el.$options.exclude = undefined;
+      el.$value = new Date("2023-01-01");
+      expect(el.$validate()).toBe("Max value is 2022");
+      el.$value = new Date("2021-12-31");
+      expect(el.$validate()).toBe("Min value is 2022");
+      el.$options.min = undefined;
+      el.$options.max = undefined;
+
+      clnd = await reopen();
+      expect(clnd.$options.endWith).toBe(PickersEnum.Year);
+      expect(el.querySelector("[calendar='year']")).toBeTruthy();
+      await h.userClick(clnd.$refCalendarItems.children[1]); // 2019
+      await h.wait();
+      expect(el.$isOpened).toBe(false);
+      expect(el.$value?.toISOString()).toBe("2019-01-01T00:00:00.000Z");
+      expect(el.$refInput.value).toBe("2019");
+
+      // without utc
+      el.$options.utc = false;
+      el.$options.validations = { max: new Date(2022, 5, 15) };
+      el.$value = new Date(2023, 0, 1);
+      expect(el.$validate()).toBe("Max value is 2022");
+      el.$value = new Date(2022, 11, 31, 23, 50);
+      expect(el.$validate()).toBeFalsy();
+      el.$options.utc = true;
+
+      // option has higher priority than format
+      el.$options.endWith = PickersEnum.Day;
+      el.$value = new Date("2019-05-20");
+      el.$options.validations = { min: new Date("2019-05-21") };
+      expect(el.$validate()).toBe("Min value is 2019"); // compared by day
+      clnd = await reopen();
+      expect(clnd.$options.endWith).toBe(PickersEnum.Day);
+      expect(el.querySelector("[calendar='day']")).toBeTruthy();
     });
   });
 

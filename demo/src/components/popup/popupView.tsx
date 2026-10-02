@@ -98,6 +98,7 @@ export default function PopupView() {
           />
         ))}
       </fieldset>
+      <br />
       <Example1 />
       <Example2 />
       <Example3 />

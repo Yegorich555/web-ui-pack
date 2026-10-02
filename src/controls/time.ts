@@ -1,11 +1,10 @@
 /* eslint-disable prefer-destructuring */
-import { AttributeMap, AttributeTypes } from "../baseElement";
+import { AttributeMap, AttributeTypes, inheritDefaults } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import WUPScrolled from "../helpers/scrolled";
-import localeInfo from "../objects/localeInfo";
+import localeInfo, { WUPTimeFormat } from "../objects/localeInfo";
 import WUPTimeObject from "../objects/timeObject";
 import WUPPopupElement from "../popup/popupElement";
-import { WUPcssIcon } from "../styles";
 import WUPBaseComboControl, { MenuCloseCases, MenuOpenCases } from "./baseCombo";
 import { SetValueReasons } from "./baseControl";
 
@@ -15,9 +14,9 @@ declare global {
   namespace WUP.Time {
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {
-      /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min time is {x}` */
+      /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min value is {x}` */
       min: WUPTimeObject;
-      /** Enabled if option [min] is pointed; if $value > pointed shows message 'Max time is {x}` */
+      /** Enabled if option [max] is pointed; if $value > pointed shows message 'Max value is {x}` */
       max: WUPTimeObject;
       /** User can't select time in excluded range */
       exclude: { test: (v: WUPTimeObject, c: WUPTimeControl) => boolean };
@@ -28,13 +27,13 @@ declare global {
        * @example `hh:mm a` or `h:m`
        * @tutorial Troubleshooting
        * * with changing $options.format need to change/reset mask/maskholder also */
-      format: string;
+      format: WUPTimeFormat | (string & {});
       /** Increment value in minutes
        *  @defaultValue 1
        * @tutorial Troubleshooting
        * If set step = 5 user still able to set minutes not divisible step */
       step: number;
-      /** Set `false` to hide menu buttons 'Ok' & 'Cancel'
+      /** Set `true` to hide menu buttons 'Ok' & 'Cancel'
        * @tutorial Troubleshooting
        * in this case any changing selection in menu changes value & input; so user don't need to press Enter
        * but if press escape: menu closed and value reverted to that was before
@@ -47,22 +46,26 @@ declare global {
       /** User can't select time in excluded range */
       exclude: { test: (v: WUPTimeObject, c: WUPTimeControl) => boolean } | null;
     }
-    interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions {}
+    interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions {
+      /** Sets minWidth of popup-menu 100% of control width (option `minWidthByTarget` of `<wup-popup/>`)
+       * @defaultValue false */
+      popupMinWidthByTarget: boolean;
+    }
     interface JSXProps<C = WUPTimeControl> extends WUP.BaseCombo.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** Default value in format hh:mm or hh:mm a */
       "w-initValue"?: string;
-      "w-format"?: string;
+      "w-format"?: WUPTimeFormat | (string & {});
       "w-step"?: number;
       "w-menuButtonsOff"?: boolean | "";
-      /** User can't select date less than min; format hh:mm */
+      /** User can't select time less than min; format hh:mm */
       "w-min"?: string;
-      /** User can't select date more than max; format hh:mm */
+      /** User can't select time more than max; format hh:mm */
       "w-max"?: string;
       /** Points that user can't choose
-      /** Global reference to object with array
+       *  Global reference to object with function `test`
        * @example
        * ```js
-       * window.exclude = [new WUPTimeObject("02:30"), ...];
+       * window.exclude = { test: (v, c) => v.hours === 12 };
        * <wup-time w-exclude="window.exclude"></wup-time>
        * ``` */
       "w-exclude"?: string;
@@ -85,6 +88,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with timepicker
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/time}
        *  @see {@link WUPTimeControl} */
       [tagName]: WUP.Base.ReactHTML<WUPTimeControl> & WUP.Time.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -98,6 +102,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with timepicker
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/time}
        *  @see {@link WUPTimeControl} */
       [tagName]: HTMLAttributes<WUPTimeControl> & WUP.Time.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -108,12 +113,17 @@ declare module "preact/jsx-runtime" {
  * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/time}
  * @tutorial Troubleshooting
  * * $options.format related only to displayed text, to work with other time-options like min/max use strict format 'hh:mm'
- * * if increase `--ctrl-icon-size`: change `ctrl-icon-img` to `--ctrl-icon-img: var(--ctrl-time-icon-img-lg)`: otherwise quality is ugly on larger icon
+ * * if increase `--ctrl-icon-size`: change `ctrl-icon-img` to `--ctrl-icon-img: var(--wup-icon-time-lg)`: otherwise quality is ugly on larger icon
  * @example
   const el = document.createElement("wup-time");
   el.$options.name = "time";
   el.$initValue = new WUPTimeObject(22, 15);
-  el.$options.validations = { required: true, min=new WUPTimeObject(01,05), max=new WUPTimeObject(23,00), exclude= };
+  el.$options.validations = {
+    required: true,
+    min: new WUPTimeObject(1, 5),
+    max: new WUPTimeObject(23, 0),
+    exclude: { test: (v) => v.hours === 12 },
+  };
   el.$options.format = "hh-mm A";
   const form = document.body.appendChild(document.createElement("wup-form"));
   form.appendChild(el);
@@ -142,154 +152,11 @@ export default class WUPTimeControl<
 
   // --ctrl-time-icon-img-png-20: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAABiAAAAYgH4krHQAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAYJJREFUOI2l1L9qVUEQBvCf5+JFUBBbJQi2SSW+gLFV88ck2tmaBJE8gen8h/gCWklInzZ5h4BKIkkUtFD7BDGF91jsHLJe7tl70Q+GPTvzzcfOnJ1lMLq4h3V8xFHYLtawEJyRMI/PqIfYAWZKQh28zBLe4RHGcTZsPHzvM95zVIMEG7FfWGwjBSos4ThynvUT5jKx66Uy+jCZiU43zi4+hfNBS2KN1ZbYcsT3Q8tdJz1rK7Mk2MGH4MxX2VFfo9eSVMJvvInvqQpXY7P1D2INNmO9VuFibL7+h+CXWC9VUu1wakjSTUwM4dQVvsdmrEC8hQvYxiuc74tfjvUbaTZraQJKOIPH+IkfuJ/FVkLjLWnQa2mcOkNE4Qo24iD8fW3mSJfxIBxLIwg2aF6bh5G7h9NNcDacx9I4jYobkdPD7f7gi0x0Wbn8TpysmeMng0hVJlpLfVmRrsq5sInwNT3r4anyy2TWSU9LtoepklCOrvT316Rn/wiH2JGuxh3ZD8jxB6xmcQf6l8SZAAAAAElFTkSuQmCC');
   static get $styleRoot(): string {
-    return `:root {
-        --ctrl-time-current: #000;
-        --ctrl-time-current-bg: #d9f7fd;
-        --ctrl-time-off-text: var(--ctrl-err);
-        --ctrl-time-off-bg: none;
-      }
-      [wupdark] {
-        --ctrl-time-current: #25a1b6;
-        --ctrl-time-current-bg: #fff1;
-        --ctrl-time-off-text: var(--ctrl-err);
-        --ctrl-time-off-bg: none;
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    // WARN: "99" & "AM" in ul:after required to fix width changing by font-bold: https://codepen.io/hexagoncircle/pen/WNrYPLo
-    const focusStyle = `
-          content: " ";
-          position: absolute;
-          display: block;
-          top: 50%; left: 50%;
-          transform: translate(-50%,-50%);
-          width: 2em;
-          height: 2em;
-          border-radius: 50%;
-          box-shadow: 0 0 3px 1px var(--ctrl-focus);
-    `;
-    return `${super.$style}
-      :host {
-        --ctrl-icon-img:  var(--wup-icon-time-lg);
-        --ctrl-icon-img: var(--wup-icon-time);
-      }
-      :host > [menu] {
-        overflow: hidden;
-      }
-      :host > [menu] > div:first-child {
-        position: relative;
-      }
-      :host > [menu] ul {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-        cursor: pointer;
-        overflow: auto;
-        text-align: center;
-        display: inline-block;
-        vertical-align: middle;
-      }
-      :host > [menu] li,
-      :host > [menu] mark,
-      :host > [menu] ul:after {
-        padding: 1em;
-        line-height: 1em;
-      }
-      :host > [menu] mark {
-        z-index: -1;
-        position: absolute;
-        display: block;
-        top:50%; left:0; right:0;
-        transform: translateY(-50%);
-        margin: 0; padding-left: 2.8em;
-        font: inherit;
-        background: var(--ctrl-time-current-bg);
-      }
-      :host > [menu] ul:after {
-        content: "99";
-        height: 0;
-        margin:0; padding-top:0; padding-bottom:0;
-        visibility: hidden;
-        overflow: hidden;
-        user-select: none;
-        pointer-events: none;
-        display: block;
-      }
-      :host > [menu] ul:nth-child(3):after {
-         content: "AM";
-      }
-      :host > [menu] li[aria-selected=true],
-      :host > [menu] mark,
-      :host > [menu] ul:after {
-        font-weight: bold;
-        color: var(--ctrl-time-current);
-      }
-      :host > [menu] li[focused] {
-        position: relative;
-      }
-      :host > [menu] li[focused]:after {
-        ${focusStyle}
-      }
-      :host > [menu] li[aria-hidden] {
-        pointer-events: none;
-        touch-action: none;
-        opacity: 0;
-      }
-      :host > [menu] li[disabled] {
-        border-radius: 999px;
-        color: var(--ctrl-time-off-text);
-        --ctrl-focus: var(--ctrl-time-off-text);
-        background-color: var(--ctrl-time-off-bg);
-      }
-      :host [group] {
-        display: flex;
-        border-top: 1px solid var(--base-sep);
-      }
-      :host [group] > button {
-        cursor: pointer;
-        flex: 1 1 50%;
-        display: inline-flex;
-        align-content: center;
-        justify-content: center;
-        height: 2.4em;
-        border: none;
-        border-radius: 0;
-        padding: 0; margin: 0;
-        background: var(--popup-bg);
-      }
-      :host [group] > button:first-child {
-        --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-valid);
-        border-bottom-left-radius: var(--border-radius);
-        border-right: 1px solid var(--base-sep);
-      }
-      :host [group] > button:last-child {
-        --ctrl-icon-img: var(--wup-icon-cross);
-        --ctrl-icon: var(--ctrl-err);
-        border-bottom-right-radius: var(--border-radius);
-      }
-      :host [group] > button:after {
-        ${WUPcssIcon}
-        content: "";
-        padding:0;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        :host > [menu] li:hover {
-          position: relative;
-        }
-        :host > [menu] li:hover:after {
-         ${focusStyle}
-        }
-        :host > [menu] button:hover {
-          box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
-        }
-      }
-      :host > [menu] button[disabled] {
-         box-shadow: inset 0 0 0 99999px rgb(0,0,0,0.05);
-         cursor: not-allowed;
-         --ctrl-icon: inherit;
-      }`;
+    return super.$style;
   }
 
   static get mappedAttributes(): Record<string, AttributeMap> {
@@ -299,10 +166,8 @@ export default class WUPTimeControl<
     return m;
   }
 
-  static $defaults: WUP.Time.Options = {
-    ...WUPBaseComboControl.$defaults,
-    validationRules: {
-      ...WUPBaseComboControl.$defaults.validationRules,
+  static $defaults: WUP.Time.Options = inheritDefaults(WUPBaseComboControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseComboControl.$defaults.validationRules, {
       min: (v, setV, c) =>
         (v === undefined || v < setV) &&
         __wupln(`Min value is ${setV.format((c as WUPTimeControl)._opts.format)}`, "validation"),
@@ -311,14 +176,15 @@ export default class WUPTimeControl<
         __wupln(`Max value is ${setV.format((c as WUPTimeControl)._opts.format)}`, "validation"),
       exclude: (v, fn, c) =>
         (v === undefined || fn.test(v, c as WUPTimeControl)) && __wupln("This value is disabled", "validation"),
-    },
+    }),
     step: 1,
     format: "",
     min: null,
     max: null,
     exclude: null,
     menuButtonsOff: false,
-  };
+    popupMinWidthByTarget: false,
+  });
 
   constructor() {
     super();
@@ -415,10 +281,7 @@ export default class WUPTimeControl<
   }
 
   #isMenuInitPhase?: boolean;
-  /** Value before menu is opened */
-  #valueBeforeMenu?: ValueType;
   protected override renderMenu(popup: WUPPopupElement, menuId: string, rows = 5): HTMLElement {
-    popup.$options.minWidthByTarget = false;
     this.#isMenuInitPhase = true;
     const append = (ul: HTMLElement, v: number | string, twoDigs: boolean, savedV?: number): HTMLElement => {
       const li = ul.appendChild(document.createElement("li"));
@@ -608,9 +471,12 @@ export default class WUPTimeControl<
     openCase: MenuOpenCases,
     e?: MouseEvent | FocusEvent | null
   ): Promise<WUPPopupElement | null> {
+    const wasOpened = this.$isOpened;
     const r = await super.goOpenMenu(openCase, e);
+    if (!r || wasOpened) {
+      return r; // otherwise menu is re-initialized when it's already opened
+    }
 
-    this.#valueBeforeMenu = this.$value;
     this.#lastInputChanged = false;
     const v = this.$value;
     if (this.$refMenuLists && v) {
@@ -662,14 +528,8 @@ export default class WUPTimeControl<
     next !== null && this.trySetValue();
   }
 
-  protected override goCloseMenu(
-    closeCase: MenuCloseCases,
-    e?: MouseEvent | FocusEvent | null | undefined
-  ): Promise<boolean> {
-    closeCase === MenuCloseCases.OnPressEsc &&
-      this._opts.menuButtonsOff &&
-      this.setValue(this.#valueBeforeMenu, SetValueReasons.clear);
-    return super.goCloseMenu(closeCase, e);
+  override canRollbackOnEsc(): boolean {
+    return this._opts.menuButtonsOff || super.canRollbackOnEsc();
   }
 
   protected override valueToInput(v: ValueType | undefined): string {

@@ -71,7 +71,8 @@ declare global {
 declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
-      /**  Modal element
+      /**  Notify element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/notify}
        *  @see {@link WUPNotifyElement} */
       [tagName]: WUP.Base.ReactHTML<WUPNotifyElement> & WUP.Notify.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -84,7 +85,8 @@ declare module "preact/jsx-runtime" {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
-      /**  Modal element
+      /**  Notify element
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/notify}
        *  @see {@link WUPNotifyElement} */
       [tagName]: HTMLAttributes<WUPNotifyElement> & WUP.Notify.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -114,7 +116,7 @@ export default class WUPNotifyElement<
   #ctr = this.constructor as typeof WUPNotifyElement;
 
   static get observedOptions(): Array<keyof WUP.Notify.Options> {
-    return ["autoClose", "closeOnClick", "openCase", "placement", "selfRemove"];
+    return ["autoClose", "closeOnClick", "openCase", "placement", "selfRemove", "pauseOnHover", "pauseOnWinBlur"];
   }
 
   static get observedAttributes(): Array<string> {
@@ -125,85 +127,11 @@ export default class WUPNotifyElement<
   // perfect bg color is: #121212c8
   // WARN: modal-anim shouldn't affect on animation of nested
   static get $styleRoot(): string {
-    return `:root {
-        --notify-anim-t: 400ms;
-        --notify-margin: 1em 0;
-        --notify-w: 300px;
-        --notify-text: #fff;
-        --notify-bg: rgba(16,70,82,0.9);
-        --notify-shadow: #0003;
-        --notify-progress: #009fbc;
-      }
-      [wupdark] {
-        --notify-text: #d8d8d8;
-        --notify-bg: rgba(16,70,82,0.9);
-        --notify-shadow: #0006;
-      }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        --modal-anim: var(--notify-anim-t) cubic-bezier(0,0,0.2,1) 0ms;
-        z-index: 9010;
-        min-height: 64px;
-        max-height: 80vh;
-        width: var(--notify-w);
-        max-width: 80wv;
-        margin: var(--notify-margin);
-        color: var(--notify-text);
-        background: var(--notify-bg);
-        box-shadow: 0 1px 4px 0 var(--notify-shadow);
-      }
-      :host[w-placement=top-left],
-      :host[w-placement=bottom-left] {
-        border-radius: 0 var(--border-radius) var(--border-radius) 0;
-        left: 0;
-        transform: translateX(-100%);
-      }
-      :host[w-placement=top-right],
-      :host[w-placement=bottom-right] {
-        border-radius: var(--border-radius) 0 0 var(--border-radius);
-        right: 0;
-        transform: translateX(100%);
-      }
-      :host[w-placement=top-middle],
-      :host[w-placement="bottom-middle"] {
-        margin-left: auto;
-        margin-right: auto;
-        left:0; right:0;
-        transform: translateY(-100%);
-      }
-      :host[w-placement=top-left],
-      :host[w-placement=top-middle],
-      :host[w-placement=top-right] {
-        top:0;
-      }
-      :host[w-placement=bottom-left],
-      :host[w-placement=bottom-middle],
-      :host[w-placement=bottom-right] {
-        bottom:0;
-      }
-      :host[show] {
-        transform: none;
-      }
-      :host > button[close] {
-        --icon-img: var(--wup-icon-cross);
-        --icon: var(--notify-text);
-        z-index: 10;
-        position: absolute;
-        right:0; top:0;
-        margin: 0.4em;
-      }
-      :host > [progress] {
-        position: absolute;
-        bottom:0; left:0;
-        width: 100%;
-        height: 5px;
-        background: var(--notify-progress);
-        transform-origin: left;
-      }
-    `;
+    return super.$style;
   }
 
   static $defaults: WUP.Notify.Options = {
@@ -255,7 +183,7 @@ export default class WUPNotifyElement<
   };
 
   #isPlayed = false;
-  /** Returns whethere element in play mode and will be closed after a time */
+  /** Returns whether element in play mode and will be closed after a time */
   get $isPlayed(): boolean {
     return this.#isPlayed;
   }
@@ -295,7 +223,7 @@ export default class WUPNotifyElement<
     };
   }
 
-  /** Called once on opening */
+  /** Called on every opening */
   protected override gotRender(isOpening = false): void {
     if (!isOpening) {
       return; // empty because component is hidden by default and need to focus on open-phase

@@ -143,14 +143,25 @@ describe("helper.observer", () => {
     expect(fn).toBeCalledTimes(1);
     expect(fn).lastCalledWith({ prev: undefined, next: "str", target: obj, prop: "addedProp" });
 
+    fn.mockImplementationOnce(() => expect("addedProp" in obj).toBe(false)); // listener gets already deleted prop
     delete obj.addedProp;
     expect(fn).toBeCalledTimes(2);
     expect(fn).lastCalledWith({ prev: "str", next: undefined, target: obj, prop: "addedProp" });
+    expect(fn.mock.results[1].type).toBe("return");
+    expect(Object.keys(obj)).toEqual(["val"]);
 
     // test case for coverage
     remove();
     fn.mockClear();
     delete obj.val;
+    expect(fn).not.toBeCalled();
+    expect(obj).toEqual({});
+
+    // non-configurable prop can't be deleted
+    observer.onPropChanged(obj, fn);
+    Object.defineProperty(obj, "fixed", { value: 1, configurable: false });
+    expect(() => delete obj.fixed).toThrow();
+    expect(obj.fixed).toBe(1);
     expect(fn).not.toBeCalled();
   });
 
@@ -631,11 +642,12 @@ describe("helper.observer", () => {
     // checking delete
     const { inObj } = obj;
     delete obj.inObj; // it will fire events
+    expect(obj.inObj).toBe(undefined);
     jest.clearAllMocks();
     jest.clearAllTimers();
     expect(observer.isObserved(inObj)).toBe(true);
-    observer.onPropChanged(obj.inObj, fnIn);
-    observer.onChanged(obj.inObj, fnIn2);
+    observer.onPropChanged(inObj, fnIn);
+    observer.onChanged(inObj, fnIn2);
     inObj.txt = "345"; // expected that previousParent not tied anymore
     jest.advanceTimersToNextTimer();
     expect(fn).not.toBeCalled(); // because it doesn't tied with obj anymore
@@ -726,6 +738,8 @@ describe("helper.observer", () => {
     let raw = { v: 1 };
     let obj = observer.make(raw);
     expect(obj.valueOf() === raw.valueOf()).toBe(true);
+    expect(obj.valueOf()).toBe(raw);
+    expect(observer.make({ v: 1 }).valueOf() === obj.valueOf()).toBe(false);
     expect(Object.keys(raw)).toEqual(Object.keys(obj));
 
     raw = { s: "str", valueOf: () => 5 };

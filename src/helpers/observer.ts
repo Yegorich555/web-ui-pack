@@ -55,7 +55,7 @@ export namespace Observer {
   export interface Options<T> {
     /** Point array of nested prop-names to exclude from observer or true to exclude every nested property of object
      * @tutorial Troubleshooting
-     * * point ['items'] to exclude any nested props of property with name `items` from obsserved of obj.items
+     * * point ['items'] to exclude any nested props of property with name `items` from observed of obj.items
      * * obj.nested.items - will be also fit the rule
      * * point `true` to exclude all nested */
     excludeNested?: Array<keyof T> | boolean;
@@ -69,7 +69,7 @@ export namespace Observer {
     prev: T[K] extends Func ? ReturnType<T[K]> : T[K] | undefined;
     /** Current/next value */
     next: T[K] extends Func ? ReturnType<T[K]> : T[K] | undefined;
-    /** Prop that is changed; For arrays it can be `length`, for Set,MapSet - `size` */
+    /** Prop that is changed; For arrays it can be `length`, for Set, Map - `size` */
     prop: K;
     /** Object to that prop related */
     target: T;
@@ -281,16 +281,18 @@ function make<T extends object>(
       return isOk;
     },
     deleteProperty(t, prop) {
-      const prev = t[prop as keyof T];
+      const prev = t[prop as keyof T] as any;
+      const isOk = Reflect.deleteProperty(t, prop);
+      if (!isOk) {
+        return false;
+      }
+
       if (!isDateObj && ref.hasListeners()) {
         propChanged({ prev, next: undefined, prop });
       }
 
       // remove parent from this object
-      if (opts?.excludeNested !== true && isRecord(prev)) {
-        const v = proxy[prop as keyof T] as unknown as Observer.Observed;
-        (lstObserved.get(v) as Ref<object>).parentRefs.delete(ref);
-      }
+      lstObserved.get(prev)?.parentRefs.delete(ref);
       return true;
     },
   };
@@ -322,7 +324,7 @@ function make<T extends object>(
   lstObjProxy.set(obj, proxy);
   if (isRecord(obj) && obj.valueOf() === obj) {
     // warn: possible error if object isn't extensible
-    Object.defineProperty(proxy, "valueOf", { value: () => obj.valueOf, enumerable: false });
+    Object.defineProperty(proxy, "valueOf", { value: () => obj, enumerable: false });
   }
 
   // scan recursive
@@ -349,9 +351,11 @@ function make<T extends object>(
  * const obj = observer.make(raw);
  * const removeListener = observer.onPropChanged(obj, (e) => console.warn(e));
  * const removeListener2 = observer.onChanged(obj, (e) => console.warn(e));
- * obj.period = 5; // events are fired after 1ms
- * removeListener();
- * removeListener2(); */
+ * obj.period = 5; // onPropChanged is fired at once, onChanged - after timeout (single time per bunch of changes)
+ * setTimeout(() => {
+ *   removeListener();
+ *   removeListener2();
+ * }); */
 const observer: Observer.IObserver = {
   isObserved,
   make<T extends object>(obj: T, opts: Observer.Options<T>): Observer.Observed<T> {

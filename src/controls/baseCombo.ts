@@ -1,3 +1,4 @@
+import { inheritDefaults } from "../baseElement";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { PopupOpenCases, PopupAnimations } from "../popup/popupElement.types";
@@ -10,7 +11,7 @@ export const enum MenuOpenCases {
   /** When control got focus via user interaction; ignores case when user changed value by click on item on clearButton
    * to change such behavior update WUPBaseComboControl.prototype.canOpenMenu */
   onFocus = 1 << 1,
-  /** When control got focus programmatically (via option `autofocus` or when called method 'focus()') */
+  /** When control got focus programmatically (via option `autoFocus` or when called method 'focus()') */
   onFocusAuto = 1 << 2,
   /** When user clicks on control (beside editable not-empty input) */
   onClick = 1 << 3,
@@ -49,16 +50,39 @@ declare global {
     }
     interface ValidityMap extends Omit<WUP.Text.ValidityMap, "min" | "max" | "email"> {}
     interface NewOptions {
-      /** Case when menu-popup to open; WARN MenuOpenCases.inputClick doesn't work without MenuOpenCases.click
+      /** Case when menu-popup to open; WARN MenuOpenCases.onClickInput doesn't work without MenuOpenCases.onClick
        * @defaultValue onPressArrowKey | onClick | onFocus */
       openCase: MenuOpenCases;
       /** Set true to make input not editable but allow select items via popup-menu (ordinary dropdown mode) */
       readOnlyInput: boolean | number;
+      /** Virtual padding of fitElement applied to popup-menu (option `offsetFitElement` of `<wup-popup/>`)
+       *  [top, right, bottom, left] or [top/bottom, right/left] in px
+       * @defaultValue [1, 1] */
+      popupOffsetFitElement?: [number, number, number, number] | [number, number];
+      /** Sets minWidth of popup-menu 100% of control width (option `minWidthByTarget` of `<wup-popup/>`)
+       * @defaultValue true */
+      popupMinWidthByTarget: boolean;
+      /** Set `true` to rollback value to that was before menu opened when user presses Escape (menu is closed in any case)
+       * @tutorial Troubleshooting
+       * * affects only if value is changed while menu is opened: by typing or via menu that stays opened
+       * (Select with `multiple: true`, SelectMany, Time with `menuButtonsOff: true`)
+       * * Time with `menuButtonsOff: true` always rollbacks value on Escape
+       * @defaultValue false */
+      menuEscRollback: boolean;
     }
     interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       "w-openCase"?: MenuOpenCases | number;
       "w-readOnlyInput"?: boolean | number;
+      /** Virtual padding of fitElement applied to popup-menu
+       * @example
+       * ```js
+       * window.offset = [2, 2];
+       * <wup-select w-popupOffsetFitElement="window.offset"></wup-select>
+       * ``` */
+      "w-popupOffsetFitElement"?: string;
+      "w-popupMinWidthByTarget"?: boolean | "";
+      "w-menuEscRollback"?: boolean | "";
     }
   }
 }
@@ -73,45 +97,24 @@ export default abstract class WUPBaseComboControl<
   #ctr = this.constructor as typeof WUPBaseComboControl;
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        cursor: pointer;
-      }
-      :host input {
-        cursor: text;
-      }
-      :host input:placeholder-shown,
-      :host input:read-only {
-        cursor: pointer;
-      }
-      :host label:after {
-        content: "";
-        -webkit-mask-image: var(--ctrl-icon-img);
-        mask-image: var(--ctrl-icon-img);
-      }
-      @media not all and (prefers-reduced-motion) {
-        :host label:after {
-          transition: transform var(--anim);
-        }
-      }
-      :host button[clear] {
-        margin: 0;
-      }
-      :host > [menu] {
-        padding: 0;
-        max-height: 300px;
-        z-index: 8010;
-      }`;
+    return super.$style;
   }
 
-  static $defaults: WUP.BaseCombo.Options<any> = {
-    ...WUPTextControl.$defaults,
-    validationRules: {
-      ...WUPBaseControl.$defaults.validationRules,
-    },
+  static $defaults: WUP.BaseCombo.Options<any> = inheritDefaults(WUPTextControl.$defaults, {
+    validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {}),
     openCase: MenuOpenCases.onClick | MenuOpenCases.onFocus | MenuOpenCases.onPressArrowKey,
     readOnlyInput: false,
-  };
+    popupOffsetFitElement: [1, 1],
+    popupMinWidthByTarget: true,
+    menuEscRollback: false,
+  });
+
+  static override cloneDefaults<T extends Record<string, any>>(): T {
+    const d = super.cloneDefaults() as WUP.BaseCombo.Options;
+    // clone array otherwise changing $options.popupOffsetFitElement[i] mutates $defaults (shared between all elements)
+    d.popupOffsetFitElement = d.popupOffsetFitElement?.slice() as WUP.BaseCombo.Options["popupOffsetFitElement"];
+    return d as unknown as T;
+  }
 
   /** Fires after popup-menu is opened (after animation finishes) */
   $onOpenMenu?: (e: Event) => void;
@@ -131,7 +134,7 @@ export default abstract class WUPBaseComboControl<
   }
 
   /** Open popup-menu
-   * @returns Promise resolved resolved by animation time */
+   * @returns Promise resolved by animation time */
   async $openMenu(): Promise<void> {
     await this.goOpenMenu(MenuOpenCases.onManualCall);
     this.#isOpened && (await this.$refPopup!.$open()); // wait for popup open-end
@@ -150,14 +153,6 @@ export default abstract class WUPBaseComboControl<
     i.focus = this.inputFocus; // assign custom method to detect how focus called
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUP.BaseCombo.Options> | null): void {
-    super.gotChanges(propsChanged as any);
-
-    this._opts.readOnlyInput
-      ? this.$refInput.removeAttribute("aria-autocomplete")
-      : this.$refInput.setAttribute("aria-autocomplete", "list");
-  }
-
   override gotFormChanges(propsChanged: Array<keyof WUP.Form.Options | keyof WUP.BaseCombo.Options> | null): void {
     super.gotFormChanges(propsChanged);
 
@@ -165,8 +160,17 @@ export default abstract class WUPBaseComboControl<
     !isMenuEnabled && this.removePopup();
   }
 
+  /** Returns whether input isn't editable because of option `readOnlyInput` */
+  isReadOnlyInput(): boolean {
+    return !!this._opts.readOnlyInput;
+  }
+
   override setupInputReadonly(): void {
-    this.$refInput.readOnly = this.$isReadOnly || !!this._opts.readOnlyInput;
+    const isRO = this.isReadOnlyInput();
+    this.$refInput.readOnly = this.$isReadOnly || isRO;
+    isRO
+      ? this.$refInput.removeAttribute("aria-autocomplete")
+      : this.$refInput.setAttribute("aria-autocomplete", "list");
   }
 
   /** Called when need to create menu in opened popup */
@@ -207,8 +211,8 @@ export default abstract class WUPBaseComboControl<
     this.$refPopup = p;
     p.$options.openCase = PopupOpenCases.onManualCall;
     p.$options.target = this;
-    p.$options.offsetFitElement = [1, 1];
-    p.$options.minWidthByTarget = true; // todo allow change it from $defaults
+    p.$options.offsetFitElement = this._opts.popupOffsetFitElement;
+    p.$options.minWidthByTarget = this._opts.popupMinWidthByTarget;
     p.$options.keepPosition = true; // avoid changing position when control-height is changed (ex. selectMany collapses items on focusOut)
     p.$options.placement = [
       WUPPopupElement.$placements.$bottom.$start,
@@ -243,6 +247,7 @@ export default abstract class WUPBaseComboControl<
       return null;
     }
     this.#isOpened = true;
+    this.#valueBeforeMenu = this.$value;
 
     // this.$hideError(); // it resolves overflow menu vs error
 
@@ -296,6 +301,13 @@ export default abstract class WUPBaseComboControl<
     return true;
   }
 
+  /** Override to change rollback-behavior on pressing Escape */
+  canRollbackOnEsc(): boolean {
+    return !!this._opts.menuEscRollback;
+  }
+
+  /** Value before menu is opened */
+  #valueBeforeMenu?: ValueType;
   protected _isClosing?: true;
   protected async goCloseMenu(closeCase: MenuCloseCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
     if (!this.#isOpened || this._isClosing) {
@@ -305,6 +317,10 @@ export default abstract class WUPBaseComboControl<
       return false;
     }
     this.#isOpened = false;
+    closeCase === MenuCloseCases.OnPressEsc &&
+      this.canRollbackOnEsc() &&
+      !this.#ctr.$isEqual(this.#valueBeforeMenu, this.$value, this) &&
+      this.setValue(this.#valueBeforeMenu, SetValueReasons.clear);
     this._isClosing = true;
     await this.$refPopup?.$close();
     delete this._isClosing;
@@ -557,5 +573,3 @@ export default abstract class WUPBaseComboControl<
  >>> console.warn('done')
  close-event
  */
-
-// NiceToHave: option for press-Escape: hideMenu + rollback value to that was before showing OR only hideMenu; now WUPTime.$options.menuButtons changes such behavior

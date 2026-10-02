@@ -2,7 +2,8 @@
 const forbiddenKeys = ["__proto__", "constructor", "prototype"];
 
 const nestedProperty = {
-  /** Parse "obj.nestedValue.items[0].id" into array of keys [obj, nestedValues, items, 0, id] */
+  /** Parse "obj.nestedValue.items[0].id" into [keys, isArray]: keys [obj, nestedValue, items, 0, id]
+   * & flags whether the next key is an array-index [false, false, true, false, false] */
   parsePath(path: string): [string[], boolean[]] {
     const keys: string[] = [];
     const isArray: boolean[] = [];
@@ -38,7 +39,7 @@ const nestedProperty = {
   /**
    * Sets the value at path of object. If a portion of path doesn’t exist it’s created.
    * nestedProperty.set(obj, "value.nestedValue", 1) as obj.value.nestedValue = 1;
-   * @param object The object to modify.
+   * @param obj The object to modify.
    * @param path The path of the property to set; point `obj.items[0].id` for example
    * @param value The value to set.
    * @returns pointed same object
@@ -72,9 +73,9 @@ const nestedProperty = {
   /**
    * Gets the property value at path of object.
    * nestedProperty.get(obj, "nestedValue1.nestVal2") returns value from obj.nestedValue1.nestVal2
-   * @param object The object to query.
+   * @param obj The object to query.
    * @param path The path of the property to get; point `obj.items[0].id` for example
-   * @param out output object. Point empty {} if you want to get extrachecking hasProp (to define if prop undefined and exists)
+   * @param out output object. Point empty {} if you want to get extra checking hasProp (to define if prop undefined and exists)
    * @return Returns the resolved value.
    */
   get<TObj extends Record<string, any>, TVal>(obj: TObj, path: string, out?: { hasProp?: boolean }): TVal | undefined {

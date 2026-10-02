@@ -1,6 +1,9 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "ignoreDeprecations": "6.0", // for baseUrl
+    "rootDir": "../", // TS6+ defaults rootDir to tsconfig folder; override inherited "./src"
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo", // override inherited "../dist/..." to avoid sharing root build cache
     "baseUrl": "./",
     "paths": {
       "web-ui-pack": ["../dist"],

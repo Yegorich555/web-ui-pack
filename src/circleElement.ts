@@ -1,6 +1,7 @@
 import WUPBaseElement from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
-import { PopupOpenCases } from "./popup/popupElement.types";
+import { PopupCloseCases, PopupOpenCases } from "./popup/popupElement.types";
+import PopupListener from "./popup/popupListener";
 import animate from "./helpers/animate";
 import { mathScaleValue, mathRotate } from "./helpers/math";
 import { parseMsTime } from "./helpers/styleHelpers";
@@ -17,7 +18,7 @@ declare global {
   namespace WUP.Circle {
     /** Item object related to */
     interface Item {
-      /** Value of item that will be rendered; depends on @see {@link Options.min}, {@link Options.max}, {@link Options.from}, {@link Options.to} */
+      /** Value of item that will be rendered; depends on @see {@link Options.min}, {@link Options.max} (ignored for several items), {@link Options.from}, {@link Options.to} */
       value: number;
       /** Color for item. Default colors defined in css-variables like `--circle-X: #e4e4e4;` where `X` is number of item */
       color?: string;
@@ -26,13 +27,14 @@ declare global {
        * * set `Item value {#}` to use tooltip where `{#}` is pointed value
        * * point function to use custom logic
        * * override `WUPCircleElement.prototype.renderTooltip` to use custom logic
-       * * to change hover-timeouts see {@link WUPCircleElement.$defaults.hoverOpenTimeout}, {@link WUPCircleElement.$defaults.hoverCloseTimeout}_
+       * * to change hover-timeouts see {@link WUPCircleElement.$defaults.hoverOpenTimeout}, {@link WUPCircleElement.$defaults.hoverCloseTimeout}
        * * use below example to use custom logic @example
        *  items = [{
        *    value: 5,
        *    tooltip: (item, popup) => {
        *     setTimeout(()=>popup.innerHTML=...);
        *     return ""
+       *    }
        *  }] */
       tooltip?: string | ItemTooltipFn;
     }
@@ -42,7 +44,7 @@ declare global {
     interface ItemResult extends Item {
       /** Pointed {@link Item.color} OR defined from css-variable like `--circle-X: #e4e4e4;` where `X` is number of item */
       color: string;
-      /** Value relative to another items where 100% is SUM or difference max-min for single item */
+      /** Value relative to another items where 100% is SUM of all values */
       percentage: number;
     }
 
@@ -53,8 +55,8 @@ declare global {
       _definedColor: string;
     }
     interface Options {
-      /** Width of each segment; expected 1..100 (perecentage)
-       * @defaultValue 10 */
+      /** Width of each segment; expected 1..100 (percentage)
+       * @defaultValue 14 */
       width: number;
       /** Border/corner radius of each segment; expected 0..0.5 where 0.5 == 50% of `$options.width`
        * @defaultValue 0.25 */
@@ -68,10 +70,10 @@ declare global {
       /** Angle to that rendering is finished -360..360 (degrees)
        * @defaultValue 360 */
       to: number;
-      /** Min possible value that fits `options.from`
+      /** Min possible value that fits `options.from`; ignored for several items (0 is used)
        * @defaultValue 0 */
       min: number;
-      /** Max possible value that fits `options.to`
+      /** Max possible value that fits `options.to`; ignored for several items (SUM of values is used)
        * @defaultValue 100 */
       max: number;
       /** Space between segments; expected 0..20 (degrees)
@@ -81,7 +83,7 @@ declare global {
        * @defaultValue 10 */
       minSize: number;
       /** Timeout in ms before popup shows on hover of target;
-       * @defaultValue inherited from WUPPopupElement.$defaults.hoverOpenTimeout */
+       * @defaultValue copied from WUPPopupElement.$defaults.hoverOpenTimeout on module load */
       hoverOpenTimeout: number;
       /** Timeout in ms before popup closes on mouse-leave of target;
        * @defaultValue 0 */
@@ -90,7 +92,7 @@ declare global {
        * If pointed single item then label will be auto created. For other label-details @see {@link WUPCircleElement.prototype.$refLabel}  */
       items: Item[];
     }
-    interface JSXProps extends WUP.Base.OnlyNames<Omit<Options, "hoverOpenTimeout" | "hoverCloseTimeout" | "items">> {
+    interface JSXProps extends WUP.Base.OnlyNames<Omit<Options, "items">> {
       "w-width"?: number;
       "w-corner"?: number;
       "w-back"?: boolean | "";
@@ -100,6 +102,8 @@ declare global {
       "w-max"?: number;
       "w-space"?: number;
       "w-minSize"?: number;
+      "w-hoverOpenTimeout"?: number;
+      "w-hoverCloseTimeout"?: number;
       /** Global reference to object with array
        * @see {@link Item}
        * @example
@@ -120,6 +124,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Arc/circle chart based on SVG
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/circle}
        *  @see {@link WUPCircleElement} */
       [tagName]: WUP.Base.ReactHTML<WUPCircleElement> & WUP.Circle.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -133,6 +138,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Arc/circle chart based on SVG
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/circle}
        *  @see {@link WUPCircleElement} */
       [tagName]: HTMLAttributes<WUPCircleElement> & WUP.Circle.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -163,76 +169,11 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   // #ctr = this.constructor as typeof WUPCircleElement;
 
   static get $styleRoot(): string {
-    return `:root {
-          --circle-0: #e4e4e4;
-          --circle-1: #009fbc;
-          --circle-2: #ff9f00;
-          --circle-3: #1fb13f;
-          --circle-4: #9482bd;
-          --circle-5: #8bc4d7;
-          --circle-6: #1abdb5;
-          --circle-7: #a0db67;
-          --circle-8: #67dbba;
-        }
-        [wupdark] {
-          --circle-0: #104652;
-        }`;
+    return "";
   }
 
   static get $style(): string {
-    return `${super.$style}
-      :host {
-        contain: style;
-        display: block;
-        position: relative;
-        overflow: visible;
-        margin: auto;
-        min-width: 100px;
-        min-height: 50px;
-        --anim-t: 400ms;
-      }
-      :host>strong {
-        display: block;
-        position: absolute;
-        transform: translate(-50%,-50%);
-        top: 50%; left: 50%;
-        font-size: larger;
-        max-width: calc(100% - 20px);
-        white-space: pre-line;
-        text-align: center;
-      }
-      :host[half] {
-        aspect-ratio: 2;
-      }
-      :host[half]>strong {
-        top: initial;
-        bottom: 0;
-        transform: translateX(-50%);
-      }
-      :host>svg {
-        overflow: visible;
-        display: block;
-      }
-      :host>svg path {
-        stroke-width: 0;
-        fill-rule: evenodd;
-      }
-      :host>svg>path { fill: var(--circle-0); }
-      :host>svg>g>path:nth-child(1) { fill: var(--circle-1); }
-      :host>svg>g>path:nth-child(2) { fill: var(--circle-2); }
-      :host>svg>g>path:nth-child(3) { fill: var(--circle-3); }
-      :host>svg>g>path:nth-child(4) { fill: var(--circle-4); }
-      :host>svg>g>path:nth-child(5) { fill: var(--circle-5); }
-      :host>svg>g>path:nth-child(6) { fill: var(--circle-6); }
-      :host>svg>g>path:nth-child(7) { fill: var(--circle-7); }
-      :host>svg>g>path:nth-child(8) { fill: var(--circle-8); }
-      :host>wup-popup,
-      :host>wup-popup-arrow {
-        white-space: pre;
-        pointer-events: none;
-        user-select: none;
-        touch-action: none;
-      }`;
+    return super.$style;
   }
 
   static $defaults: WUP.Circle.Options = {
@@ -300,7 +241,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   ): Array<{ angleFrom: number; angleTo: number; ms: number }> {
     if (items.length > 1) {
       valueMin = 0;
-      valueMax = items.reduce((v, item) => item.value + v, 0);
+      valueMax = items.reduce((v, item) => itemValue(item) + v, 0);
       angleMax -= (items.length - (angleMax - angleMin === 360 ? 0 : 1)) * space;
     }
     let angleFrom = angleMin;
@@ -310,7 +251,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     type MappedItem = { angleFrom: number; angleTo: number; ms: number; v: number };
     // calc angle-value per item
     const arr: MappedItem[] = items.map((s) => {
-      const v = mathScaleValue(s.value, valueMin, valueMax, angleMin, angleMax) - angleMin;
+      const v = mathScaleValue(itemValue(s), valueMin, valueMax, angleMin, angleMax) - angleMin || 0; // NaN when valueMin === valueMax
       const a = { angleFrom: 0, angleTo: 0, ms: 0, v };
       if (v !== 0 && v < minSizeDeg) {
         diff += minSizeDeg - v; // gather sum of difference to apply later
@@ -344,7 +285,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         );
         // assign values without minSize
         items.forEach((s, i) => {
-          arr[i].v = mathScaleValue(s.value, valueMin, valueMax, angleMin, angleMax) - angleMin;
+          arr[i].v = mathScaleValue(itemValue(s), valueMin, valueMax, angleMin, angleMax) - angleMin;
         });
       }
     }
@@ -364,6 +305,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
   _animation?: WUP.PromiseCancel<boolean>;
   protected renderItems(skipAnim?: boolean): void {
     this._animation?.stop(false);
+    this.useTooltip(false);
 
     const angleMin = this._opts.from;
     const angleMax = this._opts.to;
@@ -419,7 +361,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
         });
         !skipAnim && (await this._animation.catch().finally(() => delete this._animation));
       }
-      this.useTooltip(hasTooltip);
+      this.useTooltip(hasTooltip && this.$refItems.isConnected); // element can be removed during the animation
     })();
 
     // render/remove label
@@ -437,7 +379,7 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       if (!isCustomLabel) {
         this.$refLabel ??= this.appendChild(document.createElement("strong"));
         const rawV = items[0].value;
-        const perc = mathScaleValue(rawV, vMin, vMax, 0, 100);
+        const perc = mathScaleValue(itemValue(items[0]), vMin, vMax, 0, 100);
         this.renderLabel(this.$refLabel, perc, rawV);
         ariaLbl = this.$refLabel.textContent!;
       }
@@ -464,11 +406,11 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
       const y = r.y + segment._center.y * scale;
       return DOMRect.fromRect({ x, y, width: 0.01, height: 0.01 });
     };
-    const total = this.$options.items!.reduce((sum, a) => sum + a.value, 0);
+    const total = this.$options.items!.reduce((sum, a) => sum + itemValue(a), 0);
     const item: WUP.Circle.ItemResult = {
       ...segment._relatedItem,
       color: segment._definedColor,
-      percentage: mathScaleValue(segment._relatedItem.value, 0, total, 0, 100),
+      percentage: mathScaleValue(itemValue(segment._relatedItem), 0, total, 0, 100),
     };
 
     const lbl = item.tooltip!;
@@ -495,48 +437,65 @@ export default class WUPCircleElement extends WUPBaseElement<WUP.Circle.Options>
     if (this._tooltipDisposeLst) {
       return;
     }
-    // impossible to use popupListen because it listens for single target but we need per each segment
-    this._tooltipDisposeLst = onEvent(
-      this,
-      "mouseenter", // mouseenter is fired even with touch event (mouseleave fired with touch outside in this case)
-      (e) => {
-        // NiceToHave: rewrite popupListen to use here
-        const t = e.target as WUP.Circle.SVGItem & {
-          _tid?: ReturnType<typeof setTimeout>;
-          _tooltip?: WUPPopupElement;
-        };
-        if (t._hasTooltip) {
-          t._tid && clearTimeout(t._tid); // remove timer for mouseleave
-          t._tid = setTimeout(() => {
-            if (t._tooltip) t._tooltip.$open();
-            else t._tooltip = this.renderTooltip(t);
-          }, this._opts.hoverOpenTimeout);
 
-          onEvent(
-            e.target as HTMLElement,
-            "mouseleave",
-            () => {
-              t._tid && clearTimeout(t._tid); // remove timer for mouseenter
-              t._tid = setTimeout(() => {
-                t._tooltip?.$close().finally(() => {
-                  // popup can be opened when user returns mouse back in a short time
-                  if (t._tooltip && !t._tooltip!.$isOpened) {
-                    t._tooltip!.remove();
-                    t._tooltip = undefined;
-                  }
-                });
-                t._tid = undefined;
-              }, this._opts.hoverCloseTimeout);
-            },
-            { once: true }
-          );
+    let hovered: WUP.Circle.SVGItem | undefined; // segment under the mouse
+    let popup: WUPPopupElement | undefined;
+    const lst = new PopupListener(
+      {
+        target: this.$refItems,
+        openCase: PopupOpenCases.onHover, // mouseenter is fired even with touch event (mouseleave fired with touch outside in this case)
+        hoverOpenTimeout: this._opts.hoverOpenTimeout,
+        hoverCloseTimeout: this._opts.hoverCloseTimeout,
+      },
+      () => {
+        if (!hovered?._hasTooltip) return null;
+        // popup can be closing when user returns mouse back in a short time
+        if (popup?.$options.target === hovered) popup.$open();
+        else popup = this.renderTooltip(hovered);
+        return popup;
+      },
+      () => {
+        const p = popup!;
+        p.$close().finally(() => {
+          if (!p.$isOpened) {
+            p.remove();
+            p === popup && (popup = undefined);
+          }
+        });
+        return true;
+      }
+    );
+
+    // mouseenter isn't bubbled but captured by parent for each segment
+    const r = onEvent(
+      this,
+      "mouseenter",
+      (e) => {
+        if ((e.target as Node).parentNode !== this.$refItems) return; // skip svg, group, popup etc.
+        hovered = e.target as WUP.Circle.SVGItem;
+        if (!lst.openedEl) {
+          lst.handleEvents(e); // group is not re-entered when mouse moves from segment to segment
+        } else if (popup!.$options.target !== hovered) {
+          // show tooltip of another segment at once
+          lst.close(PopupCloseCases.onMouseLeave, e).then(() => lst.open(PopupOpenCases.onHover, e));
         }
       },
       { capture: true, passive: true }
     );
+
+    this._tooltipDisposeLst = () => {
+      r();
+      lst.stopListen();
+      popup?.remove();
+    };
   }
 
-  /** Called on every changeEvent */
+  protected override dispose(): void {
+    super.dispose();
+    this.useTooltip(false);
+  }
+
+  /** Called once on init */
   protected override gotRender(): void {
     this.$refSVG.setAttribute("viewBox", `0 0 100 100`);
     this.$refSVG.setAttribute("role", "img");
@@ -573,6 +532,11 @@ export function drawCircle(center: [number, number], r: number, width: number): 
     `A${inR} ${inR} 0 1 0 ${x - inR} ${y}`,
     "Z",
   ].join(" ");
+}
+
+/** Returns item value or 0 if value is NaN, Infinity etc. */
+function itemValue(item: WUP.Circle.Item): number {
+  return Number.isFinite(item.value) ? item.value : 0;
 }
 
 /** Returns x,y for point in the circle */

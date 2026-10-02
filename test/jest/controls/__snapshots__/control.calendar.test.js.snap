@@ -957,58 +957,58 @@ exports[`control.calendar common tests render + styles 1`] = `<wup-calendar />`;
 exports[`control.calendar common tests render + styles 2`] = `
 <style>
   :root {
-          --base-focus: #00778d;
-          --base-btn-bg: #009fbc;
-          --base-btn-text: #fff;
-          --base-btn-focus: #005766;
-          --base-btn2-bg: #6c757d;
-          --base-btn2-text: #fff;
-          --base-btn3-bg: none;
-          --base-btn3-text: inherit;
-          --base-sep: #e4e4e4;
-          --base-margin: 20px;
-          --border-radius: 6px;
-          --anim-t: 200ms;
-          --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-          --icon-hover-r: 30px;
-          --icon-hover-bg: #0001;
-          --icon-focus-bg: #0000001a;
-          --icon-size: 14px;
-          --menu-hover-text: inherit;
-          --menu-hover-bg: #f1f1f1;
-          
---wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
---wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
---wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
---wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
---wup-icon-eye: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 122.182C209.455 122.182 60.392 230.749 0 384c60.392 153.251 209.455 261.818 384 261.818S707.608 537.251 768 384c-60.392-153.251-209.455-261.818-384-261.818zm0 436.363c-96.35 0-174.545-78.197-174.545-174.545S287.651 209.455 384 209.455 558.545 287.651 558.545 384 480.348 558.545 384 558.545zm0-279.272c-57.95 0-104.727 46.778-104.727 104.727S326.051 488.727 384 488.727 488.727 441.949 488.727 384 441.949 279.273 384 279.273z'/%3E%3C/svg%3E");
---wup-icon-eye-off: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 209.375c96.393 0 174.625 78.232 174.625 174.625 0 22.701-4.54 44.005-12.573 63.913l101.981 101.981C700.77 505.889 742.331 448.961 767.826 384c-60.42-153.321-209.55-261.938-384.174-261.938-48.895 0-95.695 8.731-139.001 24.448l75.438 75.438c19.907-8.032 41.212-12.573 63.913-12.573zM34.75 114.03l95.695 95.695C72.469 254.778 27.067 314.85-.174 384.001 60.246 537.322 209.376 645.938 384 645.938c54.133 0 105.823-10.477 152.971-29.337l14.668 14.668 102.33 101.981 44.355-44.355L79.105 69.676 34.75 114.031zm193.135 193.135 54.133 54.133c-1.746 7.334-2.794 15.018-2.794 22.701 0 57.976 46.799 104.775 104.775 104.775 7.684 0 15.367-1.048 22.701-2.794l54.134 54.134c-23.4 11.525-49.244 18.51-76.835 18.51-96.393 0-174.625-78.232-174.625-174.625 0-27.591 6.985-53.435 18.51-76.835zm150.527-27.242 110.014 110.014.698-5.588c0-57.976-46.799-104.775-104.775-104.775l-5.937.349z'/%3E%3C/svg%3E");
---wup-icon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
---wup-icon-date: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M652.801 76.8c42.24 0 76.8 34.56 76.8 76.8v537.601c0 42.24-34.56 76.8-76.8 76.8H115.2c-42.624 0-76.8-34.56-76.8-76.8l.384-537.601c0-42.24 33.792-76.8 76.416-76.8h38.4V0h76.8v76.8h307.2V0h76.8v76.8h38.4zM192 345.6h76.8v76.8H192v-76.8zm230.4 0v76.8h-76.8v-76.8h76.8zm153.601 0h-76.8v76.8h76.8v-76.8zM115.2 691.2h537.601V268.8H115.2v422.4z'/%3E%3C/svg%3E");
---wup-icon-time-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
---wup-icon-time: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==');
-        }
-        [wupdark] {
-          --base-btn-focus: #bdbdbd;
-          --base-sep: #141414;
-          --icon: #fff;
-          --icon-hover-bg: #fff1;
-          --icon-focus-bg: #fff2;
-          --scroll: #fff2;
-          --scroll-hover: #fff3;
-          --menu-hover-text: inherit;
-          --menu-hover-bg: #222a36;
-        }
+  --base-focus: #00778d;
+  --base-btn-bg: #009fbc;
+  --base-btn-text: #fff;
+  --base-btn-focus: #005766;
+  --base-btn2-bg: #6c757d;
+  --base-btn2-text: #fff;
+  --base-btn3-bg: none;
+  --base-btn3-text: inherit;
+  --base-sep: #e4e4e4;
+  --base-margin: 20px;
+  --border-radius: 6px;
+  --anim-t: 200ms;
+  --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  --icon-hover-r: 30px;
+  --icon-hover-bg: #0001;
+  --icon-focus-bg: #0000001a;
+  --icon-size: 14px;
+  --menu-hover-text: inherit;
+  --menu-hover-bg: #f1f1f1;
+  --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
+  --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
+  --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
+  --wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
+  --wup-icon-eye: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 122.182C209.455 122.182 60.392 230.749 0 384c60.392 153.251 209.455 261.818 384 261.818S707.608 537.251 768 384c-60.392-153.251-209.455-261.818-384-261.818zm0 436.363c-96.35 0-174.545-78.197-174.545-174.545S287.651 209.455 384 209.455 558.545 287.651 558.545 384 480.348 558.545 384 558.545zm0-279.272c-57.95 0-104.727 46.778-104.727 104.727S326.051 488.727 384 488.727 488.727 441.949 488.727 384 441.949 279.273 384 279.273z'/%3E%3C/svg%3E");
+  --wup-icon-eye-off: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 209.375c96.393 0 174.625 78.232 174.625 174.625 0 22.701-4.54 44.005-12.573 63.913l101.981 101.981C700.77 505.889 742.331 448.961 767.826 384c-60.42-153.321-209.55-261.938-384.174-261.938-48.895 0-95.695 8.731-139.001 24.448l75.438 75.438c19.907-8.032 41.212-12.573 63.913-12.573zM34.75 114.03l95.695 95.695C72.469 254.778 27.067 314.85-.174 384.001 60.246 537.322 209.376 645.938 384 645.938c54.133 0 105.823-10.477 152.971-29.337l14.668 14.668 102.33 101.981 44.355-44.355L79.105 69.676 34.75 114.031zm193.135 193.135 54.133 54.133c-1.746 7.334-2.794 15.018-2.794 22.701 0 57.976 46.799 104.775 104.775 104.775 7.684 0 15.367-1.048 22.701-2.794l54.134 54.134c-23.4 11.525-49.244 18.51-76.835 18.51-96.393 0-174.625-78.232-174.625-174.625 0-27.591 6.985-53.435 18.51-76.835zm150.527-27.242 110.014 110.014.698-5.588c0-57.976-46.799-104.775-104.775-104.775l-5.937.349z'/%3E%3C/svg%3E");
+  --wup-icon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
+  --wup-icon-date: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M652.801 76.8c42.24 0 76.8 34.56 76.8 76.8v537.601c0 42.24-34.56 76.8-76.8 76.8H115.2c-42.624 0-76.8-34.56-76.8-76.8l.384-537.601c0-42.24 33.792-76.8 76.416-76.8h38.4V0h76.8v76.8h307.2V0h76.8v76.8h38.4zM192 345.6h76.8v76.8H192v-76.8zm230.4 0v76.8h-76.8v-76.8h76.8zm153.601 0h-76.8v76.8h76.8v-76.8zM115.2 691.2h537.601V268.8H115.2v422.4z'/%3E%3C/svg%3E");
+  --wup-icon-time-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
+  --wup-icon-time: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==");
+}
+[wupdark] {
+  --base-btn-focus: #bdbdbd;
+  --base-sep: #141414;
+  --icon: #fff;
+  --icon-hover-bg: #fff1;
+  --icon-focus-bg: #fff2;
+  --scroll: #fff2;
+  --scroll-hover: #fff3;
+  --menu-hover-text: inherit;
+  --menu-hover-bg: #222a36;
+}
 
-  .wup-hidden, [wup-hidden] {
-position: absolute;
-height:1px; width:1px;
-overflow:hidden;
-clip:rect(1px,1px,1px,1px);
-min-width:initial;
-padding:0;}
-
-  
+  .wup-hidden,
+[wup-hidden] {
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  min-width: initial;
+  padding: 0;
+}
 [wup-icon] {
   display: inline-block;
   cursor: pointer;
@@ -1030,20 +1030,19 @@ padding:0;}
   height: 100%;
   background: var(--icon, #000);
   -webkit-mask-size: var(--icon-size, 1em);
-  mask-size: var(--icon-size, 1em);
+          mask-size: var(--icon-size, 1em);
   -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
   -webkit-mask-position: center;
-  mask-position: center;
-
+          mask-position: center;
   -webkit-mask-image: var(--icon-img);
-  mask-image: var(--icon-img);
+          mask-image: var(--icon-img);
 }
 [wup-icon]:focus {
-   box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+  box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
 }
 [wup-icon]:focus:after {
-   background: var(--icon-hover, var(--icon, #000));
+  background: var(--icon-hover, var(--icon, #000));
 }
 @media (hover: hover) and (pointer: fine) {
   [wup-icon]:hover {
@@ -1053,368 +1052,396 @@ padding:0;}
     background: var(--icon-hover, var(--icon, #000));
   }
   [wup-icon]:focus:hover {
-   opacity: 0.9;
+    opacity: 0.9;
   }
 }
+  
 
   :root {
-        --ctrl-padding: 1.5em 1em 0.5em 1em;
-        --ctrl-focus: var(--base-focus);
-        --ctrl-focus-label: var(--ctrl-focus);
-        --ctrl-selected: var(--ctrl-focus);
-        --ctrl-label: #5e5e5e;
-        --ctrl-icon: var(--ctrl-label);
-        --ctrl-icon-size: 1em;
-        --ctrl-text: inherit;
-        --ctrl-bg: #fff;
-        --ctrl-border: #e6e6e6;
-        --ctrl-border-radius: var(--border-radius);
-        --ctrl-err: #ad0000;
-        --ctrl-err-bg: #fff4fa;
-        --ctrl-err-valid: green;
-        --ctrl-invalid-border: red;
-      }
-      [wupdark] {
-        --ctrl-bg: none;
-        --ctrl-border: #104652;
-        --ctrl-label: #919191;
-        --ctrl-icon: var(--ctrl-label);
-        --ctrl-focus-label: #25a1b6;
-        --ctrl-selected: #25a1b6;
-        --ctrl-err: #ff6666;
-        --ctrl-err-bg: #000;
-        --ctrl-err-valid: #54d754;
-      }
+  --ctrl-padding: 1.5em 1em 0.5em 1em;
+  --ctrl-focus: var(--base-focus);
+  --ctrl-focus-label: var(--ctrl-focus);
+  --ctrl-selected: var(--ctrl-focus);
+  --ctrl-label: #5e5e5e;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-icon-size: 1em;
+  --ctrl-text: inherit;
+  --ctrl-bg: #fff;
+  --ctrl-border: #e6e6e6;
+  --ctrl-border-radius: var(--border-radius);
+  --ctrl-err: #ad0000;
+  --ctrl-err-bg: #fff4fa;
+  --ctrl-err-valid: green;
+  --ctrl-invalid-border: red;
+}
+[wupdark] {
+  --ctrl-bg: none;
+  --ctrl-border: #104652;
+  --ctrl-label: #919191;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-focus-label: #25a1b6;
+  --ctrl-selected: #25a1b6;
+  --ctrl-err: #ff6666;
+  --ctrl-err-bg: #000;
+  --ctrl-err-valid: #54d754;
+}
   :root {
-      --ctrl-clr-selected: #fff;
-      --ctrl-clr-selected-bg: #009fbc;
-      --ctrl-clr-w: 17em;
-      --ctrl-clr-cell-gap: 0px;
-      --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
-      --ctrl-clr-off: var(--ctrl-err);
-      --ctrl-clr-off-bg: var(--ctrl-err-bg);
-    }
-    [wupdark] {
-      --ctrl-clr-off: var(--ctrl-err);
-      --ctrl-clr-off-bg: none;
-    }
+  --ctrl-clr-selected: #fff;
+  --ctrl-clr-selected-bg: #009fbc;
+  --ctrl-clr-w: 17em;
+  --ctrl-clr-cell-gap: 0px;
+  --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
+  --ctrl-clr-off: var(--ctrl-err);
+  --ctrl-clr-off-bg: var(--ctrl-err-bg);
+}
+[wupdark] {
+  --ctrl-clr-off: var(--ctrl-err);
+  --ctrl-clr-off-bg: none;
+}
   
-      WUP-CALENDAR {
-        --ctrl-focus-border: var(--ctrl-focus);
-        contain: style;
-        display: block;
-        flex: 1;
-        margin: var(--base-margin) 0;
-        box-shadow: 0 0 0 1px var(--ctrl-border);
-        border-radius: var(--ctrl-border-radius);
-        color: var(--ctrl-text);
-        background: var(--ctrl-bg);
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-      }
-      WUP-CALENDAR strong,
-      WUP-CALENDAR legend {
-        color: var(--ctrl-label);
-        pointer-events: none;
-      }
-      WUP-CALENDAR[invalid],
-      WUP-CALENDAR[invalid] &gt; [menu] {
-        --ctrl-focus-border: var( --ctrl-invalid-border);
-        box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
-      }
-      WUP-CALENDAR:focus-within,
-      WUP-CALENDAR:focus-within &gt; [menu] {
-        box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
-      }
-      WUP-CALENDAR:focus-within strong,
-      WUP-CALENDAR:focus-within legend {
-        color: var(--ctrl-focus-label);
-        pointer-events: initial;
-      }
-      [disabled] WUP-CALENDAR,
-      WUP-CALENDAR[disabled] {
-        opacity: 0.6;
-        cursor: not-allowed;
-        -webkit-user-select: none;
-        user-select: none;
-      }
-      WUP-CALENDAR[busy] {
-        opacity: 0.8;
-        cursor: inherit;
-       -webkit-user-select: none;
-        user-select: none;
-      }
-      [disabled] WUP-CALENDAR &gt; label,
-      WUP-CALENDAR[disabled] &gt; label,
-      WUP-CALENDAR[busy] &gt; label {
-        pointer-events: none;
-      }
-      WUP-CALENDAR label {
-        display: flex;
-        align-items: center;
-        box-sizing: border-box;
-        font: inherit;
-        cursor: inherit;
-        padding: var(--ctrl-padding);
-        padding-top: 0;
-        padding-bottom: 0;
-      }
-      WUP-CALENDAR input,
-      WUP-CALENDAR textarea {
-        padding: 0;
-        margin: 0;
-        cursor: inherit;
-      }
-      WUP-CALENDAR [contenteditable=true] {
-        margin: var(--ctrl-padding);
-        margin-left: 0;
-        margin-right: 0;
-        cursor: inherit;
-      }
-      WUP-CALENDAR strong {
-        cursor: inherit;
-      }
-      WUP-CALENDAR strong:empty {
-        display: none;
-      }
-      WUP-CALENDAR [aria-required=true] + strong:after,
-      WUP-CALENDAR fieldset[aria-required=true] &gt; legend:after {
-        content: "*";
-        font-size: larger;
-        font-weight: bolder;
-        line-height: 0;
-      }
-      WUP-CALENDAR [error] {
-        cursor: pointer;
-        font-size: small;
-        color: var(--ctrl-err);
-        background: var(--ctrl-err-bg);
-        overflow: auto;
-        overflow: overlay;
-        // text-shadow: 0 0 0 var(--ctrl-err);
-      }
-      WUP-CALENDAR [error] ul {
-        margin:0; padding:2px 4px 2px;
-      }
-      WUP-CALENDAR [error] li {
-        display: flex;
-        align-items: center;
-        margin-left: -5px;
-      }
-      WUP-CALENDAR [error] li:before {
-        content: '';
-        --ctrl-icon-img: var(--wup-icon-dot);
-        --ctrl-icon: var(--ctrl-err);
-        
-display: inline-block;
-width: var(--ctrl-icon-size);
-min-height: var(--ctrl-icon-size);
-box-sizing: content-box;
-margin: 0;
-padding: 5px;
-flex: 0 0 auto;
-align-self: stretch;
-border: none;
-box-shadow: none;
-background: var(--ctrl-icon);
--webkit-mask-size: var(--ctrl-icon-size);
-mask-size: var(--ctrl-icon-size);
--webkit-mask-repeat: no-repeat;
-mask-repeat: no-repeat;
--webkit-mask-position: center;
-mask-position: center;
--webkit-mask-image: var(--ctrl-icon-img);
-mask-image: var(--ctrl-icon-img);
-      }
-      WUP-CALENDAR [error] li[valid] {
-        color: var(--ctrl-err-valid);
-      }
-      WUP-CALENDAR [error] li[valid]:before {
-        content: '';
-        --ctrl-icon-img: var(--wup-icon-check);
-        --ctrl-icon: var(--ctrl-err-valid);
-      }
-      WUP-CALENDAR:focus-within [error] {
-        max-height: none;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        WUP-CALENDAR:hover strong,
-        WUP-CALENDAR[hovered] strong{
-          color: var(--ctrl-focus-label);
-        }
-        WUP-CALENDAR:hover,
-        WUP-CALENDAR:hover&gt;[menu],
-        WUP-CALENDAR[hovered],
-        WUP-CALENDAR[hovered]&gt;[menu] {
-          box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
-        }
-      }
-      @media not all and (prefers-reduced-motion) {
-        WUP-CALENDAR {
-          transition: box-shadow var(--anim);
-        }
-      }
-      WUP-CALENDAR {
-        max-width: fit-content;
-        margin: auto auto 20px;
-        box-shadow: 0 0 0 1px var(--ctrl-border);
-        border-radius: var(--ctrl-border-radius);
-        background: none;
-        text-transform: capitalize;
-      }
-      WUP-CALENDAR label {
-        max-width: var(--ctrl-clr-w);
-        display: block;
-        padding-right: 0;
-      }
-      WUP-CALENDAR strong {
-        display: block;
-        box-sizing: border-box;
-        max-width: 100%;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-      WUP-CALENDAR input {
-position: absolute;
-height:1px; width:1px;
-overflow:hidden;
-clip:rect(1px,1px,1px,1px);
-min-width:initial;
-padding:0;}
-      WUP-CALENDAR [calendar] {
-        --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-w) / 7 - var(--ctrl-clr-cell-gap));
-        --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
-        width: var(--ctrl-clr-w);
-        padding: var(--ctrl-clr-padding);
-        border-radius: var(--ctrl-border-radius);
-        background: var(--ctrl-bg);
-        box-sizing: content-box;
-      }
-      WUP-CALENDAR [calendar="day"] {
-        --ctrl-clr-cell-w: var(--ctrl-clr-cell-day-w);
-        --ctrl-clr-cell-h: var(--ctrl-clr-cell-day-w);
-      }
-      WUP-CALENDAR [calendar="month"],
-      WUP-CALENDAR [calendar="year"] {
-        --ctrl-clr-cell-w: calc(var(--ctrl-clr-w) / 4 - var(--ctrl-clr-cell-gap));
-        --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
-      }
-      WUP-CALENDAR [calendar="month"] ul,
-      WUP-CALENDAR [calendar="year"] ul {
-        display: none;
-      }
-      WUP-CALENDAR header,
-      WUP-CALENDAR ol,
-      WUP-CALENDAR ul {
-        display: flex;
-        flex-wrap: wrap;
-        margin:0; padding:0;
-      }
-      WUP-CALENDAR header &gt; button {
-        box-sizing: border-box;
-        cursor: pointer;
-        margin: auto;
-        padding: 4px 1em;
-        font-size: larger;
-        font-weight: initial;
-        border: none;
-        border-radius: 2em;
-        color: inherit;
-        background: none;
-        box-shadow: none;
-        text-transform: inherit;
-      }
-      WUP-CALENDAR header &gt; button[disabled] {
-        pointer-events: none;
-      }
-      WUP-CALENDAR ol,
-      WUP-CALENDAR ul {
-        margin-top: var(--ctrl-clr-padding);
-        list-style: none;
-      }
-      WUP-CALENDAR ul {
-        color: var(--ctrl-label);
-      }
-      WUP-CALENDAR li {
-        height: var(--ctrl-clr-cell-h);
-        width: var(--ctrl-clr-cell-w);
-        padding: 0;
-        margin: calc(var(--ctrl-clr-cell-gap) / 2);
-        font: inherit;
-        line-height: var(--ctrl-clr-cell-h);
-        text-align: center;
-        border-radius: 50%;
-      }
-      WUP-CALENDAR ul&gt;li {
-        margin: 0 calc(var(--ctrl-clr-cell-gap) / 2);
-        height: 1em;
-        line-height: 1em;
-      }
-      WUP-CALENDAR li[prev],
-      WUP-CALENDAR li[next] {
-        opacity: 0.6;
-      }
-      WUP-CALENDAR li[aria-current] {
-        color: var(--ctrl-clr-selected-bg);
-        font-weight: bold;
-        opacity: 1;
-      }
-      WUP-CALENDAR li[aria-selected] {
-        background-color: var(--ctrl-clr-selected-bg);
-        color: var(--ctrl-clr-selected);
-        opacity: 1;
-      }
-      WUP-CALENDAR li[focused] {
-        box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-        opacity: 1;
-      }
-      WUP-CALENDAR li[focused][aria-selected] {
-        text-decoration: underline;
-      }
-      @media (hover: hover) and (pointer: fine) {
-        WUP-CALENDAR header&gt;button:hover {
-          background-color: var(--ctrl-clr-selected-bg);
-          color: var(--ctrl-clr-selected);
-        }
-        WUP-CALENDAR ol&gt;li:hover:not([disabled]) {
-          box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
-          opacity: 1;
-        }
-      }
-      WUP-CALENDAR li[disabled] {
-        color: var(--ctrl-clr-off);
-        background-color: var(--ctrl-clr-off-bg);
-      }
-      WUP-CALENDAR li[disabled][aria-selected] {
-        font-weight: bold;
-      }
-      @media not all and (prefers-reduced-motion) {
-        @keyframes WUP-ZOOM-OUT-1 {
-          0% { transform: scale(1); opacity: 1; }
-          100% { transform: scale(0); opacity: 0; }
-        }
-        @keyframes WUP-ZOOM-OUT-2 {
-          0% { transform: scale(5); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes WUP-ZOOM-IN-1 {
-          0% { transform: scale(1); opacity: 1; }
-          100% { transform: scale(5); opacity: 0; }
-        }
-        @keyframes WUP-ZOOM-IN-2 {
-          0% { transform: scale(0); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        WUP-CALENDAR [calendar]&gt;div {
-          overflow: hidden;
-        }
-        WUP-CALENDAR [zoom] { animation: none var(--anim-t) linear forwards; }
-        WUP-CALENDAR [zoom="out"] { animation-name: WUP-ZOOM-OUT-1; }
-        WUP-CALENDAR [zoom="out2"] { animation-name: WUP-ZOOM-OUT-2; }
-        WUP-CALENDAR [zoom="in"] { animation-name: WUP-ZOOM-IN-1; }
-        WUP-CALENDAR [zoom="in2"] { animation-name: WUP-ZOOM-IN-2; }
-      }
+WUP-CALENDAR {
+  --ctrl-focus-border: var(--ctrl-focus);
+  contain: style;
+  display: block;
+  flex: 1;
+  margin: var(--base-margin) 0;
+  box-shadow: 0 0 0 1px var(--ctrl-border);
+  border-radius: var(--ctrl-border-radius);
+  color: var(--ctrl-text);
+  background: var(--ctrl-bg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+WUP-CALENDAR strong,
+WUP-CALENDAR legend {
+  color: var(--ctrl-label);
+  pointer-events: none;
+}
+WUP-CALENDAR[invalid], WUP-CALENDAR[invalid] &gt; [menu] {
+  --ctrl-focus-border: var(--ctrl-invalid-border);
+  box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+}
+WUP-CALENDAR:focus-within, WUP-CALENDAR:focus-within &gt; [menu] {
+  box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+}
+WUP-CALENDAR:focus-within strong,
+WUP-CALENDAR:focus-within legend {
+  color: var(--ctrl-focus-label);
+  pointer-events: initial;
+}
+[disabled] WUP-CALENDAR, WUP-CALENDAR[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  -webkit-user-select: none;
+          user-select: none;
+}
+WUP-CALENDAR[busy] {
+  opacity: 0.8;
+  cursor: inherit;
+  -webkit-user-select: none;
+          user-select: none;
+}
+[disabled] WUP-CALENDAR &gt; label, WUP-CALENDAR[disabled] &gt; label, WUP-CALENDAR[busy] &gt; label {
+  pointer-events: none;
+}
+WUP-CALENDAR label {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  font: inherit;
+  cursor: inherit;
+  padding: var(--ctrl-padding);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+WUP-CALENDAR input,
+WUP-CALENDAR textarea {
+  padding: 0;
+  margin: 0;
+  cursor: inherit;
+}
+WUP-CALENDAR [contenteditable=true] {
+  margin: var(--ctrl-padding);
+  margin-left: 0;
+  margin-right: 0;
+  cursor: inherit;
+}
+WUP-CALENDAR strong {
+  cursor: inherit;
+}
+WUP-CALENDAR strong:empty {
+  display: none;
+}
+WUP-CALENDAR [aria-required=true] + strong:after,
+WUP-CALENDAR fieldset[aria-required=true] &gt; legend:after {
+  content: "*";
+  font-size: larger;
+  font-weight: bolder;
+  line-height: 0;
+}
+WUP-CALENDAR [error] {
+  cursor: pointer;
+  font-size: small;
+  color: var(--ctrl-err);
+  background: var(--ctrl-err-bg);
+  overflow: auto;
+  overflow: overlay;
+}
+WUP-CALENDAR [error] ul {
+  margin: 0;
+  padding: 2px 4px 2px;
+}
+WUP-CALENDAR [error] li {
+  display: flex;
+  align-items: center;
+  margin-left: -5px;
+}
+WUP-CALENDAR [error] li:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-dot);
+  --ctrl-icon: var(--ctrl-err);
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+}
+WUP-CALENDAR [error] li[valid] {
+  color: var(--ctrl-err-valid);
+}
+WUP-CALENDAR [error] li[valid]:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  --ctrl-icon: var(--ctrl-err-valid);
+}
+WUP-CALENDAR:focus-within [error] {
+  max-height: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-CALENDAR:hover strong, WUP-CALENDAR[hovered] strong {
+    color: var(--ctrl-focus-label);
+  }
+  WUP-CALENDAR:hover, WUP-CALENDAR:hover &gt; [menu], WUP-CALENDAR[hovered], WUP-CALENDAR[hovered] &gt; [menu] {
+    box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+  }
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-CALENDAR {
+    transition: box-shadow var(--anim);
+  }
+}
+WUP-CALENDAR {
+  max-width: fit-content;
+  margin: auto auto 20px;
+  box-shadow: 0 0 0 1px var(--ctrl-border);
+  border-radius: var(--ctrl-border-radius);
+  background: none;
+  text-transform: capitalize;
+}
+WUP-CALENDAR label {
+  max-width: var(--ctrl-clr-w);
+  display: block;
+  padding-right: 0;
+}
+WUP-CALENDAR strong {
+  display: block;
+  box-sizing: border-box;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+WUP-CALENDAR input {
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  min-width: initial;
+  padding: 0;
+}
+WUP-CALENDAR [calendar] {
+  --ctrl-clr-cell-day-w: calc(var(--ctrl-clr-w) / 7 - var(--ctrl-clr-cell-gap));
+  --ctrl-clr-h: calc((var(--ctrl-clr-cell-day-w) + var(--ctrl-clr-cell-gap)) * 6);
+  width: var(--ctrl-clr-w);
+  padding: var(--ctrl-clr-padding);
+  border-radius: var(--ctrl-border-radius);
+  background: var(--ctrl-bg);
+  box-sizing: content-box;
+}
+WUP-CALENDAR [calendar=day] {
+  --ctrl-clr-cell-w: var(--ctrl-clr-cell-day-w);
+  --ctrl-clr-cell-h: var(--ctrl-clr-cell-day-w);
+}
+WUP-CALENDAR [calendar=month],
+WUP-CALENDAR [calendar=year] {
+  --ctrl-clr-cell-w: calc(var(--ctrl-clr-w) / 4 - var(--ctrl-clr-cell-gap));
+  --ctrl-clr-cell-h: calc((var(--ctrl-clr-h) + 1em + var(--ctrl-clr-padding)) / 4 - var(--ctrl-clr-cell-gap));
+}
+WUP-CALENDAR [calendar=month] ul,
+WUP-CALENDAR [calendar=year] ul {
+  display: none;
+}
+WUP-CALENDAR header,
+WUP-CALENDAR ol,
+WUP-CALENDAR ul {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+}
+WUP-CALENDAR header &gt; button {
+  box-sizing: border-box;
+  cursor: pointer;
+  margin: auto;
+  padding: 4px 1em;
+  font-size: larger;
+  font-weight: initial;
+  border: none;
+  border-radius: 2em;
+  color: inherit;
+  background: none;
+  box-shadow: none;
+  text-transform: inherit;
+}
+WUP-CALENDAR header &gt; button[disabled] {
+  pointer-events: none;
+}
+WUP-CALENDAR ol,
+WUP-CALENDAR ul {
+  margin-top: var(--ctrl-clr-padding);
+  list-style: none;
+}
+WUP-CALENDAR ul {
+  color: var(--ctrl-label);
+}
+WUP-CALENDAR li {
+  height: var(--ctrl-clr-cell-h);
+  width: var(--ctrl-clr-cell-w);
+  padding: 0;
+  margin: calc(var(--ctrl-clr-cell-gap) / 2);
+  font: inherit;
+  line-height: var(--ctrl-clr-cell-h);
+  text-align: center;
+  border-radius: 50%;
+}
+WUP-CALENDAR ul &gt; li {
+  margin: 0 calc(var(--ctrl-clr-cell-gap) / 2);
+  height: 1em;
+  line-height: 1em;
+}
+WUP-CALENDAR li[prev],
+WUP-CALENDAR li[next] {
+  opacity: 0.6;
+}
+WUP-CALENDAR li[aria-current] {
+  color: var(--ctrl-clr-selected-bg);
+  font-weight: bold;
+  opacity: 1;
+}
+WUP-CALENDAR li[aria-selected] {
+  background-color: var(--ctrl-clr-selected-bg);
+  color: var(--ctrl-clr-selected);
+  opacity: 1;
+}
+WUP-CALENDAR li[focused] {
+  box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+  opacity: 1;
+}
+WUP-CALENDAR li[focused][aria-selected] {
+  text-decoration: underline;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-CALENDAR header &gt; button:hover {
+    background-color: var(--ctrl-clr-selected-bg);
+    color: var(--ctrl-clr-selected);
+  }
+  WUP-CALENDAR ol &gt; li:hover:not([disabled]) {
+    box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
+    opacity: 1;
+  }
+}
+WUP-CALENDAR li[disabled] {
+  color: var(--ctrl-clr-off);
+  background-color: var(--ctrl-clr-off-bg);
+}
+WUP-CALENDAR li[disabled][aria-selected] {
+  font-weight: bold;
+}
+@media not all and (prefers-reduced-motion) {
+  @keyframes WUP-ZOOM-OUT-1 {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0);
+      opacity: 0;
+    }
+  }
+  @keyframes WUP-ZOOM-OUT-2 {
+    0% {
+      transform: scale(5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes WUP-ZOOM-IN-1 {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(5);
+      opacity: 0;
+    }
+  }
+  @keyframes WUP-ZOOM-IN-2 {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  WUP-CALENDAR [calendar] &gt; div {
+    overflow: hidden;
+  }
+  WUP-CALENDAR [zoom] {
+    animation: none var(--anim-t) linear forwards;
+  }
+  WUP-CALENDAR [zoom=out] {
+    animation-name: WUP-ZOOM-OUT-1;
+  }
+  WUP-CALENDAR [zoom=out2] {
+    animation-name: WUP-ZOOM-OUT-2;
+  }
+  WUP-CALENDAR [zoom=in] {
+    animation-name: WUP-ZOOM-IN-1;
+  }
+  WUP-CALENDAR [zoom=in2] {
+    animation-name: WUP-ZOOM-IN-2;
+  }
+}
 </style>
 `;
 
@@ -1424,6 +1451,8 @@ exports[`control.calendar common tests snapshot of $defaults 1`] = `
   "autoFocus": false,
   "clearActions": 2,
   "disabled": false,
+  "enableInitOnChange": false,
+  "endWith": null,
   "exclude": null,
   "firstWeekDay": 1,
   "focusDebounceMs": 100,
@@ -1458,6 +1487,8 @@ exports[`control.calendar common tests snapshot of $defaults 3`] = `
   "w-autofocus",
   "w-clearactions",
   "w-disabled",
+  "w-enableinitonchange",
+  "w-endwith",
   "w-exclude",
   "w-firstweekday",
   "w-focusdebouncems",

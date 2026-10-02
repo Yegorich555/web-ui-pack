@@ -2,6 +2,80 @@
 
 # Changelog
 
+## 1.2.9 (\_\_\_)
+
+### Fixes & Improvements
+
+- **Global**
+  - Changing parent `$defaults` now affects on inherited components (ex. `WUPBaseControl.$defaults.validateDebounceMs = 300` affects every control)
+  - Fixed some styles bugs (hardly ever user noticed once)
+  - Added **WUPDateFormat**, **WUPTimeFormat** & **WUPDateTimeFormat** in TS (user able to see formats in TS)
+  - Compressed built-in styles
+- **Controls**
+  - Fixed TypeScript issues (including bool attributes in React 19 - expected string-value "true" instead of bool {true} )
+  - _Validation rule **required** doesn't use overridden $isEmpty (SelectMany is affected)_
+  - _Attribute **w-initvalue** doesn't prevent taking value from `form.$initModel` when attr parsed as empty (ex. `w-initvalue=""`)_
+- [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts)
+  - With option **allowNewValue** menu shows item `{text} (New option)` at the end when input text doesn't match any item; text is configurable via `WUPSelectControl.$textNewItem` (set `undefined` to hide the item)
+  - _With option **multiple** de-selecting an item via menu adds duplicate instead of removing when value is object equal to item by `$isEqual` (ex. `{ id: 1 }`) but not the same reference_
+  - _Option **readOnlyInput** as number (auto-mode) is treated as `true` even when input is editable: delimiter `", "` isn't added on focus with option **multiple** & attr `aria-autocomplete` is missed_
+- [SelectManyControl](src/controls/selectMany.ts)
+  - Added Ctrl+Z (history undo/redo) support for the whole control (previously it worked only for text input field)
+  - Option **hideSelected**
+    - _Menu keeps text-filter on re-opening after Escape (shows filtered items when input is empty)_
+    - _Selected item is hidden with delay (blinks)_
+    - _Selected items are not hidden when value is object equal by `$isEqual` (ex. `{ id: 1 }`) but not the same reference_
+- [PasswordControl](src/controls/password.ts)
+  - _Validation rule **special** ignores `min` (fails only when no special chars at all)_
+  - _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-storageKey`, `w-storage`_
+- [RadioControl](src/controls/radio.ts). _Option **storageKey** doesn't restore value when value is object with numeric `id` (ex. `{ id: 1 }`)_
+- [CircleElement](src/circleElement.ts). _Item with value `NaN` throws infinite exceptions (now `NaN` & `Infinity` are handled as `0`)_
+- [DropdownElement](src/dropdownElement.ts). _Fix popup position on animation when item is partially visible_
+- [ModalElement](src/modalElement.ts). _Ctrl+A selects behind modal_
+- [NotifyElement](src/notifyElement.ts). _Attributes **w-pauseOnHover** & **w-pauseOnWinBlur** are ignored_
+- [PopupElement](src/popup/popupElement.ts)
+  - _Method **$attach**: memory leak when target is removed without `detach()`_
+  - _Method **$attach**: popup isn't removed when opening is prevented via event `$willOpen`_
+  - _Opening prevented via event `$willOpen` during the closing breaks next open/close by target_
+- helper [animate](src/helpers/animate.ts). _Animation is infinite when `ms` is `NaN`_
+- helper [exportToExcel](src/helpers/files/exportToExcel.ts)
+  - Added prop **isSorted** for headers
+  - Added props **freezeRows** & **freezeColumns** for sheets
+  - Added arg **sheetIndex** for cellCallback
+  - Added numberFormat into settings
+  - Added dateFormat types into TS
+- helper [dateFromString](src/helpers/dateFromString.ts)
+  - _Format without day or month (`YYYY-MM`) returns the 1st day/month instead of throwing `Out of range`_
+  - _Option **throwOutOfRange** is `false` when options are pointed without it (ex. `dateFromString("2022-02-31", "YYYY-MM-DD", {})` returns `null` instead of throwing `Out of range`)_
+- helper [observer](src/helpers/observer.ts)
+  - _`delete observed.prop` fires event but doesn't delete prop_
+  - _`observed.valueOf()` returns function instead of raw object_
+- helper [scrolled](src/helpers/scrolled.ts). _With option **pages.cycled** `goTo(pages.total)` does nothing instead of going to the last page_
+- helpers [stringLowerCount & stringUpperCount](src/helpers/string.ts). _Symbol `{` is counted as letter_ (PasswordControl validation rules **lower** & **upper** are affected)
+
+### New Features
+
+- [CheckTreeControl](src/controls/checkTree.ts)
+- helper [imageConvert](src/helpers/files/imageConvert.ts)
+- helper [selectFiles](src/helpers/files/selectFiles.ts)
+- helper [isScrollable](src/helpers/findScrollParent.ts)
+- [PopupElement](src/popup/popupElement.ts)
+  - Added `WUPPopupElement.$useTooltip()` to show tooltip on hover for elements with attribute `[w-tooltip]`
+  - Added placement `WUPPopupElement.$placements.$centerScreen` to place popup at the center of screen (as modal) when there is no space around target. Animation `drawer` moves it from top to center (like modal)
+- **Controls**
+  - Added option **enableInitOnChange** to fire `$change` event on init (with reason `initValue`) even if value is empty
+  - Added Options `disabled` & `readOnly` (attrs `[disabled]` & `[readonly]`) accept string (reason) that is shown via tooltip
+  - Option **storageKey** syncs value between controls with the same `storage` & `storageKey` (ex. changing value in one control `personType` updates all others with the same key; `$change` is fired with reason `storage`)
+- **Combobox controls** (Select, SelectMany, Date, Time).
+  - Added options **popupOffsetFitElement** & **popupMinWidthByTarget** to configure popup-menu (via `$defaults` or per element)
+  - Added option **menuEscRollback** to rollback value to that was before menu opened on pressing Escape
+- [Form](src/formElement.ts). Added `$onChange` callback: `form.$onChange = () => {...}`
+- [CalendarControl](src/controls/calendar.ts). Added option **endWith** to select only year & month (`endWith: PickersEnum.Month`) or only year
+- [DateControl](src/controls/date.ts). Allowed to select only year & month for format without day (`yyyy-mm`) or only year for `yyyy` (see option **endWith**)
+- [NumberControl](src/controls/number.ts). Attribute `[w-format]` accepts pattern like `#,##0.0#` (see `WUPNumberControl.$parseFormat`); separators are taken from [localeInfo](src/objects/localeInfo.ts)
+
+---
+
 ## 1.2.8 (Sep 10, 2026)
 
 ### Fixes & Improvements
@@ -16,13 +90,15 @@
 - helper [csv](src/helpers/files/csv.ts)
 - [SortElement](src/sortElement.ts)
 
+---
+
 ## 1.2.7 (Aug 25, 2026)
 
 ### Fixes & Improvements
 
 - **Global**. Fix `el.cloneNode(true)` produces duplicates of the internal content
 - **Security**. helper [nestedProperty](src/helpers/nestedProperty.ts). Fix prototype pollution: `set()` throws now if path contains `__proto__`, `constructor` or `prototype`
-- **SelectManyControl**. Fix `Internal bug. No cached items` when value is changed right after `$options.items` is assigned to a `Promise`
+- [SelectManyControl](src/controls/selectMany.ts). Fix `Internal bug. No cached items` when value is changed right after `$options.items` is assigned to a `Promise`
 - [PopupElement](src/popup/popupElement.ts). Added `$options.keepPosition` to lock position-priority (`bottom` <=> `top`) while target isn't moved. Enabled for menus of [comboControls](src/controls/baseCombo.ts) so menu doesn't jump when height of popup/control is changed (ex. when [SelectManyControl](src/controls/selectMany.ts) collapses items on focus lost)
 - [NotifyElement](src/notifyElement.ts). Fixed position when $open-$close-$open fired before completely closing
 
@@ -34,16 +110,20 @@
 
 - helper [nestedProperty](src/helpers/nestedProperty.ts). Added support for arrays in path: `items[0].id`
 - [Form](src/formElement.ts) & [Controls](src/controls/). Added support for arrays in names: `items[0].id`
-- [ModalElement](src/modalElement.ts.ts). Fix `WUPModalElement.$useConfirmHook produces exception when document.dispatchEvent(...) is called manually`
+- [ModalElement](src/modalElement.ts). Fix `WUPModalElement.$useConfirmHook produces exception when document.dispatchEvent(...) is called manually`
 - [RadioControl](src/controls/radio.ts). Allow full customization via html (previously possible only with JS)
 - [SelectControl](src/controls/select.ts). [SelectManyControl](src/controls/selectMany.ts). [RadioControl](src/controls/radio.ts). Rollback storing values to localStorage, sessionStorage, url so it's stored by item.value.id | item.value?.toString() | item.text now
 - DEMO: add details about `$options.mask` for [NumberControl](src/controls/number.ts)
+
+---
 
 ## 1.2.5 (Oct 28, 2025)
 
 ### Fixes & Improvements
 
 - helper [objectToFormData](src/helpers/objectToFormData.ts). Added option arrayNotationForPlainTypes (use for NodeJS) and fix serializing Files as collection for .NET
+
+---
 
 ## 1.2.4 (May 23, 2025)
 
@@ -75,7 +155,7 @@
   - Fixed _changing $options doesn't clear related attributes_
 - **Controls (Date, Time, Number)**
   - Fixed _Validation **required** shows instead of **Invalid value** OR **Incomplete value**_
-- Helper [stringPrettify](src/helpers/stringPrettify.ts)
+- Helper [stringPrettify](src/helpers/string.ts)
   - Fixed behavior with abbreviations like `reminderSMS` => `Reminder SMS` (was `Reminder S M S`)
   - Improved performance up to 3 times (rewritten Regex to for-cycle). [See benchmark here](https://measurethat.net/Benchmarks/ShowResult/575117)
 
@@ -161,7 +241,7 @@
 - [Form](src/formElement.ts)
   - _Focus lost on pending (because every active element is disabled)_. Refactored pending state: elements changes to `readonly` + applied css-style [busy] + added attribute `aria-busy` to form
   - _Possible to submit by Enter key in pending state_
-- [ModalElement](src/modalElement.ts.ts). _button[close] is overlayed by header_
+- [ModalElement](src/modalElement.ts). _button[close] is overlayed by header_
 
 ---
 
@@ -181,7 +261,7 @@
 
 ### Fixes
 
-- [ModalElement](src/modalElement.ts.ts). _Wrong behavior on confirmModal + replace: true + click outside on previous/hidden modal_
+- [ModalElement](src/modalElement.ts). _Wrong behavior on confirmModal + replace: true + click outside on previous/hidden modal_
 - [PopupElement](src/popup/popupElement.ts). _Popup blinks on fast open+close_
 - **Controls**
   - _Missed css-var `--base-margin`_
@@ -193,7 +273,7 @@
 
 ### New Features
 
-- [ModalElement](src/modalElement.ts.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
+- [ModalElement](src/modalElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/modal)
 - **Global**
   - Added multi language support: override `window.__wupln` (to dynamic change) or global `__wupln` during the compilation (for static change)
   - Added css variable `--base-margin` to unify margins for all elements
@@ -263,10 +343,6 @@
     - event `$showMenu` >>> `$openMenu`
     - event `$hideMenu` >>> `$closeMenu`
       etc.
-
----
-
----
 
 ---
 
@@ -618,7 +694,7 @@
 
 - [WUPTimeObject](src/objects/timeObject.ts) => `Ordinary class Time with hours & minutes`
 - [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
-- helper [mathScaleValue](src/helpers/mathScaleValue)
+- helper [mathScaleValue](src/helpers/math.ts)
 - **Text based controls**. **Mask** supports letters also (previously only digits can be variabled)
 
 **Fixes**:
@@ -662,7 +738,7 @@
 - Added [helpers](README.md#helpers)
   - [onScroll](src/helpers/onScroll.ts)
   - [localeInfo](src/objects/localeInfo.ts)
-  - [mathSumFloat](src/helpers/mathSumFloat.ts)
+  - mathSumFloat
 
 **Fixes**:
 
@@ -686,7 +762,7 @@
   - [dateFromString](src/helpers/dateFromString.ts)
   - [dateToString](src/helpers/dateToString.ts)
   - [onScrollStop](src/helpers/onScrollStop.ts)
-  - [scrollCarousel](src/helpers/scrollCarousel.ts)
+  - [scrollCarousel](src/helpers/scrolled.ts)
 
 **Fixes**:
 
@@ -724,8 +800,8 @@
   - [objectClone](src/helpers/objectClone.ts)
   - [isIntoView](src/helpers/isIntoView.ts)
   - [scrollIntoView](src/helpers/scrollIntoView.ts)
-  - [stringLowerCount](src/helpers/stringCaseCount.ts)
-  - [stringUpperCount](src/helpers/stringCaseCount.ts)
+  - [stringLowerCount](src/helpers/string.ts)
+  - [stringUpperCount](src/helpers/string.ts)
   - [onSpy](src/helpers/onSpy.ts)
 - Added elements
   - [SpinElement](src/spinElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/spin)
@@ -774,7 +850,7 @@
 
 - Added [PopupElement](src/popup/popupElement.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/popup)
 - Added [helpers](README.md#helpers)
-  - [stringPrettify](src/helpers/stringPrettify.ts)
+  - [stringPrettify](src/helpers/string.ts)
   - [onEvent](src/helpers/onEvent.ts)
   - [onFocusGot](src/helpers/onFocusGot.ts)
   - [onFocusLost](src/helpers/onFocusLost.ts)

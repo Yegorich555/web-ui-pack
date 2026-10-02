@@ -94,8 +94,11 @@ describe("control.time", () => {
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       "w-readonlyinput": { value: true },
+      "w-popupoffsetfitelement": { value: [2, 3] },
+      "w-popupminwidthbytarget": { value: true },
       "w-opencase": { value: 1 },
       "w-menubuttonsoff": { value: true },
+      "w-menuescrollback": { value: true },
 
       "w-mask": { value: "00:00 am", nullValue: "00:00 //[AP]//M" },
       "w-maskholder": { value: "00:00 am", nullValue: "hh:mm *M" },
@@ -847,6 +850,7 @@ describe("control.time", () => {
     await h.wait(1);
     expect(el.$onChange).toBeCalledTimes(1);
     expect(el.$value).toEqual(new WUPTimeObject("15:22"));
+    await el.$openMenu(); // calling open on opened menu must not override value before menu
     expect(isPressKeyPrevented("Escape")).toBe(true);
     await h.wait();
     expect(el.$onChange).toBeCalledTimes(2);

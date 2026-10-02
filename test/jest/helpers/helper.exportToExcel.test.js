@@ -230,11 +230,136 @@ describe("helper.exportToExcel", () => {
     cases.forEach(([, name], i) => expect(styleInfo(i + 1)).toBe(`<tableStyleInfo${name} ${rest}`));
   });
 
+  test("isSorted: the filter-button of a header per column, per sheet & $defaults", async () => {
+    /** `<autoFilter>` of the table of the pointed sheet; `""` - the table has no filter at all */
+    const filterOf = (num) =>
+      (files[`xl/tables/table${num}.xml`].match(/<autoFilter[^>]*\/>|<autoFilter[^>]*>.*?<\/autoFilter>/) || [""])[0];
+
+    await exportToExcel([
+      // 1st: nothing is pointed => $defaults.headerStyle.isSorted (true) => the ordinary filter over every column
+      { name: "s1", data: [{ v: 1, v2: 2 }], mapping: [{ propName: "v" }, { propName: "v2" }] },
+      // 2nd: a single column hides its own button & the rest of the table keeps the filter
+      {
+        name: "s2",
+        data: [{ v: 1, v2: 2, v3: 3 }],
+        mapping: [{ propName: "v" }, { propName: "v2", headerStyle: { isSorted: false } }, { propName: "v3" }],
+      },
+      // 3rd: the sheet hides them all => no <autoFilter> at all
+      {
+        name: "s3",
+        headerStyle: { isSorted: false },
+        data: [{ v: 1, v2: 2 }],
+        mapping: [{ propName: "v" }, { propName: "v2" }],
+      },
+      // 4th: the column wins over the sheet exactly as the header-font does
+      {
+        name: "s4",
+        headerStyle: { isSorted: false },
+        data: [{ v: 1, v2: 2 }],
+        mapping: [{ propName: "v" }, { propName: "v2", headerStyle: { isSorted: true } }],
+      },
+    ]);
+    expect(filterOf(1)).toBe(`<autoFilter ref="A1:B2"/>`);
+    expect(filterOf(2)).toBe(`<autoFilter ref="A1:C2"><filterColumn colId="1" hiddenButton="1"/></autoFilter>`);
+    expect(filterOf(3)).toBe("");
+    expect(files["xl/tables/table3.xml"]).not.toContain("autoFilter"); // the tag is skipped & not an empty one
+    expect(filterOf(4)).toBe(`<autoFilter ref="A1:B2"><filterColumn colId="0" hiddenButton="1"/></autoFilter>`);
+    // the filter is the very 1st tag of the table by the schema, so a broken order breaks the whole document
+    [1, 2, 3, 4].forEach((i) => expectValidXml(`xl/tables/table${i}.xml`));
+  });
+
+  test("isSorted: false doesn't reserve the room for the filter-button", async () => {
+    await exportToExcel([
+      {
+        // the header is wider than the content, so the auto-width is defined by it & by the button
+        name: "W",
+        data: [{ v: "i" }],
+        mapping: [
+          { propName: "v", headerText: "Header" },
+          { propName: "v", headerText: "Header", headerStyle: { isSorted: false } },
+          { propName: "v", headerText: "Header", headerStyle: { isSorted: false }, width: 20 },
+        ],
+      },
+    ]);
+    // the button takes 18px & a single Excel-unit of the document-font (Calibri 11) is 7px
+    expect(colWidth(1) - colWidth(2)).toBeCloseTo(18 / 7, 1);
+    expect(colWidth(3)).toBe(20); // an explicit width isn't measured at all
+  });
+
+  test("isSorted: $defaults.headerStyle can be dropped at all", async () => {
+    const { headerStyle } = exportToExcel.$defaults;
+    exportToExcel.$defaults.headerStyle = undefined;
+    try {
+      await exportToExcel([{ name: "s", data: [{ v: 1 }], mapping: [{ propName: "v" }] }]);
+    } finally {
+      exportToExcel.$defaults.headerStyle = headerStyle;
+    }
+    // no header-style at all => the button is still applied: `true` is the default of isSorted itself
+    expect(files["xl/tables/table1.xml"]).toContain(`<autoFilter ref="A1:A2"/>`);
+  });
+
+  test("freeze: rows & columns per sheet & $defaults", async () => {
+    /** `<sheetViews>` of the pointed sheet; `""` - the sheet has no frozen pane at all */
+    const viewOf = (num) => (files[`xl/worksheets/sheet${num}.xml`].match(/<sheetViews>.*?<\/sheetViews>/) || [""])[0];
+    /** `<sheetViews>` that the pointed split produces */
+    const frozen = (split, cell, pane) =>
+      `<sheetViews><sheetView workbookViewId="0"><pane ${split} topLeftCell="${cell}" activePane="${pane}" ` +
+      `state="frozen"/><selection pane="${pane}" activeCell="${cell}" sqref="${cell}"/></sheetView></sheetViews>`;
+
+    const mapping = [{ propName: "v" }, { propName: "v2" }, { propName: "v3" }];
+    const data = [{ v: 1, v2: 2, v3: 3 }];
+    await exportToExcel([
+      // 1st: nothing is pointed => $defaults (the header-row & no column)
+      { name: "s1", data, mapping },
+      // 2nd: the columns only - the header-row is unfrozen explicitly
+      { name: "s2", data, mapping, freezeRows: 0, freezeColumns: 2 },
+      // 3rd: the both axes at once
+      { name: "s3", data, mapping, freezeRows: 2, freezeColumns: 1 },
+      // 4th: nothing at all
+      { name: "s4", data, mapping, freezeRows: 0 },
+      // 5th: a sheet without data is frozen either - the header-row is there even without a single item
+      { name: "s5", data: [], mapping, freezeColumns: 1 },
+    ]);
+    expect(viewOf(1)).toBe(frozen(`ySplit="1"`, "A2", "bottomLeft"));
+    expect(viewOf(2)).toBe(frozen(`xSplit="2"`, "C1", "topRight"));
+    expect(viewOf(3)).toBe(frozen(`xSplit="1" ySplit="2"`, "B3", "bottomRight"));
+    expect(viewOf(4)).toBe("");
+    expect(files["xl/worksheets/sheet4.xml"]).not.toContain("sheetView"); // the tag is skipped & not an empty one
+    expect(viewOf(5)).toBe(frozen(`xSplit="1" ySplit="1"`, "B2", "bottomRight"));
+    // <sheetViews> must go before <cols> by the schema, so a broken order breaks the whole document
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`${viewOf(1)}<cols>`);
+    [1, 2, 3, 4, 5].forEach((i) => expectValidXml(`xl/worksheets/sheet${i}.xml`));
+  });
+
+  test("freeze: $defaults & the normalization of the pointed counts", async () => {
+    const { freezeRows, freezeColumns } = exportToExcel.$defaults;
+    exportToExcel.$defaults.freezeRows = 0;
+    exportToExcel.$defaults.freezeColumns = 2;
+    try {
+      await exportToExcel([
+        // 1st: $defaults of the document win for every sheet that points nothing
+        { name: "s1", data: [{ v: 1 }], mapping: [{ propName: "v" }] },
+        // 2nd: a fractional count is cut & a negative one (NaN either) means no frozen pane at all
+        { name: "s2", data: [{ v: 1 }], mapping: [{ propName: "v" }], freezeRows: 2.7, freezeColumns: -5 },
+        // 3rd: a count bigger than the sheet itself is limited by the last cell of the format (XFD1048576)
+        { name: "s3", data: [{ v: 1 }], mapping: [{ propName: "v" }], freezeRows: 1e9, freezeColumns: 1e9 },
+      ]);
+    } finally {
+      exportToExcel.$defaults.freezeRows = freezeRows;
+      exportToExcel.$defaults.freezeColumns = freezeColumns;
+    }
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`<pane xSplit="2" topLeftCell="C1" activePane="topRight"`);
+    expect(files["xl/worksheets/sheet2.xml"]).toContain(`<pane ySplit="2" topLeftCell="A3" activePane="bottomLeft"`);
+    expect(files["xl/worksheets/sheet3.xml"]).toContain(
+      `<pane xSplit="16383" ySplit="1048575" topLeftCell="XFD1048576" activePane="bottomRight"`
+    );
+  });
+
   test("column letters: A..Z, AA, AB", async () => {
     const mapping = Array.from({ length: 28 }, (_v, i) => ({ propName: `c${i}`, headerText: `${i}`, width: 3 }));
     await exportToExcel([{ name: "Letters", data: [{ c25: "z", c26: "aa", c27: "ab" }], mapping }]);
     // WARN: no snapshot here: 28 columns produce a huge & useless xml
-    // NiceToKnow: a cell of the default format has no `s` at all (see the 'fonts' tests below)
+    // WARN: a cell of the default format has no `s` at all (see the 'fonts' tests below)
     expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="Z2" s="1" t="inlineStr"><is><t>z</t></is></c>`);
     expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AA2" s="1" t="inlineStr"><is><t>aa</t></is></c>`);
     expect(files["xl/worksheets/sheet1.xml"]).toContain(`<c r="AB2" s="1" t="inlineStr"><is><t>ab</t></is></c>`);
@@ -699,7 +824,7 @@ describe("helper.exportToExcel", () => {
       "DD.MM.YYYY, hh:mm:ss", // de-DE, ru-RU
       "YYYY/M/D h:mm:ss", // ja-JP
       "MMM d, yy hh:mm:ss.fff Z", // the short name of the month + the fractions + the UTC-flag
-      "dddd", // WARN: 'ddd'+ is the name of the week-day in Excel, so it's cut by 2
+      "DDDD", // WARN: 'ddd'+ is the name of the week-day in Excel, so a longer run is cut by 2
     ];
     await exportToExcel([
       {
@@ -718,6 +843,272 @@ describe("helper.exportToExcel", () => {
         `<numFmt numFmtId="169" formatCode="dd"/>` +
         `</numFmts>`
     );
+  });
+
+  test("dates: an Excel-native format goes into the document as-is", async () => {
+    // the both languages are supported: such a format holds a token that dateToString hasn't at all (or no
+    // token of it at all), so it's never converted & every part of it keeps the meaning that Excel gives it
+    const formats = [
+      "m/d/yyyy", // '/' stays the date-separator of the locale (a converted format escapes it into a literal)
+      "d-mmm-yy", // 'mmm'+ is the name of the month in Excel & a padded number for dateToString
+      "dddd, mmmm d, yyyy",
+      "h:mm:ss AM/PM", // the 12-hour clock of Excel (dateToString has the trailing 'a'/'A' instead)
+      "[$-409]mm:ss.0",
+      "[h]:mm:ss",
+      "hh:mm", // the both languages read it the very same way, so it goes as-is either
+    ];
+    await exportToExcel([
+      {
+        data: [{ v: new Date(2024, 2, 5) }],
+        mapping: formats.map((dateTimeFormat) => ({ propName: "v", dateTimeFormat })),
+      },
+    ]);
+    const fmts = formats.map((f, i) => `<numFmt numFmtId="${164 + i}" formatCode="${f}"/>`).join("");
+    expect(files["xl/styles.xml"]).toContain(`<numFmts count="${formats.length}">${fmts}</numFmts>`);
+  });
+
+  test("dates: 'General' points no format at all", async () => {
+    const sheet = {
+      data: [{ v: new Date(2024, 2, 5), d: new Date(2024, 2, 5) }],
+      // 'General' is what a cell without a format is rendered by anyway: Excel shows the stored date-serial
+      mapping: [
+        { propName: "v", headerText: ".", headerStyle: { isSorted: false }, dateTimeFormat: "General" },
+        { propName: "d", headerText: ".", headerStyle: { isSorted: false }, dateTimeFormat: "dd" },
+      ],
+    };
+    await exportToExcel([sheet]);
+    expect(files["xl/styles.xml"]).toContain(`<numFmts count="1">`); // the 'dd' of the 2nd column only
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="0" `);
+    // ...such a column is measured by the date-serial itself & not by a format
+    expect(colWidth(1)).toBeGreaterThan(colWidth(2));
+
+    // a cell with an own font keeps the very same 'no format at all'
+    await exportToExcel([sheet], null, (v, rowIndex) => (rowIndex ? { style: { fontSize: 22 } } : undefined));
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="0" `);
+  });
+
+  test("dates: the Excel format-language is decoded for the auto-width", async () => {
+    const widthOf = async (dateTimeFormat) => {
+      await exportToExcel([
+        {
+          data: [{ v: new Date(2024, 2, 5, 13, 45, 30) }],
+          // the header must not define the width here: a dot is narrower than every format below
+          mapping: [{ propName: "v", headerText: ".", headerStyle: { isSorted: false }, dateTimeFormat }],
+        },
+      ]);
+      return colWidth();
+    };
+    const base = await widthOf("d"); // the day alone: 2 digits (a token renders the widest date of the format)
+    expect(await widthOf("dd")).toBe(base);
+    expect(await widthOf("m")).toBe(base); // a month & the minutes are the both 2-digit
+    expect(await widthOf("hh")).toBe(base);
+    expect(await widthOf("ss")).toBe(base);
+    expect(await widthOf("yy")).toBe(base);
+    expect(await widthOf("ee")).toBe(base); // the era-year renders the ordinary one
+    expect(await widthOf("[hh]")).toBe(base); // WARN: the elapsed time is unbounded & is measured by 2 digits
+    expect(await widthOf("yyyy")).toBeGreaterThan(base);
+    // the names of the month & of the week-day: a column must fit the longest one of the locale
+    expect(await widthOf("mmm")).toBeGreaterThan(base);
+    expect(await widthOf("mmmm")).toBeGreaterThan(await widthOf("mmm"));
+    expect(await widthOf("mmmmm")).toBeLessThan(base); // ...the 1st letter of the name only
+    expect(await widthOf("ddd")).toBeGreaterThan(base);
+    expect(await widthOf("dddd")).toBeGreaterThan(await widthOf("ddd"));
+    // the fractions of a second & the 12-hour clock ('AM' is the widest part of the pair)
+    expect(await widthOf("ss.000")).toBeGreaterThan(await widthOf("ss"));
+    expect(await widthOf("hh A/P")).toBeGreaterThan(await widthOf("hh"));
+    expect(await widthOf("hh AM/PM")).toBeGreaterThan(await widthOf("hh A/P"));
+    expect(await widthOf("a-dd")).toBeGreaterThan(base); // ...a lonely 'a' isn't a token at all
+    // a quoted text, an escaped char & a padding ('_' reserves the width of the next char) are all rendered
+    expect(await widthOf('dd" year"')).toBeGreaterThan(await widthOf('dd"y"'));
+    expect(await widthOf("dd\\d")).toBeGreaterThan(base);
+    expect(await widthOf("_(dd")).toBeGreaterThan(base);
+    // ...a color, a condition, a fill & the text-placeholder render nothing at all
+    expect(await widthOf("[Red]dd")).toBe(base);
+    expect(await widthOf("[>5]dd")).toBe(base);
+    expect(await widthOf("*-dd")).toBe(base);
+    expect(await widthOf("@dd")).toBe(base);
+    // the currency sign of a locale-part is rendered - unlike the locale-code itself
+    expect(await widthOf("[$€-407]dd")).toBeGreaterThan(base);
+    expect(await widthOf("[$€]dd")).toBeGreaterThan(base);
+    expect(await widthOf("[$-407]dd")).toBe(base);
+    // only the 1st section of a multi-section format is measured
+    expect(await widthOf("dd;yyyy-mm-dd")).toBe(base);
+    // a broken format is never a crash: an unclosed part is read till the end of the format
+    expect(await widthOf('dd"yr')).toBeGreaterThan(base);
+    expect(await widthOf("[Reddd")).toBeLessThan(base); // ...such a format renders nothing at all
+    expect(await widthOf("dd_")).toBe(base);
+    expect(await widthOf("dd\\")).toBe(base);
+  });
+
+  test("numbers: an own format of the column, of the sheet & of $defaults", async () => {
+    const orig = exportToExcel.$defaults.numberFormat;
+    exportToExcel.$defaults.numberFormat = "0.0";
+    try {
+      await exportToExcel([
+        {
+          name: "S1",
+          data: [{ v: 1234.5, own: 1234.5, txt: "1234.5" }],
+          mapping: [
+            { propName: "v" }, // the format of $defaults is inherited by every column
+            { propName: "own", numberFormat: '#,##0.00" &"' }, // ...an own format of the column wins over it
+            { propName: "txt" }, // a text-cell is never formatted at all
+          ],
+        },
+        // the format of the sheet wins over $defaults & is inherited by every column of it
+        { name: "S2", data: [{ v: 0.25 }], mapping: [{ propName: "v" }], numberFormat: "0%" },
+      ]);
+    } finally {
+      exportToExcel.$defaults.numberFormat = orig;
+    }
+    // a number-format is the Excel-language itself (unlike a dateTimeFormat), so it's only xml-escaped
+    expect(files["xl/styles.xml"]).toContain(
+      `<numFmts count="3"><numFmt numFmtId="164" formatCode="0.0"/>` +
+        `<numFmt numFmtId="165" formatCode="#,##0.00&quot; &amp;&quot;"/>` +
+        `<numFmt numFmtId="166" formatCode="0%"/></numFmts>`
+    );
+    // the stored value is never changed - only the way Excel renders it
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(`t="n"><v>1234.5</v>`);
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164" `);
+    expect(xfById(cellStyleId("A2"))).toContain(`applyNumberFormat="1"`);
+    expect(xfById(cellStyleId("B2"))).toContain(`numFmtId="165" `);
+    expect(xfById(cellStyleId("C2"))).toContain(`numFmtId="0" `);
+    expect(xfById(cellStyleId("A2", 2))).toContain(`numFmtId="166" `);
+  });
+
+  test("numbers: the format is applied to a number-cell only", async () => {
+    await exportToExcel([
+      {
+        name: "Mixed",
+        data: [{ v: 1234.5 }, { v: new Date(2024, 2, 5) }, { v: "text" }],
+        // the very same column can hold both formats: a cell takes the one of its own type
+        mapping: [{ propName: "v", numberFormat: "#,##0.00", dateTimeFormat: "dd/MM/yyyy" }],
+      },
+    ]);
+    expect(files["xl/styles.xml"]).toContain(
+      `<numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0.00"/>` +
+        `<numFmt numFmtId="165" formatCode="dd\\/mm\\/yyyy"/></numFmts>`
+    );
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164" `);
+    expect(xfById(cellStyleId("A3"))).toContain(`numFmtId="165" `);
+    expect(xfById(cellStyleId("A4"))).toContain(`numFmtId="0" `);
+  });
+
+  test("numbers: 'General' points no format at all", async () => {
+    await exportToExcel([
+      {
+        name: "G",
+        data: [{ v: 1, v2: 2 }],
+        // 'General' is what such a cell is rendered by anyway, so no custom format is registered for it
+        mapping: [
+          { propName: "v", numberFormat: "General" },
+          { propName: "v2", numberFormat: "" },
+        ],
+      },
+    ]);
+    expect(files["xl/styles.xml"]).not.toContain("<numFmts");
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="0" `);
+    expect(xfById(cellStyleId("B2"))).toContain(`numFmtId="0" `);
+  });
+
+  test("numbers: the auto-width is estimated by the format & not by the stored value", async () => {
+    const widthOf = async (numberFormat, v = 1234567.5) => {
+      await exportToExcel([{ name: "W", data: [{ v }], mapping: [{ propName: "v", headerText: "V", numberFormat }] }]);
+      return colWidth();
+    };
+    // '1234567.5' as JS stringifies it: the width that a column without a format is measured by
+    const plain = await widthOf(undefined);
+    // the group-separators & the forced fraction are rendered by Excel, so the column must fit them
+    expect(await widthOf("#,##0.00")).toBeGreaterThan(plain);
+    // ...a currency sign & a text-literal are a part of the rendered cell either
+    expect(await widthOf('"$"#,##0.00')).toBeGreaterThan(await widthOf("#,##0.00"));
+    // '%' multiplies the value by 100 => 2 extra digits + the sign itself
+    expect(await widthOf("0%")).toBeGreaterThan(await widthOf("0"));
+    // ...while a trailing comma divides it by 1000 => 3 digits less
+    expect(await widthOf("#,##0,")).toBeLessThan(await widthOf("#,##0"));
+    // a negative value is measured with its minus-sign
+    expect(await widthOf("0.00", -1234567.5)).toBeGreaterThan(await widthOf("0.00", 1234567.5));
+    // JS stringifies a huge number as '1e+21', while Excel renders every single digit of it
+    expect(await widthOf("#,##0", 1e21)).toBeGreaterThan(await widthOf("#,##0", 1234567.5));
+    // ...and a tiny one as '1e-7': the format defines the whole width of such a cell
+    expect(await widthOf("0.00", 1e-7)).toBe(await widthOf("0.00", 1));
+    // an explicit width wins & such a column isn't measured at all
+    await exportToExcel([
+      { name: "W", data: [{ v: 1234567.5 }], mapping: [{ propName: "v", numberFormat: "#,##0.00", width: 4 }] },
+    ]);
+    expect(colWidth()).toBe(4);
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="164" `);
+  });
+
+  test("numbers: the format-language is decoded for the auto-width", async () => {
+    const widthOf = async (numberFormat, v = 1) => {
+      await exportToExcel([
+        {
+          name: "W",
+          data: [{ v }],
+          // the header must not define the width here: a single digit is narrower than the filter-button
+          mapping: [{ propName: "v", headerText: ".", headerStyle: { isSorted: false }, numberFormat }],
+        },
+      ]);
+      return colWidth();
+    };
+    const base = await widthOf("0"); // a single digit of the value & nothing around it
+    // a '#'/'?' placeholder renders nothing by itself, while a '0' is padded even for a shorter number
+    expect(await widthOf("#")).toBe(base);
+    expect(await widthOf("?")).toBe(base);
+    expect(await widthOf("0000")).toBeGreaterThan(base);
+    // the fraction is rendered by the format (the decimal point included)
+    expect(await widthOf("0.??")).toBeGreaterThan(base);
+    // a char that isn't a token of the format is a literal one: an escape is optional for such a char
+    expect(await widthOf("$0")).toBeGreaterThan(base);
+    // an escaped char, a quoted text & a padding ('_' reserves the width of the next char) are all rendered
+    expect(await widthOf("0\\$")).toBeGreaterThan(base);
+    expect(await widthOf('0" pcs"')).toBeGreaterThan(await widthOf('0"p"'));
+    expect(await widthOf("_(0")).toBeGreaterThan(base);
+    // ...a color, a condition, a fill & the text-placeholder render nothing at all
+    expect(await widthOf("[Red]0")).toBe(base);
+    expect(await widthOf("[>5]0")).toBe(base);
+    expect(await widthOf("*-0")).toBe(base);
+    expect(await widthOf("@0")).toBe(base);
+    // the currency sign of a locale-part is rendered - unlike the locale-code itself
+    expect(await widthOf("[$€-407]0")).toBeGreaterThan(base);
+    expect(await widthOf("[$€]0")).toBeGreaterThan(base);
+    expect(await widthOf("[$-407]0")).toBe(base);
+    // a comma before the very 1st placeholder is a literal & not a separator
+    expect(await widthOf(",0")).toBeGreaterThan(base);
+    // the scaling can eat the whole value, but a digit is always rendered
+    expect(await widthOf("#,")).toBe(base);
+    // only the 1st section of a multi-section format is measured
+    expect(await widthOf("0;-0.0000;0.0000")).toBe(base);
+    // a broken format is never a crash: an unclosed part is read till the end of the format
+    expect(await widthOf('0"pcs')).toBeGreaterThan(base);
+    expect(await widthOf("[Red0")).toBe(base);
+    expect(await widthOf("0_")).toBe(base);
+    expect(await widthOf("0\\")).toBe(base);
+  });
+
+  test("cellCallback: an own font of a number-cell keeps the format of the column", async () => {
+    const big = { fontSize: 22 };
+    const sheet = (numberFormat) => ({
+      name: "S",
+      // the 1st 2 cells share the font, so the format is measured once per (font, column) & re-used
+      data: [{ v: 1234567.5 }, { v: 1234567.5 }, { v: 7 }],
+      mapping: [{ propName: "v", headerText: "V", numberFormat }],
+    });
+    const cb = (v, i) => (i && i < 3 ? { style: big } : undefined);
+
+    await exportToExcel([sheet("#,##0.00")], false, cb);
+    const wFormatted = colWidth();
+    const id = cellStyleId("A2");
+    // an own font of a cell changes only the font & keeps the number-format of the column
+    expect(xfById(id)).toContain(`numFmtId="164" `);
+    expect(fontById(id)).toContain(`<sz val="22"/>`);
+    // ...the cells without an own font keep the very same format either
+    expect(xfById(cellStyleId("A4"))).toContain(`numFmtId="164" `);
+
+    await exportToExcel([sheet()], false, cb);
+    // the width of such a cell is defined by the format & by the own font together
+    expect(wFormatted).toBeGreaterThan(colWidth());
+    expect(xfById(cellStyleId("A2"))).toContain(`numFmtId="0" `);
   });
 
   test("getCellValue: the type of a cell is defined by the mapper & not by the value", async () => {
@@ -784,7 +1175,7 @@ describe("helper.exportToExcel", () => {
         },
       ],
       null,
-      (value, rowIndex, mapping) => {
+      (value, rowIndex, _sheetIndex, mapping) => {
         calls.push(`${mapping.propName}${rowIndex}:${value.stringVal}`);
         // an own value only: the style of the column is kept
         if (mapping.propName === "s") {
@@ -823,6 +1214,31 @@ describe("helper.exportToExcel", () => {
     expect(noCb()).toBe(expected);
   });
 
+  test("cellCallback: the sheetIndex points the sheet that the cell belongs to", async () => {
+    const calls = [];
+    await exportToExcel(
+      [
+        { name: "First", data: [{ v: "a" }], mapping: [{ propName: "v" }] },
+        { name: "Second", data: [{ v: "b" }, { v: "c" }], mapping: [{ propName: "v" }] },
+      ],
+      null,
+      (value, rowIndex, sheetIndex, mapping) => {
+        calls.push(`${sheetIndex}.${rowIndex}:${mapping.propName}:${value.stringVal}`);
+        // the very same callback serves every sheet, so only the 2nd one is overridden here
+        return sheetIndex === 1 && rowIndex ? { value: { type: ExcelCellTypes.text, stringVal: "own" } } : undefined;
+      }
+    );
+    // the sheets are rendered one by one (the header-row of a sheet goes before its data)
+    expect(calls).toEqual(["0.0:v:V", "0.1:v:a", "1.0:v:V", "1.1:v:b", "1.2:v:c"]);
+    // the 1st sheet keeps the mapped values, while every data-cell of the 2nd one is overridden
+    expect(files["xl/worksheets/sheet1.xml"]).toContain(
+      `<c r="A2" s="${cellStyleId("A2")}" t="inlineStr"><is><t>a</t></is></c>`
+    );
+    const xml2 = files["xl/worksheets/sheet2.xml"];
+    expect(xml2).toContain(`<c r="A2" s="${cellStyleId("A2", 2)}" t="inlineStr"><is><t>own</t></is></c>`);
+    expect(xml2).toContain(`<c r="A3" s="${cellStyleId("A3", 2)}" t="inlineStr"><is><t>own</t></is></c>`);
+  });
+
   test("cellCallback: an own value, style & tooltip of a header-cell (rowIndex 0)", async () => {
     const blue = { color: "#0000ff" };
     const sheets = [
@@ -834,7 +1250,7 @@ describe("helper.exportToExcel", () => {
     const base = colWidth(1);
     const headerFont = fontById(cellStyleId("A1"));
 
-    await run((_value, rowIndex, mapping) =>
+    await run((_value, rowIndex, _sheetIndex, mapping) =>
       !rowIndex && mapping.propName === "v"
         ? { value: { type: ExcelCellTypes.text, stringVal: "Renamed & wiiiiiide" }, style: blue, tooltip: "About" }
         : undefined
@@ -1018,7 +1434,7 @@ describe("helper.exportToExcel", () => {
       // the 2nd sheet has no note at all => no extra files & no <legacyDrawing> for it
       { name: "Plain", data: [{ v: 1 }], mapping: [{ propName: "v" }] },
     ];
-    await exportToExcel(sheets, null, (_value, rowIndex, mapping) =>
+    await exportToExcel(sheets, null, (_value, rowIndex, _sheetIndex, mapping) =>
       // an empty tooltip is the very same as no tooltip at all
       mapping.propName === "s" ? { tooltip: rowIndex === 1 ? `Q&A <"'\`>` : "" } : undefined
     );

@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vscode-html-languageservice/main/docs/customData.schema.json",
-  "version": 1.2,
+  "version": 1.3,
   "_details": "// https://github.com/microsoft/vscode-html-languageservice/blob/main/docs/customData.schema.json",
   "_usage": "https://code.visualstudio.com/api/extension-guides/custom-data-extension",
   "_buildAuto": "https://github.com/runem/web-component-analyzer => run: wca analyze src --format json --outFile custom-elements.json/",
@@ -17,6 +17,16 @@
         {
           "name": "@see WUPSortElement.$attach",
           "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/sortElement.ts"
+        }
+      ]
+    },
+    {
+      "name": "w-tooltip",
+      "description": "Text of custom tooltip that shows on hover (requires WUPPopupElement.$useTooltip): \n\r set empty string to use content of elements pointed by [aria-describedby] or [aria-label]",
+      "references": [
+        {
+          "name": "@see WUPPopupElement.$useTooltip",
+          "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.ts"
         }
       ]
     }
@@ -108,6 +118,21 @@
           ]
         },
         {
+          "name": "w-endwith",
+          "description": "Picker where user selects value (lower pickers aren't rendered); point `month` to select only year & month (value is the 1st day of month) @defaultValue `day`",
+          "values": [
+            {
+              "name": "year"
+            },
+            {
+              "name": "month"
+            },
+            {
+              "name": "day"
+            }
+          ]
+        },
+        {
           "name": "w-min",
           "description": "User can't select date less than min; format `yyyy-MM-dd`"
         },
@@ -158,11 +183,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -224,6 +249,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -280,11 +315,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -346,6 +381,164 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-checktree",
+      "description": "Form-control with tree of checkboxes",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/control/checkTree"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-items",
+          "description": "Global reference to object with array where `item: {value: any, text: string, items?: item[], expanded?: boolean, checkable?: boolean, disabled?: boolean | string, readOnly?: boolean | string}`",
+          "values": [
+            {
+              "name": "window.checkTreeItems"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.CheckTree.Item",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/checkTree.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-collapsible",
+          "description": "Allow user to expand/collapse nested items @defaultValue `false`"
+        },
+        {
+          "name": "w-checkable",
+          "description": "Show the main checkbox that checks/unchecks every item; point `false` to render label as title of the tree (the same as `item.checkable: false`) @defaultValue `true`"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value: global reference to array of values (checked parent checks every nested item)",
+          "values": [
+            {
+              "name": "window.checkTreeValue"
+            }
+          ]
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
+        },
+        {
+          "name": "w-clearactions",
+          "description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.ClearActions",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-validatedebouncems",
+          "description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+        },
+        {
+          "name": "w-validationshowall",
+          "description": "Show all validation-rules with checkpoints as list instead of single error"
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -520,6 +713,21 @@
           ]
         },
         {
+          "name": "w-endwith",
+          "description": "Picker where user selects value (lower pickers aren't rendered) @defaultValue based on [w-format]: `yyyy-mm` => `month`, `yyyy` => `year`, otherwise `day`",
+          "values": [
+            {
+              "name": "year"
+            },
+            {
+              "name": "month"
+            },
+            {
+              "name": "day"
+            }
+          ]
+        },
+        {
           "name": "w-min",
           "description": "User can't select date less than min; format `yyyy-MM-dd`"
         },
@@ -555,6 +763,35 @@
         {
           "name": "w-readonlyinput",
           "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+        },
+        {
+          "name": "w-popupoffsetfitelement",
+          "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+          "values": [
+            {
+              "name": "window.offset"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Popup.Options[offsetFitElement]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-popupminwidthbytarget",
+          "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `false`",
+          "references": [
+            {
+              "name": "WUP.Popup.Options[minWidthByTarget]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-menuescrollback",
+          "description": "Set `true` to rollback value to that was before menu opened on pressing Escape (menu is closed in any case) @defaultValue `false`"
         },
         {
           "name": "w-debouncems",
@@ -635,11 +872,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -701,6 +938,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -1039,11 +1286,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -1105,6 +1352,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -1254,11 +1511,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -1292,6 +1549,16 @@
         {
           "name": "w-validationshowall",
           "description": "Show all validation-rules with checkpoints as list instead of single error"
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         }
       ]
     },
@@ -1352,11 +1619,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -1421,6 +1688,16 @@
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
         }
       ]
     },
@@ -1465,6 +1742,35 @@
         {
           "name": "w-readonlyinput",
           "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
+        },
+        {
+          "name": "w-popupoffsetfitelement",
+          "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+          "values": [
+            {
+              "name": "window.offset"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Popup.Options[offsetFitElement]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-popupminwidthbytarget",
+          "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `true`",
+          "references": [
+            {
+              "name": "WUP.Popup.Options[minWidthByTarget]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-menuescrollback",
+          "description": "Set `true` to rollback value to that was before menu opened on pressing Escape (menu is closed in any case) @defaultValue `false`"
         },
         {
           "name": "w-debouncems",
@@ -1545,11 +1851,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -1611,6 +1917,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -1664,6 +1980,35 @@
           "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
         },
         {
+          "name": "w-popupoffsetfitelement",
+          "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+          "values": [
+            {
+              "name": "window.offset"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Popup.Options[offsetFitElement]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-popupminwidthbytarget",
+          "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `true`",
+          "references": [
+            {
+              "name": "WUP.Popup.Options[minWidthByTarget]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-menuescrollback",
+          "description": "Set `true` to rollback value to that was before menu opened on pressing Escape (menu is closed in any case) @defaultValue `false`"
+        },
+        {
           "name": "w-debouncems",
           "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
@@ -1742,11 +2087,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -1808,6 +2153,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -1957,11 +2312,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -2023,6 +2378,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -2118,11 +2483,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -2184,6 +2549,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -2240,11 +2615,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -2306,6 +2681,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]
@@ -2403,6 +2788,35 @@
           "description": "Set `true` to make input not editable but allow select items via popup-menu (ordinary dropdown mode); set number X to enable autoMode where `input.readOnly = items.length < X`"
         },
         {
+          "name": "w-popupoffsetfitelement",
+          "description": "Virtual padding of fitElement applied to popup-menu: [top, right, bottom, left] or [top/bottom, right/left] in px @defaultValue `[1, 1]`\n\r Global reference to array",
+          "values": [
+            {
+              "name": "window.offset"
+            }
+          ],
+          "references": [
+            {
+              "name": "WUP.Popup.Options[offsetFitElement]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-popupminwidthbytarget",
+          "description": "Sets minWidth of popup-menu 100% of control width @defaultValue `false`",
+          "references": [
+            {
+              "name": "WUP.Popup.Options[minWidthByTarget]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/popup/popupElement.types.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-menuescrollback",
+          "description": "Set `true` to rollback value to that was before menu opened on pressing Escape (menu is closed in any case) @defaultValue `false`; value is always reverted if [w-menubuttonsoff]"
+        },
+        {
           "name": "w-debouncems",
           "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
@@ -2481,11 +2895,11 @@
         },
         {
           "name": "disabled",
-          "description": "Disallow edit/copy value; use attr [disabled] for styling"
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "readonly",
-          "description": "Disallow copy value; use attr [readonly] for styling"
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
         },
         {
           "name": "w-clearactions",
@@ -2547,6 +2961,16 @@
           "references": [
             {
               "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
               "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
             }
           ]

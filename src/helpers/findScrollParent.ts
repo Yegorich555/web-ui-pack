@@ -8,7 +8,39 @@ function hasFixedPos(el: HTMLElement): boolean {
   return p === n || (!p && window.getComputedStyle(el).position === n);
 }
 
-// todo need to implement isScrollable
+/** Returns whether element is scrollable by pointed scroll OR not
+ * @example ```
+ * const el = document.getElementById("someTestElement");
+ * isScrollable(el, 'scrollTop') - returns true if possible to scroll such element by Y (vertically)
+ * isScrollable(el, 'scrollLeft') - returns true if possible to scroll such element by X (horizontally)
+ * ``` */
+export function isScrollable(el: HTMLElement, checkScroll: "scrollTop" | "scrollLeft"): boolean {
+  const p = checkScroll;
+
+  // it means it's changed
+  if (el[p] > 0) {
+    return true;
+  }
+
+  // prevent event triggering via p.onscroll = e => e.stopImmediatePropagation...
+  const orig = el.onscroll;
+  el.onscroll = (e) => {
+    e.stopImmediatePropagation();
+  };
+
+  // try to change and check if it's affected
+  const prev = el[p];
+  el[p] += 10; // 10 to fix case when zoom applied
+  if (prev !== el[p]) {
+    el[p] = prev;
+    setTimeout(() => (el.onscroll = orig), 1);
+    return true; // WARN: scroll changeable even if css overflow:hidden
+  }
+
+  el.onscroll = orig;
+
+  return false;
+}
 
 /** Find first parent with active scroll X/Y */
 export default function findScrollParent(el: Element): HTMLElement | null {
@@ -17,35 +49,9 @@ export default function findScrollParent(el: Element): HTMLElement | null {
     return null;
   }
 
-  // it means it's changed
-  if (p.scrollTop > 0 || p.scrollLeft > 0) {
+  if (isScrollable(p, "scrollTop") || isScrollable(p, "scrollLeft")) {
     return p;
   }
-
-  // prevent event triggering via p.onscroll = e => e.stopImmediatePropagation...
-  const orig = p.onscroll;
-  p.onscroll = (e) => {
-    e.stopImmediatePropagation();
-  };
-
-  // try to change and check if it's affected
-  let prev = p.scrollTop;
-  p.scrollTop += 10; // 10 to fix case when zoom applied
-  if (prev !== p.scrollTop) {
-    p.scrollTop = prev;
-    setTimeout(() => (p.onscroll = orig), 1);
-    return p; // WARN: scroll changeable even if css overflow:hidden
-  }
-
-  prev = p.scrollLeft;
-  p.scrollLeft += 10; // 10 to fix case when zoom applied
-  if (prev !== p.scrollLeft) {
-    p.scrollLeft = prev;
-    setTimeout(() => (p.onscroll = orig), 1);
-    return p;
-  }
-
-  p.onscroll = orig;
 
   if (hasFixedPos(p)) {
     return null; // skip search if current element with fixed position

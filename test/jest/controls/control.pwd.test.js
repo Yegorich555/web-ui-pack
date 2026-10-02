@@ -66,6 +66,16 @@ describe("control.pwd", () => {
     expect(testEl.$validate()).toMatchInlineSnapshot(`"Must contain at least 2 special characters: #!-_?,.@:;'"`);
   });
 
+  test("validation special: min", () => {
+    testEl.$options.validations = { special: { min: 2, chars: "#!-_?,.@:;'" } };
+    testEl.$value = "a-b";
+    expect(testEl.$validate()).toBe("Must contain at least 2 special characters: #!-_?,.@:;'");
+    testEl.$value = "a-b!";
+    expect(testEl.$validate()).toBe(false);
+    testEl.$value = "a--b"; // the same char counts every time
+    expect(testEl.$validate()).toBe(false);
+  });
+
   test("btn eye", async () => {
     const anim = h.useFakeAnimation();
     const getSelection = () => ({ start: testEl.$refInput.selectionStart, end: testEl.$refInput.selectionEnd });

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, NavLink, useNavigate } from "re
 import { WUPHelpers, WUPSwitchControl } from "web-ui-pack";
 import { useBuiltinStyle, WUPcssButton, WUPcssScrollSmall } from "web-ui-pack/styles";
 import PopupView from "./components/popup/popupView";
+import TooltipView from "./components/popup/tooltipView";
 
 import ControlsView from "./components/controls/controlsView";
 import SpinView from "./components/spin/spinView";
@@ -20,6 +21,7 @@ import PasswordControlView from "./components/controls/password";
 import SelectControlView from "./components/controls/select";
 import SwitchControlView from "./components/controls/switch";
 import CheckControlView from "./components/controls/check";
+import CheckTreeControlView from "./components/controls/checkTree";
 import RadioControlView from "./components/controls/radio/radio";
 import CalendarControlView from "./components/controls/calendar";
 import DateControlView from "./components/controls/date";
@@ -36,6 +38,8 @@ import Login from "./components/controls/login";
 import ModalAsAlertView from "./components/modal/modalAsAlertView";
 import NotifyView from "./components/notify/notifyView";
 import ExportToExcelView from "./components/exportToExcel/exportToExcel";
+import ImageConvertView from "./components/imageConvert/imageConvert";
+import SelectFilesView from "./components/selectFiles/selectFiles";
 
 (window as any).WUPHelpers = WUPHelpers;
 
@@ -53,6 +57,7 @@ const routes: IRoute[] = [
     { path: "spin", el: SpinView },
     { path: "circle", el: CircleView },
     { path: "popup", el: PopupView },
+    { path: "tooltip", el: TooltipView },
     { path: "dropdown", el: DropdownView },
     { path: "modal", el: ModalView },
     { path: "modal-alert", label: "Alert", el: ModalAsAlertView },
@@ -67,6 +72,7 @@ const routes: IRoute[] = [
   { path: "control/number", el: NumberControlView, isNested: true },
   { path: "control/switch", el: SwitchControlView, isNested: true },
   { path: "control/check", el: CheckControlView, isNested: true },
+  { path: "control/checkTree", el: CheckTreeControlView, isNested: true },
   { path: "control/radio", el: RadioControlView, isNested: true },
   { path: "control/select", el: SelectControlView, isNested: true },
   { path: "control/selectMany", el: SelectManyControlView, isNested: true },
@@ -76,6 +82,8 @@ const routes: IRoute[] = [
   { path: "control/dateTime", el: DateTimeView, isNested: true },
 
   { path: "files/excel", label: "Export to Excel", el: ExportToExcelView },
+  { path: "files/image", label: "Image convert", el: ImageConvertView },
+  { path: "files/select", label: "Select files", el: SelectFilesView },
 
   { path: "faq", label: "FAQ", el: FAQView },
 ];
@@ -133,7 +141,8 @@ export default function AppContainer() {
           w-storageKey="darkmode"
           ref={(el) => {
             if (el) {
-              // NiceToHave: prevent toggle animation on init
+              // WARN: value from storage applies in gotReady (after timeout) so pre-set attr to prevent toggle animation on init
+              el.toggleAttribute("checked", !!window.isDark);
               el.$refInput.ariaLabel = "toggle between light and darkmode";
               el.$onChange = () => changeDarkMode(el.$value);
             }

@@ -6,6 +6,7 @@ import Code from "src/elements/code";
 import stylesCom from "./controls.scss";
 import styles from "./text.scss";
 import TextControlWithMask from "./text.mask";
+import TextControlPhone from "./text.phone";
 
 WUPTextControl.$use();
 
@@ -31,6 +32,7 @@ export default function TextControlView() {
         "Mask/maskholder support (options mask & maskholder)",
         "Prefix/postfix support (options prefix & postfix)",
         "Ability to save value to localStorage, sessionStorage, URL (options storageKey & storage)",
+        "Tooltip with reason for readonly/disabled state (point string to options readOnly & disabled or attrs [readonly] & [disabled])",
       ]}
     >
       <wup-form
@@ -58,7 +60,7 @@ export default function TextControlView() {
             w-name="readonly"
             ref={(el) => {
               if (el) {
-                el.$options.readOnly = true;
+                el.$options.readOnly = "Readonly reason (shown via tooltip)";
               }
             }}
           />
@@ -67,7 +69,7 @@ export default function TextControlView() {
             w-initValue="init value here"
             ref={(el) => {
               if (el) {
-                el.$options.disabled = true;
+                el.$options.disabled = "Disabled reason (shown via tooltip)";
               }
             }}
           />
@@ -155,6 +157,7 @@ export default function TextControlView() {
             w-initValue="12"
           />
         </TextControlWithMask>
+        <TextControlPhone />
 
         <FAQ
           endString=""
