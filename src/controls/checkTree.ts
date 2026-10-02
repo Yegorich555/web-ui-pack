@@ -11,8 +11,14 @@ declare global {
       /** Nested items: parent is checked when every nested item is checked and partially checked when some of them
        * @tutorial Rules
        * * value of checked parent is included in `$value`; point `value: undefined` to exclude it
-       * * leaf (item without nested items) must have value otherwise its state is lost */
+       * * leaf (item without nested items) must have value otherwise its state is lost
+       * * point `checkable: false` to render parent without checkbox (as title of nested items) */
       items?: Item<T>[];
+      /** Show checkbox for parent; point `false` to render it as title of nested items:
+       *  its value is ignored, Space does nothing, click expands/collapses nested items (only with option `collapsible`)
+       * * ignored for item without nested items
+       * @defaultValue true */
+      checkable?: boolean;
       /** Expanded state on init (only with option `collapsible`)
        * @defaultValue false */
       expanded?: boolean;
@@ -113,6 +119,8 @@ function setReason(row: Element, attr: string, isOn: boolean, reason?: boolean |
 type NodeElement = HTMLLIElement & { _index: number };
 interface TreeNode<T> {
   item: WUP.CheckTree.Item<T>;
+  /** Item has checkbox; otherwise it's parent with `item.checkable: false`: check-state is calculated but isn't rendered & value is ignored */
+  isCheckable: boolean;
   /** Index of parent node; -1 for root-level */
   parent: number;
   /** Index next to the last nested node: nested nodes are placed in range [index + 1, end) */
@@ -125,6 +133,9 @@ interface TreeNode<T> {
   /** Rendered element (with option `collapsible` nested items are rendered only on first expanding if HTML isn't custom) */
   li?: NodeElement;
 }
+
+/** Returns true if value of item can be included in $value */
+const hasValue = <T>(n: TreeNode<T>): boolean => n.isCheckable && n.item.value !== undefined;
 
 /** Form-control with tree of checkboxes; the main checkbox checks/unchecks all items
  * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/checkTree}
@@ -164,6 +175,10 @@ interface TreeNode<T> {
  *        <li role="treeitem" aria-checked="true"><span item><span icon></span>Read</span></li>
  *        // etc.
  *      </ul>
+ *    </li>
+ *    <li role="treeitem" aria-label="Reports"> // title (item.checkable: false): without [aria-checked] & [icon]
+ *      <span item>Reports</span>
+ *      // etc.
  *    </li>
  *    // etc.
  * </ul>
@@ -277,9 +292,7 @@ export default class WUPCheckTreeControl<
   override valueFromStorage(str: string): ValueType[] | undefined {
     const set = new Set(str.split("_"));
     const r: ValueType[] = [];
-    this._nodes!.forEach(
-      ({ item }) => item.value !== undefined && set.has(this.valueToStr(item.value)) && r.push(item.value)
-    );
+    this._nodes!.forEach((n) => hasValue(n) && set.has(this.valueToStr(n.item.value)) && r.push(n.item.value));
     return r.length ? r : undefined;
   }
 
@@ -332,6 +345,7 @@ export default class WUPCheckTreeControl<
         const i =
           nodes.push({
             item,
+            isCheckable: item.checkable !== false || !item.items?.length,
             parent,
             end: 0,
             expanded: !collapsible || !!item.expanded,
@@ -339,7 +353,7 @@ export default class WUPCheckTreeControl<
             isReadOnly: !!item.readOnly || !!p?.isReadOnly,
           }) - 1;
         const k = keyOf(item.value);
-        item.value !== undefined && !index.has(k) && index.set(k, i);
+        hasValue(nodes[i]) && !index.has(k) && index.set(k, i);
         item.items?.length && add(item.items, i);
         nodes[i].end = nodes.length;
       });
@@ -379,7 +393,7 @@ export default class WUPCheckTreeControl<
     const li = document.createElement("li") as NodeElement;
     const row = li.appendChild(document.createElement("span"));
     row.setAttribute("item", "");
-    row.appendChild(document.createElement("span")).setAttribute("icon", "");
+    n.isCheckable && row.appendChild(document.createElement("span")).setAttribute("icon", "");
     this.setupNode(i, li, row);
     const s = item.text;
     if (typeof s === "function") {
@@ -431,7 +445,7 @@ export default class WUPCheckTreeControl<
     const { disabled, readOnly } = n.item;
     li._index = i;
     li.setAttribute("role", "treeitem");
-    li.setAttribute("aria-checked", ariaChecked[this._states![i]]);
+    this.setAttr.call(li, "aria-checked", n.isCheckable && ariaChecked[this._states![i]]);
     this.setAttr.call(li, "aria-disabled", n.isDisabled);
     const prev = row.previousElementSibling;
     const ex = prev?.hasAttribute("expand") ? prev : null; // [expand] is placed right before [item]
@@ -486,7 +500,7 @@ export default class WUPCheckTreeControl<
   /** Returns value according to check-states: values of checked items (parent is checked when every nested item is checked) */
   protected statesToValue(st: Uint8Array): ValueType[] | undefined {
     const r: ValueType[] = [];
-    this._nodes!.forEach(({ item }, i) => st[i] === CheckStates.on && item.value !== undefined && r.push(item.value));
+    this._nodes!.forEach((n, i) => st[i] === CheckStates.on && hasValue(n) && r.push(n.item.value));
     return r.length ? r : undefined;
   }
 
@@ -516,7 +530,7 @@ export default class WUPCheckTreeControl<
     if (i !== undefined && WUPBaseControl.$isEqual(nodes[i].item.value, v, this)) {
       return i;
     }
-    return nodes.findIndex(({ item }) => item.value !== undefined && WUPBaseControl.$isEqual(item.value, v, this));
+    return nodes.findIndex((n) => hasValue(n) && WUPBaseControl.$isEqual(n.item.value, v, this));
   }
 
   protected override setValue(v: ValueType[] | undefined, reason: SetValueReasons): boolean | null {
@@ -532,7 +546,10 @@ export default class WUPCheckTreeControl<
   /** Called to update check-states of rendered items */
   protected renderStates(st: Uint8Array): void {
     const prev = this._states!;
-    this._nodes!.forEach(({ li }, i) => prev[i] !== st[i] && li?.setAttribute("aria-checked", ariaChecked[st[i]]));
+    this._nodes!.forEach(
+      ({ li, isCheckable }, i) =>
+        isCheckable && prev[i] !== st[i] && li?.setAttribute("aria-checked", ariaChecked[st[i]])
+    );
     this._states = st;
   }
 
@@ -668,9 +685,11 @@ export default class WUPCheckTreeControl<
       this.toggleExpand(i);
       return;
     }
-    const { item, end } = this._nodes![i];
+    const { item, end, isCheckable } = this._nodes![i];
     item.onClick?.call(li, e, item);
-    !e.defaultPrevented && !this.$isReadOnly && this.toggleCheck(i, end);
+    if (!e.defaultPrevented) {
+      isCheckable ? !this.$isReadOnly && this.toggleCheck(i, end) : this.toggleExpand(i);
+    }
   }
 
   /** Called when user presses key on focused item or the main checkbox (it's item with index `-1`):
@@ -695,7 +714,7 @@ export default class WUPCheckTreeControl<
         if (i === -1) {
           return; // browser toggles the main checkbox itself: see gotInput
         }
-        this.toggleCheck(i, this._nodes![i].end);
+        this._nodes![i].isCheckable && this.toggleCheck(i, this._nodes![i].end);
         break;
       case "Enter":
         if (!this.toggleExpand(i)) {

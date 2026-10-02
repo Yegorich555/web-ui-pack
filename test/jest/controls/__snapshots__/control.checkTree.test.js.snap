@@ -1383,6 +1383,9 @@ WUP-CHECKTREE [role=treeitem]:focus &gt; [item] [icon]:before {
 WUP-CHECKTREE [role=treeitem]:focus &gt; [item] {
   color: var(--ctrl-selected);
 }
+WUP-CHECKTREE:not([w-collapsible]) [role=treeitem]:not([aria-checked]) &gt; [item] {
+  cursor: initial;
+}
 WUP-CHECKTREE &gt; label &gt; strong {
   pointer-events: auto;
 }
@@ -1392,7 +1395,7 @@ WUP-CHECKTREE &gt; label &gt; strong:hover ~ [icon]:before,
 WUP-CHECKTREE [item]:not([disabled]):hover [icon]:before {
     content: "";
   }
-  WUP-CHECKTREE [item]:not([disabled]):hover {
+  WUP-CHECKTREE [aria-checked] &gt; [item]:not([disabled]):hover, WUP-CHECKTREE[w-collapsible] [item]:not([disabled]):hover {
     color: var(--ctrl-selected);
   }
   WUP-CHECKTREE :not([aria-disabled]) &gt; [expand]:hover {

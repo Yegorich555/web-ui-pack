@@ -119,6 +119,11 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
     color: var(--ctrl-selected);
   }
 
+  // title (item.checkable: false) is clickable only with option collapsible
+  &:not([w-collapsible]) [role="treeitem"]:not([aria-checked]) > [item] {
+    cursor: initial;
+  }
+
   > label > strong {
     pointer-events: auto; // to show hover-effect of the main checkbox only on label (but not on [expand] inside the label)
   }
@@ -130,7 +135,8 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
       content: "";
     }
 
-    [item]:not([disabled]):hover {
+    [aria-checked] > [item]:not([disabled]):hover,
+    &[w-collapsible] [item]:not([disabled]):hover {
       color: var(--ctrl-selected);
     }
 

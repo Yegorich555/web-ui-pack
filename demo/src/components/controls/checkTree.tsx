@@ -33,6 +33,15 @@ const items: WUP.CheckTree.Item[] = [
       { text: "Finance (readonly)", value: "reports.finance", readOnly: true },
     ],
   },
+  {
+    text: "Notifications (parent without checkbox)",
+    value: undefined,
+    checkable: false, // parent is title of nested items
+    items: [
+      { text: "Email", value: "notifications.email" },
+      { text: "SMS", value: "notifications.sms" },
+    ],
+  },
   { text: "Settings", value: "settings" },
 ];
 
@@ -81,6 +90,7 @@ export default function CheckTreeControlView() {
         "The main checkbox checks/unchecks every item",
         "Parent is checked when every nested item is checked and partially checked when some of them",
         "Value of checked parent is included in $value (point item.value: undefined to exclude it)",
+        "Parent without checkbox as title of nested items (item.checkable: false)",
         "Disabled & readonly items (item.disabled, item.readOnly): the same as options of the control but for item with nested items",
         "Possible to customize items rendering via HTML (see example below...)",
         "Expand/collapse via option collapsible (nested items are rendered on first expanding)",

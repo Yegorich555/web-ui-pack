@@ -242,6 +242,72 @@ describe("control.checkTree", () => {
     expect(getStates()).toStrictEqual(["Group:mixed:tab", "A:mixed", "A1:false", "A2:true", "B:false", "C:false"]);
   });
 
+  test("item.checkable: false - parent is title", async () => {
+    const onErr = h.mockConsoleError();
+    const onClick = jest.fn();
+    el.$options.items = [
+      {
+        text: "Group",
+        value: "g", // ignored
+        checkable: false,
+        onClick,
+        items: [
+          { text: "A", value: "a", items: [{ text: "A1", value: "a1" }] },
+          { text: "B", value: "b" },
+        ],
+      },
+      { text: "C", value: "c", checkable: false }, // ignored for item without nested items
+    ];
+    jest.advanceTimersByTime(1);
+    expect(el.$refTree.innerHTML).toMatchInlineSnapshot(
+      `"<li role="treeitem" aria-label="Group" tabindex="0"><span item="">Group</span><ul role="group"><li role="treeitem" aria-checked="false" aria-label="A"><span item=""><span icon=""></span>A</span><ul role="group"><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>A1</span></li></ul></li><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>B</span></li></ul></li><li role="treeitem" aria-checked="false"><span item=""><span icon=""></span>C</span></li>"`
+    );
+
+    // value of title is ignored but check-state is calculated
+    el.$value = ["a", "b"];
+    expect(el.$value).toStrictEqual(["a", "a1", "b"]);
+    expect(getStates()).toStrictEqual(["Group:null:tab", "A:true", "A1:true", "B:true", "C:false"]);
+    expect(getMainState()).toBe("mixed");
+    el.$refInput.click();
+    expect(el.$value).toStrictEqual(["a", "a1", "b", "c"]);
+    expect(getMainState()).toBe(true);
+    expect(onErr).not.toBeCalled();
+    el.$value = ["g"];
+    expect(el.$value).toBe(undefined);
+    expect(onErr).toBeCalledTimes(1);
+    expect(onErr.mock.lastCall[0]).toBe("WUP-CHECKTREE. Not found in items");
+    expect(el.valueFromStorage("g_b")).toStrictEqual(["b"]);
+
+    // click & Space don't check nested items
+    await h.userClick(getRows()[0]);
+    expect(onClick).toBeCalledTimes(1);
+    expect(el.$value).toBe(undefined);
+    expect(getFocused()).toBe("Group");
+    expect(pressKey(" ")).toBe(true);
+    expect(el.$value).toBe(undefined);
+    expect(pressKey("Enter")).toBe(false); // because option collapsible is disabled
+    await h.userClick(getRows()[3]); // B
+    expect(el.$value).toStrictEqual(["b"]);
+
+    // option collapsible: click on title expands/collapses nested items
+    el.$options.collapsible = true;
+    jest.advanceTimersByTime(1);
+    expect(getStates()).toStrictEqual(["Group:null:expanded=false:tab", "C:false"]);
+    await h.userClick(getRows()[0]);
+    expect(getStates()[0]).toBe("Group:null:expanded=true:tab");
+    expect(el.$value).toStrictEqual(["b"]);
+    expect(pressKey("Enter")).toBe(true);
+    expect(getStates()[0]).toBe("Group:null:expanded=false:tab");
+    onClick.mockImplementationOnce((e) => e.preventDefault()); // prevents expanding
+    await h.userClick(getRows()[0]);
+    expect(getStates()[0]).toBe("Group:null:expanded=false:tab");
+    el.$options.readOnly = true; // expanding is possible for readonly
+    jest.advanceTimersByTime(1);
+    await h.userClick(getRows()[0]);
+    expect(getStates()[0]).toBe("Group:null:expanded=true:tab");
+    h.unMockConsoleError();
+  });
+
   test("complex values", () => {
     const onErr = h.mockConsoleError();
     const items = [
@@ -868,6 +934,17 @@ describe("control.checkTree", () => {
     jest.advanceTimersByTime(1);
     expect(el.$refTree.querySelector("[expand],[aria-expanded]")).toBe(null);
     expect(lis.every((li, i) => li === el.querySelectorAll("li")[i])).toBe(true);
+
+    // item.checkable: false
+    const titled = getItems();
+    titled[0].checkable = false;
+    el.$options.items = titled;
+    jest.advanceTimersByTime(1);
+    expect(lis[0].hasAttribute("aria-checked")).toBe(false);
+    expect(el.$value).toStrictEqual([11, 12, 2]);
+    el.$options.items = getItems();
+    jest.advanceTimersByTime(1);
+    expect(lis[0].getAttribute("aria-checked")).toBe("true");
   });
 
   test("customization with html - not matched to items", async () => {
