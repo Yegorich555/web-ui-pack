@@ -51,7 +51,9 @@ declare global {
       maxCount: number;
     }
     interface NewOptions<T = any> {
-      /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data! */
+      /** Items showed in dropdown-menu. Provide promise/api-call to show pending status when control retrieves data!
+       * * with custom HTML (`<ul>` inside the control) items are bound to `<li>` elements by index
+       * @see {@link WUPSelectControl} customization via HTML */
       items: MenuItem<T>[] | Promise<MenuItem<T>[]> | (() => MenuItem<T>[] | Promise<MenuItem<T>[]>);
       /** Allow user to create new value if value not found in items
        * @defaultValue false */
@@ -146,6 +148,16 @@ declare module "preact/jsx-runtime" {
  *        // etc. /
  *    </ul>
  * </wup-popup>
+ * @tutorial Customization via HTML @example
+ * // place `<ul>` with items inside the control: it's moved into the menu on opening (isn't re-rendered) and bound to $options.items by index;
+ * // item.text is used for input & filtering as before; roles & aria-attrs are added by the control
+ * // if count of `<li>` doesn't match items then error is logged and HTML is replaced by default rendering
+ * <wup-select w-items="window.myItems">
+ *    <ul>
+ *      <li><span><b>Donny</b> <small>(admin)</small></span></li> // single wrapper: selected item is [display: flex] so spaces between elements are lost
+ *      <li><span><b>Mikky</b> <small>(user)</small></span></li>
+ *    </ul>
+ * </wup-select>;
  */
 export default class WUPSelectControl<
   ValueType = any | any[],
@@ -433,6 +445,19 @@ export default class WUPSelectControl<
 
   /** Items resolved from options */
   _cachedItems?: WUP.Select.MenuItem<ValueType>[];
+  /** Menu rendered via HTML (`<ul>` inside the control): it's moved into popup on opening & reused for the next popup */
+  _customMenu?: HTMLUListElement;
+  /** Removes click-listener of the current menu */
+  #offMenuClick?: () => void;
+
+  protected override renderControl(): void {
+    const ul = this.querySelector<HTMLUListElement>(":scope > ul");
+    if (ul) {
+      this._customMenu = ul;
+      ul.remove(); // it's shown only in popup
+    }
+    super.renderControl();
+  }
 
   /** Called when NoItems need to show */
   protected renderMenuNoItems(popup: WUPPopupElement, isReset: boolean): void {
@@ -481,7 +506,9 @@ export default class WUPSelectControl<
   }
 
   protected override renderMenu(popup: WUPPopupElement, menuId: string): HTMLElement {
-    const ul = popup.appendChild(document.createElement("ul"));
+    // without items nothing to bind: custom menu is kept for the next opening
+    const isCustom = !!this._customMenu && this.getItems().length !== 0;
+    const ul = popup.appendChild(isCustom ? this._customMenu! : document.createElement("ul"));
     ul.setAttribute("id", menuId);
     ul.setAttribute("role", "listbox");
     ul.setAttribute("aria-label", this.#ctr.$ariaLabelItems);
@@ -492,7 +519,7 @@ export default class WUPSelectControl<
     this._menuItems = { all, focused: -1 };
     !all.length && this.renderMenuNoItems(popup, false);
     // it happens on every show because by hide it dispose events
-    onEvent(ul, "click", (e) => this.gotMenuClick(e), { passive: false });
+    this.#offMenuClick = onEvent(ul, "click", (e) => this.gotMenuClick(e), { passive: false });
     return ul;
   }
 
@@ -515,12 +542,13 @@ export default class WUPSelectControl<
       this.throwError("Not found in items", { items, value: v }, true);
       return `Error: not found for ${v != null ? (v as any).toString() : ""}`;
     }
-    const item = items[i];
+    return this.itemToText(items[i], i);
+  }
+
+  /** Returns text of item that is shown in input & used for filtering menu */
+  protected itemToText(item: WUP.Select.MenuItem<any>, i: number): string {
     if (typeof item.text === "function") {
-      const li = document.createElement("li");
-      const s = item.text(item.value, li, i, this);
-      li.remove();
-      return s;
+      return item.text(item.value, document.createElement("li"), i, this);
     }
     return item.text;
   }
@@ -554,6 +582,14 @@ export default class WUPSelectControl<
 
   /** Create menuItems as array of HTMLLiElement with option _text required to filtering by input (otherwise content can be html-structure) */
   protected renderMenuItems(ul: HTMLUListElement): WUP.Select.MenuItemElement[] {
+    if (ul === this._customMenu) {
+      const all = this.bindMenuItems(ul);
+      if (all) {
+        return all;
+      }
+      this._customMenu = undefined; // custom HTML is replaced by default rendering
+      this.removeChildren.call(ul);
+    }
     const arr = this.getItems();
     return arr.map((a, i) => {
       const li = ul.appendChild(document.createElement("li")) as WUP.Select.MenuItemElement;
@@ -569,6 +605,23 @@ export default class WUPSelectControl<
       li._text = s.toLowerCase();
       return li;
     }); // as Array<WUP.Select.MenuItemElement> & { _focused: number; _selected: number };
+  }
+
+  /** Called to bind items to menu rendered via HTML: `<li>` elements are matched to items by index
+   * @returns null if HTML doesn't match items (nothing is bound) */
+  protected bindMenuItems(ul: HTMLUListElement): WUP.Select.MenuItemElement[] | null {
+    const arr = this.getItems();
+    const all: WUP.Select.MenuItemElement[] = Array.prototype.slice.call(ul.children);
+    if (all.length !== arr.length) {
+      this.throwError("Custom HTML doesn't match items", { items: this._opts.items, menu: ul }, true);
+      return null;
+    }
+    all.forEach((li, i) => {
+      li.setAttribute("role", "option");
+      li._value = arr[i].value;
+      li._text = this.itemToText(arr[i], i).toLowerCase();
+    });
+    return all;
   }
 
   protected gotMenuClick(e: MouseEvent): void {
@@ -949,6 +1002,20 @@ export default class WUPSelectControl<
   }
 
   protected override removePopup(): void {
+    const ul = this._customMenu;
+    if (ul && ul.parentElement === this.$refPopup) {
+      // custom menu is reused for the next popup: reset its state
+      ul.remove(); // before changes: otherwise each one invalidates styles of the document
+      this.#offMenuClick!();
+      const m = this._menuItems!;
+      m.refNew?.remove();
+      (m as any)._refNoItems?.remove();
+      m.filtered && m.all.forEach((li) => this.filterMenuItem(li, false));
+      ul.querySelectorAll("[aria-selected],[focused]").forEach((li) => {
+        li.removeAttribute("aria-selected");
+        li.removeAttribute("focused");
+      });
+    }
     super.removePopup();
     this._menuItems = undefined;
   }
@@ -959,6 +1026,5 @@ customElements.define(tagName, WUPSelectControl);
 // WARN Chrome touchscreen simulation issue: touch on label>strong fires click on input - the issue only in simulation
 // WARN label for="" in Chrome sometimes enables autosuggestion - need to remove it for select & selectMany
 
-// NiceToHave: add support custom items rendering when it's already appended to DOM like it works with dropdown
 // NiceToHave: option to allow autoselect item without pressing Enter: option: $autoComplete + aria-autocomplete: true => https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-autocomplete-both/
 // NiceToHave: color differently text-chunk that matches in menu

@@ -673,6 +673,132 @@ describe("control.select", () => {
     expect(el.$value).toBe(20);
   });
 
+  /** Creates control with custom HTML, assigns it to `el` & returns it */
+  async function createCustom(html, items) {
+    document.body.innerHTML = "";
+    el = document.createElement("wup-select");
+    el.innerHTML = html;
+    el.$options.items = items;
+    document.body.appendChild(el);
+    await h.wait();
+    return el;
+  }
+  const customHtml = `<ul class="my">${getItems()
+    .map((a) => `<li><b>${a.text}</b> <small>${a.value}</small></li>`)
+    .join("")}</ul>`;
+  const focus = async () => {
+    HTMLInputElement.prototype.focus.call(el.$refInput);
+    await h.wait();
+  };
+  const blur = async () => {
+    document.activeElement.blur();
+    await h.wait();
+  };
+
+  test("customization with html", async () => {
+    await createCustom(customHtml, getItems());
+    const ul = el._customMenu;
+    const lis = Array.from(ul.children);
+    expect(el.querySelector("ul")).toBe(null); // it's shown only in popup
+
+    await focus();
+    expect(el.$isOpened).toBe(true);
+    expect(el.$refPopup.firstElementChild).toBe(ul);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul class="my" id="txt3" role="listbox" aria-label="Items" tabindex="-1"><li role="option"><b>Donny</b> <small>10</small></li><li role="option"><b>Mikky</b> <small>20</small></li><li role="option"><b>Leo</b> <small>30</small></li><li role="option"><b>Splinter</b> <small>40</small></li></ul>"`
+    );
+    // item.text is used for input
+    await h.userClick(lis[1].querySelector("small"));
+    await h.wait();
+    expect(el.$value).toBe(20);
+    expect(el.$refInput.value).toBe("Mikky");
+    // item.text is used for filtering
+    await h.userTypeText(el.$refInput, "le");
+    expect(lis.map((li) => li.style.display)).toStrictEqual(["none", "none", "", "none"]);
+    el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait();
+    expect(el.$value).toBe(30);
+    expect(el.$refInput.value).toBe("Leo");
+
+    // popup is removed on focus lost: custom menu is detached & reset for the next popup
+    await h.userTypeText(el.$refInput, "zz");
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul class="my" id="txt3" role="listbox" aria-label="Items" tabindex="-1"><li role="option" style="display: none;"><b>Donny</b> <small>10</small></li><li role="option" aria-selected="false" style="display: none;"><b>Mikky</b> <small>20</small></li><li role="option" aria-selected="true" id="txt4" style="display: none;"><b>Leo</b> <small>30</small></li><li role="option" style="display: none;"><b>Splinter</b> <small>40</small></li><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+    );
+    await blur();
+    expect(el.$refPopup).toBe(undefined);
+    expect(ul.parentElement).toBe(null);
+    expect(ul.outerHTML).toMatchInlineSnapshot(
+      `"<ul class="my" id="txt3" role="listbox" aria-label="Items" tabindex="-1"><li role="option" style=""><b>Donny</b> <small>10</small></li><li role="option" style=""><b>Mikky</b> <small>20</small></li><li role="option" id="txt4" style=""><b>Leo</b> <small>30</small></li><li role="option" style=""><b>Splinter</b> <small>40</small></li></ul>"`
+    );
+    await focus();
+    expect(el.$refPopup.firstElementChild).toBe(ul);
+    expect(Array.from(ul.children)).toStrictEqual(lis);
+    expect(lis[2].getAttribute("aria-selected")).toBe("true");
+    // item `(New option)` is removed as well
+    el.$options.allowNewValue = true;
+    await h.userTypeText(el.$refInput, "zz");
+    expect(ul.children.length).toBe(5);
+    await blur();
+    expect(el.$value).toBe("zz");
+    expect(ul.children.length).toBe(4);
+
+    // click-listener isn't duplicated on reusing
+    await focus();
+    const spy = jest.spyOn(el, "gotMenuClick");
+    await h.userClick(lis[0]);
+    await h.wait();
+    expect(spy).toBeCalledTimes(1);
+    expect(el.$value).toBe(10);
+
+    // items changing: the same elements are bound to new items
+    const items = getItems();
+    items[0].text = "Donatello";
+    el.$options.items = items;
+    await h.wait();
+    expect(el.$refInput.value).toBe("Donatello");
+    expect(ul.parentElement).toBe(null);
+    await blur();
+    await focus();
+    expect(Array.from(el.$refPopup.firstElementChild.children)).toStrictEqual(lis);
+    await h.userTypeText(el.$refInput, "dona");
+    expect(lis.map((li) => li.style.display)).toStrictEqual(["", "none", "none", "none"]);
+  });
+
+  test("customization with html - not matched to items", async () => {
+    const spy = h.mockConsoleError();
+    // without items: nothing to bind & custom menu is kept for the next opening
+    await createCustom(customHtml, []);
+    const ul = el._customMenu;
+    await focus();
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt3" role="listbox" aria-label="Items" tabindex="-1"><li role="option" aria-disabled="true" aria-selected="false">No Items</li></ul>"`
+    );
+    expect(ul.parentElement).toBe(null);
+    await blur();
+    expect(spy).not.toBeCalled();
+    expect(el._customMenu).toBe(ul);
+
+    // elements more than items: HTML is replaced by default rendering
+    el.$options.items = getItems().slice(0, 2);
+    await h.wait();
+    await focus();
+    expect(spy).toBeCalledTimes(1);
+    expect(spy.mock.lastCall[0]).toMatch("Custom HTML doesn't match items");
+    expect(el._customMenu).toBe(undefined);
+    expect(el.$refPopup.firstElementChild).toBe(ul); // the same element with default rendering
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul class="my" id="txt4" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li></ul>"`
+    );
+    await blur();
+    await focus();
+    expect(el.$refPopup.firstElementChild).not.toBe(ul);
+    expect(el.$refPopup.innerHTML).toMatchInlineSnapshot(
+      `"<ul id="txt5" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option">Mikky</li></ul>"`
+    );
+    h.unMockConsoleError();
+  });
+
   describe("options", () => {
     test("readOnlyInput: 5", async () => {
       el.$options.readOnlyInput = 5;

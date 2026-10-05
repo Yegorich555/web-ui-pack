@@ -92,7 +92,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
       - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
       - [x] [_BaseComboControl_](src/controls/baseCombo.ts)
         - [x] [SelectControl (combobox)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-          - [ ] Full customized menu
+          - [x] Full customized menu
           - [x] [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
         - [ ] SearchControl
         - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)

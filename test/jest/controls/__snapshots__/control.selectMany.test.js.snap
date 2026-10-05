@@ -787,6 +787,9 @@ WUP-SELECTMANY label:after {
 WUP-SELECTMANY[opened] label:after {
   transform: rotate(180deg);
 }
+WUP-SELECTMANY &gt; ul {
+  display: none;
+}
 WUP-SELECTMANY [menu] {
   padding: 0;
   overflow: hidden;

@@ -2,6 +2,14 @@
 
 # Changelog
 
+## 1.2.10 (\_\_\_)
+
+### New Features
+
+- [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts). Added customization of menu via HTML: place `<ul>` with items inside the control; `<li>` elements are bound to **$options.items** by index (see example in JSDoc & demo)
+
+---
+
 ## 1.2.9 (Oct 2, 2026)
 
 ### Fixes & Improvements

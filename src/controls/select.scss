@@ -12,6 +12,11 @@
     transform: rotate(180deg);
   }
 
+  // custom menu (HTML) before the control is ready: it's shown only in popup
+  > ul {
+    display: none;
+  }
+
   // WARN: scroll sets for ul otherwise animation broken scroll to selectItem because animation affects on scrollSize
   [menu] {
     @include wup-menu;

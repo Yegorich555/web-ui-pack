@@ -774,6 +774,9 @@ WUP-SELECT label:after {
 WUP-SELECT[opened] label:after {
   transform: rotate(180deg);
 }
+WUP-SELECT &gt; ul {
+  display: none;
+}
 WUP-SELECT [menu] {
   padding: 0;
   overflow: hidden;
