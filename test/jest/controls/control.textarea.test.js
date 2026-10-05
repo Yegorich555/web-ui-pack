@@ -1,6 +1,6 @@
 import { WUPTextareaControl } from "web-ui-pack";
 import { initTestBaseControl } from "./baseControlTest";
-import testTextControl from "./control.textTest";
+import testTextareaControl, { mockAreaInput } from "./control.textareaTest";
 import * as h from "../../testHelper";
 
 /** @type WUPTextareaControl */
@@ -10,63 +10,12 @@ initTestBaseControl({
   htmlTag: "wup-textarea",
   onInit: (e) => {
     el = e;
-    // WARN: it doesn't work in jsdom
-    Object.defineProperty(el.$refInput, "value", {
-      get: () => el.$refInput.innerHTML,
-      set: (v) => {
-        el.$refInput.innerHTML = v;
-        el.$refInput.selectionStart = v.length;
-        el.$refInput.selectionEnd = v.length;
-      },
-    });
-    Object.defineProperty(el.$refInput, "selectionStart", { value: 0, writable: true });
-    Object.defineProperty(el.$refInput, "selectionEnd", { value: 0, writable: true });
-    Object.defineProperty(el.$refInput, "select", {
-      value: () => {
-        el.$refInput.selectionStart = 0;
-        el.$refInput.selectionEnd = el.$refInput.value.length;
-      },
-      writable: true,
-    });
-    Object.defineProperty(el.$refInput, "setSelectionRange", {
-      value: (start, end) => {
-        el.$refInput.selectionStart = start;
-        el.$refInput.selectionEnd = end;
-      },
-      writable: true,
-    });
+    mockAreaInput(el);
   },
 });
 
 describe("control.textarea", () => {
-  testTextControl(() => el, {
-    validations: {},
-    noInputSelection: true,
-    attrs: {
-      "w-mask": null,
-      "w-maskholder": null,
-      "w-prefix": null,
-      "w-postfix": null,
-    },
-    // validationsSkip: [],
-  });
-
-  test("Enter key works properly", async () => {
-    const form = document.body.appendChild(document.createElement("wup-form"));
-    const onSubmit = jest.fn();
-    form.$onSubmit = onSubmit;
-    form.appendChild(el);
-
-    // Enter must add multiline instead of submit
-    el.focus();
-    await h.wait(1);
-    const isPrevented = !el.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })
-    );
-    await h.wait(1);
-    expect(isPrevented).toBe(false);
-    expect(onSubmit).toBeCalledTimes(0);
-  });
+  testTextareaControl(() => el);
 
   test("custom input props", async () => {
     const area = document.body.appendChild(document.createElement("wup-textarea"));

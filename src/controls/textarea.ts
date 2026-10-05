@@ -13,7 +13,7 @@ declare global {
     interface Options<T = string, VM = ValidityMap>
       extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "prefix" | "postfix"> {}
     interface JSXProps<C = WUPTextareaControl>
-      extends Omit<WUP.Text.JSXProps<C>, "mask" | "maskholder" | "prefix" | "postfix"> {}
+      extends Omit<WUP.Text.JSXProps<C>, "w-mask" | "w-maskholder" | "w-prefix" | "w-postfix"> {}
   }
 
   interface HTMLElementTagNameMap {
@@ -205,3 +205,5 @@ rr.forEach((k) => delete WUPTextareaControl.$defaults[k as keyof WUP.Textarea.Op
 rr = undefined;
 
 customElements.define(tagName, WUPTextareaControl);
+
+// todo readonly: user can type because only [aria-readonly] is set on contenteditable => prevent beforeinput when $isReadOnly (as TextRich does)

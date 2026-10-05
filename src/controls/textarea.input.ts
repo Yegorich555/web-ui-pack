@@ -1,7 +1,8 @@
 // import WUPBaseElement from "../baseElement";
 import WUPBaseElement from "../baseElement";
 
-let isFirst = true;
+/** Tags with appended styles (the class can be inherited by another element) */
+const styledTags = new Set<string>();
 /** Represents contenteditable element with custom input props as value, select etc. */
 export default class WUPTextareaInput extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
@@ -17,9 +18,9 @@ export default class WUPTextareaInput extends HTMLElement {
 
   constructor() {
     super();
-    if (isFirst) {
+    if (!styledTags.has(this.tagName)) {
+      styledTags.add(this.tagName);
       WUPBaseElement.$refStyle!.append(this.#ctr.$style.replace(/:host/g, `${this.tagName}`));
-      isFirst = false;
     }
   }
 
@@ -167,3 +168,6 @@ export default class WUPTextareaInput extends HTMLElement {
 }
 
 customElements.define("wup-areainput", WUPTextareaInput);
+
+// todo setter `value` assigns raw html via innerHTML: `$value = '<img src=x onerror="...">'` executes script => assign as text
+// todo getter `value` returns html-escaped text: typed `a < b & c` gives $value `a &lt; b &amp; c`
