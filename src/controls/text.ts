@@ -294,11 +294,16 @@ export default class WUPTextControl<
 
   /** Custom history undo/redo */
   _refHistory?: TextHistory;
+  /** Returns custom history undo/redo (called if canHandleUndo() returns true) */
+  protected createHistory(): TextHistory {
+    return new TextHistory(this.$refInput);
+  }
+
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
 
     if (this.canHandleUndo()) {
-      this._refHistory ??= new TextHistory(this.$refInput);
+      this._refHistory ??= this.createHistory();
     }
 
     if (!this.$refInput.readOnly) {
@@ -389,7 +394,7 @@ export default class WUPTextControl<
   protected gotInput(e: WUP.Text.GotInputEvent): void {
     const isBrowserAutofill = e.isTrusted && e.inputType == null;
     if (isBrowserAutofill && !this._refHistory && this.canHandleUndo()) {
-      this._refHistory = new TextHistory(this.$refInput);
+      this._refHistory = this.createHistory();
     }
     this._refHistory?.handleInput(e);
 

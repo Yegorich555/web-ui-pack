@@ -4,14 +4,30 @@ import { PopupOpenCases } from "../popup/popupElement.types";
 import { useTooltipOnce } from "../popup/popupTooltip";
 import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
+import TextHistory from "./text.history";
 import WUPTextareaControl from "./textarea";
-import WUPTextRichInput, {
-  htmlToEditor,
-  htmlToText,
-  isIndentWrapper,
-  renderFormula,
-  sanitizeUrl,
-} from "./textRich.input";
+import WUPTextRichInput, { htmlToEditor, htmlToText, renderFormula, sanitizeUrl } from "./textRich.input";
+import TextRichHistory from "./textRich.history";
+import {
+  addInline,
+  formatParents,
+  fromLinePos,
+  getLines,
+  inlineFormats,
+  linesOf,
+  listType,
+  mergeLists,
+  removeInline,
+  setLineAlign,
+  setLineIndent,
+  setLineList,
+  setLineTag,
+  splitAt,
+  splitRange,
+  toLinePos,
+  unwrap,
+  wrapLines,
+} from "./textRich.format";
 
 WUPTextRichInput.$use();
 WUPDropdownElement.$use();
@@ -169,55 +185,43 @@ const tagFormats = new Map<string, [string, unknown]>([
   ["H6", ["header", 6]],
   ["PRE", ["code-block", true]],
 ]);
-/** Attribute `size` of `<font>` (produced by `document.execCommand("fontSize")`) by value of format `size` */
-const fontSizes = new Map<unknown, string>([
-  ["sm", "2"],
-  ["lg", "5"],
-  ["hg", "7"],
+/** Font size by value of format `size` */
+const sizes = new Map<unknown, string>([
+  ["sm", "0.75em"],
+  ["lg", "1.5em"],
+  ["hg", "2.5em"],
 ]);
-/** Value of format `size` by attribute `size` of `<font>` */
-const fontFormats = new Map<string, unknown>([
-  ["2", "sm"],
-  ["5", "lg"],
-  ["7", "hg"],
+/** Value of format `size` by font size */
+const sizeFormats = new Map<string, unknown>([
+  ["0.75em", "sm"],
+  ["1.5em", "lg"],
+  ["2.5em", "hg"],
 ]);
-/** Command of `document.execCommand` by value of format `align` */
-const alignCommands = new Map<unknown, string>([
-  ["left", "justifyLeft"],
-  ["center", "justifyCenter"],
-  ["right", "justifyRight"],
-  ["justify", "justifyFull"],
+/** Supported values of text-align */
+const aligns = new Set<string>(["left", "center", "right", "justify"]);
+/** Formatting via browser (keyboard shortcuts etc.): `beforeinput.inputType` => [format, value]; other `format...` are prevented */
+const formatInputs = new Map<string, [string, unknown?]>([
+  ["formatBold", ["bold"]],
+  ["formatItalic", ["italic"]],
+  ["formatUnderline", ["underline"]],
+  ["formatStrikeThrough", ["strike"]],
+  ["formatSuperscript", ["script", "super"]],
+  ["formatSubscript", ["script", "sub"]],
+  ["formatJustifyFull", ["align", "justify"]],
+  ["formatJustifyCenter", ["align", "center"]],
+  ["formatJustifyRight", ["align", "right"]],
+  ["formatJustifyLeft", ["align", "left"]],
+  ["formatIndent", ["indent", 1]],
+  ["formatOutdent", ["indent", -1]],
+  ["formatRemove", ["clean"]],
 ]);
-/** Formatting via browser (keyboard shortcuts etc.) allowed for user: other `beforeinput.inputType: format...` are prevented */
-const allowedFormatInputs = new Set<string>([
-  "formatBold",
-  "formatItalic",
-  "formatUnderline",
-  "formatStrikeThrough",
-  "formatSuperscript",
-  "formatSubscript",
-  "formatJustifyFull",
-  "formatJustifyCenter",
-  "formatJustifyRight",
-  "formatJustifyLeft",
-  "formatIndent",
-  "formatOutdent",
-  "formatRemove",
+/** Inline formats that can be pointed for the next typed text (when selection is collapsed) */
+const pendingFormats = new Set<string>(["bold", "italic", "underline", "strike", "script", "size"]);
+/** Tags of lines by line formats */
+const lineTags = new Map<string, string>([
+  ["blockquote", "BLOCKQUOTE"],
+  ["code-block", "PRE"],
 ]);
-
-/** Calls `document.execCommand`: it applies format to selection & saves changes in browser history (for undo/redo)
- * @param isCss point true to apply style instead of element (`style="text-align: center"` instead of `align="center"` in Firefox) */
-function exec(cmd: string, value?: string, isCss = false): void {
-  document.execCommand("styleWithCSS", false, isCss ? "true" : "false");
-  document.execCommand(cmd, false, value);
-}
-
-/** Returns line (block element) that contains node or root if there is no line (text placed directly in root) */
-function lineOf(n: Node, root: HTMLElement): HTMLElement {
-  const el = (n.nodeType === Node.ELEMENT_NODE ? n : n.parentElement) as HTMLElement;
-  const line = el.closest<HTMLElement>("p,div,li,h1,h2,h3,h4,h5,h6,blockquote,pre");
-  return line && line !== root && root.contains(line) ? line : root;
-}
 
 /** Returns the 1st node inside the range (text node at the start or next one if range starts at the end of node) */
 function firstNode(r: Range): Node {
@@ -236,14 +240,6 @@ function firstNode(r: Range): Node {
   w.currentNode = n;
   const next = w.nextNode();
   return next && r.intersectsNode(next) ? next : n;
-}
-
-/** Returns value of format `list` by list element */
-function listType(list: Element): WUP.TextRich.FormatValues["list"] {
-  if (list.tagName === "OL") {
-    return "ordered";
-  }
-  return list.hasAttribute("data-checklist") ? "check" : "bullet";
 }
 
 /** Form-control with rich text editor (WYSIWYG): text is formatted via toolbar; behavior & styles are similar to npm quill
@@ -268,8 +264,9 @@ function listType(list: Element): WUP.TextRich.FormatValues["list"] {
  * @tutorial Rules
  * * $value is html (`undefined` if there is no text); it's sanitized: only supported formats are kept
  * (paragraph `<p>`, `<strong>`, `<em>`, `<u>`, `<s>`, `<sub>`, `<sup>`, `<a>`, `<h1>...<h6>`, `<blockquote>`, `<pre>`, `<ol>`, `<ul>`)
- * * formatting is applied via browser `document.execCommand` so undo/redo works as usual (Ctrl+Z, Ctrl+Y)
- * * keyboard shortcuts: Ctrl+B, Ctrl+I, Ctrl+U & Alt+F10 to focus toolbar (Arrows to navigate, Esc to return)
+ * * formatting is saved in custom history: undo/redo (Ctrl+Z, Ctrl+Y) works for text & formats
+ * * keyboard shortcuts: Ctrl+B, Ctrl+I, Ctrl+U & Alt+F10 to focus toolbar (Arrows to navigate, Esc to return);
+ * with collapsed selection inline format (bold etc.) is applied to the next typed text
  * * formula is rendered via KaTeX if it's available as `window.katex` (otherwise as text)
  * @tutorial innerHTML @example
  * <label>
@@ -523,7 +520,7 @@ export default class WUPTextRichControl<
     });
   }
 
-  /** Returns formats applied to selection (defined by the start of selection) */
+  /** Returns formats applied to selection (defined by the start of selection) including formats for the next typed text */
   protected getFormats(): Map<string, unknown> {
     const m = new Map<string, unknown>();
     const inp = this.$refInput;
@@ -544,19 +541,18 @@ export default class WUPTextRichControl<
           !m.has(f[0]) && m.set(f[0], f[1]);
         } else if (tag === "A") {
           m.set("link", el.getAttribute("href"));
-        } else if (tag === "FONT") {
-          !m.has("size") &&
-            fontFormats.has(el.getAttribute("size")!) &&
-            m.set("size", fontFormats.get(el.getAttribute("size")!));
         } else if (tag === "BLOCKQUOTE") {
-          !isIndentWrapper(el) && m.set("blockquote", true);
+          m.set("blockquote", true);
         } else if (tag === "LI" && !m.has("list")) {
           m.set("list", listType(el.parentElement!));
         }
+        const size = sizeFormats.get(el.style.fontSize);
+        size && !m.has("size") && m.set("size", size);
         const a = el.style.textAlign;
-        !m.has("align") && alignCommands.has(a) && m.set("align", a);
+        !m.has("align") && aligns.has(a) && m.set("align", a);
       }
     }
+    this.#pending.forEach((v, k) => (v === false ? m.delete(k) : m.set(k, v)));
     return m;
   }
 
@@ -575,177 +571,288 @@ export default class WUPTextRichControl<
     }
   }
 
-  /** Applies format to selection (toggles if it's applied already) */
+  /** Applies format to selection (toggles if it's applied already);
+   * inline format with collapsed selection is applied to the next typed text (the same as quill) */
   protected applyFormat(format: string, value?: unknown): void {
     if (this.$isDisabled || this.$isReadOnly) {
       return;
     }
     this.restoreSelection();
+    const inp = this.$refInput;
+    const sel = window.getSelection()!;
+    if (!sel.rangeCount || !inp.contains(sel.anchorNode)) {
+      return;
+    }
     const f = this.getFormats();
-    const isOn = f.has(format);
-    switch (format) {
-      case "bold":
-      case "italic":
-      case "underline":
-        exec(format);
-        break;
-      case "strike":
-        exec("strikeThrough");
-        break;
-      case "script":
-        exec(value === "sub" ? "subscript" : "superscript");
-        break;
-      case "header":
-        exec("formatBlock", value ? `h${value}` : "div");
-        break;
-      case "blockquote":
-        exec("formatBlock", isOn ? "div" : "blockquote");
-        break;
-      case "code-block":
-        exec("formatBlock", isOn ? "div" : "pre");
-        break;
-      case "list":
-        this.applyList(value as WUP.TextRich.FormatValues["list"], f.get("list") as string | undefined);
-        break;
-      case "indent":
-        exec(value === -1 ? "outdent" : "indent", undefined, true);
-        f.get("list") === "check" && this.markChecklist(true); // nested list created by indent
-        break;
-      case "align":
-        exec(alignCommands.get(value)!, undefined, true);
-        break;
-      case "size":
-        exec("fontSize", fontSizes.get(value) ?? "3"); // 3 is default size: Chrome removes <font>
-        break;
-      case "link":
-        this.applyLink(isOn);
-        break;
-      case "formula":
-        this.applyFormula();
-        break;
-      case "clean":
-        this.applyClean(f);
-        break;
-      default:
-        break;
+    if (sel.isCollapsed && (pendingFormats.has(format) || format === "clean")) {
+      this.togglePending(format, value, f);
+    } else {
+      const prev = inp.value;
+      if (format === "formula" || (format === "link" && !f.has("link"))) {
+        const v = this.askValue(format);
+        v && (format === "link" ? this.addLink(v) : this.addFormula(v));
+      } else {
+        this.keepSelection((r) => this.formatRange(r, format, value));
+      }
+      this.saveChanges(prev);
     }
     this.refreshToolbar();
   }
 
-  /** Applies list to selection: toggles if list with the same type is applied already */
-  protected applyList(value: WUP.TextRich.FormatValues["list"], prev: string | undefined): void {
-    if (value === "ordered") {
-      this.execList("insertOrderedList");
-      return;
+  /** Applies format to range: inline formats are applied to text, others - to lines */
+  protected formatRange(r: Range, format: string, value?: unknown): void {
+    const inp = this.$refInput;
+    switch (format) {
+      case "bold":
+      case "italic":
+      case "underline":
+      case "strike":
+        this.toggleInline(splitRange(r), format);
+        break;
+      case "script": {
+        const nodes = splitRange(r);
+        removeInline(nodes, inlineFormats.get(value === "sub" ? "script:super" : "script:sub")!, inp); // only one is possible
+        this.toggleInline(nodes, `script:${value}`);
+        break;
+      }
+      case "size": {
+        const nodes = splitRange(r);
+        const fmt = inlineFormats.get(format)!;
+        removeInline(nodes, fmt, inp);
+        value && addInline(nodes, fmt, sizes.get(value), inp);
+        break;
+      }
+      case "link": {
+        // remove link: whole link if selection is collapsed
+        const fmt = inlineFormats.get(format)!;
+        const a = r.collapsed && formatParents(r.startContainer, fmt, inp)[0];
+        a ? unwrap(a) : removeInline(splitRange(r), fmt, inp);
+        break;
+      }
+      case "header":
+        linesOf(r, inp).forEach((l) => setLineTag(l, value ? `H${value}` : "DIV"));
+        break;
+      case "blockquote":
+      case "code-block": {
+        const lines = linesOf(r, inp);
+        const tag = lineTags.get(format)!;
+        const isOn = lines.every((l) => l.tagName === tag);
+        lines.forEach((l) => setLineTag(l, isOn ? "DIV" : tag));
+        break;
+      }
+      case "list": {
+        const lines = linesOf(r, inp);
+        const isOn = lines.every((l) => l.tagName === "LI" && listType(l.parentElement!) === value);
+        lines.forEach((l) =>
+          isOn ? setLineTag(l, "DIV") : setLineList(l, value as WUP.TextRich.FormatValues["list"])
+        );
+        mergeLists(inp);
+        break;
+      }
+      case "align":
+        linesOf(r, inp).forEach((l) => setLineAlign(l, value as string));
+        break;
+      case "indent":
+        linesOf(r, inp).forEach((l) => setLineIndent(l, value as number));
+        break;
+      case "clean": {
+        const lines = linesOf(r, inp); // before changes in range
+        const nodes = splitRange(r);
+        inlineFormats.forEach((fmt) => removeInline(nodes, fmt, inp));
+        lines.forEach((l) => setLineTag(l, "DIV").removeAttribute("style"));
+        break;
+      }
+      default:
+        break;
     }
-    // bullet & check are <ul>: switching between them only marks the list
-    (!prev || prev === "ordered" || prev === value) && this.execList("insertUnorderedList");
-    prev !== value && this.markChecklist(value === "check");
   }
 
-  /** Calls command of list & restores caret (Chrome moves it to the start of line) */
-  protected execList(cmd: string): void {
+  /** Toggles inline format: it's removed if every text node has it already */
+  protected toggleInline(nodes: Text[], key: string): void {
+    const inp = this.$refInput;
+    const fmt = inlineFormats.get(key)!;
+    nodes.every((t) => formatParents(t, fmt, inp).length)
+      ? removeInline(nodes, fmt, inp)
+      : addInline(nodes, fmt, true, inp);
+  }
+
+  /** Formats for the next typed text (when selection is collapsed): format => value (`false` to remove format) */
+  #pending = new Map<string, unknown>();
+  /** Position of caret when formats for the next typed text are pointed: they're reset when caret is moved */
+  #pendingAt?: [Node, number];
+  /** Toggles format for the next typed text (Ctrl+B and type text) */
+  protected togglePending(format: string, value: unknown, f: Map<string, unknown>): void {
+    const p = this.#pending;
+    if (format === "clean") {
+      pendingFormats.forEach((k) => f.has(k) && p.set(k, false));
+    } else if (format === "size") {
+      p.set(format, value || false);
+    } else if (format === "script") {
+      p.set(format, f.get(format) === value ? false : value);
+    } else {
+      p.set(format, !f.has(format));
+    }
+    const sel = window.getSelection()!;
+    this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
+  }
+
+  /** Inserts text with formats pointed for the next typed text */
+  protected insertPending(text: string): void {
     const inp = this.$refInput;
     const sel = window.getSelection()!;
-    let pos = 0; // count of chars before caret in the line
-    if (sel.isCollapsed && sel.anchorNode) {
-      const r = document.createRange();
-      r.setStart(lineOf(sel.anchorNode, inp), 0);
-      r.setEnd(sel.anchorNode, sel.anchorOffset);
-      pos = r.toString().length;
-    }
-    exec(cmd);
-    if (pos && sel.anchorNode) {
-      const w = document.createTreeWalker(lineOf(sel.anchorNode, inp), NodeFilter.SHOW_TEXT);
-      for (let t = w.nextNode() as Text | null; t; t = w.nextNode() as Text | null) {
-        if (pos <= t.length) {
-          sel.collapse(t, pos);
-          break;
-        }
-        pos -= t.length;
+    const r = sel.getRangeAt(0);
+    r.deleteContents();
+    // move caret out of elements of removed/changed formats
+    this.#pending.forEach((v, k) => {
+      if (v === false || k === "script" || k === "size") {
+        (k === "script" ? ["script:sub", "script:super"] : [k]).forEach((key) => {
+          const el = formatParents(r.startContainer, inlineFormats.get(key)!, inp).pop(); // the outer one
+          el && splitAt(el, r);
+        });
       }
-    }
-  }
-
-  /** Marks/unmarks list at selection as checklist */
-  protected markChecklist(isOn: boolean): void {
-    const n = window.getSelection()?.anchorNode;
-    const ul = (n?.nodeType === Node.ELEMENT_NODE ? (n as Element) : n?.parentElement)?.closest("ul");
-    if (ul && this.$refInput.contains(ul)) {
-      this.setAttr.call(ul, "data-checklist", isOn, true);
-      this.fireInput();
-    }
-  }
-
-  /** Removes link or adds new one (asked via prompt) */
-  protected applyLink(isOn: boolean): void {
-    const sel = window.getSelection()!;
-    if (isOn) {
-      const a = (sel.anchorNode as Node).parentElement?.closest("a");
-      if (a && sel.isCollapsed) {
-        sel.selectAllChildren(a); // otherwise unlink does nothing
+    });
+    const t = document.createTextNode(text);
+    let node: Node = t;
+    this.#pending.forEach((v, k) => {
+      const fmt = v !== false && inlineFormats.get(k === "script" ? `script:${v}` : k)!;
+      if (fmt && !formatParents(r.startContainer, fmt, inp).length) {
+        const el = fmt.create(k === "size" ? sizes.get(v) : v);
+        el.appendChild(node);
+        node = el;
       }
-      exec("unlink");
-      return;
-    }
-    const r = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
-    const url = window.prompt(this.#ctr.$textLink, "https://")?.trim(); // eslint-disable-line no-alert
-    this.restoreAfterPrompt(r);
-    const href = url && sanitizeUrl(url);
-    if (!href) {
-      return;
-    }
-    if (sel.isCollapsed) {
-      const a = document.createElement("a");
-      a.href = href;
-      a.textContent = url;
-      exec("insertHTML", a.outerHTML);
-    } else {
-      exec("createLink", href);
-    }
+    });
+    r.insertNode(node);
+    sel.collapse(t, t.length);
+    this.#pending.clear();
   }
 
-  /** Inserts formula (asked via prompt) */
-  protected applyFormula(): void {
+  /** Calls fn that changes editor & restores selection: it's saved by lines & chars because fn can move or split nodes */
+  protected keepSelection(fn: (r: Range) => void): void {
+    const inp = this.$refInput;
     const sel = window.getSelection()!;
-    const r = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
-    const tex = window.prompt(this.#ctr.$textFormula)?.trim(); // eslint-disable-line no-alert
-    this.restoreAfterPrompt(r);
-    if (!tex) {
-      return;
+    // position pointed by root (root, index) is converted into position inside child: otherwise index is wrong after wrapping
+    const childPos = (n: Node, offset: number): [Node, number] => {
+      const c = n === inp && inp.childNodes[offset];
+      return c ? [c, 0] : [n, offset];
+    };
+    const [an, ao] = childPos(sel.anchorNode!, sel.anchorOffset);
+    const [fn1, fo] = childPos(sel.focusNode!, sel.focusOffset);
+    wrapLines(inp) && sel.setBaseAndExtent(an, ao, fn1, fo); // nodes are moved into lines
+    let lines = getLines(inp);
+    const p1 = toLinePos(lines, sel.anchorNode!, sel.anchorOffset);
+    const p2 = toLinePos(lines, sel.focusNode!, sel.focusOffset);
+    fn(sel.getRangeAt(0));
+    lines = getLines(inp);
+    if (lines.length) {
+      const [n1, o1] = fromLinePos(lines, p1);
+      const [n2, o2] = fromLinePos(lines, p2);
+      sel.setBaseAndExtent(n1, o1, n2, o2);
     }
-    const f = document.createElement("span");
-    f.setAttribute("data-formula", tex);
-    f.textContent = tex;
-    exec("insertHTML", f.outerHTML);
-    this.$refInput.querySelectorAll<HTMLElement>("[data-formula]:not([contenteditable])").forEach(renderFormula);
-    this.fireInput();
   }
 
-  /** Called after window.prompt: returns focus & selection back */
-  protected restoreAfterPrompt(r: Range | null): void {
+  /** Asks value of link or formula via prompt; returns focus & selection back */
+  protected askValue(format: string): string | null {
+    const sel = window.getSelection()!;
+    const r = sel.getRangeAt(0).cloneRange();
+    const isLink = format === "link";
+    const v = window.prompt(isLink ? this.#ctr.$textLink : this.#ctr.$textFormula, isLink ? "https://" : "")?.trim(); // eslint-disable-line no-alert
     this.$refInput.focus({ preventScroll: true });
-    if (r) {
-      const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(r);
+    return (isLink ? v && sanitizeUrl(v) : v) || null;
+  }
+
+  /** Adds link to selection or inserts link with url as text if selection is collapsed */
+  protected addLink(href: string): void {
+    const fmt = inlineFormats.get("link")!;
+    if (window.getSelection()!.isCollapsed) {
+      const a = fmt.create(href);
+      a.textContent = href;
+      this.insertNode(a);
+    } else {
+      this.keepSelection((r) => {
+        const nodes = splitRange(r);
+        removeInline(nodes, fmt, this.$refInput);
+        addInline(nodes, fmt, href, this.$refInput);
+      });
+    }
+  }
+
+  /** Inserts formula instead of selection */
+  protected addFormula(tex: string): void {
+    const el = document.createElement("span");
+    el.setAttribute("data-formula", tex);
+    renderFormula(el);
+    this.insertNode(el);
+  }
+
+  /** Replaces selection with node & places caret after it */
+  protected insertNode(node: Node): void {
+    const sel = window.getSelection()!;
+    const r = sel.getRangeAt(0);
+    const last = node.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? node.lastChild : node;
+    r.deleteContents();
+    r.insertNode(node);
+    if (last) {
+      r.setStartAfter(last);
+      r.collapse(true);
       sel.removeAllRanges();
       sel.addRange(r);
     }
   }
 
-  /** Removes formatting: inline formats only if selection is collapsed (the same as quill) */
-  protected applyClean(f: Map<string, unknown>): void {
-    exec("removeFormat");
-    if (window.getSelection()!.isCollapsed) {
+  /** Replaces selection with sanitized html: blocks are inserted after the current line (it's split by caret) */
+  protected insertHTML(html: string): void {
+    const f = htmlToEditor(html);
+    const inp = this.$refInput;
+    const r = window.getSelection()!.getRangeAt(0);
+    r.deleteContents();
+    const line = getLines(inp).findLast((l) => l.contains(r.startContainer));
+    const first = f.firstElementChild;
+    if (!first) {
       return;
     }
-    exec("unlink");
-    (f.has("header") || f.has("blockquote") || f.has("code-block")) && exec("formatBlock", "div");
-    const list = f.get("list");
-    list && exec(list === "ordered" ? "insertOrderedList" : "insertUnorderedList"); // toggles list off
-    f.has("align") && exec("justifyLeft", undefined, true);
+    if ((f.childNodes.length === 1 && first.tagName === "DIV") || !line || line.tagName === "LI") {
+      // insert as inline content: lines are separated by <br>
+      const frag = document.createDocumentFragment();
+      const flatten = (el: Element): void => {
+        if (el.tagName === "OL" || el.tagName === "UL") {
+          Array.from(el.children).forEach(flatten);
+          return;
+        }
+        frag.lastChild && frag.append(document.createElement("br"));
+        Array.from(el.childNodes).forEach((n) =>
+          (n as Element).tagName === "OL" || (n as Element).tagName === "UL" ? flatten(n as Element) : frag.append(n)
+        );
+      };
+      Array.from(f.children).forEach(flatten);
+      this.insertNode(frag);
+      return;
+    }
+    const tail = document.createRange();
+    tail.setStart(r.startContainer, r.startOffset);
+    tail.setEnd(line, line.childNodes.length);
+    const after = line.cloneNode(false) as HTMLElement;
+    after.appendChild(tail.extractContents());
+    const last = f.lastChild!;
+    line.after(f);
+    last.after(after);
+    !after.textContent && after.remove();
+    !line.textContent && line.remove();
+    window.getSelection()!.collapse(last, last.childNodes.length);
   }
 
-  /** Called after manual changes of editor (not via execCommand) to update $value */
+  /** Called after changes of editor (not by browser): saves history & updates $value */
+  protected saveChanges(prev: string): void {
+    const inp = this.$refInput as unknown as WUPTextRichInput;
+    inp._cached = undefined;
+    if (inp.value !== prev) {
+      this._refHistory?.save(prev, inp.value);
+      this.fireInput();
+    }
+  }
+
+  /** Fires event input to update $value after manual changes of editor */
   protected fireInput(): void {
     this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
   }
@@ -838,8 +945,9 @@ export default class WUPTextRichControl<
     }
     const isIcon = e.clientX < li.getBoundingClientRect().left + parseFloat(getComputedStyle(li).paddingLeft);
     if (isIcon) {
+      const prev = this.$refInput.value;
       li.toggleAttribute("data-checked");
-      this.fireInput();
+      this.saveChanges(prev);
     }
   }
 
@@ -849,6 +957,8 @@ export default class WUPTextRichControl<
       const sel = window.getSelection();
       if (sel?.rangeCount && this.$refInput.contains(sel.getRangeAt(0).startContainer)) {
         this.#range = sel.getRangeAt(0).cloneRange();
+        const p = this.#pendingAt;
+        p && (sel.anchorNode !== p[0] || sel.anchorOffset !== p[1]) && this.#pending.clear(); // caret is moved
         this.refreshToolbar();
       }
     };
@@ -860,6 +970,7 @@ export default class WUPTextRichControl<
   protected override gotFocusLost(): void {
     super.gotFocusLost();
     this.#range = undefined;
+    this.#pending.clear();
     this.refreshToolbar(new Map());
   }
 
@@ -879,37 +990,40 @@ export default class WUPTextRichControl<
     }
     const t = e.inputType;
     if (t.startsWith("format")) {
-      !allowedFormatInputs.has(t) && e.preventDefault(); // color, font etc. aren't supported
-    } else if (t === "insertFromPaste" || t === "insertFromPasteAsQuotation" || t === "insertFromDrop") {
-      const html = e.dataTransfer?.getData("text/html");
-      if (html) {
-        // insert sanitized html (otherwise browser inserts any content: images, colors etc.)
-        e.preventDefault();
-        const [tr] = e.getTargetRanges();
-        this.$refInput.focus({ preventScroll: true });
-        if (tr) {
-          const r = document.createRange();
-          r.setStart(tr.startContainer, tr.startOffset);
-          r.setEnd(tr.endContainer, tr.endOffset);
-          const sel = window.getSelection()!;
-          sel.removeAllRanges();
-          sel.addRange(r);
-        }
-        const div = document.createElement("div");
-        div.appendChild(htmlToEditor(html));
-        exec("insertHTML", div.innerHTML);
-      }
+      e.preventDefault(); // formatting by browser (keyboard shortcuts) is replaced with custom one: to save it in custom history
+      const f = formatInputs.get(t); // color, font etc. aren't supported
+      f && this.applyFormat(f[0], f[1]);
+      return;
     }
+    super.gotBeforeInput(e); // custom history: undo/redo & state before changes
+    if (e.defaultPrevented) {
+      return;
+    }
+    const isPaste = t === "insertFromPaste" || t === "insertFromPasteAsQuotation" || t === "insertFromDrop";
+    const html = isPaste && e.dataTransfer?.getData("text/html");
+    if (html) {
+      // insert sanitized html (otherwise browser inserts any content: images, colors etc.)
+      e.preventDefault();
+      const [r] = e.getTargetRanges();
+      this.$refInput.focus({ preventScroll: true });
+      r && window.getSelection()!.setBaseAndExtent(r.startContainer, r.startOffset, r.endContainer, r.endOffset);
+      this.insertHTML(html);
+    } else if (t === "insertText" && e.data && this.#pending.size) {
+      e.preventDefault();
+      this.insertPending(e.data);
+    } else {
+      return;
+    }
+    this.fireInput(); // history is saved on input according to state before changes
   }
 
-  /** Native undo/redo of browser is used (custom history works only with plain text) */
-  protected override canHandleUndo(): boolean {
-    return false;
+  protected override createHistory(): TextHistory {
+    return new TextRichHistory(this.$refInput);
   }
 
   protected override setInputValue(v: string, reason: SetValueReasons): void {
     if (v && v === this.$refInput.value) {
-      return; // skip re-rendering: it resets selection, scroll & browser history
+      return; // skip re-rendering: it resets selection & scroll
     }
     super.setInputValue(v, reason);
   }

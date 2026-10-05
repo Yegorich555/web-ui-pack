@@ -1,4 +1,4 @@
-const enum InputTypes {
+export const enum InputTypes {
   /** Same as insert but possible with update last snapshot to merge several append to single */
   append,
   insert,
@@ -7,7 +7,7 @@ const enum InputTypes {
   replace,
 }
 
-interface InputState {
+export interface InputState {
   pos1: number;
   pos2: number;
   inserted: string | null;

@@ -36,8 +36,9 @@ export default function TextRichControlView() {
         "Inheritted features from TextareaControl",
         "Toolbar with formats: headers, bold, italic, underline, strike, quote, code, link, formula, lists, subscript & superscript, indentation, size, alignment & clean",
         "Value is html: it's sanitized & only supported formats are kept (pasted content as well)",
-        "Undo/redo via browser history (Ctrl+Z, Ctrl+Y)",
+        "Undo/redo for text & formatting (Ctrl+Z, Ctrl+Y)",
         "Keyboard: Ctrl+B, Ctrl+I, Ctrl+U & Alt+F10 to focus toolbar (Arrows to navigate, Esc to return)",
+        "Inline format with collapsed selection is applied to the next typed text (Ctrl+B and type text)",
         "Validations min/max count visible chars only",
         "Temporarily icons are taken from npm quill",
       ]}

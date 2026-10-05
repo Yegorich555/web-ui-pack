@@ -79,18 +79,14 @@ const skipTags = new Set([
   "LINK",
   "BASE",
 ]);
-/** Font size in value by attribute `size` of `<font>` in editor (`document.execCommand("fontSize")` produces `<font>`) */
+/** Font size by attribute `size` of `<font>` (produced by `document.execCommand("fontSize")` in another editors) */
 const fontSizes = new Map<string, string>([
   ["2", "0.75em"],
   ["5", "1.5em"],
   ["7", "2.5em"],
 ]);
-/** Attribute `size` of `<font>` in editor by font size in value */
-const fontAttrs = new Map<string, string>([
-  ["0.75em", "2"],
-  ["1.5em", "5"],
-  ["2.5em", "7"],
-]);
+/** Supported font sizes */
+const sizes = new Set(fontSizes.values());
 const textAligns = new Set(["center", "right", "justify"]);
 const safeProtocols = new Set(["http:", "https:", "mailto:", "tel:", "sms:"]);
 /** Positive length for margin-left (indentation) */
@@ -103,12 +99,6 @@ export function sanitizeUrl(url: string): string {
   } catch {
     return "";
   }
-}
-
-/** Returns true if element is a wrapper produced by `document.execCommand("indent")` in Chrome:
- * `<blockquote style="margin: 0 0 0 40px; border: none; padding: 0px;">` */
-export function isIndentWrapper(el: HTMLElement): boolean {
-  return el.tagName === "BLOCKQUOTE" && indentReg.test(el.style.marginLeft) && el.style.borderStyle === "none";
 }
 
 /** Renders formula via KaTeX if it's available (`window.katex`) otherwise as plain text */
@@ -132,14 +122,15 @@ export function htmlToText(html: string): string {
 
 /** Context of cleaning; WARN: source nodes are never cloned or moved (they can be unsafe) - only new nodes are created */
 interface Ctx {
-  /** Result for editor: paragraph as `<div>`, size as `<font>` (formats produced by `document.execCommand`) */
+  /** Result for editor: paragraph as `<div>` (browser adds it on Enter), bold as `<b>` */
   isEditor: boolean;
 }
 
-const isBlockTag = (tag: string): boolean =>
+/** Returns true if element with tag is block */
+export const isBlockTag = (tag: string): boolean =>
   lineTags.has(tag) || paragraphTags.has(tag) || listTags.has(tag) || tag === "LI";
 
-/** Copies supported styles of block: text-align & margin-left (indentation in Firefox) */
+/** Copies supported styles of block: text-align & margin-left (indentation) */
 function copyBlockStyle(src: HTMLElement, dst: HTMLElement): void {
   const align = src.style.textAlign || src.getAttribute("align") || "";
   textAligns.has(align) && (dst.style.textAlign = align);
@@ -208,14 +199,9 @@ function appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
     }
   } else {
     const size = tag === "FONT" ? fontSizes.get(el.getAttribute("size")!) : tag === "SPAN" && el.style.fontSize;
-    if (size && fontAttrs.has(size)) {
-      if (ctx.isEditor) {
-        next = document.createElement("font");
-        next.setAttribute("size", fontAttrs.get(size)!);
-      } else {
-        next = document.createElement("span");
-        next.style.fontSize = size;
-      }
+    if (size && sizes.has(size)) {
+      next = document.createElement("span");
+      next.style.fontSize = size;
     }
   }
 
@@ -318,15 +304,11 @@ function appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
     closeParagraph();
     if (paragraphTags.has(tag)) {
       if (hasBlocks(el)) {
-        appendBlocks(el, dst, ctx); // unwrap: `<div><ol>...</ol></div>` produced by Chrome
+        appendBlocks(el, dst, ctx); // unwrap: `<div><ol>...</ol></div>`
       } else {
         const line = toLine(el, pTag, ctx);
         line.firstChild && dst.appendChild(line);
       }
-    } else if (isIndentWrapper(el)) {
-      const w = dst.appendChild(document.createElement("blockquote"));
-      w.setAttribute("style", `margin: 0 0 0 ${el.style.marginLeft}; border: none; padding: 0px;`);
-      appendBlocks(el, w, ctx);
     } else if (lineTags.has(tag)) {
       dst.appendChild(toLine(el, tag, ctx));
     } else if (listTags.has(tag)) {
