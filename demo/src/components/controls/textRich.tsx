@@ -32,6 +32,7 @@ export default function TextRichControlView() {
         "Inline format with collapsed selection is applied to the next typed text (Ctrl+B and type text)",
         "Validations min/max count visible chars only",
         "Uses own js-engine and doesn't depend on Browser (not used deprecated and not stable document.execCommand)",
+        "All styles are globally defined except <pre/> and <blockquote/>: use <div [wup-textrich] /> to render content with same styles",
         // todo "Ability to add custom tool to toolbar"
       ]}
     >
@@ -61,6 +62,10 @@ export default function TextRichControlView() {
                 "<ul><li>Bulleted</li><li>List</li></ul>",
                 '<p style="text-align: center;">Centered text with <span style="font-size: x-large">large</span> size</p>',
               ].join("");
+
+              setTimeout(() => {
+                refPreview.current!.innerHTML = el.$initValue!;
+              }, 100);
               el.$onChange = () => {
                 console.warn("$change", { value: el.$value });
                 refPreview.current!.innerHTML = el.$value ?? ""; // value is sanitized html
@@ -68,13 +73,18 @@ export default function TextRichControlView() {
             }
           }}
         />
-        {/* value of the 1st input shown outside control with the same styles */}
-        {/* todo improve styles - wrap into section and add description about what is it */}
-        <div wup-textrich="" ref={refPreview} />
+        <section>
+          <h3>Preview</h3>
+          <small>
+            value of the 1st control rendered via {"<div wup-textrich />"} with the same styles (change the value to see
+            it here)
+          </small>
+          <div wup-textrich="" ref={refPreview} />
+        </section>
         <div className={stylesCom.group}>
           <wup-textrich
             w-name="readonly"
-            w-label="Readonly with smaller toolbar (options.$toolbar)"
+            w-label="Readonly with smaller toolbar ($options.toolbar)"
             readonly
             w-toolbar="window.myTextRichToolbarShort"
             ref={(el) => {

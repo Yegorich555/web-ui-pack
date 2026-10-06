@@ -122,9 +122,9 @@ code {
 }
 
 a {
-  color: var(--activeLinkColor);
+  color: $activeLinkColor;
 
   &:hover {
-    opacity: 0.9;
+    color: $basicActiveBgColor;
   }
 }
