@@ -6,7 +6,7 @@ import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 import TextHistory from "./text.history";
 import WUPTextareaControl from "./textarea";
-import WUPTextRichInput, { htmlToEditor, htmlToText, renderFormula, sanitizeUrl } from "./textRich.input";
+import WUPTextRichInput, { htmlToEditor, htmlToText, sanitizeUrl } from "./textRich.input";
 import TextRichHistory from "./textRich.history";
 import {
   addInline,
@@ -39,8 +39,8 @@ declare global {
     interface FormatValues {
       /** Heading level; `false` - normal paragraph */
       header: 1 | 2 | 3 | 4 | 5 | 6 | false;
-      /** Numbered list, bulleted list or checklist */
-      list: "ordered" | "bullet" | "check";
+      /** Numbered or bulleted list */
+      list: "ordered" | "bullet";
       /** Subscript or superscript */
       script: "sub" | "super";
       /** Decrease (`-1`) or increase (`+1`) indentation */
@@ -50,18 +50,9 @@ declare global {
       /** Text alignment; `"left"` - default */
       align: "left" | "center" | "right" | "justify";
     }
-    /** Toolbar button: toggles format (bold, blockquote etc.), inserts link or formula,
+    /** Toolbar button: toggles format (bold, blockquote etc.), inserts link,
      *  or removes formatting of selected text (clean) */
-    type ToolbarButton =
-      | "bold"
-      | "italic"
-      | "underline"
-      | "strike"
-      | "blockquote"
-      | "code-block"
-      | "link"
-      | "formula"
-      | "clean";
+    type ToolbarButton = "bold" | "italic" | "underline" | "strike" | "blockquote" | "code-block" | "link" | "clean";
     /** Formats with pointed values: `{ header: [1, 2, false] }` */
     type ToolbarValues = { [K in keyof FormatValues]: FormatValues[K][] };
     /** Toolbar item: button `"bold"`, format with every value `"header"`
@@ -89,6 +80,7 @@ declare global {
        * ]
        * @defaultValue every supported item */
       toolbar: ToolbarGroup[];
+      // classNames: { bold: ".wup-bold", toolbar?: string | bool | null }; // todo implement this so if pointed className then it must be applied to relevant block, for toolbar expected string=> another classname, and if NOT (false or null) => add same className to related toolbar item
     }
     interface Options<T = string, VM = ValidityMap> extends WUP.Textarea.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTextRichControl> extends WUP.Textarea.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
@@ -154,7 +146,6 @@ const toolButtons = new Set<string>([
   "blockquote",
   "code-block",
   "link",
-  "formula",
   "clean",
 ]);
 /** Formats rendered as dropdown with default value (when format isn't applied); other formats are rendered as buttons */
@@ -164,7 +155,7 @@ const pickerDefaults = new Map<string, unknown>([
   ["align", "left"],
 ]);
 /** Buttons without pressed state */
-const actionButtons = new Set<string>(["clean", "indent", "formula"]);
+const actionButtons = new Set<string>(["clean", "indent"]);
 /** Formats by tagName of element */
 const tagFormats = new Map<string, [string, unknown]>([
   ["B", ["bold", true]],
@@ -187,15 +178,15 @@ const tagFormats = new Map<string, [string, unknown]>([
 ]);
 /** Font size by value of format `size` */
 const sizes = new Map<unknown, string>([
-  ["sm", "0.75em"],
-  ["lg", "1.5em"],
-  ["hg", "2.5em"],
+  ["sm", "small"],
+  ["lg", "x-large"],
+  ["hg", "xxx-large"],
 ]);
 /** Value of format `size` by font size */
 const sizeFormats = new Map<string, unknown>([
-  ["0.75em", "sm"],
-  ["1.5em", "lg"],
-  ["2.5em", "hg"],
+  ["small", "sm"],
+  ["x-large", "lg"],
+  ["xxx-large", "hg"],
 ]);
 /** Supported values of text-align */
 const aligns = new Set<string>(["left", "center", "right", "justify"]);
@@ -264,14 +255,14 @@ function firstNode(r: Range): Node {
  * @tutorial Rules
  * * $value is html (`undefined` if there is no text); it's sanitized: only supported formats are kept
  * (paragraph `<p>`, `<strong>`, `<em>`, `<u>`, `<s>`, `<sub>`, `<sup>`, `<a>`, `<h1>...<h6>`, `<blockquote>`, `<pre>`, `<ol>`, `<ul>`)
- * * formatting is saved in custom history: undo/redo (Ctrl+Z, Ctrl+Y) works for text & formats
+ * * formatting is saved in custom history: undo/redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y, OS-native) works for text & formats
  * * keyboard shortcuts: Ctrl+B, Ctrl+I, Ctrl+U & Alt+F10 to focus toolbar (Arrows to navigate, Esc to return);
  * with collapsed selection inline format (bold etc.) is applied to the next typed text
- * * formula is rendered via KaTeX if it's available as `window.katex` (otherwise as text)
+ * * styles of content are global: use `<div wup-textrich>{$value}</div>` to show value outside control in the same way
  * @tutorial innerHTML @example
  * <label>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
- *      <wup-richinput contenteditable="true" role="textbox" aria-multiline="true" />
+ *      <wup-richinput contenteditable="true" role="textbox" aria-multiline="true" wup-textrich />
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>
@@ -281,12 +272,12 @@ function firstNode(r: Range): Node {
  *     <button tool="bold" aria-pressed="false"></button>
  *     <wup-dropdown tool="header">
  *       <button>Normal</button>
- *       <wup-popup><ul role="listbox"><li role="option" tool="header:1">Heading 1</li>...</ul></wup-popup>
+ *       <wup-popup><ul role="listbox"><li role="option" tool="header:1"><h1 role="none">Heading 1</h1></li>...</ul></wup-popup>
  *     </wup-dropdown>
  *   </div>
  * </div>
  * @tutorial Troubleshooting
- * * link & formula are requested via `window.prompt` */
+ * * link is requested via `window.prompt` */
 export default class WUPTextRichControl<
   ValueType = string,
   TOptions extends WUP.TextRich.Options = WUP.TextRich.Options,
@@ -307,8 +298,6 @@ export default class WUPTextRichControl<
   static $ariaDescription = __wupln("press Alt + F10 to focus toolbar", "aria");
   /** Text of prompt for link; @defaultValue `Enter link` */
   static $textLink = __wupln("Enter link", "content");
-  /** Text of prompt for formula; @defaultValue `Enter formula` */
-  static $textFormula = __wupln("Enter formula", "content");
   /** Labels of toolbar items: key is `format` or `format:value` (ex. `header:1`);
    * used as `aria-label` for buttons (+ tooltip) & as text for items of dropdowns */
   static $labels = new Map<string, string>([
@@ -320,7 +309,6 @@ export default class WUPTextRichControl<
     ["blockquote", __wupln("Quote", "aria")],
     ["code-block", __wupln("Code block", "aria")],
     ["link", __wupln("Link", "aria")],
-    ["formula", __wupln("Formula", "aria")],
     ["clean", __wupln("Clear formatting", "aria")],
     ["header", __wupln("Heading", "aria")],
     ["header:false", __wupln("Normal", "content")],
@@ -332,7 +320,6 @@ export default class WUPTextRichControl<
     ["header:6", __wupln("Heading 6", "content")],
     ["list:ordered", __wupln("Numbered list", "aria")],
     ["list:bullet", __wupln("Bulleted list", "aria")],
-    ["list:check", __wupln("Checklist", "aria")],
     ["script:sub", __wupln("Subscript", "aria")],
     ["script:super", __wupln("Superscript", "aria")],
     ["indent:-1", __wupln("Decrease indent", "aria")],
@@ -352,7 +339,7 @@ export default class WUPTextRichControl<
   /** Values of formats used when toolbar item is pointed as string (ex. `"header"` is the same as `{ header: [1, 2, 3, 4, 5, 6, false] }`) */
   static $toolbarValues: WUP.TextRich.ToolbarValues = {
     header: [1, 2, 3, 4, 5, 6, false],
-    list: ["ordered", "bullet", "check"],
+    list: ["ordered", "bullet"],
     script: ["sub", "super"],
     indent: [-1, 1],
     size: ["hg", "lg", "sm", false],
@@ -371,8 +358,8 @@ export default class WUPTextRichControl<
       ["header"], // equal to [{header: [1,2,3,4,5,6, false]}],
       ["bold", "italic", "underline", "strike"], // { bold: true, italic: true, underline: true, strike: true },
       ["blockquote", "code-block"],
-      ["link", "formula"], // not supported => image: true, video: true
-      ["list"], // equal to [{ list: ["ordered", "bullet", "check"] ]
+      ["link"], // not supported => image: true, video: true, formula: true
+      ["list"], // equal to [{ list: ["ordered", "bullet"] ]
       ["script"], // equal to [{script: ['sub', 'super']}]
       ["indent"], // equal to [{indent: [-1, +1]}]
       ["size"], // equal to [{sizes: ["hg", "lg","sm", false]}]
@@ -416,8 +403,8 @@ export default class WUPTextRichControl<
     hint.className = this.#ctr.classNameHidden;
     hint.textContent = this.#ctr.$ariaDescription;
     this.$refInput.setAttribute("aria-describedby", hint.id);
+    this.$refInput.setAttribute("wup-textrich", ""); // styles of content are global: the same for value shown outside
 
-    this.$refInput.addEventListener("click", (e) => this.gotEditorClick(e));
     useTooltipOnce("w-tooltip"); // toolbar buttons show aria-label via tooltip
   }
 
@@ -494,7 +481,16 @@ export default class WUPTextRichControl<
       li.setAttribute("role", "option");
       li.setAttribute("tool", key);
       li.tabIndex = -1;
-      format === "align" ? li.setAttribute("aria-label", label) : (li.textContent = label); // align is rendered as icon
+      if (format === "align") {
+        li.setAttribute("aria-label", label); // align is rendered as icon
+      } else if (format === "header" && v) {
+        // rendered via heading tag to use the same (default/global) styles as in editor; role="none" hides heading semantics
+        const h = li.appendChild(document.createElement(`h${v}`));
+        h.setAttribute("role", "none");
+        h.textContent = label;
+      } else {
+        li.textContent = label;
+      }
       li._format = format;
       li._value = v;
       return li;
@@ -588,9 +584,9 @@ export default class WUPTextRichControl<
       this.togglePending(format, value, f);
     } else {
       const prev = inp.value;
-      if (format === "formula" || (format === "link" && !f.has("link"))) {
-        const v = this.askValue(format);
-        v && (format === "link" ? this.addLink(v) : this.addFormula(v));
+      if (format === "link" && !f.has("link")) {
+        const v = this.askLink();
+        v && this.addLink(v);
       } else {
         this.keepSelection((r) => this.formatRange(r, format, value));
       }
@@ -750,16 +746,15 @@ export default class WUPTextRichControl<
     }
   }
 
-  /** Asks value of link or formula via prompt; returns focus & selection back */
-  protected askValue(format: string): string | null {
+  /** Asks url of link via prompt; returns focus & selection back */
+  protected askLink(): string | null {
     const sel = window.getSelection()!;
     const r = sel.getRangeAt(0).cloneRange();
-    const isLink = format === "link";
-    const v = window.prompt(isLink ? this.#ctr.$textLink : this.#ctr.$textFormula, isLink ? "https://" : "")?.trim(); // eslint-disable-line no-alert
+    const v = window.prompt(this.#ctr.$textLink, "https://")?.trim(); // eslint-disable-line no-alert
     this.$refInput.focus({ preventScroll: true });
     sel.removeAllRanges();
     sel.addRange(r);
-    return (isLink ? v && sanitizeUrl(v) : v) || null;
+    return (v && sanitizeUrl(v)) || null;
   }
 
   /** Adds link to selection or inserts link with url as text if selection is collapsed */
@@ -776,14 +771,6 @@ export default class WUPTextRichControl<
         addInline(nodes, fmt, href, this.$refInput);
       });
     }
-  }
-
-  /** Inserts formula instead of selection */
-  protected addFormula(tex: string): void {
-    const el = document.createElement("span");
-    el.setAttribute("data-formula", tex);
-    renderFormula(el);
-    this.insertNode(el);
   }
 
   /** Replaces selection with node & places caret after it */
@@ -934,20 +921,6 @@ export default class WUPTextRichControl<
     if (next) {
       e.preventDefault();
       next.focus();
-    }
-  }
-
-  /** Called on click inside editor: toggles item of checklist */
-  protected gotEditorClick(e: MouseEvent): void {
-    const li = (e.target as HTMLElement).closest?.("li");
-    if (!li || !li.parentElement!.hasAttribute("data-checklist") || this.$isDisabled || this.$isReadOnly) {
-      return;
-    }
-    const isIcon = e.clientX < li.getBoundingClientRect().left + parseFloat(getComputedStyle(li).paddingLeft);
-    if (isIcon) {
-      const prev = this.$refInput.value;
-      li.toggleAttribute("data-checked");
-      this.saveChanges(prev);
     }
   }
 

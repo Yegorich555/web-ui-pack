@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import Page from "src/elements/page";
 import { WUPTextRichControl } from "web-ui-pack";
 import stylesCom from "./controls.scss";
@@ -18,11 +19,12 @@ const initValue = [
   "<blockquote>Quote</blockquote>",
   "<pre>const code = true;</pre>",
   "<ol><li>Numbered</li><li>List</li></ol>",
-  "<ul data-checklist><li data-checked>Done</li><li>To do</li></ul>",
-  '<p style="text-align: center;">Centered text with <span style="font-size: 1.5em">large</span> size</p>',
+  "<ul><li>Bulleted</li><li>List</li></ul>",
+  '<p style="text-align: center;">Centered text with <span style="font-size: x-large">large</span> size</p>',
 ].join("");
 
 export default function TextRichControlView() {
+  const refPreview = useRef<HTMLDivElement>(null);
   return (
     <Page
       header="TextRichControl"
@@ -34,16 +36,16 @@ export default function TextRichControlView() {
       }}
       features={[
         "Inheritted features from TextareaControl",
-        "Toolbar with formats: headers, bold, italic, underline, strike, quote, code, link, formula, lists, subscript & superscript, indentation, size, alignment & clean",
+        "Toolbar with formats: headers, bold, italic, underline, strike, quote, code, link, lists, subscript & superscript, indentation, size, alignment & clean",
         "Value is html: it's sanitized & only supported formats are kept (pasted content as well)",
-        "Undo/redo for text & formatting (Ctrl+Z, Ctrl+Y)",
+        "Undo/redo for text & formatting (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y) including OS-native ones (Edit menu, shake on iPhone)",
         "Keyboard: Ctrl+B, Ctrl+I, Ctrl+U & Alt+F10 to focus toolbar (Arrows to navigate, Esc to return)",
         "Inline format with collapsed selection is applied to the next typed text (Ctrl+B and type text)",
         "Validations min/max count visible chars only",
-        "Temporarily icons are taken from npm quill",
       ]}
     >
       <wup-form
+        class={stylesCom.formWide}
         ref={(el) => {
           if (el) {
             el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
@@ -59,11 +61,16 @@ export default function TextRichControlView() {
           w-toolbar="window.myTextRichToolbar"
           ref={(el) => {
             if (el) {
-              el.$onChange = () => console.warn("$change", { value: el.$value });
+              el.$onChange = () => {
+                console.warn("$change", { value: el.$value });
+                refPreview.current!.innerHTML = el.$value ?? ""; // value is sanitized html
+              };
             }
           }}
         />
-        <wup-textrich w-name="header" w-toolbar="window.myTextRichToolbarShort" />
+        {/* value of the 1st input shown outside control with the same styles */}
+        <div wup-textrich="" ref={refPreview} />
+        <wup-textrich w-name="Custom toolbar" w-toolbar="window.myTextRichToolbarShort" />
         <wup-textrich
           w-name="withValue"
           w-label="With init value"

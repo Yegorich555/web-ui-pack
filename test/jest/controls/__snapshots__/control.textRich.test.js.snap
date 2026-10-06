@@ -12,6 +12,7 @@ exports[`control.textRich $ariaDetails 1`] = `
         aria-multiline="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -72,7 +73,11 @@ exports[`control.textRich $ariaDetails 1`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -80,7 +85,11 @@ exports[`control.textRich $ariaDetails 1`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -88,7 +97,11 @@ exports[`control.textRich $ariaDetails 1`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -96,7 +109,11 @@ exports[`control.textRich $ariaDetails 1`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -104,7 +121,11 @@ exports[`control.textRich $ariaDetails 1`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -112,7 +133,11 @@ exports[`control.textRich $ariaDetails 1`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -193,13 +218,6 @@ exports[`control.textRich $ariaDetails 1`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -217,14 +235,6 @@ exports[`control.textRich $ariaDetails 1`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -413,6 +423,7 @@ exports[`control.textRich $ariaDetails 2`] = `
         aria-multiline="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -468,7 +479,11 @@ exports[`control.textRich $ariaDetails 2`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -476,7 +491,11 @@ exports[`control.textRich $ariaDetails 2`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -484,7 +503,11 @@ exports[`control.textRich $ariaDetails 2`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -492,7 +515,11 @@ exports[`control.textRich $ariaDetails 2`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -500,7 +527,11 @@ exports[`control.textRich $ariaDetails 2`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -508,7 +539,11 @@ exports[`control.textRich $ariaDetails 2`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -589,13 +624,6 @@ exports[`control.textRich $ariaDetails 2`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -613,14 +641,6 @@ exports[`control.textRich $ariaDetails 2`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -809,6 +829,7 @@ exports[`control.textRich $ariaSpeak 1`] = `
         aria-multiline="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -864,7 +885,11 @@ exports[`control.textRich $ariaSpeak 1`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -872,7 +897,11 @@ exports[`control.textRich $ariaSpeak 1`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -880,7 +909,11 @@ exports[`control.textRich $ariaSpeak 1`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -888,7 +921,11 @@ exports[`control.textRich $ariaSpeak 1`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -896,7 +933,11 @@ exports[`control.textRich $ariaSpeak 1`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -904,7 +945,11 @@ exports[`control.textRich $ariaSpeak 1`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -985,13 +1030,6 @@ exports[`control.textRich $ariaSpeak 1`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -1009,14 +1047,6 @@ exports[`control.textRich $ariaSpeak 1`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -1213,6 +1243,7 @@ exports[`control.textRich $ariaSpeak 2`] = `
         aria-multiline="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -1268,7 +1299,11 @@ exports[`control.textRich $ariaSpeak 2`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -1276,7 +1311,11 @@ exports[`control.textRich $ariaSpeak 2`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -1284,7 +1323,11 @@ exports[`control.textRich $ariaSpeak 2`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -1292,7 +1335,11 @@ exports[`control.textRich $ariaSpeak 2`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -1300,7 +1347,11 @@ exports[`control.textRich $ariaSpeak 2`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -1308,7 +1359,11 @@ exports[`control.textRich $ariaSpeak 2`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -1389,13 +1444,6 @@ exports[`control.textRich $ariaSpeak 2`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -1413,14 +1461,6 @@ exports[`control.textRich $ariaSpeak 2`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -1609,6 +1649,7 @@ exports[`control.textRich $show/$hide error 1`] = `
         aria-multiline="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -1664,7 +1705,11 @@ exports[`control.textRich $show/$hide error 1`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -1672,7 +1717,11 @@ exports[`control.textRich $show/$hide error 1`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -1680,7 +1729,11 @@ exports[`control.textRich $show/$hide error 1`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -1688,7 +1741,11 @@ exports[`control.textRich $show/$hide error 1`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -1696,7 +1753,11 @@ exports[`control.textRich $show/$hide error 1`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -1704,7 +1765,11 @@ exports[`control.textRich $show/$hide error 1`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -1785,13 +1850,6 @@ exports[`control.textRich $show/$hide error 1`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -1809,14 +1867,6 @@ exports[`control.textRich $show/$hide error 1`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -2007,6 +2057,7 @@ exports[`control.textRich $show/$hide error 2`] = `
         aria-multiline="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -2062,7 +2113,11 @@ exports[`control.textRich $show/$hide error 2`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -2070,7 +2125,11 @@ exports[`control.textRich $show/$hide error 2`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -2078,7 +2137,11 @@ exports[`control.textRich $show/$hide error 2`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -2086,7 +2149,11 @@ exports[`control.textRich $show/$hide error 2`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -2094,7 +2161,11 @@ exports[`control.textRich $show/$hide error 2`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -2102,7 +2173,11 @@ exports[`control.textRich $show/$hide error 2`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -2183,13 +2258,6 @@ exports[`control.textRich $show/$hide error 2`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -2207,14 +2275,6 @@ exports[`control.textRich $show/$hide error 2`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -2416,6 +2476,7 @@ exports[`control.textRich $show/$hide error 3`] = `
         aria-multiline="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -2471,7 +2532,11 @@ exports[`control.textRich $show/$hide error 3`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -2479,7 +2544,11 @@ exports[`control.textRich $show/$hide error 3`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -2487,7 +2556,11 @@ exports[`control.textRich $show/$hide error 3`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -2495,7 +2568,11 @@ exports[`control.textRich $show/$hide error 3`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -2503,7 +2580,11 @@ exports[`control.textRich $show/$hide error 3`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -2511,7 +2592,11 @@ exports[`control.textRich $show/$hide error 3`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -2592,13 +2677,6 @@ exports[`control.textRich $show/$hide error 3`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -2616,14 +2694,6 @@ exports[`control.textRich $show/$hide error 3`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -2965,29 +3035,42 @@ exports[`control.textRich common tests render + styles 2`] = `
   --ctrl-textrich-quote: #ccc;
   --ctrl-textrich-code-bg: #f0f0f0;
   --ctrl-textrich-btn-focus: rgba(0, 0, 0, 0.08);
-  --wup-icon-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5,4H9.5A2.5,2.5,0,0,1,12,6.5v0A2.5,2.5,0,0,1,9.5,9H5A0,0,0,0,1,5,9V4A0,0,0,0,1,5,4Z'/%3E%3Cpath d='M5,9h5.5A2.5,2.5,0,0,1,13,11.5v0A2.5,2.5,0,0,1,10.5,14H5a0,0,0,0,1,0,0V9A0,0,0,0,1,5,9Z'/%3E%3C/svg%3E");
-  --wup-icon-italic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cline x1='7' x2='13' y1='4' y2='4'/%3E%3Cline x1='5' x2='11' y1='14' y2='14'/%3E%3Cline x1='8' x2='10' y1='14' y2='4'/%3E%3C/svg%3E");
-  --wup-icon-underline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5,3V9a4.012,4.012,0,0,0,4,4H9a4.012,4.012,0,0,0,4-4V3'/%3E%3Crect stroke='none' fill='%23000' height='1' rx='0.5' ry='0.5' width='12' x='3' y='15'/%3E%3C/svg%3E");
-  --wup-icon-strike: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cline stroke-width='1' x1='15.5' x2='2.5' y1='8.5' y2='9.5'/%3E%3Cpath stroke='none' fill='%23000' d='M9.007,8C6.542,7.791,6,7.519,6,6.5,6,5.792,7.283,5,9,5c1.571,0,2.765.679,2.969,1.309a1,1,0,0,0,1.9-.617C13.356,4.106,11.354,3,9,3,6.2,3,4,4.538,4,6.5a3.2,3.2,0,0,0,.5,1.843Z'/%3E%3Cpath stroke='none' fill='%23000' d='M8.984,10C11.457,10.208,12,10.479,12,11.5c0,0.708-1.283,1.5-3,1.5-1.571,0-2.765-.679-2.969-1.309a1,1,0,1,0-1.9.617C4.644,13.894,6.646,15,9,15c2.8,0,5-1.538,5-3.5a3.2,3.2,0,0,0-.5-1.843Z'/%3E%3C/svg%3E");
-  --wup-icon-blockquote: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Crect fill='%23000' height='3' width='3' x='4' y='5'/%3E%3Crect fill='%23000' height='3' width='3' x='11' y='5'/%3E%3Cpath fill='%23000' fill-rule='evenodd' d='M7,8c0,4.031-3,5-3,5'/%3E%3Cpath fill='%23000' fill-rule='evenodd' d='M14,8c0,4.031-3,5-3,5'/%3E%3C/svg%3E");
-  --wup-icon-code-block: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpolyline fill-rule='evenodd' points='5 7 3 9 5 11'/%3E%3Cpolyline fill-rule='evenodd' points='13 7 15 9 13 11'/%3E%3Cline x1='10' x2='8' y1='5' y2='13'/%3E%3C/svg%3E");
-  --wup-icon-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cline x1='7' x2='11' y1='7' y2='11'/%3E%3Cpath fill-rule='evenodd' d='M8.9,4.577a3.476,3.476,0,0,1,.36,4.679A3.476,3.476,0,0,1,4.577,8.9C3.185,7.5,2.035,6.4,4.217,4.217S7.5,3.185,8.9,4.577Z'/%3E%3Cpath fill-rule='evenodd' d='M13.423,9.1a3.476,3.476,0,0,0-4.679-.36,3.476,3.476,0,0,0,.36,4.679c1.392,1.392,2.5,2.542,4.679.36S14.815,10.5,13.423,9.1Z'/%3E%3C/svg%3E");
-  --wup-icon-formula: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath stroke='none' fill='%23000' d='M11.759,2.482a2.561,2.561,0,0,0-3.53.607A7.656,7.656,0,0,0,6.8,6.2C6.109,9.188,5.275,14.677,4.15,14.927a1.545,1.545,0,0,0-1.3-.933A0.922,0.922,0,0,0,2,15.036S1.954,16,4.119,16s3.091-2.691,3.7-5.553c0.177-.826.36-1.726,0.554-2.6L8.775,6.2c0.381-1.421.807-2.521,1.306-2.676a1.014,1.014,0,0,0,1.02.56A0.966,0.966,0,0,0,11.759,2.482Z'/%3E%3Crect stroke='none' fill='%23000' height='1.6' rx='0.8' ry='0.8' width='5' x='5.15' y='6.2'/%3E%3Cpath stroke='none' fill='%23000' d='M13.663,12.027a1.662,1.662,0,0,1,.266-0.276q0.193,0.069.456,0.138a2.1,2.1,0,0,0,.535.069,1.075,1.075,0,0,0,.767-0.3,1.044,1.044,0,0,0,.314-0.8,0.84,0.84,0,0,0-.238-0.619,0.8,0.8,0,0,0-.594-0.239,1.154,1.154,0,0,0-.781.3,4.607,4.607,0,0,0-.781,1q-0.091.15-.218,0.346l-0.246.38c-0.068-.288-0.137-0.582-0.212-0.885-0.459-1.847-2.494-.984-2.941-0.8-0.482.2-.353,0.647-0.094,0.529a0.869,0.869,0,0,1,1.281.585c0.217,0.751.377,1.436,0.527,2.038a5.688,5.688,0,0,1-.362.467,2.69,2.69,0,0,1-.264.271q-0.221-.08-0.471-0.147a2.029,2.029,0,0,0-.522-0.066,1.079,1.079,0,0,0-.768.3A1.058,1.058,0,0,0,9,15.131a0.82,0.82,0,0,0,.832.852,1.134,1.134,0,0,0,.787-0.3,5.11,5.11,0,0,0,.776-0.993q0.141-.219.215-0.34c0.046-.076.122-0.194,0.223-0.346a2.786,2.786,0,0,0,.918,1.726,2.582,2.582,0,0,0,2.376-.185c0.317-.181.212-0.565,0-0.494A0.807,0.807,0,0,1,14.176,15a5.159,5.159,0,0,1-.913-2.446l0,0Q13.487,12.24,13.663,12.027Z'/%3E%3C/svg%3E");
-  --wup-icon-clean: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cline x1='5' x2='13' y1='3' y2='3'/%3E%3Cline x1='6' x2='9.35' y1='12' y2='3'/%3E%3Cline x1='11' x2='15' y1='11' y2='15'/%3E%3Cline x1='15' x2='11' y1='11' y2='15'/%3E%3Crect stroke='none' fill='%23000' height='1' rx='0.5' ry='0.5' width='7' x='2' y='14'/%3E%3C/svg%3E");
-  --wup-icon-list-ordered: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cline x1='7' x2='15' y1='4' y2='4'/%3E%3Cline x1='7' x2='15' y1='9' y2='9'/%3E%3Cline x1='7' x2='15' y1='14' y2='14'/%3E%3Cline stroke-width='1' x1='2.5' x2='4.5' y1='5.5' y2='5.5'/%3E%3Cpath stroke='none' fill='%23000' d='M3.5,6A0.5,0.5,0,0,1,3,5.5V3.085l-0.276.138A0.5,0.5,0,0,1,2.053,3c-0.124-.247-0.023-0.324.224-0.447l1-.5A0.5,0.5,0,0,1,4,2.5v3A0.5,0.5,0,0,1,3.5,6Z'/%3E%3Cpath stroke-width='1' d='M4.5,10.5h-2c0-.234,1.85-1.076,1.85-2.234A0.959,0.959,0,0,0,2.5,8.156'/%3E%3Cpath stroke-width='1' d='M2.5,14.846a0.959,0.959,0,0,0,1.85-.109A0.7,0.7,0,0,0,3.75,14a0.688,0.688,0,0,0,.6-0.736,0.959,0.959,0,0,0-1.85-.109'/%3E%3C/svg%3E");
-  --wup-icon-list-bullet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cline x1='6' x2='15' y1='4' y2='4'/%3E%3Cline x1='6' x2='15' y1='9' y2='9'/%3E%3Cline x1='6' x2='15' y1='14' y2='14'/%3E%3Cline x1='3' x2='3' y1='4' y2='4'/%3E%3Cline x1='3' x2='3' y1='9' y2='9'/%3E%3Cline x1='3' x2='3' y1='14' y2='14'/%3E%3C/svg%3E");
-  --wup-icon-list-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cline x1='9' x2='15' y1='4' y2='4'/%3E%3Cpolyline points='3 4 4 5 6 3'/%3E%3Cline x1='9' x2='15' y1='14' y2='14'/%3E%3Cpolyline points='3 14 4 15 6 13'/%3E%3Cline x1='9' x2='15' y1='9' y2='9'/%3E%3Cpolyline points='3 9 4 10 6 8'/%3E%3C/svg%3E");
-  --wup-icon-script-sub: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath stroke='none' fill='%23000' d='M15.5,15H13.861a3.858,3.858,0,0,0,1.914-2.975,1.8,1.8,0,0,0-1.6-1.751A1.921,1.921,0,0,0,12.021,11.7a0.50013,0.50013,0,1,0,.957.291h0a0.914,0.914,0,0,1,1.053-.725,0.81,0.81,0,0,1,.744.762c0,1.076-1.16971,1.86982-1.93971,2.43082A1.45639,1.45639,0,0,0,12,15.5a0.5,0.5,0,0,0,.5.5h3A0.5,0.5,0,0,0,15.5,15Z'/%3E%3Cpath stroke='none' fill='%23000' d='M9.65,5.241a1,1,0,0,0-1.409.108L6,7.964,3.759,5.349A1,1,0,0,0,2.192,6.59178Q2.21541,6.6213,2.241,6.649L4.684,9.5,2.241,12.35A1,1,0,0,0,3.71,13.70722q0.02557-.02768.049-0.05722L6,11.036,8.241,13.65a1,1,0,1,0,1.567-1.24277Q9.78459,12.3777,9.759,12.35L7.316,9.5,9.759,6.651A1,1,0,0,0,9.65,5.241Z'/%3E%3C/svg%3E");
-  --wup-icon-script-super: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath stroke='none' fill='%23000' d='M15.5,7H13.861a4.015,4.015,0,0,0,1.914-2.975,1.8,1.8,0,0,0-1.6-1.751A1.922,1.922,0,0,0,12.021,3.7a0.5,0.5,0,1,0,.957.291,0.917,0.917,0,0,1,1.053-.725,0.81,0.81,0,0,1,.744.762c0,1.077-1.164,1.925-1.934,2.486A1.423,1.423,0,0,0,12,7.5a0.5,0.5,0,0,0,.5.5h3A0.5,0.5,0,0,0,15.5,7Z'/%3E%3Cpath stroke='none' fill='%23000' d='M9.651,5.241a1,1,0,0,0-1.41.108L6,7.964,3.759,5.349a1,1,0,1,0-1.519,1.3L4.683,9.5,2.241,12.35a1,1,0,1,0,1.519,1.3L6,11.036,8.241,13.65a1,1,0,0,0,1.519-1.3L7.317,9.5,9.759,6.651A1,1,0,0,0,9.651,5.241Z'/%3E%3C/svg%3E");
-  --wup-icon-indent: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cline x1='3' x2='15' y1='14' y2='14'/%3E%3Cline x1='3' x2='15' y1='4' y2='4'/%3E%3Cline x1='9' x2='15' y1='9' y2='9'/%3E%3Cpolyline fill='%23000' points='3 7 3 11 5 9 3 7'/%3E%3C/svg%3E");
-  --wup-icon-align-left: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cline x1='3' x2='15' y1='9' y2='9'/%3E%3Cline x1='3' x2='13' y1='14' y2='14'/%3E%3Cline x1='3' x2='9' y1='4' y2='4'/%3E%3C/svg%3E");
-  --wup-icon-align-center: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cline x1='15' x2='3' y1='9' y2='9'/%3E%3Cline x1='14' x2='4' y1='14' y2='14'/%3E%3Cline x1='12' x2='6' y1='4' y2='4'/%3E%3C/svg%3E");
-  --wup-icon-align-justify: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cline x1='15' x2='3' y1='9' y2='9'/%3E%3Cline x1='15' x2='3' y1='14' y2='14'/%3E%3Cline x1='15' x2='3' y1='4' y2='4'/%3E%3C/svg%3E");
+  --ctrl-textrich-label-bg: var(--ctrl-bg);
+  --wup-icon-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 4h4.5A2.5 2.5 0 0 1 12 6.5 2.5 2.5 0 0 1 9.5 9H5zm0 5h5.5a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5H5z'/%3E%3C/svg%3E");
+  --wup-icon-italic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M7 4h6M5 14h6m-3 0 2-10'/%3E%3C/svg%3E");
+  --wup-icon-underline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 3v6a4.01 4.01 0 0 0 4 4 4.01 4.01 0 0 0 4-4V3'/%3E%3Crect width='12' height='1' x='3' y='15' fill='%23000' stroke='none' rx='.5' ry='.5'/%3E%3C/svg%3E");
+  --wup-icon-strike: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath stroke-width='1' d='m15.5 8.5-13 1'/%3E%3Cpath fill='%23000' stroke='none' d='M9.007 8C6.542 7.791 6 7.519 6 6.5 6 5.792 7.283 5 9 5c1.571 0 2.765.679 2.969 1.309a1 1 0 0 0 1.9-.617C13.356 4.106 11.354 3 9 3 6.2 3 4 4.538 4 6.5a3.2 3.2 0 0 0 .5 1.843Zm-.023 2c2.473.208 3.016.479 3.016 1.5 0 .708-1.283 1.5-3 1.5-1.571 0-2.765-.679-2.969-1.309a1 1 0 1 0-1.9.617C4.644 13.894 6.646 15 9 15c2.8 0 5-1.538 5-3.5a3.2 3.2 0 0 0-.5-1.843Z'/%3E%3C/svg%3E");
+  --wup-icon-blockquote: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath fill='%23000' d='M4 5h3v3H4zm7 0h3v3h-3z'/%3E%3Cpath fill='%23000' fill-rule='evenodd' d='M7 8c0 4.031-3 5-3 5m10-5c0 4.031-3 5-3 5'/%3E%3C/svg%3E");
+  --wup-icon-code-block: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 7 3 9l2 2m8-4 2 2-2 2m-3-6-2 8'/%3E%3C/svg%3E");
+  --wup-icon-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='m7 7 4 4M8.9 4.577a3.476 3.476 0 0 1 .36 4.679A3.476 3.476 0 0 1 4.577 8.9c-1.392-1.4-2.542-2.5-.36-4.683S7.5 3.185 8.9 4.577'/%3E%3Cpath d='M13.423 9.1a3.476 3.476 0 0 0-4.679-.36 3.476 3.476 0 0 0 .36 4.679c1.392 1.392 2.5 2.542 4.679.36s1.032-3.279-.36-4.679'/%3E%3C/svg%3E");
+  --wup-icon-clean: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 3h8m-7 9 3.35-9M11 11l4 4m0-4-4 4'/%3E%3Crect width='7' height='1' x='2' y='14' fill='%23000' stroke='none' rx='.5' ry='.5'/%3E%3C/svg%3E");
+  --wup-icon-list-ordered: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M7 4h8M7 9h8m-8 5h8'/%3E%3Cpath stroke-width='1' d='M2.5 5.5h2'/%3E%3Cpath fill='%23000' stroke='none' d='M3.5 6a.5.5 0 0 1-.5-.5V3.085l-.276.138A.5.5 0 0 1 2.053 3c-.124-.247-.023-.324.224-.447l1-.5A.5.5 0 0 1 4 2.5v3a.5.5 0 0 1-.5.5'/%3E%3Cpath stroke-width='1' d='M4.5 10.5h-2c0-.234 1.85-1.076 1.85-2.234a.959.959 0 0 0-1.85-.11m0 6.69a.959.959 0 0 0 1.85-.109.7.7 0 0 0-.6-.737.69.69 0 0 0 .6-.736.959.959 0 0 0-1.85-.109'/%3E%3C/svg%3E");
+  --wup-icon-list-bullet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M6 4h9M6 9h9m-9 5h9M3 4zm0 5zm0 5z'/%3E%3C/svg%3E");
+  --wup-icon-script-sub: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath fill='%23000' stroke='none' d='M15.5 15h-1.639a3.86 3.86 0 0 0 1.914-2.975 1.8 1.8 0 0 0-1.6-1.751 1.92 1.92 0 0 0-2.154 1.426.5.5 0 1 0 .957.291.914.914 0 0 1 1.053-.725.81.81 0 0 1 .744.762c0 1.076-1.17 1.87-1.94 2.43A1.46 1.46 0 0 0 12 15.5a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 0-1M9.65 5.241a1 1 0 0 0-1.409.108L6 7.964 3.759 5.349a1 1 0 0 0-1.567 1.243q.023.03.049.057L4.684 9.5l-2.443 2.85a1 1 0 0 0 1.469 1.357q.026-.027.049-.057L6 11.036l2.241 2.614a1 1 0 1 0 1.567-1.243q-.023-.03-.049-.057L7.316 9.5l2.443-2.849a1 1 0 0 0-.109-1.41'/%3E%3C/svg%3E");
+  --wup-icon-script-super: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath fill='%23000' stroke='none' d='M15.5 7h-1.639a4.01 4.01 0 0 0 1.914-2.975 1.8 1.8 0 0 0-1.6-1.751A1.92 1.92 0 0 0 12.021 3.7a.5.5 0 1 0 .957.291.917.917 0 0 1 1.053-.725.81.81 0 0 1 .744.762c0 1.077-1.164 1.925-1.934 2.486A1.42 1.42 0 0 0 12 7.5a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 0-1M9.651 5.241a1 1 0 0 0-1.41.108L6 7.964 3.759 5.349a1 1 0 1 0-1.519 1.3L4.683 9.5l-2.442 2.85a1 1 0 1 0 1.519 1.3L6 11.036l2.241 2.614a1 1 0 0 0 1.519-1.3L7.317 9.5l2.442-2.849a1 1 0 0 0-.108-1.41'/%3E%3C/svg%3E");
+  --wup-icon-indent: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M3 14h12M3 4h12M9 9h6'/%3E%3Cpath fill='%23000' d='M3 7v4l2-2z'/%3E%3C/svg%3E");
+  --wup-icon-align-left: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M3 9h12M3 14h10M3 4h6'/%3E%3C/svg%3E");
+  --wup-icon-align-center: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M15 9H3m11 5H4m8-10H6'/%3E%3C/svg%3E");
+  --wup-icon-align-justify: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M15 9H3m12 5H3M15 4H3'/%3E%3C/svg%3E");
 }
 [wupdark] {
   --ctrl-textrich-quote: #555;
   --ctrl-textrich-code-bg: #1d1d1d;
   --ctrl-textrich-btn-focus: rgba(255, 255, 255, 0.12);
+  --ctrl-textrich-label-bg: #161b24;
+}
+[wup-textrich] blockquote {
+  margin: 5px 0;
+  padding-left: 16px;
+  border-left: 4px solid var(--ctrl-textrich-quote);
+}
+[wup-textrich] pre {
+  margin: 5px 0;
+  padding: 5px 10px;
+  border-radius: 3px;
+  background: var(--ctrl-textrich-code-bg);
+  font-family: monospace;
+  white-space: pre-wrap;
 }
   
 WUP-TEXTRICH {
@@ -3338,8 +3421,23 @@ WUP-TEXTRICH [contenteditable=true] {
   max-height: 4em;
 }
 WUP-TEXTRICH {
+  --ctrl-label-active-pos: translateY(-50%) scale(0.9);
+  position: relative;
   display: flex;
   flex-direction: column;
+}
+WUP-TEXTRICH label &gt; span {
+  position: static;
+}
+WUP-TEXTRICH strong {
+  top: 0;
+  left: 0.75em;
+  max-width: calc(100% - 1.5em);
+  padding: 0 0.25em;
+  transform-origin: center left;
+  transform: var(--ctrl-label-active-pos);
+  color: var(--ctrl-focus-label);
+  background: linear-gradient(transparent calc(50% - 1px), var(--ctrl-textrich-label-bg) 0);
 }
 WUP-TEXTRICH [role=toolbar] {
   order: -1;
@@ -3439,9 +3537,6 @@ WUP-TEXTRICH [tool=code-block] {
 WUP-TEXTRICH [tool=link] {
   --icon-img: var(--wup-icon-link);
 }
-WUP-TEXTRICH [tool=formula] {
-  --icon-img: var(--wup-icon-formula);
-}
 WUP-TEXTRICH [tool=clean] {
   --icon-img: var(--wup-icon-clean);
 }
@@ -3450,9 +3545,6 @@ WUP-TEXTRICH [tool="list:ordered"] {
 }
 WUP-TEXTRICH [tool="list:bullet"] {
   --icon-img: var(--wup-icon-list-bullet);
-}
-WUP-TEXTRICH [tool="list:check"] {
-  --icon-img: var(--wup-icon-list-check);
 }
 WUP-TEXTRICH [tool="script:sub"] {
   --icon-img: var(--wup-icon-script-sub);
@@ -3571,35 +3663,23 @@ WUP-TEXTRICH wup-dropdown &gt; [menu] li {
 WUP-TEXTRICH wup-dropdown &gt; [menu] li:focus {
   box-shadow: inset 0 0 4px 0 var(--base-focus);
 }
-WUP-TEXTRICH wup-dropdown &gt; [menu] [tool^="header:"] {
-  font-weight: bold;
-}
-WUP-TEXTRICH wup-dropdown &gt; [menu] [tool="header:false"] {
-  font-weight: normal;
-}
-WUP-TEXTRICH [tool="header:1"] {
-  font-size: 1.6em;
-}
-WUP-TEXTRICH [tool="header:2"] {
-  font-size: 1.4em;
-}
-WUP-TEXTRICH [tool="header:3"] {
-  font-size: 1.2em;
-}
-WUP-TEXTRICH [tool="header:5"] {
-  font-size: 0.9em;
-}
-WUP-TEXTRICH [tool="header:6"] {
-  font-size: 0.8em;
+WUP-TEXTRICH wup-dropdown &gt; [menu] h1,
+WUP-TEXTRICH wup-dropdown &gt; [menu] h2,
+WUP-TEXTRICH wup-dropdown &gt; [menu] h3,
+WUP-TEXTRICH wup-dropdown &gt; [menu] h4,
+WUP-TEXTRICH wup-dropdown &gt; [menu] h5,
+WUP-TEXTRICH wup-dropdown &gt; [menu] h6 {
+  margin: 0;
+  padding: 0;
 }
 WUP-TEXTRICH [tool="size:sm"] {
-  font-size: 0.75em;
+  font-size: small;
 }
 WUP-TEXTRICH [tool="size:lg"] {
-  font-size: 1.4em;
+  font-size: x-large;
 }
 WUP-TEXTRICH [tool="size:hg"] {
-  font-size: 2em;
+  font-size: xxx-large;
 }
 WUP-TEXTRICH wup-dropdown[tool=align] &gt; button[value=left],
 WUP-TEXTRICH [tool="align:left"] {
@@ -3654,89 +3734,6 @@ WUP-TEXTRICH[readonly] [role=toolbar] {
 WUP-TEXTRICH [contenteditable=true] {
   min-height: 8em;
   max-height: 16em;
-}
-WUP-TEXTRICH [contenteditable=true] h1,
-WUP-TEXTRICH [contenteditable=true] h2,
-WUP-TEXTRICH [contenteditable=true] h3,
-WUP-TEXTRICH [contenteditable=true] h4,
-WUP-TEXTRICH [contenteditable=true] h5,
-WUP-TEXTRICH [contenteditable=true] h6,
-WUP-TEXTRICH [contenteditable=true] blockquote,
-WUP-TEXTRICH [contenteditable=true] pre,
-WUP-TEXTRICH [contenteditable=true] ol,
-WUP-TEXTRICH [contenteditable=true] ul {
-  margin: 0;
-  padding: 0;
-}
-WUP-TEXTRICH [contenteditable=true] h1 {
-  font-size: 2em;
-}
-WUP-TEXTRICH [contenteditable=true] h2 {
-  font-size: 1.5em;
-}
-WUP-TEXTRICH [contenteditable=true] h3 {
-  font-size: 1.17em;
-}
-WUP-TEXTRICH [contenteditable=true] h4 {
-  font-size: 1em;
-}
-WUP-TEXTRICH [contenteditable=true] h5 {
-  font-size: 0.83em;
-}
-WUP-TEXTRICH [contenteditable=true] h6 {
-  font-size: 0.67em;
-}
-WUP-TEXTRICH [contenteditable=true] blockquote {
-  margin: 5px 0;
-  padding-left: 16px;
-  border-left: 4px solid var(--ctrl-textrich-quote);
-}
-WUP-TEXTRICH [contenteditable=true] pre {
-  margin: 5px 0;
-  padding: 5px 10px;
-  border-radius: 3px;
-  background: var(--ctrl-textrich-code-bg);
-  font-family: monospace;
-  white-space: pre-wrap;
-}
-WUP-TEXTRICH [contenteditable=true] ol,
-WUP-TEXTRICH [contenteditable=true] ul {
-  padding-left: 1.5em;
-}
-WUP-TEXTRICH [contenteditable=true] ul[data-checklist] {
-  list-style: none;
-  padding-left: 0;
-}
-WUP-TEXTRICH [contenteditable=true] ul[data-checklist] &gt; li {
-  position: relative;
-  padding-left: 1.5em;
-}
-WUP-TEXTRICH [contenteditable=true] ul[data-checklist] &gt; li:before {
-  content: "☐";
-  position: absolute;
-  left: 0.2em;
-  color: var(--ctrl-icon);
-  cursor: pointer;
-}
-WUP-TEXTRICH [contenteditable=true] ul[data-checklist] &gt; li[data-checked]:before {
-  content: "☑";
-}
-WUP-TEXTRICH [contenteditable=true] a {
-  color: var(--ctrl-selected);
-  text-decoration: underline;
-}
-WUP-TEXTRICH [contenteditable=true] font[size="2"] {
-  font-size: 0.75em;
-}
-WUP-TEXTRICH [contenteditable=true] font[size="5"] {
-  font-size: 1.5em;
-}
-WUP-TEXTRICH [contenteditable=true] font[size="7"] {
-  font-size: 2.5em;
-}
-WUP-TEXTRICH [contenteditable=true] [data-formula] {
-  font-family: serif;
-  font-style: italic;
 }
   WUP-AREAINPUT {
   display: inline-block;
@@ -4100,7 +4097,6 @@ exports[`control.textRich common tests snapshot of $defaults 1`] = `
     ],
     [
       "link",
-      "formula",
     ],
     [
       "list",
@@ -4178,6 +4174,7 @@ exports[`control.textRich options clearButton 1`] = `
         aria-multiline="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -4233,7 +4230,11 @@ exports[`control.textRich options clearButton 1`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -4241,7 +4242,11 @@ exports[`control.textRich options clearButton 1`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -4249,7 +4254,11 @@ exports[`control.textRich options clearButton 1`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -4257,7 +4266,11 @@ exports[`control.textRich options clearButton 1`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -4265,7 +4278,11 @@ exports[`control.textRich options clearButton 1`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -4273,7 +4290,11 @@ exports[`control.textRich options clearButton 1`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -4354,13 +4375,6 @@ exports[`control.textRich options clearButton 1`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -4378,14 +4392,6 @@ exports[`control.textRich options clearButton 1`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -4580,6 +4586,7 @@ exports[`control.textRich options clearButton 2`] = `
         aria-multiline="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -4628,7 +4635,11 @@ exports[`control.textRich options clearButton 2`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -4636,7 +4647,11 @@ exports[`control.textRich options clearButton 2`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -4644,7 +4659,11 @@ exports[`control.textRich options clearButton 2`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -4652,7 +4671,11 @@ exports[`control.textRich options clearButton 2`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -4660,7 +4683,11 @@ exports[`control.textRich options clearButton 2`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -4668,7 +4695,11 @@ exports[`control.textRich options clearButton 2`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -4749,13 +4780,6 @@ exports[`control.textRich options clearButton 2`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -4773,14 +4797,6 @@ exports[`control.textRich options clearButton 2`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -4979,6 +4995,7 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
         aria-required="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -5034,7 +5051,11 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -5042,7 +5063,11 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -5050,7 +5075,11 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -5058,7 +5087,11 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -5066,7 +5099,11 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -5074,7 +5111,11 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -5155,13 +5196,6 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -5179,14 +5213,6 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -5409,6 +5435,7 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
         aria-required="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       >
         123
       </wup-richinput>
@@ -5466,7 +5493,11 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -5474,7 +5505,11 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -5482,7 +5517,11 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -5490,7 +5529,11 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -5498,7 +5541,11 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -5506,7 +5553,11 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -5587,13 +5638,6 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -5611,14 +5655,6 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -5847,6 +5883,7 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
         aria-required="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -5904,7 +5941,11 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -5912,7 +5953,11 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -5920,7 +5965,11 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -5928,7 +5977,11 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -5936,7 +5989,11 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -5944,7 +6001,11 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -6025,13 +6086,6 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -6049,14 +6103,6 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -6264,6 +6310,7 @@ exports[`control.textRich validations options.validationCase 1`] = `
         aria-multiline="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       >
         123
       </wup-richinput>
@@ -6321,7 +6368,11 @@ exports[`control.textRich validations options.validationCase 1`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -6329,7 +6380,11 @@ exports[`control.textRich validations options.validationCase 1`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -6337,7 +6392,11 @@ exports[`control.textRich validations options.validationCase 1`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -6345,7 +6404,11 @@ exports[`control.textRich validations options.validationCase 1`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -6353,7 +6416,11 @@ exports[`control.textRich validations options.validationCase 1`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -6361,7 +6428,11 @@ exports[`control.textRich validations options.validationCase 1`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -6442,13 +6513,6 @@ exports[`control.textRich validations options.validationCase 1`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -6466,14 +6530,6 @@ exports[`control.textRich validations options.validationCase 1`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -6666,6 +6722,7 @@ exports[`control.textRich validations options.validationCase 2`] = `
         aria-required="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -6723,7 +6780,11 @@ exports[`control.textRich validations options.validationCase 2`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -6731,7 +6792,11 @@ exports[`control.textRich validations options.validationCase 2`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -6739,7 +6804,11 @@ exports[`control.textRich validations options.validationCase 2`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -6747,7 +6816,11 @@ exports[`control.textRich validations options.validationCase 2`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -6755,7 +6828,11 @@ exports[`control.textRich validations options.validationCase 2`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -6763,7 +6840,11 @@ exports[`control.textRich validations options.validationCase 2`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -6844,13 +6925,6 @@ exports[`control.textRich validations options.validationCase 2`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -6868,14 +6942,6 @@ exports[`control.textRich validations options.validationCase 2`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -7087,6 +7153,7 @@ exports[`control.textRich validations options.validationCase 3`] = `
         aria-required="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       >
         123
       </wup-richinput>
@@ -7146,7 +7213,11 @@ exports[`control.textRich validations options.validationCase 3`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -7154,7 +7225,11 @@ exports[`control.textRich validations options.validationCase 3`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -7162,7 +7237,11 @@ exports[`control.textRich validations options.validationCase 3`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -7170,7 +7249,11 @@ exports[`control.textRich validations options.validationCase 3`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -7178,7 +7261,11 @@ exports[`control.textRich validations options.validationCase 3`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -7186,7 +7273,11 @@ exports[`control.textRich validations options.validationCase 3`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -7267,13 +7358,6 @@ exports[`control.textRich validations options.validationCase 3`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -7291,14 +7375,6 @@ exports[`control.textRich validations options.validationCase 3`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -7509,6 +7585,7 @@ exports[`control.textRich validations options.validationCase 4`] = `
         aria-required="true"
         contenteditable="true"
         role="textbox"
+        wup-textrich=""
       />
       <strong
         id="txt1"
@@ -7566,7 +7643,11 @@ exports[`control.textRich validations options.validationCase 4`] = `
               tabindex="-1"
               tool="header:1"
             >
-              Heading 1
+              <h1
+                role="none"
+              >
+                Heading 1
+              </h1>
             </li>
             <li
               aria-selected="false"
@@ -7574,7 +7655,11 @@ exports[`control.textRich validations options.validationCase 4`] = `
               tabindex="-1"
               tool="header:2"
             >
-              Heading 2
+              <h2
+                role="none"
+              >
+                Heading 2
+              </h2>
             </li>
             <li
               aria-selected="false"
@@ -7582,7 +7667,11 @@ exports[`control.textRich validations options.validationCase 4`] = `
               tabindex="-1"
               tool="header:3"
             >
-              Heading 3
+              <h3
+                role="none"
+              >
+                Heading 3
+              </h3>
             </li>
             <li
               aria-selected="false"
@@ -7590,7 +7679,11 @@ exports[`control.textRich validations options.validationCase 4`] = `
               tabindex="-1"
               tool="header:4"
             >
-              Heading 4
+              <h4
+                role="none"
+              >
+                Heading 4
+              </h4>
             </li>
             <li
               aria-selected="false"
@@ -7598,7 +7691,11 @@ exports[`control.textRich validations options.validationCase 4`] = `
               tabindex="-1"
               tool="header:5"
             >
-              Heading 5
+              <h5
+                role="none"
+              >
+                Heading 5
+              </h5>
             </li>
             <li
               aria-selected="false"
@@ -7606,7 +7703,11 @@ exports[`control.textRich validations options.validationCase 4`] = `
               tabindex="-1"
               tool="header:6"
             >
-              Heading 6
+              <h6
+                role="none"
+              >
+                Heading 6
+              </h6>
             </li>
             <li
               aria-selected="true"
@@ -7687,13 +7788,6 @@ exports[`control.textRich validations options.validationCase 4`] = `
         type="button"
         w-tooltip=""
       />
-      <button
-        aria-label="Formula"
-        tabindex="-1"
-        tool="formula"
-        type="button"
-        w-tooltip=""
-      />
     </div>
     <div
       role="group"
@@ -7711,14 +7805,6 @@ exports[`control.textRich validations options.validationCase 4`] = `
         aria-pressed="false"
         tabindex="-1"
         tool="list:bullet"
-        type="button"
-        w-tooltip=""
-      />
-      <button
-        aria-label="Checklist"
-        aria-pressed="false"
-        tabindex="-1"
-        tool="list:check"
         type="button"
         w-tooltip=""
       />
@@ -7929,6 +8015,7 @@ exports[`control.textRich with form 1`] = `
           aria-multiline="true"
           contenteditable="true"
           role="textbox"
+          wup-textrich=""
         />
         <strong
           id="txt1"
@@ -7986,7 +8073,11 @@ exports[`control.textRich with form 1`] = `
                 tabindex="-1"
                 tool="header:1"
               >
-                Heading 1
+                <h1
+                  role="none"
+                >
+                  Heading 1
+                </h1>
               </li>
               <li
                 aria-selected="false"
@@ -7994,7 +8085,11 @@ exports[`control.textRich with form 1`] = `
                 tabindex="-1"
                 tool="header:2"
               >
-                Heading 2
+                <h2
+                  role="none"
+                >
+                  Heading 2
+                </h2>
               </li>
               <li
                 aria-selected="false"
@@ -8002,7 +8097,11 @@ exports[`control.textRich with form 1`] = `
                 tabindex="-1"
                 tool="header:3"
               >
-                Heading 3
+                <h3
+                  role="none"
+                >
+                  Heading 3
+                </h3>
               </li>
               <li
                 aria-selected="false"
@@ -8010,7 +8109,11 @@ exports[`control.textRich with form 1`] = `
                 tabindex="-1"
                 tool="header:4"
               >
-                Heading 4
+                <h4
+                  role="none"
+                >
+                  Heading 4
+                </h4>
               </li>
               <li
                 aria-selected="false"
@@ -8018,7 +8121,11 @@ exports[`control.textRich with form 1`] = `
                 tabindex="-1"
                 tool="header:5"
               >
-                Heading 5
+                <h5
+                  role="none"
+                >
+                  Heading 5
+                </h5>
               </li>
               <li
                 aria-selected="false"
@@ -8026,7 +8133,11 @@ exports[`control.textRich with form 1`] = `
                 tabindex="-1"
                 tool="header:6"
               >
-                Heading 6
+                <h6
+                  role="none"
+                >
+                  Heading 6
+                </h6>
               </li>
               <li
                 aria-selected="true"
@@ -8107,13 +8218,6 @@ exports[`control.textRich with form 1`] = `
           type="button"
           w-tooltip=""
         />
-        <button
-          aria-label="Formula"
-          tabindex="-1"
-          tool="formula"
-          type="button"
-          w-tooltip=""
-        />
       </div>
       <div
         role="group"
@@ -8131,14 +8235,6 @@ exports[`control.textRich with form 1`] = `
           aria-pressed="false"
           tabindex="-1"
           tool="list:bullet"
-          type="button"
-          w-tooltip=""
-        />
-        <button
-          aria-label="Checklist"
-          aria-pressed="false"
-          tabindex="-1"
-          tool="list:check"
           type="button"
           w-tooltip=""
         />

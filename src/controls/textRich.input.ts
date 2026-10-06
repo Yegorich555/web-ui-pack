@@ -81,9 +81,9 @@ const skipTags = new Set([
 ]);
 /** Font size by attribute `size` of `<font>` (produced by `document.execCommand("fontSize")` in another editors) */
 const fontSizes = new Map<string, string>([
-  ["2", "0.75em"],
-  ["5", "1.5em"],
-  ["7", "2.5em"],
+  ["2", "small"],
+  ["5", "x-large"],
+  ["7", "xxx-large"],
 ]);
 /** Supported font sizes */
 const sizes = new Set(fontSizes.values());
@@ -98,18 +98,6 @@ export function sanitizeUrl(url: string): string {
     return safeProtocols.has(new URL(url, document.baseURI).protocol) ? url : "";
   } catch {
     return "";
-  }
-}
-
-/** Renders formula via KaTeX if it's available (`window.katex`) otherwise as plain text */
-export function renderFormula(el: HTMLElement): void {
-  const tex = el.getAttribute("data-formula") || "";
-  el.setAttribute("contenteditable", "false");
-  const { katex } = window as { katex?: { render: (tex: string, el: HTMLElement, opts: object) => void } };
-  if (katex) {
-    katex.render(tex, el, { throwOnError: false });
-  } else {
-    el.textContent = tex;
   }
 }
 
@@ -178,13 +166,6 @@ function appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
     appendInline(el, dst, ctx);
     return;
   }
-  if (el.hasAttribute("data-formula")) {
-    const f = dst.appendChild(document.createElement("span"));
-    f.setAttribute("data-formula", el.getAttribute("data-formula")!);
-    ctx.isEditor ? renderFormula(f) : (f.textContent = f.getAttribute("data-formula"));
-    return;
-  }
-
   let next: HTMLElement | null = null;
   const it = inlineTags.get(tag);
   if (it) {
@@ -230,7 +211,6 @@ function toLine(src: HTMLElement, tag: string, ctx: Ctx): HTMLElement {
 /** Appends cleaned list item to list: nested lists are kept, other content is flattened */
 function appendListItem(src: HTMLElement, list: HTMLElement, ctx: Ctx): void {
   const li = list.appendChild(document.createElement("li"));
-  src.hasAttribute("data-checked") && li.setAttribute("data-checked", "");
   copyBlockStyle(src, li);
   src.childNodes.forEach((n) => {
     listTags.has((n as Element).tagName) ? li.appendChild(toList(n as HTMLElement, ctx)) : appendInlineNode(n, li, ctx);
@@ -242,7 +222,6 @@ function appendListItem(src: HTMLElement, list: HTMLElement, ctx: Ctx): void {
 /** Returns cleaned list */
 function toList(src: HTMLElement, ctx: Ctx): HTMLElement {
   const list = document.createElement(src.tagName);
-  src.tagName === "UL" && src.hasAttribute("data-checklist") && list.setAttribute("data-checklist", "");
   let li: HTMLElement | null = null; // for content placed directly into list (invalid html)
   src.childNodes.forEach((n) => {
     const tag = (n as Element).tagName;
@@ -336,8 +315,7 @@ export function htmlToEditor(html: string): DocumentFragment {
 export function htmlFromEditor(editor: Node): string {
   const div = document.createElement("div");
   appendBlocks(editor, div, { isEditor: false });
-  const isEmpty = !div.textContent!.trim() && !div.querySelector("[data-formula]");
-  return isEmpty ? "" : div.innerHTML;
+  return div.textContent!.trim() ? div.innerHTML : "";
 }
 
 /** Represents contenteditable element with rich text where value is html */

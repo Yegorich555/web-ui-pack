@@ -79,8 +79,7 @@ export function splitRange(r: Range): Text[] {
     const isOut =
       !t.length ||
       (t === r.startContainer && r.startOffset === t.length) ||
-      (t === r.endContainer && r.endOffset === 0) ||
-      !!t.parentElement!.closest("[data-formula]"); // formula is single element
+      (t === r.endContainer && r.endOffset === 0);
     !isOut && r.intersectsNode(t) && arr.push(t);
   }
   return arr;
@@ -158,11 +157,8 @@ export function splitAt(el: Element, r: Range): void {
 }
 
 /** Returns value of format `list` by list element */
-export function listType(list: Element): "ordered" | "bullet" | "check" {
-  if (list.tagName === "OL") {
-    return "ordered";
-  }
-  return list.hasAttribute("data-checklist") ? "check" : "bullet";
+export function listType(list: Element): "ordered" | "bullet" {
+  return list.tagName === "OL" ? "ordered" : "bullet";
 }
 
 /** Returns lines of editor: blocks placed directly into root & items of lists */
@@ -298,7 +294,7 @@ export function setLineTag(line: HTMLElement, tag: string): HTMLElement {
 }
 
 /** Converts line into item of list with pointed type */
-export function setLineList(line: HTMLElement, type: "ordered" | "bullet" | "check"): void {
+export function setLineList(line: HTMLElement, type: "ordered" | "bullet"): void {
   if (line.tagName === "LI") {
     if (listType(line.parentElement!) === type) {
       return;
@@ -309,7 +305,6 @@ export function setLineList(line: HTMLElement, type: "ordered" | "bullet" | "che
   li.append(...line.childNodes);
   copyStyle(line, li);
   const list = document.createElement(type === "ordered" ? "ol" : "ul");
-  type === "check" && list.setAttribute("data-checklist", "");
   list.appendChild(li);
   line.replaceWith(list);
 }
@@ -319,9 +314,6 @@ export function mergeLists(root: Element): void {
   for (let el = root.firstElementChild; el; el = el.nextElementSibling) {
     if (el.tagName === "OL" || el.tagName === "UL") {
       for (let next = el.nextElementSibling; next?.tagName === el.tagName; next = el.nextElementSibling) {
-        if (next.hasAttribute("data-checklist") !== el.hasAttribute("data-checklist")) {
-          break;
-        }
         el.append(...next.childNodes);
         next.remove();
       }

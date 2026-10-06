@@ -1,6 +1,5 @@
 @import "../styles";
 
-// WARN: icons are taken temporarily from npm quill
 :root {
   --ctrl-textrich-quote: #ccc;
   --ctrl-textrich-code-bg: #f0f0f0;
@@ -12,11 +11,9 @@
   --wup-icon-blockquote: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath fill='%23000' d='M4 5h3v3H4zm7 0h3v3h-3z'/%3E%3Cpath fill='%23000' fill-rule='evenodd' d='M7 8c0 4.031-3 5-3 5m10-5c0 4.031-3 5-3 5'/%3E%3C/svg%3E");
   --wup-icon-code-block: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 7 3 9l2 2m8-4 2 2-2 2m-3-6-2 8'/%3E%3C/svg%3E");
   --wup-icon-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='m7 7 4 4M8.9 4.577a3.476 3.476 0 0 1 .36 4.679A3.476 3.476 0 0 1 4.577 8.9c-1.392-1.4-2.542-2.5-.36-4.683S7.5 3.185 8.9 4.577'/%3E%3Cpath d='M13.423 9.1a3.476 3.476 0 0 0-4.679-.36 3.476 3.476 0 0 0 .36 4.679c1.392 1.392 2.5 2.542 4.679.36s1.032-3.279-.36-4.679'/%3E%3C/svg%3E");
-  --wup-icon-formula: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath fill='%23000' stroke='none' d='M11.759 2.482a2.56 2.56 0 0 0-3.53.607A7.66 7.66 0 0 0 6.8 6.2c-.691 2.988-1.525 8.477-2.65 8.727a1.55 1.55 0 0 0-1.3-.933.92.92 0 0 0-.85 1.042S1.954 16 4.119 16s3.091-2.691 3.7-5.553c.177-.826.36-1.726.554-2.6L8.775 6.2c.381-1.421.807-2.521 1.306-2.676a1.01 1.01 0 0 0 1.02.56.966.966 0 0 0 .658-1.602'/%3E%3Crect width='5' height='1.6' x='5.15' y='6.2' fill='%23000' stroke='none' rx='.8' ry='.8'/%3E%3Cpath fill='%23000' stroke='none' d='M13.663 12.027a1.7 1.7 0 0 1 .266-.276q.193.069.456.138a2 2 0 0 0 .535.069 1.08 1.08 0 0 0 .767-.3 1.04 1.04 0 0 0 .314-.8.84.84 0 0 0-.238-.619.8.8 0 0 0-.594-.239 1.15 1.15 0 0 0-.781.3 4.6 4.6 0 0 0-.781 1q-.091.15-.218.346l-.246.38q-.1-.431-.212-.885c-.459-1.847-2.494-.984-2.941-.8-.482.2-.353.647-.094.529a.87.87 0 0 1 1.281.585c.217.751.377 1.436.527 2.038a6 6 0 0 1-.362.467 3 3 0 0 1-.264.271q-.221-.08-.471-.147a2 2 0 0 0-.522-.066 1.08 1.08 0 0 0-.768.3 1.06 1.06 0 0 0-.317.813.82.82 0 0 0 .832.852 1.13 1.13 0 0 0 .787-.3 5 5 0 0 0 .776-.993q.141-.219.215-.34.07-.116.223-.346a2.8 2.8 0 0 0 .918 1.726 2.58 2.58 0 0 0 2.376-.185c.317-.181.212-.565 0-.494a.81.81 0 0 1-.951-.051 5.16 5.16 0 0 1-.913-2.446q.224-.314.4-.527'/%3E%3C/svg%3E");
   --wup-icon-clean: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 3h8m-7 9 3.35-9M11 11l4 4m0-4-4 4'/%3E%3Crect width='7' height='1' x='2' y='14' fill='%23000' stroke='none' rx='.5' ry='.5'/%3E%3C/svg%3E");
   --wup-icon-list-ordered: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M7 4h8M7 9h8m-8 5h8'/%3E%3Cpath stroke-width='1' d='M2.5 5.5h2'/%3E%3Cpath fill='%23000' stroke='none' d='M3.5 6a.5.5 0 0 1-.5-.5V3.085l-.276.138A.5.5 0 0 1 2.053 3c-.124-.247-.023-.324.224-.447l1-.5A.5.5 0 0 1 4 2.5v3a.5.5 0 0 1-.5.5'/%3E%3Cpath stroke-width='1' d='M4.5 10.5h-2c0-.234 1.85-1.076 1.85-2.234a.959.959 0 0 0-1.85-.11m0 6.69a.959.959 0 0 0 1.85-.109.7.7 0 0 0-.6-.737.69.69 0 0 0 .6-.736.959.959 0 0 0-1.85-.109'/%3E%3C/svg%3E");
   --wup-icon-list-bullet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M6 4h9M6 9h9m-9 5h9M3 4zm0 5zm0 5z'/%3E%3C/svg%3E");
-  --wup-icon-list-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M9 4h6M3 4l1 1 2-2m3 11h6M3 14l1 1 2-2m3-4h6M3 9l1 1 2-2'/%3E%3C/svg%3E");
   --wup-icon-script-sub: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath fill='%23000' stroke='none' d='M15.5 15h-1.639a3.86 3.86 0 0 0 1.914-2.975 1.8 1.8 0 0 0-1.6-1.751 1.92 1.92 0 0 0-2.154 1.426.5.5 0 1 0 .957.291.914.914 0 0 1 1.053-.725.81.81 0 0 1 .744.762c0 1.076-1.17 1.87-1.94 2.43A1.46 1.46 0 0 0 12 15.5a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 0-1M9.65 5.241a1 1 0 0 0-1.409.108L6 7.964 3.759 5.349a1 1 0 0 0-1.567 1.243q.023.03.049.057L4.684 9.5l-2.443 2.85a1 1 0 0 0 1.469 1.357q.026-.027.049-.057L6 11.036l2.241 2.614a1 1 0 1 0 1.567-1.243q-.023-.03-.049-.057L7.316 9.5l2.443-2.849a1 1 0 0 0-.109-1.41'/%3E%3C/svg%3E");
   --wup-icon-script-super: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath fill='%23000' stroke='none' d='M15.5 7h-1.639a4.01 4.01 0 0 0 1.914-2.975 1.8 1.8 0 0 0-1.6-1.751A1.92 1.92 0 0 0 12.021 3.7a.5.5 0 1 0 .957.291.917.917 0 0 1 1.053-.725.81.81 0 0 1 .744.762c0 1.077-1.164 1.925-1.934 2.486A1.42 1.42 0 0 0 12 7.5a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 0-1M9.651 5.241a1 1 0 0 0-1.41.108L6 7.964 3.759 5.349a1 1 0 1 0-1.519 1.3L4.683 9.5l-2.442 2.85a1 1 0 1 0 1.519 1.3L6 11.036l2.241 2.614a1 1 0 0 0 1.519-1.3L7.317 9.5l2.442-2.849a1 1 0 0 0-.108-1.41'/%3E%3C/svg%3E");
   --wup-icon-indent: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M3 14h12M3 4h12M9 9h6'/%3E%3Cpath fill='%23000' d='M3 7v4l2-2z'/%3E%3C/svg%3E");
@@ -29,6 +26,24 @@
     --ctrl-textrich-code-bg: #1d1d1d;
     --ctrl-textrich-btn-focus: rgba(255, 255, 255, 0.12);
   }
+
+  // content of editor: global to show value outside control with the same styles via `<div wup-textrich>{value}</div>`
+  [wup-textrich] {
+    blockquote {
+      margin: 5px 0;
+      padding-left: 16px;
+      border-left: 4px solid var(--ctrl-textrich-quote);
+    }
+
+    pre {
+      margin: 5px 0;
+      padding: 5px 10px;
+      border-radius: 3px;
+      background: var(--ctrl-textrich-code-bg);
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  }
 }
 
 // icons of toolbar items: [tool] => --wup-icon-...
@@ -40,11 +55,9 @@ $tools: (
   "blockquote": "blockquote",
   "code-block": "code-block",
   "link": "link",
-  "formula": "formula",
   "clean": "clean",
   "list:ordered": "list-ordered",
   "list:bullet": "list-bullet",
-  "list:check": "list-check",
   "script:sub": "script-sub",
   "script:super": "script-super",
   "indent:-1": "indent",
@@ -59,8 +72,26 @@ $aligns: (
 );
 
 :host {
+  --ctrl-label-active-pos: translateY(-50%) scale(0.9); // label is always placed at the middle of top border
+  position: relative; // to position label relative to control instead of editor
   display: flex;
   flex-direction: column;
+
+  label > span {
+    position: static;
+  }
+
+  strong {
+    top: 0;
+    left: calc(var(--ctrl-icon-size) - 0.25em);
+    max-width: calc(100% - 2 * var(--ctrl-icon-size));
+    padding: 0 0.25em;
+    transform-origin: center left;
+    transform: var(--ctrl-label-active-pos);
+    color: var(--ctrl-focus-label);
+    background: var(--ctrl-bg); // hides border behind label
+    border-radius: 0.5em;
+  }
 
   [role="toolbar"] {
     order: -1; // toolbar is placed after editor in DOM
@@ -183,6 +214,7 @@ $aligns: (
   }
 
   wup-dropdown > [menu] {
+    /* stylelint-disable-next-line no-descending-specificity */
     li {
       padding: 0.4em 1em;
       line-height: 1.2;
@@ -195,45 +227,28 @@ $aligns: (
       }
     }
 
-    [tool^="header:"] {
-      font-weight: bold;
+    // headings use default/global styles (the same as in editor)
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 0;
+      padding: 0;
     }
-
-    [tool="header:false"] {
-      font-weight: normal;
-    }
-  }
-
-  [tool="header:1"] {
-    font-size: 1.6em;
-  }
-
-  [tool="header:2"] {
-    font-size: 1.4em;
-  }
-
-  [tool="header:3"] {
-    font-size: 1.2em;
-  }
-
-  [tool="header:5"] {
-    font-size: 0.9em;
-  }
-
-  [tool="header:6"] {
-    font-size: 0.8em;
   }
 
   [tool="size:sm"] {
-    font-size: 0.75em;
+    font-size: small;
   }
 
   [tool="size:lg"] {
-    font-size: 1.4em;
+    font-size: x-large;
   }
 
   [tool="size:hg"] {
-    font-size: 2em;
+    font-size: xxx-large;
   }
 
   @each $a, $icon in $aligns {
@@ -265,111 +280,9 @@ $aligns: (
     opacity: 0.5;
   }
 
-  // editor
+  // editor: styles of content are defined globally via [wup-textrich]
   [contenteditable="true"] {
     min-height: 8em;
     max-height: 16em;
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    blockquote,
-    pre,
-    ol,
-    ul {
-      margin: 0;
-      padding: 0;
-    }
-
-    h1 {
-      font-size: 2em;
-    }
-
-    h2 {
-      font-size: 1.5em;
-    }
-
-    h3 {
-      font-size: 1.17em;
-    }
-
-    h4 {
-      font-size: 1em;
-    }
-
-    h5 {
-      font-size: 0.83em;
-    }
-
-    h6 {
-      font-size: 0.67em;
-    }
-
-    blockquote {
-      margin: 5px 0;
-      padding-left: 16px;
-      border-left: 4px solid var(--ctrl-textrich-quote);
-    }
-
-    pre {
-      margin: 5px 0;
-      padding: 5px 10px;
-      border-radius: 3px;
-      background: var(--ctrl-textrich-code-bg);
-      font-family: monospace;
-      white-space: pre-wrap;
-    }
-
-    ol,
-    ul {
-      padding-left: 1.5em;
-    }
-
-    ul[data-checklist] {
-      list-style: none;
-      padding-left: 0;
-
-      > li {
-        position: relative;
-        padding-left: 1.5em;
-
-        &:before {
-          content: "\2610";
-          position: absolute;
-          left: 0.2em;
-          color: var(--ctrl-icon);
-          cursor: pointer;
-        }
-
-        &[data-checked]:before {
-          content: "\2611";
-        }
-      }
-    }
-
-    a {
-      color: var(--ctrl-selected);
-      text-decoration: underline;
-    }
-
-    font[size="2"] {
-      font-size: 0.75em;
-    }
-
-    font[size="5"] {
-      font-size: 1.5em;
-    }
-
-    font[size="7"] {
-      font-size: 2.5em;
-    }
-
-    [data-formula] {
-      font-family: serif;
-      font-style: italic;
-    }
   }
 }
