@@ -3,7 +3,6 @@
 :root {
   --ctrl-textrich-quote: #ccc;
   --ctrl-textrich-code-bg: #f0f0f0;
-  --ctrl-textrich-btn-focus: rgba(0, 0, 0, 0.08);
   --wup-icon-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 4h4.5A2.5 2.5 0 0 1 12 6.5 2.5 2.5 0 0 1 9.5 9H5zm0 5h5.5a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5H5z'/%3E%3C/svg%3E");
   --wup-icon-italic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M7 4h6M5 14h6m-3 0 2-10'/%3E%3C/svg%3E");
   --wup-icon-underline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 3v6a4.01 4.01 0 0 0 4 4 4.01 4.01 0 0 0 4-4V3'/%3E%3Crect width='12' height='1' x='3' y='15' fill='%23000' stroke='none' rx='.5' ry='.5'/%3E%3C/svg%3E");
@@ -24,7 +23,6 @@
   [wupdark] {
     --ctrl-textrich-quote: #555;
     --ctrl-textrich-code-bg: #1d1d1d;
-    --ctrl-textrich-btn-focus: rgba(255, 255, 255, 0.12);
   }
 
   // content of editor: global to show value outside control with the same styles via `<div wup-textrich>{value}</div>`
@@ -89,7 +87,9 @@ $aligns: (
     transform-origin: center left;
     transform: var(--ctrl-label-active-pos);
     color: var(--ctrl-focus-label);
-    background: var(--ctrl-bg); // hides border behind label
+    // hides border behind label so must be opaque: point --ctrl-textrich-label-bg (page color) when --ctrl-bg is transparent (dark mode)
+    // WARN: not defined in :root: otherwise var(--ctrl-bg) is resolved there and dark --ctrl-bg is ignored
+    background: var(--ctrl-textrich-label-bg, var(--ctrl-bg));
     border-radius: 0.5em;
   }
 
@@ -119,14 +119,9 @@ $aligns: (
     --icon-size: 1.125em;
     --icon-hover: var(--ctrl-selected);
     --icon-hover-bg: none;
-    --icon-focus-bg: var(--ctrl-textrich-btn-focus);
     --icon-hover-r: 1.75em;
     @include wup-btnIcon;
     border-radius: 4px;
-
-    &:after {
-      border-radius: 0;
-    }
 
     &[aria-pressed="true"] {
       --icon: var(--ctrl-selected);
@@ -149,32 +144,19 @@ $aligns: (
   wup-dropdown > button {
     display: inline-flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.25em;
     height: 1.75em;
-    min-width: initial;
-    margin: 0;
     padding: 0 0.25em 0 0.5em;
     border-radius: 4px;
     font: inherit;
     color: var(--ctrl-icon);
     background: none;
-    box-shadow: none;
     white-space: nowrap;
 
-    /* stylelint-disable-next-line no-descending-specificity */
     &:after {
-      content: "";
       --ctrl-icon-img: var(--wup-icon-chevron);
       --ctrl-icon-size: 0.6em;
-      @include wup-icon;
-      padding: 0;
-      align-self: center;
-      height: var(--ctrl-icon-size);
-      background: currentColor;
-    }
-
-    &:focus {
-      box-shadow: inset 0 0 0 99999px var(--ctrl-textrich-btn-focus);
     }
 
     &[aria-expanded="true"]:after {
@@ -186,40 +168,48 @@ $aligns: (
         color: var(--ctrl-selected);
         box-shadow: none;
       }
+    }
 
-      &:focus:hover {
-        box-shadow: inset 0 0 0 99999px var(--ctrl-textrich-btn-focus);
-      }
+    // after :hover to keep focus-bg on hover
+    &:focus {
+      box-shadow: inset 0 0 0 99999px var(--icon-focus-bg); // the same as for icon buttons
     }
   }
 
   // fixed width: otherwise toolbar is shifted when selection is changed
   wup-dropdown[tool="header"] > button {
     min-width: 6.5em;
-    justify-content: space-between;
   }
 
   wup-dropdown[tool="size"] > button {
     min-width: 4.75em;
-    justify-content: space-between;
   }
 
   wup-dropdown[tool="align"] > button:before {
-    content: "";
     --ctrl-icon-size: 1.125em;
+  }
+
+  // icons: chevron & align of dropdown buttons, align of menu items
+  wup-dropdown > button:after,
+  wup-dropdown[tool="align"] > button:before,
+  [tool^="align:"]:before {
+    content: "";
     @include wup-icon;
     padding: 0;
+    vertical-align: middle;
+  }
+
+  wup-dropdown > button:after,
+  wup-dropdown[tool="align"] > button:before {
     align-self: center;
     background: currentColor;
   }
 
   wup-dropdown > [menu] {
-    /* stylelint-disable-next-line no-descending-specificity */
     li {
       padding: 0.4em 1em;
       line-height: 1.2;
       white-space: nowrap;
-      cursor: pointer;
       outline: none;
 
       &:focus {
@@ -239,30 +229,11 @@ $aligns: (
     }
   }
 
-  [tool="size:sm"] {
-    font-size: small;
-  }
-
-  [tool="size:lg"] {
-    font-size: x-large;
-  }
-
-  [tool="size:hg"] {
-    font-size: xxx-large;
-  }
-
   @each $a, $icon in $aligns {
     wup-dropdown[tool="align"] > button[value="#{$a}"],
     [tool="align:#{$a}"] {
       --ctrl-icon-img: var(--wup-icon-#{$icon});
     }
-  }
-
-  [tool^="align:"]:before {
-    content: "";
-    @include wup-icon;
-    padding: 0;
-    vertical-align: middle;
   }
 
   // align-right: the same icon as align-left but mirrored

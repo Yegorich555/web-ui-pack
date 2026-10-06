@@ -45,7 +45,6 @@ export default function TextRichControlView() {
         <wup-textrich
           w-name="description"
           w-label="Rich text"
-          w-initValue=""
           w-validations="window.myTextRichValidations"
           w-toolbar="window.myTextRichToolbar"
           ref={(el) => {
@@ -73,7 +72,7 @@ export default function TextRichControlView() {
         <div className={stylesCom.group}>
           <wup-textrich
             w-name="readonly"
-            w-label="Readonly and with smaller toolbar (see options.$toolbar)"
+            w-label="Readonly and with smaller toolbar (options.$toolbar)"
             readonly
             w-toolbar="window.myTextRichToolbarShort"
             ref={(el) => {

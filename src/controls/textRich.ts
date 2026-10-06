@@ -490,6 +490,7 @@ export default class WUPTextRichControl<
         h.textContent = label;
       } else {
         li.textContent = label;
+        format === "size" && (li.style.fontSize = sizes.get(v) ?? ""); // the same font size as in editor
       }
       li._format = format;
       li._value = v;
