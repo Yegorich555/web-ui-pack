@@ -68,7 +68,7 @@ const routes: IRoute[] = [
 
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
-  { path: "control/textarea", el: TextAreaControlView, isNested: true },
+  { path: "control/textArea", el: TextAreaControlView, isNested: true },
   { path: "control/textRich", el: TextRichControlView, isNested: true },
   { path: "control/password", el: PasswordControlView, isNested: true },
   { path: "control/number", el: NumberControlView, isNested: true },

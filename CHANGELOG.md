@@ -771,7 +771,7 @@
 - Controls **Number, Date, Calendar** are locale based and depends on [localeInfo](src/objects/localeInfo.ts) helper
 - Added elements
   - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
-  - [TextAreaControl](src/controls/textArea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
+  - [TextAreaControl](src/controls/textArea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textArea)
 - Added [helpers](README.md#helpers)
   - [onScroll](src/helpers/onScroll.ts)
   - [localeInfo](src/objects/localeInfo.ts)

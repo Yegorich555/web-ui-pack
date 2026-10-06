@@ -25,7 +25,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       /** Form-control with multiline text-input
-       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textarea}
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textArea}
        *  @see {@link WUPTextAreaControl} */
       [tagName]: WUP.Base.ReactHTML<WUPTextAreaControl> & WUP.TextArea.JSXProps; // add element to tsx/jsx intellisense (react)
     }
@@ -39,7 +39,7 @@ declare module "preact/jsx-runtime" {
     interface HTMLAttributes<RefType> {}
     interface IntrinsicElements {
       /** Form-control with multiline text-input
-       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textarea}
+       *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textArea}
        *  @see {@link WUPTextAreaControl} */
       [tagName]: HTMLAttributes<WUPTextAreaControl> & WUP.TextArea.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
@@ -47,7 +47,7 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Form-control with multiline text-input
- * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textarea}
+ * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textArea}
  * @example
   const el = document.createElement("wup-textarea");
   el.$options.name = "textarea";

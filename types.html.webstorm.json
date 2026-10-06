@@ -1529,7 +1529,7 @@
         {
           "name": "wup-textarea",
           "description": "Form-control with multiline text-input",
-          "doc-url": "https://yegorich555.github.io/web-ui-pack/control/textarea",
+          "doc-url": "https://yegorich555.github.io/web-ui-pack/control/textArea",
           "attributes": [
             {
               "name": "w-debouncems",
