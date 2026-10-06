@@ -147,6 +147,10 @@ export default class WUPTextControl<
     return super.$style;
   }
 
+  static $isEmpty(v: unknown): boolean {
+    return v === "" || v == null;
+  }
+
   static $errorParse = __wupln("Invalid value", "validation");
   static $errorMask = __wupln("Incomplete value", "validation");
 
@@ -154,10 +158,8 @@ export default class WUPTextControl<
     selectOnFocus: false,
     clearButton: true,
     validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {
-      min: (v, setV) =>
-        (v === undefined || v.length < setV) && __wupln(`Min length is ${setV} characters`, "validation"),
-      max: (v, setV) =>
-        (v === undefined || v.length > setV) && __wupln(`Max length is ${setV} characters`, "validation"),
+      min: (v, setV) => (!v || v.length < setV) && __wupln(`Min length is ${setV} characters`, "validation"),
+      max: (v, setV) => (!v || v.length > setV) && __wupln(`Max length is ${setV} characters`, "validation"),
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && __wupln("Invalid email address", "validation"),
     }),
     debounceMs: 0,

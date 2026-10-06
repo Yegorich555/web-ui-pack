@@ -100,6 +100,11 @@ export default abstract class WUPBaseComboControl<
     return super.$style;
   }
 
+  /** `null` can be a valid value (menu item) so it isn't empty */
+  static override $isEmpty(v: unknown): boolean {
+    return WUPBaseControl.$isEmpty(v);
+  }
+
   static $defaults: WUP.BaseCombo.Options<any> = inheritDefaults(WUPTextControl.$defaults, {
     validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {}),
     openCase: MenuOpenCases.onClick | MenuOpenCases.onFocus | MenuOpenCases.onPressArrowKey,
