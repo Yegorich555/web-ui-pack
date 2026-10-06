@@ -849,7 +849,7 @@ WUP-SELECTMANY [menu] li[aria-selected=true]:after {
   min-height: var(--ctrl-icon-size);
   box-sizing: content-box;
   margin: 0;
-  padding: 5px;
+  padding: 0;
   flex: 0 0 auto;
   align-self: stretch;
   border: none;
@@ -865,9 +865,12 @@ WUP-SELECTMANY [menu] li[aria-selected=true]:after {
           mask-image: var(--ctrl-icon-img);
   background: var(--ctrl-selected);
   margin-left: auto;
-  padding: 0;
+  padding-left: 0.5em;
+  -webkit-mask-position: right center;
+          mask-position: right center;
 }
-WUP-SELECTMANY [menu] li[focused] {
+WUP-SELECTMANY [menu] li[focused], WUP-SELECTMANY [menu] li:focus {
+  outline: none;
   box-shadow: inset 0 0 4px 0 var(--base-focus);
 }
 WUP-SELECTMANY {
@@ -960,7 +963,7 @@ WUP-SELECTMANY [item]:after {
   min-height: var(--ctrl-icon-size);
   box-sizing: content-box;
   margin: 0;
-  padding: 5px;
+  padding: 0;
   flex: 0 0 auto;
   align-self: stretch;
   border: none;
@@ -976,7 +979,6 @@ WUP-SELECTMANY [item]:after {
           mask-image: var(--ctrl-icon-img);
   display: var(--ctrl-select-item-del-display);
   content: "";
-  padding: 0;
   margin-left: 0.5em;
 }
 WUP-SELECTMANY [item][focused] {

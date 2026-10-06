@@ -896,7 +896,7 @@ WUP-TIME [group] &gt; button:after {
   min-height: var(--ctrl-icon-size);
   box-sizing: content-box;
   margin: 0;
-  padding: 5px;
+  padding: 0;
   flex: 0 0 auto;
   align-self: stretch;
   border: none;
@@ -911,7 +911,6 @@ WUP-TIME [group] &gt; button:after {
   -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
   content: "";
-  padding: 0;
 }
 @media (hover: hover) and (pointer: fine) {
   WUP-TIME &gt; [menu] li:hover {

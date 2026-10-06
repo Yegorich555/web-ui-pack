@@ -1191,7 +1191,7 @@ WUP-CHECKTREE[checked] &gt; label &gt; [icon]:after {
   min-height: var(--ctrl-icon-size);
   box-sizing: content-box;
   margin: 0;
-  padding: 5px;
+  padding: 0;
   flex: 0 0 auto;
   align-self: stretch;
   border: none;
@@ -1208,7 +1208,6 @@ WUP-CHECKTREE[checked] &gt; label &gt; [icon]:after {
   content: "";
   top: 0;
   left: 0;
-  padding: 0;
   border-radius: 0;
   height: 100%;
   width: 100%;
@@ -1282,7 +1281,7 @@ WUP-CHECKTREE [expand] {
   min-height: var(--ctrl-icon-size);
   box-sizing: content-box;
   margin: 0;
-  padding: 5px;
+  padding: 0;
   flex: 0 0 auto;
   align-self: stretch;
   border: none;
@@ -1296,7 +1295,6 @@ WUP-CHECKTREE [expand] {
           mask-position: center;
   -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
-  padding: 0;
   transform: rotate(-90deg);
 }
 WUP-CHECKTREE [item][disabled],
@@ -1349,7 +1347,7 @@ WUP-CHECKTREE [aria-checked=true] &gt; [item] &gt; [icon]:after {
   min-height: var(--ctrl-icon-size);
   box-sizing: content-box;
   margin: 0;
-  padding: 5px;
+  padding: 0;
   flex: 0 0 auto;
   align-self: stretch;
   border: none;
@@ -1366,7 +1364,6 @@ WUP-CHECKTREE [aria-checked=true] &gt; [item] &gt; [icon]:after {
   content: "";
   top: 0;
   left: 0;
-  padding: 0;
   border-radius: 0;
   height: 100%;
   width: 100%;
