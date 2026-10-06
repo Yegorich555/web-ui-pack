@@ -31,6 +31,8 @@ export default function TextRichControlView() {
         "Keyboard: Ctrl+B, Ctrl+I, Ctrl+U & Alt+F10 to focus toolbar (Arrows to navigate, Esc to return)",
         "Inline format with collapsed selection is applied to the next typed text (Ctrl+B and type text)",
         "Validations min/max count visible chars only",
+        "Uses own js-engine and doesn't depend on Browser (not used deprecated and not stable document.execCommand)",
+        // todo "Ability to add custom tool to toolbar"
       ]}
     >
       <wup-form

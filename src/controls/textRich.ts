@@ -488,9 +488,13 @@ export default class WUPTextRichControl<
         const h = li.appendChild(document.createElement(`h${v}`));
         h.setAttribute("role", "none");
         h.textContent = label;
+      } else if (format === "size") {
+        // font size is applied to inner span: otherwise checkmark of selected item is scaled too
+        const s = li.appendChild(document.createElement("span"));
+        s.style.fontSize = sizes.get(v) ?? ""; // the same font size as in editor
+        s.textContent = label;
       } else {
         li.textContent = label;
-        format === "size" && (li.style.fontSize = sizes.get(v) ?? ""); // the same font size as in editor
       }
       li._format = format;
       li._value = v;

@@ -309,7 +309,9 @@ exports[`control.textRich $ariaDetails 1`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -317,7 +319,11 @@ exports[`control.textRich $ariaDetails 1`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -325,7 +331,11 @@ exports[`control.textRich $ariaDetails 1`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -333,7 +343,9 @@ exports[`control.textRich $ariaDetails 1`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -715,7 +727,9 @@ exports[`control.textRich $ariaDetails 2`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -723,7 +737,11 @@ exports[`control.textRich $ariaDetails 2`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -731,7 +749,11 @@ exports[`control.textRich $ariaDetails 2`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -739,7 +761,9 @@ exports[`control.textRich $ariaDetails 2`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -1121,7 +1145,9 @@ exports[`control.textRich $ariaSpeak 1`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -1129,7 +1155,11 @@ exports[`control.textRich $ariaSpeak 1`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -1137,7 +1167,11 @@ exports[`control.textRich $ariaSpeak 1`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -1145,7 +1179,9 @@ exports[`control.textRich $ariaSpeak 1`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -1535,7 +1571,9 @@ exports[`control.textRich $ariaSpeak 2`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -1543,7 +1581,11 @@ exports[`control.textRich $ariaSpeak 2`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -1551,7 +1593,11 @@ exports[`control.textRich $ariaSpeak 2`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -1559,7 +1605,9 @@ exports[`control.textRich $ariaSpeak 2`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -1941,7 +1989,9 @@ exports[`control.textRich $show/$hide error 1`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -1949,7 +1999,11 @@ exports[`control.textRich $show/$hide error 1`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -1957,7 +2011,11 @@ exports[`control.textRich $show/$hide error 1`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -1965,7 +2023,9 @@ exports[`control.textRich $show/$hide error 1`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -2349,7 +2409,9 @@ exports[`control.textRich $show/$hide error 2`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -2357,7 +2419,11 @@ exports[`control.textRich $show/$hide error 2`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -2365,7 +2431,11 @@ exports[`control.textRich $show/$hide error 2`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -2373,7 +2443,9 @@ exports[`control.textRich $show/$hide error 2`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -2768,7 +2840,9 @@ exports[`control.textRich $show/$hide error 3`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -2776,7 +2850,11 @@ exports[`control.textRich $show/$hide error 3`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -2784,7 +2862,11 @@ exports[`control.textRich $show/$hide error 3`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -2792,7 +2874,9 @@ exports[`control.textRich $show/$hide error 3`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -3034,8 +3118,6 @@ exports[`control.textRich common tests render + styles 2`] = `
   :root {
   --ctrl-textrich-quote: #ccc;
   --ctrl-textrich-code-bg: #f0f0f0;
-  --ctrl-textrich-btn-focus: rgba(0, 0, 0, 0.08);
-  --ctrl-textrich-label-bg: var(--ctrl-bg);
   --wup-icon-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 4h4.5A2.5 2.5 0 0 1 12 6.5 2.5 2.5 0 0 1 9.5 9H5zm0 5h5.5a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5H5z'/%3E%3C/svg%3E");
   --wup-icon-italic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M7 4h6M5 14h6m-3 0 2-10'/%3E%3C/svg%3E");
   --wup-icon-underline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 3v6a4.01 4.01 0 0 0 4 4 4.01 4.01 0 0 0 4-4V3'/%3E%3Crect width='12' height='1' x='3' y='15' fill='%23000' stroke='none' rx='.5' ry='.5'/%3E%3C/svg%3E");
@@ -3056,8 +3138,6 @@ exports[`control.textRich common tests render + styles 2`] = `
 [wupdark] {
   --ctrl-textrich-quote: #555;
   --ctrl-textrich-code-bg: #1d1d1d;
-  --ctrl-textrich-btn-focus: rgba(255, 255, 255, 0.12);
-  --ctrl-textrich-label-bg: #161b24;
 }
 [wup-textrich] blockquote {
   margin: 5px 0;
@@ -3431,13 +3511,14 @@ WUP-TEXTRICH label &gt; span {
 }
 WUP-TEXTRICH strong {
   top: 0;
-  left: 0.75em;
-  max-width: calc(100% - 1.5em);
+  left: calc(var(--ctrl-icon-size) - 0.25em);
+  max-width: calc(100% - 2 * var(--ctrl-icon-size));
   padding: 0 0.25em;
   transform-origin: center left;
   transform: var(--ctrl-label-active-pos);
   color: var(--ctrl-focus-label);
-  background: linear-gradient(transparent calc(50% - 1px), var(--ctrl-textrich-label-bg) 0);
+  background: var(--ctrl-textrich-label-bg, var(--ctrl-bg));
+  border-radius: 0.5em;
 }
 WUP-TEXTRICH [role=toolbar] {
   order: -1;
@@ -3462,7 +3543,6 @@ WUP-TEXTRICH [role=group] &gt; button {
   --icon-size: 1.125em;
   --icon-hover: var(--ctrl-selected);
   --icon-hover-bg: none;
-  --icon-focus-bg: var(--ctrl-textrich-btn-focus);
   --icon-hover-r: 1.75em;
   display: inline-block;
   cursor: pointer;
@@ -3509,9 +3589,6 @@ WUP-TEXTRICH [role=group] &gt; button:focus:after {
   WUP-TEXTRICH [role=group] &gt; button:focus:hover {
     opacity: 0.9;
   }
-}
-WUP-TEXTRICH [role=group] &gt; button:after {
-  border-radius: 0;
 }
 WUP-TEXTRICH [role=group] &gt; button[aria-pressed=true] {
   --icon: var(--ctrl-selected);
@@ -3562,80 +3639,32 @@ WUP-TEXTRICH [tool="indent:-1"]:after {
   transform: rotate(180deg);
 }
 WUP-TEXTRICH wup-dropdown &gt; button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25em;
+  --icon-hover-bg: none;
+  justify-content: space-between;
   height: 1.75em;
-  min-width: initial;
-  margin: 0;
-  padding: 0 0.25em 0 0.5em;
   border-radius: 4px;
-  font: inherit;
   color: var(--ctrl-icon);
-  background: none;
-  box-shadow: none;
-  white-space: nowrap;
-}
-WUP-TEXTRICH wup-dropdown &gt; button:after {
-  content: "";
-  --ctrl-icon-img: var(--wup-icon-chevron);
-  --ctrl-icon-size: 0.6em;
-  display: inline-block;
-  width: var(--ctrl-icon-size);
-  min-height: var(--ctrl-icon-size);
-  box-sizing: content-box;
-  margin: 0;
-  padding: 5px;
-  flex: 0 0 auto;
-  align-self: stretch;
-  border: none;
-  box-shadow: none;
-  background: var(--ctrl-icon);
-  -webkit-mask-size: var(--ctrl-icon-size);
-          mask-size: var(--ctrl-icon-size);
-  -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-          mask-position: center;
-  -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
-  padding: 0;
-  align-self: center;
-  height: var(--ctrl-icon-size);
-  background: currentColor;
-}
-WUP-TEXTRICH wup-dropdown &gt; button:focus {
-  box-shadow: inset 0 0 0 99999px var(--ctrl-textrich-btn-focus);
-}
-WUP-TEXTRICH wup-dropdown &gt; button[aria-expanded=true]:after {
-  transform: rotate(180deg);
 }
 @media (hover: hover) and (pointer: fine) {
   WUP-TEXTRICH wup-dropdown &gt; button:hover {
     color: var(--ctrl-selected);
-    box-shadow: none;
-  }
-  WUP-TEXTRICH wup-dropdown &gt; button:focus:hover {
-    box-shadow: inset 0 0 0 99999px var(--ctrl-textrich-btn-focus);
   }
 }
 WUP-TEXTRICH wup-dropdown[tool=header] &gt; button {
   min-width: 6.5em;
-  justify-content: space-between;
 }
 WUP-TEXTRICH wup-dropdown[tool=size] &gt; button {
   min-width: 4.75em;
-  justify-content: space-between;
 }
-WUP-TEXTRICH wup-dropdown[tool=align] &gt; button:before {
+WUP-TEXTRICH wup-dropdown[tool=align] &gt; button:before,
+WUP-TEXTRICH [tool^="align:"]:before {
   content: "";
-  --ctrl-icon-size: 1.125em;
   display: inline-block;
   width: var(--ctrl-icon-size);
   min-height: var(--ctrl-icon-size);
   box-sizing: content-box;
   margin: 0;
-  padding: 5px;
+  padding: 0;
   flex: 0 0 auto;
   align-self: stretch;
   border: none;
@@ -3649,7 +3678,10 @@ WUP-TEXTRICH wup-dropdown[tool=align] &gt; button:before {
           mask-position: center;
   -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
-  padding: 0;
+  vertical-align: middle;
+}
+WUP-TEXTRICH wup-dropdown[tool=align] &gt; button:before {
+  --ctrl-icon-size: 1.125em;
   align-self: center;
   background: currentColor;
 }
@@ -3657,11 +3689,6 @@ WUP-TEXTRICH wup-dropdown &gt; [menu] li {
   padding: 0.4em 1em;
   line-height: 1.2;
   white-space: nowrap;
-  cursor: pointer;
-  outline: none;
-}
-WUP-TEXTRICH wup-dropdown &gt; [menu] li:focus {
-  box-shadow: inset 0 0 4px 0 var(--base-focus);
 }
 WUP-TEXTRICH wup-dropdown &gt; [menu] h1,
 WUP-TEXTRICH wup-dropdown &gt; [menu] h2,
@@ -3671,15 +3698,6 @@ WUP-TEXTRICH wup-dropdown &gt; [menu] h5,
 WUP-TEXTRICH wup-dropdown &gt; [menu] h6 {
   margin: 0;
   padding: 0;
-}
-WUP-TEXTRICH [tool="size:sm"] {
-  font-size: small;
-}
-WUP-TEXTRICH [tool="size:lg"] {
-  font-size: x-large;
-}
-WUP-TEXTRICH [tool="size:hg"] {
-  font-size: xxx-large;
 }
 WUP-TEXTRICH wup-dropdown[tool=align] &gt; button[value=left],
 WUP-TEXTRICH [tool="align:left"] {
@@ -3696,30 +3714,6 @@ WUP-TEXTRICH [tool="align:right"] {
 WUP-TEXTRICH wup-dropdown[tool=align] &gt; button[value=justify],
 WUP-TEXTRICH [tool="align:justify"] {
   --ctrl-icon-img: var(--wup-icon-align-justify);
-}
-WUP-TEXTRICH [tool^="align:"]:before {
-  content: "";
-  display: inline-block;
-  width: var(--ctrl-icon-size);
-  min-height: var(--ctrl-icon-size);
-  box-sizing: content-box;
-  margin: 0;
-  padding: 5px;
-  flex: 0 0 auto;
-  align-self: stretch;
-  border: none;
-  box-shadow: none;
-  background: var(--ctrl-icon);
-  -webkit-mask-size: var(--ctrl-icon-size);
-          mask-size: var(--ctrl-icon-size);
-  -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-          mask-position: center;
-  -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
-  padding: 0;
-  vertical-align: middle;
 }
 WUP-TEXTRICH wup-dropdown[tool=align] &gt; button[value=right]:before,
 WUP-TEXTRICH [tool="align:right"]:before {
@@ -3812,66 +3806,62 @@ WUP-DROPDOWN {
   contain: style;
   display: inline-block;
 }
-WUP-DROPDOWN button {
-  box-shadow: none;
+WUP-DROPDOWN &gt; button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  margin: 0;
+  padding: 0.25em 0.25em 0.25em 0.5em;
   border: none;
   border-radius: var(--border-radius);
-  box-sizing: border-box;
-  padding: 11px;
-  margin: var(--base-margin) 0;
-  min-width: 10em;
-  cursor: pointer;
   font: inherit;
-  font-weight: bold;
-  background: var(--base-btn-bg);
-  color: var(--base-btn-text);
+  color: inherit;
+  background: none;
+  box-shadow: none;
   outline: none;
-  min-width: initial;
-  margin: 0;
-  padding: 0.7em;
+  cursor: pointer;
+  white-space: nowrap;
 }
-WUP-DROPDOWN button:focus {
-  box-shadow: inset 0 0 0 2px var(--base-btn-focus);
+WUP-DROPDOWN &gt; button:after {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-chevron);
+  --ctrl-icon-size: 0.6em;
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  align-self: center;
+  background: currentColor;
+}
+WUP-DROPDOWN &gt; button[aria-expanded=true]:after {
+  transform: rotate(180deg);
 }
 @media (hover: hover) and (pointer: fine) {
-  WUP-DROPDOWN button:hover {
-    box-shadow: inset 0 0 0 99999px rgba(0, 0, 0, 0.2);
+  WUP-DROPDOWN &gt; button:hover {
+    box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
   }
 }
-WUP-DROPDOWN button[disabled] {
+WUP-DROPDOWN &gt; button:focus {
+  box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+WUP-DROPDOWN &gt; button[disabled] {
   opacity: 0.3;
   cursor: not-allowed;
-  -webkit-user-select: none;
-          user-select: none;
-}
-WUP-DROPDOWN button[aria-busy] {
-  cursor: wait;
-}
-WUP-DROPDOWN button[busy] {
-  position: relative;
-}
-WUP-DROPDOWN button[busy]:after {
-  content: "";
-  display: block;
-  position: absolute;
-  height: 3px;
-  width: 90%;
-  width: calc(100% - calc(var(--base-margin) * 2));
-  background-color: #fff;
-  animation: BTN-BUSY 3s cubic-bezier(0, 0, 0.2, 1) infinite;
-  opacity: 0.3;
-  left: 50%;
-}
-@keyframes BTN-BUSY {
-  0% {
-    transform: translateX(-50%) scaleX(40%);
-  }
-  50% {
-    transform: translateX(-50%) scaleX(100%);
-  }
-  100% {
-    transform: translateX(-50%) scaleX(40%);
-  }
 }
 WUP-DROPDOWN &gt; [menu] {
   padding: 0;
@@ -3932,7 +3922,7 @@ WUP-DROPDOWN &gt; [menu] li[aria-selected=true]:after {
   min-height: var(--ctrl-icon-size);
   box-sizing: content-box;
   margin: 0;
-  padding: 5px;
+  padding: 0;
   flex: 0 0 auto;
   align-self: stretch;
   border: none;
@@ -3948,9 +3938,12 @@ WUP-DROPDOWN &gt; [menu] li[aria-selected=true]:after {
           mask-image: var(--ctrl-icon-img);
   background: var(--ctrl-selected);
   margin-left: auto;
-  padding: 0;
+  padding-left: 0.5em;
+  -webkit-mask-position: right center;
+          mask-position: right center;
 }
-WUP-DROPDOWN &gt; [menu] li[focused] {
+WUP-DROPDOWN &gt; [menu] li[focused], WUP-DROPDOWN &gt; [menu] li:focus {
+  outline: none;
   box-shadow: inset 0 0 4px 0 var(--base-focus);
 }
   :root {
@@ -4466,7 +4459,9 @@ exports[`control.textRich options clearButton 1`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -4474,7 +4469,11 @@ exports[`control.textRich options clearButton 1`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -4482,7 +4481,11 @@ exports[`control.textRich options clearButton 1`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -4490,7 +4493,9 @@ exports[`control.textRich options clearButton 1`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -4871,7 +4876,9 @@ exports[`control.textRich options clearButton 2`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -4879,7 +4886,11 @@ exports[`control.textRich options clearButton 2`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -4887,7 +4898,11 @@ exports[`control.textRich options clearButton 2`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -4895,7 +4910,9 @@ exports[`control.textRich options clearButton 2`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -5287,7 +5304,9 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -5295,7 +5314,11 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -5303,7 +5326,11 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -5311,7 +5338,9 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -5729,7 +5758,9 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -5737,7 +5768,11 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -5745,7 +5780,11 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -5753,7 +5792,9 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -6177,7 +6218,9 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -6185,7 +6228,11 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -6193,7 +6240,11 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -6201,7 +6252,9 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -6604,7 +6657,9 @@ exports[`control.textRich validations options.validationCase 1`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -6612,7 +6667,11 @@ exports[`control.textRich validations options.validationCase 1`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -6620,7 +6679,11 @@ exports[`control.textRich validations options.validationCase 1`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -6628,7 +6691,9 @@ exports[`control.textRich validations options.validationCase 1`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -7016,7 +7081,9 @@ exports[`control.textRich validations options.validationCase 2`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -7024,7 +7091,11 @@ exports[`control.textRich validations options.validationCase 2`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -7032,7 +7103,11 @@ exports[`control.textRich validations options.validationCase 2`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -7040,7 +7115,9 @@ exports[`control.textRich validations options.validationCase 2`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -7449,7 +7526,9 @@ exports[`control.textRich validations options.validationCase 3`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -7457,7 +7536,11 @@ exports[`control.textRich validations options.validationCase 3`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -7465,7 +7548,11 @@ exports[`control.textRich validations options.validationCase 3`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -7473,7 +7560,9 @@ exports[`control.textRich validations options.validationCase 3`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -7879,7 +7968,9 @@ exports[`control.textRich validations options.validationCase 4`] = `
               tabindex="-1"
               tool="size:hg"
             >
-              Huge
+              <span>
+                Huge
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -7887,7 +7978,11 @@ exports[`control.textRich validations options.validationCase 4`] = `
               tabindex="-1"
               tool="size:lg"
             >
-              Large
+              <span
+                style="font-size: x-large;"
+              >
+                Large
+              </span>
             </li>
             <li
               aria-selected="false"
@@ -7895,7 +7990,11 @@ exports[`control.textRich validations options.validationCase 4`] = `
               tabindex="-1"
               tool="size:sm"
             >
-              Small
+              <span
+                style="font-size: small;"
+              >
+                Small
+              </span>
             </li>
             <li
               aria-selected="true"
@@ -7903,7 +8002,9 @@ exports[`control.textRich validations options.validationCase 4`] = `
               tabindex="-1"
               tool="size:false"
             >
-              Normal
+              <span>
+                Normal
+              </span>
             </li>
           </ul>
         </wup-popup>
@@ -8309,7 +8410,9 @@ exports[`control.textRich with form 1`] = `
                 tabindex="-1"
                 tool="size:hg"
               >
-                Huge
+                <span>
+                  Huge
+                </span>
               </li>
               <li
                 aria-selected="false"
@@ -8317,7 +8420,11 @@ exports[`control.textRich with form 1`] = `
                 tabindex="-1"
                 tool="size:lg"
               >
-                Large
+                <span
+                  style="font-size: x-large;"
+                >
+                  Large
+                </span>
               </li>
               <li
                 aria-selected="false"
@@ -8325,7 +8432,11 @@ exports[`control.textRich with form 1`] = `
                 tabindex="-1"
                 tool="size:sm"
               >
-                Small
+                <span
+                  style="font-size: small;"
+                >
+                  Small
+                </span>
               </li>
               <li
                 aria-selected="true"
@@ -8333,7 +8444,9 @@ exports[`control.textRich with form 1`] = `
                 tabindex="-1"
                 tool="size:false"
               >
-                Normal
+                <span>
+                  Normal
+                </span>
               </li>
             </ul>
           </wup-popup>

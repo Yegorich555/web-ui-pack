@@ -232,6 +232,8 @@
         @include wup-icon;
         background: var(--ctrl-selected);
         margin-left: auto;
+        padding-left: 0.5em; // min space between text and checkmark
+        mask-position: right center; /* stylelint-disable-line plugin/no-unsupported-browser-features */
       }
     }
 
