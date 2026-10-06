@@ -2709,7 +2709,7 @@
       "attributes": [
         {
           "name": "w-toolbar",
-          "description": "Global reference to object with array of toolbar groups (see WUP.TextRich.ToolbarGroup). Example: window.myToolbar = [[\"bold\", \"italic\"], [\"header\"], [\"clean\"]]"
+          "description": "Global reference to object with array of toolbar groups (see WUP.TextRich.ToolbarGroup). Example: window.myToolbar = [[\"bold\", \"italic\"], [\"header\"], [\"clean-format\"]]"
         },
         {
           "name": "w-debouncems",

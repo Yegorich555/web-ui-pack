@@ -53,8 +53,20 @@ declare global {
       align: "left" | "center" | "right" | "justify";
     }
     /** Toolbar button: toggles format (bold, blockquote etc.), inserts link,
-     *  or removes formatting of selected text (clean) */
-    type ToolbarButton = "bold" | "italic" | "underline" | "strike" | "blockquote" | "code-block" | "link" | "clean";
+     *  removes formatting of selected text (clean-format) or clears value (clear)
+     * @tutorial Rules
+     * * `clear` is the button clear of other controls ($refBtnClear): it's rendered if `$options.clearButton` is true
+     * and works according to `$options.clearActions` (the same as Esc) */
+    type ToolbarButton =
+      | "bold"
+      | "italic"
+      | "underline"
+      | "strike"
+      | "blockquote"
+      | "code-block"
+      | "link"
+      | "clean-format"
+      | "clear";
     /** Formats with pointed values: `{ header: [1, 2, false] }` */
     type ToolbarValues = { [K in keyof FormatValues]: FormatValues[K][] };
     /** Toolbar item: button `"bold"`, format with every value `"header"`
@@ -78,14 +90,14 @@ declare global {
        *   ["bold", "italic", "underline"], // buttons
        *   ["header"], // format with every value
        *   [{ size: ["sm", false, "lg"] }], // format with pointed values only
-       *   ["clean"], // removes formatting
+       *   ["clean-format"], // removes formatting
+       *   ["clear"], // clears value: button clear (if $options.clearButton is true)
        * ]
        * @defaultValue every supported item */
       toolbar: ToolbarGroup[];
       // classNames: { bold: ".wup-bold", toolbar?: string | bool | null }; // todo implement this so if pointed className then it must be applied to relevant block, for toolbar expected string=> another classname, and if NOT (false or null) => use same className to related toolbar item
       // hideHotKeysTooltip: false // todo when true add to tooltip '{Tool} ({HotKeys})'
       // hookeys: {'bold': [Ctrl, B] } // todo all tools must has keyboard hotkeys tooltips: for macOs we must show macOs hotkeys, for windows - windows hotkeys etc. User must able to redefine once
-      // todo move btnClear to toolbar - add it to toolbar options
     }
     interface Options<T = string, VM = ValidityMap> extends WUP.TextArea.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTextRichControl> extends WUP.TextArea.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
@@ -93,7 +105,7 @@ declare global {
        * @see {@link ToolbarGroup}
        * @example
        * ```js
-       * window.myToolbar = [["bold", "italic"], ["clean"]];
+       * window.myToolbar = [["bold", "italic"], ["clean-format", "clear"]];
        * <wup-textrich w-toolbar="window.myToolbar"></wup-textrich>
        * ``` */
       "w-toolbar"?: string;
@@ -151,7 +163,7 @@ const toolButtons = new Set<string>([
   "blockquote",
   "code-block",
   "link",
-  "clean",
+  "clean-format",
 ]);
 /** Formats rendered as dropdown with default value (when format isn't applied); other formats are rendered as buttons */
 const pickerDefaults = new Map<string, unknown>([
@@ -160,7 +172,7 @@ const pickerDefaults = new Map<string, unknown>([
   ["align", "left"],
 ]);
 /** Buttons without pressed state */
-const actionButtons = new Set<string>(["clean", "indent"]);
+const actionButtons = new Set<string>(["clean-format", "indent"]);
 /** Formats by tagName of element */
 const tagFormats = new Map<string, [string, unknown]>([
   ["B", ["bold", true]],
@@ -209,7 +221,7 @@ const formatInputs = new Map<string, [string, unknown?]>([
   ["formatJustifyLeft", ["align", "left"]],
   ["formatIndent", ["indent", 1]],
   ["formatOutdent", ["indent", -1]],
-  ["formatRemove", ["clean"]],
+  ["formatRemove", ["clean-format"]],
 ]);
 /** Inline formats that can be pointed for the next typed text (when selection is collapsed) */
 const pendingFormats = new Set<string>(["bold", "italic", "underline", "strike", "script", "size"]);
@@ -246,7 +258,7 @@ function firstNode(r: Range): Node {
   el.$options.toolbar = [
     ["bold", "italic", "underline"],
     [{ list: ["ordered", "bullet"] }],
-    ["clean"],
+    ["clean-format", "clear"],
   ];
   el.$options.validations = { required: true, max: 1000 };
   el.$initValue = "<p>Some <strong>bold</strong> text</p>";
@@ -270,7 +282,6 @@ function firstNode(r: Range): Node {
  *      <wup-richinput contenteditable="true" role="textbox" aria-multiline="true" wup-textrich />
  *      <strong>{$options.label}</strong>
  *   </span>
- *   <button clear/>
  * </label>
  * <div role="toolbar"> // placed at the top via css (order: -1)
  *   <div role="group">
@@ -280,6 +291,7 @@ function firstNode(r: Range): Node {
  *       <wup-popup><ul role="listbox"><li role="option" tool="header:1"><h1 role="none">Heading 1</h1></li>...</ul></wup-popup>
  *     </wup-dropdown>
  *   </div>
+ *   <div role="group"><button tool="clear" clear></button></div> // $refBtnClear: placed in toolbar instead of label
  * </div>
  * <wup-popup link><wup-text/></wup-popup> // to enter url: appended on click on toolbar button `link` or on hover on link */
 export default class WUPTextRichControl<
@@ -315,7 +327,9 @@ export default class WUPTextRichControl<
     ["blockquote", __wupln("Quote", "aria")],
     ["code-block", __wupln("Code block", "aria")],
     ["link", __wupln("Link", "aria")],
-    ["clean", __wupln("Clear formatting", "aria")],
+    ["clean-format", __wupln("Clear formatting", "aria")],
+    ["clear", __wupln("Clear content", "aria")],
+    ["clear:back", __wupln("Restore", "aria")], // the next clearing restores previous value (see $options.clearActions)
     ["header", __wupln("Heading", "aria")],
     ["header:false", __wupln("Normal", "content")],
     ["header:1", __wupln("Heading 1", "content")],
@@ -374,7 +388,8 @@ export default class WUPTextRichControl<
       // not supported => { colors: true },
       // not supported => [{ background: [] }],
       ["align"], // equal to [{ align: ["center", "right", "justify", "left", false] }],
-      ["clean"],
+      ["clean-format"],
+      ["clear"], // button clear (rendered if $options.clearButton is true)
     ],
   });
 
@@ -433,8 +448,8 @@ export default class WUPTextRichControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.TextRich.Options> | null): void {
-    super.gotChanges(propsChanged as any);
-    (!propsChanged || propsChanged.includes("toolbar")) && this.renderToolbar();
+    super.gotChanges(propsChanged as any); // creates/removes $refBtnClear according to $options.clearButton
+    (!propsChanged || propsChanged.includes("toolbar") || propsChanged.includes("clearButton")) && this.renderToolbar();
   }
 
   /** Renders toolbar according to $options.toolbar */
@@ -459,7 +474,9 @@ export default class WUPTextRichControl<
       isName ? this.#ctr.$toolbarValues[item as keyof WUP.TextRich.FormatValues] : Object.values(item)[0]
     ) as unknown[] | undefined;
 
-    if (!values) {
+    if (format === "clear") {
+      this.$refBtnClear && group.appendChild(this.$refBtnClear); // it's created by super if $options.clearButton is true
+    } else if (!values) {
       toolButtons.has(format)
         ? this.renderButton(group, format)
         : this.throwError(`Toolbar item '${format}' isn't supported`, undefined, true);
@@ -483,6 +500,22 @@ export default class WUPTextRichControl<
     b._format = format;
     b._value = value;
     this.#tools.push({ format, value, el: b });
+  }
+
+  /** Returns button clear: it's placed in toolbar (item `clear`) instead of label */
+  protected override renderBtnClear(): HTMLButtonElement {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.tabIndex = -1;
+    b.setAttribute("tool", "clear");
+    b.setAttribute("clear", ""); // icon & state are the same as in other controls
+    b.setAttribute("aria-label", this.#ctr.$labels.get("clear") ?? "clear");
+    b.setAttribute("w-tooltip", "");
+    b.addEventListener("click", () => {
+      this.restoreSelection(); // the same as other tools: focus is returned to editor
+      this.clearValue();
+    });
+    return b;
   }
 
   /** Renders dropdown of toolbar */
@@ -612,7 +645,7 @@ export default class WUPTextRichControl<
     if (format === "link" && !f.has("link")) {
       const btn = this.#tools.find((t) => t.format === "link")?.el;
       this.askLink(btn ?? inp, "https://").then((url) => url && this.changeContent(() => this.addLink(url)));
-    } else if (sel.isCollapsed && (pendingFormats.has(format) || format === "clean")) {
+    } else if (sel.isCollapsed && (pendingFormats.has(format) || format === "clean-format")) {
       this.togglePending(format, value, f);
       this.refreshToolbar();
     } else {
@@ -684,7 +717,7 @@ export default class WUPTextRichControl<
       case "indent":
         linesOf(r, inp).forEach((l) => setLineIndent(l, value as number));
         break;
-      case "clean": {
+      case "clean-format": {
         const lines = linesOf(r, inp); // before changes in range
         const nodes = splitRange(r);
         inlineFormats.forEach((fmt) => removeInline(nodes, fmt, inp));
@@ -712,7 +745,7 @@ export default class WUPTextRichControl<
   /** Toggles format for the next typed text (Ctrl+B and type text) */
   protected togglePending(format: string, value: unknown, f: Map<string, unknown>): void {
     const p = this.#pending;
-    if (format === "clean") {
+    if (format === "clean-format") {
       pendingFormats.forEach((k) => f.has(k) && p.set(k, false));
     } else if (format === "size") {
       p.set(format, value || false);
@@ -1118,6 +1151,14 @@ export default class WUPTextRichControl<
       return; // skip re-rendering: it resets selection & scroll
     }
     super.setInputValue(v, reason);
+  }
+
+  protected override setClearState(): ValueType | undefined {
+    const next = super.setClearState();
+    // label (tooltip) of button clear depends on state like its icon: the next clearing restores previous value or clears it
+    const key = this.#ctr.$isEmpty(next) ? "clear" : "clear:back";
+    this.$refBtnClear?.setAttribute("aria-label", this.#ctr.$labels.get(key) ?? key);
+    return next;
   }
 }
 
