@@ -45,7 +45,7 @@ declare global {
       script: "sub" | "super";
       /** Decrease (`-1`) or increase (`+1`) indentation */
       indent: -1 | 1;
-      /** Font size: `"sm"` - small, `"lg"` - large, `"hg"` - huge; `false` - normal */
+      /** Font size: `"sm"` - small, `"lg"` - large, `"hg"` - huge; `false` - default */
       size: "sm" | "lg" | "hg" | false;
       /** Text alignment; `"left"` - default */
       align: "left" | "center" | "right" | "justify";
@@ -325,10 +325,10 @@ export default class WUPTextRichControl<
     ["indent:-1", __wupln("Decrease indent", "aria")],
     ["indent:1", __wupln("Increase indent", "aria")],
     ["size", __wupln("Font size", "aria")],
-    ["size:false", __wupln("Normal", "content")],
-    ["size:sm", __wupln("Small", "content")],
-    ["size:lg", __wupln("Large", "content")],
     ["size:hg", __wupln("Huge", "content")],
+    ["size:lg", __wupln("Large", "content")],
+    ["size:false", __wupln("Default", "content")],
+    ["size:sm", __wupln("Small", "content")],
     ["align", __wupln("Alignment", "aria")],
     ["align:left", __wupln("Left", "aria")],
     ["align:center", __wupln("Center", "aria")],
@@ -342,7 +342,7 @@ export default class WUPTextRichControl<
     list: ["ordered", "bullet"],
     script: ["sub", "super"],
     indent: [-1, 1],
-    size: ["hg", "lg", "sm", false],
+    size: ["hg", "lg", false, "sm"],
     align: ["center", "right", "justify", "left"],
   };
 
@@ -362,7 +362,7 @@ export default class WUPTextRichControl<
       ["list"], // equal to [{ list: ["ordered", "bullet"] ]
       ["script"], // equal to [{script: ['sub', 'super']}]
       ["indent"], // equal to [{indent: [-1, +1]}]
-      ["size"], // equal to [{sizes: ["hg", "lg","sm", false]}]
+      ["size"], // equal to [{size: ["hg", "lg", false, "sm"]}]
       // not supported => direction
       // not supported => [{ font: [] }],
       // not supported => { colors: true },
