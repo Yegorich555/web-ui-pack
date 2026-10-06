@@ -153,7 +153,7 @@
   // style for icons
   label:after,
   label:before {
-    @include wup-icon;
+    @include wup-icon(5px);
     cursor: pointer;
     /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
     mask-image: none;

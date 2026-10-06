@@ -72,7 +72,7 @@ export default function TextRichControlView() {
         <div className={stylesCom.group}>
           <wup-textrich
             w-name="readonly"
-            w-label="Readonly and with smaller toolbar (options.$toolbar)"
+            w-label="Readonly with smaller toolbar (options.$toolbar)"
             readonly
             w-toolbar="window.myTextRichToolbarShort"
             ref={(el) => {

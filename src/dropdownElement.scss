@@ -26,7 +26,6 @@
       --ctrl-icon-img: var(--wup-icon-chevron);
       --ctrl-icon-size: 0.6em;
       @include wup-icon;
-      padding: 0;
       align-self: center;
       background: currentColor;
     }

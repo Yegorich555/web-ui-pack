@@ -154,7 +154,7 @@
         content: "";
         --ctrl-icon-img: var(--wup-icon-dot);
         --ctrl-icon: var(--ctrl-err);
-        @include wup-icon;
+        @include wup-icon(5px);
       }
 
       &[valid] {
