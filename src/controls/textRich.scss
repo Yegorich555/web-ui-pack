@@ -70,27 +70,31 @@ $aligns: (
 );
 
 :host {
-  --ctrl-label-active-pos: translateY(-50%) scale(0.9); // label is always placed at the middle of top border
   position: relative; // to position label relative to control instead of editor
   display: flex;
   flex-direction: column;
 
-  label > span {
-    position: static;
-  }
+  // own label only: otherwise it affects <wup-text> in popup to enter link
+  > label {
+    --ctrl-label-active-pos: translateY(-50%) scale(0.9); // label is always placed at the middle of top border
 
-  strong {
-    top: 0;
-    left: calc(var(--ctrl-icon-size) - 0.25em);
-    max-width: calc(100% - 2 * var(--ctrl-icon-size));
-    padding: 0 0.25em;
-    transform-origin: center left;
-    transform: var(--ctrl-label-active-pos);
-    color: var(--ctrl-focus-label);
-    // hides border behind label so must be opaque: point --ctrl-textrich-label-bg (page color) when --ctrl-bg is transparent (dark mode)
-    // WARN: not defined in :root: otherwise var(--ctrl-bg) is resolved there and dark --ctrl-bg is ignored
-    background: var(--ctrl-textrich-label-bg, var(--ctrl-bg));
-    border-radius: 0.5em;
+    > span {
+      position: static;
+    }
+
+    strong {
+      top: 0;
+      left: calc(var(--ctrl-icon-size) - 0.25em);
+      max-width: calc(100% - 2 * var(--ctrl-icon-size));
+      padding: 0 0.25em;
+      transform-origin: center left;
+      transform: var(--ctrl-label-active-pos);
+      color: var(--ctrl-focus-label);
+      // hides border behind label so must be opaque: point --ctrl-textrich-label-bg (page color) when --ctrl-bg is transparent (dark mode)
+      // WARN: not defined in :root: otherwise var(--ctrl-bg) is resolved there and dark --ctrl-bg is ignored
+      background: var(--ctrl-textrich-label-bg, var(--ctrl-bg));
+      border-radius: 0.5em;
+    }
   }
 
   [role="toolbar"] {
@@ -216,6 +220,12 @@ $aligns: (
 
   &[readonly] [role="toolbar"] {
     opacity: 0.5;
+  }
+
+  // popup to enter link
+  wup-popup[link] > wup-text {
+    width: min(40em, calc(100vw - 3em)); // long urls are visible entirely; fits small screens
+    margin: 0;
   }
 
   // editor: styles of content are defined globally via [wup-textrich]

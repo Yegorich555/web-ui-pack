@@ -1,8 +1,10 @@
 import { inheritDefaults } from "../baseElement";
 import WUPDropdownElement from "../dropdownElement";
+import WUPPopupElement from "../popup/popupElement";
 import { PopupOpenCases } from "../popup/popupElement.types";
+import { PopupPlacements } from "../popup/popupPlacements";
 import { useTooltipOnce } from "../popup/popupTooltip";
-import { SetValueReasons } from "./baseControl";
+import { SetValueReasons, ValidationCases } from "./baseControl";
 import WUPTextControl from "./text";
 import TextHistory from "./text.history";
 import WUPTextAreaControl from "./textArea";
@@ -81,6 +83,8 @@ declare global {
        * @defaultValue every supported item */
       toolbar: ToolbarGroup[];
       // classNames: { bold: ".wup-bold", toolbar?: string | bool | null }; // todo implement this so if pointed className then it must be applied to relevant block, for toolbar expected string=> another classname, and if NOT (false or null) => use same className to related toolbar item
+      // hideHotKeysTooltip: false // todo when true add to tooltip '{Tool} ({HotKeys})'
+      // hookeys: {'bold': [Ctrl, B] } // todo all tools must has keyboard hotkeys tooltips: for macOs we must show macOs hotkeys, for windows - windows hotkeys etc. User must able to redefine once
     }
     interface Options<T = string, VM = ValidityMap> extends WUP.TextArea.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTextRichControl> extends WUP.TextArea.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
@@ -276,8 +280,7 @@ function firstNode(r: Range): Node {
  *     </wup-dropdown>
  *   </div>
  * </div>
- * @tutorial Troubleshooting
- * * link is requested via `window.prompt` */
+ * <wup-popup link><wup-text/></wup-popup> // to enter url: appended on click on toolbar button `link` or on hover on link */
 export default class WUPTextRichControl<
   ValueType = string,
   TOptions extends WUP.TextRich.Options = WUP.TextRich.Options,
@@ -296,8 +299,10 @@ export default class WUPTextRichControl<
 
   /** Text announced by screen-readers; @defaultValue `press Alt + F10 to focus toolbar` */
   static $ariaDescription = __wupln("press Alt + F10 to focus toolbar", "aria");
-  /** Text of prompt for link; @defaultValue `Enter link` */
+  /** Label of text control in popup to enter link; @defaultValue `Enter link` */
   static $textLink = __wupln("Enter link", "content");
+  /** Validation error of entered link; @defaultValue `Invalid link` */
+  static $errorLink = __wupln("Invalid link", "validation");
   /** Labels of toolbar items: key is `format` or `format:value` (ex. `header:1`);
    * used as `aria-label` for buttons (+ tooltip) & as text for items of dropdowns */
   static $labels = new Map<string, string>([
@@ -406,6 +411,24 @@ export default class WUPTextRichControl<
     this.$refInput.setAttribute("wup-textrich", ""); // styles of content are global: the same for value shown outside
 
     useTooltipOnce("w-tooltip"); // toolbar buttons show aria-label via tooltip
+    // hover on link shows popup to edit url; skipped during selecting by mouse
+    const inp = this.$refInput;
+    const opts = { passive: true };
+    inp.addEventListener(
+      "pointerover",
+      (e) => !e.buttons && this.gotHoverLink((e.target as Element).closest("a")),
+      opts
+    );
+    inp.addEventListener("pointerleave", () => this.gotHoverLink(null), opts);
+    // Ctrl/Cmd + Click opens link in new tab: browser doesn't follow links inside contenteditable
+    inp.addEventListener("click", (e) => {
+      const a = (e.ctrlKey || e.metaKey) && (e.target as Element).closest("a");
+      const href = a && sanitizeUrl(a.href);
+      if (href) {
+        e.preventDefault();
+        window.open(href, "_blank", "noopener,noreferrer");
+      }
+    });
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.TextRich.Options> | null): void {
@@ -585,18 +608,22 @@ export default class WUPTextRichControl<
       return;
     }
     const f = this.getFormats();
-    if (sel.isCollapsed && (pendingFormats.has(format) || format === "clean")) {
+    if (format === "link" && !f.has("link")) {
+      const btn = this.#tools.find((t) => t.format === "link")?.el;
+      this.askLink(btn ?? inp, "https://").then((url) => url && this.changeContent(() => this.addLink(url)));
+    } else if (sel.isCollapsed && (pendingFormats.has(format) || format === "clean")) {
       this.togglePending(format, value, f);
+      this.refreshToolbar();
     } else {
-      const prev = inp.value;
-      if (format === "link" && !f.has("link")) {
-        const v = this.askLink();
-        v && this.addLink(v);
-      } else {
-        this.keepSelection((r) => this.formatRange(r, format, value));
-      }
-      this.saveChanges(prev);
+      this.changeContent(() => this.keepSelection((r) => this.formatRange(r, format, value)));
     }
+  }
+
+  /** Calls fn that changes editor, saves changes & refreshes toolbar */
+  protected changeContent(fn: () => void): void {
+    const prev = this.$refInput.value;
+    fn();
+    this.saveChanges(prev);
     this.refreshToolbar();
   }
 
@@ -751,21 +778,100 @@ export default class WUPTextRichControl<
     }
   }
 
-  /** Asks url of link via prompt; returns focus & selection back */
-  protected askLink(): string | null {
-    const sel = window.getSelection()!;
-    const r = sel.getRangeAt(0).cloneRange();
-    // todo use wup-popup with textControl instead
-    const v = window.prompt(this.#ctr.$textLink, "https://")?.trim(); // eslint-disable-line no-alert
-    this.$refInput.focus({ preventScroll: true });
-    sel.removeAllRanges();
-    sel.addRange(r);
-    return (v && sanitizeUrl(v)) || null;
+  /** Popup with text control to enter url of link */
+  #refLink?: WUPPopupElement;
+  /** Closes popup of link & resolves url (`null` if canceled); `isBack` - return focus & selection to editor */
+  #doneLink?: (url: string | null, isBack: boolean) => void;
+  /** Link which url is edited via popup opened by hover */
+  #hoverLink: HTMLAnchorElement | null = null;
+  #hoverTimer?: ReturnType<typeof setTimeout>;
+
+  /** Asks url of link via popup with text control: Enter submits, Escape or moving focus out cancels (resolves `null`);
+   *  returns focus & selection back to editor on Enter/Escape
+   * @param target element popup is placed near
+   * @param url initial value of text control
+   * @param isHover popup is opened by hover (to edit existed link): text control isn't focused, popup is closed when pointer leaves it,
+   * clearing value (Enter with empty value or button clear) resolves `""` to remove link */
+  protected askLink(target: HTMLElement, url: string, isHover = false): Promise<string | null> {
+    this.#doneLink?.(null, false); // only one popup at once
+    const p = document.createElement("wup-popup");
+    p.$options.openCase = PopupOpenCases.onInit;
+    p.$options.target = target;
+    p.$options.placement = [PopupPlacements.$top.$middle.$adjust, PopupPlacements.$bottom.$middle.$adjust];
+    p.setAttribute("link", "");
+    const el = p.appendChild(document.createElement("wup-text"));
+    el.$options.label = this.#ctr.$textLink;
+    el.$options.validations = { required: !isHover, url: (v) => !!v && !sanitizeUrl(v) && this.#ctr.$errorLink };
+    el.$options.validationCase = ValidationCases.onChangeSmart; // without onFocusWithValue: otherwise error is shown at once
+    el.$options.readOnly = this.$isReadOnly;
+    el.$options.autoFocus = !isHover;
+    el.$initValue = url;
+    this.#refLink = p;
+
+    return new Promise((resolve) => {
+      const done = (v: string | null, isBack: boolean): void => {
+        this.#doneLink = undefined;
+        this.#refLink = undefined;
+        this.#hoverLink = null;
+        clearTimeout(this.#hoverTimer);
+        isBack && this.restoreSelection(); // otherwise focus is moved by user
+        p.$close().finally(() => p.remove());
+        resolve(v);
+      };
+      this.#doneLink = done;
+      p.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          e.preventDefault(); // otherwise value of control is cleared
+          done(null, true);
+        } else if (e.key === "Enter") {
+          e.preventDefault(); // otherwise form is submitted
+          !el.$validate() && done(el.$value ?? "", true);
+        }
+      });
+      el.addEventListener("$change", (e) => {
+        e.stopPropagation(); // nested control isn't related to form
+        isHover && e.detail.reason === SetValueReasons.clear && el.$value === undefined && done("", true);
+      });
+      p.addEventListener(
+        "focusout",
+        (e) => this.#doneLink === done && !p.contains(e.relatedTarget as Node) && done(null, false)
+      );
+      // closed by itself: when target is removed
+      p.addEventListener("$close", (e) => e.target === p && this.#doneLink === done && done(null, false));
+      p.addEventListener("pointerenter", () => this.#hoverLink && this.gotHoverLink(this.#hoverLink));
+      p.addEventListener("pointerleave", () => this.gotHoverLink(null));
+      this.appendChild(p);
+    });
+  }
+
+  /** Called when pointer is over link or its popup (`a` is related link) or out of them (`a` is `null`):
+   *  shows popup to edit url of link with delay & hides it when pointer is out (but not while user edits url) */
+  protected gotHoverLink(a: HTMLAnchorElement | null): void {
+    if ((this.#doneLink && !this.#hoverLink) || this.#refLink?.contains(document.activeElement)) {
+      return; // popup is opened via toolbar or user edits url
+    }
+    clearTimeout(this.#hoverTimer);
+    if (a === this.#hoverLink) {
+      return; // pointer is moved between link & popup
+    }
+    const { hoverOpenTimeout, hoverCloseTimeout } = WUPPopupElement.$defaults;
+    this.#hoverTimer = setTimeout(
+      () => {
+        if (a?.isConnected) {
+          this.askLink(a, a.getAttribute("href")!, true).then(
+            (url) => url != null && this.changeContent(() => (url ? a.setAttribute("href", url) : unwrap(a)))
+          );
+          this.#hoverLink = a;
+        } else {
+          this.#doneLink?.(null, false);
+        }
+      },
+      a ? hoverOpenTimeout : hoverCloseTimeout
+    );
   }
 
   /** Adds link to selection or inserts link with url as text if selection is collapsed */
   protected addLink(href: string): void {
-    // todo when user hover this link - show tooltip with attached url
     const fmt = inlineFormats.get("link")!;
     if (window.getSelection()!.isCollapsed) {
       const a = fmt.create(href);
@@ -958,6 +1064,11 @@ export default class WUPTextRichControl<
     if (e.altKey && e.key === "F10") {
       e.preventDefault();
       this.$refToolbar.querySelector("button")?.focus();
+      return;
+    }
+    if (e.key === "Escape" && this.#hoverLink) {
+      e.preventDefault(); // otherwise value is cleared: the 1st Escape closes popup of link
+      this.#doneLink!(null, false);
       return;
     }
     super.gotKeyDown(e);
