@@ -143,7 +143,6 @@ $aligns: (
   /* stylelint-disable-next-line no-descending-specificity */
   wup-dropdown > button {
     --icon-hover-bg: none;
-    justify-content: space-between;
     height: 1.75em;
     border-radius: 4px;
     color: var(--ctrl-icon);
@@ -157,7 +156,7 @@ $aligns: (
 
   // fixed width: otherwise toolbar is shifted when selection is changed
   wup-dropdown[tool="header"] > button {
-    min-width: 6.5em;
+    min-width: 5.75em;
   }
 
   wup-dropdown[tool="size"] > button {
