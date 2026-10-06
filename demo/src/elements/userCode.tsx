@@ -99,6 +99,7 @@ function RenderHTMLCode({
     addUnique({ name: "w-autocomplete", value: "off" });
     addUnique({ name: "w-storage", value: "local" });
     addUnique({ name: "w-storagekey", value: "false" });
+    addUnique({ name: "w-initvalue", value: "some value here" });
   }
   if (el instanceof WUPSwitchControl || el instanceof WUPPasswordControl || el instanceof WUPRadioControl) {
     addUnique({ name: "w-reverse", value: "false" });

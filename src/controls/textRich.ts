@@ -80,7 +80,7 @@ declare global {
        * ]
        * @defaultValue every supported item */
       toolbar: ToolbarGroup[];
-      // classNames: { bold: ".wup-bold", toolbar?: string | bool | null }; // todo implement this so if pointed className then it must be applied to relevant block, for toolbar expected string=> another classname, and if NOT (false or null) => add same className to related toolbar item
+      // classNames: { bold: ".wup-bold", toolbar?: string | bool | null }; // todo implement this so if pointed className then it must be applied to relevant block, for toolbar expected string=> another classname, and if NOT (false or null) => use same className to related toolbar item
     }
     interface Options<T = string, VM = ValidityMap> extends WUP.Textarea.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTextRichControl> extends WUP.Textarea.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
@@ -367,7 +367,7 @@ export default class WUPTextRichControl<
       // not supported => [{ font: [] }],
       // not supported => { colors: true },
       // not supported => [{ background: [] }],
-      ["align"], // equal to [{ align: ["center", "right", "justify", "left", false] }], // what options missed here ???
+      ["align"], // equal to [{ align: ["center", "right", "justify", "left", false] }],
       ["clean"],
     ],
   });
@@ -750,6 +750,7 @@ export default class WUPTextRichControl<
   protected askLink(): string | null {
     const sel = window.getSelection()!;
     const r = sel.getRangeAt(0).cloneRange();
+    // todo use wup-popup with textControl instead
     const v = window.prompt(this.#ctr.$textLink, "https://")?.trim(); // eslint-disable-line no-alert
     this.$refInput.focus({ preventScroll: true });
     sel.removeAllRanges();
@@ -759,6 +760,7 @@ export default class WUPTextRichControl<
 
   /** Adds link to selection or inserts link with url as text if selection is collapsed */
   protected addLink(href: string): void {
+    // todo when user hover this link - show tooltip with attached url
     const fmt = inlineFormats.get("link")!;
     if (window.getSelection()!.isCollapsed) {
       const a = fmt.create(href);

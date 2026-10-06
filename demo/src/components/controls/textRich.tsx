@@ -12,17 +12,6 @@ WUPTextRichControl.$use();
   ["bold", "underline", "italic", "strike"],
 ] as WUP.TextRich.Options["toolbar"];
 
-const initValue = [
-  "<h2>Release notes</h2>",
-  "<p>Text with <strong>bold</strong>, <em>italic</em>, <u>underline</u>, <s>strike</s> and ",
-  '<a href="https://github.com/Yegorich555/web-ui-pack">link</a></p>',
-  "<blockquote>Quote</blockquote>",
-  "<pre>const code = true;</pre>",
-  "<ol><li>Numbered</li><li>List</li></ol>",
-  "<ul><li>Bulleted</li><li>List</li></ul>",
-  '<p style="text-align: center;">Centered text with <span style="font-size: x-large">large</span> size</p>',
-].join("");
-
 export default function TextRichControlView() {
   const refPreview = useRef<HTMLDivElement>(null);
   return (
@@ -61,6 +50,16 @@ export default function TextRichControlView() {
           w-toolbar="window.myTextRichToolbar"
           ref={(el) => {
             if (el) {
+              el.$initValue = [
+                "<h2>Release notes</h2>",
+                "<p>Text with <strong>bold</strong>, <em>italic</em>, <u>underline</u>, <s>strike</s> and ",
+                '<a href="https://github.com/Yegorich555/web-ui-pack">link</a></p>',
+                "<blockquote>Quote</blockquote>",
+                "<pre>const code = true;</pre>",
+                "<ol><li>Numbered</li><li>List</li></ol>",
+                "<ul><li>Bulleted</li><li>List</li></ul>",
+                '<p style="text-align: center;">Centered text with <span style="font-size: x-large">large</span> size</p>',
+              ].join("");
               el.$onChange = () => {
                 console.warn("$change", { value: el.$value });
                 refPreview.current!.innerHTML = el.$value ?? ""; // value is sanitized html
@@ -69,20 +68,12 @@ export default function TextRichControlView() {
           }}
         />
         {/* value of the 1st input shown outside control with the same styles */}
+        {/* todo improve styles - wrap into section and add description about what is it */}
         <div wup-textrich="" ref={refPreview} />
-        <wup-textrich w-name="Custom toolbar" w-toolbar="window.myTextRichToolbarShort" />
-        <wup-textrich
-          w-name="withValue"
-          w-label="With init value"
-          ref={(el) => {
-            if (el) {
-              el.$initValue = initValue;
-            }
-          }}
-        />
         <div className={stylesCom.group}>
           <wup-textrich
             w-name="readonly"
+            w-label="Readonly and with smaller toolbar (see options.$toolbar)"
             readonly
             w-toolbar="window.myTextRichToolbarShort"
             ref={(el) => {
