@@ -62,6 +62,7 @@ declare global {
       | "italic"
       | "underline"
       | "strike"
+      // todo add quote - suggest similar icon as blockquote - probably different look of this char: "
       | "blockquote"
       | "code-block"
       | "link"
@@ -79,6 +80,21 @@ declare global {
       | { [K in keyof ToolbarValues]: Pick<ToolbarValues, K> }[keyof ToolbarValues];
     /** Group of toolbar items (groups are visually separated) */
     type ToolbarGroup = ToolbarItem[];
+    /** Key of toolbar item: button `"bold"`, dropdown `"size"` or format with value `"header:1"` */
+    type ToolKey =
+      | ToolbarButton
+      | keyof FormatValues
+      | { [K in keyof FormatValues]: `${K}:${FormatValues[K]}` }[keyof FormatValues];
+    /** Keyboard shortcuts of toolbar items in format of `aria-keyshortcuts`: `Control+Shift+X`
+     *  (several shortcuts are separated by space: `Control+Shift+X Alt+Shift+5`); point `undefined` to disable shortcut
+     * @tutorial Rules
+     * * `Control` is Cmd on macOS/iOS (shown as `⌘`)
+     * * shortcut must contain `Control` or `Alt`; key is compared by physical key (`KeyboardEvent.code`), so it works with any keyboard layout
+     * * shortcut works only if related tool is rendered in toolbar (see $options.toolbar)
+     * * `size`: the 1st shortcut increases font size, the 2nd one decreases it
+     * * `toolbar`: focuses toolbar (Arrows to navigate, Esc to return)
+     * * `clear`: Escape clears value according to $options.clearActions (the same as in other controls) */
+    type HotKeys = { [K in ToolKey | "toolbar"]?: string };
 
     interface EventMap extends WUP.TextArea.EventMap {}
     interface ValidityMap extends WUP.TextArea.ValidityMap {}
@@ -95,9 +111,12 @@ declare global {
        * ]
        * @defaultValue every supported item */
       toolbar: ToolbarGroup[];
+      /** Hide keyboard shortcuts in tooltips of toolbar buttons (`Bold (Ctrl+B)` => `Bold`) & in items of dropdowns;
+       *  `aria-keyshortcuts` is set anyway
+       * @see {@link WUPTextRichControl.$hotKeys}
+       * @defaultValue false */
+      hideHotKeysHint: boolean;
       // classNames: { bold: ".wup-bold", toolbar?: string | bool | null }; // todo implement this so if pointed className then it must be applied to relevant block, for toolbar expected string=> another classname, and if NOT (false or null) => use same className to related toolbar item
-      // hideHotKeysTooltip: false // todo when not false add to tooltip '{Tool} ({HotKeys})'
-      // hookeys: {'bold': [Ctrl, B] } // todo all tools must has keyboard hotkeys tooltips: for macOs we must show macOs hotkeys, for windows - windows hotkeys etc. User must able to redefine once
     }
     interface Options<T = string, VM = ValidityMap> extends WUP.TextArea.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTextRichControl> extends WUP.TextArea.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
@@ -109,6 +128,7 @@ declare global {
        * <wup-textrich w-toolbar="window.myToolbar"></wup-textrich>
        * ``` */
       "w-toolbar"?: string;
+      "w-hideHotKeysHint"?: boolean | "" | "true" | "false";
     }
   }
 
@@ -193,6 +213,8 @@ const tagFormats = new Map<string, [string, unknown]>([
   ["H6", ["header", 6]],
   ["PRE", ["code-block", true]],
 ]);
+/** Values of format `size` from smaller to larger: shortcuts of `size` change font size step by step */
+const sizeSteps: unknown[] = ["sm", false, "lg", "hg"];
 /** Font size by value of format `size` */
 const sizes = new Map<unknown, string>([
   ["sm", "small"],
@@ -223,6 +245,53 @@ const formatInputs = new Map<string, [string, unknown?]>([
   ["formatOutdent", ["indent", -1]],
   ["formatRemove", ["clean-format"]],
 ]);
+/** Command key is Cmd instead of Ctrl (iPadOS reports Macintosh, iOS - like Mac OS X) */
+const isMac = navigator.userAgent.includes("Mac");
+/** Keys of shortcuts by `KeyboardEvent.code` (physical key): letters & digits are taken from code (`KeyB` => `B`) */
+const codeKeys = new Map<string, string>([
+  ["Period", "."],
+  ["Comma", ","],
+  ["BracketLeft", "["],
+  ["BracketRight", "]"],
+  ["Backslash", "\\"],
+]);
+/** Codes of keys formatting via browser (Ctrl/Cmd + B, I, U): prevented so only shortcuts of $hotKeys work */
+const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
+
+/** Returns whether keyboard shortcut (in format of `aria-keyshortcuts`) is pressed
+ * @param key pressed key by `KeyboardEvent.code`: `B`, `7`, `.`, `F10` etc.
+ * @param mod whether Ctrl is pressed (Cmd on macOS/iOS) */
+function isHotKey(shortcut: string, e: KeyboardEvent, key: string, mod: boolean): boolean {
+  const keys = shortcut.split("+");
+  return (
+    keys.pop()!.toUpperCase() === key.toUpperCase() &&
+    keys.includes("Control") === mod &&
+    keys.includes("Alt") === e.altKey &&
+    keys.includes("Shift") === e.shiftKey
+  );
+}
+
+/** Returns shortcuts of $hotKeys in format of `aria-keyshortcuts`: `Control` is `Meta` (Cmd) on macOS/iOS */
+function hotKeysAria(hk: string): string {
+  return isMac ? hk.replace(/Control/g, "Meta") : hk;
+}
+
+/** Returns text of shortcuts of $hotKeys: `Ctrl+Shift+X / Alt+Shift+5` or `⇧⌘X` on macOS/iOS */
+function hotKeysText(hk: string): string {
+  return hk
+    .split(" ")
+    .map((s) => {
+      const keys = s.split("+");
+      const k = keys.pop()!;
+      const key = k === "Escape" ? "Esc" : k;
+      return isMac // modifiers in the same order as in macOS menus
+        ? `${keys.includes("Alt") ? "⌥" : ""}${keys.includes("Shift") ? "⇧" : ""}${
+            keys.includes("Control") ? "⌘" : ""
+          }${key}`
+        : [...keys, key].join("+").replace("Control", "Ctrl");
+    })
+    .join(" / ");
+}
 /** Inline formats that can be pointed for the next typed text (when selection is collapsed) */
 const pendingFormats = new Set<string>(["bold", "italic", "underline", "strike", "script", "size"]);
 /** Tags of lines by line formats */
@@ -273,7 +342,9 @@ function firstNode(r: Range): Node {
  * * $value is html (`undefined` if there is no text); it's sanitized: only supported formats are kept
  * (paragraph `<p>`, `<strong>`, `<em>`, `<u>`, `<s>`, `<sub>`, `<sup>`, `<a>`, `<h1>...<h6>`, `<blockquote>`, `<pre>`, `<ol>`, `<ul>`)
  * * formatting is saved in custom history: undo/redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y, OS-native) works for text & formats
- * * keyboard shortcuts: Ctrl+B, Ctrl+I, Ctrl+U & Alt+F10 to focus toolbar (Arrows to navigate, Esc to return);
+ * * keyboard shortcuts (see static $hotKeys) are similar to Google Docs: Ctrl+B, Ctrl+Shift+7, Ctrl+Alt+1 etc. (Cmd on macOS/iOS);
+ * they're shown in tooltips of toolbar buttons & in items of dropdowns (see $options.hideHotKeysHint);
+ * Alt+F10 to focus toolbar (Arrows to navigate, Esc to return);
  * with collapsed selection inline format (bold etc.) is applied to the next typed text
  * * styles of content are global: use `<div wup-textrich>{$value}</div>` to show value outside control in the same way
  * @tutorial innerHTML @example
@@ -356,6 +427,43 @@ export default class WUPTextRichControl<
     ["align:justify", __wupln("Justify", "aria")],
   ]);
 
+  /** Keyboard shortcuts of toolbar items: change it to redefine shortcuts (applied on the next rendering of toolbar)
+   * @see {@link WUP.TextRich.HotKeys}
+   * @example
+   * WUPTextRichControl.$hotKeys.strike = "Control+Shift+S";
+   * delete WUPTextRichControl.$hotKeys["header:6"]; // disable shortcut
+   * @defaultValue similar to Google Docs, Gmail & Slack */
+  static $hotKeys: WUP.TextRich.HotKeys = {
+    toolbar: "Alt+F10",
+    bold: "Control+B",
+    italic: "Control+I",
+    underline: "Control+U",
+    strike: "Control+Shift+X", // possible "Control+Shift+X Alt+Shift+5", // Alt+Shift+5 - the same as in Google Docs
+    blockquote: "Control+Shift+9",
+    "code-block": "Control+Alt+Shift+C",
+    link: "Control+K",
+    "clean-format": "Control+\\",
+    clear: "Escape",
+    "header:false": "Control+Alt+0",
+    "header:1": "Control+Alt+1",
+    "header:2": "Control+Alt+2",
+    "header:3": "Control+Alt+3",
+    "header:4": "Control+Alt+4",
+    "header:5": "Control+Alt+5",
+    "header:6": "Control+Alt+6",
+    "list:ordered": "Control+Shift+7",
+    "list:bullet": "Control+Shift+8",
+    "script:sub": "Control+,",
+    "script:super": "Control+.",
+    "indent:-1": "Control+[",
+    "indent:1": "Control+]",
+    size: "Control+Shift+. Control+Shift+,", // increase & decrease
+    "align:left": "Control+Shift+L",
+    "align:center": "Control+Shift+E",
+    "align:right": "Control+Shift+R",
+    "align:justify": "Control+Shift+J",
+  };
+
   /** Values of formats used when toolbar item is pointed as string (ex. `"header"` is the same as `{ header: [1, 2, 3, 4, 5, 6, false] }`) */
   static $toolbarValues: WUP.TextRich.ToolbarValues = {
     header: [1, 2, 3, 4, 5, 6, false],
@@ -391,6 +499,7 @@ export default class WUPTextRichControl<
       ["clean-format"],
       ["clear"], // button clear (rendered if $options.clearButton is true)
     ],
+    hideHotKeysHint: false,
   });
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
@@ -449,7 +558,10 @@ export default class WUPTextRichControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.TextRich.Options> | null): void {
     super.gotChanges(propsChanged as any); // creates/removes $refBtnClear according to $options.clearButton
-    (!propsChanged || propsChanged.includes("toolbar") || propsChanged.includes("clearButton")) && this.renderToolbar();
+    const isHints = propsChanged?.includes("hideHotKeysHint");
+    (!propsChanged || isHints || propsChanged.includes("toolbar") || propsChanged.includes("clearButton")) &&
+      this.renderToolbar();
+    isHints && this.setClearState(); // button clear isn't re-rendered: update its tooltip
   }
 
   /** Renders toolbar according to $options.toolbar */
@@ -494,12 +606,26 @@ export default class WUPTextRichControl<
     b.type = "button";
     b.tabIndex = -1; // toolbar is reachable via Alt+F10
     b.setAttribute("tool", key);
-    b.setAttribute("aria-label", this.#ctr.$labels.get(key) ?? key);
-    b.setAttribute("w-tooltip", "");
+    this.setToolLabel(b, key);
     !actionButtons.has(format) && b.setAttribute("aria-pressed", false);
     b._format = format;
     b._value = value;
     this.#tools.push({ format, value, el: b });
+  }
+
+  /** Sets `aria-label` & tooltip of toolbar button by key of `$labels`;
+   *  tooltip includes keyboard shortcut `{Tool} ({HotKeys})` if it exists & isn't hidden via $options.hideHotKeysHint */
+  protected setToolLabel(b: HTMLElement, key: string): void {
+    const label = this.#ctr.$labels.get(key) ?? key;
+    b.setAttribute("aria-label", label);
+    // button clear: the same shortcut for labels `clear` & `clear:back`
+    const hk = this.#ctr.$hotKeys[(b.getAttribute("tool") ?? key) as WUP.TextRich.ToolKey];
+    let tip = "";
+    if (hk) {
+      b.setAttribute("aria-keyshortcuts", hotKeysAria(hk));
+      tip = this._opts.hideHotKeysHint ? "" : `${label} (${hotKeysText(hk)})`;
+    }
+    b.setAttribute("w-tooltip", tip); // empty: tooltip shows aria-label
   }
 
   /** Returns button clear: it's placed in toolbar (item `clear`) instead of label */
@@ -509,8 +635,7 @@ export default class WUPTextRichControl<
     b.tabIndex = -1;
     b.setAttribute("tool", "clear");
     b.setAttribute("clear", ""); // icon & state are the same as in other controls
-    b.setAttribute("aria-label", this.#ctr.$labels.get("clear") ?? "clear");
-    b.setAttribute("w-tooltip", "");
+    this.setToolLabel(b, "clear");
     b.addEventListener("click", () => {
       this.restoreSelection(); // the same as other tools: focus is returned to editor
       this.clearValue();
@@ -527,8 +652,7 @@ export default class WUPTextRichControl<
     const b = dd.appendChild(document.createElement("button"));
     b.type = "button";
     b.tabIndex = -1;
-    b.setAttribute("aria-label", this.#ctr.$labels.get(format) ?? format);
-    b.setAttribute("w-tooltip", "");
+    this.setToolLabel(b, format);
     const ul = dd.appendChild(document.createElement("wup-popup")).appendChild(document.createElement("ul"));
     ul.setAttribute("role", "listbox");
     const items = values.map((v) => {
@@ -552,6 +676,15 @@ export default class WUPTextRichControl<
         s.textContent = label;
       } else {
         li.textContent = label;
+      }
+      const hk = this.#ctr.$hotKeys[key as WUP.TextRich.ToolKey];
+      if (hk) {
+        li.setAttribute("aria-keyshortcuts", hotKeysAria(hk));
+        if (!this._opts.hideHotKeysHint) {
+          const kbd = li.appendChild(document.createElement("kbd")); // at the right side of item (like in menus of OS)
+          kbd.setAttribute("aria-hidden", true); // announced via aria-keyshortcuts
+          kbd.textContent = hotKeysText(hk);
+        }
       }
       li._format = format;
       li._value = v;
@@ -1094,10 +1227,58 @@ export default class WUPTextRichControl<
     this.refreshToolbar(new Map());
   }
 
-  protected override gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
-    if (e.altKey && e.key === "F10") {
-      e.preventDefault();
+  /** Returns rendered toolbar button or item of dropdown by key `format` or `format:value` */
+  protected findTool(key: string): ToolElement | null {
+    return this.$refToolbar.querySelector(`[tool="${key}"]`);
+  }
+
+  /** Called on keydown in editor or toolbar: applies tool by keyboard shortcut ($hotKeys) if tool is rendered in toolbar
+   * @returns true if event must be prevented */
+  protected gotHotKey(e: KeyboardEvent): boolean {
+    const mod = isMac ? e.metaKey : e.ctrlKey;
+    // AltGraph: AltGr+key (the same as Ctrl+Alt+key on Windows) types char with some keyboard layouts
+    if ((!mod && !e.altKey) || (isMac ? e.ctrlKey : e.metaKey) || e.getModifierState("AltGraph")) {
+      return false;
+    }
+    const key = codeKeys.get(e.code) ?? e.code.replace(/^(Key|Digit)/, "");
+    let i = -1; // index of pressed shortcut of tool
+    const tool = Object.entries(this.#ctr.$hotKeys).find(([, hk]) => {
+      i = hk?.split(" ").findIndex((s) => isHotKey(s, e, key, mod)) ?? -1;
+      return i !== -1;
+    })?.[0];
+    if (!tool) {
+      return mod && !e.altKey && !e.shiftKey && browserHotKeys.has(e.code); // otherwise browser formats via beforeinput
+    }
+    if (tool === "toolbar") {
       this.$refToolbar.querySelector("button")?.focus();
+      return true;
+    }
+    if (tool === "size") {
+      const items = this.#tools.find((t) => t.format === "size")?.items;
+      items && this.stepSize(i ? -1 : 1, items);
+      return !!items;
+    }
+    const el = this.findTool(tool);
+    if (!el) {
+      return false; // tool isn't rendered: browser shortcut works as usual
+    }
+    el._format ? this.applyFormat(el._format, el._value) : el.click(); // button clear isn't ToolElement
+    return true;
+  }
+
+  /** Increases (`step` = 1) or decreases (`step` = -1) font size to the nearest value of dropdown `size` */
+  protected stepSize(step: 1 | -1, items: ToolElement[]): void {
+    const cur = sizeSteps.indexOf(this.getFormats().get("size") ?? false);
+    const values = sizeSteps.filter((v) => items.some((li) => li._value === v)); // from smaller to larger
+    const next =
+      step > 0 ? values.find((v) => sizeSteps.indexOf(v) > cur) : values.findLast((v) => sizeSteps.indexOf(v) < cur);
+    next !== undefined && this.applyFormat("size", next);
+  }
+
+  protected override gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
+    const t = e.target as Node;
+    if ((t === this.$refInput || this.$refToolbar.contains(t)) && this.gotHotKey(e)) {
+      e.preventDefault(); // skipped for nested control in popup of link
       return;
     }
     if (e.key === "Escape" && this.#hoverLink) {
@@ -1115,9 +1296,10 @@ export default class WUPTextRichControl<
     }
     const t = e.inputType;
     if (t.startsWith("format")) {
-      e.preventDefault(); // formatting by browser (keyboard shortcuts) is replaced with custom one: to save it in custom history
+      e.preventDefault(); // formatting by browser (menu of Safari, iOS etc.) is replaced with custom one: to save it in custom history
       const f = formatInputs.get(t); // color, font etc. aren't supported
-      f && this.applyFormat(f[0], f[1]);
+      const el = f && this.findTool(f[1] === undefined ? f[0] : `${f[0]}:${f[1]}`); // only formats rendered in toolbar
+      el && this.applyFormat(el._format, el._value);
       return;
     }
     super.gotBeforeInput(e); // custom history: undo/redo & state before changes
@@ -1156,8 +1338,7 @@ export default class WUPTextRichControl<
   protected override setClearState(): ValueType | undefined {
     const next = super.setClearState();
     // label (tooltip) of button clear depends on state like its icon: the next clearing restores previous value or clears it
-    const key = this.#ctr.$isEmpty(next) ? "clear" : "clear:back";
-    this.$refBtnClear?.setAttribute("aria-label", this.#ctr.$labels.get(key) ?? key);
+    this.$refBtnClear && this.setToolLabel(this.$refBtnClear, this.#ctr.$isEmpty(next) ? "clear" : "clear:back");
     return next;
   }
 }

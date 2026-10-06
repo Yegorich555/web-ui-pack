@@ -28,7 +28,8 @@ export default function TextRichControlView() {
         "Toolbar with formats: headers, bold, italic, underline, strike, quote, code, link, lists, subscript & superscript, indentation, size, alignment & clean format",
         "Value is html: it's sanitized & only supported formats are kept (pasted content as well)",
         "Undo/redo for text & formatting (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y) including OS-native ones (Edit menu, shake on iPhone)",
-        "Keyboard: Ctrl+B, Ctrl+I, Ctrl+U & Alt+F10 to focus toolbar (Arrows to navigate, Esc to return)",
+        "Keyboard shortcuts for every tool similar to Google Docs (Ctrl+Shift+7, Ctrl+Alt+1 etc.) & Alt+F10 to focus toolbar (Arrows to navigate, Esc to return)",
+        "Shortcuts are customizable via static $hotKeys & shown in tooltips (Bold (Ctrl+B) or Bold (⌘B) on macOS/iOS) & in items of dropdowns",
         "Inline format with collapsed selection is applied to the next typed text (Ctrl+B and type text)",
         "Validations min/max count visible chars only",
         "Uses own js-engine and doesn't depend on Browser (not used deprecated and not stable document.execCommand)",
@@ -50,6 +51,7 @@ export default function TextRichControlView() {
           w-label="Rich text"
           w-validations="window.myTextRichValidations"
           w-toolbar="window.myTextRichToolbar"
+          w-hideHotKeysHint="false"
           ref={(el) => {
             if (el) {
               el.$initValue = [

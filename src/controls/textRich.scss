@@ -190,9 +190,24 @@ $aligns: (
 
   wup-dropdown > [menu] {
     li {
+      display: flex;
+      align-items: center;
       padding: 0.4em 1em;
       line-height: 1.2;
       white-space: nowrap;
+    }
+
+    // keyboard shortcut ($hotKeys) at the right side: before checkmark of selected item
+    kbd {
+      margin-left: auto;
+      padding-left: 2em;
+      font: inherit;
+      font-size: 0.75em;
+      color: var(--ctrl-label);
+    }
+
+    li:has(> kbd)[aria-selected="true"]:after {
+      margin-left: 0; // otherwise free space is shared with kbd
     }
 
     // headings use default/global styles (the same as in editor)
