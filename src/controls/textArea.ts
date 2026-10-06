@@ -1,23 +1,23 @@
 import { inheritDefaults } from "../baseElement";
 import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
-import WUPTextareaInput from "./textarea.input";
+import WUPTextAreaInput from "./textArea.input";
 
-WUPTextareaInput.$use();
+WUPTextAreaInput.$use();
 
 const tagName = "wup-textarea";
 declare global {
-  namespace WUP.Textarea {
+  namespace WUP.TextArea {
     interface EventMap extends WUP.Text.EventMap {}
     interface ValidityMap extends WUP.Text.ValidityMap {}
     interface Options<T = string, VM = ValidityMap>
       extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "prefix" | "postfix"> {}
-    interface JSXProps<C = WUPTextareaControl>
+    interface JSXProps<C = WUPTextAreaControl>
       extends Omit<WUP.Text.JSXProps<C>, "w-mask" | "w-maskholder" | "w-prefix" | "w-postfix"> {}
   }
 
   interface HTMLElementTagNameMap {
-    [tagName]: WUPTextareaControl; // add element to document.createElement
+    [tagName]: WUPTextAreaControl; // add element to document.createElement
   }
 }
 
@@ -26,8 +26,8 @@ declare module "react" {
     interface IntrinsicElements {
       /** Form-control with multiline text-input
        *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textarea}
-       *  @see {@link WUPTextareaControl} */
-      [tagName]: WUP.Base.ReactHTML<WUPTextareaControl> & WUP.Textarea.JSXProps; // add element to tsx/jsx intellisense (react)
+       *  @see {@link WUPTextAreaControl} */
+      [tagName]: WUP.Base.ReactHTML<WUPTextAreaControl> & WUP.TextArea.JSXProps; // add element to tsx/jsx intellisense (react)
     }
   }
 }
@@ -40,8 +40,8 @@ declare module "preact/jsx-runtime" {
     interface IntrinsicElements {
       /** Form-control with multiline text-input
        *  @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textarea}
-       *  @see {@link WUPTextareaControl} */
-      [tagName]: HTMLAttributes<WUPTextareaControl> & WUP.Textarea.JSXProps; // add element to tsx/jsx intellisense (preact)
+       *  @see {@link WUPTextAreaControl} */
+      [tagName]: HTMLAttributes<WUPTextAreaControl> & WUP.TextArea.JSXProps; // add element to tsx/jsx intellisense (preact)
     }
   }
 }
@@ -72,21 +72,21 @@ declare module "preact/jsx-runtime" {
  * </label>
  * @tutorial Troubleshooting
  * * known issue: NVDA doesn't read multiline text https://github.com/nvaccess/nvda/issues/13369
- * to resolve it set WUPTextareaControl.$defaults.selectOnFocus = true */
-export default class WUPTextareaControl<
+ * to resolve it set WUPTextAreaControl.$defaults.selectOnFocus = true */
+export default class WUPTextAreaControl<
   ValueType = string,
-  TOptions extends WUP.Textarea.Options = WUP.Textarea.Options,
-  EventMap extends WUP.Textarea.EventMap = WUP.Textarea.EventMap
+  TOptions extends WUP.TextArea.Options = WUP.TextArea.Options,
+  EventMap extends WUP.TextArea.EventMap = WUP.TextArea.EventMap
 > extends WUPTextControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
-  // #ctr = this.constructor as typeof WUPTextareaControl;
+  // #ctr = this.constructor as typeof WUPTextAreaControl;
 
   static get $style(): string {
     return super.$style;
   }
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.Textarea.Options = inheritDefaults(WUPTextControl.$defaults, {
+  static $defaults: WUP.TextArea.Options = inheritDefaults(WUPTextControl.$defaults, {
     validationRules: inheritDefaults(WUPTextControl.$defaults.validationRules, {
       // WARN: validations min/max must depend on visible chars only
       min: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.min!.call!(c, v?.replace(/\n/g, ""), setV, c, r),
@@ -104,7 +104,7 @@ export default class WUPTextareaControl<
     this.$refTitle.id = id;
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUP.Textarea.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.TextArea.Options> | null): void {
     super.gotChanges(propsChanged);
     const o = this._opts as WUP.Text.Options;
     delete o.mask;
@@ -189,7 +189,7 @@ export default class WUPTextareaControl<
     } else {
       super.gotBeforeInput(e);
     }
-    // delete (this.$refInput as unknown as WUPTextareaInput)._cached;
+    // delete (this.$refInput as unknown as WUPTextAreaInput)._cached;
   }
 
   protected override gotFocusLost(): void {
@@ -200,9 +200,9 @@ export default class WUPTextareaControl<
 
 // prettify defaults before create
 let rr: Array<keyof WUP.Text.Options> | undefined = ["mask", "maskholder", "prefix", "postfix"];
-rr.forEach((k) => delete WUPTextareaControl.$defaults[k as keyof WUP.Textarea.Options]);
+rr.forEach((k) => delete WUPTextAreaControl.$defaults[k as keyof WUP.TextArea.Options]);
 rr = undefined;
 
-customElements.define(tagName, WUPTextareaControl);
+customElements.define(tagName, WUPTextAreaControl);
 
 // todo readonly: user can type because only [aria-readonly] is set on contenteditable => prevent beforeinput when $isReadOnly (as TextRich does)

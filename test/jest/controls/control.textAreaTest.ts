@@ -1,11 +1,11 @@
-import { WUPTextareaControl } from "web-ui-pack";
+import { WUPTextAreaControl } from "web-ui-pack";
 import { testBaseControl } from "./baseControlTest";
 import testTextControl from "./control.textTest";
 import * as h from "../../testHelper";
 
 /** Mocks input props of contenteditable since they don't work in jsdom */
 // eslint-disable-next-line jest/no-export
-export function mockAreaInput(el: WUPTextareaControl): void {
+export function mockAreaInput(el: WUPTextAreaControl): void {
   const inp = el.$refInput;
   Object.defineProperty(inp, "value", {
     get: () => inp.innerHTML,
@@ -34,8 +34,8 @@ export function mockAreaInput(el: WUPTextareaControl): void {
 }
 
 // eslint-disable-next-line jest/no-export
-export default function testTextareaControl(
-  getEl: () => WUPTextareaControl,
+export default function testTextAreaControl(
+  getEl: () => WUPTextAreaControl,
   opts: Parameters<typeof testBaseControl>[0]
 ) {
   testTextControl(getEl, {

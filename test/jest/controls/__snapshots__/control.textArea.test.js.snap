@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`control.textarea $ariaDetails 1`] = `
+exports[`control.textArea $ariaDetails 1`] = `
 <wup-textarea>
   <label
     for="txt1"
@@ -32,7 +32,7 @@ exports[`control.textarea $ariaDetails 1`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea $ariaDetails 2`] = `
+exports[`control.textArea $ariaDetails 2`] = `
 <wup-textarea>
   <label
     for="txt1"
@@ -59,7 +59,7 @@ exports[`control.textarea $ariaDetails 2`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea $ariaSpeak 1`] = `
+exports[`control.textArea $ariaSpeak 1`] = `
 <wup-textarea>
   <label
     for="txt1"
@@ -95,7 +95,7 @@ exports[`control.textarea $ariaSpeak 1`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea $ariaSpeak 2`] = `
+exports[`control.textArea $ariaSpeak 2`] = `
 <wup-textarea>
   <label
     for="txt1"
@@ -123,7 +123,7 @@ exports[`control.textarea $ariaSpeak 2`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea $show/$hide error 1`] = `
+exports[`control.textArea $show/$hide error 1`] = `
 <wup-textarea>
   <label
     for="txt1"
@@ -150,7 +150,7 @@ exports[`control.textarea $show/$hide error 1`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea $show/$hide error 2`] = `
+exports[`control.textArea $show/$hide error 2`] = `
 <wup-textarea
   invalid=""
 >
@@ -194,7 +194,7 @@ exports[`control.textarea $show/$hide error 2`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea $show/$hide error 3`] = `
+exports[`control.textArea $show/$hide error 3`] = `
 <wup-textarea>
   <label
     for="txt1"
@@ -238,9 +238,9 @@ exports[`control.textarea $show/$hide error 3`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea common tests render + styles 1`] = `<wup-textarea />`;
+exports[`control.textArea common tests render + styles 1`] = `<wup-textarea />`;
 
-exports[`control.textarea common tests render + styles 2`] = `
+exports[`control.textArea common tests render + styles 2`] = `
 <style>
   :root {
   --base-focus: #00778d;
@@ -769,7 +769,7 @@ WUP-AREAINPUT::-webkit-scrollbar-track-piece:vertical:start, WUP-AREAINPUT::-web
 </style>
 `;
 
-exports[`control.textarea common tests snapshot of $defaults 1`] = `
+exports[`control.textArea common tests snapshot of $defaults 1`] = `
 {
   "autoComplete": null,
   "autoFocus": false,
@@ -800,9 +800,9 @@ exports[`control.textarea common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`control.textarea common tests snapshot of $defaults 2`] = `undefined`;
+exports[`control.textArea common tests snapshot of $defaults 2`] = `undefined`;
 
-exports[`control.textarea common tests snapshot of $defaults 3`] = `
+exports[`control.textArea common tests snapshot of $defaults 3`] = `
 [
   "disabled",
   "readonly",
@@ -829,7 +829,7 @@ exports[`control.textarea common tests snapshot of $defaults 3`] = `
 ]
 `;
 
-exports[`control.textarea options clearButton 1`] = `
+exports[`control.textArea options clearButton 1`] = `
 <wup-textarea>
   <label
     for="txt1"
@@ -863,7 +863,7 @@ exports[`control.textarea options clearButton 1`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea options clearButton 2`] = `
+exports[`control.textArea options clearButton 2`] = `
 <wup-textarea>
   <label
     for="txt1"
@@ -890,7 +890,7 @@ exports[`control.textarea options clearButton 2`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea validations $options.validationShowAll 1`] = `
+exports[`control.textArea validations $options.validationShowAll 1`] = `
 <wup-textarea
   invalid=""
   required=""
@@ -952,7 +952,7 @@ exports[`control.textarea validations $options.validationShowAll 1`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea validations $options.validationShowAll 2`] = `
+exports[`control.textArea validations $options.validationShowAll 2`] = `
 <wup-textarea
   invalid=""
   required=""
@@ -1022,7 +1022,7 @@ exports[`control.textarea validations $options.validationShowAll 2`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea validations $options.validationShowAll 3`] = `
+exports[`control.textArea validations $options.validationShowAll 3`] = `
 <wup-textarea
   invalid=""
   required=""
@@ -1075,7 +1075,7 @@ exports[`control.textarea validations $options.validationShowAll 3`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea validations options.validationCase 1`] = `
+exports[`control.textArea validations options.validationCase 1`] = `
 <wup-textarea>
   <label
     for="txt1"
@@ -1104,7 +1104,7 @@ exports[`control.textarea validations options.validationCase 1`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea validations options.validationCase 2`] = `
+exports[`control.textArea validations options.validationCase 2`] = `
 <wup-textarea
   invalid=""
   required=""
@@ -1157,7 +1157,7 @@ exports[`control.textarea validations options.validationCase 2`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea validations options.validationCase 3`] = `
+exports[`control.textArea validations options.validationCase 3`] = `
 <wup-textarea
   invalid=""
   required=""
@@ -1211,7 +1211,7 @@ exports[`control.textarea validations options.validationCase 3`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea validations options.validationCase 4`] = `
+exports[`control.textArea validations options.validationCase 4`] = `
 <wup-textarea
   invalid=""
   required=""
@@ -1264,7 +1264,7 @@ exports[`control.textarea validations options.validationCase 4`] = `
 </wup-textarea>
 `;
 
-exports[`control.textarea with form 1`] = `
+exports[`control.textArea with form 1`] = `
 <wup-form
   role="form"
 >

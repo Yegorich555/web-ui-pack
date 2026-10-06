@@ -2,11 +2,12 @@
 
 # Changelog
 
-## 1.2.10 (\_\_\_)
+## 1.3.1 (\_\_\_)
 
 ### Fixes & Improvements
 
-- [TextareaControl](src/controls/textarea.ts). _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-prefix`, `w-postfix`_
+- [TextAreaControl](src/controls/textArea.ts). **BREAKING:** renamed `WUPTextareaControl` => `WUPTextAreaControl`, `WUP.Textarea` => `WUP.TextArea`, `web-ui-pack/controls/textarea` => `web-ui-pack/controls/textArea` (tag `wup-textarea` isn't changed)
+- [TextAreaControl](src/controls/textArea.ts). _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-prefix`, `w-postfix`_
 - [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
   - toggle button (direct child `wup-dropdown > button`) has neutral style: inherited font & color, no background, chevron icon at the right (rotated when menu is opened), hover/focus background via css-vars `--icon-hover-bg` & `--icon-focus-bg`
   - buttons inside menu aren't styled anymore (it's custom content)
@@ -541,7 +542,7 @@
   - _Wrong size of monthPicker if previously scroll dayPicker to min/max date_
   - _User can't scroll when `$initValue` > `$options.max`_
 - [DateControl](src/controls/date.ts). _Menu isn't closed if click on the selected date_
-- [TextareaControl](src/controls/textarea.ts)
+- [TextAreaControl](src/controls/textArea.ts)
   - _Exception when try to clear empty control_
   - _`Ctrl + Z` doesn't revert changes_
 - [NumberControl](src/controls/number.ts). _option `format` isn't applied on init_
@@ -672,7 +673,7 @@
 - helper [onFocusLost](src/helpers/onFocusLost.ts). _Isn't fired if stopPropagation is called_
 - [TimeControl](src/controls/time.ts). _Extra margin for menu-buttons on Safari_
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _Attribute `initvalue=''` sets value to `true` (expected `false`)_
-- [TextareaControl](src/controls/textarea.ts). _`Ctrl + B` makes text bold but it's unexpected for plain textarea_
+- [TextAreaControl](src/controls/textArea.ts). _`Ctrl + B` makes text bold but it's unexpected for plain textarea_
 - **Controls**. _Hover effect on Android devices (expected: no-hover on touch-screens)_
 - **Controls**. _Focus frame isn't rounded on Safari_
 - **Controls**. _Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)_
@@ -770,7 +771,7 @@
 - Controls **Number, Date, Calendar** are locale based and depends on [localeInfo](src/objects/localeInfo.ts) helper
 - Added elements
   - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
-  - [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
+  - [TextAreaControl](src/controls/textArea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
 - Added [helpers](README.md#helpers)
   - [onScroll](src/helpers/onScroll.ts)
   - [localeInfo](src/objects/localeInfo.ts)

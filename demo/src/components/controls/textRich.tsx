@@ -24,7 +24,7 @@ export default function TextRichControlView() {
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
       features={[
-        "Inheritted features from TextareaControl",
+        "Inheritted features from TextAreaControl",
         "Toolbar with formats: headers, bold, italic, underline, strike, quote, code, link, lists, subscript & superscript, indentation, size, alignment & clean",
         "Value is html: it's sanitized & only supported formats are kept (pasted content as well)",
         "Undo/redo for text & formatting (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y) including OS-native ones (Edit menu, shake on iPhone)",

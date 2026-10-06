@@ -56,7 +56,7 @@ WUPTextControl.$use();
 // #2.1 change defaults globally via the main parent (affects every control until a child overrides the option)
 WUPBaseControl.$defaults.validateDebounceMs = 600;
 
-// #2.2 change defaults for WUPTextControl and controls inherited from it (Number, Password, Textarea, Select, SelectMany, Date, Time)
+// #2.2 change defaults for WUPTextControl and controls inherited from it (Number, Password, TextArea, Select, SelectMany, Date, Time)
 WUPTextControl.$defaults.clearButton = true;
 
 // #3.0 override messages according to required language

@@ -1,12 +1,12 @@
-import { WUPTextareaControl } from "web-ui-pack";
+import { WUPTextAreaControl } from "web-ui-pack";
 import { initTestBaseControl } from "./baseControlTest";
-import testTextareaControl, { mockAreaInput } from "./control.textareaTest";
+import testTextAreaControl, { mockAreaInput } from "./control.textAreaTest";
 import * as h from "../../testHelper";
 
-/** @type WUPTextareaControl */
+/** @type WUPTextAreaControl */
 let el;
 initTestBaseControl({
-  type: WUPTextareaControl,
+  type: WUPTextAreaControl,
   htmlTag: "wup-textarea",
   onInit: (e) => {
     el = e;
@@ -14,8 +14,8 @@ initTestBaseControl({
   },
 });
 
-describe("control.textarea", () => {
-  testTextareaControl(() => el);
+describe("control.textArea", () => {
+  testTextAreaControl(() => el);
 
   test("custom input props", async () => {
     const area = document.body.appendChild(document.createElement("wup-textarea"));

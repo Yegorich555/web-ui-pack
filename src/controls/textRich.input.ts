@@ -1,4 +1,4 @@
-import WUPTextareaInput from "./textarea.input";
+import WUPTextAreaInput from "./textArea.input";
 
 /** Inline formats: tagName => tagName in result */
 const inlineTags = new Map<string, string>([
@@ -319,7 +319,7 @@ export function htmlFromEditor(editor: Node): string {
 }
 
 /** Represents contenteditable element with rich text where value is html */
-export default class WUPTextRichInput extends WUPTextareaInput {
+export default class WUPTextRichInput extends WUPTextAreaInput {
   /** Get/set html: getter returns clean html (empty string if there is no text); setter sanitizes html
    * @tutorial Rules
    * * only supported formats are kept: other elements are unwrapped (`<span>`, `<table>` etc.) or removed with content (`<script>`, `<img>` etc.)

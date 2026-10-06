@@ -16,7 +16,7 @@ import SortView from "./components/sort/sortView";
 import ModalView from "./components/modal/modalView";
 
 import TextControlView from "./components/controls/text";
-import TextareaControlView from "./components/controls/textarea";
+import TextAreaControlView from "./components/controls/textArea";
 import TextRichControlView from "./components/controls/textRich";
 import PasswordControlView from "./components/controls/password";
 import SelectControlView from "./components/controls/select";
@@ -68,7 +68,7 @@ const routes: IRoute[] = [
 
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
-  { path: "control/textarea", el: TextareaControlView, isNested: true },
+  { path: "control/textarea", el: TextAreaControlView, isNested: true },
   { path: "control/textRich", el: TextRichControlView, isNested: true },
   { path: "control/password", el: PasswordControlView, isNested: true },
   { path: "control/number", el: NumberControlView, isNested: true },

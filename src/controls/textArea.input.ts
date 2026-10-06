@@ -4,9 +4,9 @@ import WUPBaseElement from "../baseElement";
 /** Tags with appended styles (the class can be inherited by another element) */
 const styledTags = new Set<string>();
 /** Represents contenteditable element with custom input props as value, select etc. */
-export default class WUPTextareaInput extends HTMLElement {
+export default class WUPTextAreaInput extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
-  #ctr = this.constructor as typeof WUPTextareaInput;
+  #ctr = this.constructor as typeof WUPTextAreaInput;
 
   static $use(): void {
     // it's for sideEffects component self-registered
@@ -167,7 +167,7 @@ export default class WUPTextareaInput extends HTMLElement {
   }
 }
 
-customElements.define("wup-areainput", WUPTextareaInput);
+customElements.define("wup-areainput", WUPTextAreaInput);
 
 // todo setter `value` assigns raw html via innerHTML: `$value = '<img src=x onerror="...">'` executes script => assign as text
 // todo getter `value` returns html-escaped text: typed `a < b & c` gives $value `a &lt; b &amp; c`

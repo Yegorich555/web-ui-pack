@@ -16,7 +16,7 @@ export { default as WUPSortElement } from "./sortElement";
 
 export { default as WUPFormElement } from "./formElement";
 export { default as WUPTextControl } from "./controls/text";
-export { default as WUPTextareaControl } from "./controls/textarea";
+export { default as WUPTextAreaControl } from "./controls/textArea";
 export { default as WUPTextRichControl } from "./controls/textRich";
 export { default as WUPPasswordControl } from "./controls/password";
 export { default as WUPSelectControl } from "./controls/select";

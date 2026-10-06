@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const WUPTextareaControl = require("web-ui-pack/controls/textarea").default;
+const WUPTextAreaControl = require("web-ui-pack/controls/textArea").default;
 
-/** @type WUPTextareaControl */
+/** @type WUPTextAreaControl */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let el;
 
@@ -13,7 +13,7 @@ beforeEach(async () => {
   await page.evaluate(() => (window.el = document.querySelector("wup-textarea")));
 });
 
-describe("control.textarea", () => {
+describe("control.textArea", () => {
   test("user can type new line", async () => {
     await page.type("[role=textbox]", "Abc");
     expect(await page.evaluate(() => el.$value)).toBe("Abc");

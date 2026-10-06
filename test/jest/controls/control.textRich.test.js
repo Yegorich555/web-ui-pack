@@ -1,7 +1,7 @@
 import WUPTextRichControl from "web-ui-pack/controls/textRich";
 import WUPDropdownElement from "web-ui-pack/dropdownElement";
 import { initTestBaseControl } from "./baseControlTest";
-import testTextareaControl, { mockAreaInput } from "./control.textareaTest";
+import testTextAreaControl, { mockAreaInput } from "./control.textAreaTest";
 
 // WARN: it must be before initTestBaseControl: the control with dropdowns is created in its beforeEach
 beforeEach(() => {
@@ -22,7 +22,7 @@ initTestBaseControl({
 });
 
 describe("control.textRich", () => {
-  testTextareaControl(() => el, {
+  testTextAreaControl(() => el, {
     attrs: {
       "w-toolbar": {
         value: [

@@ -5,7 +5,7 @@ import { useTooltipOnce } from "../popup/popupTooltip";
 import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 import TextHistory from "./text.history";
-import WUPTextareaControl from "./textarea";
+import WUPTextAreaControl from "./textArea";
 import WUPTextRichInput, { htmlToEditor, htmlToText, sanitizeUrl } from "./textRich.input";
 import TextRichHistory from "./textRich.history";
 import {
@@ -66,8 +66,8 @@ declare global {
     /** Group of toolbar items (groups are visually separated) */
     type ToolbarGroup = ToolbarItem[];
 
-    interface EventMap extends WUP.Textarea.EventMap {}
-    interface ValidityMap extends WUP.Textarea.ValidityMap {}
+    interface EventMap extends WUP.TextArea.EventMap {}
+    interface ValidityMap extends WUP.TextArea.ValidityMap {}
     interface NewOptions {
       /** Toolbar items split into groups; point empty array to hide toolbar
        * @see {@link ToolbarItem}
@@ -82,8 +82,8 @@ declare global {
       toolbar: ToolbarGroup[];
       // classNames: { bold: ".wup-bold", toolbar?: string | bool | null }; // todo implement this so if pointed className then it must be applied to relevant block, for toolbar expected string=> another classname, and if NOT (false or null) => use same className to related toolbar item
     }
-    interface Options<T = string, VM = ValidityMap> extends WUP.Textarea.Options<T, VM>, NewOptions {}
-    interface JSXProps<C = WUPTextRichControl> extends WUP.Textarea.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
+    interface Options<T = string, VM = ValidityMap> extends WUP.TextArea.Options<T, VM>, NewOptions {}
+    interface JSXProps<C = WUPTextRichControl> extends WUP.TextArea.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** Global reference to object with array
        * @see {@link ToolbarGroup}
        * @example
@@ -282,7 +282,7 @@ export default class WUPTextRichControl<
   ValueType = string,
   TOptions extends WUP.TextRich.Options = WUP.TextRich.Options,
   EventMap extends WUP.TextRich.EventMap = WUP.TextRich.EventMap
-> extends WUPTextareaControl<ValueType, TOptions, EventMap> {
+> extends WUPTextAreaControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextRichControl;
 
@@ -347,8 +347,8 @@ export default class WUPTextRichControl<
   };
 
   /** Default options - applied to every element. Change it to configure default behavior */
-  static $defaults: WUP.TextRich.Options = inheritDefaults(WUPTextareaControl.$defaults, {
-    validationRules: inheritDefaults(WUPTextareaControl.$defaults.validationRules, {
+  static $defaults: WUP.TextRich.Options = inheritDefaults(WUPTextAreaControl.$defaults, {
+    validationRules: inheritDefaults(WUPTextAreaControl.$defaults.validationRules, {
       // WARN: validations min/max must depend on visible chars only
       min: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.min!.call!(c, v && htmlToText(v), setV, c, r),
       max: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.max!.call!(c, v && htmlToText(v), setV, c, r),
