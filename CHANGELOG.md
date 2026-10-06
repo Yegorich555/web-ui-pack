@@ -7,6 +7,29 @@
 ### Fixes & Improvements
 
 - [TextareaControl](src/controls/textarea.ts). _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-prefix`, `w-postfix`_
+- [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
+  - toggle button (direct child `wup-dropdown > button`) has neutral style: inherited font & color, no background, chevron icon at the right (rotated when menu is opened), hover/focus background via css-vars `--icon-hover-bg` & `--icon-focus-bg`
+  - buttons inside menu aren't styled anymore (it's custom content)
+  - to restore previous styles add the following code once (ex. in the entry file before/after `WUPDropdownElement.$use()`)
+
+    ```js
+    import { useBuiltinStyle, WUPcssButton } from "web-ui-pack/styles";
+
+    // :root increases specificity, so styles override built-in ones regardless of order in <head>
+    useBuiltinStyle(`${WUPcssButton(":root wup-dropdown button")}
+      :root wup-dropdown button {
+        display: inline-block;
+        min-width: initial;
+        margin: 0;
+        padding: 0.7em;
+        white-space: normal;
+      }
+      :root wup-dropdown > button:after {
+        content: none;
+      }`);
+    ```
+
+  - to restore styles of menu buttons only (and keep new style of toggle button) use `useBuiltinStyle(WUPcssButton(":root wup-dropdown [menu] button"))` with the same `min-width`, `margin`, `padding` overrides for selector `:root wup-dropdown [menu] button`
 
 ### New Features
 

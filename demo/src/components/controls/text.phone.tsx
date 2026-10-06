@@ -2,7 +2,6 @@ import Example from "src/elements/example";
 import { WUPDropdownElement, WUPTextControl } from "web-ui-pack";
 import { inheritDefaults } from "web-ui-pack/baseElement";
 import { SetValueReasons, ValidateFromCases } from "web-ui-pack/controls/baseControl";
-import { WUPcssIcon } from "web-ui-pack/styles";
 
 WUPDropdownElement.$use();
 
@@ -27,24 +26,6 @@ export class WUPPhoneControl extends WUPTextControl {
         flex: 0 0 auto;
         margin-right: 0.5em;
       }
-      :host wup-dropdown button {
-        font-weight: normal;
-        color: inherit;
-        background: none;
-      }
-      :host wup-dropdown > button {
-        display: flex;
-        align-items: center;
-        padding: 0 0 0 0.4em;
-      }
-      :host wup-dropdown > button:after {
-        content: "";
-        --ctrl-icon-img: var(--wup-icon-chevron);
-      }
-      ${WUPcssIcon(":host wup-dropdown > button:after")}
-      :host wup-dropdown > button[aria-expanded=true]:after {
-        transform: rotate(180deg);
-      }
       :host wup-dropdown [menu] li {
         position: relative;
         padding: 0;
@@ -59,11 +40,13 @@ export class WUPPhoneControl extends WUPTextControl {
         width: 100%;
         padding: 1em;
         padding-right: calc(1.5em + var(--ctrl-icon-size)); ${/* space for check-icon */ ""}
-        border-radius: 0;
+        border: none;
+        font: inherit;
+        color: inherit;
+        background: none;
         text-align: start;
-      }
-      :host wup-dropdown [menu] li > button:hover {
-        box-shadow: none;
+        cursor: pointer;
+        outline: none;
       }
       :host wup-dropdown [menu] li > button:focus {
         box-shadow: inset 0 0 0 2px var(--base-btn-focus);

@@ -1,4 +1,10 @@
 import Example from "src/elements/example";
+import { useBuiltinStyle, WUPcssButton } from "web-ui-pack/styles";
+import styles from "./dropdownView.scss";
+
+useBuiltinStyle(WUPcssButton(`.${styles.primary} > button`)); // toggle button is styled as primary
+
+const items = ["Home", "Products", "Profile", "Very", "or", "not", "very", "long", "list"];
 
 export default function Example1() {
   return (
@@ -7,15 +13,19 @@ export default function Example1() {
         <button type="button">Click me</button>
         <wup-popup>
           <ul>
-            <li>Home</li>
-            <li>Products</li>
-            <li>Profile</li>
-            <li>Very</li>
-            <li>or</li>
-            <li>not</li>
-            <li>very</li>
-            <li>long</li>
-            <li>list</li>
+            {items.map((v) => (
+              <li key={v}>{v}</li>
+            ))}
+          </ul>
+        </wup-popup>
+      </wup-dropdown>
+      <wup-dropdown class={styles.primary}>
+        <button type="button">Dropdown with ButtonPrimaryStyle</button>
+        <wup-popup>
+          <ul>
+            {items.map((v) => (
+              <li key={v}>{v}</li>
+            ))}
           </ul>
         </wup-popup>
       </wup-dropdown>

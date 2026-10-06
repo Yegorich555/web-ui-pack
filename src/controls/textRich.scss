@@ -139,40 +139,19 @@ $aligns: (
     transform: rotate(180deg);
   }
 
-  // dropdowns: reset styles of button inside <wup-dropdown>
+  // dropdowns: base styles of toggle button (chevron, focus) are defined in <wup-dropdown>
   /* stylelint-disable-next-line no-descending-specificity */
   wup-dropdown > button {
-    display: inline-flex;
-    align-items: center;
+    --icon-hover-bg: none;
     justify-content: space-between;
-    gap: 0.25em;
     height: 1.75em;
-    padding: 0 0.25em 0 0.5em;
     border-radius: 4px;
-    font: inherit;
     color: var(--ctrl-icon);
-    background: none;
-    white-space: nowrap;
-
-    &:after {
-      --ctrl-icon-img: var(--wup-icon-chevron);
-      --ctrl-icon-size: 0.6em;
-    }
-
-    &[aria-expanded="true"]:after {
-      transform: rotate(180deg);
-    }
 
     @media (hover: hover) and (pointer: fine) {
       &:hover {
         color: var(--ctrl-selected);
-        box-shadow: none;
       }
-    }
-
-    // after :hover to keep focus-bg on hover
-    &:focus {
-      box-shadow: inset 0 0 0 99999px var(--icon-focus-bg); // the same as for icon buttons
     }
   }
 
@@ -185,12 +164,7 @@ $aligns: (
     min-width: 4.75em;
   }
 
-  wup-dropdown[tool="align"] > button:before {
-    --ctrl-icon-size: 1.125em;
-  }
-
-  // icons: chevron & align of dropdown buttons, align of menu items
-  wup-dropdown > button:after,
+  // icons of align: dropdown button & menu items
   wup-dropdown[tool="align"] > button:before,
   [tool^="align:"]:before {
     content: "";
@@ -199,8 +173,8 @@ $aligns: (
     vertical-align: middle;
   }
 
-  wup-dropdown > button:after,
   wup-dropdown[tool="align"] > button:before {
+    --ctrl-icon-size: 1.125em;
     align-self: center;
     background: currentColor;
   }
