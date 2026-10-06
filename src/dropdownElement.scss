@@ -27,6 +27,7 @@
       --ctrl-icon-size: 0.6em;
       @include wup-icon;
       align-self: center;
+      margin-left: auto; // at the right side when button is wider than content (ex. min-width)
       background: currentColor;
     }
 

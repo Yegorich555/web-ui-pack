@@ -293,7 +293,7 @@ exports[`control.textRich $ariaDetails 1`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -326,6 +326,16 @@ exports[`control.textRich $ariaDetails 1`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -335,16 +345,6 @@ exports[`control.textRich $ariaDetails 1`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -711,7 +711,7 @@ exports[`control.textRich $ariaDetails 2`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -744,6 +744,16 @@ exports[`control.textRich $ariaDetails 2`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -753,16 +763,6 @@ exports[`control.textRich $ariaDetails 2`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -1129,7 +1129,7 @@ exports[`control.textRich $ariaSpeak 1`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -1162,6 +1162,16 @@ exports[`control.textRich $ariaSpeak 1`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -1171,16 +1181,6 @@ exports[`control.textRich $ariaSpeak 1`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -1555,7 +1555,7 @@ exports[`control.textRich $ariaSpeak 2`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -1588,6 +1588,16 @@ exports[`control.textRich $ariaSpeak 2`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -1597,16 +1607,6 @@ exports[`control.textRich $ariaSpeak 2`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -1973,7 +1973,7 @@ exports[`control.textRich $show/$hide error 1`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -2006,6 +2006,16 @@ exports[`control.textRich $show/$hide error 1`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -2015,16 +2025,6 @@ exports[`control.textRich $show/$hide error 1`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -2393,7 +2393,7 @@ exports[`control.textRich $show/$hide error 2`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -2426,6 +2426,16 @@ exports[`control.textRich $show/$hide error 2`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -2435,16 +2445,6 @@ exports[`control.textRich $show/$hide error 2`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -2824,7 +2824,7 @@ exports[`control.textRich $show/$hide error 3`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -2857,6 +2857,16 @@ exports[`control.textRich $show/$hide error 3`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -2866,16 +2876,6 @@ exports[`control.textRich $show/$hide error 3`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -3501,15 +3501,17 @@ WUP-TEXTRICH [contenteditable=true] {
   max-height: 4em;
 }
 WUP-TEXTRICH {
-  --ctrl-label-active-pos: translateY(-50%) scale(0.9);
   position: relative;
   display: flex;
   flex-direction: column;
 }
-WUP-TEXTRICH label &gt; span {
+WUP-TEXTRICH &gt; label {
+  --ctrl-label-active-pos: translateY(-50%) scale(0.9);
+}
+WUP-TEXTRICH &gt; label &gt; span {
   position: static;
 }
-WUP-TEXTRICH strong {
+WUP-TEXTRICH &gt; label strong {
   top: 0;
   left: calc(var(--ctrl-icon-size) - 0.25em);
   max-width: calc(100% - 2 * var(--ctrl-icon-size));
@@ -3640,7 +3642,6 @@ WUP-TEXTRICH [tool="indent:-1"]:after {
 }
 WUP-TEXTRICH wup-dropdown &gt; button {
   --icon-hover-bg: none;
-  justify-content: space-between;
   height: 1.75em;
   border-radius: 4px;
   color: var(--ctrl-icon);
@@ -3651,10 +3652,10 @@ WUP-TEXTRICH wup-dropdown &gt; button {
   }
 }
 WUP-TEXTRICH wup-dropdown[tool=header] &gt; button {
-  min-width: 6.5em;
+  min-width: 6.25em;
 }
 WUP-TEXTRICH wup-dropdown[tool=size] &gt; button {
-  min-width: 4.75em;
+  min-width: 4.875em;
 }
 WUP-TEXTRICH wup-dropdown[tool=align] &gt; button:before,
 WUP-TEXTRICH [tool^="align:"]:before {
@@ -3724,6 +3725,10 @@ WUP-TEXTRICH[disabled] [role=toolbar], WUP-TEXTRICH[readonly] [role=toolbar] {
 }
 WUP-TEXTRICH[readonly] [role=toolbar] {
   opacity: 0.5;
+}
+WUP-TEXTRICH wup-popup[link] &gt; wup-text {
+  width: min(40em, calc(100vw - 3em));
+  margin: 0;
 }
 WUP-TEXTRICH [contenteditable=true] {
   min-height: 8em;
@@ -3846,6 +3851,7 @@ WUP-DROPDOWN &gt; button:after {
   -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
   align-self: center;
+  margin-left: auto;
   background: currentColor;
 }
 WUP-DROPDOWN &gt; button[aria-expanded=true]:after {
@@ -4443,7 +4449,7 @@ exports[`control.textRich options clearButton 1`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -4476,6 +4482,16 @@ exports[`control.textRich options clearButton 1`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -4485,16 +4501,6 @@ exports[`control.textRich options clearButton 1`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -4860,7 +4866,7 @@ exports[`control.textRich options clearButton 2`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -4893,6 +4899,16 @@ exports[`control.textRich options clearButton 2`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -4902,16 +4918,6 @@ exports[`control.textRich options clearButton 2`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -5288,7 +5294,7 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -5321,6 +5327,16 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -5330,16 +5346,6 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -5742,7 +5748,7 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -5775,6 +5781,16 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -5784,16 +5800,6 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -6202,7 +6208,7 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -6235,6 +6241,16 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -6244,16 +6260,6 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -6641,7 +6647,7 @@ exports[`control.textRich validations options.validationCase 1`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -6674,6 +6680,16 @@ exports[`control.textRich validations options.validationCase 1`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -6683,16 +6699,6 @@ exports[`control.textRich validations options.validationCase 1`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -7065,7 +7071,7 @@ exports[`control.textRich validations options.validationCase 2`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -7098,6 +7104,16 @@ exports[`control.textRich validations options.validationCase 2`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -7107,16 +7123,6 @@ exports[`control.textRich validations options.validationCase 2`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -7510,7 +7516,7 @@ exports[`control.textRich validations options.validationCase 3`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -7543,6 +7549,16 @@ exports[`control.textRich validations options.validationCase 3`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -7552,16 +7568,6 @@ exports[`control.textRich validations options.validationCase 3`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -7952,7 +7958,7 @@ exports[`control.textRich validations options.validationCase 4`] = `
           type="button"
           w-tooltip=""
         >
-          Normal
+          Default
         </button>
         <wup-popup
           menu=""
@@ -7985,6 +7991,16 @@ exports[`control.textRich validations options.validationCase 4`] = `
               </span>
             </li>
             <li
+              aria-selected="true"
+              role="option"
+              tabindex="-1"
+              tool="size:false"
+            >
+              <span>
+                Default
+              </span>
+            </li>
+            <li
               aria-selected="false"
               role="option"
               tabindex="-1"
@@ -7994,16 +8010,6 @@ exports[`control.textRich validations options.validationCase 4`] = `
                 style="font-size: small;"
               >
                 Small
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span>
-                Normal
               </span>
             </li>
           </ul>
@@ -8394,7 +8400,7 @@ exports[`control.textRich with form 1`] = `
             type="button"
             w-tooltip=""
           >
-            Normal
+            Default
           </button>
           <wup-popup
             menu=""
@@ -8427,6 +8433,16 @@ exports[`control.textRich with form 1`] = `
                 </span>
               </li>
               <li
+                aria-selected="true"
+                role="option"
+                tabindex="-1"
+                tool="size:false"
+              >
+                <span>
+                  Default
+                </span>
+              </li>
+              <li
                 aria-selected="false"
                 role="option"
                 tabindex="-1"
@@ -8436,16 +8452,6 @@ exports[`control.textRich with form 1`] = `
                   style="font-size: small;"
                 >
                   Small
-                </span>
-              </li>
-              <li
-                aria-selected="true"
-                role="option"
-                tabindex="-1"
-                tool="size:false"
-              >
-                <span>
-                  Normal
                 </span>
               </li>
             </ul>

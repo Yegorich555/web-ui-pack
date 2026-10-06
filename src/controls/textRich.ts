@@ -85,6 +85,7 @@ declare global {
       // classNames: { bold: ".wup-bold", toolbar?: string | bool | null }; // todo implement this so if pointed className then it must be applied to relevant block, for toolbar expected string=> another classname, and if NOT (false or null) => use same className to related toolbar item
       // hideHotKeysTooltip: false // todo when true add to tooltip '{Tool} ({HotKeys})'
       // hookeys: {'bold': [Ctrl, B] } // todo all tools must has keyboard hotkeys tooltips: for macOs we must show macOs hotkeys, for windows - windows hotkeys etc. User must able to redefine once
+      // todo move btnClear to toolbar - add it to toolbar options
     }
     interface Options<T = string, VM = ValidityMap> extends WUP.TextArea.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTextRichControl> extends WUP.TextArea.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
