@@ -281,6 +281,16 @@ export default class TextHistory {
       stateBefore = arg1;
     }
     this._stateBeforeInput = stateBefore;
+    this.saveSnapshot(stateBefore, arg2);
+    this._histTimeout = setTimeout(() => {
+      this._histTimeout = null;
+      this._stateBeforeInput = undefined;
+    }, 1);
+  }
+
+  /** Adds snapshot of changes to history or updates the last one (called by `save`)
+   * @param next value after changes (current value by default) */
+  saveSnapshot(stateBefore: InputState, next?: string): void {
     const { pos1, pos2, action, value: prev } = stateBefore;
 
     // init new snapshot or get/update previous
@@ -340,7 +350,7 @@ export default class TextHistory {
       default:
         {
           // replace
-          const diff = TextHistory.findDiff(prev, arg2 ?? this.refInput.value);
+          const diff = TextHistory.findDiff(prev, next ?? this.refInput.value);
           // extra case with number format: 123| => 1,234|: removed 23 inserted 34
           if (diff.inserted) {
             snap.inserted = diff.inserted.v;
@@ -362,10 +372,6 @@ export default class TextHistory {
     } else {
       this._hist.push(sn);
     }
-    this._histTimeout = setTimeout(() => {
-      this._histTimeout = null;
-      this._stateBeforeInput = undefined;
-    }, 1);
   }
 
   /** Returns last history index */

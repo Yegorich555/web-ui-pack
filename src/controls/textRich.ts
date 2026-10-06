@@ -1,14 +1,22 @@
 import { inheritDefaults } from "../baseElement";
 import WUPDropdownElement from "../dropdownElement";
+import onEvent from "../helpers/onEvent";
 import WUPPopupElement from "../popup/popupElement";
 import { PopupOpenCases } from "../popup/popupElement.types";
-import { PopupPlacements } from "../popup/popupPlacements";
 import { useTooltipOnce } from "../popup/popupTooltip";
 import { SetValueReasons, ValidationCases } from "./baseControl";
 import WUPTextControl from "./text";
 import TextHistory from "./text.history";
 import WUPTextAreaControl from "./textArea";
-import WUPTextRichInput, { htmlToEditor, htmlToText, sanitizeUrl } from "./textRich.input";
+import WUPTextRichInput, {
+  htmlToEditor,
+  htmlToText,
+  listTags,
+  sanitizeUrl,
+  sizeFormats,
+  sizes,
+  textAligns,
+} from "./textRich.input";
 import TextRichHistory from "./textRich.history";
 import {
   addInline,
@@ -17,17 +25,11 @@ import {
   getLines,
   inlineFormats,
   linesOf,
-  listType,
-  mergeLists,
   removeInline,
-  setLineAlign,
-  setLineIndent,
-  setLineList,
   setLineTag,
   splitAt,
   splitRange,
   toLinePos,
-  unwrap,
   wrapLines,
 } from "./textRich.format";
 
@@ -162,17 +164,8 @@ declare module "preact/jsx-runtime" {
   }
 }
 
-/** Toolbar button or item of dropdown that applies format on click */
+/** Toolbar button or item of dropdown that applies format on click: `_value` - value of format (ex. `"ordered"` for list) */
 type ToolElement = HTMLElement & { _format: string; _value?: unknown };
-interface Tool {
-  format: string;
-  /** Value of button (ex. `"ordered"` for list) */
-  value?: unknown;
-  /** Button or button of dropdown */
-  el: HTMLElement;
-  /** Items of dropdown */
-  items?: ToolElement[];
-}
 
 /** Toolbar buttons without value */
 const toolButtons = new Set<string>([
@@ -211,39 +204,28 @@ const tagFormats = new Map<string, [string, unknown]>([
   ["H4", ["header", 4]],
   ["H5", ["header", 5]],
   ["H6", ["header", 6]],
+  ["BLOCKQUOTE", ["blockquote", true]],
   ["PRE", ["code-block", true]],
+  ["OL", ["list", "ordered"]],
+  ["UL", ["list", "bullet"]],
 ]);
 /** Values of format `size` from smaller to larger: shortcuts of `size` change font size step by step */
 const sizeSteps: unknown[] = ["sm", false, "lg", "hg"];
-/** Font size by value of format `size` */
-const sizes = new Map<unknown, string>([
-  ["sm", "small"],
-  ["lg", "x-large"],
-  ["hg", "xxx-large"],
-]);
-/** Value of format `size` by font size */
-const sizeFormats = new Map<string, unknown>([
-  ["small", "sm"],
-  ["x-large", "lg"],
-  ["xxx-large", "hg"],
-]);
-/** Supported values of text-align */
-const aligns = new Set<string>(["left", "center", "right", "justify"]);
-/** Formatting via browser (keyboard shortcuts etc.): `beforeinput.inputType` => [format, value]; other `format...` are prevented */
-const formatInputs = new Map<string, [string, unknown?]>([
-  ["formatBold", ["bold"]],
-  ["formatItalic", ["italic"]],
-  ["formatUnderline", ["underline"]],
-  ["formatStrikeThrough", ["strike"]],
-  ["formatSuperscript", ["script", "super"]],
-  ["formatSubscript", ["script", "sub"]],
-  ["formatJustifyFull", ["align", "justify"]],
-  ["formatJustifyCenter", ["align", "center"]],
-  ["formatJustifyRight", ["align", "right"]],
-  ["formatJustifyLeft", ["align", "left"]],
-  ["formatIndent", ["indent", 1]],
-  ["formatOutdent", ["indent", -1]],
-  ["formatRemove", ["clean-format"]],
+/** Formatting via browser (keyboard shortcuts etc.): `beforeinput.inputType` => tool; other `format...` are prevented */
+const formatInputs = new Map<string, WUP.TextRich.ToolKey>([
+  ["formatBold", "bold"],
+  ["formatItalic", "italic"],
+  ["formatUnderline", "underline"],
+  ["formatStrikeThrough", "strike"],
+  ["formatSuperscript", "script:super"],
+  ["formatSubscript", "script:sub"],
+  ["formatJustifyFull", "align:justify"],
+  ["formatJustifyCenter", "align:center"],
+  ["formatJustifyRight", "align:right"],
+  ["formatJustifyLeft", "align:left"],
+  ["formatIndent", "indent:1"],
+  ["formatOutdent", "indent:-1"],
+  ["formatRemove", "clean-format"],
 ]);
 /** Command key is Cmd instead of Ctrl (iPadOS reports Macintosh, iOS - like Mac OS X) */
 const isMac = navigator.userAgent.includes("Mac");
@@ -257,48 +239,8 @@ const codeKeys = new Map<string, string>([
 ]);
 /** Codes of keys formatting via browser (Ctrl/Cmd + B, I, U): prevented so only shortcuts of $hotKeys work */
 const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
-
-/** Returns whether keyboard shortcut (in format of `aria-keyshortcuts`) is pressed
- * @param key pressed key by `KeyboardEvent.code`: `B`, `7`, `.`, `F10` etc.
- * @param mod whether Ctrl is pressed (Cmd on macOS/iOS) */
-function isHotKey(shortcut: string, e: KeyboardEvent, key: string, mod: boolean): boolean {
-  const keys = shortcut.split("+");
-  return (
-    keys.pop()!.toUpperCase() === key.toUpperCase() &&
-    keys.includes("Control") === mod &&
-    keys.includes("Alt") === e.altKey &&
-    keys.includes("Shift") === e.shiftKey
-  );
-}
-
-/** Returns shortcuts of $hotKeys in format of `aria-keyshortcuts`: `Control` is `Meta` (Cmd) on macOS/iOS */
-function hotKeysAria(hk: string): string {
-  return isMac ? hk.replace(/Control/g, "Meta") : hk;
-}
-
-/** Returns text of shortcuts of $hotKeys: `Ctrl+Shift+X / Alt+Shift+5` or `⇧⌘X` on macOS/iOS */
-function hotKeysText(hk: string): string {
-  return hk
-    .split(" ")
-    .map((s) => {
-      const keys = s.split("+");
-      const k = keys.pop()!;
-      const key = k === "Escape" ? "Esc" : k;
-      return isMac // modifiers in the same order as in macOS menus
-        ? `${keys.includes("Alt") ? "⌥" : ""}${keys.includes("Shift") ? "⇧" : ""}${
-            keys.includes("Control") ? "⌘" : ""
-          }${key}`
-        : [...keys, key].join("+").replace("Control", "Ctrl");
-    })
-    .join(" / ");
-}
 /** Inline formats that can be pointed for the next typed text (when selection is collapsed) */
 const pendingFormats = new Set<string>(["bold", "italic", "underline", "strike", "script", "size"]);
-/** Tags of lines by line formats */
-const lineTags = new Map<string, string>([
-  ["blockquote", "BLOCKQUOTE"],
-  ["code-block", "PRE"],
-]);
 
 /** Returns the 1st node inside the range (text node at the start or next one if range starts at the end of node) */
 function firstNode(r: Range): Node {
@@ -513,8 +455,8 @@ export default class WUPTextRichControl<
   /** Toolbar with buttons & dropdowns to format text */
   $refToolbar = document.createElement("div");
 
-  /** Rendered items of toolbar */
-  #tools: Tool[] = [];
+  /** Formats shown by toolbar: it's refreshed only when formats are changed */
+  #shown?: string;
   /** Last selection inside editor: restored when format is applied via toolbar by keyboard (when focus is on toolbar) */
   #range?: Range;
 
@@ -528,23 +470,18 @@ export default class WUPTextRichControl<
     this.appendChild(bar); // placed after editor & moved to the top via css: otherwise form autofocus focuses toolbar
 
     // hint for screen-readers how to reach toolbar via keyboard
+    const inp = this.$refInput;
     const hint = this.$refLabel.appendChild(document.createElement("span"));
     hint.id = this.#ctr.$uniqueId;
     hint.className = this.#ctr.classNameHidden;
     hint.textContent = this.#ctr.$ariaDescription;
-    this.$refInput.setAttribute("aria-describedby", hint.id);
-    this.$refInput.setAttribute("wup-textrich", ""); // styles of content are global: the same for value shown outside
+    inp.setAttribute("aria-describedby", hint.id);
+    inp.setAttribute("wup-textrich", ""); // styles of content are global: the same for value shown outside
 
     useTooltipOnce("w-tooltip"); // toolbar buttons show aria-label via tooltip
     // hover on link shows popup to edit url; skipped during selecting by mouse
-    const inp = this.$refInput;
-    const opts = { passive: true };
-    inp.addEventListener(
-      "pointerover",
-      (e) => !e.buttons && this.gotHoverLink((e.target as Element).closest("a")),
-      opts
-    );
-    inp.addEventListener("pointerleave", () => this.gotHoverLink(null), opts);
+    onEvent(inp, "pointerover", (e) => !e.buttons && this.gotHoverLink((e.target as Element).closest("a")));
+    onEvent(inp, "pointerleave", () => this.gotHoverLink(null));
     // Ctrl/Cmd + Click opens link in new tab: browser doesn't follow links inside contenteditable
     inp.addEventListener("click", (e) => {
       const a = (e.ctrlKey || e.metaKey) && (e.target as Element).closest("a");
@@ -568,23 +505,23 @@ export default class WUPTextRichControl<
   protected renderToolbar(): void {
     const bar = this.$refToolbar;
     bar.replaceChildren();
-    this.#tools = [];
     this._opts.toolbar?.forEach((items) => {
       const g = document.createElement("div");
       g.setAttribute("role", "group");
       items.forEach((item) => this.renderTool(g, item));
       g.firstChild && bar.appendChild(g);
     });
+    this.#shown = undefined; // new items must be refreshed
     this.refreshToolbar();
   }
 
   /** Renders toolbar item into group */
   protected renderTool(group: HTMLElement, item: WUP.TextRich.ToolbarItem): void {
-    const isName = typeof item === "string";
-    const format: string = isName ? item : Object.keys(item)[0];
-    const values = (
-      isName ? this.#ctr.$toolbarValues[item as keyof WUP.TextRich.FormatValues] : Object.values(item)[0]
-    ) as unknown[] | undefined;
+    const [format, values] = (
+      typeof item === "string"
+        ? [item, this.#ctr.$toolbarValues[item as keyof WUP.TextRich.FormatValues]]
+        : Object.entries(item)[0]
+    ) as [string, unknown[] | undefined];
 
     if (format === "clear") {
       this.$refBtnClear && group.appendChild(this.$refBtnClear); // it's created by super if $options.clearButton is true
@@ -610,7 +547,6 @@ export default class WUPTextRichControl<
     !actionButtons.has(format) && b.setAttribute("aria-pressed", false);
     b._format = format;
     b._value = value;
-    this.#tools.push({ format, value, el: b });
   }
 
   /** Sets `aria-label` & tooltip of toolbar button by key of `$labels`;
@@ -618,14 +554,36 @@ export default class WUPTextRichControl<
   protected setToolLabel(b: HTMLElement, key: string): void {
     const label = this.#ctr.$labels.get(key) ?? key;
     b.setAttribute("aria-label", label);
-    // button clear: the same shortcut for labels `clear` & `clear:back`
-    const hk = this.#ctr.$hotKeys[(b.getAttribute("tool") ?? key) as WUP.TextRich.ToolKey];
-    let tip = "";
-    if (hk) {
-      b.setAttribute("aria-keyshortcuts", hotKeysAria(hk));
-      tip = this._opts.hideHotKeysHint ? "" : `${label} (${hotKeysText(hk)})`;
+    const hint = this.setHotKeys(b, b.getAttribute("tool") ?? key); // button clear: the same shortcut for `clear` & `clear:back`
+    b.setAttribute("w-tooltip", hint && `${label} (${hint})`); // empty: tooltip shows aria-label
+  }
+
+  /** Sets `aria-keyshortcuts` of toolbar item by $hotKeys (`Control` is `Meta` on macOS/iOS)
+   * @returns text of shortcuts: `Ctrl+Shift+X / Alt+Shift+5` or `⇧⌘X` on macOS/iOS (empty if hidden via $options.hideHotKeysHint) */
+  protected setHotKeys(el: HTMLElement, key: string): string {
+    const hk = this.#ctr.$hotKeys[key as WUP.TextRich.ToolKey];
+    if (!hk) {
+      return "";
     }
-    b.setAttribute("w-tooltip", tip); // empty: tooltip shows aria-label
+    el.setAttribute("aria-keyshortcuts", isMac ? hk.replace(/Control/g, "Meta") : hk);
+    if (this._opts.hideHotKeysHint) {
+      return "";
+    }
+    return hk
+      .replace(/Escape/g, "Esc")
+      .split(" ")
+      .map((s) => {
+        if (!isMac) {
+          return s.replace("Control", "Ctrl");
+        }
+        const keys = s.split("+");
+        const k = keys.pop();
+        // modifiers in the same order as in macOS menus
+        return `${keys.includes("Alt") ? "⌥" : ""}${keys.includes("Shift") ? "⇧" : ""}${
+          keys.includes("Control") ? "⌘" : ""
+        }${k}`;
+      })
+      .join(" / ");
   }
 
   /** Returns button clear: it's placed in toolbar (item `clear`) instead of label */
@@ -655,7 +613,7 @@ export default class WUPTextRichControl<
     this.setToolLabel(b, format);
     const ul = dd.appendChild(document.createElement("wup-popup")).appendChild(document.createElement("ul"));
     ul.setAttribute("role", "listbox");
-    const items = values.map((v) => {
+    values.forEach((v) => {
       const li = ul.appendChild(document.createElement("li")) as HTMLLIElement & ToolElement;
       const key = `${format}:${v}`;
       const label = this.#ctr.$labels.get(key) ?? String(v);
@@ -677,36 +635,35 @@ export default class WUPTextRichControl<
       } else {
         li.textContent = label;
       }
-      const hk = this.#ctr.$hotKeys[key as WUP.TextRich.ToolKey];
-      if (hk) {
-        li.setAttribute("aria-keyshortcuts", hotKeysAria(hk));
-        if (!this._opts.hideHotKeysHint) {
-          const kbd = li.appendChild(document.createElement("kbd")); // at the right side of item (like in menus of OS)
-          kbd.setAttribute("aria-hidden", true); // announced via aria-keyshortcuts
-          kbd.textContent = hotKeysText(hk);
-        }
+      const hint = this.setHotKeys(li, key);
+      if (hint) {
+        const kbd = li.appendChild(document.createElement("kbd")); // at the right side of item (like in menus of OS)
+        kbd.setAttribute("aria-hidden", true); // announced via aria-keyshortcuts
+        kbd.textContent = hint;
       }
       li._format = format;
       li._value = v;
-      return li;
     });
-    this.#tools.push({ format, el: b, items });
   }
 
-  /** Updates state of toolbar items according to formats of selection */
+  /** Updates state of toolbar items according to formats of selection (skipped if formats aren't changed) */
   protected refreshToolbar(formats = this.getFormats()): void {
-    this.#tools.forEach((t) => {
-      if (t.items) {
-        const cur = formats.get(t.format) ?? pickerDefaults.get(t.format);
-        if (t.format === "align") {
-          t.el.setAttribute("value", String(cur)); // icon is defined by value
-        } else {
-          t.el.textContent = this.#ctr.$labels.get(`${t.format}:${cur}`) ?? String(cur);
-        }
-        t.items.forEach((li) => li.setAttribute("aria-selected", li._value === cur));
-      } else if (!actionButtons.has(t.format)) {
-        const v = formats.get(t.format);
-        t.el.setAttribute("aria-pressed", t.value === undefined ? v !== undefined : v === t.value);
+    const shown = JSON.stringify([...formats]);
+    if (shown === this.#shown) {
+      return;
+    }
+    this.#shown = shown;
+    this.$refToolbar.querySelectorAll<ToolElement>("[tool]").forEach((el) => {
+      const f = el._format ?? el.getAttribute("tool")!; // dropdown & button clear don't have `_format`
+      const cur = formats.get(f) ?? pickerDefaults.get(f);
+      if (el.tagName === "LI") {
+        el.setAttribute("aria-selected", el._value === cur);
+      } else if (el.hasAttribute("aria-pressed")) {
+        el.setAttribute("aria-pressed", el._value === undefined ? cur !== undefined : cur === el._value);
+      } else if (f === "align") {
+        el.firstElementChild!.setAttribute("value", String(cur)); // icon of dropdown is defined by value
+      } else if (pickerDefaults.has(f)) {
+        el.firstElementChild!.textContent = this.#ctr.$labels.get(`${f}:${cur}`) ?? String(cur);
       }
     });
   }
@@ -716,34 +673,20 @@ export default class WUPTextRichControl<
     const m = new Map<string, unknown>();
     const inp = this.$refInput;
     const sel = window.getSelection();
-    if (!sel?.rangeCount) {
-      return m;
-    }
-    let n: Node | null = firstNode(sel.getRangeAt(0));
-    if (!inp.contains(n)) {
-      return m;
-    }
-    for (; n && n !== inp; n = n.parentNode) {
-      if (n.nodeType === Node.ELEMENT_NODE) {
-        const el = n as HTMLElement;
-        const tag = el.tagName;
-        const f = tagFormats.get(tag);
-        if (f) {
-          !m.has(f[0]) && m.set(f[0], f[1]);
-        } else if (tag === "A") {
-          m.set("link", el.getAttribute("href"));
-        } else if (tag === "BLOCKQUOTE") {
-          m.set("blockquote", true);
-        } else if (tag === "LI" && !m.has("list")) {
-          m.set("list", listType(el.parentElement!));
-        }
+    const n = sel?.rangeCount ? firstNode(sel.getRangeAt(0)) : null;
+    if (n && inp.contains(n)) {
+      let el = (n.nodeType === Node.ELEMENT_NODE ? n : n.parentElement) as HTMLElement;
+      for (; el !== inp; el = el.parentElement!) {
+        const f = tagFormats.get(el.tagName);
+        f && !m.has(f[0]) && m.set(f[0], f[1]);
+        el.tagName === "A" && m.set("link", el.getAttribute("href"));
         const size = sizeFormats.get(el.style.fontSize);
         size && !m.has("size") && m.set("size", size);
         const a = el.style.textAlign;
-        !m.has("align") && aligns.has(a) && m.set("align", a);
+        !m.has("align") && textAligns.has(a) && m.set("align", a);
       }
+      this.#pending.forEach((v, k) => (v === false ? m.delete(k) : m.set(k, v)));
     }
-    this.#pending.forEach((v, k) => (v === false ? m.delete(k) : m.set(k, v)));
     return m;
   }
 
@@ -756,9 +699,7 @@ export default class WUPTextRichControl<
     inp.focus({ preventScroll: true });
     const r = this.#range;
     if (r && inp.contains(r.startContainer)) {
-      const sel = window.getSelection()!;
-      sel.removeAllRanges();
-      sel.addRange(r);
+      window.getSelection()!.setBaseAndExtent(r.startContainer, r.startOffset, r.endContainer, r.endOffset);
     }
   }
 
@@ -776,21 +717,38 @@ export default class WUPTextRichControl<
     }
     const f = this.getFormats();
     if (format === "link" && !f.has("link")) {
-      const btn = this.#tools.find((t) => t.format === "link")?.el;
-      this.askLink(btn ?? inp, "https://").then((url) => url && this.changeContent(() => this.addLink(url)));
+      this.askLink(this.findTool("link") ?? inp, "https://").then(
+        (url) => url && this.changeContent(() => this.addLink(url))
+      );
     } else if (sel.isCollapsed && (pendingFormats.has(format) || format === "clean-format")) {
-      this.togglePending(format, value, f);
+      // format for the next typed text (Ctrl+B and type text)
+      const p = this.#pending;
+      if (format === "clean-format") {
+        pendingFormats.forEach((k) => f.has(k) && p.set(k, false));
+      } else if (format === "size") {
+        p.set(format, value || false);
+      } else if (format === "script") {
+        p.set(format, f.get(format) === value ? false : value);
+      } else {
+        p.set(format, !f.has(format));
+      }
+      this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
       this.refreshToolbar();
     } else {
       this.changeContent(() => this.keepSelection((r) => this.formatRange(r, format, value)));
     }
   }
 
-  /** Calls fn that changes editor, saves changes & refreshes toolbar */
+  /** Calls fn that changes editor (not by browser), saves changes to history, updates $value & toolbar */
   protected changeContent(fn: () => void): void {
-    const prev = this.$refInput.value;
+    const inp = this.$refInput as unknown as WUPTextRichInput;
+    const prev = inp.value;
     fn();
-    this.saveChanges(prev);
+    inp._cached = undefined;
+    if (inp.value !== prev) {
+      this._refHistory?.save(prev, inp.value);
+      this.fireInput();
+    }
     this.refreshToolbar();
   }
 
@@ -802,26 +760,29 @@ export default class WUPTextRichControl<
       case "italic":
       case "underline":
       case "strike":
-        this.toggleInline(splitRange(r), format);
-        break;
       case "script": {
+        // toggle: format is removed if every text node has it already
         const nodes = splitRange(r);
-        removeInline(nodes, inlineFormats.get(value === "sub" ? "script:super" : "script:sub")!, inp); // only one is possible
-        this.toggleInline(nodes, `script:${value}`);
+        const isScript = format === "script";
+        isScript && removeInline(nodes, inlineFormats.get(value === "sub" ? "script:super" : "script:sub")!, inp); // only one is possible
+        const fmt = inlineFormats.get(isScript ? `script:${value}` : format)!;
+        nodes.every((t) => formatParents(t, fmt, inp).length)
+          ? removeInline(nodes, fmt, inp)
+          : addInline(nodes, fmt, true, inp);
         break;
       }
-      case "size": {
-        const nodes = splitRange(r);
-        const fmt = inlineFormats.get(format)!;
-        removeInline(nodes, fmt, inp);
-        value && addInline(nodes, fmt, sizes.get(value), inp);
-        break;
-      }
+      case "size":
       case "link": {
-        // remove link: whole link if selection is collapsed
         const fmt = inlineFormats.get(format)!;
-        const a = r.collapsed && formatParents(r.startContainer, fmt, inp)[0];
-        a ? unwrap(a) : removeInline(splitRange(r), fmt, inp);
+        // remove link: whole link if selection is collapsed
+        const a = format === "link" && !value && r.collapsed && formatParents(r.startContainer, fmt, inp)[0];
+        if (a) {
+          a.replaceWith(...a.childNodes);
+        } else {
+          const nodes = splitRange(r);
+          removeInline(nodes, fmt, inp);
+          value && addInline(nodes, fmt, value, inp);
+        }
         break;
       }
       case "header":
@@ -830,25 +791,45 @@ export default class WUPTextRichControl<
       case "blockquote":
       case "code-block": {
         const lines = linesOf(r, inp);
-        const tag = lineTags.get(format)!;
+        const tag = format === "blockquote" ? "BLOCKQUOTE" : "PRE";
         const isOn = lines.every((l) => l.tagName === tag);
         lines.forEach((l) => setLineTag(l, isOn ? "DIV" : tag));
         break;
       }
       case "list": {
         const lines = linesOf(r, inp);
-        const isOn = lines.every((l) => l.tagName === "LI" && listType(l.parentElement!) === value);
-        lines.forEach((l) =>
-          isOn ? setLineTag(l, "DIV") : setLineList(l, value as WUP.TextRich.FormatValues["list"])
-        );
-        mergeLists(inp);
+        const tag = value === "ordered" ? "OL" : "UL";
+        const isOn = lines.every((l) => l.parentElement!.tagName === tag);
+        lines.forEach((l) => {
+          if (isOn) {
+            setLineTag(l, "DIV");
+          } else if (l.parentElement!.tagName !== tag) {
+            const li = setLineTag(l, "LI"); // item of another list is moved out of it at first
+            const list = document.createElement(tag);
+            li.replaceWith(list);
+            list.appendChild(li);
+          }
+        });
+        // merge neighbor lists of the same type: `<ol><li>a</li></ol><ol><li>b</li></ol>` => `<ol><li>a</li><li>b</li></ol>`
+        inp.querySelectorAll(":scope > ol + ol, :scope > ul + ul").forEach((el) => {
+          el.previousElementSibling!.append(...el.childNodes);
+          el.remove();
+        });
         break;
       }
       case "align":
-        linesOf(r, inp).forEach((l) => setLineAlign(l, value as string));
-        break;
       case "indent":
-        linesOf(r, inp).forEach((l) => setLineIndent(l, value as number));
+        linesOf(r, inp).forEach((l) => {
+          if (format === "align") {
+            l.style.textAlign = value === "left" ? "" : (value as string);
+          } else {
+            // 3em per level (the same as quill)
+            const m = /^(\d+(\.\d+)?)em$/.exec(l.style.marginLeft);
+            const level = Math.min(8, Math.max(0, Math.round((m ? +m[1] : 0) / 3) + (value as number)));
+            l.style.marginLeft = level ? `${level * 3}em` : "";
+          }
+          this.removeEmptyStyle.call(l);
+        });
         break;
       case "clean-format": {
         const lines = linesOf(r, inp); // before changes in range
@@ -857,39 +838,14 @@ export default class WUPTextRichControl<
         lines.forEach((l) => setLineTag(l, "DIV").removeAttribute("style"));
         break;
       }
-      default:
-        break;
+      // no default
     }
-  }
-
-  /** Toggles inline format: it's removed if every text node has it already */
-  protected toggleInline(nodes: Text[], key: string): void {
-    const inp = this.$refInput;
-    const fmt = inlineFormats.get(key)!;
-    nodes.every((t) => formatParents(t, fmt, inp).length)
-      ? removeInline(nodes, fmt, inp)
-      : addInline(nodes, fmt, true, inp);
   }
 
   /** Formats for the next typed text (when selection is collapsed): format => value (`false` to remove format) */
   #pending = new Map<string, unknown>();
   /** Position of caret when formats for the next typed text are pointed: they're reset when caret is moved */
   #pendingAt?: [Node, number];
-  /** Toggles format for the next typed text (Ctrl+B and type text) */
-  protected togglePending(format: string, value: unknown, f: Map<string, unknown>): void {
-    const p = this.#pending;
-    if (format === "clean-format") {
-      pendingFormats.forEach((k) => f.has(k) && p.set(k, false));
-    } else if (format === "size") {
-      p.set(format, value || false);
-    } else if (format === "script") {
-      p.set(format, f.get(format) === value ? false : value);
-    } else {
-      p.set(format, !f.has(format));
-    }
-    const sel = window.getSelection()!;
-    this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
-  }
 
   /** Inserts text with formats pointed for the next typed text */
   protected insertPending(text: string): void {
@@ -897,9 +853,9 @@ export default class WUPTextRichControl<
     const sel = window.getSelection()!;
     const r = sel.getRangeAt(0);
     r.deleteContents();
-    // move caret out of elements of removed/changed formats
+    // move caret out of elements of removed/changed formats: `true` means format without value is added
     this.#pending.forEach((v, k) => {
-      if (v === false || k === "script" || k === "size") {
+      if (v !== true) {
         (k === "script" ? ["script:sub", "script:super"] : [k]).forEach((key) => {
           const el = formatParents(r.startContainer, inlineFormats.get(key)!, inp).pop(); // the outer one
           el && splitAt(el, r);
@@ -911,7 +867,7 @@ export default class WUPTextRichControl<
     this.#pending.forEach((v, k) => {
       const fmt = v !== false && inlineFormats.get(k === "script" ? `script:${v}` : k)!;
       if (fmt && !formatParents(r.startContainer, fmt, inp).length) {
-        const el = fmt.create(k === "size" ? sizes.get(v) : v);
+        const el = fmt.create(v);
         el.appendChild(node);
         node = el;
       }
@@ -945,12 +901,9 @@ export default class WUPTextRichControl<
     }
   }
 
-  /** Popup with text control to enter url of link */
-  #refLink?: WUPPopupElement;
-  /** Closes popup of link & resolves url (`null` if canceled); `isBack` - return focus & selection to editor */
-  #doneLink?: (url: string | null, isBack: boolean) => void;
-  /** Link which url is edited via popup opened by hover */
-  #hoverLink: HTMLAnchorElement | null = null;
+  /** Popup with text control to enter url of link: `done` closes it & resolves url (`null` if canceled),
+   * `isBack` - return focus & selection to editor; `a` - link which url is edited via popup opened by hover */
+  #link?: { popup: WUPPopupElement; done: (url: string | null, isBack: boolean) => void; a?: HTMLAnchorElement };
   #hoverTimer?: ReturnType<typeof setTimeout>;
 
   /** Asks url of link via popup with text control: Enter submits, Escape or moving focus out cancels (resolves `null`);
@@ -960,11 +913,10 @@ export default class WUPTextRichControl<
    * @param isHover popup is opened by hover (to edit existed link): text control isn't focused, popup is closed when pointer leaves it,
    * clearing value (Enter with empty value or button clear) resolves `""` to remove link */
   protected askLink(target: HTMLElement, url: string, isHover = false): Promise<string | null> {
-    this.#doneLink?.(null, false); // only one popup at once
+    this.#link?.done(null, false); // only one popup at once
     const p = document.createElement("wup-popup");
     p.$options.openCase = PopupOpenCases.onInit;
     p.$options.target = target;
-    p.$options.placement = [PopupPlacements.$top.$middle.$adjust, PopupPlacements.$bottom.$middle.$adjust];
     p.setAttribute("link", "");
     const el = p.appendChild(document.createElement("wup-text"));
     el.$options.label = this.#ctr.$textLink;
@@ -973,19 +925,16 @@ export default class WUPTextRichControl<
     el.$options.readOnly = this.$isReadOnly;
     el.$options.autoFocus = !isHover;
     el.$initValue = url;
-    this.#refLink = p;
 
     return new Promise((resolve) => {
       const done = (v: string | null, isBack: boolean): void => {
-        this.#doneLink = undefined;
-        this.#refLink = undefined;
-        this.#hoverLink = null;
+        this.#link = undefined;
         clearTimeout(this.#hoverTimer);
         isBack && this.restoreSelection(); // otherwise focus is moved by user
         p.$close().finally(() => p.remove());
         resolve(v);
       };
-      this.#doneLink = done;
+      this.#link = { popup: p, done, a: isHover ? (target as HTMLAnchorElement) : undefined };
       p.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           e.preventDefault(); // otherwise value of control is cleared
@@ -1001,11 +950,11 @@ export default class WUPTextRichControl<
       });
       p.addEventListener(
         "focusout",
-        (e) => this.#doneLink === done && !p.contains(e.relatedTarget as Node) && done(null, false)
+        (e) => this.#link?.done === done && !p.contains(e.relatedTarget as Node) && done(null, false)
       );
       // closed by itself: when target is removed
-      p.addEventListener("$close", (e) => e.target === p && this.#doneLink === done && done(null, false));
-      p.addEventListener("pointerenter", () => this.#hoverLink && this.gotHoverLink(this.#hoverLink));
+      p.addEventListener("$close", (e) => e.target === p && this.#link?.done === done && done(null, false));
+      p.addEventListener("pointerenter", () => this.#link?.a && this.gotHoverLink(this.#link.a));
       p.addEventListener("pointerleave", () => this.gotHoverLink(null));
       this.appendChild(p);
     });
@@ -1014,11 +963,12 @@ export default class WUPTextRichControl<
   /** Called when pointer is over link or its popup (`a` is related link) or out of them (`a` is `null`):
    *  shows popup to edit url of link with delay & hides it when pointer is out (but not while user edits url) */
   protected gotHoverLink(a: HTMLAnchorElement | null): void {
-    if ((this.#doneLink && !this.#hoverLink) || this.#refLink?.contains(document.activeElement)) {
+    const l = this.#link;
+    if (l && (!l.a || l.popup.contains(document.activeElement))) {
       return; // popup is opened via toolbar or user edits url
     }
     clearTimeout(this.#hoverTimer);
-    if (a === this.#hoverLink) {
+    if (a === (l?.a ?? null)) {
       return; // pointer is moved between link & popup
     }
     const { hoverOpenTimeout, hoverCloseTimeout } = WUPPopupElement.$defaults;
@@ -1026,11 +976,12 @@ export default class WUPTextRichControl<
       () => {
         if (a?.isConnected) {
           this.askLink(a, a.getAttribute("href")!, true).then(
-            (url) => url != null && this.changeContent(() => (url ? a.setAttribute("href", url) : unwrap(a)))
+            (url) =>
+              url != null &&
+              this.changeContent(() => (url ? a.setAttribute("href", url) : a.replaceWith(...a.childNodes)))
           );
-          this.#hoverLink = a;
         } else {
-          this.#doneLink?.(null, false);
+          this.#link?.done(null, false);
         }
       },
       a ? hoverOpenTimeout : hoverCloseTimeout
@@ -1039,17 +990,12 @@ export default class WUPTextRichControl<
 
   /** Adds link to selection or inserts link with url as text if selection is collapsed */
   protected addLink(href: string): void {
-    const fmt = inlineFormats.get("link")!;
     if (window.getSelection()!.isCollapsed) {
-      const a = fmt.create(href);
+      const a = inlineFormats.get("link")!.create(href);
       a.textContent = href;
       this.insertNode(a);
     } else {
-      this.keepSelection((r) => {
-        const nodes = splitRange(r);
-        removeInline(nodes, fmt, this.$refInput);
-        addInline(nodes, fmt, href, this.$refInput);
-      });
+      this.keepSelection((r) => this.formatRange(r, "link", href));
     }
   }
 
@@ -1062,9 +1008,7 @@ export default class WUPTextRichControl<
     r.insertNode(node);
     if (last) {
       r.setStartAfter(last);
-      r.collapse(true);
-      sel.removeAllRanges();
-      sel.addRange(r);
+      sel.collapse(r.startContainer, r.startOffset);
     }
   }
 
@@ -1083,40 +1027,21 @@ export default class WUPTextRichControl<
       // insert as inline content: lines are separated by <br>
       const frag = document.createDocumentFragment();
       const flatten = (el: Element): void => {
-        if (el.tagName === "OL" || el.tagName === "UL") {
+        if (listTags.has(el.tagName)) {
           Array.from(el.children).forEach(flatten);
           return;
         }
         frag.lastChild && frag.append(document.createElement("br"));
-        Array.from(el.childNodes).forEach((n) =>
-          (n as Element).tagName === "OL" || (n as Element).tagName === "UL" ? flatten(n as Element) : frag.append(n)
-        );
+        Array.from(el.childNodes).forEach((n) => (listTags.has(n.nodeName) ? flatten(n as Element) : frag.append(n)));
       };
       Array.from(f.children).forEach(flatten);
       this.insertNode(frag);
       return;
     }
-    const tail = document.createRange();
-    tail.setStart(r.startContainer, r.startOffset);
-    tail.setEnd(line, line.childNodes.length);
-    const after = line.cloneNode(false) as HTMLElement;
-    after.appendChild(tail.extractContents());
     const last = f.lastChild!;
-    line.after(f);
-    last.after(after);
-    !after.textContent && after.remove();
-    !line.textContent && line.remove();
+    splitAt(line, r); // empty parts are removed
+    r.insertNode(f);
     window.getSelection()!.collapse(last, last.childNodes.length);
-  }
-
-  /** Called after changes of editor (not by browser): saves history & updates $value */
-  protected saveChanges(prev: string): void {
-    const inp = this.$refInput as unknown as WUPTextRichInput;
-    inp._cached = undefined;
-    if (inp.value !== prev) {
-      this._refHistory?.save(prev, inp.value);
-      this.fireInput();
-    }
   }
 
   /** Fires event input to update $value after manual changes of editor */
@@ -1171,7 +1096,7 @@ export default class WUPTextRichControl<
         const items = Array.from(dd.querySelectorAll("li"));
         if (isItem) {
           const i = items.indexOf(el as HTMLLIElement);
-          next = e.key === "ArrowDown" ? items[(i + 1) % items.length] : items[(i - 1 + items.length) % items.length];
+          next = e.key === "ArrowDown" ? items[(i + 1) % items.length] : items.at(i - 1);
         } else {
           const focusItem = (): void =>
             (items.find((li) => li.getAttribute("aria-selected") === "true") ?? items[0])?.focus();
@@ -1240,10 +1165,19 @@ export default class WUPTextRichControl<
     if ((!mod && !e.altKey) || (isMac ? e.ctrlKey : e.metaKey) || e.getModifierState("AltGraph")) {
       return false;
     }
-    const key = codeKeys.get(e.code) ?? e.code.replace(/^(Key|Digit)/, "");
+    const key = (codeKeys.get(e.code) ?? e.code.replace(/^(Key|Digit)/, "")).toUpperCase();
     let i = -1; // index of pressed shortcut of tool
     const tool = Object.entries(this.#ctr.$hotKeys).find(([, hk]) => {
-      i = hk?.split(" ").findIndex((s) => isHotKey(s, e, key, mod)) ?? -1;
+      i =
+        hk?.split(" ").findIndex((s) => {
+          const keys = s.split("+");
+          return (
+            keys.pop()!.toUpperCase() === key &&
+            keys.includes("Control") === mod &&
+            keys.includes("Alt") === e.altKey &&
+            keys.includes("Shift") === e.shiftKey
+          );
+        }) ?? -1;
       return i !== -1;
     })?.[0];
     if (!tool) {
@@ -1253,26 +1187,21 @@ export default class WUPTextRichControl<
       this.$refToolbar.querySelector("button")?.focus();
       return true;
     }
-    if (tool === "size") {
-      const items = this.#tools.find((t) => t.format === "size")?.items;
-      items && this.stepSize(i ? -1 : 1, items);
-      return !!items;
-    }
     const el = this.findTool(tool);
     if (!el) {
       return false; // tool isn't rendered: browser shortcut works as usual
     }
-    el._format ? this.applyFormat(el._format, el._value) : el.click(); // button clear isn't ToolElement
+    if (tool === "size") {
+      // the 1st shortcut increases font size, the 2nd one decreases it: to the nearest value of dropdown
+      const cur = sizeSteps.indexOf(this.getFormats().get("size") ?? false);
+      const next = (i ? sizeSteps.slice(0, cur).reverse() : sizeSteps.slice(cur + 1)).find((v) =>
+        this.findTool(`size:${v}`)
+      );
+      next !== undefined && this.applyFormat("size", next);
+    } else {
+      el._format ? this.applyFormat(el._format, el._value) : el.click(); // button clear isn't ToolElement
+    }
     return true;
-  }
-
-  /** Increases (`step` = 1) or decreases (`step` = -1) font size to the nearest value of dropdown `size` */
-  protected stepSize(step: 1 | -1, items: ToolElement[]): void {
-    const cur = sizeSteps.indexOf(this.getFormats().get("size") ?? false);
-    const values = sizeSteps.filter((v) => items.some((li) => li._value === v)); // from smaller to larger
-    const next =
-      step > 0 ? values.find((v) => sizeSteps.indexOf(v) > cur) : values.findLast((v) => sizeSteps.indexOf(v) < cur);
-    next !== undefined && this.applyFormat("size", next);
   }
 
   protected override gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
@@ -1281,9 +1210,10 @@ export default class WUPTextRichControl<
       e.preventDefault(); // skipped for nested control in popup of link
       return;
     }
-    if (e.key === "Escape" && this.#hoverLink) {
+    const l = this.#link;
+    if (e.key === "Escape" && l?.a) {
       e.preventDefault(); // otherwise value is cleared: the 1st Escape closes popup of link
-      this.#doneLink!(null, false);
+      l.done(null, false);
       return;
     }
     super.gotKeyDown(e);
@@ -1297,8 +1227,8 @@ export default class WUPTextRichControl<
     const t = e.inputType;
     if (t.startsWith("format")) {
       e.preventDefault(); // formatting by browser (menu of Safari, iOS etc.) is replaced with custom one: to save it in custom history
-      const f = formatInputs.get(t); // color, font etc. aren't supported
-      const el = f && this.findTool(f[1] === undefined ? f[0] : `${f[0]}:${f[1]}`); // only formats rendered in toolbar
+      const k = formatInputs.get(t); // color, font etc. aren't supported
+      const el = k && this.findTool(k); // only formats rendered in toolbar
       el && this.applyFormat(el._format, el._value);
       return;
     }

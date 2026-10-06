@@ -1,10 +1,10 @@
-import { isBlockTag } from "./textRich.input";
+import { isBlockTag, listTags, sizes } from "./textRich.input";
 
 /** Inline format applied via element */
 export interface InlineFormat {
   /** Returns true if element applies the format */
   is: (el: Element) => boolean;
-  /** Returns new element that applies the format */
+  /** Returns new element that applies the format with value (ex. `"lg"` for format `size`) */
   create: (value?: unknown) => HTMLElement;
 }
 
@@ -27,7 +27,7 @@ export const inlineFormats = new Map<string, InlineFormat>([
       is: (el) => el.tagName === "SPAN" && !!(el as HTMLElement).style.fontSize,
       create: (v) => {
         const el = document.createElement("span");
-        el.style.fontSize = v as string;
+        el.style.fontSize = sizes.get(v) ?? "";
         return el;
       },
     },
@@ -53,11 +53,6 @@ export function formatParents(n: Node, f: InlineFormat, root: Node): Element[] {
     el = el.parentElement;
   }
   return arr;
-}
-
-/** Replaces element with its children */
-export function unwrap(el: Element): void {
-  el.replaceWith(...el.childNodes);
 }
 
 /** Returns text nodes inside range; text nodes at the boundaries are split so range starts/ends at edges of nodes */
@@ -115,8 +110,8 @@ export function removeInline(nodes: Text[], f: InlineFormat, root: Node): void {
     })
   );
   groups.forEach((arr, el) => {
-    isolate(el, arr[0], arr[arr.length - 1]);
-    unwrap(el);
+    isolate(el, arr[0], arr.at(-1)!);
+    el.replaceWith(...el.childNodes);
   });
 }
 
@@ -156,11 +151,6 @@ export function splitAt(el: Element, r: Range): void {
   !el.textContent && el.remove();
 }
 
-/** Returns value of format `list` by list element */
-export function listType(list: Element): "ordered" | "bullet" {
-  return list.tagName === "OL" ? "ordered" : "bullet";
-}
-
 /** Returns lines of editor: blocks placed directly into root & items of lists */
 export function getLines(root: Element): HTMLElement[] {
   const arr: HTMLElement[] = [];
@@ -171,7 +161,7 @@ export function getLines(root: Element): HTMLElement[] {
       el = el.nextElementSibling as HTMLElement | null
     ) {
       const tag = el.tagName;
-      if (tag === "OL" || tag === "UL") {
+      if (listTags.has(tag)) {
         walk(el);
       } else if (tag === "LI") {
         arr.push(el);
@@ -191,7 +181,7 @@ export function wrapLines(root: Element): boolean {
   let isChanged = false;
   let div: HTMLElement | null = null;
   Array.from(root.childNodes).forEach((n) => {
-    if (n.nodeType === Node.ELEMENT_NODE && isBlockTag((n as Element).tagName)) {
+    if (isBlockTag(n.nodeName)) {
       div = null;
     } else if (n.nodeName === "BR") {
       if (div) {
@@ -219,11 +209,11 @@ export function linesOf(r: Range, root: Element): HTMLElement[] {
   const arr = getLines(root).filter((l) => r.intersectsNode(l));
   if (!r.collapsed && arr.length > 1) {
     const end = document.createRange();
-    end.setStart(arr[arr.length - 1], 0);
+    end.setStart(arr.at(-1)!, 0);
     end.setEnd(r.endContainer, r.endOffset);
     !end.toString() && arr.pop();
   }
-  return arr.filter((l) => !arr.some((n) => n !== l && l.contains(n))); // only nested items of lists
+  return arr.filter((l, i) => !l.contains(arr[i + 1] ?? null)); // only nested items of lists: nested item follows its parent
 }
 
 /** Returns position as [line index, count of chars before position in the line] */
@@ -253,89 +243,28 @@ export function fromLinePos(lines: HTMLElement[], [i, pos]: [number, number]): [
   return last ? [last, last.length] : [line, 0];
 }
 
-/** Copies attribute style */
-function copyStyle(src: Element, dst: Element): void {
-  const s = src.getAttribute("style");
-  s && dst.setAttribute("style", s);
-}
-
-/** Moves item of list out of the list as <div>: list is split if item is in the middle */
-export function liftItem(li: HTMLElement): HTMLElement {
-  const list = li.parentElement!;
-  const div = document.createElement("div");
-  div.append(...li.childNodes);
-  copyStyle(li, div);
-  if (li.nextSibling) {
-    const rest = list.cloneNode(false);
-    while (li.nextSibling) {
-      rest.appendChild(li.nextSibling);
-    }
-    list.after(rest);
-  }
-  list.after(div);
-  li.remove();
-  !list.firstElementChild && list.remove();
-  return div;
-}
-
-/** Replaces line with element of pointed tag (item of list is moved out of the list) */
+/** Replaces line with element of pointed tag (only style is kept);
+ * item of list is moved out of the list at first (list is split if item is in the middle) */
 export function setLineTag(line: HTMLElement, tag: string): HTMLElement {
   if (line.tagName === "LI") {
-    line = liftItem(line);
+    const list = line.parentElement!;
+    if (line.nextSibling) {
+      const rest = list.cloneNode(false);
+      while (line.nextSibling) {
+        rest.appendChild(line.nextSibling);
+      }
+      list.after(rest);
+    }
+    list.after(line);
+    !list.firstElementChild && list.remove();
   }
   if (line.tagName === tag) {
     return line;
   }
   const el = document.createElement(tag);
   el.append(...line.childNodes);
-  copyStyle(line, el);
+  const s = line.getAttribute("style");
+  s && el.setAttribute("style", s);
   line.replaceWith(el);
   return el;
-}
-
-/** Converts line into item of list with pointed type */
-export function setLineList(line: HTMLElement, type: "ordered" | "bullet"): void {
-  if (line.tagName === "LI") {
-    if (listType(line.parentElement!) === type) {
-      return;
-    }
-    line = liftItem(line);
-  }
-  const li = document.createElement("li");
-  li.append(...line.childNodes);
-  copyStyle(line, li);
-  const list = document.createElement(type === "ordered" ? "ol" : "ul");
-  list.appendChild(li);
-  line.replaceWith(list);
-}
-
-/** Merges neighbor lists of the same type: `<ol><li>a</li></ol><ol><li>b</li></ol>` => `<ol><li>a</li><li>b</li></ol>` */
-export function mergeLists(root: Element): void {
-  for (let el = root.firstElementChild; el; el = el.nextElementSibling) {
-    if (el.tagName === "OL" || el.tagName === "UL") {
-      for (let next = el.nextElementSibling; next?.tagName === el.tagName; next = el.nextElementSibling) {
-        el.append(...next.childNodes);
-        next.remove();
-      }
-    }
-  }
-}
-
-/** Removes empty attribute style */
-function removeEmptyStyle(el: Element): void {
-  !el.getAttribute("style") && el.removeAttribute("style");
-}
-
-/** Sets text alignment of line ("left" is default) */
-export function setLineAlign(line: HTMLElement, align: string): void {
-  line.style.textAlign = align === "left" ? "" : align;
-  removeEmptyStyle(line);
-}
-
-/** Changes indentation of line: 3em per level (the same as quill) */
-export function setLineIndent(line: HTMLElement, diff: number): void {
-  const m = /^(\d+(\.\d+)?)em$/.exec(line.style.marginLeft);
-  const level = Math.min(8, Math.max(0, Math.round((m ? +m[1] : 0) / 3) + diff));
-  line.style.marginLeft = level ? `${level * 3}em` : "";
-  removeEmptyStyle(line);
 }

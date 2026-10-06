@@ -46,7 +46,7 @@ const paragraphTags = new Set([
   "TH",
   "TD",
 ]);
-const listTags = new Set(["OL", "UL"]);
+export const listTags = new Set(["OL", "UL"]);
 /** Elements skipped with content: unsafe or not supported */
 const skipTags = new Set([
   "SCRIPT",
@@ -73,11 +73,22 @@ const skipTags = new Set([
   "SELECT",
   "BUTTON",
   "HR",
-  "HEAD",
   "TITLE",
   "META",
   "LINK",
   "BASE",
+]);
+/** Font size by value of format `size` */
+export const sizes = new Map<unknown, string>([
+  ["sm", "small"],
+  ["lg", "x-large"],
+  ["hg", "xxx-large"],
+]);
+/** Value of format `size` by font size (supported font sizes) */
+export const sizeFormats = new Map<string, unknown>([
+  ["small", "sm"],
+  ["x-large", "lg"],
+  ["xxx-large", "hg"],
 ]);
 /** Font size by attribute `size` of `<font>` (produced by `document.execCommand("fontSize")` in another editors) */
 const fontSizes = new Map<string, string>([
@@ -85,9 +96,8 @@ const fontSizes = new Map<string, string>([
   ["5", "x-large"],
   ["7", "xxx-large"],
 ]);
-/** Supported font sizes */
-const sizes = new Set(fontSizes.values());
-const textAligns = new Set(["center", "right", "justify"]);
+/** Supported values of text-align ("left" is default) */
+export const textAligns = new Set(["center", "right", "justify"]);
 const safeProtocols = new Set(["http:", "https:", "mailto:", "tel:", "sms:"]);
 /** Positive length for margin-left (indentation) */
 const indentReg = /^\d+(\.\d+)?(px|em)$/;
@@ -101,18 +111,21 @@ export function sanitizeUrl(url: string): string {
   }
 }
 
+/** The last html converted to text & its text: validations min & max convert the same value (getter `value` sets it as well) */
+let lastText = ["", ""];
+
 /** Returns text content of html (for validations) */
 export function htmlToText(html: string): string {
-  const t = document.createElement("template");
-  t.innerHTML = html; // inert: scripts & resources aren't executed/loaded
-  return t.content.textContent || "";
+  if (html !== lastText[0]) {
+    const t = document.createElement("template");
+    t.innerHTML = html; // inert: scripts & resources aren't executed/loaded
+    lastText = [html, t.content.textContent || ""];
+  }
+  return lastText[1];
 }
 
-/** Context of cleaning; WARN: source nodes are never cloned or moved (they can be unsafe) - only new nodes are created */
-interface Ctx {
-  /** Result for editor: paragraph as `<div>` (browser adds it on Enter), bold as `<b>` */
-  isEditor: boolean;
-}
+// WARN: during cleaning source nodes are never cloned or moved (they can be unsafe): only new nodes are created;
+// param `isEditor` - result for editor: paragraph as `<div>` (browser adds it on Enter), bold as `<b>`
 
 /** Returns true if element with tag is block */
 export const isBlockTag = (tag: string): boolean =>
@@ -129,21 +142,11 @@ function copyBlockStyle(src: HTMLElement, dst: HTMLElement): void {
 /** Removes `<br>` at the end of line with content (browser adds it as placeholder) */
 function trimBr(el: HTMLElement): void {
   const last = el.lastChild;
-  last && last !== el.firstChild && (last as Element).tagName === "BR" && last.remove();
-}
-
-/** Returns true if element contains block elements */
-function hasBlocks(el: Element): boolean {
-  for (let n = el.firstElementChild; n; n = n.nextElementSibling) {
-    if (isBlockTag(n.tagName)) {
-      return true;
-    }
-  }
-  return false;
+  last && last !== el.firstChild && last.nodeName === "BR" && last.remove();
 }
 
 /** Appends cleaned inline node to dst; nested blocks are flattened into lines separated by `<br>` */
-function appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
+function appendInlineNode(n: Node, dst: HTMLElement, isEditor: boolean): void {
   if (n.nodeType === Node.TEXT_NODE) {
     dst.append((n as Text).data);
     return;
@@ -162,14 +165,14 @@ function appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
   }
   if (isBlockTag(tag)) {
     // nested block inside line: flatten into lines
-    dst.lastChild && (dst.lastChild as Element).tagName !== "BR" && dst.appendChild(document.createElement("br"));
-    appendInline(el, dst, ctx);
+    dst.lastChild && dst.lastChild.nodeName !== "BR" && dst.appendChild(document.createElement("br"));
+    appendInline(el, dst, isEditor);
     return;
   }
   let next: HTMLElement | null = null;
   const it = inlineTags.get(tag);
   if (it) {
-    next = document.createElement(ctx.isEditor && it === "strong" ? "b" : it); // <strong> is styled as label of the control
+    next = document.createElement(isEditor && it === "strong" ? "b" : it); // <strong> is styled as label of the control
   } else if (tag === "A") {
     const href = sanitizeUrl(el.getAttribute("href") || "");
     if (href) {
@@ -180,71 +183,71 @@ function appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
     }
   } else {
     const size = tag === "FONT" ? fontSizes.get(el.getAttribute("size")!) : tag === "SPAN" && el.style.fontSize;
-    if (size && sizes.has(size)) {
+    if (size && sizeFormats.has(size)) {
       next = document.createElement("span");
       next.style.fontSize = size;
     }
   }
 
   if (next) {
-    appendInline(el, next, ctx);
+    appendInline(el, next, isEditor);
     next.firstChild && dst.appendChild(next);
   } else {
-    appendInline(el, dst, ctx); // unwrap not supported element: <span>, <font>, <code> etc.
+    appendInline(el, dst, isEditor); // unwrap not supported element: <span>, <font>, <code> etc.
   }
 }
 
 /** Appends cleaned inline content of src to dst */
-function appendInline(src: Node, dst: HTMLElement, ctx: Ctx): void {
-  src.childNodes.forEach((n) => appendInlineNode(n, dst, ctx));
+function appendInline(src: Node, dst: HTMLElement, isEditor: boolean): void {
+  src.childNodes.forEach((n) => appendInlineNode(n, dst, isEditor));
 }
 
 /** Returns cleaned line: heading, blockquote, pre or paragraph */
-function toLine(src: HTMLElement, tag: string, ctx: Ctx): HTMLElement {
+function toLine(src: HTMLElement, tag: string, isEditor: boolean): HTMLElement {
   const el = document.createElement(tag);
   copyBlockStyle(src, el);
-  appendInline(src, el, ctx);
-  !ctx.isEditor && trimBr(el);
+  appendInline(src, el, isEditor);
+  !isEditor && trimBr(el);
   return el;
 }
 
 /** Appends cleaned list item to list: nested lists are kept, other content is flattened */
-function appendListItem(src: HTMLElement, list: HTMLElement, ctx: Ctx): void {
+function appendListItem(src: HTMLElement, list: HTMLElement, isEditor: boolean): void {
   const li = list.appendChild(document.createElement("li"));
   copyBlockStyle(src, li);
   src.childNodes.forEach((n) => {
-    listTags.has((n as Element).tagName) ? li.appendChild(toList(n as HTMLElement, ctx)) : appendInlineNode(n, li, ctx);
+    listTags.has(n.nodeName) ? li.appendChild(toList(n as HTMLElement, isEditor)) : appendInlineNode(n, li, isEditor);
   });
-  !ctx.isEditor && trimBr(li);
+  !isEditor && trimBr(li);
   !li.firstChild && li.appendChild(document.createElement("br"));
 }
 
 /** Returns cleaned list */
-function toList(src: HTMLElement, ctx: Ctx): HTMLElement {
+function toList(src: HTMLElement, isEditor: boolean): HTMLElement {
   const list = document.createElement(src.tagName);
   let li: HTMLElement | null = null; // for content placed directly into list (invalid html)
   src.childNodes.forEach((n) => {
-    const tag = (n as Element).tagName;
+    const tag = n.nodeName;
     if (tag === "LI") {
       li = null;
-      appendListItem(n as HTMLElement, list, ctx);
+      appendListItem(n as HTMLElement, list, isEditor);
     } else if (listTags.has(tag)) {
       li = null;
-      list.appendChild(toList(n as HTMLElement, ctx)); // nested list produced by Chrome (indent)
+      list.appendChild(toList(n as HTMLElement, isEditor)); // nested list produced by Chrome (indent)
     } else if (n.nodeType === Node.ELEMENT_NODE || (n.nodeType === Node.TEXT_NODE && (n as Text).data.trim())) {
       li ??= list.appendChild(document.createElement("li"));
-      appendInlineNode(n, li, ctx);
+      appendInlineNode(n, li, isEditor);
     }
   });
   return list;
 }
 
 /** Appends cleaned content of container (root, indentation) to dst: inline content is grouped into paragraphs */
-function appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
-  const pTag = ctx.isEditor ? "div" : "p";
+function appendBlocks(src: Node, dst: Node, isEditor: boolean): void {
+  const pTag = isEditor ? "div" : "p";
   let p: HTMLElement | null = null; // current paragraph for inline content
   const closeParagraph = (): void => {
-    p && !ctx.isEditor && trimBr(p);
+    p && !isEditor && trimBr(p);
     p = null;
   };
 
@@ -276,25 +279,25 @@ function appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
     }
     if (!isBlockTag(tag)) {
       p ??= dst.appendChild(document.createElement(pTag));
-      appendInlineNode(el, p, ctx);
+      appendInlineNode(el, p, isEditor);
       return;
     }
 
     closeParagraph();
     if (paragraphTags.has(tag)) {
-      if (hasBlocks(el)) {
-        appendBlocks(el, dst, ctx); // unwrap: `<div><ol>...</ol></div>`
+      if (Array.prototype.some.call(el.children, (c: Element) => isBlockTag(c.tagName))) {
+        appendBlocks(el, dst, isEditor); // unwrap: `<div><ol>...</ol></div>`
       } else {
-        const line = toLine(el, pTag, ctx);
+        const line = toLine(el, pTag, isEditor);
         line.firstChild && dst.appendChild(line);
       }
     } else if (lineTags.has(tag)) {
-      dst.appendChild(toLine(el, tag, ctx));
+      dst.appendChild(toLine(el, tag, isEditor));
     } else if (listTags.has(tag)) {
-      dst.appendChild(toList(el, ctx));
+      dst.appendChild(toList(el, isEditor));
     } else {
       // <li> without list
-      appendListItem(el, dst.appendChild(document.createElement("ul")), ctx);
+      appendListItem(el, dst.appendChild(document.createElement("ul")), isEditor);
     }
   });
   closeParagraph();
@@ -305,27 +308,26 @@ export function htmlToEditor(html: string): DocumentFragment {
   const f = document.createDocumentFragment();
   if (html) {
     const { body } = new DOMParser().parseFromString(html, "text/html"); // inert: scripts & resources aren't executed/loaded
-    appendBlocks(body, f, { isEditor: true });
+    appendBlocks(body, f, true);
   }
   return f;
 }
 
-/** Returns clean html of editor: paragraphs as `<p>`, inline formats as `<strong>`, `<em>` etc.;
- *  empty string if there is no text */
-export function htmlFromEditor(editor: Node): string {
-  const div = document.createElement("div");
-  appendBlocks(editor, div, { isEditor: false });
-  return div.textContent!.trim() ? div.innerHTML : "";
-}
-
 /** Represents contenteditable element with rich text where value is html */
 export default class WUPTextRichInput extends WUPTextAreaInput {
-  /** Get/set html: getter returns clean html (empty string if there is no text); setter sanitizes html
+  /** Get/set html: getter returns clean html (empty string if there is no text): paragraphs as `<p>`, inline formats as `<strong>`, `<em>` etc.;
+   * setter sanitizes html
    * @tutorial Rules
    * * only supported formats are kept: other elements are unwrapped (`<span>`, `<table>` etc.) or removed with content (`<script>`, `<img>` etc.)
    * * links with unsafe protocols are removed (`javascript:` etc.) */
   override get value(): string {
-    this._cached ??= htmlFromEditor(this);
+    if (this._cached == null) {
+      const div = document.createElement("div");
+      appendBlocks(this, div, false);
+      const text = div.textContent!;
+      this._cached = text.trim() ? div.innerHTML : "";
+      lastText = [this._cached, this._cached && text]; // validations get text without parsing html
+    }
     return this._cached;
   }
 
