@@ -205,8 +205,8 @@ export default class WUPPasswordControl<
   protected changeInputType(isVisible: boolean): void {
     const h = this.$refInput.offsetHeight;
     this.$refInput.type = isVisible ? "text" : "password";
-    const isHchanged = h !== this.$refInput.offsetHeight;
-    if (isHchanged && h) {
+    const isChanged = h !== this.$refInput.offsetHeight;
+    if (isChanged && h) {
       this.$refInput.style.height = `${h}px`;
     }
   }
