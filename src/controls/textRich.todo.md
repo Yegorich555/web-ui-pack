@@ -30,9 +30,7 @@
     note: same behavior for other similar chars etc.
     add browser test for this (if possible otherwise use jest test)
 
-3. Preferred Object instead of new Map<string, any> where it's possible, with object init is faster and TS handles this better
+3. Preferred Object instead of new Map<string, any> where it's possible, with object init is faster and TS handles this better, write this into memory
 
-4. ToolValues: rename 'code-block' into 'code', 'clean-format' into 'clean', 'clear' into 'btnClear'
-
-5. Tool.dropdown - remove option, if Tool.values is array - then show in dropdown, otherwise it's single button
+4. Tool.dropdown - remove option, if Tool.values is array - then show in dropdown, otherwise it's single button
    Also simplify WUP.TextRich.Tool via reducing options. For example create and ask could be merged into create. So if create returns promise - then it's ask inside etc. Suggest other possible ways

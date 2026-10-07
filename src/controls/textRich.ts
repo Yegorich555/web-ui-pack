@@ -64,14 +64,14 @@ declare global {
       strike: true;
       // todo add quote - suggest similar icon as blockquote - probably different look of this char: "
       blockquote: true;
-      "code-block": true;
+      code: true;
       /** Url of link: it's asked via popup */
       link: string;
       /** Removes formatting of selected text */
-      "clean-format": true;
+      clean: true;
       /** Button clear of other controls ($refBtnClear): it's rendered if `$options.clearButton` is true
        *  and works according to `$options.clearActions` (the same as Esc) */
-      clear: true;
+      btnClear: true;
       /** Heading level; `false` - normal paragraph */
       header: 1 | 2 | 3 | 4 | 5 | 6 | false;
       /** Numbered or bulleted list */
@@ -114,7 +114,7 @@ declare global {
        * * shortcut works only if tool is rendered in toolbar (see $options.toolbar)
        * * tool with values: the 1st shortcut selects the previous value (in order of `values`), the 2nd one - the next value
        * (`size`: increases & decreases font size)
-       * * `clear`: Escape clears value according to $options.clearActions (the same as in other controls) */
+       * * `btnClear`: Escape clears value according to $options.clearActions (the same as in other controls) */
       hotKey?: string;
       /** Icon of button: css image (`url("data:image/svg+xml,...")` or `var(--wup-icon-...)`) set as css-var `--icon-img`;
        *  otherwise point it via css: `wup-textrich [tool="upper"] { --icon-img: url(...) }` */
@@ -127,7 +127,7 @@ declare global {
       default?: V;
       /** Kind of format: defines default `format`, detection via `is`, sanitizing & behavior of collapsed selection
        * * `inline` - element wraps text (`<b>`, `<a>`, `<span style>`): with collapsed selection format is applied to the next typed text
-       * (if tool doesn't have `ask`); it's removed by `clean-format`
+       * (if tool doesn't have `ask`); it's removed by `clean`
        * * `line` - block element of line (`<h1>`, `<blockquote>`): it replaces selected lines (`false` - paragraph)
        * * `lineStyle` - style of line (`text-align` etc.): it's set to selected lines via `set`
        * * `embed` - element without text (`<img>`, `<hr>`): it replaces selection & caret is placed after it;
@@ -171,7 +171,7 @@ declare global {
      * @see {@link Tool} */
     type Tools = { [K in keyof ToolValues]: Tool<ToolValues[K]> } & {
       /** Button clear: `labelBack` is label when the next clearing restores previous value (see $options.clearActions) */
-      clear: { labelBack: string };
+      btnClear: { labelBack: string };
     };
     /** Toolbar item: tool `"bold"`, tool with every value `"header"` (the same as `{ header: [1, 2, 3, 4, 5, 6, false] }`)
      *  or tool with pointed values `{ header: [1, 2, false] }` */
@@ -193,8 +193,8 @@ declare global {
        *   ["bold", "italic", "underline"], // buttons
        *   ["header"], // tool with every value
        *   [{ size: ["sm", false, "lg"] }], // tool with pointed values only
-       *   ["clean-format"], // removes formatting
-       *   ["clear"], // clears value: button clear (if $options.clearButton is true)
+       *   ["clean"], // removes formatting
+       *   ["btnClear"], // clears value: button clear (if $options.clearButton is true)
        * ]
        * @defaultValue every built-in tool */
       toolbar: ToolbarGroup[];
@@ -211,7 +211,7 @@ declare global {
        * @see {@link ToolbarGroup}
        * @example
        * ```js
-       * window.myToolbar = [["bold", "italic"], ["clean-format", "clear"]];
+       * window.myToolbar = [["bold", "italic"], ["clean", "btnClear"]];
        * <wup-textrich w-toolbar="window.myToolbar"></wup-textrich>
        * ``` */
       "w-toolbar"?: string;
@@ -271,7 +271,7 @@ const tagFormats = new Map<string, [string, unknown]>([
   ["H5", ["header", 5]],
   ["H6", ["header", 6]],
   ["BLOCKQUOTE", ["blockquote", true]],
-  ["PRE", ["code-block", true]],
+  ["PRE", ["code", true]],
   ["OL", ["list", "ordered"]],
   ["UL", ["list", "bullet"]],
 ]);
@@ -296,7 +296,7 @@ const formatInputs = new Map<string, string>([
   ["formatJustifyLeft", "align:left"],
   ["formatIndent", "indent:1"],
   ["formatOutdent", "indent:-1"],
-  ["formatRemove", "clean-format"],
+  ["formatRemove", "clean"],
 ]);
 /** Command key is Cmd instead of Ctrl (iPadOS reports Macintosh, iOS - like Mac OS X) */
 const isMac = navigator.userAgent.includes("Mac");
@@ -354,7 +354,7 @@ function setInline(nodes: Text[], f: InlineFormat, value: unknown, root: Node): 
   el.$options.toolbar = [
     ["bold", "italic", "underline"],
     [{ list: ["ordered", "bullet"] }],
-    ["clean-format", "clear"],
+    ["clean", "btnClear"],
   ];
   el.$options.validations = { required: true, max: 1000 };
   el.$initValue = "<p>Some <strong>bold</strong> text</p>";
@@ -391,7 +391,7 @@ function setInline(nodes: Text[], f: InlineFormat, value: unknown, root: Node): 
  *       <wup-popup><ul role="listbox"><li role="option" tool="header:1"><h1 role="none">Heading 1</h1></li>...</ul></wup-popup>
  *     </wup-dropdown>
  *   </div>
- *   <div role="group"><button tool="clear" clear></button></div> // $refBtnClear: placed in toolbar instead of label
+ *   <div role="group"><button tool="btnClear" clear></button></div> // $refBtnClear: placed in toolbar instead of label
  * </div>
  * <wup-popup><wup-text/></wup-popup> // to enter value via $ask: url on click on toolbar button `link` or on hover on link */
 export default class WUPTextRichControl<
@@ -498,11 +498,11 @@ export default class WUPTextRichControl<
       is: byTag("blockquote"),
       create: () => document.createElement("blockquote"),
     },
-    "code-block": {
+    code: {
       label: __wupln("Code block", "aria"),
       hotKey: "Control+Alt+Shift+C",
       kind: "line",
-      is: byTag("code-block"),
+      is: byTag("code"),
       create: () => document.createElement("pre"),
     },
     link: {
@@ -648,7 +648,7 @@ export default class WUPTextRichControl<
       },
       set: (el, v) => (el.style.textAlign = v === "left" ? "" : v ?? ""),
     },
-    "clean-format": {
+    clean: {
       label: __wupln("Clear formatting", "aria"),
       hotKey: "Control+\\",
       // with collapsed selection inline formats are removed for the next typed text
@@ -663,7 +663,7 @@ export default class WUPTextRichControl<
         lines.forEach((l) => setLineTag(l, document.createElement("div")).removeAttribute("style"));
       },
     },
-    clear: {
+    btnClear: {
       label: __wupln("Clear content", "aria"),
       labelBack: __wupln("Restore", "aria"), // the next clearing restores previous value (see $options.clearActions)
       hotKey: "Escape",
@@ -681,7 +681,7 @@ export default class WUPTextRichControl<
     toolbar: [
       ["header"], // equal to [{header: [1,2,3,4,5,6, false]}],
       ["bold", "italic", "underline", "strike"], // { bold: true, italic: true, underline: true, strike: true },
-      ["blockquote", "code-block"],
+      ["blockquote", "code"],
       ["link"], // todo add to example custom tool => image: true, video: true
       ["list"], // equal to [{ list: ["ordered", "bullet"] ]
       ["script"], // equal to [{script: ['sub', 'super']}]
@@ -691,8 +691,8 @@ export default class WUPTextRichControl<
       // todo add to example as custom tool => [{ font: [] }],
       // not supported yet => [{ color: true, background: true}],
       ["align"], // equal to [{ align: ["center", "right", "justify", "left", false] }],
-      ["clean-format"],
-      ["clear"], // button clear (rendered if $options.clearButton is true)
+      ["clean"],
+      ["btnClear"], // button clear (rendered if $options.clearButton is true)
     ],
     hideHotKeysHint: false,
   });
@@ -778,7 +778,7 @@ export default class WUPTextRichControl<
     const tool = (this.#ctr.$tools as Record<string, WUP.TextRich.Tool>)[name];
     if (!tool) {
       this.throwError(`Toolbar item '${name}' isn't defined in $tools`, undefined, true);
-    } else if (name === "clear") {
+    } else if (name === "btnClear") {
       const b = this.$refBtnClear; // it's created by super if $options.clearButton is true
       if (b) {
         this.setClearLabel(b); // button isn't re-rendered: hint can be changed
@@ -822,8 +822,8 @@ export default class WUPTextRichControl<
 
   /** Sets label of button clear: it depends on state like its icon - the next clearing restores previous value or clears it */
   protected setClearLabel(b: HTMLElement): void {
-    const t = this.#ctr.$tools.clear;
-    this.setToolLabel(b, (b.getAttribute("clear") ? t.labelBack : t.label) ?? "clear", t.hotKey);
+    const t = this.#ctr.$tools.btnClear;
+    this.setToolLabel(b, (b.getAttribute("clear") ? t.labelBack : t.label) ?? "btnClear", t.hotKey);
   }
 
   /** Sets `aria-keyshortcuts` of toolbar item (`Control` is `Meta` on macOS/iOS)
@@ -853,12 +853,12 @@ export default class WUPTextRichControl<
       .join(" / ");
   }
 
-  /** Returns button clear: it's placed in toolbar (item `clear`) instead of label */
+  /** Returns button clear: it's placed in toolbar (item `btnClear`) instead of label */
   protected override renderBtnClear(): HTMLButtonElement {
     const b = document.createElement("button");
     b.type = "button";
     b.tabIndex = -1;
-    b.setAttribute("tool", "clear");
+    b.setAttribute("tool", "btnClear");
     b.setAttribute("clear", ""); // icon & state are the same as in other controls
     b.addEventListener("click", () => {
       this.restoreSelection(); // the same as other tools: focus is returned to editor
@@ -1015,10 +1015,10 @@ export default class WUPTextRichControl<
           this.applyFormat(name, v);
         }
       });
-    } else if (sel.isCollapsed && ((tool.kind === "inline" && !tool.ask) || name === "clean-format")) {
+    } else if (sel.isCollapsed && ((tool.kind === "inline" && !tool.ask) || name === "clean")) {
       // format for the next typed text (Ctrl+B and type text)
       const p = this.#pending;
-      if (name === "clean-format") {
+      if (name === "clean") {
         Object.entries(tools).forEach(([k, t]) => t.kind === "inline" && !t.ask && f.has(k) && p.set(k, false));
       } else if (tool.dropdown) {
         p.set(name, value || false);
