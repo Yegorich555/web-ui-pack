@@ -148,15 +148,28 @@ function firstOf(tools: WUP.TextRich.Tool[], el: HTMLElement): [WUP.TextRich.Too
   return t && [t, v];
 }
 
-/** Returns new element applying format of tool with value: `create` of tool is tag name or function */
+/** Adds classes to element: every argument can contain several classes separated by space (`"fa fa-bold"`) */
+export function addClass(el: Element, ...classes: Array<string | undefined>): void {
+  classes.forEach((c) => c && el.classList.add(...c.split(" ").filter(Boolean)));
+}
+
+/** Returns new element applying format of tool with value: `create` of tool is tag name or function;
+ *  element gets `classNameTag` of tool & of value */
 export function createOf(t: WUP.TextRich.Tool, v: unknown): HTMLElement {
-  return typeof t.create === "string" ? document.createElement(t.create) : t.create!(v);
+  const el = typeof t.create === "string" ? document.createElement(t.create) : t.create!(v);
+  addClass(el, t.classNameTag, t.values?.find((x) => x.value === v)?.classNameTag);
+  return el;
 }
 
 /** Returns new element of format: `<b>` is replaced with `<strong>` in value (in editor `<strong>` is styled as label of control) */
 function create(t: WUP.TextRich.Tool, v: unknown, ctx: Ctx): HTMLElement {
   const el = createOf(t, v);
-  return !ctx.isEditor && el.tagName === "B" ? document.createElement("strong") : el;
+  if (ctx.isEditor || el.tagName !== "B") {
+    return el;
+  }
+  const s = document.createElement("strong");
+  el.className && (s.className = el.className); // classNameTag
+  return s;
 }
 
 /** Returns new element of embed (`<img>` etc.) if element is embed of tools */

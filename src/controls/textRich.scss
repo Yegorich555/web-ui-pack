@@ -18,6 +18,7 @@
   --wup-icon-indent: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M3 14h12M3 4h12M9 9h6'/%3E%3Cpath fill='%23000' d='M3 7v4l2-2z'/%3E%3C/svg%3E");
   --wup-icon-align-left: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M3 9h12M3 14h10M3 4h6'/%3E%3C/svg%3E");
   --wup-icon-align-center: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M15 9H3m11 5H4m8-10H6'/%3E%3C/svg%3E");
+  --wup-icon-align-right: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M15 9H3m12 5H5m10-10H9'/%3E%3C/svg%3E");
   --wup-icon-align-justify: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M15 9H3m12 5H3M15 4H3'/%3E%3C/svg%3E");
 
   [wupdark] {
@@ -44,7 +45,7 @@
   }
 }
 
-// icons of toolbar buttons: [tool] => --wup-icon-... (icons of dropdown values are defined via `icon` of static $tools)
+// icons of toolbar buttons: [tool] => --wup-icon-... (icons of dropdown values are pointed via `className` of static $tools)
 $tools: (
   "bold": "bold",
   "italic": "italic",
@@ -167,7 +168,15 @@ $tools: (
     min-width: 4.875em;
   }
 
-  // dropdown with icons (align): button shows icon of the current value; icon is pointed via --ctrl-icon-img
+  // icons of values (align): `className` of value in static $tools => icon of button `{ align: "center" }` or item of dropdown
+  @each $icon in ("align-left", "align-center", "align-right", "align-justify") {
+    .wup-icon-#{$icon} {
+      --icon-img: var(--wup-icon-#{$icon});
+      --ctrl-icon-img: var(--wup-icon-#{$icon});
+    }
+  }
+
+  // dropdown with icons (values with `className`): button gets class of the current value; class points icon via --ctrl-icon-img
   wup-dropdown[icon] > button:before,
   wup-dropdown li[icon]:before {
     content: "";
@@ -213,12 +222,6 @@ $tools: (
       margin: 0;
       padding: 0;
     }
-  }
-
-  // align-right: the same icon as align-left but mirrored
-  wup-dropdown[tool="align"] > button[value="right"]:before,
-  [tool="align:right"]:before {
-    transform: scaleX(-1);
   }
 
   &[disabled] [role="toolbar"],

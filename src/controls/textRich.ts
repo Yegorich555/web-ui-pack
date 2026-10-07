@@ -9,6 +9,7 @@ import WUPTextControl from "./text";
 import TextHistory from "./text.history";
 import WUPTextAreaControl from "./textArea";
 import WUPTextRichInput, {
+  addClass,
   createOf,
   embedOf,
   htmlToEditor,
@@ -90,9 +91,10 @@ declare global {
       label?: string;
       /** Keyboard shortcut to apply value (see Tool.hotKey) */
       hotKey?: string;
-      /** Icon: css image (`url("data:image/svg+xml,...")` or `var(--wup-icon-...)`);
-       *  dropdown with icons shows icon of the current value & labels in tooltips */
-      icon?: string; // todo replace with className
+      /** Class of related tool bar button */
+      className?: string;
+      /** Class of element created via `create` for related tool */
+      classNameTag?: string;
     }
     /** Tool of toolbar
      * @tutorial Rules
@@ -113,9 +115,13 @@ declare global {
        * (`size`: increases & decreases font size)
        * * `btnClear`: Escape clears value according to $options.clearActions (the same as in other controls) */
       hotKey?: string;
-      /** Icon of button: css image (`url("data:image/svg+xml,...")` or `var(--wup-icon-...)`) set as css-var `--icon-img`;
-       *  otherwise point it via css: `wup-textrich [tool="upper"] { --icon-img: url(...) }` */
-      icon?: string;
+      /** Class of toolbar button or dropdown (`<wup-dropdown>`) of tool (several classes are separated by space):
+       *  to style it or point icon of button via css-var `--icon-img` (`.my-icon-upper { --icon-img: url("data:image/svg+xml,...") }`);
+       *  otherwise point it via attribute `tool`: `wup-textrich [tool="upper"] { --icon-img: url(...) }` */
+      className?: string;
+      /** Class of element created via `create` (in editor, $value & preview of dropdown item): to style format via css
+       *  (`is` can detect format by it) */
+      classNameTag?: string;
       /** Values of dropdown in default order (toolbar item `"header"` is the same as `{ header: [1, 2, 3, 4, 5, 6, false] }`);
        *  value `false` means format isn't applied: it removes format & it's selected if selection doesn't have format (`Normal` of `header`) */
       values?: ToolValue<V>[];
@@ -414,14 +420,15 @@ export default class WUPTextRichControl<
    * // custom tools: extend WUP.TextRich.ToolValues with `highlight: true; upper: true;` for TS
    * WUPTextRichControl.$tools.highlight = {
    *   label: "Highlight",
-   *   icon: "url('data:image/svg+xml,...')",
+   *   className: "my-icon-highlight", // css: `.my-icon-highlight { --icon-img: url("data:image/svg+xml,...") }`
    *   kind: "inline", // default format toggles it
-   *   is: (el) => el.tagName === "MARK" || undefined,
-   *   create: "mark",
+   *   is: (el) => el.classList.contains("my-highlight") || undefined,
+   *   create: "span",
+   *   classNameTag: "my-highlight", // css: `.my-highlight { background: yellow }`
    * };
    * WUPTextRichControl.$tools.upper = {
    *   label: "Uppercase",
-   *   icon: "url('data:image/svg+xml,...')",
+   *   className: "my-icon-upper",
    *   format: ({ texts }) => texts.forEach((t) => (t.data = t.data.toUpperCase())),
    * };
    * el.$options.toolbar = [["bold", "highlight", "upper"]];
@@ -587,30 +594,31 @@ export default class WUPTextRichControl<
     },
     align: {
       label: __wupln("Alignment", "aria"),
+      // icons are pointed via classes in css
       values: [
         {
           value: "center",
           label: __wupln("Center", "aria"),
           hotKey: "Control+Shift+E",
-          icon: "var(--wup-icon-align-center)",
+          className: "wup-icon-align-center",
         },
         {
           value: "right",
           label: __wupln("Right", "aria"),
           hotKey: "Control+Shift+R",
-          icon: "var(--wup-icon-align-left)", // mirrored via css
+          className: "wup-icon-align-right",
         },
         {
           value: "justify",
           label: __wupln("Justify", "aria"),
           hotKey: "Control+Shift+J",
-          icon: "var(--wup-icon-align-justify)",
+          className: "wup-icon-align-justify",
         },
         {
           value: false,
           label: __wupln("Left", "aria"),
           hotKey: "Control+Shift+L",
-          icon: "var(--wup-icon-align-left)",
+          className: "wup-icon-align-left",
         },
       ],
       kind: "lineStyle",
@@ -745,7 +753,7 @@ export default class WUPTextRichControl<
   protected renderTool(group: HTMLElement, item: WUP.TextRich.ToolbarItem): void {
     const [name, picked] = (typeof item === "string" ? [item] : Object.entries(item)[0]) as [string, unknown];
     const tool = (this.#ctr.$tools as Record<string, WUP.TextRich.Tool>)[name];
-    // values pointed in toolbar are taken from tool: with labels, shortcuts & icons
+    // values pointed in toolbar are taken from tool: with labels, shortcuts & classes
     const valueOf = (v: unknown): WUP.TextRich.ToolValue => tool.values?.find((t) => t.value === v) ?? { value: v };
     if (!tool) {
       this.throwError(`Toolbar item '${name}' isn't defined in $tools`, undefined, true);
@@ -773,8 +781,7 @@ export default class WUPTextRichControl<
     b.tabIndex = -1; // toolbar is reachable via Alt+F10
     b.setAttribute("tool", v ? `${name}:${v.value}` : name);
     this.setToolLabel(b, v ? v.label ?? String(v.value) : tool.label ?? name, v ? v.hotKey : tool.hotKey);
-    const icon = v ? v.icon : tool.icon;
-    icon && b.style.setProperty("--icon-img", icon);
+    addClass(b, tool.className, v?.className);
     // tool without `is` doesn't have state: it's action (embed inserts element)
     tool.is && tool.kind !== "embed" && b.setAttribute("aria-pressed", false);
     b._format = name;
@@ -837,7 +844,7 @@ export default class WUPTextRichControl<
   }
 
   /** Renders dropdown of toolbar: item shows label inside element of format (preview via `create`)
-   *  or icon (if value has it: label is shown via tooltip) */
+   *  or icon (if value has `className`: label is shown via tooltip) */
   protected renderPicker(
     group: HTMLElement,
     name: string,
@@ -848,7 +855,8 @@ export default class WUPTextRichControl<
     dd.$options.openCase = PopupOpenCases.onClick; // without onFocus: otherwise it's opened on navigation via Arrows
     dd.$options.closeOnPopupClick = false; // closed manually: otherwise popup returns focus to button instead of editor
     dd.setAttribute("tool", name);
-    values.some((v) => v.icon) && dd.setAttribute("icon", ""); // button shows icon of the current value instead of label
+    addClass(dd, tool.className);
+    values.some((v) => v.className) && dd.setAttribute("icon", ""); // button shows icon of the current value instead of label
     const b = dd.appendChild(document.createElement("button"));
     b.type = "button";
     b.tabIndex = -1;
@@ -863,9 +871,9 @@ export default class WUPTextRichControl<
       li.tabIndex = -1;
       li._format = name;
       li._value = v.value;
-      if (v.icon) {
+      if (v.className) {
         li.setAttribute("icon", "");
-        li.style.setProperty("--ctrl-icon-img", v.icon);
+        addClass(li, v.className);
         this.setToolLabel(li, label, v.hotKey); // label & shortcut are shown via tooltip like for buttons
         return;
       }
@@ -906,12 +914,12 @@ export default class WUPTextRichControl<
       } else if (el.hasAttribute("aria-pressed")) {
         el.setAttribute("aria-pressed", el._value === undefined ? cur !== false : cur === el._value);
       } else if (el.tagName === "WUP-DROPDOWN") {
-        // button shows the current value: its icon or label
+        // button shows the current value: its icon (class) or label
         const b = el.firstElementChild as HTMLElement;
         const v = tool.values?.find((x) => x.value === cur);
         b.setAttribute("value", String(cur));
         el.hasAttribute("icon")
-          ? b.style.setProperty("--ctrl-icon-img", v?.icon ?? "")
+          ? (b.className = v?.className ?? "")
           : (b.textContent = v?.label ?? (cur === false ? tool.label ?? name : String(cur)));
       }
     });
