@@ -151,6 +151,8 @@ function listenTooltips(): NonNullable<typeof tooltipLst> {
   };
 }
 
+// todo merge useToolTipOnce into useTooltip
+
 /** Call `useTooltip({ attr })` if pointed attr isn't registered yet; registration is never disposed */
 export function useTooltipOnce(attr: string): void {
   !tooltipRegs.some((a) => a.attr === attr) && useTooltip({ attr });

@@ -26,7 +26,6 @@ import {
   formatParents,
   fromLinePos,
   getLines,
-  InlineFormat,
   lineOf,
   linesOf,
   removeInline,
@@ -54,7 +53,7 @@ declare global {
      *     }
      *   }
      * }
-     * WUPTextRichControl.$tools.upper = { label: "Uppercase", format: (r) => ... };
+     * WUPTextRichControl.$tools.upper = { label: "Uppercase", format: ({ texts }) => ... };
      * el.$options.toolbar = [["bold", "upper"], ["color"]]; */
     interface ToolValues {
       bold: true;
@@ -151,10 +150,36 @@ declare global {
        * @param current value of format applied at the start of selection
        * @see {@link WUPTextRichControl.$ask} - popup with text control */
       ask?: (target: HTMLElement, control: WUPTextRichControl, current: V | undefined) => Promise<V | null | undefined>;
-      /** Applies format to selected range instead of default one (see `kind`): control saves changes in history,
-       *  restores selection (use `control.$insert` to insert content & place caret after it), updates $value & toolbar;
-       *  `value` is `true` for tool without values */
-      format?: (selectedRange: Range, value: V, control: WUPTextRichControl) => void;
+      /** Applies format to selection instead of default one (see `kind`): control saves changes in history,
+       *  restores selection (use `control.$insert` to insert content & place caret after it), updates $value & toolbar
+       * @example
+       * format: ({ texts }) => texts.forEach((t) => (t.data = t.data.toUpperCase())), // uppercase of selected text
+       * format: ({ control }) => control.$insert(document.createTextNode(new Date().toLocaleDateString())), // insert date
+       * format: (ctx) => { ctx.applyDefault(); myStatistics.push(ctx.value); }, // extends default format */
+      format?: (ctx: FormatContext<V>) => void;
+    }
+    /** Selection & helpers for `format` of tool
+     * @see {@link Tool.format} */
+    interface FormatContext<V = any> {
+      /** Selected range: it's live, so changes of editor can move it */
+      range: Range;
+      /** Value of format: `true` for tool without values, `false` removes format */
+      value: V;
+      /** Value must be set (item of dropdown, value asked via `ask`), otherwise format is toggled (button) */
+      isSet: boolean;
+      /** Selected lines: paragraphs, headings, items of lists etc. (taken before format) */
+      readonly lines: HTMLElement[];
+      /** Selected text nodes: nodes at the edges of selection are split by it;
+       *  WARN: it's computed on the 1st access, so read it before changes of editor (destructure it in arguments) */
+      readonly texts: Text[];
+      /** Element with `contenteditable` */
+      editor: HTMLElement;
+      /** Tool which format is applied */
+      tool: Tool<V>;
+      /** Control which editor is formatted */
+      control: WUPTextRichControl;
+      /** Applies default format of tool according to its `kind`: use it to extend default behavior */
+      applyDefault: () => void;
     }
     /** Tools of toolbar
      * @see {@link Tool} */
@@ -241,23 +266,6 @@ declare module "preact/jsx-runtime" {
 /** Toolbar button or item of dropdown that applies format on click: `_value` - value of format (ex. `"ordered"` for list) */
 type ToolElement = HTMLElement & { _format: string; _value?: unknown };
 
-// todo remove this const and use directly logic in the code
-/** Formatting via browser (keyboard shortcuts etc.): `beforeinput.inputType` => tool; other `format...` are prevented */
-const formatInputs = {
-  formatBold: "bold",
-  formatItalic: "italic",
-  formatUnderline: "underline",
-  formatStrikeThrough: "strike",
-  formatSuperscript: "script:super",
-  formatSubscript: "script:sub",
-  formatJustifyFull: "align:justify",
-  formatJustifyCenter: "align:center",
-  formatJustifyRight: "align:right",
-  formatJustifyLeft: "align:false",
-  formatIndent: "indent:1",
-  formatOutdent: "indent:-1",
-  formatRemove: "clean",
-};
 /** Command key is Cmd instead of Ctrl (iPadOS reports Macintosh, iOS - like Mac OS X) */
 const isMac = navigator.userAgent.includes("Mac");
 /** Keys of shortcuts by `KeyboardEvent.code` (physical key): letters & digits are taken from code (`KeyB` => `B`) */
@@ -295,16 +303,9 @@ function firstNode(r: Range): Node {
 /** Returns true if value of format applied via element matches value of tool (`true` - any value: tool without values) */
 const isMatch = (v: unknown, value: unknown): boolean => v !== undefined && (value === true || v === value);
 
-/** Returns inline format of tool: element applies it if `is` returns pointed value (any value if it's `true`) */
-function inlineOf(t: WUP.TextRich.Tool, value: unknown = true): InlineFormat {
-  return { is: (el) => isMatch(t.is!(el as HTMLElement), value), create: (v) => t.create!(v) };
-}
-
-// todo remove this function since it's called only once directly use the logic
-/** Sets value of inline format to text nodes: format is removed if value is empty */
-function setInline(nodes: Text[], f: InlineFormat, value: unknown, root: Node): void {
-  removeInline(nodes, f, root);
-  value && addInline(nodes, f, value, root);
+/** Returns function that checks if element applies format of tool: `is` of tool returns pointed value (any value if it's `true`) */
+function isOf(t: WUP.TextRich.Tool, value: unknown = true): (el: Element) => boolean {
+  return (el) => isMatch(t.is!(el as HTMLElement), value);
 }
 
 /** Form-control with rich text editor (WYSIWYG): text is formatted via toolbar; behavior & styles are similar to npm quill
@@ -417,7 +418,7 @@ export default class WUPTextRichControl<
    * WUPTextRichControl.$tools.upper = {
    *   label: "Uppercase",
    *   icon: "url('data:image/svg+xml,...')",
-   *   format: (r) => splitRange(r).forEach((t) => (t.data = t.data.toUpperCase())), // from web-ui-pack/controls/textRich.format
+   *   format: ({ texts }) => texts.forEach((t) => (t.data = t.data.toUpperCase())),
    * };
    * el.$options.toolbar = [["bold", "highlight", "upper"]];
    * @defaultValue keyboard shortcuts are similar to Google Docs, Gmail & Slack */
@@ -494,18 +495,16 @@ export default class WUPTextRichControl<
       },
       // link is removed if selection starts inside it, otherwise url is asked via popup
       ask: (target, c, cur) => (cur === undefined ? c.askLink(target, "https://") : Promise.resolve("")),
-      format(r, url, c) {
-        const inp = c.$refInput;
-        const fmt = inlineOf(this);
-        const a = !url && r.collapsed && formatParents(r.startContainer, fmt, inp)[0]; // whole link is removed
-        if (a) {
-          a.replaceWith(...a.childNodes);
-        } else if (url && r.collapsed) {
-          const el = this.create!(url); // link with url as text
-          el.textContent = url;
-          c.$insert(el);
+      format: ({ range, value: url, editor, tool, control, applyDefault }) => {
+        if (!range.collapsed) {
+          applyDefault(); // url is set to selected text: empty one removes link
+        } else if (url) {
+          const a = tool.create!(url); // link with url as text
+          a.textContent = url;
+          control.$insert(a);
         } else {
-          setInline(splitRange(r), fmt, url, inp);
+          const a = formatParents(range.startContainer, isOf(tool), editor)[0]; // whole link is removed
+          a?.replaceWith(...a.childNodes);
         }
       },
     },
@@ -519,10 +518,8 @@ export default class WUPTextRichControl<
         const t = el.tagName === "LI" && el.parentElement?.tagName; // item of list: type of its list
         return (t === "OL" && "ordered") || (t === "UL" && "bullet") || undefined;
       },
-      format: (r, v, c) => {
-        const inp = c.$refInput;
-        const lines = linesOf(r, inp);
-        const tag = v === "ordered" ? "OL" : "UL";
+      format: ({ lines, value, editor }) => {
+        const tag = value === "ordered" ? "OL" : "UL";
         const isOn = lines.every((l) => l.parentElement!.tagName === tag);
         lines.forEach((l) => {
           if (isOn) {
@@ -535,7 +532,7 @@ export default class WUPTextRichControl<
           }
         });
         // merge neighbor lists of the same type: `<ol><li>a</li></ol><ol><li>b</li></ol>` => `<ol><li>a</li><li>b</li></ol>`
-        inp.querySelectorAll(":scope > ol + ol, :scope > ul + ul").forEach((el) => {
+        editor.querySelectorAll(":scope > ol + ol, :scope > ul + ul").forEach((el) => {
           el.previousElementSibling!.append(...el.childNodes);
           el.remove();
         });
@@ -555,13 +552,12 @@ export default class WUPTextRichControl<
         { value: -1, label: __wupln("Decrease indent", "aria"), hotKey: "Control+[" },
         { value: 1, label: __wupln("Increase indent", "aria"), hotKey: "Control+]" },
       ],
-      format: (r, v, c) =>
-        linesOf(r, c.$refInput).forEach((l) => {
+      format: ({ lines, value }) =>
+        lines.forEach((l) => {
           // 3em per level (the same as quill)
           const m = /^(\d+(\.\d+)?)em$/.exec(l.style.marginLeft);
-          const level = Math.min(8, Math.max(0, Math.round((m ? +m[1] : 0) / 3) + v));
+          const level = Math.min(8, Math.max(0, Math.round((m ? +m[1] : 0) / 3) + value));
           l.style.marginLeft = level ? `${level * 3}em` : "";
-          c.removeEmptyStyle.call(l);
         }),
     },
     size: {
@@ -628,12 +624,9 @@ export default class WUPTextRichControl<
       label: __wupln("Clear formatting", "aria"),
       hotKey: "Control+\\",
       // with collapsed selection inline formats are removed for the next typed text
-      format: (r, _v, c) => {
-        const inp = c.$refInput;
-        const lines = linesOf(r, inp); // before changes in range
-        const nodes = splitRange(r);
-        Object.values(c.#ctr.$tools as Record<string, WUP.TextRich.Tool>).forEach(
-          (t) => t.kind === "inline" && t.is && removeInline(nodes, inlineOf(t), inp)
+      format: ({ lines, texts, editor }) => {
+        Object.values(WUPTextRichControl.$tools as Record<string, WUP.TextRich.Tool>).forEach(
+          (t) => t.kind === "inline" && t.is && removeInline(texts, isOf(t), editor)
         );
         // new paragraph without attributes of formats
         lines.forEach((l) => setLineTag(l, document.createElement("div")).removeAttribute("style"));
@@ -658,13 +651,13 @@ export default class WUPTextRichControl<
       ["header"], // equal to [{header: [1,2,3,4,5,6, false]}],
       ["bold", "italic", "underline", "strike"], // { bold: true, italic: true, underline: true, strike: true },
       ["blockquote", "code"],
-      ["link"], // todo add to example custom tool => image: true, video: true
+      ["link"], // todo add to demo example custom tool => image: true, video: true
       [{ list: "ordered" }, { list: "bullet" }], // buttons; ["list"] is dropdown
       [{ script: "sub" }, { script: "super" }],
       [{ indent: -1 }, { indent: 1 }],
       ["size"], // equal to [{size: ["hg", "lg", false, "sm"]}]
-      // todo add to example as custom tool => direction
-      // todo add to example as custom tool => [{ font: [] }],
+      // todo add to demo example as custom tool => direction
+      // todo add to demo example as custom tool => [{ font: [] }],
       // not supported yet => [{ color: true, background: true}],
       ["align"], // equal to [{ align: ["center", "right", "justify", false] }],
       ["clean"],
@@ -987,7 +980,7 @@ export default class WUPTextRichControl<
     if (tool.ask && value === undefined) {
       // selection is restored by positions: focus can be moved out of control (to modal etc.) & nodes can be re-rendered
       const pos = this.getSelectionPos();
-      tool.ask(this.findTool(name) ?? inp, this, f.get(name)).then((v) => {
+      tool.ask(this.findTool(name) ?? inp, this as WUPTextRichControl, f.get(name)).then((v) => {
         if (v != null) {
           inp.focus({ preventScroll: true });
           this.setSelectionPos(pos);
@@ -1013,34 +1006,54 @@ export default class WUPTextRichControl<
     }
   }
 
-  /** Applies tool to range via its `format` or default one according to `kind` of tool:
-   *  `isSet` - value is set (`false` removes format), otherwise format is toggled (it's removed if range has it already) */
-  protected formatRange(tool: WUP.TextRich.Tool, r: Range, value: unknown, isSet: boolean): void {
-    if (tool.format) {
-      tool.format(r, value, this);
-      return;
-    }
-    const inp = this.$refInput;
+  /** Applies tool to range via its `format` or default one (see formatByKind) */
+  protected formatRange(tool: WUP.TextRich.Tool, range: Range, value: unknown, isSet: boolean): void {
+    const editor: HTMLElement = this.$refInput;
+    let lines = tool.format && linesOf(range, editor); // custom format gets lines before its changes: they move range
+    let texts: Text[] | undefined;
+    const ctx: WUP.TextRich.FormatContext = {
+      range,
+      value,
+      isSet,
+      get lines() {
+        return (lines ??= linesOf(range, editor));
+      },
+      get texts() {
+        return (texts ??= splitRange(range));
+      },
+      editor,
+      tool,
+      control: this as WUPTextRichControl,
+      applyDefault: () => this.formatByKind(ctx),
+    };
+    tool.format ? tool.format(ctx) : this.formatByKind(ctx);
+  }
+
+  /** Applies default format of tool according to its `kind`: `isSet` - value is set (`false` removes format),
+   *  otherwise format is toggled (it's removed if selection has it already) */
+  protected formatByKind(ctx: WUP.TextRich.FormatContext): void {
+    const { tool, value, isSet, editor } = ctx; // lines & texts are read below: they're computed on access
     switch (tool.kind) {
       case "inline": {
-        const nodes = splitRange(r);
-        const any = inlineOf(tool);
-        const f = inlineOf(tool, value);
-        if (isSet) {
-          removeInline(nodes, any, inp);
-          value && addInline(nodes, f, value, inp);
+        const { texts } = ctx;
+        const any = isOf(tool);
+        const f = isOf(tool, value);
+        const create = (): HTMLElement => tool.create!(value);
+        if (isSet || !value) {
+          removeInline(texts, any, editor);
+          value && addInline(texts, f, create, editor);
         } else {
           // only one value is possible: elements with other values are removed (subscript & superscript)
-          value !== true && removeInline(nodes, { is: (el) => any.is(el) && !f.is(el), create: f.create }, inp);
-          nodes.every((t) => formatParents(t, f, inp).length)
-            ? removeInline(nodes, f, inp)
-            : addInline(nodes, f, value, inp);
+          value !== true && removeInline(texts, (el) => any(el) && !f(el), editor);
+          texts.every((t) => formatParents(t, f, editor).length)
+            ? removeInline(texts, f, editor)
+            : addInline(texts, f, create, editor);
         }
         break;
       }
       case "line":
       case "lineStyle": {
-        const lines = linesOf(r, inp);
+        const { lines } = ctx;
         const isOff = !value || (!isSet && lines.every((l) => isMatch(tool.is?.(l), value)));
         lines.forEach((l) => {
           if (tool.kind === "line") {
@@ -1048,7 +1061,6 @@ export default class WUPTextRichControl<
             setLineTag(l, isOff ? document.createElement("div") : tool.create!(value));
           } else {
             tool.set!(l, isOff ? undefined : value);
-            this.removeEmptyStyle.call(l);
           }
         });
         break;
@@ -1093,13 +1105,13 @@ export default class WUPTextRichControl<
     r.deleteContents();
     // move caret out of elements of removed/changed formats: `true` means format without value is added
     this.#pending.forEach((v, k) => {
-      const el = v !== true && formatParents(r.startContainer, inlineOf(tools[k]), inp).pop(); // the outer one
+      const el = v !== true && formatParents(r.startContainer, isOf(tools[k]), inp).pop(); // the outer one
       el && splitAt(el, r);
     });
     const t = document.createTextNode(text);
     let node: Node = t;
     this.#pending.forEach((v, k) => {
-      if (v !== false && !formatParents(r.startContainer, inlineOf(tools[k], v), inp).length) {
+      if (v !== false && !formatParents(r.startContainer, isOf(tools[k], v), inp).length) {
         const el = tools[k].create!(v);
         el.appendChild(node);
         node = el;
@@ -1173,13 +1185,16 @@ export default class WUPTextRichControl<
   #isInserted = false;
 
   /** Calls fn that changes editor & restores selection by lines & chars (fn can move or split nodes);
-   *  adjacent text nodes are joined (split by formatting: `"a""b"` => `"ab"`);
+   *  adjacent text nodes are joined (split by formatting: `"a""b"` => `"ab"`) & empty attributes `style` are removed
+   *  (left by changing styles: `el.style.textAlign = ""`);
    *  selection isn't restored if content is inserted via $insert (caret is placed after it) */
   protected keepSelection(fn: (r: Range) => void): void {
     const pos = this.getSelectionPos();
     this.#isInserted = false;
     fn(window.getSelection()!.getRangeAt(0));
-    this.$refInput.normalize();
+    const inp = this.$refInput;
+    inp.normalize();
+    inp.querySelectorAll("[style='']").forEach((el) => el.removeAttribute("style"));
     !this.#isInserted && this.setSelectionPos(pos);
   }
 
@@ -1561,8 +1576,17 @@ export default class WUPTextRichControl<
     const t = e.inputType;
     if (t.startsWith("format")) {
       e.preventDefault(); // formatting by browser (menu of Safari, iOS etc.) is replaced with custom one: to save it in custom history
-      const k = formatInputs[t as keyof typeof formatInputs]; // color, font etc. aren't supported
-      const el = k && this.findTool(k); // only formats rendered in toolbar
+      // inputType => tool: formatBold => bold, formatJustifyCenter => align:center etc.; color, font etc. aren't supported
+      const f = t.slice(6).toLowerCase(); // formatJustifyCenter => justifycenter
+      const k =
+        (f === "justifyfull" && "align:justify") ||
+        (f === "justifyleft" && "align:false") ||
+        (f.startsWith("justify") && `align:${f.slice(7)}`) || // center, right
+        (f.endsWith("script") && `script:${f.slice(0, -6)}`) || // superscript, subscript
+        (f.endsWith("dent") && `indent:${f === "indent" ? 1 : -1}`) || // indent, outdent
+        (f === "remove" && "clean") ||
+        f.replace("strikethrough", "strike"); // bold, italic, underline
+      const el = this.findTool(k); // only formats rendered in toolbar
       el && this.applyTool(el);
       return;
     }

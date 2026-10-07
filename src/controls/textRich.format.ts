@@ -1,19 +1,11 @@
 import { charsBefore, pointAt } from "./textArea.input";
 import { isBlockTag, listTags } from "./textRich.input";
 
-/** Inline format applied via element */
-export interface InlineFormat {
-  /** Returns true if element applies the format */
-  is: (el: Element) => boolean;
-  /** Returns new element that applies the format with value (ex. `"lg"` for format `size`) */
-  create: (value?: unknown) => HTMLElement;
-}
-
-/** Returns elements of format that wrap node (from inner to outer) inside root */
-export function formatParents(n: Node, f: InlineFormat, root: Node): Element[] {
+/** Returns elements of format (`is` returns true for them) that wrap node (from inner to outer) inside root */
+export function formatParents(n: Node, is: (el: Element) => boolean, root: Node): Element[] {
   const arr: Element[] = [];
   for (let el = (n.nodeType === Node.ELEMENT_NODE ? n : n.parentElement) as Element | null; el && el !== root; ) {
-    f.is(el) && arr.push(el);
+    is(el) && arr.push(el);
     el = el.parentElement;
   }
   return arr;
@@ -31,15 +23,21 @@ export function splitRange(r: Range): Text[] {
   }
 
   const arr: Text[] = [];
-  const root = r.commonAncestorContainer;
-  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  for (let n = root.nodeType === Node.TEXT_NODE ? root : w.nextNode(); n; n = w.nextNode()) {
+  const w = document.createTreeWalker(r.commonAncestorContainer, NodeFilter.SHOW_TEXT);
+  w.currentNode = r.startContainer.childNodes[r.startOffset] ?? r.startContainer; // walk from start of range
+  let isIn = false;
+  for (let n = w.currentNode.nodeType === Node.TEXT_NODE ? w.currentNode : w.nextNode(); n; n = w.nextNode()) {
     const t = n as Text;
-    const isOut =
-      !t.length ||
-      (t === r.startContainer && r.startOffset === t.length) ||
-      (t === r.endContainer && r.endOffset === 0);
-    !isOut && r.intersectsNode(t) && arr.push(t);
+    if (r.intersectsNode(t)) {
+      isIn = true;
+      const isOut =
+        !t.length ||
+        (t === r.startContainer && r.startOffset === t.length) ||
+        (t === r.endContainer && r.endOffset === 0);
+      !isOut && arr.push(t);
+    } else if (isIn) {
+      break; // the rest is after range
+    }
   }
   return arr;
 }
@@ -64,11 +62,11 @@ function isolate(el: Element, first: Node, last: Node): void {
   }
 }
 
-/** Removes inline format from text nodes */
-export function removeInline(nodes: Text[], f: InlineFormat, root: Node): void {
+/** Removes inline format from text nodes: elements of format (`is` returns true for them) are unwrapped around nodes */
+export function removeInline(nodes: Text[], is: (el: Element) => boolean, root: Node): void {
   const groups = new Map<Element, Text[]>(); // element of format => text nodes inside
   nodes.forEach((t) =>
-    formatParents(t, f, root).forEach((el) => {
+    formatParents(t, is, root).forEach((el) => {
       const arr = groups.get(el);
       arr ? arr.push(t) : groups.set(el, [t]);
     })
@@ -88,11 +86,11 @@ function mergePrev(el: Node | null): void {
   }
 }
 
-/** Wraps text nodes into element of format (if they don't have format yet) */
-export function addInline(nodes: Text[], f: InlineFormat, value: unknown, root: Node): void {
+/** Wraps text nodes into new element of format (if they don't have format yet: `is` returns false for their parents) */
+export function addInline(nodes: Text[], is: (el: Element) => boolean, create: () => HTMLElement, root: Node): void {
   nodes.forEach((t) => {
-    if (!formatParents(t, f, root).length) {
-      const el = f.create(value);
+    if (!formatParents(t, is, root).length) {
+      const el = create();
       t.before(el);
       el.appendChild(t);
       mergePrev(el.nextSibling);
