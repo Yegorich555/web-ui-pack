@@ -1,18 +1,8 @@
 import WUPTextAreaInput from "./textArea.input";
 
-/** Inline formats: tagName => tagName in result */
-const inlineTags = new Map<string, string>([
-  ["B", "strong"],
-  ["STRONG", "strong"],
-  ["I", "em"],
-  ["EM", "em"],
-  ["U", "u"],
-  ["S", "s"],
-  ["STRIKE", "s"],
-  ["DEL", "s"],
-  ["SUB", "sub"],
-  ["SUP", "sup"],
-]);
+/** Tools of toolbar: formats of tools are kept by sanitizer (static $tools of control) */
+type Tools = Record<string, WUP.TextRich.Tool>;
+
 /** Lines: block elements with inline content only */
 const lineTags = new Set(["H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "PRE"]);
 /** Containers converted into paragraph (`<p>` in value, `<div>` in editor) or unwrapped if contain blocks */
@@ -91,7 +81,7 @@ export const sizeFormats = new Map<string, unknown>([
   ["xxx-large", "hg"],
 ]);
 /** Font size by attribute `size` of `<font>` (produced by `document.execCommand("fontSize")` in another editors) */
-const fontSizes = new Map<string, string>([
+export const fontSizes = new Map<string, string>([
   ["2", "small"],
   ["5", "x-large"],
   ["7", "xxx-large"],
@@ -125,17 +115,126 @@ export function htmlToText(html: string): string {
   return lastText[1];
 }
 
-// WARN: during cleaning source nodes are never cloned or moved (they can be unsafe): only new nodes are created;
-// param `isEditor` - result for editor: paragraph as `<div>` (browser adds it on Enter), bold as `<b>`
+/** Returns function that checks if element is embed (`<img>` etc. of tools with kind `embed`);
+ *  `undefined` if tools don't have embeds */
+export function embedOf(tools: Tools): ((el: Element) => boolean) | undefined {
+  const arr = Object.values(tools).filter((t) => t.kind === "embed" && t.is);
+  return arr.length ? (el) => arr.some((t) => t.is!(el as HTMLElement) !== undefined) : undefined;
+}
+
+/** Returns count of chars before point (node & offset) inside root: embed (see `isEmbed`) is counted as 1 char */
+export function charsBefore(root: Node, node: Node, offset: number, isEmbed?: (el: Element) => boolean): number {
+  const r = document.createRange();
+  r.setStart(root, 0);
+  r.setEnd(node, offset);
+  let n = r.toString().length;
+  if (isEmbed) {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+    for (let el = w.nextNode() as Element | null; el; el = w.nextNode() as Element | null) {
+      if (isEmbed(el)) {
+        const p = el.parentNode!;
+        if (r.comparePoint(p, Array.prototype.indexOf.call(p.childNodes, el) + 1)) {
+          break; // embed is after point: the next ones too
+        }
+        n += 1 - el.textContent!.length; // embed is counted as 1 char instead of its text
+      }
+    }
+  }
+  return n;
+}
+
+/** Returns point (node & offset) by count of chars inside root: embed (see `isEmbed`) is counted as 1 char & its content is skipped;
+ *  point at the boundary of nodes is placed at the end of the previous one; position out of range - at the end of root */
+export function pointAt(root: Node, pos: number, isEmbed?: (el: Element) => boolean): [Node, number] {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | (isEmbed ? NodeFilter.SHOW_ELEMENT : 0));
+  let last: [Node, number] = [root, 0];
+  for (let n = w.nextNode(); n; n = w.nextNode()) {
+    if (n.nodeType === Node.TEXT_NODE) {
+      const len = (n as Text).length;
+      if (pos <= len) {
+        return [n, pos];
+      }
+      pos -= len;
+      last = [n, len];
+    } else if (isEmbed!(n as Element)) {
+      const p = n.parentNode!;
+      const i = Array.prototype.indexOf.call(p.childNodes, n);
+      if (!pos) {
+        return [p, i]; // before embed
+      }
+      pos -= 1;
+      last = [p, i + 1]; // after embed
+      if (!pos) {
+        return last;
+      }
+      while (n.lastChild) {
+        n = n.lastChild; // content of embed is skipped
+      }
+      w.currentNode = n;
+    }
+  }
+  return last;
+}
+
+// WARN: during cleaning source nodes are never cloned or moved (they can be unsafe): only new nodes are created
+
+/** Context of cleaning: tools with formats grouped by kind & type of result */
+interface Ctx {
+  /** Result for editor: paragraph as `<div>` (browser adds it on Enter), bold as `<b>` (`<strong>` is styled as label of control) */
+  isEditor: boolean;
+  inline: WUP.TextRich.Tool[];
+  line: WUP.TextRich.Tool[];
+  lineStyle: WUP.TextRich.Tool[];
+  embed: WUP.TextRich.Tool[];
+  /** Embed is added: result isn't empty even without text */
+  hasEmbed?: boolean;
+}
+
+/** Returns context of cleaning: tools grouped by kind (tool without `is`, `create` or `set` doesn't define format) */
+function ctxOf(tools: Tools, isEditor: boolean): Ctx {
+  const ctx: Ctx = { isEditor, inline: [], line: [], lineStyle: [], embed: [] };
+  Object.values(tools).forEach(
+    (t) => t.kind && t.is && (t.kind === "lineStyle" ? t.set : t.create) && ctx[t.kind].push(t)
+  );
+  return ctx;
+}
+
+/** Returns value of format applied via element (`undefined` if it isn't applied: `false` means default value) */
+function applied(t: WUP.TextRich.Tool, el: HTMLElement): unknown {
+  const v = t.is!(el);
+  return v === false ? undefined : v;
+}
+
+/** Returns the 1st tool which format is applied via element & its value */
+function firstOf(tools: WUP.TextRich.Tool[], el: HTMLElement): [WUP.TextRich.Tool, unknown] | undefined {
+  let v: unknown;
+  const t = tools.find((x) => (v = applied(x, el)) !== undefined);
+  return t && [t, v];
+}
+
+/** Returns new element of format: `<b>` is replaced with `<strong>` in value (in editor `<strong>` is styled as label of control) */
+function create(t: WUP.TextRich.Tool, v: unknown, ctx: Ctx): HTMLElement {
+  const el = t.create!(v);
+  return !ctx.isEditor && el.tagName === "B" ? document.createElement("strong") : el;
+}
+
+/** Returns new element of embed (`<img>` etc.) if element is embed of tools */
+function toEmbed(el: HTMLElement, ctx: Ctx): HTMLElement | null {
+  const m = firstOf(ctx.embed, el);
+  ctx.hasEmbed ||= !!m;
+  return m ? create(m[0], m[1], ctx) : null;
+}
 
 /** Returns true if element with tag is block */
 export const isBlockTag = (tag: string): boolean =>
   lineTags.has(tag) || paragraphTags.has(tag) || listTags.has(tag) || tag === "LI";
 
-/** Copies supported styles of block: text-align & margin-left (indentation) */
-function copyBlockStyle(src: HTMLElement, dst: HTMLElement): void {
-  const align = src.style.textAlign || src.getAttribute("align") || "";
-  textAligns.has(align) && (dst.style.textAlign = align);
+/** Copies styles of line: formats of tools with kind `lineStyle` (alignment etc.) & indentation (margin-left) */
+function copyBlockStyle(src: HTMLElement, dst: HTMLElement, ctx: Ctx): void {
+  ctx.lineStyle.forEach((t) => {
+    const v = applied(t, src);
+    v !== undefined && t.set!(dst, v);
+  });
   const ml = src.style.marginLeft;
   indentReg.test(ml) && parseFloat(ml) > 0 && (dst.style.marginLeft = ml);
 }
@@ -147,7 +246,7 @@ function trimBr(el: HTMLElement): void {
 }
 
 /** Appends cleaned inline node to dst; nested blocks are flattened into lines separated by `<br>` */
-function appendInlineNode(n: Node, dst: HTMLElement, isEditor: boolean): void {
+function appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
   if (n.nodeType === Node.TEXT_NODE) {
     dst.append((n as Text).data);
     return;
@@ -157,6 +256,11 @@ function appendInlineNode(n: Node, dst: HTMLElement, isEditor: boolean): void {
   }
   const el = n as HTMLElement;
   const tag = el.tagName;
+  const embed = toEmbed(el, ctx);
+  if (embed) {
+    dst.appendChild(embed);
+    return;
+  }
   if (skipTags.has(tag)) {
     return;
   }
@@ -167,88 +271,73 @@ function appendInlineNode(n: Node, dst: HTMLElement, isEditor: boolean): void {
   if (isBlockTag(tag)) {
     // nested block inside line: flatten into lines
     dst.lastChild && dst.lastChild.nodeName !== "BR" && dst.appendChild(document.createElement("br"));
-    appendInline(el, dst, isEditor);
+    appendInline(el, dst, ctx);
     return;
   }
-  let next: HTMLElement | null = null;
-  const it = inlineTags.get(tag);
-  if (it) {
-    next = document.createElement(isEditor && it === "strong" ? "b" : it); // <strong> is styled as label of the control
-  } else if (tag === "A") {
-    const href = sanitizeUrl(el.getAttribute("href") || "");
-    if (href) {
-      next = document.createElement("a");
-      next.setAttribute("href", href);
-      next.setAttribute("target", "_blank");
-      next.setAttribute("rel", "noopener noreferrer");
-    }
+  // inline formats of tools: element can apply several ones (`<span style="font-size; color">`) => nested elements
+  const arr = ctx.inline.flatMap((t) => {
+    const v = applied(t, el);
+    return v === undefined ? [] : [create(t, v, ctx)];
+  });
+  if (arr.length) {
+    const inner = arr.reduce((a, b) => a.appendChild(b));
+    appendInline(el, inner, ctx);
+    inner.firstChild && dst.appendChild(arr[0]);
   } else {
-    const size = tag === "FONT" ? fontSizes.get(el.getAttribute("size")!) : tag === "SPAN" && el.style.fontSize;
-    if (size && sizeFormats.has(size)) {
-      next = document.createElement("span");
-      next.style.fontSize = size;
-    }
-  }
-
-  if (next) {
-    appendInline(el, next, isEditor);
-    next.firstChild && dst.appendChild(next);
-  } else {
-    appendInline(el, dst, isEditor); // unwrap not supported element: <span>, <font>, <code> etc.
+    appendInline(el, dst, ctx); // unwrap not supported element: <span>, <font>, <code> etc.
   }
 }
 
 /** Appends cleaned inline content of src to dst */
-function appendInline(src: Node, dst: HTMLElement, isEditor: boolean): void {
-  src.childNodes.forEach((n) => appendInlineNode(n, dst, isEditor));
+function appendInline(src: Node, dst: HTMLElement, ctx: Ctx): void {
+  src.childNodes.forEach((n) => appendInlineNode(n, dst, ctx));
 }
 
-/** Returns cleaned line: heading, blockquote, pre or paragraph */
-function toLine(src: HTMLElement, tag: string, isEditor: boolean): HTMLElement {
-  const el = document.createElement(tag);
-  copyBlockStyle(src, el);
-  appendInline(src, el, isEditor);
-  !isEditor && trimBr(el);
+/** Returns line with cleaned inline content of src: element of format (heading etc.) or paragraph */
+function toLine(src: HTMLElement, el: HTMLElement, ctx: Ctx): HTMLElement {
+  copyBlockStyle(src, el, ctx);
+  appendInline(src, el, ctx);
+  !ctx.isEditor && trimBr(el);
   return el;
 }
 
 /** Appends cleaned list item to list: nested lists are kept, other content is flattened */
-function appendListItem(src: HTMLElement, list: HTMLElement, isEditor: boolean): void {
+function appendListItem(src: HTMLElement, list: HTMLElement, ctx: Ctx): void {
   const li = list.appendChild(document.createElement("li"));
-  copyBlockStyle(src, li);
+  copyBlockStyle(src, li, ctx);
   src.childNodes.forEach((n) => {
-    listTags.has(n.nodeName) ? li.appendChild(toList(n as HTMLElement, isEditor)) : appendInlineNode(n, li, isEditor);
+    listTags.has(n.nodeName) ? li.appendChild(toList(n as HTMLElement, ctx)) : appendInlineNode(n, li, ctx);
   });
-  !isEditor && trimBr(li);
+  !ctx.isEditor && trimBr(li);
   !li.firstChild && li.appendChild(document.createElement("br"));
 }
 
 /** Returns cleaned list */
-function toList(src: HTMLElement, isEditor: boolean): HTMLElement {
+function toList(src: HTMLElement, ctx: Ctx): HTMLElement {
   const list = document.createElement(src.tagName);
   let li: HTMLElement | null = null; // for content placed directly into list (invalid html)
   src.childNodes.forEach((n) => {
     const tag = n.nodeName;
     if (tag === "LI") {
       li = null;
-      appendListItem(n as HTMLElement, list, isEditor);
+      appendListItem(n as HTMLElement, list, ctx);
     } else if (listTags.has(tag)) {
       li = null;
-      list.appendChild(toList(n as HTMLElement, isEditor)); // nested list produced by Chrome (indent)
+      list.appendChild(toList(n as HTMLElement, ctx)); // nested list produced by Chrome (indent)
     } else if (n.nodeType === Node.ELEMENT_NODE || (n.nodeType === Node.TEXT_NODE && (n as Text).data.trim())) {
       li ??= list.appendChild(document.createElement("li"));
-      appendInlineNode(n, li, isEditor);
+      appendInlineNode(n, li, ctx);
     }
   });
   return list;
 }
 
 /** Appends cleaned content of container (root, indentation) to dst: inline content is grouped into paragraphs */
-function appendBlocks(src: Node, dst: Node, isEditor: boolean): void {
-  const pTag = isEditor ? "div" : "p";
+function appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
+  const pTag = ctx.isEditor ? "div" : "p";
   let p: HTMLElement | null = null; // current paragraph for inline content
   const closeParagraph = (): void => {
-    p && !isEditor && trimBr(p);
+    p && !ctx.isEditor && trimBr(p);
     p = null;
   };
 
@@ -266,9 +355,6 @@ function appendBlocks(src: Node, dst: Node, isEditor: boolean): void {
     }
     const el = n as HTMLElement;
     const tag = el.tagName;
-    if (skipTags.has(tag)) {
-      return;
-    }
     if (tag === "BR") {
       // line break after inline content means the next paragraph; otherwise it's an empty line
       if (p) {
@@ -279,62 +365,103 @@ function appendBlocks(src: Node, dst: Node, isEditor: boolean): void {
       return;
     }
     if (!isBlockTag(tag)) {
-      p ??= dst.appendChild(document.createElement(pTag));
-      appendInlineNode(el, p, isEditor);
+      // inline content: not supported elements are skipped with content (<script> etc.) except embeds of tools (<img> etc.)
+      const embed = toEmbed(el, ctx);
+      if (embed || !skipTags.has(tag)) {
+        p ??= dst.appendChild(document.createElement(pTag));
+        embed ? p.appendChild(embed) : appendInlineNode(el, p, ctx);
+      }
       return;
     }
 
     closeParagraph();
-    if (paragraphTags.has(tag)) {
-      if (Array.prototype.some.call(el.children, (c: Element) => isBlockTag(c.tagName))) {
-        appendBlocks(el, dst, isEditor); // unwrap: `<div><ol>...</ol></div>`
-      } else {
-        const line = toLine(el, pTag, isEditor);
-        line.firstChild && dst.appendChild(line);
-      }
-    } else if (lineTags.has(tag)) {
-      dst.appendChild(toLine(el, tag, isEditor));
+    const line = firstOf(ctx.line, el); // heading, blockquote etc.
+    if (line) {
+      dst.appendChild(toLine(el, create(line[0], line[1], ctx), ctx));
     } else if (listTags.has(tag)) {
-      dst.appendChild(toList(el, isEditor));
+      dst.appendChild(toList(el, ctx));
+    } else if (tag === "LI") {
+      appendListItem(el, dst.appendChild(document.createElement("ul")), ctx); // <li> without list
+    } else if (Array.prototype.some.call(el.children, (c: Element) => isBlockTag(c.tagName))) {
+      appendBlocks(el, dst, ctx); // unwrap: `<div><ol>...</ol></div>`
     } else {
-      // <li> without list
-      appendListItem(el, dst.appendChild(document.createElement("ul")), isEditor);
+      const paragraph = toLine(el, document.createElement(pTag), ctx);
+      paragraph.firstChild && dst.appendChild(paragraph);
     }
   });
   closeParagraph();
 }
 
-/** Returns sanitized content for editor: only supported formats & safe elements are kept */
-export function htmlToEditor(html: string): DocumentFragment {
+/** Returns sanitized content for editor: only formats of tools & safe elements are kept */
+export function htmlToEditor(html: string, tools: Tools): DocumentFragment {
   const f = document.createDocumentFragment();
   if (html) {
     const { body } = new DOMParser().parseFromString(html, "text/html"); // inert: scripts & resources aren't executed/loaded
-    appendBlocks(body, f, true);
+    appendBlocks(body, f, ctxOf(tools, true));
   }
   return f;
 }
 
+/** Returns clean html of value by content of src (editor or parsed html): empty string if there is no text & embeds */
+function toValue(src: Node, tools: Tools): string {
+  const div = document.createElement("div");
+  const ctx = ctxOf(tools, false);
+  appendBlocks(src, div, ctx);
+  const text = div.textContent!;
+  const v = text.trim() || ctx.hasEmbed ? div.innerHTML : "";
+  lastText = [v, v && text]; // validations get text without parsing html
+  return v;
+}
+
+/** Returns sanitized html of value: paragraphs as `<p>`, only formats of tools & safe elements are kept
+ *  (empty string if there is no text & embeds) */
+export function htmlToValue(html: string, tools: Tools): string {
+  return toValue(new DOMParser().parseFromString(html, "text/html").body, tools); // inert: scripts & resources aren't executed/loaded
+}
+
 /** Represents contenteditable element with rich text where value is html */
 export default class WUPTextRichInput extends WUPTextAreaInput {
-  /** Get/set html: getter returns clean html (empty string if there is no text): paragraphs as `<p>`, inline formats as `<strong>`, `<em>` etc.;
-   * setter sanitizes html
+  /** Tools of toolbar (static $tools of control): their formats are kept by sanitizer */
+  _tools: Tools = {};
+
+  /** Get/set html: getter returns clean html (empty string if there is no text or embeds): paragraphs as `<p>`,
+   *  inline formats as `<strong>`, `<em>` etc.; setter sanitizes html
    * @tutorial Rules
-   * * only supported formats are kept: other elements are unwrapped (`<span>`, `<table>` etc.) or removed with content (`<script>`, `<img>` etc.)
+   * * only formats of tools are kept (see `is`, `create` & `set` of $tools): other elements are unwrapped
+   * (`<span>`, `<table>` etc.) or removed with content (`<script>`, `<img>` if it isn't embed of tools etc.)
    * * links with unsafe protocols are removed (`javascript:` etc.) */
   override get value(): string {
-    if (this._cached == null) {
-      const div = document.createElement("div");
-      appendBlocks(this, div, false);
-      const text = div.textContent!;
-      this._cached = text.trim() ? div.innerHTML : "";
-      lastText = [this._cached, this._cached && text]; // validations get text without parsing html
-    }
+    this._cached ??= toValue(this, this._tools);
     return this._cached;
   }
 
   override set value(v: string) {
     this._cached = undefined;
-    this.replaceChildren(htmlToEditor(v));
+    this.replaceChildren(htmlToEditor(v, this._tools));
+  }
+
+  /** Positions of selection by chars: embed (`<img>` etc. of tools with kind `embed`) is counted as 1 char */
+  override get selection(): null | { start: number; end: number } {
+    const sel = window.getSelection();
+    if (document.activeElement !== this || !sel?.rangeCount) {
+      return null;
+    }
+    const r = sel.getRangeAt(0);
+    const isEmbed = embedOf(this._tools);
+    return {
+      start: charsBefore(this, r.startContainer, r.startOffset, isEmbed),
+      end: charsBefore(this, r.endContainer, r.endOffset, isEmbed),
+    };
+  }
+
+  override set selection(sel) {
+    if (document.activeElement !== this) {
+      return;
+    }
+    const isEmbed = embedOf(this._tools);
+    const [n1, o1] = pointAt(this, sel?.start ?? 0, isEmbed);
+    const [n2, o2] = pointAt(this, sel?.end ?? 0, isEmbed);
+    window.getSelection()!.setBaseAndExtent(n1, o1, n2, o2);
   }
 }
 

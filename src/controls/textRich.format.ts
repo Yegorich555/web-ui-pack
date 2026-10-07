@@ -1,4 +1,4 @@
-import { isBlockTag, listTags, sizes } from "./textRich.input";
+import { charsBefore, isBlockTag, listTags, pointAt } from "./textRich.input";
 
 /** Inline format applied via element */
 export interface InlineFormat {
@@ -7,43 +7,6 @@ export interface InlineFormat {
   /** Returns new element that applies the format with value (ex. `"lg"` for format `size`) */
   create: (value?: unknown) => HTMLElement;
 }
-
-const isTag =
-  (...tags: string[]) =>
-  (el: Element): boolean =>
-    tags.includes(el.tagName);
-
-/** Inline formats where key is name of format (or `format:value` for script) */
-export const inlineFormats = new Map<string, InlineFormat>([
-  ["bold", { is: isTag("B", "STRONG"), create: () => document.createElement("b") }], // <strong> is styled as label of the control
-  ["italic", { is: isTag("EM", "I"), create: () => document.createElement("em") }],
-  ["underline", { is: isTag("U"), create: () => document.createElement("u") }],
-  ["strike", { is: isTag("S", "STRIKE", "DEL"), create: () => document.createElement("s") }],
-  ["script:sub", { is: isTag("SUB"), create: () => document.createElement("sub") }],
-  ["script:super", { is: isTag("SUP"), create: () => document.createElement("sup") }],
-  [
-    "size",
-    {
-      is: (el) => el.tagName === "SPAN" && !!(el as HTMLElement).style.fontSize,
-      create: (v) => {
-        const el = document.createElement("span");
-        el.style.fontSize = sizes.get(v) ?? "";
-        return el;
-      },
-    },
-  ],
-  [
-    "link",
-    {
-      is: isTag("A"),
-      create: (v) => {
-        const el = document.createElement("a");
-        el.setAttribute("href", v as string);
-        return el;
-      },
-    },
-  ],
-]);
 
 /** Returns elements of format that wrap node (from inner to outer) inside root */
 export function formatParents(n: Node, f: InlineFormat, root: Node): Element[] {
@@ -204,6 +167,16 @@ export function wrapLines(root: Element): boolean {
   return isChanged;
 }
 
+/** Returns line of element (the nearest element placed directly into root or item of list) */
+export function lineOf(el: HTMLElement | null, root: Element): HTMLElement | null {
+  for (; el && el !== root; el = el.parentElement) {
+    if (el.parentElement === root || el.tagName === "LI") {
+      return el;
+    }
+  }
+  return null;
+}
+
 /** Returns lines that intersect with range (line is skipped if range ends at the start of it: on triple click) */
 export function linesOf(r: Range, root: Element): HTMLElement[] {
   const arr = getLines(root).filter((l) => r.intersectsNode(l));
@@ -216,36 +189,30 @@ export function linesOf(r: Range, root: Element): HTMLElement[] {
   return arr.filter((l, i) => !l.contains(arr[i + 1] ?? null)); // only nested items of lists: nested item follows its parent
 }
 
-/** Returns position as [line index, count of chars before position in the line] */
-export function toLinePos(lines: HTMLElement[], n: Node, offset: number): [number, number] {
+/** Returns position as [line index, count of chars before position in the line]: embed (see `isEmbed`) is counted as 1 char */
+export function toLinePos(
+  lines: HTMLElement[],
+  n: Node,
+  offset: number,
+  isEmbed?: (el: Element) => boolean
+): [number, number] {
   const i = lines.findLastIndex((l) => l.contains(n));
-  if (i < 0) {
-    return [0, 0];
-  }
-  const r = document.createRange();
-  r.setStart(lines[i], 0);
-  r.setEnd(n, offset);
-  return [i, r.toString().length];
+  return i < 0 ? [0, 0] : [i, charsBefore(lines[i], n, offset, isEmbed)];
 }
 
-/** Returns node & offset by position [line index, count of chars before position in the line] */
-export function fromLinePos(lines: HTMLElement[], [i, pos]: [number, number]): [Node, number] {
-  const line = lines[Math.min(i, lines.length - 1)];
-  const w = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
-  let last: Text | null = null;
-  for (let t = w.nextNode() as Text | null; t; t = w.nextNode() as Text | null) {
-    if (pos <= t.length) {
-      return [t, pos];
-    }
-    pos -= t.length;
-    last = t;
-  }
-  return last ? [last, last.length] : [line, 0];
+/** Returns node & offset by position [line index, count of chars before position in the line]: embed (see `isEmbed`) is counted as 1 char */
+export function fromLinePos(
+  lines: HTMLElement[],
+  [i, pos]: [number, number],
+  isEmbed?: (el: Element) => boolean
+): [Node, number] {
+  return pointAt(lines[Math.min(i, lines.length - 1)], pos, isEmbed);
 }
 
-/** Replaces line with element of pointed tag (only style is kept);
+/** Replaces line with element of pointed tag or with pointed element (style of line is kept: alignment etc.);
+ * line with the same tag isn't replaced (if tag is pointed);
  * item of list is moved out of the list at first (list is split if item is in the middle) */
-export function setLineTag(line: HTMLElement, tag: string): HTMLElement {
+export function setLineTag(line: HTMLElement, tag: string | HTMLElement): HTMLElement {
   if (line.tagName === "LI") {
     const list = line.parentElement!;
     if (line.nextSibling) {
@@ -261,10 +228,10 @@ export function setLineTag(line: HTMLElement, tag: string): HTMLElement {
   if (line.tagName === tag) {
     return line;
   }
-  const el = document.createElement(tag);
+  const el = typeof tag === "string" ? document.createElement(tag) : tag;
   el.append(...line.childNodes);
   const s = line.getAttribute("style");
-  s && el.setAttribute("style", s);
+  s && el.setAttribute("style", s + (el.getAttribute("style") ?? "")); // style of element is applied after style of line
   line.replaceWith(el);
   return el;
 }

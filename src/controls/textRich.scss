@@ -44,7 +44,7 @@
   }
 }
 
-// icons of toolbar items: [tool] => --wup-icon-...
+// icons of toolbar buttons: [tool] => --wup-icon-... (icons of dropdown values are defined via `icon` of static $tools)
 $tools: (
   "bold": "bold",
   "italic": "italic",
@@ -60,13 +60,6 @@ $tools: (
   "script:super": "script-super",
   "indent:-1": "indent",
   "indent:1": "indent",
-);
-// icons of aligns: [align] => --wup-icon-...
-$aligns: (
-  "left": "align-left",
-  "center": "align-center",
-  "right": "align-left",
-  "justify": "align-justify",
 );
 
 :host {
@@ -174,15 +167,15 @@ $aligns: (
     min-width: 4.875em;
   }
 
-  // icons of align: dropdown button & menu items
-  wup-dropdown[tool="align"] > button:before,
-  [tool^="align:"]:before {
+  // dropdown with icons (align): button shows icon of the current value; icon is pointed via --ctrl-icon-img
+  wup-dropdown[icon] > button:before,
+  wup-dropdown li[icon]:before {
     content: "";
     @include wup-icon;
     vertical-align: middle;
   }
 
-  wup-dropdown[tool="align"] > button:before {
+  wup-dropdown[icon] > button:before {
     --ctrl-icon-size: 1.125em;
     align-self: center;
     background: currentColor;
@@ -197,7 +190,7 @@ $aligns: (
       white-space: nowrap;
     }
 
-    // keyboard shortcut ($hotKeys) at the right side: before checkmark of selected item
+    // keyboard shortcut (`hotKey` of $tools) at the right side: before checkmark of selected item
     kbd {
       margin-left: auto;
       padding-left: 2em;
@@ -222,13 +215,6 @@ $aligns: (
     }
   }
 
-  @each $a, $icon in $aligns {
-    wup-dropdown[tool="align"] > button[value="#{$a}"],
-    [tool="align:#{$a}"] {
-      --ctrl-icon-img: var(--wup-icon-#{$icon});
-    }
-  }
-
   // align-right: the same icon as align-left but mirrored
   wup-dropdown[tool="align"] > button[value="right"]:before,
   [tool="align:right"]:before {
@@ -244,8 +230,8 @@ $aligns: (
     opacity: 0.5;
   }
 
-  // popup to enter link
-  wup-popup[link] > wup-text {
+  // popup to enter value via $ask (url of link etc.)
+  > wup-popup > wup-text {
     width: min(40em, calc(100vw - 3em)); // long urls are visible entirely; fits small screens
     margin: 0;
   }
