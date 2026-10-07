@@ -69,23 +69,15 @@ const skipTags = new Set([
   "BASE",
 ]);
 /** Font size by value of format `size` */
-export const sizes = new Map<unknown, string>([
-  ["sm", "small"],
-  ["lg", "x-large"],
-  ["hg", "xxx-large"],
-]);
+export const sizes = { sm: "small", lg: "x-large", hg: "xxx-large" };
 /** Value of format `size` by font size (supported font sizes) */
-export const sizeFormats = new Map<string, unknown>([
-  ["small", "sm"],
-  ["x-large", "lg"],
-  ["xxx-large", "hg"],
-]);
+export const sizeFormats = {
+  small: "sm",
+  "x-large": "lg",
+  "xxx-large": "hg",
+} satisfies Record<string, WUP.TextRich.ToolValues["size"]>;
 /** Font size by attribute `size` of `<font>` (produced by `document.execCommand("fontSize")` in another editors) */
-export const fontSizes = new Map<string, string>([
-  ["2", "small"],
-  ["5", "x-large"],
-  ["7", "xxx-large"],
-]);
+export const fontSizes = { "2": "small", "5": "x-large", "7": "xxx-large" };
 /** Supported values of text-align ("left" is default) */
 export const textAligns = new Set(["center", "right", "justify"]);
 const safeProtocols = new Set(["http:", "https:", "mailto:", "tel:", "sms:"]);

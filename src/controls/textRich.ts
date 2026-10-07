@@ -253,61 +253,61 @@ declare module "preact/jsx-runtime" {
 type ToolElement = HTMLElement & { _format: string; _value?: unknown };
 
 /** Formats by tagName of element: [tool, value] */
-const tagFormats = new Map<string, [string, unknown]>([
-  ["B", ["bold", true]],
-  ["STRONG", ["bold", true]],
-  ["I", ["italic", true]],
-  ["EM", ["italic", true]],
-  ["U", ["underline", true]],
-  ["S", ["strike", true]],
-  ["STRIKE", ["strike", true]],
-  ["DEL", ["strike", true]],
-  ["SUB", ["script", "sub"]],
-  ["SUP", ["script", "super"]],
-  ["H1", ["header", 1]],
-  ["H2", ["header", 2]],
-  ["H3", ["header", 3]],
-  ["H4", ["header", 4]],
-  ["H5", ["header", 5]],
-  ["H6", ["header", 6]],
-  ["BLOCKQUOTE", ["blockquote", true]],
-  ["PRE", ["code", true]],
-  ["OL", ["list", "ordered"]],
-  ["UL", ["list", "bullet"]],
-]);
+const tagFormats = {
+  B: ["bold", true],
+  STRONG: ["bold", true],
+  I: ["italic", true],
+  EM: ["italic", true],
+  U: ["underline", true],
+  S: ["strike", true],
+  STRIKE: ["strike", true],
+  DEL: ["strike", true],
+  SUB: ["script", "sub"],
+  SUP: ["script", "super"],
+  H1: ["header", 1],
+  H2: ["header", 2],
+  H3: ["header", 3],
+  H4: ["header", 4],
+  H5: ["header", 5],
+  H6: ["header", 6],
+  BLOCKQUOTE: ["blockquote", true],
+  PRE: ["code", true],
+  OL: ["list", "ordered"],
+  UL: ["list", "bullet"],
+};
 /** Returns `is` of tool: value of format applied via element by its tagName (see tagFormats) */
 const byTag =
   (tool: string) =>
   (el: Element): any => {
-    const f = tagFormats.get(el.tagName);
+    const f = tagFormats[el.tagName as keyof typeof tagFormats];
     return f?.[0] === tool ? f[1] : undefined;
   };
 /** Formatting via browser (keyboard shortcuts etc.): `beforeinput.inputType` => tool; other `format...` are prevented */
-const formatInputs = new Map<string, string>([
-  ["formatBold", "bold"],
-  ["formatItalic", "italic"],
-  ["formatUnderline", "underline"],
-  ["formatStrikeThrough", "strike"],
-  ["formatSuperscript", "script:super"],
-  ["formatSubscript", "script:sub"],
-  ["formatJustifyFull", "align:justify"],
-  ["formatJustifyCenter", "align:center"],
-  ["formatJustifyRight", "align:right"],
-  ["formatJustifyLeft", "align:left"],
-  ["formatIndent", "indent:1"],
-  ["formatOutdent", "indent:-1"],
-  ["formatRemove", "clean"],
-]);
+const formatInputs = {
+  formatBold: "bold",
+  formatItalic: "italic",
+  formatUnderline: "underline",
+  formatStrikeThrough: "strike",
+  formatSuperscript: "script:super",
+  formatSubscript: "script:sub",
+  formatJustifyFull: "align:justify",
+  formatJustifyCenter: "align:center",
+  formatJustifyRight: "align:right",
+  formatJustifyLeft: "align:left",
+  formatIndent: "indent:1",
+  formatOutdent: "indent:-1",
+  formatRemove: "clean",
+};
 /** Command key is Cmd instead of Ctrl (iPadOS reports Macintosh, iOS - like Mac OS X) */
 const isMac = navigator.userAgent.includes("Mac");
 /** Keys of shortcuts by `KeyboardEvent.code` (physical key): letters & digits are taken from code (`KeyB` => `B`) */
-const codeKeys = new Map<string, string>([
-  ["Period", "."],
-  ["Comma", ","],
-  ["BracketLeft", "["],
-  ["BracketRight", "]"],
-  ["Backslash", "\\"],
-]);
+const codeKeys = {
+  Period: ".",
+  Comma: ",",
+  BracketLeft: "[",
+  BracketRight: "]",
+  Backslash: "\\",
+};
 /** Codes of keys formatting via browser (Ctrl/Cmd + B, I, U): prevented so only shortcuts of $tools work */
 const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
 /** Positions of selection (anchor & focus): [line index, count of chars before position in the line] */
@@ -601,13 +601,15 @@ export default class WUPTextRichControl<
       kind: "inline",
       // any font size is removed via format, unsupported one is shown as default; `<font size>` is produced by other editors
       is: (el) => {
-        const size =
-          el.tagName === "FONT" ? fontSizes.get(el.getAttribute("size")!) : el.tagName === "SPAN" && el.style.fontSize;
-        return size ? ((sizeFormats.get(size) ?? false) as WUP.TextRich.ToolValues["size"]) : undefined;
+        const a = el.tagName === "FONT" && el.getAttribute("size"); // attribute is untrusted: own keys only
+        const size = a
+          ? Object.hasOwn(fontSizes, a) && fontSizes[a as keyof typeof fontSizes]
+          : el.tagName === "SPAN" && el.style.fontSize;
+        return size ? sizeFormats[size as keyof typeof sizeFormats] ?? false : undefined;
       },
       create: (v) => {
         const el = document.createElement("span");
-        el.style.fontSize = sizes.get(v) ?? "";
+        el.style.fontSize = sizes[v as keyof typeof sizes] ?? "";
         return el;
       },
     },
@@ -1448,7 +1450,7 @@ export default class WUPTextRichControl<
     if ((!mod && !e.altKey) || (isMac ? e.ctrlKey : e.metaKey) || e.getModifierState("AltGraph")) {
       return false;
     }
-    const key = (codeKeys.get(e.code) ?? e.code.replace(/^(Key|Digit)/, "")).toUpperCase();
+    const key = (codeKeys[e.code as keyof typeof codeKeys] ?? e.code.replace(/^(Key|Digit)/, "")).toUpperCase();
     /** Returns index of shortcut that matches pressed keys (`-1` if nothing) */
     const match = (hk: string | undefined): number =>
       hk?.split(" ").findIndex((s) => {
@@ -1522,7 +1524,7 @@ export default class WUPTextRichControl<
     const t = e.inputType;
     if (t.startsWith("format")) {
       e.preventDefault(); // formatting by browser (menu of Safari, iOS etc.) is replaced with custom one: to save it in custom history
-      const k = formatInputs.get(t); // color, font etc. aren't supported
+      const k = formatInputs[t as keyof typeof formatInputs]; // color, font etc. aren't supported
       const el = k && this.findTool(k); // only formats rendered in toolbar
       el && this.applyFormat(el._format, el._value);
       return;
