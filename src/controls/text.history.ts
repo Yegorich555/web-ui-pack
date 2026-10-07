@@ -81,7 +81,11 @@ export default class TextHistory {
   constructor(
     public refInput:
       | HTMLInputElement
-      | (HTMLElement & Pick<HTMLInputElement, "value" | "selectionStart" | "selectionEnd" | "setSelectionRange">)
+      | (HTMLElement &
+          Pick<HTMLInputElement, "value" | "selectionStart" | "selectionEnd" | "setSelectionRange"> & {
+            /** Start & end of selection calculated at once (contenteditable) */
+            selection?: { start: number; end: number } | null;
+          })
   ) {
     // call manually handlers instead to reduce event-listeners
     // this.refInput.addEventListener("keydown", (e) => this.handleKeyDown(e as KeyboardEvent));
@@ -149,15 +153,15 @@ export default class TextHistory {
   _stateBeforeInput?: InputState | false;
   /** Returns basic input state */
   get inputState(): InputState {
-    const pos1 = this.refInput.selectionStart || 0;
-    const pos2 = this.refInput.selectionEnd || 0;
-    const v = this.refInput.value;
+    const el = this.refInput;
+    // contenteditable: selectionStart & selectionEnd walk the whole text before caret (each of them)
+    const s = "selection" in el ? el.selection : { start: el.selectionStart, end: el.selectionEnd };
     return {
-      pos1,
-      pos2,
+      pos1: s?.start || 0,
+      pos2: s?.end || 0,
       action: InputTypes.replace,
       inserted: null,
-      value: v,
+      value: el.value,
     };
   }
 

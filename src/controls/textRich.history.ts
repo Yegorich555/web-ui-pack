@@ -12,7 +12,7 @@ export default class TextRichHistory extends TextHistory {
   /** Last char typed by user; `null` if last saved changes isn't typing
    * (the next typing is merged into the last typing: to undo words instead of chars) */
   #lastChar: string | null = null;
-  /** Position of caret after last changes */
+  /** Position of caret after last typing */
   #lastPos = 0;
   /** Snapshot of the current state before the 1st undo (to redo the last changes) */
   #head = "";
@@ -32,8 +32,8 @@ export default class TextRichHistory extends TextHistory {
         this._hist.length > TextRichHistory.maxSnapshots && this._hist.shift();
       }
       this.#lastChar = ch;
+      this.#lastPos = st.pos1 + (ch?.length ?? 0); // it's compared only after typing (selection of contenteditable is expensive)
     }
-    this.#lastPos = this.refInput.selectionEnd || 0;
     this._histTimeout && clearTimeout(this._histTimeout);
   }
 

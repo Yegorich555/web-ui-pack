@@ -495,10 +495,11 @@ export default class WUPTextRichControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.TextRich.Options> | null): void {
     super.gotChanges(propsChanged as any); // creates/removes $refBtnClear according to $options.clearButton
-    const isHints = propsChanged?.includes("hideHotKeysHint");
-    (!propsChanged || isHints || propsChanged.includes("toolbar") || propsChanged.includes("clearButton")) &&
+    (!propsChanged ||
+      propsChanged.includes("toolbar") ||
+      propsChanged.includes("hideHotKeysHint") ||
+      propsChanged.includes("clearButton")) &&
       this.renderToolbar();
-    isHints && this.setClearState(); // button clear isn't re-rendered: update its tooltip
   }
 
   /** Renders toolbar according to $options.toolbar */
@@ -524,7 +525,11 @@ export default class WUPTextRichControl<
     ) as [string, unknown[] | undefined];
 
     if (format === "clear") {
-      this.$refBtnClear && group.appendChild(this.$refBtnClear); // it's created by super if $options.clearButton is true
+      const b = this.$refBtnClear; // it's created by super if $options.clearButton is true
+      if (b) {
+        this.setToolLabel(b, format); // button isn't re-rendered: hint can be changed
+        group.appendChild(b);
+      }
     } else if (!values) {
       toolButtons.has(format)
         ? this.renderButton(group, format)
@@ -552,9 +557,10 @@ export default class WUPTextRichControl<
   /** Sets `aria-label` & tooltip of toolbar button by key of `$labels`;
    *  tooltip includes keyboard shortcut `{Tool} ({HotKeys})` if it exists & isn't hidden via $options.hideHotKeysHint */
   protected setToolLabel(b: HTMLElement, key: string): void {
-    const label = this.#ctr.$labels.get(key) ?? key;
+    // button clear: label depends on state like its icon - the next clearing restores previous value (`clear:back`) or clears it
+    const label = this.#ctr.$labels.get(b.getAttribute("clear") ? `${key}:back` : key) ?? key;
     b.setAttribute("aria-label", label);
-    const hint = this.setHotKeys(b, b.getAttribute("tool") ?? key); // button clear: the same shortcut for `clear` & `clear:back`
+    const hint = this.setHotKeys(b, key);
     b.setAttribute("w-tooltip", hint && `${label} (${hint})`); // empty: tooltip shows aria-label
   }
 
@@ -593,7 +599,6 @@ export default class WUPTextRichControl<
     b.tabIndex = -1;
     b.setAttribute("tool", "clear");
     b.setAttribute("clear", ""); // icon & state are the same as in other controls
-    this.setToolLabel(b, "clear");
     b.addEventListener("click", () => {
       this.restoreSelection(); // the same as other tools: focus is returned to editor
       this.clearValue();
@@ -1266,9 +1271,10 @@ export default class WUPTextRichControl<
   }
 
   protected override setClearState(): ValueType | undefined {
-    const next = super.setClearState();
-    // label (tooltip) of button clear depends on state like its icon: the next clearing restores previous value or clears it
-    this.$refBtnClear && this.setToolLabel(this.$refBtnClear, this.#ctr.$isEmpty(next) ? "clear" : "clear:back");
+    const b = this.$refBtnClear;
+    const was = b?.getAttribute("clear");
+    const next = super.setClearState(); // it's called on every change: label is updated only if state is changed
+    b && b.getAttribute("clear") !== was && this.setToolLabel(b, "clear");
     return next;
   }
 }

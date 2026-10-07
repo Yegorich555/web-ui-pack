@@ -380,8 +380,14 @@ export default class WUPTextControl<
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     const isUndoRedo = this._refHistory?.handleBeforeInput(e);
 
-    this.#declineInputEnd?.call(this);
-    this._beforeSnap = TextHistory.historyToSnapshot(this.$refInput.value, this.$refInput.selectionStart || 0);
+    const decline = this.#declineInputEnd;
+    decline?.call(this);
+    // state is captured by history already (selectionStart of contenteditable walks the whole text before caret)
+    const st = (!decline && this._refHistory?._stateBeforeInput) || {
+      value: this.$refInput.value,
+      pos1: this.$refInput.selectionStart || 0,
+    };
+    this._beforeSnap = TextHistory.historyToSnapshot(st.value, st.pos1);
     setTimeout(() => delete this._beforeSnap);
 
     if (!isUndoRedo && this._opts.mask) {
@@ -567,9 +573,9 @@ export default class WUPTextControl<
 
   protected override setClearState(): ValueType | undefined {
     const next = super.setClearState();
-    if (this.$refBtnClear) {
-      this.$refBtnClear.setAttribute("clear", this.#ctr.$isEmpty(next) ? "" : "back");
-    }
+    const b = this.$refBtnClear;
+    const v = this.#ctr.$isEmpty(next) ? "" : "back";
+    b && b.getAttribute("clear") !== v && b.setAttribute("clear", v); // it's called on every change: skip the same value
     return next;
   }
 

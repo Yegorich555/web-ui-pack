@@ -104,6 +104,7 @@ const indentReg = /^\d+(\.\d+)?(px|em)$/;
 
 /** Returns url if its protocol is safe (http, https, mailto, tel, sms) otherwise empty string */
 export function sanitizeUrl(url: string): string {
+  // todo update when min Safari 18+ (URL.parse returns null instead of throwing, so without try/catch): return safeProtocols.has(URL.parse(url, document.baseURI)?.protocol ?? "") ? url : "";
   try {
     return safeProtocols.has(new URL(url, document.baseURI).protocol) ? url : "";
   } catch {
