@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import Page from "src/elements/page";
 import { WUPTextRichControl } from "web-ui-pack";
-import stylesCom from "./controls.scss";
+import Example1 from "./example1";
+import stylesCom from "../controls.scss";
 
 WUPTextRichControl.$use();
 
@@ -20,7 +21,7 @@ export default function TextRichControlView() {
       link="src/controls/textRich.ts"
       details={{
         tag: "wup-textrich",
-        linkDemo: "demo/src/components/controls/textRich.tsx",
+        linkDemo: "demo/src/components/controls/textRich/textRich.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
       features={[
@@ -35,7 +36,7 @@ export default function TextRichControlView() {
         "Validations min/max count visible chars only",
         "Uses own js-engine and doesn't depend on Browser (not used deprecated and not stable document.execCommand)",
         "All styles are globally defined except <pre/> and <blockquote/>: use <div [wup-textrich] /> to render content with same styles",
-        // todo "Ability to add custom tool to toolbar"
+        "Custom tools via static $tools: buttons, dropdowns, actions, new tags & embeds (see example below)",
       ]}
     >
       <wup-form
@@ -47,6 +48,7 @@ export default function TextRichControlView() {
         }}
         w-autoFocus
       >
+        {/* todo issue delete 1st line which is <h2> then 2nd line applies this style - it's wrong */}
         <wup-textrich
           w-name="description"
           w-label="Rich text"
@@ -99,6 +101,7 @@ export default function TextRichControlView() {
             w-initValue="Disabled <strong>text</strong>"
           />
         </div>
+        <Example1 />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

@@ -1,6 +1,7 @@
 import { inheritDefaults } from "../baseElement";
 import WUPDropdownElement from "../dropdownElement";
 import onEvent from "../helpers/onEvent";
+import { stringPrettify } from "../helpers/string";
 import WUPPopupElement from "../popup/popupElement";
 import { PopupOpenCases } from "../popup/popupElement.types";
 import { useTooltipOnce } from "../popup/popupTooltip";
@@ -56,7 +57,9 @@ declare global {
      * }
      * WUPTextRichControl.$tools.upper = { label: "Uppercase", format: ({ texts }) => ... };
      * el.$options.toolbar = [["bold", "upper"], ["color"]]; */
-    interface ToolValues {
+    interface ToolValues extends BuiltInToolValues {}
+    /** Built-in tools: they're always defined in static $tools (custom ones are optional) */
+    interface BuiltInToolValues {
       bold: true;
       italic: true;
       underline: true;
@@ -87,7 +90,7 @@ declare global {
     interface ToolValue<V = any> {
       /** Value applied by tool (ex. `1` for `header`) */
       value: V;
-      /** `aria-label` & tooltip of button or text of dropdown item; @defaultValue `String(value)` */
+      /** `aria-label` & tooltip of button or text of dropdown item; @defaultValue prettified value (`sans-serif` => `Sans Serif`) */
       label?: string;
       /** Keyboard shortcut to apply value (see Tool.hotKey) */
       hotKey?: string;
@@ -153,8 +156,8 @@ declare global {
       /** Sets value of format to line (`undefined` removes it): used by default format & sanitizer of `lineStyle`;
        *  WARN: line replaced via format `line` (heading etc.) keeps only `style`, so use style properties instead of attributes */
       set?: (el: HTMLElement, value: V | undefined) => void;
-      /** Asks value via own UI (popup, modal etc.) when tool is applied without value (button or keyboard shortcut of tool without values):
-       *  format is applied with resolved value (`null` or `undefined` cancels it);
+      /** Asks value via own UI (popup, modal etc.) when tool is applied without value (button or keyboard shortcut of tool without values)
+       *  or on click on `embed` element (image etc.: asked value replaces it): format is applied with resolved value (`null` or `undefined` cancels it);
        *  selection is restored even if focus is moved out of control (to modal etc.)
        * @param target element to place popup near it: button of tool or editor (if tool isn't rendered)
        * @param current value of format applied at the start of selection
@@ -193,7 +196,9 @@ declare global {
     }
     /** Tools of toolbar
      * @see {@link Tool} */
-    type Tools = { [K in keyof ToolValues]: Tool<ToolValues[K]> } & {
+    type Tools = { [K in keyof BuiltInToolValues]: Tool<ToolValues[K]> } & {
+      [K in keyof ToolValues]?: Tool<ToolValues[K]>;
+    } & {
       /** Button clear: `labelBack` is label when the next clearing restores previous value (see $options.clearActions) */
       btnClear: { labelBack: string };
     };
@@ -317,6 +322,10 @@ const isMatch = (v: unknown, value: unknown): boolean => v !== undefined && (val
 function isOf(t: WUP.TextRich.Tool, value: unknown = true): (el: Element) => boolean {
   return (el) => isMatch(t.is!(el as HTMLElement), value);
 }
+
+/** Returns label of tool value: pointed one or prettified value (`sans-serif` => `Sans Serif`) */
+const labelOf = (v: WUP.TextRich.ToolValue): string =>
+  v.label ?? __wupln(stringPrettify(String(v.value), true, true), "content");
 
 /** Form-control with rich text editor (WYSIWYG): text is formatted via toolbar; behavior & styles are similar to npm quill
  * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textRich}
@@ -659,13 +668,11 @@ export default class WUPTextRichControl<
       ["header"], // equal to [{header: [1,2,3,4,5,6, false]}],
       ["bold", "italic", "underline", "strike"], // { bold: true, italic: true, underline: true, strike: true },
       ["blockquote", "code"],
-      ["link"], // todo add to demo example custom tool => image: true, video: true
+      ["link"],
       [{ list: "ordered" }, { list: "bullet" }], // buttons; ["list"] is dropdown
       [{ script: "sub" }, { script: "super" }],
       [{ indent: -1 }, { indent: 1 }],
       ["size"], // equal to [{size: ["hg", "lg", false, "sm"]}]
-      // todo add to demo example as custom tool => direction
-      // todo add to demo example as custom tool => [{ font: [] }],
       // not supported yet => [{ color: true, background: true}],
       ["align"], // equal to [{ align: ["center", "right", "justify", false] }],
       ["clean"],
@@ -722,6 +729,8 @@ export default class WUPTextRichControl<
       if (href) {
         e.preventDefault();
         window.open(href, "_blank", "noopener,noreferrer");
+      } else {
+        this.gotClickEmbed(e.target as HTMLElement);
       }
     });
   }
@@ -780,7 +789,7 @@ export default class WUPTextRichControl<
     b.type = "button";
     b.tabIndex = -1; // toolbar is reachable via Alt+F10
     b.setAttribute("tool", v ? `${name}:${v.value}` : name);
-    this.setToolLabel(b, v ? v.label ?? String(v.value) : tool.label ?? name, v ? v.hotKey : tool.hotKey);
+    this.setToolLabel(b, v ? labelOf(v) : tool.label ?? name, v ? v.hotKey : tool.hotKey);
     addClass(b, tool.className, v?.className);
     // tool without `is` doesn't have state: it's action (embed inserts element)
     tool.is && tool.kind !== "embed" && b.setAttribute("aria-pressed", false);
@@ -865,7 +874,7 @@ export default class WUPTextRichControl<
     ul.setAttribute("role", "listbox");
     values.forEach((v) => {
       const li = ul.appendChild(document.createElement("li")) as HTMLLIElement & ToolElement;
-      const label = v.label ?? String(v.value);
+      const label = labelOf(v);
       li.setAttribute("role", "option");
       li.setAttribute("tool", `${name}:${v.value}`);
       li.tabIndex = -1;
@@ -920,7 +929,7 @@ export default class WUPTextRichControl<
         b.setAttribute("value", String(cur));
         el.hasAttribute("icon")
           ? (b.className = v?.className ?? "")
-          : (b.textContent = v?.label ?? (cur === false ? tool.label ?? name : String(cur)));
+          : (b.textContent = cur === false && !v ? tool.label ?? name : labelOf(v ?? { value: cur }));
       }
     });
   }
@@ -1312,6 +1321,23 @@ export default class WUPTextRichControl<
     const { $textLink, $errorLink } = this.#ctr;
     const validations = { required: !a, url: (v?: string) => !!v && !sanitizeUrl(v) && $errorLink };
     return this.$ask(target, url, { label: $textLink, validations }, a);
+  }
+
+  /** Called on click in editor: click on embed (image etc.) asks new value via `ask` of its tool & replaces embed
+   *  (if tool is rendered in toolbar) */
+  protected gotClickEmbed(el: HTMLElement): void {
+    const tools = this.#ctr.$tools as Record<string, WUP.TextRich.Tool>;
+    const name = Object.keys(tools).find((k) => {
+      const t = tools[k];
+      return t.kind === "embed" && t.ask && t.is?.(el) !== undefined;
+    });
+    if (name && this.findTool(name)) {
+      const r = document.createRange();
+      r.selectNode(el); // asked value replaces selected embed
+      window.getSelection()!.removeAllRanges();
+      window.getSelection()!.addRange(r);
+      this.applyFormat(name);
+    }
   }
 
   /** Called when pointer is over link or its popup (`a` is related link) or out of them (`a` is `null`):

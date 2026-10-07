@@ -17,7 +17,7 @@ import ModalView from "./components/modal/modalView";
 
 import TextControlView from "./components/controls/text";
 import TextAreaControlView from "./components/controls/textArea";
-import TextRichControlView from "./components/controls/textRich";
+import TextRichControlView from "./components/controls/textRich/textRich";
 import PasswordControlView from "./components/controls/password";
 import SelectControlView from "./components/controls/select";
 import SwitchControlView from "./components/controls/switch";

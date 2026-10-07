@@ -3,6 +3,7 @@
 :root {
   --ctrl-textrich-quote: #ccc;
   --ctrl-textrich-code-bg: #f0f0f0;
+  // todo svg icons are bad rendered when small - need to improve render quality OR use png instead - let try fix for 1st icon  --wup-icon-bold
   --wup-icon-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 4h4.5A2.5 2.5 0 0 1 12 6.5 2.5 2.5 0 0 1 9.5 9H5zm0 5h5.5a2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5H5z'/%3E%3C/svg%3E");
   --wup-icon-italic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M7 4h6M5 14h6m-3 0 2-10'/%3E%3C/svg%3E");
   --wup-icon-underline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 18 18'%3E%3Cpath d='M5 3v6a4.01 4.01 0 0 0 4 4 4.01 4.01 0 0 0 4-4V3'/%3E%3Crect width='12' height='1' x='3' y='15' fill='%23000' stroke='none' rx='.5' ry='.5'/%3E%3C/svg%3E");
@@ -64,6 +65,7 @@ $tools: (
 );
 
 :host {
+  // todo margin-top is wrong for this control, since there is no label content in this area - need to descrease it
   position: relative; // to position label relative to control instead of editor
   display: flex;
   flex-direction: column;
