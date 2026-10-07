@@ -76,8 +76,6 @@ export const sizeFormats = {
   "x-large": "lg",
   "xxx-large": "hg",
 } satisfies Record<string, WUP.TextRich.ToolValues["size"]>;
-/** Font size by attribute `size` of `<font>` (produced by `document.execCommand("fontSize")` in another editors) */
-export const fontSizes = { "2": "small", "5": "x-large", "7": "xxx-large" };
 /** Supported values of text-align ("left" is default) */
 export const textAligns = new Set(["center", "right", "justify"]);
 const safeProtocols = new Set(["http:", "https:", "mailto:", "tel:", "sms:"]);
@@ -150,9 +148,14 @@ function firstOf(tools: WUP.TextRich.Tool[], el: HTMLElement): [WUP.TextRich.Too
   return t && [t, v];
 }
 
+/** Returns new element applying format of tool with value: `create` of tool is tag name or function */
+export function createOf(t: WUP.TextRich.Tool, v: unknown): HTMLElement {
+  return typeof t.create === "string" ? document.createElement(t.create) : t.create!(v);
+}
+
 /** Returns new element of format: `<b>` is replaced with `<strong>` in value (in editor `<strong>` is styled as label of control) */
 function create(t: WUP.TextRich.Tool, v: unknown, ctx: Ctx): HTMLElement {
-  const el = t.create!(v);
+  const el = createOf(t, v);
   return !ctx.isEditor && el.tagName === "B" ? document.createElement("strong") : el;
 }
 

@@ -9,8 +9,8 @@ import WUPTextControl from "./text";
 import TextHistory from "./text.history";
 import WUPTextAreaControl from "./textArea";
 import WUPTextRichInput, {
+  createOf,
   embedOf,
-  fontSizes,
   htmlToEditor,
   htmlToText,
   isBlockTag,
@@ -138,8 +138,12 @@ declare global {
        *  WARN: sanitizer calls it for untrusted html (pasted etc.): return only safe values (see `sanitizeUrl` for urls) */
       is?: (el: HTMLElement) => V | undefined;
       /** Returns new element applying format with value: used by default format & sanitizer (`inline`, `line`, `embed`);
-       *  item of dropdown shows label inside it (ex. heading as preview) */
-      create?: (value: V) => HTMLElement;
+       *  item of dropdown shows label inside it (ex. heading as preview);
+       *  tag name is the same as `() => document.createElement(tag)`
+       * @example
+       * create: "mark",
+       * create: (v) => document.createElement(v === "sub" ? "sub" : "sup"), */
+      create?: keyof HTMLElementTagNameMap | ((value: V) => HTMLElement);
       /** Sets value of format to line (`undefined` removes it): used by default format & sanitizer of `lineStyle`;
        *  WARN: line replaced via format `line` (heading etc.) keeps only `style`, so use style properties instead of attributes */
       set?: (el: HTMLElement, value: V | undefined) => void;
@@ -413,7 +417,7 @@ export default class WUPTextRichControl<
    *   icon: "url('data:image/svg+xml,...')",
    *   kind: "inline", // default format toggles it
    *   is: (el) => el.tagName === "MARK" || undefined,
-   *   create: () => document.createElement("mark"),
+   *   create: "mark",
    * };
    * WUPTextRichControl.$tools.upper = {
    *   label: "Uppercase",
@@ -443,42 +447,42 @@ export default class WUPTextRichControl<
       hotKey: "Control+B",
       kind: "inline",
       is: ({ tagName: t }) => t === "B" || t === "STRONG" || undefined,
-      create: () => document.createElement("b"), // <strong> is styled as label of the control
+      create: "b", // <strong> is styled as label of the control
     },
     italic: {
       label: __wupln("Italic", "aria"),
       hotKey: "Control+I",
       kind: "inline",
       is: ({ tagName: t }) => t === "I" || t === "EM" || undefined,
-      create: () => document.createElement("em"), // todo add support for create: "em" - so if string then document.createElement will be auto applied
+      create: "em",
     },
     underline: {
       label: __wupln("Underline", "aria"),
       hotKey: "Control+U",
       kind: "inline",
       is: (el) => el.tagName === "U" || undefined,
-      create: () => document.createElement("u"),
+      create: "u",
     },
     strike: {
       label: __wupln("Strikethrough", "aria"),
       hotKey: "Control+Shift+X", // possible "Control+Shift+X Alt+Shift+5", // Alt+Shift+5 - the same as in Google Docs
       kind: "inline",
-      is: ({ tagName: t }) => t === "S" || t === "STRIKE" || t === "DEL" || undefined, // todo why do we have undefined here
-      create: () => document.createElement("s"),
+      is: ({ tagName: t }) => t === "S" || t === "STRIKE" || t === "DEL" || undefined, // undefined: element doesn't apply format (false is a value)
+      create: "s",
     },
     blockquote: {
       label: __wupln("Quote", "aria"),
       hotKey: "Control+Shift+9",
       kind: "line",
       is: (el) => el.tagName === "BLOCKQUOTE" || undefined,
-      create: () => document.createElement("blockquote"),
+      create: "blockquote",
     },
     code: {
       label: __wupln("Code block", "aria"),
       hotKey: "Control+Alt+Shift+C",
       kind: "line",
       is: (el) => el.tagName === "PRE" || undefined,
-      create: () => document.createElement("pre"),
+      create: "pre",
     },
     link: {
       label: __wupln("Link", "aria"),
@@ -499,7 +503,7 @@ export default class WUPTextRichControl<
         if (!range.collapsed) {
           applyDefault(); // url is set to selected text: empty one removes link
         } else if (url) {
-          const a = tool.create!(url); // link with url as text
+          const a = createOf(tool, url); // link with url as text
           a.textContent = url;
           control.$insert(a);
         } else {
@@ -570,13 +574,9 @@ export default class WUPTextRichControl<
         { value: "sm", label: __wupln("Small", "content") },
       ],
       kind: "inline",
-      // any font size is removed via format, unsupported one is shown as default; `<font size>` is produced by other editors
+      // any font size is removed via format, unsupported one is shown as default
       is: (el) => {
-        // todo we must handle only <span style="fontSize">
-        const a = el.tagName === "FONT" && el.getAttribute("size"); // attribute is untrusted: own keys only
-        const size = a
-          ? Object.hasOwn(fontSizes, a) && fontSizes[a as keyof typeof fontSizes]
-          : el.tagName === "SPAN" && el.style.fontSize;
+        const size = el.tagName === "SPAN" && el.style.fontSize;
         return size ? sizeFormats[size as keyof typeof sizeFormats] ?? false : undefined;
       },
       create: (v) => {
@@ -872,7 +872,7 @@ export default class WUPTextRichControl<
       let preview: HTMLElement | undefined;
       if (tool.create && tool.kind !== "embed") {
         // the same styles as in editor (heading, font size etc.): inner element, otherwise checkmark of selected item is scaled too
-        preview = li.appendChild(tool.create(v.value));
+        preview = li.appendChild(createOf(tool, v.value));
         preview.setAttribute("role", "none"); // hides semantics: heading etc.
         preview.textContent = label;
       } else {
@@ -1038,7 +1038,7 @@ export default class WUPTextRichControl<
         const { texts } = ctx;
         const any = isOf(tool);
         const f = isOf(tool, value);
-        const create = (): HTMLElement => tool.create!(value);
+        const create = (): HTMLElement => createOf(tool, value);
         if (isSet || !value) {
           removeInline(texts, any, editor);
           value && addInline(texts, f, create, editor);
@@ -1058,7 +1058,7 @@ export default class WUPTextRichControl<
         lines.forEach((l) => {
           if (tool.kind === "line") {
             // new paragraph: otherwise attributes of format are kept (class etc.) if line is <div> already
-            setLineTag(l, isOff ? document.createElement("div") : tool.create!(value));
+            setLineTag(l, isOff ? document.createElement("div") : createOf(tool, value));
           } else {
             tool.set!(l, isOff ? undefined : value);
           }
@@ -1066,7 +1066,7 @@ export default class WUPTextRichControl<
         break;
       }
       case "embed":
-        this.$insert(tool.create!(value)); // caret is placed after element
+        this.$insert(createOf(tool, value)); // caret is placed after element
         break;
       default: // action without format
     }
@@ -1112,7 +1112,7 @@ export default class WUPTextRichControl<
     let node: Node = t;
     this.#pending.forEach((v, k) => {
       if (v !== false && !formatParents(r.startContainer, isOf(tools[k], v), inp).length) {
-        const el = tools[k].create!(v);
+        const el = createOf(tools[k], v);
         el.appendChild(node);
         node = el;
       }
