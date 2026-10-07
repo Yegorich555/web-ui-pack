@@ -400,7 +400,7 @@ exports[`control.textRich $ariaDetails 1`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -452,7 +452,7 @@ exports[`control.textRich $ariaDetails 1`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -883,7 +883,7 @@ exports[`control.textRich $ariaDetails 2`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -935,7 +935,7 @@ exports[`control.textRich $ariaDetails 2`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -1366,7 +1366,7 @@ exports[`control.textRich $ariaSpeak 1`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -1418,7 +1418,7 @@ exports[`control.textRich $ariaSpeak 1`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -1857,7 +1857,7 @@ exports[`control.textRich $ariaSpeak 2`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -1909,7 +1909,7 @@ exports[`control.textRich $ariaSpeak 2`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -2340,7 +2340,7 @@ exports[`control.textRich $show/$hide error 1`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -2392,7 +2392,7 @@ exports[`control.textRich $show/$hide error 1`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -2825,7 +2825,7 @@ exports[`control.textRich $show/$hide error 2`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -2877,7 +2877,7 @@ exports[`control.textRich $show/$hide error 2`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -3321,7 +3321,7 @@ exports[`control.textRich $show/$hide error 3`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -3373,7 +3373,7 @@ exports[`control.textRich $show/$hide error 3`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -4555,13 +4555,28 @@ exports[`control.textRich common tests snapshot of $defaults 1`] = `
       "link",
     ],
     [
-      "list",
+      {
+        "list": "ordered",
+      },
+      {
+        "list": "bullet",
+      },
     ],
     [
-      "script",
+      {
+        "script": "sub",
+      },
+      {
+        "script": "super",
+      },
     ],
     [
-      "indent",
+      {
+        "indent": -1,
+      },
+      {
+        "indent": 1,
+      },
     ],
     [
       "size",
@@ -5017,7 +5032,7 @@ exports[`control.textRich options clearButton 1`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -5069,7 +5084,7 @@ exports[`control.textRich options clearButton 1`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -5506,7 +5521,7 @@ exports[`control.textRich options clearButton 2`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -5558,7 +5573,7 @@ exports[`control.textRich options clearButton 2`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -5986,7 +6001,7 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -6038,7 +6053,7 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -6505,7 +6520,7 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -6557,7 +6572,7 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -7030,7 +7045,7 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -7082,7 +7097,7 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -7534,7 +7549,7 @@ exports[`control.textRich validations options.validationCase 1`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -7586,7 +7601,7 @@ exports[`control.textRich validations options.validationCase 1`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -8023,7 +8038,7 @@ exports[`control.textRich validations options.validationCase 2`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -8075,7 +8090,7 @@ exports[`control.textRich validations options.validationCase 2`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -8533,7 +8548,7 @@ exports[`control.textRich validations options.validationCase 3`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -8585,7 +8600,7 @@ exports[`control.textRich validations options.validationCase 3`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -9040,7 +9055,7 @@ exports[`control.textRich validations options.validationCase 4`] = `
           style="--ctrl-icon-img: var(--wup-icon-align-left);"
           tabindex="-1"
           type="button"
-          value="left"
+          value="false"
           w-tooltip=""
         />
         <wup-popup
@@ -9092,7 +9107,7 @@ exports[`control.textRich validations options.validationCase 4`] = `
               role="option"
               style="--ctrl-icon-img: var(--wup-icon-align-left);"
               tabindex="-1"
-              tool="align:left"
+              tool="align:false"
               w-tooltip="Left (Ctrl+Shift+L)"
             />
           </ul>
@@ -9547,7 +9562,7 @@ exports[`control.textRich with form 1`] = `
             style="--ctrl-icon-img: var(--wup-icon-align-left);"
             tabindex="-1"
             type="button"
-            value="left"
+            value="false"
             w-tooltip=""
           />
           <wup-popup
@@ -9599,7 +9614,7 @@ exports[`control.textRich with form 1`] = `
                 role="option"
                 style="--ctrl-icon-img: var(--wup-icon-align-left);"
                 tabindex="-1"
-                tool="align:left"
+                tool="align:false"
                 w-tooltip="Left (Ctrl+Shift+L)"
               />
             </ul>

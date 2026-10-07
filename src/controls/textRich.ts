@@ -72,18 +72,18 @@ declare global {
       btnClear: true;
       /** Heading level; `false` - normal paragraph */
       header: 1 | 2 | 3 | 4 | 5 | 6 | false;
-      /** Numbered or bulleted list */
+      /** Numbered or bulleted list (button per value: `{ list: "ordered" }`) */
       list: "ordered" | "bullet";
-      /** Subscript or superscript */
+      /** Subscript or superscript (button per value: `{ script: "sub" }`) */
       script: "sub" | "super";
-      /** Decrease (`-1`) or increase (`+1`) indentation */
+      /** Decrease (`-1`) or increase (`+1`) indentation (button per value: `{ indent: -1 }`) */
       indent: -1 | 1;
       /** Font size: `"sm"` - small, `"lg"` - large, `"hg"` - huge; `false` - default */
       size: "sm" | "lg" | "hg" | false;
-      /** Text alignment; `"left"` - default */
-      align: "left" | "center" | "right" | "justify";
+      /** Text alignment; `false` - default (left) */
+      align: "center" | "right" | "justify" | false;
     }
-    /** Value of tool: button or item of dropdown (see Tool.values) */
+    /** Value of tool: item of dropdown or button (toolbar item with single value: `{ list: "ordered" }`) */
     interface ToolValue<V = any> {
       /** Value applied by tool (ex. `1` for `header`) */
       value: V;
@@ -93,13 +93,13 @@ declare global {
       hotKey?: string;
       /** Icon: css image (`url("data:image/svg+xml,...")` or `var(--wup-icon-...)`);
        *  dropdown with icons shows icon of the current value & labels in tooltips */
-      icon?: string;
+      icon?: string; // todo replace with className
     }
     /** Tool of toolbar
      * @tutorial Rules
      * * tool without values is rendered as button: it's pressed when format is applied (see `is`), otherwise it's action
-     * * tool with values is rendered as dropdown (see `dropdown`) or as button per value
-     * * format is applied via `format` or default one according to `kind`: dropdown sets selected value (`false` removes format),
+     * * tool with values is rendered as dropdown; toolbar item with single value (`{ list: "ordered" }`) - as button of the value
+     * * format is applied via `format` or default one according to `kind`: item of dropdown sets value (`false` removes format),
      * button toggles format (it's removed if selection has it already) */
     interface Tool<V = any> {
       /** `aria-label` & tooltip of button or `aria-label` of dropdown; @defaultValue name of tool */
@@ -117,12 +117,9 @@ declare global {
       /** Icon of button: css image (`url("data:image/svg+xml,...")` or `var(--wup-icon-...)`) set as css-var `--icon-img`;
        *  otherwise point it via css: `wup-textrich [tool="upper"] { --icon-img: url(...) }` */
       icon?: string;
-      /** Values used when toolbar item is pointed as string (`"header"` is the same as `{ header: [1, 2, 3, 4, 5, 6, false] }`) */
+      /** Values of dropdown in default order (toolbar item `"header"` is the same as `{ header: [1, 2, 3, 4, 5, 6, false] }`);
+       *  value `false` means format isn't applied: it removes format & it's selected if selection doesn't have format (`Normal` of `header`) */
       values?: ToolValue<V>[];
-      /** Values are rendered as dropdown (otherwise as button per value) */
-      dropdown?: boolean;
-      /** Value of dropdown when format isn't applied (ex. `false` for `header`: Normal) */
-      default?: V;
       /** Kind of format: defines default `format`, detection via `is`, sanitizing & behavior of collapsed selection
        * * `inline` - element wraps text (`<b>`, `<a>`, `<span style>`): with collapsed selection format is applied to the next typed text
        * (if tool doesn't have `ask`); it's removed by `clean`
@@ -153,17 +150,11 @@ declare global {
        * @param target element to place popup near it: button of tool or editor (if tool isn't rendered)
        * @param current value of format applied at the start of selection
        * @see {@link WUPTextRichControl.$ask} - popup with text control */
-      ask?: (
-        target: HTMLElement,
-        control: WUPTextRichControl<any, any, any>,
-        current: V | undefined
-      ) => Promise<V | null | undefined>;
-      /** Renders custom content of dropdown item instead of label (color swatch etc.): label is used as `aria-label` */
-      renderItem?: (li: HTMLLIElement, value: V) => void;
+      ask?: (target: HTMLElement, control: WUPTextRichControl, current: V | undefined) => Promise<V | null | undefined>;
       /** Applies format to selected range instead of default one (see `kind`): control saves changes in history,
        *  restores selection (use `control.$insert` to insert content & place caret after it), updates $value & toolbar;
        *  `value` is `true` for tool without values */
-      format?: (r: Range, value: V, control: WUPTextRichControl<any, any, any>) => void;
+      format?: (selectedRange: Range, value: V, control: WUPTextRichControl) => void;
     }
     /** Tools of toolbar
      * @see {@link Tool} */
@@ -171,12 +162,12 @@ declare global {
       /** Button clear: `labelBack` is label when the next clearing restores previous value (see $options.clearActions) */
       btnClear: { labelBack: string };
     };
-    /** Toolbar item: tool `"bold"`, tool with every value `"header"` (the same as `{ header: [1, 2, 3, 4, 5, 6, false] }`)
-     *  or tool with pointed values `{ header: [1, 2, false] }` */
+    /** Toolbar item: button `"bold"`, dropdown with every value `"header"` (the same as `{ header: [1, 2, 3, 4, 5, 6, false] }`),
+     *  dropdown with pointed values `{ header: [1, 2, false] }` or button of pointed value `{ list: "ordered" }` */
     type ToolbarItem =
       | keyof ToolValues
       | {
-          [K in keyof ToolValues]: ToolValues[K] extends true ? never : { [P in K]: ToolValues[P][] };
+          [K in keyof ToolValues]: ToolValues[K] extends true ? never : { [P in K]: ToolValues[P] | ToolValues[P][] };
         }[keyof ToolValues];
     /** Group of toolbar items (groups are visually separated) */
     type ToolbarGroup = ToolbarItem[];
@@ -189,8 +180,9 @@ declare global {
        * @example
        * [
        *   ["bold", "italic", "underline"], // buttons
-       *   ["header"], // tool with every value
-       *   [{ size: ["sm", false, "lg"] }], // tool with pointed values only
+       *   ["header"], // dropdown with every value
+       *   [{ size: ["sm", false, "lg"] }], // dropdown with pointed values only
+       *   [{ list: "ordered" }, { list: "bullet" }], // button per value
        *   ["clean"], // removes formatting
        *   ["btnClear"], // clears value: button clear (if $options.clearButton is true)
        * ]
@@ -249,36 +241,7 @@ declare module "preact/jsx-runtime" {
 /** Toolbar button or item of dropdown that applies format on click: `_value` - value of format (ex. `"ordered"` for list) */
 type ToolElement = HTMLElement & { _format: string; _value?: unknown };
 
-/** Formats by tagName of element: [tool, value] */
-const tagFormats = {
-  B: ["bold", true],
-  STRONG: ["bold", true],
-  I: ["italic", true],
-  EM: ["italic", true],
-  U: ["underline", true],
-  S: ["strike", true],
-  STRIKE: ["strike", true],
-  DEL: ["strike", true],
-  SUB: ["script", "sub"],
-  SUP: ["script", "super"],
-  H1: ["header", 1],
-  H2: ["header", 2],
-  H3: ["header", 3],
-  H4: ["header", 4],
-  H5: ["header", 5],
-  H6: ["header", 6],
-  BLOCKQUOTE: ["blockquote", true],
-  PRE: ["code", true],
-  OL: ["list", "ordered"],
-  UL: ["list", "bullet"],
-};
-/** Returns `is` of tool: value of format applied via element by its tagName (see tagFormats) */
-const byTag =
-  (tool: string) =>
-  (el: Element): any => {
-    const f = tagFormats[el.tagName as keyof typeof tagFormats];
-    return f?.[0] === tool ? f[1] : undefined;
-  };
+// todo remove this const and use directly logic in the code
 /** Formatting via browser (keyboard shortcuts etc.): `beforeinput.inputType` => tool; other `format...` are prevented */
 const formatInputs = {
   formatBold: "bold",
@@ -290,7 +253,7 @@ const formatInputs = {
   formatJustifyFull: "align:justify",
   formatJustifyCenter: "align:center",
   formatJustifyRight: "align:right",
-  formatJustifyLeft: "align:left",
+  formatJustifyLeft: "align:false",
   formatIndent: "indent:1",
   formatOutdent: "indent:-1",
   formatRemove: "clean",
@@ -337,6 +300,7 @@ function inlineOf(t: WUP.TextRich.Tool, value: unknown = true): InlineFormat {
   return { is: (el) => isMatch(t.is!(el as HTMLElement), value), create: (v) => t.create!(v) };
 }
 
+// todo remove this function since it's called only once directly use the logic
 /** Sets value of inline format to text nodes: format is removed if value is empty */
 function setInline(nodes: Text[], f: InlineFormat, value: unknown, root: Node): void {
   removeInline(nodes, f, root);
@@ -350,7 +314,7 @@ function setInline(nodes: Text[], f: InlineFormat, value: unknown, root: Node): 
   el.$options.name = "description";
   el.$options.toolbar = [
     ["bold", "italic", "underline"],
-    [{ list: ["ordered", "bullet"] }],
+    [{ list: "ordered" }, { list: "bullet" }],
     ["clean", "btnClear"],
   ];
   el.$options.validations = { required: true, max: 1000 };
@@ -460,8 +424,6 @@ export default class WUPTextRichControl<
   static $tools: WUP.TextRich.Tools = {
     header: {
       label: __wupln("Heading", "aria"),
-      dropdown: true,
-      default: false,
       values: [
         { value: 1, label: __wupln("Heading 1", "content"), hotKey: "Control+Alt+1" },
         { value: 2, label: __wupln("Heading 2", "content"), hotKey: "Control+Alt+2" },
@@ -472,49 +434,49 @@ export default class WUPTextRichControl<
         { value: false, label: __wupln("Normal", "content"), hotKey: "Control+Alt+0" },
       ],
       kind: "line",
-      is: byTag("header"),
+      is: (el) => (/^H[1-6]$/.test(el.tagName) ? (+el.tagName[1] as WUP.TextRich.ToolValues["header"]) : undefined),
       create: (v) => document.createElement(v ? `h${v}` : "div"),
     },
     bold: {
       label: __wupln("Bold", "aria"),
       hotKey: "Control+B",
       kind: "inline",
-      is: byTag("bold"),
+      is: ({ tagName: t }) => t === "B" || t === "STRONG" || undefined,
       create: () => document.createElement("b"), // <strong> is styled as label of the control
     },
     italic: {
       label: __wupln("Italic", "aria"),
       hotKey: "Control+I",
       kind: "inline",
-      is: byTag("italic"),
-      create: () => document.createElement("em"),
+      is: ({ tagName: t }) => t === "I" || t === "EM" || undefined,
+      create: () => document.createElement("em"), // todo add support for create: "em" - so if string then document.createElement will be auto applied
     },
     underline: {
       label: __wupln("Underline", "aria"),
       hotKey: "Control+U",
       kind: "inline",
-      is: byTag("underline"),
+      is: (el) => el.tagName === "U" || undefined,
       create: () => document.createElement("u"),
     },
     strike: {
       label: __wupln("Strikethrough", "aria"),
       hotKey: "Control+Shift+X", // possible "Control+Shift+X Alt+Shift+5", // Alt+Shift+5 - the same as in Google Docs
       kind: "inline",
-      is: byTag("strike"),
+      is: ({ tagName: t }) => t === "S" || t === "STRIKE" || t === "DEL" || undefined, // todo why do we have undefined here
       create: () => document.createElement("s"),
     },
     blockquote: {
       label: __wupln("Quote", "aria"),
       hotKey: "Control+Shift+9",
       kind: "line",
-      is: byTag("blockquote"),
+      is: (el) => el.tagName === "BLOCKQUOTE" || undefined,
       create: () => document.createElement("blockquote"),
     },
     code: {
       label: __wupln("Code block", "aria"),
       hotKey: "Control+Alt+Shift+C",
       kind: "line",
-      is: byTag("code"),
+      is: (el) => el.tagName === "PRE" || undefined,
       create: () => document.createElement("pre"),
     },
     link: {
@@ -553,7 +515,10 @@ export default class WUPTextRichControl<
         { value: "bullet", label: __wupln("Bulleted list", "aria"), hotKey: "Control+Shift+8" },
       ],
       kind: "line",
-      is: (el) => (el.tagName === "LI" ? byTag("list")(el.parentElement!) : undefined),
+      is: (el) => {
+        const t = el.tagName === "LI" && el.parentElement?.tagName; // item of list: type of its list
+        return (t === "OL" && "ordered") || (t === "UL" && "bullet") || undefined;
+      },
       format: (r, v, c) => {
         const inp = c.$refInput;
         const lines = linesOf(r, inp);
@@ -582,7 +547,7 @@ export default class WUPTextRichControl<
         { value: "super", label: __wupln("Superscript", "aria"), hotKey: "Control+." },
       ],
       kind: "inline",
-      is: byTag("script"),
+      is: ({ tagName: t }) => (t === "SUB" && "sub") || (t === "SUP" && "super") || undefined,
       create: (v) => document.createElement(v === "sub" ? "sub" : "sup"),
     },
     indent: {
@@ -602,8 +567,6 @@ export default class WUPTextRichControl<
     size: {
       label: __wupln("Font size", "aria"),
       hotKey: "Control+Shift+. Control+Shift+,", // increase & decrease
-      dropdown: true,
-      default: false,
       values: [
         { value: "hg", label: __wupln("Huge", "content") },
         { value: "lg", label: __wupln("Large", "content") },
@@ -613,6 +576,7 @@ export default class WUPTextRichControl<
       kind: "inline",
       // any font size is removed via format, unsupported one is shown as default; `<font size>` is produced by other editors
       is: (el) => {
+        // todo we must handle only <span style="fontSize">
         const a = el.tagName === "FONT" && el.getAttribute("size"); // attribute is untrusted: own keys only
         const size = a
           ? Object.hasOwn(fontSizes, a) && fontSizes[a as keyof typeof fontSizes]
@@ -627,8 +591,6 @@ export default class WUPTextRichControl<
     },
     align: {
       label: __wupln("Alignment", "aria"),
-      dropdown: true,
-      default: "left",
       values: [
         {
           value: "center",
@@ -649,7 +611,7 @@ export default class WUPTextRichControl<
           icon: "var(--wup-icon-align-justify)",
         },
         {
-          value: "left",
+          value: false,
           label: __wupln("Left", "aria"),
           hotKey: "Control+Shift+L",
           icon: "var(--wup-icon-align-left)",
@@ -657,10 +619,10 @@ export default class WUPTextRichControl<
       ],
       kind: "lineStyle",
       is: (el) => {
-        const a = el.style.textAlign || el.getAttribute("align") || ""; // attribute `align` is deprecated but still used
+        const a = el.style.textAlign || el.getAttribute("align") || ""; // attribute `align` is deprecated but still used - todo drop it
         return textAligns.has(a) ? (a as WUP.TextRich.ToolValues["align"]) : undefined;
       },
-      set: (el, v) => (el.style.textAlign = v === "left" ? "" : v ?? ""),
+      set: (el, v) => (el.style.textAlign = v || ""),
     },
     clean: {
       label: __wupln("Clear formatting", "aria"),
@@ -697,14 +659,14 @@ export default class WUPTextRichControl<
       ["bold", "italic", "underline", "strike"], // { bold: true, italic: true, underline: true, strike: true },
       ["blockquote", "code"],
       ["link"], // todo add to example custom tool => image: true, video: true
-      ["list"], // equal to [{ list: ["ordered", "bullet"] ]
-      ["script"], // equal to [{script: ['sub', 'super']}]
-      ["indent"], // equal to [{indent: [-1, +1]}]
+      [{ list: "ordered" }, { list: "bullet" }], // buttons; ["list"] is dropdown
+      [{ script: "sub" }, { script: "super" }],
+      [{ indent: -1 }, { indent: 1 }],
       ["size"], // equal to [{size: ["hg", "lg", false, "sm"]}]
       // todo add to example as custom tool => direction
       // todo add to example as custom tool => [{ font: [] }],
       // not supported yet => [{ color: true, background: true}],
-      ["align"], // equal to [{ align: ["center", "right", "justify", "left", false] }],
+      ["align"], // equal to [{ align: ["center", "right", "justify", false] }],
       ["clean"],
       ["btnClear"], // button clear (rendered if $options.clearButton is true)
     ],
@@ -788,8 +750,10 @@ export default class WUPTextRichControl<
 
   /** Renders toolbar item into group */
   protected renderTool(group: HTMLElement, item: WUP.TextRich.ToolbarItem): void {
-    const [name, picked] = (typeof item === "string" ? [item] : Object.entries(item)[0]) as [string, unknown[]?];
+    const [name, picked] = (typeof item === "string" ? [item] : Object.entries(item)[0]) as [string, unknown];
     const tool = (this.#ctr.$tools as Record<string, WUP.TextRich.Tool>)[name];
+    // values pointed in toolbar are taken from tool: with labels, shortcuts & icons
+    const valueOf = (v: unknown): WUP.TextRich.ToolValue => tool.values?.find((t) => t.value === v) ?? { value: v };
     if (!tool) {
       this.throwError(`Toolbar item '${name}' isn't defined in $tools`, undefined, true);
     } else if (name === "btnClear") {
@@ -798,16 +762,14 @@ export default class WUPTextRichControl<
         this.setClearLabel(b); // button isn't re-rendered: hint can be changed
         group.appendChild(b);
       }
+    } else if (Array.isArray(picked)) {
+      this.renderPicker(group, name, tool, picked.map(valueOf));
+    } else if (picked !== undefined) {
+      this.renderButton(group, name, tool, valueOf(picked));
+    } else if (tool.values) {
+      this.renderPicker(group, name, tool, tool.values);
     } else {
-      // values pointed in toolbar are taken from tool: with labels, shortcuts & icons
-      const values = picked?.map((v) => tool.values?.find((t) => t.value === v) ?? { value: v }) ?? tool.values;
-      if (!values) {
-        this.renderButton(group, name, tool);
-      } else if (tool.dropdown) {
-        this.renderPicker(group, name, tool, values);
-      } else {
-        values.forEach((v) => this.renderButton(group, name, tool, v));
-      }
+      this.renderButton(group, name, tool);
     }
   }
 
@@ -881,8 +843,8 @@ export default class WUPTextRichControl<
     return b;
   }
 
-  /** Renders dropdown of toolbar: item shows label inside element of format (preview via `create`),
-   *  icon (if value has it: label is shown via tooltip) or custom content (`renderItem`) */
+  /** Renders dropdown of toolbar: item shows label inside element of format (preview via `create`)
+   *  or icon (if value has it: label is shown via tooltip) */
   protected renderPicker(
     group: HTMLElement,
     name: string,
@@ -915,10 +877,7 @@ export default class WUPTextRichControl<
         return;
       }
       let preview: HTMLElement | undefined;
-      if (tool.renderItem) {
-        li.setAttribute("aria-label", label);
-        tool.renderItem(li, v.value);
-      } else if (tool.create && tool.kind !== "embed") {
+      if (tool.create && tool.kind !== "embed") {
         // the same styles as in editor (heading, font size etc.): inner element, otherwise checkmark of selected item is scaled too
         preview = li.appendChild(tool.create(v.value));
         preview.setAttribute("role", "none"); // hides semantics: heading etc.
@@ -948,19 +907,19 @@ export default class WUPTextRichControl<
     this.$refToolbar.querySelectorAll<ToolElement>("[tool]").forEach((el) => {
       const name = el._format ?? el.getAttribute("tool")!; // dropdown & button clear don't have `_format`
       const tool = tools[name];
-      const cur = formats.get(name) ?? tool?.default;
+      const cur = formats.get(name) ?? false; // `false` - format isn't applied
       if (el.tagName === "LI") {
         el.setAttribute("aria-selected", el._value === cur);
       } else if (el.hasAttribute("aria-pressed")) {
-        el.setAttribute("aria-pressed", el._value === undefined ? cur !== undefined : cur === el._value);
+        el.setAttribute("aria-pressed", el._value === undefined ? cur !== false : cur === el._value);
       } else if (el.tagName === "WUP-DROPDOWN") {
         // button shows the current value: its icon or label
         const b = el.firstElementChild as HTMLElement;
         const v = tool.values?.find((x) => x.value === cur);
-        b.setAttribute("value", String(cur ?? ""));
+        b.setAttribute("value", String(cur));
         el.hasAttribute("icon")
           ? b.style.setProperty("--ctrl-icon-img", v?.icon ?? "")
-          : (b.textContent = v?.label ?? (cur === undefined ? tool.label ?? name : String(cur)));
+          : (b.textContent = v?.label ?? (cur === false ? tool.label ?? name : String(cur)));
       }
     });
   }
@@ -1004,9 +963,15 @@ export default class WUPTextRichControl<
     }
   }
 
+  /** Applies tool of toolbar item: item of dropdown sets its value, button toggles format */
+  protected applyTool(el: ToolElement): void {
+    this.applyFormat(el._format, el._value, el.tagName === "LI");
+  }
+
   /** Applies tool of $tools to selection (see `kind` & `format` of tool); value is asked via `ask` of tool if it isn't pointed;
-   * inline format with collapsed selection is applied to the next typed text (the same as quill) */
-  protected applyFormat(name: string, value?: unknown): void {
+   * inline format with collapsed selection is applied to the next typed text (the same as quill)
+   * @param isSet value is chosen (item of dropdown, asked value etc.): it's set, otherwise format is toggled (button) */
+  protected applyFormat(name: string, value?: unknown, isSet = false): void {
     if (this.$isDisabled || this.$isReadOnly) {
       return;
     }
@@ -1026,37 +991,36 @@ export default class WUPTextRichControl<
         if (v != null) {
           inp.focus({ preventScroll: true });
           this.setSelectionPos(pos);
-          this.applyFormat(name, v);
+          this.applyFormat(name, v, true);
         }
       });
-    } else if (sel.isCollapsed && ((tool.kind === "inline" && !tool.ask) || name === "clean")) {
+      return;
+    }
+    const v = value ?? true; // tool without values gets `true`
+    if (sel.isCollapsed && ((tool.kind === "inline" && !tool.ask) || name === "clean")) {
       // format for the next typed text (Ctrl+B and type text)
       const p = this.#pending;
       if (name === "clean") {
         Object.entries(tools).forEach(([k, t]) => t.kind === "inline" && !t.ask && f.has(k) && p.set(k, false));
-      } else if (tool.dropdown) {
-        p.set(name, value || false);
-      } else if (tool.values) {
-        p.set(name, f.get(name) === value ? false : value);
       } else {
-        p.set(name, !f.has(name));
+        const isOff = !v || (!isSet && isMatch(f.get(name), v)); // button toggles format
+        p.set(name, !isOff && v);
       }
       this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
       this.refreshToolbar();
     } else {
-      this.changeContent(() => this.keepSelection((r) => this.formatRange(tool, r, value ?? true))); // tool without values gets `true`
+      this.changeContent(() => this.keepSelection((r) => this.formatRange(tool, r, v, isSet)));
     }
   }
 
   /** Applies tool to range via its `format` or default one according to `kind` of tool:
-   *  dropdown sets selected value (`false` removes format), button toggles format (it's removed if range has it already) */
-  protected formatRange(tool: WUP.TextRich.Tool, r: Range, value: unknown): void {
+   *  `isSet` - value is set (`false` removes format), otherwise format is toggled (it's removed if range has it already) */
+  protected formatRange(tool: WUP.TextRich.Tool, r: Range, value: unknown, isSet: boolean): void {
     if (tool.format) {
       tool.format(r, value, this);
       return;
     }
     const inp = this.$refInput;
-    const isSet = tool.dropdown;
     switch (tool.kind) {
       case "inline": {
         const nodes = splitRange(r);
@@ -1067,7 +1031,7 @@ export default class WUPTextRichControl<
           value && addInline(nodes, f, value, inp);
         } else {
           // only one value is possible: elements with other values are removed (subscript & superscript)
-          tool.values && removeInline(nodes, { is: (el) => any.is(el) && !f.is(el), create: f.create }, inp);
+          value !== true && removeInline(nodes, { is: (el) => any.is(el) && !f.is(el), create: f.create }, inp);
           nodes.every((t) => formatParents(t, f, inp).length)
             ? removeInline(nodes, f, inp)
             : addInline(nodes, f, value, inp);
@@ -1412,7 +1376,7 @@ export default class WUPTextRichControl<
     if (!el?._format) {
       return; // dropdown has [tool] too but it opens popup itself
     }
-    this.applyFormat(el._format, el._value);
+    this.applyTool(el);
     el.tagName === "LI" && el.closest("wup-dropdown")!.$refPopup.$close();
   }
 
@@ -1553,7 +1517,7 @@ export default class WUPTextRichControl<
       if (!el) {
         return false; // tool isn't rendered: browser shortcut works as usual
       }
-      el._format ? this.applyFormat(el._format, el._value) : el.click(); // button clear isn't ToolElement
+      el._format ? this.applyTool(el) : el.click(); // button clear isn't ToolElement
       return true;
     }
     // tool with values: the 1st shortcut selects the previous value (increases font size), the 2nd one - the next value;
@@ -1563,9 +1527,9 @@ export default class WUPTextRichControl<
     if (!values.some(isRendered)) {
       return false;
     }
-    const at = values.findIndex((v) => v.value === (this.getFormats().get(name) ?? tool.default));
+    const at = values.findIndex((v) => v.value === (this.getFormats().get(name) ?? false));
     const next = (i ? values.slice(at + 1) : values.slice(0, at < 0 ? undefined : at).reverse()).find(isRendered);
-    next && this.applyFormat(name, next.value);
+    next && this.applyFormat(name, next.value, true);
     return true;
   }
 
@@ -1599,7 +1563,7 @@ export default class WUPTextRichControl<
       e.preventDefault(); // formatting by browser (menu of Safari, iOS etc.) is replaced with custom one: to save it in custom history
       const k = formatInputs[t as keyof typeof formatInputs]; // color, font etc. aren't supported
       const el = k && this.findTool(k); // only formats rendered in toolbar
-      el && this.applyFormat(el._format, el._value);
+      el && this.applyTool(el);
       return;
     }
     super.gotBeforeInput(e); // custom history: undo/redo & state before changes
