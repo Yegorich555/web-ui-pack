@@ -6122,9 +6122,7 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
         role="textbox"
         wup-textrich=""
       >
-        <p>
-          123
-        </p>
+        123
       </wup-richinput>
       <strong
         id="txt1"
@@ -7153,9 +7151,7 @@ exports[`control.textRich validations options.validationCase 1`] = `
         role="textbox"
         wup-textrich=""
       >
-        <p>
-          123
-        </p>
+        123
       </wup-richinput>
       <strong
         id="txt1"
@@ -8152,9 +8148,7 @@ exports[`control.textRich validations options.validationCase 3`] = `
         role="textbox"
         wup-textrich=""
       >
-        <p>
-          123
-        </p>
+        123
       </wup-richinput>
       <strong
         id="txt1"

@@ -12,7 +12,6 @@ import WUPTextRichInput, {
   embedOf,
   fontSizes,
   htmlToEditor,
-  htmlToValue,
   htmlToText,
   isBlockTag,
   listTags,
@@ -356,7 +355,7 @@ function setInline(nodes: Text[], f: InlineFormat, value: unknown, root: Node): 
     ["clean", "btnClear"],
   ];
   el.$options.validations = { required: true, max: 1000 };
-  el.$initValue = "<p>Some <strong>bold</strong> text</p>";
+  el.$initValue = "Some <strong>bold</strong> text";
 
   const form = document.body.appendChild(document.createElement("wup-form"));
   form.appendChild(el);
@@ -365,9 +364,10 @@ function setInline(nodes: Text[], f: InlineFormat, value: unknown, root: Node): 
     <wup-textrich w-name="description" w-toolbar="window.myToolbar" w-validations="myValidations"/>
   </wup-form>;
  * @tutorial Rules
- * * $value is html (`undefined` if there is no text & embeds); it's sanitized (pointed via $value & $initValue too): only formats of $tools are kept
+ * * $value is html (`undefined` if there is no text & embeds); it's sanitized: only formats of $tools are kept
  * (`<strong>`, `<em>`, `<u>`, `<s>`, `<sub>`, `<sup>`, `<a>`, `<h1>...<h6>`, `<blockquote>`, `<pre>` etc.)
- * with paragraphs `<p>`, lists `<ol>`, `<ul>` & indentation
+ * with paragraphs `<p>`, lists `<ol>`, `<ul>` & indentation;
+ * `<p>` is used only if it's required: single paragraph without styles is returned without it (`text` instead of `<p>text</p>`)
  * * formatting is saved in custom history: undo/redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y, OS-native) works for text & formats
  * * tools of toolbar are defined in static $tools: change it to redefine labels, keyboard shortcuts etc. or add custom tool
  * * keyboard shortcuts (see static $tools) are similar to Google Docs: Ctrl+B, Ctrl+Shift+7, Ctrl+Alt+1 etc. (Cmd on macOS/iOS);
@@ -1630,29 +1630,6 @@ export default class WUPTextRichControl<
 
   protected override createHistory(): TextHistory {
     return new TextRichHistory(this.$refInput);
-  }
-
-  /** Returns sanitized html: paragraphs as `<p>`, only formats of $tools & safe elements are kept
-   *  (`undefined` if there is no text & embeds) */
-  protected sanitize(v: ValueType | undefined): ValueType | undefined {
-    // via constructor instead of #ctr: $initValue can be set before fields of class are defined
-    const { $tools } = this.constructor as typeof WUPTextRichControl;
-    return typeof v === "string" ? ((htmlToValue(v, $tools) || undefined) as ValueType) : v;
-  }
-
-  /** Default/init value: it's sanitized the same as $value (only formats of $tools are kept) */
-  override get $initValue(): ValueType | undefined {
-    return super.$initValue;
-  }
-
-  override set $initValue(v: ValueType | undefined) {
-    super.$initValue = this.sanitize(v);
-  }
-
-  protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
-    // value of editor (user input) & init value are sanitized already
-    const isClean = reason === SetValueReasons.userInput || reason === SetValueReasons.initValue;
-    return super.setValue(isClean ? v : this.sanitize(v), reason, skipInput);
   }
 
   protected override setInputValue(v: string, reason: SetValueReasons): void {

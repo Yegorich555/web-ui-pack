@@ -394,21 +394,18 @@ export function htmlToEditor(html: string, tools: Tools): DocumentFragment {
   return f;
 }
 
-/** Returns clean html of value by content of src (editor or parsed html): empty string if there is no text & embeds */
-function toValue(src: Node, tools: Tools): string {
-  const div = document.createElement("div");
-  const ctx = ctxOf(tools, false);
-  appendBlocks(src, div, ctx);
-  const text = div.textContent!;
-  const v = text.trim() || ctx.hasEmbed ? div.innerHTML : "";
-  lastText = [v, v && text]; // validations get text without parsing html
-  return v;
-}
-
-/** Returns sanitized html of value: paragraphs as `<p>`, only formats of tools & safe elements are kept
- *  (empty string if there is no text & embeds) */
-export function htmlToValue(html: string, tools: Tools): string {
-  return toValue(new DOMParser().parseFromString(html, "text/html").body, tools); // inert: scripts & resources aren't executed/loaded
+/** Returns true if node is the only paragraph without styles: `<p>` isn't required in value since sanitizer adds it back;
+ *  it's required if paragraph contains `<br>` or starts with whitespaces (outside paragraph they're parsed differently) */
+function isPlainParagraph(p: HTMLElement): boolean {
+  if (p.nextSibling || p.tagName !== "P" || p.attributes.length) {
+    return false;
+  }
+  p.normalize(); // join text nodes to check leading whitespaces
+  const f = p.firstChild!;
+  return (
+    (f.nodeType !== Node.TEXT_NODE || !!(f as Text).data.trim()) &&
+    !Array.prototype.some.call(p.childNodes, (n: Node) => n.nodeName === "BR")
+  );
 }
 
 /** Represents contenteditable element with rich text where value is html */
@@ -419,11 +416,20 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   /** Get/set html: getter returns clean html (empty string if there is no text or embeds): paragraphs as `<p>`,
    *  inline formats as `<strong>`, `<em>` etc.; setter sanitizes html
    * @tutorial Rules
+   * * `<p>` is used only if it's required: single paragraph without styles is returned without it (`text` instead of `<p>text</p>`)
    * * only formats of tools are kept (see `is`, `create` & `set` of $tools): other elements are unwrapped
    * (`<span>`, `<table>` etc.) or removed with content (`<script>`, `<img>` if it isn't embed of tools etc.)
    * * links with unsafe protocols are removed (`javascript:` etc.) */
   override get value(): string {
-    this._cached ??= toValue(this, this._tools);
+    if (this._cached == null) {
+      const div = document.createElement("div");
+      const ctx = ctxOf(this._tools, false);
+      appendBlocks(this, div, ctx);
+      const text = div.textContent!;
+      const p = div.firstChild as HTMLElement;
+      this._cached = text.trim() || ctx.hasEmbed ? (isPlainParagraph(p) ? p : div).innerHTML : "";
+      lastText = [this._cached, this._cached && text]; // validations get text without parsing html
+    }
     return this._cached;
   }
 

@@ -31,6 +31,7 @@ describe("control.textRich", () => {
           ["header", { size: ["sm", false, "lg"] }],
         ],
       },
+      "w-hidehotkeyshint": { value: true },
     },
   });
 
@@ -66,5 +67,33 @@ describe("control.textRich", () => {
     expect(inp.firstChild.childNodes.length).toBe(1); // "Text with " "bold" "," => "Text with bold,"
     const sel = window.getSelection();
     expect(sel.toString()).toBe("Text with bold,"); // selection is kept
+  });
+
+  test("value: <p> is used only if it's required", () => {
+    const inp = document.createElement("wup-richinput"); // value of control's input is mocked by mockAreaInput
+    inp._tools = WUPTextRichControl.$tools;
+    const toValue = (html) => {
+      inp.value = html;
+      return inp.value;
+    };
+
+    [
+      ["Some text", "Some text"],
+      ["<p>Some <strong>bold</strong> text</p>", "Some <strong>bold</strong> text"],
+      ["<div><b>bold</b></div>", "<strong>bold</strong>"],
+      ["<p>First</p><p>Second</p>", "<p>First</p><p>Second</p>"],
+      ["<h1>Heading</h1>", "<h1>Heading</h1>"],
+      ["<ul><li>Item</li></ul>", "<ul><li>Item</li></ul>"],
+      ['<p style="text-align: center;">Centered</p>', '<p style="text-align: center;">Centered</p>'],
+      // otherwise it's parsed as 2 paragraphs
+      ["<p>Line<br>break</p>", "<p>Line<br>break</p>"],
+      // otherwise leading whitespaces are skipped
+      ["<p>&nbsp;<strong>bold</strong></p>", "<p>&nbsp;<strong>bold</strong></p>"],
+      ["<p>&nbsp;text</p>", "&nbsp;text"],
+      ["<p></p>", ""],
+    ].forEach(([html, expected]) => {
+      expect(toValue(html)).toBe(expected);
+      expect(toValue(expected)).toBe(expected); // value is the same after parsing back
+    });
   });
 });

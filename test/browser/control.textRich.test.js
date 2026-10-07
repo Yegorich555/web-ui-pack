@@ -41,7 +41,7 @@ describe("control.textRich", () => {
     expect(await getState()).toEqual(['<div>Some "text" here</div>', "text"]); // selection is kept: to wrap again
     await page.keyboard.type("(");
     expect(await getState()).toEqual(['<div>Some "(text)" here</div>', "text"]);
-    expect(await page.evaluate(() => el.$value)).toBe('<p>Some "(text)" here</p>');
+    expect(await page.evaluate(() => el.$value)).toBe('Some "(text)" here');
 
     // every wrapping is a separate step of undo
     await page.keyboard.down("ControlLeft");

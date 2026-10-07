@@ -90,13 +90,13 @@ export default function TextRichControlView() {
             w-label="Readonly with smaller toolbar ($options.toolbar)"
             readonly
             w-toolbar="window.myTextRichToolbarShort"
-            w-initValue="<p>Readonly <strong>text</strong></p>"
+            w-initValue="Readonly <strong>text</strong>"
           />
           <wup-textrich
             w-name="disabled"
             disabled
             w-toolbar="window.myTextRichToolbarShort"
-            w-initValue="<p>Disabled <strong>text</strong></p>"
+            w-initValue="Disabled <strong>text</strong>"
           />
         </div>
         <button type="submit">Submit</button>
