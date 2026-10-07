@@ -114,60 +114,6 @@ export function embedOf(tools: Tools): ((el: Element) => boolean) | undefined {
   return arr.length ? (el) => arr.some((t) => t.is!(el as HTMLElement) !== undefined) : undefined;
 }
 
-/** Returns count of chars before point (node & offset) inside root: embed (see `isEmbed`) is counted as 1 char */
-export function charsBefore(root: Node, node: Node, offset: number, isEmbed?: (el: Element) => boolean): number {
-  const r = document.createRange();
-  r.setStart(root, 0);
-  r.setEnd(node, offset);
-  let n = r.toString().length;
-  if (isEmbed) {
-    const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
-    for (let el = w.nextNode() as Element | null; el; el = w.nextNode() as Element | null) {
-      if (isEmbed(el)) {
-        const p = el.parentNode!;
-        if (r.comparePoint(p, Array.prototype.indexOf.call(p.childNodes, el) + 1)) {
-          break; // embed is after point: the next ones too
-        }
-        n += 1 - el.textContent!.length; // embed is counted as 1 char instead of its text
-      }
-    }
-  }
-  return n;
-}
-
-/** Returns point (node & offset) by count of chars inside root: embed (see `isEmbed`) is counted as 1 char & its content is skipped;
- *  point at the boundary of nodes is placed at the end of the previous one; position out of range - at the end of root */
-export function pointAt(root: Node, pos: number, isEmbed?: (el: Element) => boolean): [Node, number] {
-  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | (isEmbed ? NodeFilter.SHOW_ELEMENT : 0));
-  let last: [Node, number] = [root, 0];
-  for (let n = w.nextNode(); n; n = w.nextNode()) {
-    if (n.nodeType === Node.TEXT_NODE) {
-      const len = (n as Text).length;
-      if (pos <= len) {
-        return [n, pos];
-      }
-      pos -= len;
-      last = [n, len];
-    } else if (isEmbed!(n as Element)) {
-      const p = n.parentNode!;
-      const i = Array.prototype.indexOf.call(p.childNodes, n);
-      if (!pos) {
-        return [p, i]; // before embed
-      }
-      pos -= 1;
-      last = [p, i + 1]; // after embed
-      if (!pos) {
-        return last;
-      }
-      while (n.lastChild) {
-        n = n.lastChild; // content of embed is skipped
-      }
-      w.currentNode = n;
-    }
-  }
-  return last;
-}
-
 // WARN: during cleaning source nodes are never cloned or moved (they can be unsafe): only new nodes are created
 
 /** Context of cleaning: tools with formats grouped by kind & type of result */
@@ -438,28 +384,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     this.replaceChildren(htmlToEditor(v, this._tools));
   }
 
-  /** Positions of selection by chars: embed (`<img>` etc. of tools with kind `embed`) is counted as 1 char */
-  override get selection(): null | { start: number; end: number } {
-    const sel = window.getSelection();
-    if (document.activeElement !== this || !sel?.rangeCount) {
-      return null;
-    }
-    const r = sel.getRangeAt(0);
-    const isEmbed = embedOf(this._tools);
-    return {
-      start: charsBefore(this, r.startContainer, r.startOffset, isEmbed),
-      end: charsBefore(this, r.endContainer, r.endOffset, isEmbed),
-    };
-  }
-
-  override set selection(sel) {
-    if (document.activeElement !== this) {
-      return;
-    }
-    const isEmbed = embedOf(this._tools);
-    const [n1, o1] = pointAt(this, sel?.start ?? 0, isEmbed);
-    const [n2, o2] = pointAt(this, sel?.end ?? 0, isEmbed);
-    window.getSelection()!.setBaseAndExtent(n1, o1, n2, o2);
+  override _embedOf(): ((el: Element) => boolean) | undefined {
+    return embedOf(this._tools);
   }
 }
 

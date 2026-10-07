@@ -3,6 +3,86 @@ import WUPBaseElement from "../baseElement";
 
 /** Tags with appended styles (the class can be inherited by another element) */
 const styledTags = new Set<string>();
+
+/** Lines: line break is placed before them (browser adds `<div>` on Enter) */
+const lineTags = new Set(["DIV", "P", "LI", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "PRE"]);
+
+/** Walks parts of text inside root in order: text node, line break (before line except the 1st one & `<br>` except the last child)
+ *  & embed (see `isEmbed`: counted as 1 char, its content is skipped); walking is stopped when fn returns true */
+function walkText(root: Node, fn: (n: Node, len: number) => boolean | void, isEmbed?: (el: Element) => boolean): void {
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+  let isStarted = false;
+  for (let n = w.nextNode(); n; n = w.nextNode()) {
+    let len = 1;
+    if (n.nodeType === Node.TEXT_NODE) {
+      len = (n as Text).length;
+    } else if (isEmbed?.(n as Element)) {
+      let last: Node = n;
+      while (last.lastChild) {
+        last = last.lastChild;
+      }
+      w.currentNode = last; // content of embed is skipped
+    } else if (lineTags.has(n.nodeName)) {
+      len = +isStarted;
+      isStarted = true;
+    } else if (n.nodeName !== "BR" || !n.nextSibling) {
+      continue; // inline element or the last `<br>`: browser adds it to show empty line
+    }
+    isStarted ||= len > 0;
+    if (fn(n, len)) {
+      return;
+    }
+  }
+}
+
+/** Returns count of chars before point (node & offset) inside root: line break & embed are counted as 1 char (see walkText) */
+export function charsBefore(root: Node, node: Node, offset: number, isEmbed?: (el: Element) => boolean): number {
+  const r = document.createRange();
+  r.setStart(node, offset);
+  let cnt = 0;
+  walkText(
+    root,
+    (n, len) => {
+      if (n === node && n.nodeType === Node.TEXT_NODE) {
+        cnt += offset;
+        return true;
+      }
+      if (r.comparePoint(n, 0) > 0) {
+        return true; // part is after point
+      }
+      cnt += len;
+      return false;
+    },
+    isEmbed
+  );
+  return cnt;
+}
+
+/** Returns point (node & offset) by count of chars inside root: line break & embed are counted as 1 char (see walkText);
+ *  point at the boundary of parts is placed at the end of the previous one (at the start of line - into its text);
+ *  position out of range - at the end of root */
+export function pointAt(root: Node, pos: number, isEmbed?: (el: Element) => boolean): [Node, number] {
+  let last: [Node, number] = [root, 0];
+  walkText(
+    root,
+    (n, len) => {
+      const isLine = lineTags.has(n.nodeName);
+      if (n.nodeType === Node.TEXT_NODE) {
+        last = [n, Math.min(pos, len)];
+      } else if (len && !pos) {
+        return true; // before line break or embed
+      } else {
+        const p = n.parentNode!;
+        last = isLine ? [n, 0] : [p, Array.prototype.indexOf.call(p.childNodes, n) + 1];
+      }
+      pos -= len;
+      return pos < 0 || (!pos && !isLine);
+    },
+    isEmbed
+  );
+  return last;
+}
+
 /** Represents contenteditable element with custom input props as value, select etc. */
 export default class WUPTextAreaInput extends HTMLElement {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
@@ -57,23 +137,26 @@ export default class WUPTextAreaInput extends HTMLElement {
   }
 
   _cached?: string;
-  /** Get/set innerHTML (getter converts br into '\n'; setter assigns raw innerHTML) */
+  /** Get/set plain text (getter converts `<br>` & lines added by browser on Enter into '\n'; setter assigns textContent) */
   get value(): string {
     if (this._cached == null) {
-      this._cached = this.innerHTML
-        // .replace(/\n $/, "\n")
-        .replace(/<div><br><\/div>/g, "\n") // Chrome newLine
-        .replace(/<br>|<div>/g, "\n")
-        .replace(/<\/div>/g, "")
-        .replace(/^&nbsp;/, "");
+      let s = "";
+      walkText(this, (n, len) => {
+        s += n.nodeType === Node.TEXT_NODE ? (n as Text).data : "\n".repeat(len);
+      });
+      this._cached = s;
     }
     return this._cached;
   }
 
   set value(v: string) {
     this._cached = undefined;
-    this.innerHTML = v;
+    this.textContent = v;
+    v.endsWith("\n") && this.append(document.createElement("br")); // otherwise browser doesn't show the last empty line
   }
+
+  /** Returns function that checks if element is embed (`<img>` etc.): it's counted as 1 char in positions of selection */
+  _embedOf?(): ((el: Element) => boolean) | undefined;
 
   /** Sets the start and end positions of a selection in a text field.
    * @param start The offset into the text field for the start of the selection.
@@ -100,24 +183,17 @@ export default class WUPTextAreaInput extends HTMLElement {
     this.selection = { start: this.selection?.start as number, end: v || 0 };
   }
 
-  /** Fix for contenteditable (it doesn't contain selectionStart & selectionEnd props) */
+  /** Positions of selection by chars of value (contenteditable doesn't contain selectionStart & selectionEnd props) */
   get selection(): null | { start: number; end: number } {
-    if (document.activeElement !== this) {
-      return null;
-    }
     const sel = window.getSelection();
-    if (!sel || sel.rangeCount < 1) {
+    if (document.activeElement !== this || !sel?.rangeCount) {
       return null;
     }
-    const range = sel.getRangeAt(0);
-    const pre = range.cloneRange();
-    pre.selectNodeContents(this);
-    pre.setEnd(range.startContainer, range.startOffset);
-    const start = pre.toString().length;
-
+    const r = sel.getRangeAt(0);
+    const isEmbed = this._embedOf?.();
     return {
-      start,
-      end: start + range.toString().length,
+      start: charsBefore(this, r.startContainer, r.startOffset, isEmbed),
+      end: charsBefore(this, r.endContainer, r.endOffset, isEmbed),
     };
   }
 
@@ -125,49 +201,11 @@ export default class WUPTextAreaInput extends HTMLElement {
     if (document.activeElement !== this) {
       return;
     }
-    let charIndex = 0;
-    const range = document.createRange();
-    range.setStart(this, 0);
-    range.collapse(true);
-    const nodeStack: Node[] = [this];
-    let node;
-    let foundStart = false;
-    let stop = false;
-
-    // from https://stackoverflow.com/questions/13949059/persisting-the-changes-of-range-objects-after-selection-in-html/13950376#13950376
-    /* istanbul ignore else */
-    if (sel) {
-      // eslint-disable-next-line no-cond-assign
-      while (!stop && (node = nodeStack.pop())) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const nextCharIndex = charIndex + (node as Text).length;
-          /* istanbul ignore else */
-          if (!foundStart && sel.start >= charIndex && sel.start <= nextCharIndex) {
-            range.setStart(node, sel.start - charIndex);
-            foundStart = true;
-          }
-          /* istanbul ignore else */
-          if (foundStart && sel.end >= charIndex && sel.end <= nextCharIndex) {
-            range.setEnd(node, sel.end - charIndex);
-            stop = true;
-          }
-          charIndex = nextCharIndex;
-        } else {
-          let i = node.childNodes.length;
-          while (i--) {
-            nodeStack.push(node.childNodes[i]);
-          }
-        }
-      }
-    }
-
-    const s = window.getSelection()!;
-    s.removeAllRanges();
-    s.addRange(range);
+    const isEmbed = this._embedOf?.();
+    const [n1, o1] = pointAt(this, sel?.start ?? 0, isEmbed);
+    const [n2, o2] = pointAt(this, sel?.end ?? 0, isEmbed);
+    window.getSelection()!.setBaseAndExtent(n1, o1, n2, o2);
   }
 }
 
 customElements.define("wup-areainput", WUPTextAreaInput);
-
-// todo setter `value` assigns raw html via innerHTML: `$value = '<img src=x onerror="...">'` executes script => assign as text
-// todo getter `value` returns html-escaped text: typed `a < b & c` gives $value `a &lt; b &amp; c`

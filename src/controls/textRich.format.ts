@@ -1,4 +1,5 @@
-import { charsBefore, isBlockTag, listTags, pointAt } from "./textRich.input";
+import { charsBefore, pointAt } from "./textArea.input";
+import { isBlockTag, listTags } from "./textRich.input";
 
 /** Inline format applied via element */
 export interface InlineFormat {

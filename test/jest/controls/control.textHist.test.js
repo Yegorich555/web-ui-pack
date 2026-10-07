@@ -199,6 +199,18 @@ describe("control.text.hist", () => {
     expect(await h.userUndo(el)).toBe("|");
   });
 
+  test("insert without data", async () => {
+    // contenteditable fires beforeinput without data on Enter, paste etc. => changes are defined by diff of values
+    expect(await h.userTypeText(el, "abc")).toBe("abc|");
+    h.setInputCursor(el, "ab|c", { skipEvent: true });
+    const inputType = "insertFromPaste";
+    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType }));
+    h.setInputCursor(el, "ab12|c", { skipEvent: true });
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType }));
+    expect(await h.userUndo(el)).toBe("ab|c");
+    expect(await h.userRedo(el)).toBe("ab12|c");
+  });
+
   test("findDifference & updateLast", async () => {
     // appended
     expect(TextHistory.findDiff("ab", "ab.")).toStrictEqual({ inserted: { v: ".", pos: 2 }, removed: null });

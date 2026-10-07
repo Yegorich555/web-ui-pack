@@ -191,7 +191,8 @@ export default class TextHistory {
       default:
         this._stateBeforeInput = this.inputState;
         // all types here: https://rawgit.com/w3c/input-events/v1/index.html#interface-InputEvent-Attributes
-        if (e.inputType.startsWith("insert")) {
+        // contenteditable: data is null on Enter, paste etc. => changes are defined by diff of values (action replace)
+        if (e.data != null && e.inputType.startsWith("insert")) {
           this._stateBeforeInput.action = e.inputType === "insertText" ? InputTypes.append : InputTypes.insert;
           this._stateBeforeInput.inserted = e.data;
         } else if (e.inputType.startsWith("delete")) {
