@@ -2,6 +2,7 @@ import WUPTextRichControl from "web-ui-pack/controls/textRich";
 import WUPDropdownElement from "web-ui-pack/dropdownElement";
 import { initTestBaseControl } from "./baseControlTest";
 import testTextAreaControl, { mockAreaInput } from "./control.textAreaTest";
+import * as h from "../../testHelper";
 
 // WARN: it must be before initTestBaseControl: the control with dropdowns is created in its beforeEach
 beforeEach(() => {
@@ -31,5 +32,25 @@ describe("control.textRich", () => {
         ],
       },
     },
+  });
+
+  test("format of line in empty editor", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    expect(inp.innerHTML).toBe("");
+    inp.focus();
+    window.getSelection().collapse(inp, 0); // caret is placed into root when editor is empty
+    const btn = el.querySelector("wup-dropdown[tool=header] > button");
+    expect(btn.textContent).toBe("Normal");
+
+    btn.click(); // open dropdown
+    await h.wait();
+    expect(btn.parentElement.$refPopup.$isOpened).toBe(true);
+    el.querySelector('[tool="header:1"]').click();
+    expect(inp.innerHTML).toBe("<h1><br></h1>");
+    expect(btn.textContent).toBe("Heading 1"); // the 1st click must apply format to the line added for empty editor
+    const sel = window.getSelection();
+    expect(sel.anchorNode).toBe(inp.firstChild);
+    expect(sel.anchorOffset).toBe(0);
   });
 });

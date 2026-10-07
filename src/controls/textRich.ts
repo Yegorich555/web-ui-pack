@@ -893,7 +893,8 @@ export default class WUPTextRichControl<
     };
     const [an, ao] = childPos(sel.anchorNode!, sel.anchorOffset);
     const [fn1, fo] = childPos(sel.focusNode!, sel.focusOffset);
-    wrapLines(inp) && sel.setBaseAndExtent(an, ao, fn1, fo); // nodes are moved into lines
+    // nodes are moved into lines; position pointed by root is converted again: empty root gets the 1st line (caret goes into it)
+    wrapLines(inp) && sel.setBaseAndExtent(...childPos(an, ao), ...childPos(fn1, fo));
     let lines = getLines(inp);
     const p1 = toLinePos(lines, sel.anchorNode!, sel.anchorOffset);
     const p2 = toLinePos(lines, sel.focusNode!, sel.focusOffset);

@@ -10,10 +10,14 @@ import {
   WUPPasswordControl,
   WUPSelectManyControl,
   WUPFormElement,
+  WUPTextAreaControl,
+  WUPTextRichControl,
 } from "web-ui-pack";
 
 WUPFormElement.$use();
 WUPTextControl.$use();
+WUPTextAreaControl.$use();
+WUPTextRichControl.$use();
 WUPPasswordControl.$use();
 WUPSelectControl.$use();
 WUPSelectManyControl.$use();
@@ -119,6 +123,8 @@ export default function ControlsView() {
         />
         <wup-date w-name="date" />
         <wup-time w-name="time" />
+        <wup-textarea w-name="textArea" />
+        <wup-textrich w-name="textRich" />
         <button type="submit">Submit (see result into browser console)</button>
       </wup-form>
     </Page>
