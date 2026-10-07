@@ -285,7 +285,7 @@ function firstNode(r: Range): Node {
  * (paragraph `<p>`, `<strong>`, `<em>`, `<u>`, `<s>`, `<sub>`, `<sup>`, `<a>`, `<h1>...<h6>`, `<blockquote>`, `<pre>`, `<ol>`, `<ul>`)
  * * formatting is saved in custom history: undo/redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y, OS-native) works for text & formats
  * * keyboard shortcuts (see static $hotKeys) are similar to Google Docs: Ctrl+B, Ctrl+Shift+7, Ctrl+Alt+1 etc. (Cmd on macOS/iOS);
- * they're shown in tooltips of toolbar buttons & in items of dropdowns (see $options.hideHotKeysHint);
+ * they're shown in tooltips of toolbar buttons & in items of dropdowns (align & header: in tooltips) (see $options.hideHotKeysHint);
  * Alt+F10 to focus toolbar (Arrows to navigate, Esc to return);
  * with collapsed selection inline format (bold etc.) is applied to the next typed text
  * * styles of content are global: use `<div wup-textrich>{$value}</div>` to show value outside control in the same way
@@ -554,7 +554,7 @@ export default class WUPTextRichControl<
     b._value = value;
   }
 
-  /** Sets `aria-label` & tooltip of toolbar button by key of `$labels`;
+  /** Sets `aria-label` & tooltip of toolbar button (or icon item of dropdown) by key of `$labels`;
    *  tooltip includes keyboard shortcut `{Tool} ({HotKeys})` if it exists & isn't hidden via $options.hideHotKeysHint */
   protected setToolLabel(b: HTMLElement, key: string): void {
     // button clear: label depends on state like its icon - the next clearing restores previous value (`clear:back`) or clears it
@@ -625,9 +625,13 @@ export default class WUPTextRichControl<
       li.setAttribute("role", "option");
       li.setAttribute("tool", key);
       li.tabIndex = -1;
+      li._format = format;
+      li._value = v;
       if (format === "align") {
-        li.setAttribute("aria-label", label); // align is rendered as icon
-      } else if (format === "header" && v) {
+        this.setToolLabel(li, key); // align is rendered as icon: label & hotkeys are shown via tooltip like for buttons
+        return;
+      }
+      if (format === "header" && v) {
         // rendered via heading tag to use the same (default/global) styles as in editor; role="none" hides heading semantics
         const h = li.appendChild(document.createElement(`h${v}`));
         h.setAttribute("role", "none");
@@ -641,13 +645,13 @@ export default class WUPTextRichControl<
         li.textContent = label;
       }
       const hint = this.setHotKeys(li, key);
-      if (hint) {
+      if (format === "header") {
+        hint && li.setAttribute("w-tooltip", `${label} (${hint})`); // the same as align: headings are big, so hint is only in tooltip
+      } else if (hint) {
         const kbd = li.appendChild(document.createElement("kbd")); // at the right side of item (like in menus of OS)
         kbd.setAttribute("aria-hidden", true); // announced via aria-keyshortcuts
         kbd.textContent = hint;
       }
-      li._format = format;
-      li._value = v;
     });
   }
 
