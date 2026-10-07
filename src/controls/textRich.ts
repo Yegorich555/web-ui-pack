@@ -719,17 +719,19 @@ export default class WUPTextRichControl<
     inp.setAttribute("wup-textrich", ""); // styles of content are global: the same for value shown outside
 
     useTooltipOnce("w-tooltip"); // toolbar buttons show aria-label via tooltip
-    // hover on link shows popup to edit url; skipped during selecting by mouse
+    // hover on link shows popup to edit url; skipped during selecting by mouse & for touch (it's pressed: buttons = 1)
     onEvent(inp, "pointerover", (e) => !e.buttons && this.gotHoverLink((e.target as Element).closest("a")));
-    onEvent(inp, "pointerleave", () => this.gotHoverLink(null));
-    // Ctrl/Cmd + Click opens link in new tab: browser doesn't follow links inside contenteditable
+    // touch leaves element right after tap: popup is closed by tap outside link or when focus leaves control
+    onEvent(inp, "pointerleave", (e) => e.pointerType !== "touch" && this.gotHoverLink(null));
     inp.addEventListener("click", (e) => {
-      const a = (e.ctrlKey || e.metaKey) && (e.target as Element).closest("a");
-      const href = a && sanitizeUrl(a.href);
+      const a = (e.target as Element).closest("a");
+      const href = a && (e.ctrlKey || e.metaKey) && sanitizeUrl(a.href);
       if (href) {
+        // Ctrl/Cmd + Click opens link in new tab: browser doesn't follow links inside contenteditable
         e.preventDefault();
         window.open(href, "_blank", "noopener,noreferrer");
       } else {
+        this.gotHoverLink(a); // tap on link shows popup on touch devices (nothing changes for mouse: it's hovered)
         this.gotClickEmbed(e.target as HTMLElement);
       }
     });
@@ -1311,7 +1313,7 @@ export default class WUPTextRichControl<
       );
       p.$onClose = () => this.#ask?.done === done && done(null, false); // closed by itself: when target is removed
       p.onpointerenter = () => this.#ask?.a && this.gotHoverLink(this.#ask.a);
-      p.onpointerleave = () => this.gotHoverLink(null);
+      p.onpointerleave = (e) => e.pointerType !== "touch" && this.gotHoverLink(null); // touch leaves it after tap
       this.appendChild(p);
     });
   }
@@ -1518,6 +1520,7 @@ export default class WUPTextRichControl<
 
   protected override gotFocusLost(): void {
     super.gotFocusLost();
+    this.#ask?.a && this.#ask.done(null, false); // popup of link opened by hover or tap (touch doesn't leave it)
     this.#range = undefined;
     this.#pending.clear();
     this.refreshToolbar(new Map());
