@@ -623,7 +623,7 @@ export default class WUPTextRichControl<
       ],
       kind: "lineStyle",
       is: (el) => {
-        const a = el.style.textAlign || el.getAttribute("align") || ""; // attribute `align` is deprecated but still used - todo drop it
+        const a = el.style.textAlign;
         return textAligns.has(a) ? (a as WUP.TextRich.ToolValues["align"]) : undefined;
       },
       set: (el, v) => (el.style.textAlign = v || ""),
