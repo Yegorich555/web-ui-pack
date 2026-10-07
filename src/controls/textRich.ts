@@ -62,7 +62,6 @@ declare global {
       italic: true;
       underline: true;
       strike: true;
-      // todo add quote - suggest similar icon as blockquote - probably different look of this char: "
       blockquote: true;
       code: true;
       /** Url of link: it's asked via popup */
@@ -1138,11 +1137,13 @@ export default class WUPTextRichControl<
   #isInserted = false;
 
   /** Calls fn that changes editor & restores selection by lines & chars (fn can move or split nodes);
+   *  adjacent text nodes are joined (split by formatting: `"a""b"` => `"ab"`);
    *  selection isn't restored if content is inserted via $insert (caret is placed after it) */
   protected keepSelection(fn: (r: Range) => void): void {
     const pos = this.getSelectionPos();
     this.#isInserted = false;
     fn(window.getSelection()!.getRangeAt(0));
+    this.$refInput.normalize();
     !this.#isInserted && this.setSelectionPos(pos);
   }
 

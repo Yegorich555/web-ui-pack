@@ -53,4 +53,18 @@ describe("control.textRich", () => {
     expect(sel.anchorNode).toBe(inp.firstChild);
     expect(sel.anchorOffset).toBe(0);
   });
+
+  test("text nodes are joined after formatting", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.innerHTML = "<div>Text with <b>bold</b>,</div>"; // value isn't used: it's mocked by mockAreaInput
+    inp.focus();
+    window.getSelection().selectAllChildren(inp.firstChild);
+
+    el.applyFormat("clean");
+    expect(inp.innerHTML).toBe("<div>Text with bold,</div>");
+    expect(inp.firstChild.childNodes.length).toBe(1); // "Text with " "bold" "," => "Text with bold,"
+    const sel = window.getSelection();
+    expect(sel.toString()).toBe("Text with bold,"); // selection is kept
+  });
 });
