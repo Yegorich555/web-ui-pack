@@ -374,6 +374,7 @@ function setInline(nodes: Text[], f: InlineFormat, value: unknown, root: Node): 
  * they're shown in tooltips of toolbar buttons & in items of dropdowns (align & header: in tooltips) (see $options.hideHotKeysHint);
  * Alt+F10 to focus toolbar (Arrows to navigate, Esc to return);
  * with collapsed selection inline format (bold etc.) is applied to the next typed text
+ * * selected text is wrapped into typed quote or bracket like in code editors: `"text"`, `(text)` etc. (see static $wrapChars)
  * * styles of content are global: use `<div wup-textrich>{$value}</div>` to show value outside control in the same way
  * @tutorial innerHTML @example
  * <label>
@@ -421,6 +422,19 @@ export default class WUPTextRichControl<
    * @see {@link WUP.TextRich.Tool.hotKey}
    * @defaultValue `Alt+F10` */
   static $hotKeyToolbar = "Alt+F10";
+  /** Pairs of chars that wrap selected text on typing like in code editors: opening char => closing one
+   *  (typed `(` with selected `text` gives `(text)` & selection is kept on `text`);
+   *  delete pair (or clear map) to replace selected text with typed char as usual
+   * @defaultValue quotes (double, single & backtick) & brackets (round, square, curly & angle) */
+  static $wrapChars = new Map([
+    ['"', '"'],
+    ["'", "'"],
+    ["`", "`"],
+    ["(", ")"],
+    ["[", "]"],
+    ["{", "}"],
+    ["<", ">"],
+  ]);
 
   /** Tools of toolbar: key is name of tool used in $options.toolbar; change it to redefine labels, keyboard shortcuts etc.
    *  or add custom tool (changes are applied on the next rendering of toolbar)
@@ -1133,6 +1147,65 @@ export default class WUPTextRichControl<
     this.#pending.clear();
   }
 
+  /** Wraps selected content into typed char & its pair (see $wrapChars) & keeps selection on the content:
+   *  whitespaces & line breaks at the edges stay outside (double click selects word with trailing space on Windows,
+   *  triple click - line with line break)
+   * @returns false if char doesn't have pair or selection doesn't have visible content (typed char replaces selection) */
+  protected wrapSelection(open: string): boolean {
+    const close = this.#ctr.$wrapChars.get(open);
+    const sel = window.getSelection()!;
+    if (sel.isCollapsed || !close) {
+      return false;
+    }
+    const r = sel.getRangeAt(0);
+    const isEmbed = embedOf(this.#ctr.$tools);
+    const inner = document.createRange(); // from the 1st visible char (embed) to the last one: collapsed if there are no such
+    const w = document.createTreeWalker(r.commonAncestorContainer, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    for (let n: Node | null = w.currentNode; n; n = w.nextNode()) {
+      if (!r.intersectsNode(n)) {
+        continue;
+      }
+      if (n.nodeType === Node.TEXT_NODE) {
+        const t = n as Text;
+        const from = t === r.startContainer ? r.startOffset : 0;
+        const s = t.data.slice(0, t === r.endContainer ? r.endOffset : undefined);
+        const i = s.slice(from).search(/\S/);
+        if (i !== -1) {
+          inner.collapsed && inner.setStart(t, from + i);
+          inner.setEnd(t, s.trimEnd().length);
+        }
+      } else if (isEmbed?.(n as Element)) {
+        inner.collapsed && inner.setStartBefore(n);
+        inner.setEndAfter(n);
+        while (n.lastChild) {
+          n = n.lastChild; // content of embed is skipped
+        }
+        w.currentNode = n;
+      }
+    }
+    if (inner.collapsed) {
+      return false;
+    }
+    this.changeContent(() => {
+      /** Inserts text at point (in text node or before child of element): returns offset after text */
+      const insert = (n: Node, offset: number, s: string): number => {
+        if (n.nodeType === Node.TEXT_NODE) {
+          (n as Text).insertData(offset, s);
+          return offset + s.length;
+        }
+        n.insertBefore(document.createTextNode(s), n.childNodes[offset] ?? null);
+        return offset + 1;
+      };
+      // range is live: its end stays before closing char & it's moved by opening char inserted before it
+      const { startContainer, startOffset } = inner;
+      insert(inner.endContainer, inner.endOffset, close);
+      inner.setStart(startContainer, insert(startContainer, startOffset, open));
+      sel.removeAllRanges();
+      sel.addRange(inner);
+    });
+    return true;
+  }
+
   /** Selection is placed by $insert: it isn't restored by keepSelection */
   #isInserted = false;
 
@@ -1543,6 +1616,9 @@ export default class WUPTextRichControl<
       this.$refInput.focus({ preventScroll: true });
       r && window.getSelection()!.setBaseAndExtent(r.startContainer, r.startOffset, r.endContainer, r.endOffset);
       this.insertHTML(html);
+    } else if (t === "insertText" && e.data && this.wrapSelection(e.data)) {
+      e.preventDefault(); // history & $value are updated via changeContent: wrapping is a separate step of undo
+      return;
     } else if (t === "insertText" && e.data && this.#pending.size) {
       e.preventDefault();
       this.insertPending(e.data);

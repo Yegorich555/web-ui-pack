@@ -31,6 +31,7 @@ export default function TextRichControlView() {
         "Keyboard shortcuts for every tool similar to Google Docs (Ctrl+Shift+7, Ctrl+Alt+1 etc.) & Alt+F10 to focus toolbar (Arrows to navigate, Esc to return)",
         "Shortcuts are customizable via static $tools & shown in tooltips (Bold (Ctrl+B) or Bold (⌘B) on macOS/iOS) & in items of dropdowns",
         "Inline format with collapsed selection is applied to the next typed text (Ctrl+B and type text)",
+        'Selected text is wrapped into typed quote or bracket like in code editors: "text", (text) etc. (customizable via static $wrapChars)',
         "Validations min/max count visible chars only",
         "Uses own js-engine and doesn't depend on Browser (not used deprecated and not stable document.execCommand)",
         "All styles are globally defined except <pre/> and <blockquote/>: use <div [wup-textrich] /> to render content with same styles",
