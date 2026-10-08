@@ -70,27 +70,27 @@ $tools: (
   position: relative; // to position label relative to control instead of editor
   display: flex;
   flex-direction: column;
+  margin-top: calc(var(--base-margin) + 1.75em); // space for label placed above the border: line-height of label + gap
+
+  &:has(> label strong:empty) {
+    margin-top: var(--base-margin);
+  }
 
   // own label only: otherwise it affects <wup-text> in popup to enter link
   > label {
-    --ctrl-label-active-pos: translateY(-50%) scale(0.9); // label is always placed at the middle of top border
+    --ctrl-label-active-pos: none; // label is always placed above the border like header
 
     > span {
       position: static;
     }
 
     strong {
-      top: 0;
-      left: calc(var(--ctrl-icon-size) - 0.25em);
-      max-width: calc(100% - 2 * var(--ctrl-icon-size));
-      padding: 0 0.25em;
-      transform-origin: center left;
-      transform: var(--ctrl-label-active-pos);
-      color: var(--ctrl-focus-label);
-      // hides border behind label so must be opaque: point --ctrl-textrich-label-bg (page color) when --ctrl-bg is transparent (dark mode)
-      // WARN: not defined in :root: otherwise var(--ctrl-bg) is resolved there and dark --ctrl-bg is ignored
-      background: var(--ctrl-textrich-label-bg, var(--ctrl-bg));
-      border-radius: 0.5em;
+      top: auto;
+      bottom: calc(100% + 0.25em);
+      left: 0;
+      transform: none;
+      line-height: 1.5;
+      font-weight: bold;
     }
   }
 
@@ -239,7 +239,7 @@ $tools: (
 
   // editor: styles of content are defined globally via [wup-textrich]
   [contenteditable="true"] {
-    margin-top: 0.5em; // the same as bottom of --ctrl-padding: top of --ctrl-padding is space for label but here label is placed at the top border
+    margin-top: 0.5em; // the same as bottom of --ctrl-padding: top of --ctrl-padding is space for label but here label is placed above the border
     min-height: 8em;
     max-height: 16em;
   }

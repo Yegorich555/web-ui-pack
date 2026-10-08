@@ -85,7 +85,8 @@ export default function TextRichControlView() {
           </small>
           <div wup-textrich="" ref={refPreview} />
         </section>
-        <div className={stylesCom.group}>
+        {/* margin of controls is reset in group: so it requires space for label placed above the border */}
+        <div className={stylesCom.group} style={{ marginTop: "calc(var(--base-margin) + 1.75em)" }}>
           <wup-textrich
             w-name="readonly"
             w-label="Readonly with smaller toolbar ($options.toolbar)"
