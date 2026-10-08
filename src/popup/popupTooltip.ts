@@ -151,9 +151,14 @@ function listenTooltips(): NonNullable<typeof tooltipLst> {
   };
 }
 
-// todo merge useToolTipOnce into useTooltip
-
-/** Call `useTooltip({ attr })` if pointed attr isn't registered yet; registration is never disposed */
+/** Call `useTooltip({ attr })` if pointed attr isn't registered yet; registration is never disposed
+ * @tutorial Why not `useTooltip()`
+ * * it's for internal usage: controls call it on each change (ex. `$options.disabled = "Reason"`),
+ * so `useTooltip()` would add a duplicated registration on each call
+ * * it never overrides options of the user: `WUPPopupElement.$useTooltip({ attr })` called before keeps its options
+ * @tutorial Troubleshooting
+ * * if attr is registered via `useTooltip()` and disposed then tooltip disappears until the next call of this one
+ * * `WUPPopupElement.$useTooltip({ attr })` called after this one is ignored (the 1st registered options are applied) */
 export function useTooltipOnce(attr: string): void {
   !tooltipRegs.some((a) => a.attr === attr) && useTooltip({ attr });
 }

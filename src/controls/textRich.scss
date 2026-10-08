@@ -231,6 +231,19 @@ $tools: (
     opacity: 0.5;
   }
 
+  // count of chars: hidden via $options.hideFooter
+  > footer {
+    align-self: flex-end; // width by content: otherwise tooltip points to the middle of the whole width
+    padding: 0 0.5em 0.25em;
+    font-size: small;
+    color: var(--ctrl-label);
+    cursor: default;
+
+    &[invalid] {
+      color: var(--ctrl-err); // count exceeds validations.max
+    }
+  }
+
   // popup to enter value via $ask (url of link etc.)
   > wup-popup > wup-text {
     width: min(40em, calc(100vw - 3em)); // long urls are visible entirely; fits small screens

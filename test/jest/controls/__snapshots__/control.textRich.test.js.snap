@@ -4527,6 +4527,7 @@ exports[`control.textRich common tests snapshot of $defaults 1`] = `
   "disabled": false,
   "enableInitOnChange": false,
   "focusDebounceMs": 100,
+  "hideFooter": false,
   "hideHotKeysHint": false,
   "label": null,
   "name": null,

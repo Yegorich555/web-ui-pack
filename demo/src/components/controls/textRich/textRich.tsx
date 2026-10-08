@@ -51,6 +51,7 @@ export default function TextRichControlView() {
           w-validations="window.myTextRichValidations"
           w-toolbar="window.myTextRichToolbar"
           w-hideHotKeysHint="false"
+          w-hideFooter="false"
           ref={(el) => {
             if (el) {
               el.$initValue = [

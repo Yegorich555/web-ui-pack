@@ -234,6 +234,10 @@ declare global {
        * @see {@link WUP.TextRich.Tool.hotKey}
        * @defaultValue false */
       hideHotKeysHint: boolean;
+      /** Hide footer with count of visible chars: `{count} / {max}` (see $renderFooter to customize content)
+       * @see {@link WUPTextRichControl.$renderFooter}
+       * @defaultValue false */
+      hideFooter: boolean;
     }
     interface Options<T = string, VM = ValidityMap> extends WUP.TextArea.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTextRichControl> extends WUP.TextArea.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
@@ -246,6 +250,7 @@ declare global {
        * ``` */
       "w-toolbar"?: string;
       "w-hideHotKeysHint"?: boolean | "" | "true" | "false";
+      "w-hideFooter"?: boolean | "" | "true" | "false";
     }
   }
 
@@ -377,6 +382,7 @@ const labelOf = (v: WUP.TextRich.ToolValue): string =>
  *   </div>
  *   <div role="group"><button tool="btnClear" clear></button></div> // $refBtnClear: placed in toolbar instead of label
  * </div>
+ * <footer role="note" aria-label="Characters: {count} of {max}" w-tooltip>{count} / {max}</footer> // $refFooter: see $renderFooter & $options.hideFooter
  * <wup-popup><wup-text/></wup-popup> // to enter value via $ask: url on click on toolbar button `link` or on hover on link */
 export default class WUPTextRichControl<
   ValueType = string,
@@ -680,6 +686,7 @@ export default class WUPTextRichControl<
       ["btnClear"], // button clear (rendered if $options.clearButton is true)
     ],
     hideHotKeysHint: false,
+    hideFooter: false,
   });
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
@@ -695,6 +702,8 @@ export default class WUPTextRichControl<
 
   /** Toolbar with buttons & dropdowns to format text */
   $refToolbar = document.createElement("div");
+  /** Footer with count of chars: it's removed if $options.hideFooter is true (see $renderFooter) */
+  $refFooter?: HTMLElement;
 
   /** Formats shown by toolbar: it's refreshed only when formats are changed */
   #shown?: string;
@@ -745,6 +754,47 @@ export default class WUPTextRichControl<
       propsChanged.includes("hideHotKeysHint") ||
       propsChanged.includes("clearButton")) &&
       this.renderToolbar();
+    this.setupFooter(); // max count depends on validations: they can be changed via form too
+  }
+
+  /** Creates or removes footer according to $options.hideFooter & renders its content */
+  protected setupFooter(): void {
+    if (this._opts.hideFooter) {
+      this.$refFooter?.remove();
+      this.$refFooter = undefined;
+    } else {
+      if (!this.$refFooter) {
+        const f = this.appendChild(document.createElement("footer"));
+        f.setAttribute("role", "note"); // otherwise it's landmark `contentinfo` (outside of <section>, <article> etc.) & aria-label isn't allowed
+        f.setAttribute("w-tooltip", ""); // empty: tooltip shows aria-label
+        this.$refFooter = f;
+      }
+      this.$renderFooter(this.$refFooter);
+    }
+  }
+
+  /** Renders content of footer: count of visible chars (the same as validations min/max count)
+   *  `{count} / {max}` if `validations.max` is pointed (with attr `invalid` if count exceeds max: red text), otherwise `{count}`;
+   *  `aria-label` is shown via tooltip;
+   *  it's called on every change of value & options (if footer isn't hidden via $options.hideFooter): override it to customize content
+   * @example
+   * class MyTextRich extends WUPTextRichControl {
+   *   override $renderFooter(footer: HTMLElement): void {
+   *     const words = this.$refInput.innerText.split(/\s+/).filter(Boolean).length;
+   *     footer.textContent = `${words}`;
+   *     footer.setAttribute("aria-label", `Words: ${words}`);
+   *   }
+   * } */
+  $renderFooter(footer: HTMLElement): void {
+    const count = htmlToText(this.$refInput.value).length;
+    const max = (this.validations as WUP.TextRich.Options["validations"])?.max;
+    const isMax = typeof max === "number";
+    footer.textContent = isMax ? `${count} / ${max}` : `${count}`;
+    this.setAttr.call(footer, "invalid", isMax && count > max, true); // red if count exceeds max
+    footer.setAttribute(
+      "aria-label",
+      isMax ? __wupln(`Characters: ${count} of ${max}`, "aria") : __wupln(`Characters: ${count}`, "aria")
+    );
   }
 
   /** Renders toolbar according to $options.toolbar */
@@ -1702,11 +1752,17 @@ export default class WUPTextRichControl<
     return new TextRichHistory(this.$refInput);
   }
 
+  protected override gotInput(e: WUP.Text.GotInputEvent): void {
+    super.gotInput(e);
+    this.$refFooter && this.$renderFooter(this.$refFooter); // at once: $value is changed after $options.debounceMs
+  }
+
   protected override setInputValue(v: string, reason: SetValueReasons): void {
     if (v && v === this.$refInput.value) {
       return; // skip re-rendering: it resets selection & scroll
     }
     super.setInputValue(v, reason);
+    this.$refFooter && this.$renderFooter(this.$refFooter);
   }
 
   protected override setClearState(): ValueType | undefined {

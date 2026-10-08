@@ -99,6 +99,7 @@ WUPTextRichControl.$tools.image = {
   ["image"], // custom tool
   ["clean"],
 ] as WUP.TextRich.Options["toolbar"];
+(window as any).myTextRichValidationsMax = { max: 500 } as WUP.TextRich.Options["validations"];
 
 export default function Example1() {
   return (
@@ -106,12 +107,14 @@ export default function Example1() {
       <small>
         Font, direction & image are added via static $tools. See details in{" "}
         <MyLink href="/demo/src/components/controls/textRich/example1.tsx">textRich/example1.tsx</MyLink> &{" "}
-        <MyLink href="/demo/src/components/controls/textRich/example1.scss">textRich/example1.scss</MyLink>
+        <MyLink href="/demo/src/components/controls/textRich/example1.scss">textRich/example1.scss</MyLink>. Footer
+        shows count of chars & validations.max (hidden via $options.hideFooter)
       </small>
       <wup-textrich
         w-name="customTools"
         w-label="Rich text with custom tools"
         w-toolbar="window.myTextRichToolbarCustom"
+        w-validations="window.myTextRichValidationsMax"
         w-initValue={[
           '<p>Text with <span style="font-family: serif;">serif</span> & <span style="font-family: monospace;">monospace</span> fonts</p>',
           '<p style="direction: rtl;">Right-to-left line</p>',
