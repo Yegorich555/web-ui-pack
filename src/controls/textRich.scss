@@ -67,7 +67,6 @@ $tools: (
 );
 
 :host {
-  // todo margin-top is wrong for this control, since there is no label content in this area - need to descrease it
   position: relative; // to position label relative to control instead of editor
   display: flex;
   flex-direction: column;
@@ -240,6 +239,7 @@ $tools: (
 
   // editor: styles of content are defined globally via [wup-textrich]
   [contenteditable="true"] {
+    margin-top: 0.5em; // the same as bottom of --ctrl-padding: top of --ctrl-padding is space for label but here label is placed at the top border
     min-height: 8em;
     max-height: 16em;
   }
