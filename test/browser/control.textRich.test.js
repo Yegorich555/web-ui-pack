@@ -112,4 +112,60 @@ describe("control.textRich", () => {
     await page.keyboard.press("Backspace");
     expect(await getState()).toEqual(["<h2>HeadText <b>bold</b></h2>", ""]);
   });
+
+  test("ArrowRight at end of format: the 1st one keeps format for typed text, the 2nd one leaves it", async () => {
+    /** Sets value, places caret before the last char of format, presses keys & types text
+     * @returns html of editor & pressed buttons of toolbar before typing */
+    const type = async (html, caret, keys, text) => {
+      await page.evaluate(
+        (h, pos) => {
+          el.$value = h;
+          el.$refInput.focus();
+          el.$refInput.setSelectionRange(pos, pos);
+        },
+        html,
+        caret
+      );
+      await keys.reduce((p, k) => p.then(() => page.keyboard.press(k)), Promise.resolve());
+      await page.waitForTimeout(1); // toolbar is updated on selectionchange
+      const pressed = await page.evaluate(() =>
+        Array.from(el.querySelectorAll('[aria-pressed="true"]'), (b) => b.getAttribute("tool")).join()
+      );
+      await page.keyboard.type(text);
+      return [(await getState())[0], pressed];
+    };
+
+    const link = '<p>Text <a href="https://x.com/">link</a> more</p>';
+    const a = '<a href="https://x.com/" target="_blank" rel="noopener noreferrer">';
+    // otherwise Chrome places text after link although toolbar shows link
+    expect(await type(link, 8, ["ArrowRight"], "Z")).toEqual([`<div>Text ${a}linkZ</a> more</div>`, "link"]);
+    // the 2nd ArrowRight doesn't move caret (otherwise it jumps over the next char)
+    expect(await type(link, 8, ["ArrowRight", "ArrowRight"], "Z")).toEqual([`<div>Text ${a}link</a>Z more</div>`, ""]);
+    // the 3rd one moves caret as usual
+    expect(await type(link, 8, ["ArrowRight", "ArrowRight", "ArrowRight"], "Z")).toEqual([
+      `<div>Text ${a}link</a> Zmore</div>`,
+      "",
+    ]);
+    // ArrowLeft returns into format
+    expect(await type(link, 8, ["ArrowRight", "ArrowRight", "ArrowLeft"], "Z")).toEqual([
+      `<div>Text ${a}linkZ</a> more</div>`,
+      "link",
+    ]);
+    // format at the end of line
+    expect(await type("<p>Text <a href='https://x.com/'>link</a></p>", 8, ["ArrowRight", "ArrowRight"], "Z")).toEqual([
+      `<div>Text ${a}link</a>Z</div>`,
+      "",
+    ]);
+
+    // the same for other formats: all formats ending at caret are left at once
+    const nested = "<p>Text <strong>bo<em>ld</em></strong> more</p>";
+    expect(await type(nested, 8, ["ArrowRight"], "Z")).toEqual([
+      "<div>Text <b>bo<em>ldZ</em></b> more</div>",
+      "bold,italic",
+    ]);
+    expect(await type(nested, 8, ["ArrowRight", "ArrowRight"], "Z")).toEqual([
+      "<div>Text <b>bo<em>ld</em></b>Z more</div>",
+      "",
+    ]);
+  });
 });

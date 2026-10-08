@@ -1256,6 +1256,64 @@ export default class WUPTextRichControl<
     return true;
   }
 
+  /** Returns inline formats (bold, link etc.; except tokens) which elements end at collapsed caret */
+  protected formatsAtEnd(): string[] {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode;
+    if (!sel.isCollapsed || !n) {
+      return [];
+    }
+    const r = document.createRange();
+    return Object.entries(this.#ctr.$tools as Record<string, WUP.TextRich.Tool>)
+      .filter(([, t]) => {
+        const el = t.kind === "inline" && !t.trigger && formatParents(n, isOf(t), this.$refInput).pop(); // the outer one
+        if (!el) {
+          return false;
+        }
+        r.selectNodeContents(el);
+        r.setStart(n, sel.focusOffset);
+        return !r.toString(); // range is empty at the end
+      })
+      .map(([name]) => name);
+  }
+
+  /** Inserts typed text into formatted element when caret is at its end (toolbar shows format):
+   *  otherwise Chrome places text after link
+   * @returns false if caret isn't at end of formatted element */
+  protected insertAtEnd(text: string): boolean {
+    if (!this.formatsAtEnd().length) {
+      return false;
+    }
+    const sel = window.getSelection()!;
+    const n = sel.focusNode!;
+    const off = sel.focusOffset;
+    if (n.nodeType === Node.TEXT_NODE) {
+      (n as Text).insertData(off, text);
+      sel.collapse(n, off + text.length);
+    } else {
+      const t = document.createTextNode(text);
+      n.insertBefore(t, n.childNodes[off] ?? null);
+      sel.collapse(t, t.length);
+    }
+    return true;
+  }
+
+  /** Called on ArrowRight/ArrowLeft when caret is at end of formatted element: the next typed text is placed out of it
+   *  or into it (caret isn't moved): ArrowRight leaves formats, ArrowLeft returns into them
+   * @returns false if caret isn't at end of formatted element or it's already out of it (ArrowRight) or inside (ArrowLeft) */
+  protected leaveFormats(isLeave: boolean): boolean {
+    const p = this.#pending;
+    const arr = this.formatsAtEnd().filter((k) => (p.get(k) === false) !== isLeave);
+    if (!arr.length) {
+      return false;
+    }
+    const sel = window.getSelection()!;
+    arr.forEach((k) => (isLeave ? p.set(k, false) : p.delete(k)));
+    this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
+    this.refreshToolbar();
+    return true;
+  }
+
   /** Inserts text with formats pointed for the next typed text */
   protected insertPending(text: string): void {
     const inp = this.$refInput;
@@ -1907,6 +1965,12 @@ export default class WUPTextRichControl<
       l.done();
       return;
     }
+    const isArrow = e.key === "ArrowRight" || e.key === "ArrowLeft";
+    const isPlain = !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey;
+    if (t === this.$refInput && isArrow && isPlain && this.leaveFormats(e.key === "ArrowRight")) {
+      e.preventDefault(); // the 1st ArrowRight moves caret to end of format (bold, link), the 2nd one - out of it: caret stays visually
+      return;
+    }
     super.gotKeyDown(e);
   }
 
@@ -1951,6 +2015,8 @@ export default class WUPTextRichControl<
     } else if (t === "insertText" && e.data && this.#pending.size) {
       e.preventDefault();
       this.insertPending(e.data);
+    } else if (t === "insertText" && e.data && this.insertAtEnd(e.data)) {
+      e.preventDefault();
     } else if (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0])) {
       e.preventDefault();
     } else {
