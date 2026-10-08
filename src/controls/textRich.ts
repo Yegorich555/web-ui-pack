@@ -785,6 +785,15 @@ export default class WUPTextRichControl<
     });
     // touch leaves element right after tap: popup is closed by tap outside link or when focus leaves control
     onEvent(inp, "pointerleave", (e) => e.pointerType !== "touch" && this.gotHover(null));
+    // click shows popup of element at once (the same as hover: caret is placed in text) & click in other place closes it;
+    // touch shows it on tap (see click): otherwise it's shown at the start of scrolling
+    onEvent(inp, "pointerdown", (e) => {
+      const el = e.pointerType !== "touch" && this.hoverOf(e.target as Element);
+      if (el !== false && el !== (this.#ask?.hovered ?? null)) {
+        clearTimeout(this.#hoverTimer);
+        el ? this.askHover(el) : this.#ask?.hovered && this.#ask.done();
+      }
+    });
     inp.addEventListener("click", (e) => {
       const t = e.target as HTMLElement;
       const a = t.closest("a");
@@ -1535,8 +1544,7 @@ export default class WUPTextRichControl<
   }
 
   /** Called on typing: typed `trigger` of tool rendered in toolbar shows its dropdown near it (see askMenu);
-   *  chosen value replaces typed text (trigger & text typed after it); typed pair of trigger (see $wrapChars)
-   *  applies typed text as value even if it isn't in values: `{someProp}` */
+   *  chosen value replaces typed text (trigger & text typed after it) */
   protected gotTrigger(): void {
     const sel = window.getSelection()!;
     const n = sel.focusNode as Text | null;
@@ -1545,42 +1553,51 @@ export default class WUPTextRichControl<
     }
     const s = n.data.slice(0, sel.focusOffset);
     const tools = this.#ctr.$tools as Record<string, WUP.TextRich.Tool>;
-    const { $wrapChars } = this.#ctr;
-    /** Replaces text typed from trigger (`start` in text node) to caret with value of tool:
-     *  embed & token (inline) replace selection, other formats are applied after removing it */
-    const replace = (k: string, v: unknown, start: Range): void => {
-      sel.setBaseAndExtent(start.startContainer, start.startOffset, sel.focusNode!, sel.focusOffset);
-      const t = tools[k];
-      t.kind === "line" && this.changeContent(() => sel.getRangeAt(0).deleteContents());
-      this.applyFormat(k, v, true);
-    };
-    const r = document.createRange(); // typed trigger: range is live, so it isn't extended by typing after it
-    let typed: string | undefined;
-    const closed = Object.keys(tools).find((k) => {
-      const t = tools[k];
-      typed =
-        t.trigger && t.kind === "inline" && this.findTool(k)
-          ? typedValue(s, t.trigger, $wrapChars.get(t.trigger))
-          : undefined;
-      return typed && t.is?.(this.createToken(t, typed)) !== undefined; // `is` can reject value: unknown placeholder etc.
-    });
-    if (closed) {
-      this.#ask?.done(); // menu of typed trigger
-      const t = tools[closed].trigger!;
-      r.setStart(n, s.length - $wrapChars.get(t)!.length - typed!.length - t.length);
-      // after typed text is saved in history (it merges changes made during input): so undo returns typed text
-      setTimeout(() => sel.focusNode === n && sel.focusOffset === s.length && replace(closed, typed, r));
-      return;
-    }
     const name = Object.keys(tools).find((k) => {
       const t = tools[k].trigger;
       return t && s.endsWith(t);
     });
     if (name) {
+      const r = document.createRange(); // typed trigger: range is live, so it isn't extended by typing after it
       r.setStart(n, s.length - tools[name].trigger!.length);
       r.setEnd(n, s.length);
-      this.askMenu(name, r, "typed").then((v) => v != null && replace(name, v, r));
+      this.askMenu(name, r, "typed").then((v) => {
+        if (v != null) {
+          // typed text is replaced: embed & token replace selection, other formats are applied after removing it
+          sel.setBaseAndExtent(r.startContainer, r.startOffset, sel.focusNode!, sel.focusOffset);
+          tools[name].kind === "line" && this.changeContent(() => sel.getRangeAt(0).deleteContents());
+          this.applyFormat(name, v, true);
+        }
+      });
     }
+  }
+
+  /** Called before typing: typed pair of trigger (see $wrapChars) applies text typed after trigger as value of token
+   *  even if it isn't in values (`{someProp` + `}` gives placeholder `someProp`), if `is` of tool returns value for it
+   * @returns false if typed text isn't token */
+  protected gotTokenEnd(data: string): boolean {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode as Text | null;
+    if (!sel.isCollapsed || n?.nodeType !== Node.TEXT_NODE) {
+      return false;
+    }
+    const s = n.data.slice(0, sel.focusOffset) + data;
+    const tools = this.#ctr.$tools as Record<string, WUP.TextRich.Tool>;
+    let typed: string | undefined;
+    const name = Object.keys(tools).find((k) => {
+      const t = tools[k];
+      const tr = t.trigger;
+      typed =
+        tr && t.kind === "inline" && this.findTool(k) ? typedValue(s, tr, this.#ctr.$wrapChars.get(tr)) : undefined;
+      return typed && t.is?.(this.createToken(t, typed)) !== undefined; // `is` can reject value: unknown placeholder etc.
+    });
+    if (!name) {
+      return false;
+    }
+    this.#ask?.done(); // menu of typed trigger
+    sel.setBaseAndExtent(n, sel.focusOffset - typed!.length - tools[name].trigger!.length, n, sel.focusOffset);
+    this.applyFormat(name, typed, true); // token replaces typed text: it's a separate step of undo
+    return true;
   }
 
   /** Returns name of tool if element is its embed or token (`inline` of tool with `trigger`: placeholder, mention)
@@ -1970,6 +1987,9 @@ export default class WUPTextRichControl<
       this.insertHTML(html);
     } else if (t === "insertText" && e.data && this.wrapSelection(e.data)) {
       e.preventDefault(); // history & $value are updated via changeContent: wrapping is a separate step of undo
+      return;
+    } else if (t === "insertText" && e.data && this.gotTokenEnd(e.data)) {
+      e.preventDefault(); // history & $value are updated via changeContent
       return;
     } else if (t === "insertText" && e.data && this.insertOutOfToken(e.data)) {
       e.preventDefault();

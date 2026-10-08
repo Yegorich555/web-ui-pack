@@ -1,13 +1,12 @@
 import Example from "src/elements/example";
 import MyLink from "src/elements/myLink";
-import { WUPSwitchControl, WUPTextRichControl } from "web-ui-pack";
+import { WUPTextRichControl } from "web-ui-pack";
 import imageConvert from "web-ui-pack/helpers/files/imageConvert";
 import selectFiles from "web-ui-pack/helpers/files/selectFiles";
 import imgLogo from "../../../assets/logo-small.png";
 import styles from "./example1.scss";
 
 WUPTextRichControl.$use();
-WUPSwitchControl.$use();
 
 declare global {
   namespace WUP.TextRich {
@@ -102,7 +101,7 @@ const placeholders = ["firstName", "lastName", "email", "company", "date"];
 /** Returns name of placeholder: text inside braces (`{someProp}` => `someProp`);
  *  unknown name is rejected if it isn't allowed: typed `{someProp}` stays text & such element is unwrapped by sanitizer */
 function placeholderOf(el: HTMLElement): string | undefined {
-  /** Placeholders out of `placeholders` are allowed: `{someProp}` (it's switched by end-user in the example) */
+  /** Placeholders out of `placeholders` are allowed: `{someProp}`; set `false` to allow only known ones */
   const allowUnknown = true;
 
   const t = el.textContent!;
@@ -140,11 +139,6 @@ function gotRef(el: WUPTextRichControl | null): void {
       t.tagName === "IMG" && t.setAttribute("w-tooltip", "Click on image to change");
     });
   }
-}
-
-/** Switch to allow unknown placeholders: rule is applied to new placeholders & to $value (existing ones are kept in editor) */
-function gotSwitchRef(el: WUPSwitchControl | null): void {
-  el && (el.$onChange = () => (allowUnknown = !!el.$value));
 }
 
 export default function Example1() {
