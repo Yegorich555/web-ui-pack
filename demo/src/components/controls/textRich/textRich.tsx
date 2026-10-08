@@ -31,8 +31,9 @@ export default function TextRichControlView() {
         "Customizable toolbar with formats",
         "Value is sanitized html",
         "Undo/redo for text & formatting (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y) including OS-native ones (Edit menu, shake on iPhone)",
-        "Customizable Hot-Keys for every tool Alt+F10 to focus toolbar (Arrows to navigate, Esc to return)",
+        "Customizable Hot-Keys for every tool; use Alt+F10 to focus toolbar, Arrows to navigate, Esc to return",
         'Selected text is wrapped into typed quote or bracket like in code editors: "text", (text) etc. (customizable via static $wrapChars)',
+        "Menu of values on typed char like mentions in messengers: { for placeholders, @ for users, / for commands (see `trigger` of static $tools)",
         "Validations min/max count visible chars only",
       ]}
     >

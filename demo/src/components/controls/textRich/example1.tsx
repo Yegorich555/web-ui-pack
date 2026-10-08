@@ -18,6 +18,8 @@ declare global {
       font: "serif" | "monospace" | false;
       /** Url of image: it's asked via browser-dialog to select file */
       image: string;
+      /** Name of placeholder `{firstName}`: it's chosen from menu shown on typing `{` */
+      placeholder: string;
     }
   }
 }
@@ -52,6 +54,7 @@ WUPTextRichControl.$tools.font = {
 /** Returns url of image if it's safe (it's called by sanitizer for pasted html): http(s), relative or data-url of image */
 function imageUrl(src: string | null): string | undefined {
   try {
+    // todo src could be relative url /someImage.png for example
     return src && (/^data:image\//i.test(src) || /^https?:$/.test(new URL(src, document.baseURI).protocol))
       ? src
       : undefined;
@@ -92,21 +95,52 @@ WUPTextRichControl.$tools.image = {
     }),
 };
 
+/** Names of placeholders: `{firstName}` etc. is replaced with real value by server (mail merge etc.) */
+const placeholders = ["firstName", "lastName", "email", "company", "date"];
+
+WUPTextRichControl.$tools.placeholder = {
+  label: "Placeholder",
+  // dropdown in toolbar & menu shown on typing `{` or on click/hover on placeholder (chosen value replaces it)
+  values: placeholders.map((value) => ({ value })), // label is prettified value: `First Name`
+  trigger: "{", // menu is filtered by text typed after it
+  kind: "embed", // counted as 1 char: it's removed entirely by Backspace
+  is: (el) =>
+    el.classList.contains(styles.placeholder) ? placeholders.find((v) => el.textContent === `{${v}}`) : undefined,
+  create: (v) => {
+    const el = document.createElement("span");
+    el.contentEditable = "false"; // otherwise caret can be placed inside
+    el.textContent = `{${v}}`;
+    return el;
+  },
+  classNameTag: styles.placeholder, // highlighted via css
+};
+
 (window as any).myTextRichToolbarCustom = [
   ["bold", "italic", "underline"],
   ["size", "font"], // font - custom tool
   ["align", { direction: "rtl" }], // direction - custom tool
-  ["image"], // custom tool
+  ["image", "placeholder"], // custom tools: placeholder is rendered as dropdown (tool with values)
   ["clean"],
 ] as WUP.TextRich.Options["toolbar"];
 (window as any).myTextRichValidationsMax = { max: 500 } as WUP.TextRich.Options["validations"];
+
+/** Called once on mount/unmount: function is defined outside of component, so React doesn't call it on every render */
+function gotRef(el: WUPTextRichControl | null): void {
+  if (el) {
+    // hint on hover: attribute is set in editor only ($value is rebuilt via `create` of tool)
+    el.$refInput.addEventListener("pointerover", (e) => {
+      const t = e.target as HTMLElement;
+      t.tagName === "IMG" && t.setAttribute("w-tooltip", "Click on image to change");
+    });
+  }
+}
 
 export default function Example1() {
   return (
     <Example header="Custom tools" link="demo/src/components/controls/textRich/example1.tsx">
       <small>
-        Font, direction & image are added via static $tools. See details in{" "}
-        <MyLink href="/demo/src/components/controls/textRich/example1.tsx">textRich/example1.tsx</MyLink> &{" "}
+        Font, direction, image & placeholder (type <b>{"{"}</b> to choose it) are added via static $tools. See details
+        in <MyLink href="/demo/src/components/controls/textRich/example1.tsx">textRich/example1.tsx</MyLink> &{" "}
         <MyLink href="/demo/src/components/controls/textRich/example1.scss">textRich/example1.scss</MyLink>. Footer
         shows count of chars & validations.max (hidden via $options.hideFooter)
       </small>
@@ -119,14 +153,9 @@ export default function Example1() {
           '<p>Text with <span style="font-family: serif;">serif</span> & <span style="font-family: monospace;">monospace</span> fonts</p>',
           '<p style="direction: rtl;">Right-to-left line</p>',
           `<p>Image <img src="${imgLogo}" alt="" style="max-width: 100%;"> inside text (click on it to change)</p>`,
+          `<p>Dear <span class="${styles.placeholder}">{firstName}</span>, thank you for your order</p>`,
         ].join("")}
-        ref={(el) => {
-          // hint on hover: attribute is set in editor only ($value is rebuilt via `create` of tool)
-          el?.$refInput.addEventListener("pointerover", (e) => {
-            const t = e.target as HTMLElement;
-            t.tagName === "IMG" && t.setAttribute("w-tooltip", "Click on image to change");
-          });
-        }}
+        ref={gotRef}
       />
     </Example>
   );

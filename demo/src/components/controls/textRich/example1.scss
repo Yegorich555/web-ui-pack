@@ -12,3 +12,18 @@
 .font > button {
   min-width: 6.875em;
 }
+
+// the same for dropdown of custom tool `placeholder`: it's pointed via attribute `tool` instead of `className` of tool
+wup-richselect[tool="placeholder"] > button {
+  min-width: 6.375em;
+}
+
+// custom tool `placeholder`: class is pointed via `classNameTag` of tool in static $tools;
+// [wup-textrich] increases specificity: otherwise `[contenteditable="false"]` gets styles of control input (`background: none` etc.)
+[wup-textrich] .placeholder {
+  padding: 0 0.25em;
+  border-radius: 0.25em;
+  color: #00778d;
+  background: #009fbc26;
+  cursor: pointer;
+}

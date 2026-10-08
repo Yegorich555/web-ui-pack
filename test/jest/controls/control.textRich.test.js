@@ -1,5 +1,5 @@
 import WUPTextRichControl from "web-ui-pack/controls/textRich";
-import WUPDropdownElement from "web-ui-pack/dropdownElement";
+import WUPTextRichSelect from "web-ui-pack/controls/textRich.select";
 import { initTestBaseControl } from "./baseControlTest";
 import testTextAreaControl, { mockAreaInput } from "./control.textAreaTest";
 import * as h from "../../testHelper";
@@ -8,7 +8,7 @@ import * as h from "../../testHelper";
 beforeEach(() => {
   let lastId = 0;
   // dropdowns of toolbar use own counter: otherwise ids in snapshots depend on order of tests
-  jest.spyOn(WUPDropdownElement, "$uniqueId", "get").mockImplementation(() => `dd${++lastId}`);
+  jest.spyOn(WUPTextRichSelect, "$uniqueId", "get").mockImplementation(() => `dd${++lastId}`);
 });
 
 /** @type WUPTextRichControl */
@@ -41,15 +41,19 @@ describe("control.textRich", () => {
     expect(inp.innerHTML).toBe("");
     inp.focus();
     window.getSelection().collapse(inp, 0); // caret is placed into root when editor is empty
-    const btn = el.querySelector("wup-dropdown[tool=header] > button");
+    const s = el.querySelector("wup-richselect[tool=header]");
+    const btn = s.$refInput;
+    await h.wait(); // text of value is set with delay
     expect(btn.textContent).toBe("Normal");
 
-    btn.click(); // open dropdown
+    s.$openMenu(); // open dropdown
     await h.wait();
-    expect(btn.parentElement.$refPopup.$isOpened).toBe(true);
-    el.querySelector('[tool="header:1"]').click();
+    expect(s.$isOpened).toBe(true);
+    [...s.$refPopup.querySelectorAll("li")].find((li) => li.textContent === "Heading 1").click();
     expect(inp.innerHTML).toBe("<h1><br></h1>");
+    await h.wait();
     expect(btn.textContent).toBe("Heading 1"); // the 1st click must apply format to the line added for empty editor
+    expect(s.$isOpened).toBe(false);
     const sel = window.getSelection();
     expect(sel.anchorNode).toBe(inp.firstChild);
     expect(sel.anchorOffset).toBe(0);
