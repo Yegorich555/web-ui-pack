@@ -1471,6 +1471,7 @@ export default class WUPTextRichControl<
   /** Deletes range between lines instead of browser: the rest of the last line is moved into the 1st one;
    *  if the 1st line is deleted from its start, it's removed instead & the last line keeps its tag
    *  (otherwise triple click on heading + Delete turns the next paragraph into heading);
+   *  if all lines are deleted completely, the empty line is reset to paragraph (select all + Delete doesn't keep heading, alignment etc.);
    *  besides browser wraps moved content into `<span style>` to keep its computed styles
    * @returns false if range is inside single line or nested lists are involved (browser deletes it as usual) */
   protected deleteLines(sr: StaticRange | undefined): boolean {
@@ -1486,7 +1487,7 @@ export default class WUPTextRichControl<
     const pos = toLinePos(lines, sr.startContainer, sr.startOffset, isEmbed);
     const isRest = // the last line has content after range
       charsBefore(b, sr.endContainer, sr.endOffset, isEmbed) < charsBefore(b, b, b.childNodes.length, isEmbed);
-    const isKeep = !pos[1] && isRest; // the 1st line is deleted completely & the last one isn't
+    const isKeep = !pos[1]; // the 1st line is deleted completely
     if (!isKeep && isRest && b.querySelector("ol,ul")) {
       return false;
     }
@@ -1500,11 +1501,14 @@ export default class WUPTextRichControl<
       listTags.has(list.tagName) && !list.firstElementChild && list.remove();
     };
     if (isKeep) {
+      if (!isRest) {
+        // all lines are deleted: new paragraph without formats & leftovers of partially deleted elements
+        b.replaceChildren(document.createElement("br"));
+        setLineTag(b, document.createElement("div")).removeAttribute("style");
+      }
       remove(a);
     } else {
-      if (!pos[1]) {
-        a.replaceChildren(document.createElement("br")); // empty line: leftovers of partially deleted elements are removed
-      } else if (isRest) {
+      if (isRest) {
         a.lastChild?.nodeName === "BR" && a.lastChild.remove(); // otherwise it breaks merged line
         a.append(...b.childNodes);
       }

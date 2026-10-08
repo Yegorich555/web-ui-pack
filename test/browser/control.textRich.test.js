@@ -98,6 +98,15 @@ describe("control.textRich", () => {
     await page.keyboard.press("Delete");
     expect(await getState()).toEqual(["<div>Text <b>bold</b></div>", ""]);
 
+    // select all: formats of the 1st & the last line are reset
+    await page.evaluate(() => {
+      el.$value = '<h2>Head</h2><ul><li style="text-align: center;">Item</li></ul>';
+      el.$refInput.setSelectionRange(0, 99);
+    });
+    await page.keyboard.press("Delete");
+    await page.keyboard.type("X");
+    expect(await getState()).toEqual(["<div>X</div>", ""]);
+
     // otherwise the next line is merged into heading (without <span style> added by browser)
     await select(5, 5);
     await page.keyboard.press("Backspace");
