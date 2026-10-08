@@ -72,4 +72,35 @@ describe("control.textRich", () => {
     await page.keyboard.type('"');
     expect(await getState()).toEqual(['<div>Some"text</div>', ""]);
   });
+
+  test("deleted line doesn't apply its tag to the next line", async () => {
+    const html = "<h2>Head</h2><p>Text <b>bold</b></p>";
+    // triple click selects line with line break: heading is removed & the next line keeps its tag
+    await clickText(html, "Head", 3);
+    await page.keyboard.press("Delete");
+    await page.keyboard.type("X");
+    expect(await getState()).toEqual(["<div>XText <b>bold</b></div>", ""]);
+
+    /** Sets value & selection by chars */
+    const select = (start, end) =>
+      page.evaluate(
+        (h, s, e) => {
+          el.$value = h;
+          el.$refInput.setSelectionRange(s, e);
+        },
+        html,
+        start,
+        end
+      );
+    // Delete in empty heading
+    await select(0, 4);
+    await page.keyboard.press("Backspace");
+    await page.keyboard.press("Delete");
+    expect(await getState()).toEqual(["<div>Text <b>bold</b></div>", ""]);
+
+    // otherwise the next line is merged into heading (without <span style> added by browser)
+    await select(5, 5);
+    await page.keyboard.press("Backspace");
+    expect(await getState()).toEqual(["<h2>HeadText <b>bold</b></h2>", ""]);
+  });
 });

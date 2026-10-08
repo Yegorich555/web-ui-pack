@@ -48,7 +48,6 @@ export default function TextRichControlView() {
         }}
         w-autoFocus
       >
-        {/* todo issue delete 1st line which is <h2> then 2nd line applies this style - it's wrong */}
         <wup-textrich
           w-name="description"
           w-label="Rich text"

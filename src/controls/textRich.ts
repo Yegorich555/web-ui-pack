@@ -9,6 +9,7 @@ import { SetValueReasons, ValidationCases } from "./baseControl";
 import WUPTextControl from "./text";
 import TextHistory from "./text.history";
 import WUPTextAreaControl from "./textArea";
+import { charsBefore } from "./textArea.input";
 import WUPTextRichInput, {
   addClass,
   createOf,
@@ -1417,6 +1418,53 @@ export default class WUPTextRichControl<
     window.getSelection()!.collapse(last, last.childNodes.length);
   }
 
+  /** Deletes range between lines instead of browser: the rest of the last line is moved into the 1st one;
+   *  if the 1st line is deleted from its start, it's removed instead & the last line keeps its tag
+   *  (otherwise triple click on heading + Delete turns the next paragraph into heading);
+   *  besides browser wraps moved content into `<span style>` to keep its computed styles
+   * @returns false if range is inside single line or nested lists are involved (browser deletes it as usual) */
+  protected deleteLines(sr: StaticRange | undefined): boolean {
+    const inp = this.$refInput;
+    const lines = getLines(inp);
+    const lineAt = (n: Node): HTMLElement | undefined => lines.findLast((l) => l.contains(n));
+    const a = sr && lineAt(sr.startContainer);
+    const b = sr && lineAt(sr.endContainer);
+    if (!a || !b || a === b || a.contains(b) || b.parentElement!.closest("li")) {
+      return false;
+    }
+    const isEmbed = embedOf(this.#ctr.$tools);
+    const pos = toLinePos(lines, sr.startContainer, sr.startOffset, isEmbed);
+    const isRest = // the last line has content after range
+      charsBefore(b, sr.endContainer, sr.endOffset, isEmbed) < charsBefore(b, b, b.childNodes.length, isEmbed);
+    const isKeep = !pos[1] && isRest; // the 1st line is deleted completely & the last one isn't
+    if (!isKeep && isRest && b.querySelector("ol,ul")) {
+      return false;
+    }
+    const r = document.createRange();
+    r.setStart(sr.startContainer, sr.startOffset);
+    r.setEnd(sr.endContainer, sr.endOffset);
+    r.deleteContents();
+    const remove = (l: HTMLElement): void => {
+      const list = l.parentElement!;
+      l.remove();
+      listTags.has(list.tagName) && !list.firstElementChild && list.remove();
+    };
+    if (isKeep) {
+      remove(a);
+    } else {
+      if (!pos[1]) {
+        a.replaceChildren(document.createElement("br")); // empty line: leftovers of partially deleted elements are removed
+      } else if (isRest) {
+        a.lastChild?.nodeName === "BR" && a.lastChild.remove(); // otherwise it breaks merged line
+        a.append(...b.childNodes);
+      }
+      remove(b);
+    }
+    inp.normalize();
+    this.setSelectionPos([pos, pos]);
+    return true;
+  }
+
   /** Fires event input to update $value after manual changes of editor */
   protected fireInput(): void {
     this.$refInput.dispatchEvent(new InputEvent("input", { bubbles: true }));
@@ -1646,6 +1694,8 @@ export default class WUPTextRichControl<
     } else if (t === "insertText" && e.data && this.#pending.size) {
       e.preventDefault();
       this.insertPending(e.data);
+    } else if (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0])) {
+      e.preventDefault();
     } else {
       return;
     }
