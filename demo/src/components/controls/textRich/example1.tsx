@@ -1,12 +1,13 @@
 import Example from "src/elements/example";
 import MyLink from "src/elements/myLink";
-import { WUPTextRichControl } from "web-ui-pack";
+import { WUPSwitchControl, WUPTextRichControl } from "web-ui-pack";
 import imageConvert from "web-ui-pack/helpers/files/imageConvert";
 import selectFiles from "web-ui-pack/helpers/files/selectFiles";
 import imgLogo from "../../../assets/logo-small.png";
 import styles from "./example1.scss";
 
 WUPTextRichControl.$use();
+WUPSwitchControl.$use();
 
 declare global {
   namespace WUP.TextRich {
@@ -98,20 +99,26 @@ WUPTextRichControl.$tools.image = {
 /** Names of placeholders: `{firstName}` etc. is replaced with real value by server (mail merge etc.) */
 const placeholders = ["firstName", "lastName", "email", "company", "date"];
 
+/** Returns name of placeholder: text inside braces (`{someProp}` => `someProp`);
+ *  unknown name is rejected if it isn't allowed: typed `{someProp}` stays text & such element is unwrapped by sanitizer */
+function placeholderOf(el: HTMLElement): string | undefined {
+  /** Placeholders out of `placeholders` are allowed: `{someProp}` (it's switched by end-user in the example) */
+  const allowUnknown = true;
+
+  const t = el.textContent!;
+  const v =
+    el.classList.contains(styles.placeholder) && t.length > 2 && t.startsWith("{") && t.endsWith("}") && t.slice(1, -1);
+  return v && (allowUnknown || placeholders.includes(v)) ? v : undefined;
+}
+
 WUPTextRichControl.$tools.placeholder = {
   label: "Placeholder",
-  // dropdown in toolbar & menu shown on typing `{` or on click/hover on placeholder (chosen value replaces it)
+  // dropdown in toolbar & menu shown on typing `{` or on hover on placeholder (chosen value replaces it)
   values: placeholders.map((value) => ({ value, label: value })), // label is name as is: otherwise it's prettified (`First Name`)
-  trigger: "{", // menu is filtered by text typed after it
-  kind: "embed", // counted as 1 char: it's removed entirely by Backspace
-  is: (el) =>
-    el.classList.contains(styles.placeholder) ? placeholders.find((v) => el.textContent === `{${v}}`) : undefined,
-  create: (v) => {
-    const el = document.createElement("span");
-    el.contentEditable = "false"; // otherwise caret can be placed inside
-    el.textContent = `{${v}}`;
-    return el;
-  },
+  trigger: "{", // menu is filtered by text typed after it; typed `{someProp}` is placeholder too (if `is` allows it)
+  kind: "inline", // editable text like link: caret can be placed inside
+  is: placeholderOf, // WARN: sanitizer calls it for pasted html: value is used as text only
+  create: "span", // chosen value is inserted as `<span>{firstName}</span>` (trigger, value & its pair `}`)
   classNameTag: styles.placeholder, // highlighted via css
 };
 
@@ -135,12 +142,18 @@ function gotRef(el: WUPTextRichControl | null): void {
   }
 }
 
+/** Switch to allow unknown placeholders: rule is applied to new placeholders & to $value (existing ones are kept in editor) */
+function gotSwitchRef(el: WUPSwitchControl | null): void {
+  el && (el.$onChange = () => (allowUnknown = !!el.$value));
+}
+
 export default function Example1() {
   return (
     <Example header="Custom tools" link="demo/src/components/controls/textRich/example1.tsx">
       <small>
-        Font, direction, image & placeholder (type <b>{"{"}</b> to choose it) are added via static $tools. See details
-        in <MyLink href="/demo/src/components/controls/textRich/example1.tsx">textRich/example1.tsx</MyLink> &{" "}
+        Font, direction, image & placeholder (type <b>{"{"}</b> to choose it or <b>{"{someProp}"}</b>) are added via
+        static $tools. See details in{" "}
+        <MyLink href="/demo/src/components/controls/textRich/example1.tsx">textRich/example1.tsx</MyLink> &{" "}
         <MyLink href="/demo/src/components/controls/textRich/example1.scss">textRich/example1.scss</MyLink>. Footer
         shows count of chars & validations.max (hidden via $options.hideFooter)
       </small>

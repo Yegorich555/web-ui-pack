@@ -134,13 +134,20 @@ declare global {
        *  Arrows to navigate, Enter/Tab or click to choose, Escape, whitespace or moving caret out to close
        * @tutorial Rules
        * * it works if tool is rendered in toolbar as dropdown (see $options.toolbar): menu shows its items
+       * * typed pair of trigger (see static $wrapChars) applies typed text as value of `inline` tool even if it isn't in values:
+       * `{someProp}` gives placeholder `someProp` (if `is` returns value for created element: return `undefined` to reject it)
+       * * `inline` element of tool with trigger is token (placeholder, mention): chosen value inserts element via `create`
+       * with text `{trigger}{value}{pair}` (`{firstName}`, `@john`) instead of wrapping selection; hover on it shows dropdown
+       * to replace it (the same as for `embed`), but it's editable text like link (text typed at its edges is placed outside it)
        * * typed char with selection wraps it if char is pointed in static $wrapChars (`{` gives `{text}`)
        * @example
        * WUPTextRichControl.$tools.placeholder = {
-       *   values: [{ value: "firstName" }, { value: "email" }], // label is prettified value: `First Name`
-       *   trigger: "{", // typed `{fi` shows `First Name`
-       *   kind: "embed",
-       *   ...
+       *   values: [{ value: "firstName", label: "firstName" }, { value: "email" }], // label is prettified value by default: `Email`
+       *   trigger: "{", // typed `{fi` shows `firstName`
+       *   kind: "inline",
+       *   is: (el) => (el.classList.contains("placeholder") ? el.textContent.slice(1, -1) : undefined),
+       *   create: "span", // inserted as `<span class="placeholder">{firstName}</span>`
+       *   classNameTag: "placeholder",
        * }; */
       trigger?: string;
       /** Kind of format: defines default `format`, detection via `is`, sanitizing & behavior of collapsed selection
@@ -347,6 +354,17 @@ function isOf(t: WUP.TextRich.Tool, value: unknown = true): (el: Element) => boo
 /** Returns label of tool value: pointed one or prettified value (`sans-serif` => `Sans Serif`) */
 const labelOf = (v: WUP.TextRich.ToolValue): string =>
   v.label ?? __wupln(stringPrettify(String(v.value), true, true), "content");
+
+/** Returns text typed between trigger & its pair at the end of text (`{someProp}` => `someProp`)
+ * @returns `undefined` if text doesn't end with pair or typed text is empty or has whitespaces */
+function typedValue(s: string, trigger: string, pair: string | undefined): string | undefined {
+  if (!pair || !s.endsWith(pair)) {
+    return undefined;
+  }
+  const i = s.lastIndexOf(trigger, s.length - pair.length - 1);
+  const v = i < 0 ? "" : s.slice(i + trigger.length, -pair.length);
+  return v && !/\s/.test(v) ? v : undefined;
+}
 
 /** Selects node: format of embed replaces it */
 function selectNode(n: Node): void {
@@ -776,7 +794,8 @@ export default class WUPTextRichControl<
         // Ctrl/Cmd + Click opens link in new tab: browser doesn't follow links inside contenteditable
         window.open(href, "_blank", "noopener,noreferrer");
       } else if (!this.gotClickEmbed(t)) {
-        this.gotHover(a); // tap on link shows popup on touch devices (nothing changes for mouse: it's hovered)
+        // tap on link or token shows popup on touch devices (nothing changes for mouse: it's hovered)
+        this.gotHover(this.hoverOf(t));
       }
     });
   }
@@ -1010,7 +1029,8 @@ export default class WUPTextRichControl<
           el.className = "";
           addClass(el, tool.className, v?.className);
         } else {
-          el.textContent = cur === false && !v ? tool.label ?? name : labelOf(v ?? { value: cur });
+          const label = cur === false ? tool.label ?? name : String(cur); // value out of values is shown as is: `someProp`
+          el.textContent = v ? labelOf(v) : label;
         }
       }
     });
@@ -1112,11 +1132,13 @@ export default class WUPTextRichControl<
       return;
     }
     const v = value ?? true; // tool without values gets `true`
-    if (sel.isCollapsed && ((tool.kind === "inline" && !tool.ask) || name === "clean")) {
+    if (sel.isCollapsed && ((tool.kind === "inline" && !tool.ask && !tool.trigger) || name === "clean")) {
       // format for the next typed text (Ctrl+B and type text)
       const p = this.#pending;
       if (name === "clean") {
-        Object.entries(tools).forEach(([k, t]) => t.kind === "inline" && !t.ask && f.has(k) && p.set(k, false));
+        Object.entries(tools).forEach(
+          ([k, t]) => t.kind === "inline" && !t.ask && !t.trigger && f.has(k) && p.set(k, false)
+        );
       } else {
         const isOff = !v || (!isSet && isMatch(f.get(name), v)); // button toggles format
         p.set(name, !isOff && v);
@@ -1151,12 +1173,27 @@ export default class WUPTextRichControl<
     tool.format ? tool.format(ctx) : this.formatByKind(ctx);
   }
 
+  /** Returns new element of token (`inline` of tool with `trigger`: placeholder, mention) via `create` of tool
+   *  with text of trigger, value & pair of trigger (see $wrapChars): `{firstName}`, `@john` */
+  protected createToken(tool: WUP.TextRich.Tool, value: unknown): HTMLElement {
+    const el = createOf(tool, value);
+    el.textContent = tool.trigger! + value + (this.#ctr.$wrapChars.get(tool.trigger!) ?? "");
+    return el;
+  }
+
   /** Applies default format of tool according to its `kind`: `isSet` - value is set (`false` removes format),
    *  otherwise format is toggled (it's removed if selection has it already) */
   protected formatByKind(ctx: WUP.TextRich.FormatContext): void {
     const { tool, value, isSet, editor } = ctx; // lines & texts are read below: they're computed on access
     switch (tool.kind) {
       case "inline": {
+        if (tool.trigger && isSet && value !== false) {
+          // token (placeholder, mention) replaces selection or token with caret inside: `{firstName}`, `@john`
+          const cur = formatParents(ctx.range.startContainer, isOf(tool), editor)[0];
+          cur && window.getSelection()!.getRangeAt(0).selectNode(cur);
+          this.$insert(this.createToken(tool, value));
+          break;
+        }
         const { texts } = ctx;
         const any = isOf(tool);
         const f = isOf(tool, value);
@@ -1217,6 +1254,43 @@ export default class WUPTextRichControl<
   #pending = new Map<string, unknown>();
   /** Position of caret when formats for the next typed text are pointed: they're reset when caret is moved */
   #pendingAt?: [Node, number];
+
+  /** Inserts typed text outside of token (`inline` of tool with `trigger`: placeholder, mention) when caret is at its edge:
+   *  otherwise browser extends token (`{firstName}x`)
+   * @returns false if caret isn't at edge of token */
+  protected insertOutOfToken(text: string): boolean {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode;
+    if (!sel.isCollapsed || !n) {
+      return false;
+    }
+    const tools = Object.values(this.#ctr.$tools as Record<string, WUP.TextRich.Tool>);
+    const isToken = (el: Element): boolean =>
+      tools.some((t) => t.kind === "inline" && t.trigger && t.is?.(el as HTMLElement) !== undefined);
+    const off = sel.focusOffset;
+    const kids = n.childNodes;
+    // caret inside token (the outer one) or between nodes (after inserted token): browser places text into the previous node
+    const el =
+      formatParents(n, isToken, this.$refInput).pop() ??
+      [kids[off - 1], kids[off]].find((x): x is Element => x instanceof Element && isToken(x));
+    if (!el) {
+      return false;
+    }
+    // range is collapsed if caret is out of token: so text is empty at the edge
+    const r = document.createRange();
+    r.selectNodeContents(el);
+    r.setEnd(n, off);
+    const isStart = !r.toString();
+    r.selectNodeContents(el);
+    r.setStart(n, off);
+    if (!isStart && r.toString()) {
+      return false; // caret is inside token: text is edited
+    }
+    const t = document.createTextNode(text);
+    isStart ? el.before(t) : el.after(t);
+    sel.collapse(t, t.length);
+    return true;
+  }
 
   /** Inserts text with formats pointed for the next typed text */
   protected insertPending(text: string): void {
@@ -1461,7 +1535,8 @@ export default class WUPTextRichControl<
   }
 
   /** Called on typing: typed `trigger` of tool rendered in toolbar shows its dropdown near it (see askMenu);
-   *  chosen value replaces typed text (trigger & text typed after it) */
+   *  chosen value replaces typed text (trigger & text typed after it); typed pair of trigger (see $wrapChars)
+   *  applies typed text as value even if it isn't in values: `{someProp}` */
   protected gotTrigger(): void {
     const sel = window.getSelection()!;
     const n = sel.focusNode as Text | null;
@@ -1470,47 +1545,69 @@ export default class WUPTextRichControl<
     }
     const s = n.data.slice(0, sel.focusOffset);
     const tools = this.#ctr.$tools as Record<string, WUP.TextRich.Tool>;
+    const { $wrapChars } = this.#ctr;
+    /** Replaces text typed from trigger (`start` in text node) to caret with value of tool:
+     *  embed & token (inline) replace selection, other formats are applied after removing it */
+    const replace = (k: string, v: unknown, start: Range): void => {
+      sel.setBaseAndExtent(start.startContainer, start.startOffset, sel.focusNode!, sel.focusOffset);
+      const t = tools[k];
+      t.kind === "line" && this.changeContent(() => sel.getRangeAt(0).deleteContents());
+      this.applyFormat(k, v, true);
+    };
+    const r = document.createRange(); // typed trigger: range is live, so it isn't extended by typing after it
+    let typed: string | undefined;
+    const closed = Object.keys(tools).find((k) => {
+      const t = tools[k];
+      typed =
+        t.trigger && t.kind === "inline" && this.findTool(k)
+          ? typedValue(s, t.trigger, $wrapChars.get(t.trigger))
+          : undefined;
+      return typed && t.is?.(this.createToken(t, typed)) !== undefined; // `is` can reject value: unknown placeholder etc.
+    });
+    if (closed) {
+      this.#ask?.done(); // menu of typed trigger
+      const t = tools[closed].trigger!;
+      r.setStart(n, s.length - $wrapChars.get(t)!.length - typed!.length - t.length);
+      // after typed text is saved in history (it merges changes made during input): so undo returns typed text
+      setTimeout(() => sel.focusNode === n && sel.focusOffset === s.length && replace(closed, typed, r));
+      return;
+    }
     const name = Object.keys(tools).find((k) => {
       const t = tools[k].trigger;
       return t && s.endsWith(t);
     });
     if (name) {
-      const r = document.createRange(); // typed trigger: range is live, so it isn't extended by typing after it
       r.setStart(n, s.length - tools[name].trigger!.length);
       r.setEnd(n, s.length);
-      this.askMenu(name, r, "typed").then((v) => {
-        if (v != null) {
-          // typed text is replaced: embed replaces selection, other formats are applied after removing it
-          sel.setBaseAndExtent(r.startContainer, r.startOffset, sel.focusNode!, sel.focusOffset);
-          tools[name].kind !== "embed" && this.changeContent(() => sel.getRangeAt(0).deleteContents());
-          this.applyFormat(name, v, true);
-        }
-      });
+      this.askMenu(name, r, "typed").then((v) => v != null && replace(name, v, r));
     }
   }
 
-  /** Returns name of tool if element is its embed & value can be changed (tool is rendered in toolbar):
-   *  via `ask` of tool on click or via dropdown of tool on click & hover (`isHover`) */
+  /** Returns name of tool if element is its embed or token (`inline` of tool with `trigger`: placeholder, mention)
+   *  & value can be changed (tool is rendered in toolbar): via `ask` of tool on click (embed)
+   *  or via dropdown of tool on click (embed) & hover (`isHover`) */
   protected embedTool(el: Element, isHover?: boolean): string | undefined {
     const tools = this.#ctr.$tools as Record<string, WUP.TextRich.Tool>;
-    const name = Object.keys(tools).find(
-      (k) => tools[k].kind === "embed" && tools[k].is?.(el as HTMLElement) !== undefined
-    );
+    const name = Object.keys(tools).find((k) => {
+      const t = tools[k];
+      return (t.kind === "embed" || (t.kind === "inline" && t.trigger)) && t.is?.(el as HTMLElement) !== undefined;
+    });
     const can = name && !this.$isReadOnly && !this.$isDisabled && (!isHover || !tools[name].ask) && this.findTool(name);
     return can ? name : undefined;
   }
 
-  /** Returns element under pointer editable via popup opened by hover: embed of tool with values (dropdown) or link (url) */
+  /** Returns element under pointer editable via popup opened by hover: embed or token of tool with values (dropdown)
+   *  or link (url) */
   protected hoverOf(t: Element): HTMLElement | null {
     return this.embedTool(t, true) ? (t as HTMLElement) : t.closest("a");
   }
 
   /** Called on click in editor: click on embed (image etc.) asks new value via `ask` of its tool or its dropdown
-   *  (if tool is rendered in toolbar): asked value replaces embed
+   *  (if tool is rendered in toolbar): asked value replaces embed; token is editable text, so click places caret in it
    * @returns true if embed is clicked */
   protected gotClickEmbed(el: HTMLElement): boolean {
     const name = this.embedTool(el);
-    if (!name) {
+    if (!name || (this.#ctr.$tools as Record<string, WUP.TextRich.Tool>)[name].kind !== "embed") {
       return false;
     }
     clearTimeout(this.#hoverTimer); // clicked before hover delay: menu is opened by click
@@ -1547,7 +1644,7 @@ export default class WUPTextRichControl<
         if (v != null && el.isConnected) {
           this.$refInput.focus({ preventScroll: true }); // otherwise control restores its previous selection
           selectNode(el);
-          this.applyFormat(name, v, true); // embed replaces selection & caret is placed after it
+          this.applyFormat(name, v, true); // embed (token) replaces selection & caret is placed after it
         }
       });
     } else if (el.tagName === "A") {
@@ -1874,6 +1971,8 @@ export default class WUPTextRichControl<
     } else if (t === "insertText" && e.data && this.wrapSelection(e.data)) {
       e.preventDefault(); // history & $value are updated via changeContent: wrapping is a separate step of undo
       return;
+    } else if (t === "insertText" && e.data && this.insertOutOfToken(e.data)) {
+      e.preventDefault();
     } else if (t === "insertText" && e.data && this.#pending.size) {
       e.preventDefault();
       this.insertPending(e.data);

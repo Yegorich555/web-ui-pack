@@ -19,11 +19,10 @@ button[tool="placeholder"] {
 }
 
 // custom tool `placeholder`: class is pointed via `classNameTag` of tool in static $tools;
-// [wup-textrich] increases specificity: otherwise `[contenteditable="false"]` gets styles of control input (`background: none` etc.)
+// [wup-textrich] - styles of content: in editor & in value shown outside control
 [wup-textrich] .placeholder {
   padding: 0 0.25em;
   border-radius: 0.25em;
   color: #00778d;
   background: #009fbc26;
-  cursor: pointer;
 }
