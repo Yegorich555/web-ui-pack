@@ -115,7 +115,7 @@ $tools: (
     align-items: center;
   }
 
-  [role="group"] > button {
+  [role="group"] > button:not([role="combobox"]) {
     --icon: var(--ctrl-icon);
     --icon-size: 1.125em;
     --icon-hover: var(--ctrl-selected);
@@ -142,14 +142,64 @@ $tools: (
     }
   }
 
-  // dropdowns (see WUPTextRichSelect): fixed width by the widest item (with sans-serif fonts),
-  // otherwise toolbar is shifted when selection is changed
-  wup-richselect[tool="header"] > button {
-    min-width: 6.25em;
-  }
+  // dropdown: button with label of the current value & chevron (menu is opened via askMenu)
+  [role="combobox"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+    height: 1.75em;
+    margin: 0;
+    padding: 0.25em 0.25em 0.25em 0.5em;
+    border: none;
+    border-radius: 4px;
+    font: inherit;
+    color: var(--ctrl-icon);
+    background: none;
+    box-shadow: none;
+    outline: none;
+    cursor: pointer;
+    white-space: nowrap;
 
-  wup-richselect[tool="size"] > button {
-    min-width: 4.875em;
+    &:after {
+      content: "";
+      --ctrl-icon-img: var(--wup-icon-chevron);
+      --ctrl-icon-size: 0.6em;
+      @include wup-icon;
+      align-self: center;
+      margin-left: auto; // at the right side when button is wider than content (ex. min-width)
+      background: currentColor;
+    }
+
+    &[aria-expanded="true"]:after {
+      transform: rotate(180deg);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        color: var(--ctrl-selected);
+      }
+    }
+
+    &:focus {
+      box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+    }
+
+    // shows icon of the current value (class of value): label is shown via tooltip
+    &[icon]:before {
+      content: "";
+      --ctrl-icon-size: 15px; // the same as icons of tool buttons
+      @include wup-icon;
+      background: currentColor;
+    }
+
+    // fixed width by the widest item (with sans-serif fonts): otherwise toolbar is shifted when selection is changed
+    &[tool="header"] {
+      min-width: 6.25em;
+    }
+
+    &[tool="size"] {
+      min-width: 4.875em;
+    }
   }
 
   // icons of values (align): `className` of value in static $tools => icon of button `{ align: "center" }` or item of dropdown
@@ -179,6 +229,56 @@ $tools: (
 
     &[invalid] {
       color: var(--ctrl-err); // count exceeds validations.max
+    }
+  }
+
+  // menu of dropdown (see askMenu)
+  > wup-popup[menu] {
+    @include wup-menu;
+    z-index: 8010;
+
+    li {
+      display: flex;
+      align-items: center;
+      padding: 0.4em 1em;
+      line-height: 1.2;
+      white-space: nowrap;
+
+      &[hidden] {
+        display: none; // filtered by text typed after trigger
+      }
+    }
+
+    // icon of value (`className` of value): label is shown via tooltip
+    li[icon]:before {
+      content: "";
+      --ctrl-icon-size: 15px;
+      @include wup-icon;
+      vertical-align: middle;
+    }
+
+    // keyboard shortcut (`hotKey` of value) at the right side: before checkmark of selected item
+    kbd {
+      margin-left: auto;
+      padding-left: 2em;
+      font: inherit;
+      font-size: 0.75em;
+      color: var(--ctrl-label);
+    }
+
+    li:has(> kbd)[aria-selected="true"]:after {
+      margin-left: 0; // otherwise free space is shared with kbd
+    }
+
+    // headings use default/global styles (the same as in editor)
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 0;
+      padding: 0;
     }
   }
 

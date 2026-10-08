@@ -1,186 +1,232 @@
-import { inheritDefaults } from "../baseElement";
+// eslint-disable-next-line max-classes-per-file
+import onEvent from "../helpers/onEvent";
 import WUPPopupElement from "../popup/popupElement";
-import { MenuCloseCases, MenuOpenCases } from "./baseCombo";
-import WUPSelectControl from "./select";
+import { PopupAnimations, PopupOpenCases } from "../popup/popupElement.types";
+import { SetValueReasons, ValidationCases } from "./baseControl";
 
-const tagName = "wup-richselect";
-declare global {
-  interface HTMLElementTagNameMap {
-    [tagName]: WUPTextRichSelect; // add element to document.createElement
+/** Returns rect of range to place popup near it: collapsed range (caret) gets width 1px */
+function rectOf(r: Range): DOMRect {
+  const rect = r.getBoundingClientRect();
+  if (rect.height) {
+    return rect.width ? rect : new DOMRect(rect.x, rect.y, 1, rect.height);
+  }
+  // caret between nodes (browser returns empty rect): at the end of the previous node (embed, text at the end of line etc.)
+  // or at the start of node (empty line)
+  const n = r.startContainer;
+  const prev = n.childNodes[r.startOffset - 1];
+  const x = document.createRange();
+  x.selectNode(prev ?? n);
+  const rects = x.getClientRects();
+  const b = rects[prev ? rects.length - 1 : 0] ?? rect;
+  return new DOMRect(prev ? b.right : b.x, b.y, 1, b.height);
+}
+
+/** Popup of TextRich to ask value placed near target: text control (see TextRichPrompt) or menu of dropdown (see TextRichMenu);
+ *  control keeps only one popup at once (see WUPTextRichControl.openAsk) */
+export class TextRichAsk {
+  popup = document.createElement("wup-popup");
+  /** Popup is closed: `done` is called */
+  isClosed = false;
+  /** Handles key pressed in editor while focus stays there (menu): returns true if key is handled */
+  onKey?: (e: KeyboardEvent) => boolean;
+  /** Called when selection is changed in editor */
+  onSelect?: () => void;
+  /** Called once when popup is closed: `v` - asked value (`null` if canceled), `isBack` - return focus & selection to editor */
+  onClose?: (v: any, isBack: boolean) => void;
+
+  /**
+   * @param target element to place popup near it (also popup is closed when it's removed)
+   * @param hovered element which value is edited via popup opened by hover (link, embed):
+   * popup is closed when pointer leaves element & popup */
+  constructor(target: HTMLElement, public hovered?: HTMLElement) {
+    const p = this.popup;
+    p.$options.openCase = PopupOpenCases.onInit;
+    p.$options.target = target;
+    p.$onClose = () => this.done(); // closed by itself: when target is removed
+  }
+
+  /** Appends popup into control: it's opened at once */
+  open(parent: HTMLElement): void {
+    parent.appendChild(this.popup);
+  }
+
+  /** Closes popup & calls `onClose` (only once)
+   * @param v asked value: `null` if canceled
+   * @param isBack return focus & selection to editor */
+  done(v: unknown = null, isBack = false): void {
+    if (this.isClosed) {
+      return;
+    }
+    this.isClosed = true;
+    this.popup.$close().finally(() => this.popup.remove());
+    this.onClose?.(v, isBack);
   }
 }
 
-/** Dropdown of TextRich toolbar: select with button instead of input (menu, keyboard & aria are the same as in WUPSelectControl);
- *  focus stays in owner (editor) on click: menu is opened near button or editor (caret, embed) via `openMenuAt` & its keys are handled
- *  via `handleKey`
+/** Popup with text control to enter value (see WUPTextRichControl.$ask): Enter submits, Escape or moving focus out cancels;
+ *  focus & selection are returned to editor on Enter/Escape
  * @tutorial innerHTML @example
- * <button role="combobox" aria-label="{$options.label}">{label of the current value}</button> // $refInput: label is shown if value is empty
- * <wup-popup menu><ul role="listbox"><li role="option">Heading 1</li>...</ul></wup-popup> */
-export default class WUPTextRichSelect extends WUPSelectControl {
-  static get $style(): string {
-    return ""; // own styles only: button of toolbar with menu instead of form control
-  }
+ * <wup-popup><wup-text/></wup-popup> */
+export class TextRichPrompt extends TextRichAsk {
+  /**
+   * @param value initial value of text control
+   * @param opts options of text control: label, validations etc.
+   * @param hovered for popup opened by hover (link): text control isn't focused,
+   * clearing value (Enter with empty value or button clear) resolves `""` (to remove link) */
+  constructor(target: HTMLElement, value: string, opts: Partial<WUP.Text.Options>, hovered?: HTMLElement) {
+    super(target, hovered);
+    const p = this.popup;
+    const el = p.appendChild(document.createElement("wup-text"));
+    el.$options.validationCase = ValidationCases.onChangeSmart; // without onFocusWithValue: otherwise error is shown at once
+    el.$options.autoFocus = !hovered;
+    Object.assign(el.$options, opts);
+    el.$initValue = value;
 
-  /** Text for listbox when no items are displayed: menu is hidden instead (it's closed when nothing matches typed text) */
-  static $textNoItems: string | undefined = undefined;
-
-  /** Item is visible if its label or value contains typed text: `{name` & `{firstName` show `First Name` */
-  static $filterMenuItem(this: WUPSelectControl, text: string, value: unknown, input: string): boolean {
-    return text.includes(input) || String(value).toLowerCase().includes(input);
-  }
-
-  static $defaults: WUP.Select.Options = inheritDefaults(WUPSelectControl.$defaults, {
-    openCase: MenuOpenCases.onClick | MenuOpenCases.onPressArrowKey, // without onFocus: otherwise it's opened on navigation via Arrows
-    clearButton: false,
-  });
-
-  /** Text of button (like value of input): it isn't shown if control has attribute `icon` (button shows icon of value) */
-  #text = "";
-  /** Menu is opened via `openMenuAt` & controlled by owner: owner gets aria-activedescendant */
-  #isOwned = false;
-  /** Text to filter items instead of input: text typed in editor (see `filter`) */
-  _query?: string;
-  /** Element that keeps focus (editor): click on button or item doesn't move focus from it, menu opened via `openMenuAt`
-   *  is controlled by its keys (see `handleKey`) */
-  _owner?: HTMLElement;
-  /** Returns rect to place menu near it instead of control (caret, embed); it's reset when menu is opened via button */
-  _anchor?: () => DOMRect;
-  /** Called when menu is closed (at once, before animation): item is chosen, Escape is pressed etc. */
-  _onCloseMenu?: () => void;
-  /** Returns text of value that isn't in items: format is applied but its value isn't rendered in toolbar
-   *  (`Heading 3` for `{ header: [1, 2, false] }`) */
-  _textOf?: (v: unknown) => string;
-
-  /** Button instead of input: `value` is its text like for input (control reads & sets it) */
-  $refInput = Object.defineProperties(document.createElement("button"), {
-    value: {
-      get: () => this._query ?? this.#text,
-      set: (v: string) => {
-        this.#text = v;
-        !this.hasAttribute("icon") && (this.$refInput.textContent = v);
-      },
-    },
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    select: { value: () => {} }, // it's called for input on clearing value (Escape)
-  }) as unknown as HTMLInputElement;
-
-  protected override renderControl(): void {
-    super.renderControl();
-    const b = this.$refInput as unknown as HTMLButtonElement;
-    b.type = "button"; // otherwise it submits form: type `text` is invalid for button
-    this.$refLabel.replaceWith(b); // without label: it's `aria-label` of button (shown when value is empty)
-  }
-
-  protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
-    super.gotChanges(propsChanged);
-    this.$refInput.setAttribute("aria-label", this._opts.label ?? "");
-  }
-
-  /** Opens menu near anchor (button, caret, embed etc.): it's controlled by keys of owner (see `handleKey`) & item is focused at once
-   *  (selected or the 1st one)
-   * @param isHover menu is opened by hover: owner doesn't control it
-   * @param value value to select instead of $value (value of hovered embed) */
-  openMenuAt(anchor: () => DOMRect, isHover = false, value: unknown = this.$value): void {
-    this._anchor = anchor;
-    this.#isOwned = !isHover && !!this._owner;
-    this._menuItems && this.focusMenuItem(null); // reset after previous menu: it can be still closing
-    this.goOpenMenu(MenuOpenCases.onManualCall).then((p) => {
-      if (p) {
-        this.selectMenuItemByValue(value);
-        // otherwise item is focused by filtering already (text is typed fast)
-        this.#isOwned &&
-          !this._focusedMenuItem &&
-          this.focusMenuItemByKeydown(new KeyboardEvent("keydown", { key: "ArrowDown" }));
+    p.onkeydown = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault(); // otherwise value of control is cleared
+        this.done(null, true);
+      } else if (e.key === "Enter") {
+        e.preventDefault(); // otherwise form is submitted
+        !el.$validate() && this.done(el.$value ?? "", true);
       }
+    };
+    el.$onChange = (e) => {
+      e.stopPropagation(); // nested control isn't related to form
+      hovered && e.detail.reason === SetValueReasons.clear && el.$value === undefined && this.done("", true);
+    };
+    // WARN: `onfocusout` isn't supported (there is no such property in HTML spec)
+    p.addEventListener("focusout", (e) => !p.contains(e.relatedTarget as Node) && this.done());
+  }
+}
+
+interface MenuOptions {
+  /** Dropdown of toolbar: it gets `aria-expanded` */
+  button: HTMLElement;
+  /** Element that keeps focus (editor or dropdown focused via keyboard): it gets `aria-activedescendant`
+   *  & passes its keys via `onKey`; `null` - menu is opened by hover (keys aren't handled) */
+  owner: HTMLElement | null;
+  /** Element (dropdown, embed) or range of editor (caret, typed trigger) to place menu near it */
+  target: HTMLElement | Range;
+  /** Element which value is edited via menu opened by hover (embed) */
+  hovered?: HTMLElement;
+  values: WUP.TextRich.ToolValue[];
+  /** Value of selected item */
+  selected: unknown;
+  /** Renders content of item */
+  render: (li: HTMLLIElement, v: WUP.TextRich.ToolValue) => void;
+}
+
+/** Menu of dropdown of TextRich toolbar: listbox of values (keyboard & aria are the same as in WUPSelectControl);
+ *  focus stays in owner, so item is focused virtually; click on item or Enter/Tab (Space for dropdown) chooses its value
+ * @tutorial innerHTML @example
+ * <wup-popup menu><ul role="listbox" aria-label="Heading"><li role="option"><h1 role="none">Heading 1</h1></li>...</ul></wup-popup> */
+export default class TextRichMenu extends TextRichAsk {
+  #o: MenuOptions;
+  #items: HTMLLIElement[];
+  #focused?: HTMLLIElement;
+  /** Removes listener of blur of owner: focus is moved to toolbar, from it to editor etc. */
+  #offBlur?: () => void;
+
+  constructor(o: MenuOptions) {
+    super(o.target instanceof Range ? o.button : o.target, o.hovered);
+    this.#o = o;
+    const p = this.popup;
+    const t = o.target;
+    t instanceof Range && (p.getTargetRect = () => rectOf(t));
+    p.setAttribute("menu", "");
+    p.$options.animation = PopupAnimations.drawer;
+    p.$options.placement = [
+      WUPPopupElement.$placements.$bottom.$start,
+      WUPPopupElement.$placements.$bottom.$end,
+      WUPPopupElement.$placements.$top.$start,
+      WUPPopupElement.$placements.$top.$end,
+      WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
+      WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
+      WUPPopupElement.$placements.$top.$start.$resizeHeight,
+      WUPPopupElement.$placements.$top.$end.$resizeHeight,
+    ]; // the same as in select
+
+    const ul = p.appendChild(document.createElement("ul"));
+    ul.id = WUPPopupElement.$uniqueId;
+    ul.setAttribute("role", "listbox");
+    ul.setAttribute("aria-label", o.button.getAttribute("aria-label")!); // label of tool
+    this.#items = o.values.map((v) => {
+      const li = ul.appendChild(document.createElement("li"));
+      li.id = WUPPopupElement.$uniqueId;
+      li.setAttribute("role", "option");
+      li.setAttribute("aria-selected", v.value === o.selected);
+      li.onclick = () => this.done(v.value);
+      o.render(li, v);
+      return li;
     });
-    this.#isOwned &&
-      this.$isOpened &&
-      this._owner!.setAttribute("aria-controls", this.$refInput.getAttribute("aria-controls")!);
+    o.owner && (this.onKey = this.handleKey);
   }
 
-  /** Handles key pressed in owner while menu is opened near it (see openMenuAt): Arrows to navigate, Enter/Tab to choose,
-   *  Escape to close
+  override open(parent: HTMLElement): void {
+    const { button, owner, values, selected } = this.#o;
+    button.setAttribute("aria-expanded", true);
+    if (owner) {
+      owner.setAttribute("aria-controls", this.popup.firstElementChild!.id);
+      this.#offBlur = onEvent(owner, "blur", () => this.done());
+      this.focus(this.#items[values.findIndex((v) => v.value === selected)] ?? this.#items[0]);
+    }
+    super.open(parent);
+    // after popup is shown: otherwise item isn't scrolled into view
+    setTimeout(() =>
+      (this.#focused ?? this.popup.querySelector("[aria-selected=true]"))?.scrollIntoView({ block: "nearest" })
+    );
+  }
+
+  /** Focuses item virtually: real focus stays in owner */
+  protected focus(li: HTMLLIElement | undefined): void {
+    const { owner } = this.#o;
+    this.#focused?.removeAttribute("focused");
+    this.#focused = li;
+    li?.setAttribute("focused", "");
+    li?.scrollIntoView({ block: "nearest" });
+    li ? owner?.setAttribute("aria-activedescendant", li.id) : owner?.removeAttribute("aria-activedescendant");
+  }
+
+  /** Handles key pressed in owner: Arrows to navigate, Enter/Tab (Space for dropdown) to choose, Escape to close
    * @returns true if key is handled */
-  handleKey(e: KeyboardEvent): boolean {
+  protected handleKey = (e: KeyboardEvent): boolean => {
     const k = !(e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.isComposing) && e.key;
-    if (k === "Tab") {
-      this._focusedMenuItem?.click(); // the same as Enter
-    } else if (k === "ArrowDown" || k === "ArrowUp" || k === "Enter" || k === "Escape") {
-      this.gotKeyDown(e);
+    const f = this.#focused;
+    if (k === "ArrowDown" || k === "ArrowUp") {
+      const arr = this.#items.filter((li) => !li.hidden);
+      const i = arr.indexOf(f!);
+      this.focus(k === "ArrowDown" ? arr[(i + 1) % arr.length] : arr[(i > 0 ? i : arr.length) - 1]);
+    } else if (k === "Enter" || k === "Tab" || (k === " " && this.#o.owner === this.#o.button)) {
+      f ? f.click() : this.done(); // Space in editor types whitespace: it closes menu
+    } else if (k === "Escape") {
+      this.done();
     } else {
       return false;
     }
     return true;
-  }
+  };
 
-  /** Filters items by text (typed in owner instead of input)
-   * @returns count of visible items */
-  filter(text: string): number {
-    this._query = text;
-    this.filterMenuItems();
-    const m = this._menuItems!;
-    return (m.filtered ?? m.all).length;
-  }
-
-  protected override valueToText(v: unknown, items: WUP.Select.MenuItem[]): string {
-    return this._textOf && !items.some((x) => x.value === v) ? this._textOf(v) : super.valueToText(v, items);
-  }
-
-  override focus(): boolean {
-    return document.activeElement !== this._owner && super.focus(); // click on button or item doesn't move focus from owner
-  }
-
-  protected override gotKeyDown(e: KeyboardEvent): void {
-    if (e.key === " " && this.$isOpened) {
-      e.preventDefault(); // otherwise button is clicked: menu is closed
-      this._focusedMenuItem?.click(); // the same as Enter
-      return;
+  /** Hides items that don't match & focuses the 1st visible one
+   * @returns false if nothing matches: items aren't changed (they're visible during animation of closing) */
+  filter(isMatch: (v: WUP.TextRich.ToolValue) => boolean): boolean {
+    const shown = this.#o.values.map(isMatch);
+    if (!shown.includes(true)) {
+      return false;
     }
-    super.gotKeyDown(e);
+    this.#items.forEach((li, i) => (li.hidden = !shown[i]));
+    this.focus(this.#items[shown.indexOf(true)]);
+    return true;
   }
 
-  protected override focusMenuItem(next: HTMLElement | null): void {
-    super.focusMenuItem(next);
-    if (this.#isOwned) {
-      const o = this._owner!;
-      next ? o.setAttribute("aria-activedescendant", next.id) : o.removeAttribute("aria-activedescendant");
+  override done(v: unknown = null, isBack = false): void {
+    if (!this.isClosed) {
+      const { button, owner } = this.#o;
+      this.#offBlur?.();
+      owner?.removeAttribute("aria-activedescendant");
+      owner?.removeAttribute("aria-controls");
+      button.setAttribute("aria-expanded", false);
     }
-  }
-
-  protected override renderPopup(menuId: string): WUPPopupElement {
-    const p = super.renderPopup(menuId);
-    p.getTargetRect = (t) => this._anchor?.() ?? t.getBoundingClientRect(); // menu can be placed near editor instead of control
-    return p;
-  }
-
-  protected override async goOpenMenu(
-    openCase: MenuOpenCases,
-    e?: MouseEvent | FocusEvent | KeyboardEvent | null
-  ): Promise<WUPPopupElement | null> {
-    if (openCase !== MenuOpenCases.onManualCall) {
-      this._anchor = undefined; // opened via focused button (keyboard): placed near it
-      this.#isOwned = false;
-    }
-    const p = await super.goOpenMenu(openCase, e);
-    p && this.selectMenuItemByValue(this.$value); // even if text of button is empty: it's set with delay after changing $value
-    return p;
-  }
-
-  protected override goCloseMenu(closeCase: MenuCloseCases, e?: MouseEvent | FocusEvent | null): Promise<boolean> {
-    const r = super.goCloseMenu(closeCase, e);
-    if (!this.$isOpened) {
-      const f = this._onCloseMenu;
-      this._onCloseMenu = undefined;
-      if (this.#isOwned) {
-        this.#isOwned = false;
-        this._owner!.removeAttribute("aria-activedescendant");
-        this._owner!.removeAttribute("aria-controls");
-      }
-      this._query = undefined;
-      f?.();
-    }
-    return r;
+    super.done(v, isBack);
   }
 }
-
-customElements.define(tagName, WUPTextRichSelect);

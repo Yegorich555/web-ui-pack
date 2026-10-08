@@ -101,7 +101,7 @@ const placeholders = ["firstName", "lastName", "email", "company", "date"];
 WUPTextRichControl.$tools.placeholder = {
   label: "Placeholder",
   // dropdown in toolbar & menu shown on typing `{` or on click/hover on placeholder (chosen value replaces it)
-  values: placeholders.map((value) => ({ value })), // label is prettified value: `First Name`
+  values: placeholders.map((value) => ({ value, label: value })), // label is name as is: otherwise it's prettified (`First Name`)
   trigger: "{", // menu is filtered by text typed after it
   kind: "embed", // counted as 1 char: it's removed entirely by Backspace
   is: (el) =>

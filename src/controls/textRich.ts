@@ -2,9 +2,8 @@ import { inheritDefaults } from "../baseElement";
 import onEvent from "../helpers/onEvent";
 import { stringPrettify } from "../helpers/string";
 import WUPPopupElement from "../popup/popupElement";
-import { PopupOpenCases } from "../popup/popupElement.types";
 import { useTooltipOnce } from "../popup/popupTooltip";
-import { SetValueReasons, ValidationCases } from "./baseControl";
+import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 import TextHistory from "./text.history";
 import WUPTextAreaControl from "./textArea";
@@ -23,7 +22,7 @@ import WUPTextRichInput, {
   textAligns,
 } from "./textRich.input";
 import TextRichHistory from "./textRich.history";
-import WUPTextRichSelect from "./textRich.select";
+import TextRichMenu, { TextRichAsk, TextRichPrompt } from "./textRich.select";
 import {
   addInline,
   formatParents,
@@ -40,7 +39,6 @@ import {
 } from "./textRich.format";
 
 WUPTextRichInput.$use();
-WUPTextRichSelect.$use();
 
 const tagName = "wup-textrich";
 declare global {
@@ -119,7 +117,7 @@ declare global {
        * (`size`: increases & decreases font size)
        * * `btnClear`: Escape clears value according to $options.clearActions (the same as in other controls) */
       hotKey?: string;
-      /** Class of toolbar button or dropdown (`<wup-richselect>`) of tool (several classes are separated by space):
+      /** Class of toolbar button or dropdown (`<button role="combobox">`) of tool (several classes are separated by space):
        *  to style it or point icon of button via css-var `--icon-img` (`.my-icon-upper { --icon-img: url("data:image/svg+xml,...") }`);
        *  otherwise point it via attribute `tool`: `wup-textrich [tool="upper"] { --icon-img: url(...) }` */
       className?: string;
@@ -300,8 +298,9 @@ declare module "preact/jsx-runtime" {
   }
 }
 
-/** Toolbar button or item of dropdown that applies format on click: `_value` - value of format (ex. `"ordered"` for list) */
-type ToolElement = HTMLElement & { _format: string; _value?: unknown };
+/** Toolbar button that applies format on click: `_value` - value of format (ex. `"ordered"` for list),
+ *  `_values` - values of dropdown (button opens menu of them: see askMenu) */
+type ToolElement = HTMLElement & { _format: string; _value?: unknown; _values?: WUP.TextRich.ToolValue[] };
 
 /** Command key is Cmd instead of Ctrl (iPadOS reports Macintosh, iOS - like Mac OS X) */
 const isMac = navigator.userAgent.includes("Mac");
@@ -349,23 +348,6 @@ function isOf(t: WUP.TextRich.Tool, value: unknown = true): (el: Element) => boo
 const labelOf = (v: WUP.TextRich.ToolValue): string =>
   v.label ?? __wupln(stringPrettify(String(v.value), true, true), "content");
 
-/** Returns rect of range to place popup near it: collapsed range (caret) gets width 1px */
-function rectOf(r: Range): DOMRect {
-  const rect = r.getBoundingClientRect();
-  if (rect.height) {
-    return rect.width ? rect : new DOMRect(rect.x, rect.y, 1, rect.height);
-  }
-  // caret between nodes (browser returns empty rect): at the end of the previous node (embed, text at the end of line etc.)
-  // or at the start of node (empty line)
-  const n = r.startContainer;
-  const prev = n.childNodes[r.startOffset - 1];
-  const x = document.createRange();
-  x.selectNode(prev ?? n);
-  const rects = x.getClientRects();
-  const b = rects[prev ? rects.length - 1 : 0] ?? rect;
-  return new DOMRect(prev ? b.right : b.x, b.y, 1, b.height);
-}
-
 /** Selects node: format of embed replaces it */
 function selectNode(n: Node): void {
   const r = document.createRange();
@@ -373,19 +355,6 @@ function selectNode(n: Node): void {
   const sel = window.getSelection()!;
   sel.removeAllRanges();
   sel.addRange(r);
-}
-
-/** Popup to ask value: text control of $ask or dropdown of toolbar opened near editor */
-interface AskPopup {
-  popup: WUPPopupElement;
-  /** Closes popup & resolves value (`null` if canceled): `isBack` - return focus & selection to editor */
-  done: (v: any, isBack: boolean) => void;
-  /** Element which value is edited via popup opened by hover (link, embed): popup is closed when pointer leaves element & popup */
-  hovered?: HTMLElement;
-  /** Handles key pressed in editor (menu: focus stays in editor): returns true if key is handled */
-  onKey?: (e: KeyboardEvent) => boolean;
-  /** Called when selection is changed in editor */
-  onSelect?: () => void;
 }
 
 /** Form-control with rich text editor (WYSIWYG): text is formatted via toolbar; behavior & styles are similar to npm quill
@@ -431,15 +400,13 @@ interface AskPopup {
  * <div role="toolbar"> // placed at the top via css (order: -1)
  *   <div role="group">
  *     <button tool="bold" aria-pressed="false"></button>
- *     <wup-richselect tool="header"> // WUPSelectControl with button instead of input: see WUPTextRichSelect
- *       <button role="combobox" aria-label="Heading">Normal</button>
- *       <wup-popup menu><ul role="listbox"><li role="option"><h1 role="none">Heading 1</h1></li>...</ul></wup-popup>
- *     </wup-richselect>
+ *     <button tool="header" role="combobox" aria-label="Heading" aria-expanded="false">Normal</button> // dropdown
  *   </div>
  *   <div role="group"><button tool="btnClear" clear></button></div> // $refBtnClear: placed in toolbar instead of label
  * </div>
  * <footer role="note" aria-label="Characters: {count} of {max}" w-tooltip>{count} / {max}</footer> // $refFooter: see $renderFooter & $options.hideFooter
- * <wup-popup><wup-text/></wup-popup> // to enter value via $ask: url on click on toolbar button `link` or on hover on link */
+ * <wup-popup><wup-text/></wup-popup> // to enter value via $ask: url on click on toolbar button `link` or on hover on link
+ * <wup-popup menu><ul role="listbox"><li role="option"><h1 role="none">Heading 1</h1></li>...</ul></wup-popup> // menu of dropdown: see askMenu */
 export default class WUPTextRichControl<
   ValueType = string,
   TOptions extends WUP.TextRich.Options = WUP.TextRich.Options,
@@ -972,42 +939,35 @@ export default class WUPTextRichControl<
     return b;
   }
 
-  /** Renders dropdown of toolbar: select with button (see WUPTextRichSelect) that shows label or icon of the current value */
+  /** Renders dropdown of toolbar: button that shows label or icon of the current value & opens menu of values (see askMenu) */
   protected renderPicker(
     group: HTMLElement,
     name: string,
     tool: WUP.TextRich.Tool,
     values: WUP.TextRich.ToolValue[]
   ): void {
-    const s = group.appendChild(document.createElement("wup-richselect"));
-    s.setAttribute("tool", name);
-    addClass(s, tool.className);
-    values.some((v) => v.className) && s.setAttribute("icon", ""); // button shows icon of the current value instead of label
-    s.$options.label = tool.label ?? name;
-    s.$options.items = values.map((v) => ({
-      value: v.value,
-      // without parent: it's called to get text of value
-      text: (_, li) => (li.parentElement ? this.renderItem(li, tool, v) : labelOf(v)),
-      onClick: (e) => this.gotPick(e, s, name, v.value),
-    }));
-    s.$onChange = (e) => e.stopPropagation(); // nested control isn't related to form
-    s._owner = this.$refInput; // focus stays in editor on click: menu is opened via gotToolbarClick
-    s._textOf = (v) => labelOf(tool.values?.find((x) => x.value === v) ?? { value: v }); // format isn't rendered in toolbar
-    const b = s.$refInput;
+    const b = group.appendChild(document.createElement("button")) as HTMLButtonElement & ToolElement;
+    b.type = "button";
     b.tabIndex = -1; // toolbar is reachable via Alt+F10
-    this.setToolLabel(b, s.$options.label, tool.hotKey);
+    b.setAttribute("tool", name);
+    b.setAttribute("role", "combobox"); // select-only combobox: it gets aria-activedescendant while menu is opened via keyboard
+    b.setAttribute("aria-expanded", false);
+    addClass(b, tool.className);
+    values.some((v) => v.className) && b.setAttribute("icon", ""); // button shows icon of the current value instead of label
+    this.setToolLabel(b, tool.label ?? name, tool.hotKey);
+    b._format = name;
+    b._values = values;
   }
 
   /** Renders item of dropdown: label inside element of format (preview via `create`)
-   *  or icon (if value has `className`: label is shown via tooltip)
-   * @returns label of item */
-  protected renderItem(li: HTMLElement, tool: WUP.TextRich.Tool, v: WUP.TextRich.ToolValue): string {
+   *  or icon (if value has `className`: label is shown via tooltip) */
+  protected renderItem(li: HTMLElement, tool: WUP.TextRich.Tool, v: WUP.TextRich.ToolValue): void {
     const label = labelOf(v);
     if (v.className) {
       li.setAttribute("icon", "");
       addClass(li, v.className);
       this.setToolLabel(li, label, v.hotKey); // label & shortcut are shown via tooltip like for buttons
-      return label;
+      return;
     }
     let preview: HTMLElement | undefined;
     if (tool.create && tool.kind !== "embed") {
@@ -1026,19 +986,6 @@ export default class WUPTextRichControl<
       kbd.setAttribute("aria-hidden", true); // announced via aria-keyshortcuts
       kbd.textContent = hint;
     }
-    return label;
-  }
-
-  /** Called on click on item of dropdown: value is applied to selection or to target of menu opened near editor (see askMenu) */
-  protected gotPick(e: MouseEvent, s: WUPTextRichSelect, name: string, v: unknown): void {
-    e.preventDefault(); // otherwise select changes own value: it shows format of selection (see refreshToolbar)
-    const l = this.#ask;
-    if (l && l.popup === s.$refPopup) {
-      l.done(v, false);
-    } else {
-      s.$closeMenu();
-      this.applyFormat(name, v, true);
-    }
   }
 
   /** Updates state of toolbar items according to formats of selection (skipped if formats aren't changed) */
@@ -1055,13 +1002,16 @@ export default class WUPTextRichControl<
       const cur = formats.get(name) ?? false; // `false` - format isn't applied
       if (el.hasAttribute("aria-pressed")) {
         el.setAttribute("aria-pressed", el._value === undefined ? cur !== false : cur === el._value);
-      } else if (el.tagName === "WUP-RICHSELECT") {
-        // button shows label of the current value (even if it isn't rendered: see _textOf) or its icon (class);
+      } else if (el._values) {
+        // dropdown shows icon (class) or label of the current value (even if it isn't rendered in toolbar: `Heading 3`);
         // label of tool if format isn't applied & tool doesn't have value `false` (`Normal` of header)
-        const s = el as unknown as WUPTextRichSelect;
         const v = tool.values?.find((x) => x.value === cur);
-        s.$value = cur === false && !v ? undefined : cur;
-        el.hasAttribute("icon") && (s.$refInput.className = v?.className ?? "");
+        if (el.hasAttribute("icon")) {
+          el.className = "";
+          addClass(el, tool.className, v?.className);
+        } else {
+          el.textContent = cur === false && !v ? tool.label ?? name : labelOf(v ?? { value: cur });
+        }
       }
     });
   }
@@ -1105,9 +1055,15 @@ export default class WUPTextRichControl<
     }
   }
 
-  /** Applies tool of toolbar item: item of dropdown sets its value, button toggles format */
+  /** Applies tool of toolbar item: button toggles format, dropdown opens menu of its values near itself */
   protected applyTool(el: ToolElement): void {
-    this.applyFormat(el._format, el._value, el.tagName === "LI");
+    const name = el._format;
+    if (el._values && document.activeElement === el) {
+      // dropdown focused via keyboard keeps focus: selection is restored on choosing
+      this.askMenu(name, el).then((v) => v != null && this.applyFormat(name, v, true));
+    } else {
+      this.applyFormat(name, el._value, false, el._values && el);
+    }
   }
 
   /** Applies tool of $tools to selection (the same as toolbar, but tool can be not rendered in toolbar):
@@ -1126,7 +1082,7 @@ export default class WUPTextRichControl<
    * (or via its dropdown if tool has values) if it isn't pointed;
    * inline format with collapsed selection is applied to the next typed text (the same as quill)
    * @param isSet value is chosen (item of dropdown, asked value etc.): it's set, otherwise format is toggled (button)
-   * @param target element to place popup near it to ask value (clicked embed) */
+   * @param target element to place popup near it to ask value: clicked embed or dropdown of toolbar (opens its menu) */
   protected applyFormat(name: string, value?: unknown, isSet?: boolean, target?: HTMLElement): void {
     if (this.$isDisabled || this.$isReadOnly) {
       return;
@@ -1143,7 +1099,7 @@ export default class WUPTextRichControl<
     if (value === undefined && (tool.ask || tool.values)) {
       // selection is restored by positions: focus can be moved out of control (to modal etc.) & nodes can be re-rendered
       const pos = this.getSelectionPos();
-      (tool.ask && target?.tagName !== "WUP-RICHSELECT" // click on dropdown of toolbar opens its menu
+      (tool.ask && !(target as ToolElement | undefined)?._values // click on dropdown of toolbar opens its menu
         ? tool.ask(target ?? this.findTool(name) ?? inp, this as WUPTextRichControl, f.get(name))
         : this.askMenu(name, target ?? sel.getRangeAt(0).cloneRange())
       ).then((v) => {
@@ -1397,10 +1353,10 @@ export default class WUPTextRichControl<
     }
   }
 
-  /** Popup to ask value: text control of $ask or dropdown of toolbar opened near editor (see askMenu) */
-  #ask?: AskPopup;
+  /** Popup to ask value: text control of $ask or menu of dropdown (see askMenu) */
+  #ask?: TextRichAsk;
   #hoverTimer?: ReturnType<typeof setTimeout>;
-  /** Hover is skipped until pointer is moved: browser fires pointerover on element under pointer when menu is closed
+  /** Hover is skipped until pointer is moved: browser fires pointerover on element under pointer when popup is closed
    *  (embed chosen via menu is new element under pointer) */
   #isHoverOff = false;
 
@@ -1422,48 +1378,25 @@ export default class WUPTextRichControl<
     opts?: Partial<WUP.Text.Options>,
     hovered?: HTMLElement
   ): Promise<string | null> {
-    this.#ask?.done(null, false); // only one popup at once
-    const p = document.createElement("wup-popup");
-    p.$options.openCase = PopupOpenCases.onInit;
-    p.$options.target = target;
-    const el = p.appendChild(document.createElement("wup-text"));
-    el.$options.validationCase = ValidationCases.onChangeSmart; // without onFocusWithValue: otherwise error is shown at once
-    el.$options.readOnly = this.$isReadOnly;
-    el.$options.autoFocus = !hovered;
-    Object.assign(el.$options, opts);
-    el.$initValue = value;
+    return this.openAsk(new TextRichPrompt(target, value, { readOnly: this.$isReadOnly, ...opts }, hovered));
+  }
 
+  /** Opens popup to ask value (only one at once): popup opened by hover is closed by hover out (see gotHover)
+   * @returns asked value or `null` if canceled */
+  protected openAsk<T>(a: TextRichAsk): Promise<T | null> {
+    this.#ask?.done();
     return new Promise((resolve) => {
-      const done = (v: string | null, isBack: boolean): void => {
+      a.onClose = (v, isBack) => {
         this.#ask = undefined;
+        this.#isHoverOff = true;
         clearTimeout(this.#hoverTimer);
         isBack && this.restoreSelection(); // otherwise focus is moved by user
-        p.$close().finally(() => p.remove());
         resolve(v);
       };
-      this.#ask = { popup: p, done, hovered };
-      p.onkeydown = (e) => {
-        if (e.key === "Escape") {
-          e.preventDefault(); // otherwise value of control is cleared
-          done(null, true);
-        } else if (e.key === "Enter") {
-          e.preventDefault(); // otherwise form is submitted
-          !el.$validate() && done(el.$value ?? "", true);
-        }
-      };
-      el.$onChange = (e) => {
-        e.stopPropagation(); // nested control isn't related to form
-        hovered && e.detail.reason === SetValueReasons.clear && el.$value === undefined && done("", true);
-      };
-      // WARN: `onfocusout` isn't supported (there is no such property in HTML spec)
-      p.addEventListener(
-        "focusout",
-        (e) => this.#ask?.done === done && !p.contains(e.relatedTarget as Node) && done(null, false)
-      );
-      p.$onClose = () => this.#ask?.done === done && done(null, false); // closed by itself: when target is removed
-      p.onpointerenter = () => this.#ask?.hovered && this.gotHover(this.#ask.hovered);
-      p.onpointerleave = (e) => e.pointerType !== "touch" && this.gotHover(null); // touch leaves it after tap
-      this.appendChild(p);
+      a.popup.onpointerenter = () => this.#ask?.hovered && this.gotHover(this.#ask.hovered);
+      a.popup.onpointerleave = (e) => e.pointerType !== "touch" && this.gotHover(null); // touch leaves it after tap
+      this.#ask = a;
+      a.open(this);
     });
   }
 
@@ -1474,61 +1407,57 @@ export default class WUPTextRichControl<
     return this.$ask(target, url, { label: $textLink, validations }, hovered);
   }
 
-  /** Asks value of tool via its dropdown of toolbar (see WUPTextRichSelect) opened near target: focus stays in editor
-   *  (Arrows to navigate, Enter/Tab or click to choose, Escape to cancel)
-   * @param target element of tool (embed) or range of editor (selection, typed trigger)
+  /** Asks value of tool via menu of its dropdown of toolbar opened near target (see TextRichMenu): focus stays in editor
+   *  or dropdown (focused via keyboard) & menu is controlled by its keys
+   * @param target element of tool (embed, dropdown) or range of editor (selection, typed trigger)
    * @param mode `typed` - target is typed trigger: items are filtered by text typed after it, menu is closed if caret leaves it,
    * whitespace is typed or nothing matches; `hover` - menu is opened by hover on target: it's closed when pointer leaves target
    * & menu (keys aren't handled except Escape); otherwise menu is closed when selection is changed
    * @returns chosen value or `null` if canceled or tool isn't rendered in toolbar as dropdown */
   protected askMenu(name: string, target: HTMLElement | Range, mode?: "typed" | "hover"): Promise<unknown> {
-    this.#ask?.done(null, false); // only one popup at once
-    this.refreshToolbar(); // value of dropdown is selected (embed is selected on click): otherwise it's updated on selectionchange
-    const s = this.findSelect(name);
-    const isHover = mode === "hover";
-    s?.openMenuAt(
-      () => (target instanceof Range ? rectOf(target) : target.getBoundingClientRect()),
-      isHover,
-      isHover ? (this.#ctr.$tools as Record<string, WUP.TextRich.Tool>)[name].is?.(target as HTMLElement) : undefined // value of embed
-    );
-    if (!s?.$isOpened) {
+    const b = this.findTool(name);
+    if (!b?._values) {
       return Promise.resolve(null);
+    }
+    const tool = (this.#ctr.$tools as Record<string, WUP.TextRich.Tool>)[name];
+    const isHover = mode === "hover";
+    const m = new TextRichMenu({
+      button: b,
+      // focus stays in editor or in dropdown focused via keyboard
+      owner: isHover ? null : (document.activeElement === b && b) || this.$refInput,
+      target,
+      hovered: isHover ? (target as HTMLElement) : undefined,
+      values: b._values,
+      selected: isHover ? tool.is?.(target as HTMLElement) : this.getFormats().get(name) ?? false, // value of hovered embed
+      render: (li, v) => this.renderItem(li, tool, v),
+    });
+    if (isHover) {
+      return this.openAsk(m); // isn't related to selection: it's changed when editor is focused by click on item
     }
     const sel = window.getSelection()!;
     const at = [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset];
     const trigger = mode === "typed" && (target as Range).toString();
-    const p = s.$refPopup!;
-    p.onpointerenter = () => this.#ask?.hovered && this.gotHover(this.#ask.hovered);
-    p.onpointerleave = (e) => e.pointerType !== "touch" && this.gotHover(null); // touch leaves it after tap
-
-    return new Promise((resolve) => {
-      const done = (v: unknown): void => {
-        this.#ask = undefined;
-        this.#isHoverOff = true;
-        clearTimeout(this.#hoverTimer);
-        s._onCloseMenu = undefined;
-        s.$closeMenu();
-        resolve(v);
-      };
-      s._onCloseMenu = () => this.#ask?.done === done && done(null); // closed by itself: Escape etc.
-      const onSelect = (): void => {
-        if (trigger === false) {
-          // menu opened by click or via $format: closed when selection is changed
-          [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset].some((v, i) => v !== at[i]) && done(null);
-          return;
-        }
-        // text typed from trigger to caret: caret before trigger collapses range
-        const r = document.createRange();
-        r.setStart((target as Range).startContainer, (target as Range).startOffset);
-        sel.isCollapsed && this.$refInput.contains(sel.focusNode) && r.setEnd(sel.focusNode!, sel.focusOffset);
-        const str = r.toString();
-        const q = str.startsWith(trigger) && !/\s/.test(str) && str.slice(trigger.length);
-        (q === false || !s.filter(q)) && done(null);
-      };
-      this.#ask = isHover
-        ? { popup: p, done, hovered: target as HTMLElement }
-        : { popup: p, done, onKey: (e) => s.handleKey(e), onSelect };
-    });
+    m.onSelect = () => {
+      if (trigger === false) {
+        // menu opened by click or via $format: closed when selection is changed
+        [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset].some((v, i) => v !== at[i]) && m.done();
+        return;
+      }
+      // text typed from trigger to caret: caret before trigger collapses range
+      const r = document.createRange();
+      r.setStart((target as Range).startContainer, (target as Range).startOffset);
+      sel.isCollapsed && this.$refInput.contains(sel.focusNode) && r.setEnd(sel.focusNode!, sel.focusOffset);
+      const str = r.toString();
+      const q = str.startsWith(trigger) && !/\s/.test(str) && str.slice(trigger.length).toLowerCase();
+      if (q === false) {
+        m.done();
+        return;
+      }
+      // item is visible if its label or value contains typed text: `{name` & `{firstName` show `First Name`
+      const has = (s: string): boolean => s.toLowerCase().includes(q);
+      !m.filter((v) => has(labelOf(v)) || has(String(v.value))) && m.done(); // closed when nothing matches
+    };
+    return this.openAsk(m);
   }
 
   /** Called on typing: typed `trigger` of tool rendered in toolbar shows its dropdown near it (see askMenu);
@@ -1605,7 +1534,7 @@ export default class WUPTextRichControl<
     }
     const { hoverOpenTimeout, hoverCloseTimeout } = WUPPopupElement.$defaults;
     this.#hoverTimer = setTimeout(
-      () => (el?.isConnected ? this.askHover(el) : this.#ask?.done(null, false)),
+      () => (el?.isConnected ? this.askHover(el) : this.#ask?.done()),
       el ? hoverOpenTimeout : hoverCloseTimeout
     );
   }
@@ -1734,40 +1663,39 @@ export default class WUPTextRichControl<
   }
 
   protected gotToolbarClick(e: MouseEvent): void {
-    const t = e.target as HTMLElement;
-    const el = t.closest("[tool]") as ToolElement | null;
-    const l = this.#ask;
-    if (el?.tagName === "WUP-RICHSELECT") {
-      const s = el as unknown as WUPTextRichSelect;
-      if (s.$refInput === t && !s.$isFocused) {
-        // focus stays in editor: dropdown is opened near own button like via $format (focused one opens it itself)
-        const isOpened = !!l && l.popup === s.$refPopup;
-        l?.done(null, false);
-        !isOpened && this.applyFormat(el.getAttribute("tool")!, undefined, false, s);
-      }
-      return; // click on item is handled by dropdown
-    }
+    const el = (e.target as HTMLElement).closest("[tool]") as ToolElement | null;
     if (el?._format) {
-      l?.done(null, false); // menu opened near editor is closed by another tool
-      this.applyTool(el);
+      const l = this.#ask;
+      l?.done(); // menu opened near editor is closed by another tool
+      !(el._values && l?.popup.$options.target === el) && this.applyTool(el); // click on dropdown toggles its menu
     }
   }
 
-  /** Handles keyboard on toolbar: Arrows to navigate, Esc to return to editor (dropdowns handle own keys: see WUPTextRichSelect) */
+  /** Handles keyboard on toolbar: Arrows to navigate, Esc to return to editor; menu of focused dropdown is controlled by its keys */
   protected gotToolbarKeyDown(e: KeyboardEvent): void {
-    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || this.$isDisabled || this.$isReadOnly) {
-      return; // handled by dropdown: navigation in its menu etc.
+    if (e.altKey || e.ctrlKey || e.metaKey || this.$isDisabled || this.$isReadOnly) {
+      return;
     }
+    if (this.#ask?.onKey?.(e)) {
+      e.preventDefault(); // otherwise button is clicked by Enter/Space: menu is opened again
+      return;
+    }
+    const el = e.target as ToolElement;
     let next: HTMLElement | undefined;
     switch (e.key) {
+      case "ArrowDown":
+      case "ArrowUp":
+        if (el._values) {
+          e.preventDefault(); // otherwise page is scrolled
+          this.applyTool(el); // opens menu of dropdown
+        }
+        return;
       case "ArrowLeft":
       case "ArrowRight":
       case "Home":
       case "End": {
-        const arr = Array.from(
-          this.$refToolbar.querySelectorAll<HTMLElement>("[role=group] > button, wup-richselect button")
-        );
-        const i = arr.indexOf(document.activeElement as HTMLElement);
+        const arr = Array.from(this.$refToolbar.querySelectorAll<HTMLElement>("[role=group] > button"));
+        const i = arr.indexOf(el);
         const last = arr.length - 1;
         if (e.key === "Home" || e.key === "End") {
           next = arr[e.key === "Home" ? 0 : last];
@@ -1810,7 +1738,7 @@ export default class WUPTextRichControl<
     super.gotFocusLost();
     const l = this.#ask;
     // popup opened by hover or tap (touch doesn't leave it) & menu (focus stays in editor)
-    (l?.hovered || l?.onKey) && l.done(null, false);
+    (l?.hovered || l?.onKey) && l.done();
     this.#range = undefined;
     this.#pending.clear();
     this.refreshToolbar(new Map());
@@ -1821,14 +1749,9 @@ export default class WUPTextRichControl<
     return this.$refToolbar.querySelector(`[tool="${key}"]`);
   }
 
-  /** Returns rendered dropdown of toolbar by name of tool (see WUPTextRichSelect) */
-  protected findSelect(name: string): WUPTextRichSelect | null {
-    return this.$refToolbar.querySelector(`wup-richselect[tool="${name}"]`);
-  }
-
   /** Returns items of dropdown of tool: values rendered in toolbar */
-  protected itemsOf(name: string): WUP.Select.MenuItem[] {
-    return (this.findSelect(name)?.$options.items as WUP.Select.MenuItem[] | undefined) ?? [];
+  protected itemsOf(name: string): WUP.TextRich.ToolValue[] {
+    return this.findTool(name)?._values ?? [];
   }
 
   /** Returns true if value of tool is rendered in toolbar: button of value or item of dropdown */
@@ -1912,7 +1835,7 @@ export default class WUPTextRichControl<
     }
     if (e.key === "Escape" && l?.hovered) {
       e.preventDefault(); // the 1st Escape closes popup opened by hover: otherwise value is cleared
-      l.done(null, false);
+      l.done();
       return;
     }
     super.gotKeyDown(e);
