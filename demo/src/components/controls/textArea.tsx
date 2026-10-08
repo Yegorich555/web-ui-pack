@@ -20,6 +20,7 @@ export default function TextControlView() {
       features={[
         "Inheritted features from TextControl (mask, prefix, postfix are not supported)",
         "Autoheight (change css rule: wup-textarea [contenteditable] { max-height: none })",
+        "Footer with count of chars & validations.max (hidden via $options.hideFooter; override $renderFooter to customize)",
       ]}
     >
       <wup-form
@@ -70,8 +71,9 @@ export default function TextControlView() {
         />
         <wup-textarea
           w-name="withoutClearButton"
-          w-label="Without clear button"
-          w-initValue="Use $options.clearButton"
+          w-label="Without clear button & footer"
+          w-initValue="Use $options.clearButton & $options.hideFooter"
+          w-hideFooter
           ref={(el) => {
             if (el) {
               el.$options.clearButton = false;

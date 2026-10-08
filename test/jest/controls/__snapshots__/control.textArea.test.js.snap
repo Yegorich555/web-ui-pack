@@ -29,6 +29,13 @@ exports[`control.textArea $ariaDetails 1`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
 </wup-textarea>
 `;
 
@@ -56,6 +63,13 @@ exports[`control.textArea $ariaDetails 2`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
 </wup-textarea>
 `;
 
@@ -84,6 +98,13 @@ exports[`control.textArea $ariaSpeak 1`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -120,6 +141,13 @@ exports[`control.textArea $ariaSpeak 2`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
 </wup-textarea>
 `;
 
@@ -147,6 +175,13 @@ exports[`control.textArea $show/$hide error 1`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
 </wup-textarea>
 `;
 
@@ -177,6 +212,13 @@ exports[`control.textArea $show/$hide error 2`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -218,6 +260,13 @@ exports[`control.textArea $show/$hide error 3`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -729,6 +778,17 @@ WUP-TEXTAREA [contenteditable] {
   min-height: 4em;
   max-height: 4em;
 }
+WUP-TEXTAREA &gt; footer {
+  width: fit-content;
+  margin-left: auto;
+  padding: 0 0.5em 0.25em;
+  font-size: small;
+  color: var(--ctrl-label);
+  cursor: default;
+}
+WUP-TEXTAREA &gt; footer[invalid] {
+  color: var(--ctrl-err);
+}
   WUP-AREAINPUT {
   display: inline-block;
   cursor: text;
@@ -778,6 +838,7 @@ exports[`control.textArea common tests snapshot of $defaults 1`] = `
   "disabled": false,
   "enableInitOnChange": false,
   "focusDebounceMs": 100,
+  "hideFooter": false,
   "label": null,
   "name": null,
   "readOnly": false,
@@ -813,6 +874,7 @@ exports[`control.textArea common tests snapshot of $defaults 3`] = `
   "w-disabled",
   "w-enableinitonchange",
   "w-focusdebouncems",
+  "w-hidefooter",
   "w-initvalue",
   "w-label",
   "w-name",
@@ -853,6 +915,13 @@ exports[`control.textArea options clearButton 1`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -880,6 +949,13 @@ exports[`control.textArea options clearButton 2`] = `
       />
     </span>
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -918,6 +994,13 @@ exports[`control.textArea validations $options.validationShowAll 1`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0 of 3"
+    role="note"
+    w-tooltip=""
+  >
+    0 / 3
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -982,6 +1065,13 @@ exports[`control.textArea validations $options.validationShowAll 2`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 3 of 3"
+    role="note"
+    w-tooltip=""
+  >
+    3 / 3
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -1052,6 +1142,13 @@ exports[`control.textArea validations $options.validationShowAll 3`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -1100,6 +1197,13 @@ exports[`control.textArea validations options.validationCase 1`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 3"
+    role="note"
+    w-tooltip=""
+  >
+    3
+  </footer>
 </wup-textarea>
 `;
 
@@ -1134,6 +1238,13 @@ exports[`control.textArea validations options.validationCase 2`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -1189,6 +1300,13 @@ exports[`control.textArea validations options.validationCase 3`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 3"
+    role="note"
+    w-tooltip=""
+  >
+    3
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -1241,6 +1359,13 @@ exports[`control.textArea validations options.validationCase 4`] = `
       wup-icon=""
     />
   </label>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -1292,6 +1417,13 @@ exports[`control.textArea with form 1`] = `
         wup-icon=""
       />
     </label>
+    <footer
+      aria-label="Characters: 0"
+      role="note"
+      w-tooltip=""
+    >
+      0
+    </footer>
   </wup-textarea>
 </wup-form>
 `;

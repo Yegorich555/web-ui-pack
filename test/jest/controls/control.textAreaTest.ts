@@ -46,6 +46,7 @@ export default function testTextAreaControl(
       "w-maskholder": null,
       "w-prefix": null,
       "w-postfix": null,
+      "w-hidefooter": { value: true },
       ...opts?.attrs,
     },
   });

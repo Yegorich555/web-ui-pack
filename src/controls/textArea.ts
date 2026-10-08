@@ -1,4 +1,5 @@
 import { inheritDefaults } from "../baseElement";
+import { useTooltipOnce } from "../popup/popupTooltip";
 import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 import WUPTextAreaInput from "./textArea.input";
@@ -10,10 +11,20 @@ declare global {
   namespace WUP.TextArea {
     interface EventMap extends WUP.Text.EventMap {}
     interface ValidityMap extends WUP.Text.ValidityMap {}
+    interface NewOptions {
+      /** Hide footer with count of visible chars: `{count} / {max}` (see $renderFooter to customize content)
+       * @see {@link WUPTextAreaControl.$renderFooter}
+       * @defaultValue false */
+      hideFooter: boolean;
+    }
     interface Options<T = string, VM = ValidityMap>
-      extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "prefix" | "postfix"> {}
+      extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "prefix" | "postfix">,
+        NewOptions {}
     interface JSXProps<C = WUPTextAreaControl>
-      extends Omit<WUP.Text.JSXProps<C>, "w-mask" | "w-maskholder" | "w-prefix" | "w-postfix"> {}
+      extends Omit<WUP.Text.JSXProps<C>, "w-mask" | "w-maskholder" | "w-prefix" | "w-postfix">,
+        WUP.Base.OnlyNames<NewOptions> {
+      "w-hideFooter"?: boolean | "" | "true" | "false";
+    }
   }
 
   interface HTMLElementTagNameMap {
@@ -70,6 +81,7 @@ declare module "preact/jsx-runtime" {
  *   </span>
  *   <button clear/>
  * </label>
+ * <footer role="note" aria-label="Characters: {count} of {max}" w-tooltip>{count} / {max}</footer> // $refFooter: see $renderFooter & $options.hideFooter
  * @tutorial Troubleshooting
  * * known issue: NVDA doesn't read multiline text https://github.com/nvaccess/nvda/issues/13369
  * to resolve it set WUPTextAreaControl.$defaults.selectOnFocus = true */
@@ -92,9 +104,13 @@ export default class WUPTextAreaControl<
       min: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.min!.call!(c, v?.replace(/\n/g, ""), setV, c, r),
       max: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.max!.call!(c, v?.replace(/\n/g, ""), setV, c, r),
     }),
+    hideFooter: false,
   });
 
   $refInput = document.createElement("wup-areainput") as HTMLInputElement;
+
+  /** Footer with count of chars: it's removed if $options.hideFooter is true (see $renderFooter) */
+  $refFooter?: HTMLElement;
 
   protected override renderControl(): void {
     super.renderControl();
@@ -104,13 +120,70 @@ export default class WUPTextAreaControl<
     this.$refTitle.id = id;
   }
 
-  protected override gotChanges(propsChanged: Array<keyof WUP.TextArea.Options> | null): void {
+  protected override gotChanges(propsChanged: Array<keyof WUP.TextArea.Options | any> | null): void {
     super.gotChanges(propsChanged);
     const o = this._opts as WUP.Text.Options;
     delete o.mask;
     delete o.maskholder;
     delete o.prefix;
     delete o.postfix;
+    this.setupFooter(); // max count depends on validations: they can be changed via form too
+  }
+
+  /** Creates or removes footer according to $options.hideFooter & renders its content */
+  protected setupFooter(): void {
+    if (this._opts.hideFooter) {
+      this.$refFooter?.remove();
+      this.$refFooter = undefined;
+    } else {
+      if (!this.$refFooter) {
+        useTooltipOnce("w-tooltip"); // footer shows aria-label via tooltip
+        const f = this.appendChild(document.createElement("footer"));
+        f.setAttribute("role", "note"); // otherwise it's landmark `contentinfo` (outside of <section>, <article> etc.) & aria-label isn't allowed
+        f.setAttribute("w-tooltip", ""); // empty: tooltip shows aria-label
+        this.$refFooter = f;
+      }
+      this.$renderFooter(this.$refFooter);
+    }
+  }
+
+  /** Returns count of visible chars in input (the same as validations min/max count): line breaks are skipped */
+  protected countChars(): number {
+    return this.$refInput.value.replace(/\n/g, "").length;
+  }
+
+  /** Renders content of footer: count of visible chars (the same as validations min/max count)
+   *  `{count} / {max}` if `validations.max` is pointed (with attr `invalid` if count exceeds max: red text), otherwise `{count}`;
+   *  `aria-label` is shown via tooltip;
+   *  it's called on every change of value & options (if footer isn't hidden via $options.hideFooter): override it to customize content
+   * @example
+   * class MyTextArea extends WUPTextAreaControl {
+   *   override $renderFooter(footer: HTMLElement): void {
+   *     const words = this.$refInput.innerText.split(/\s+/).filter(Boolean).length;
+   *     footer.textContent = `${words}`;
+   *     footer.setAttribute("aria-label", `Words: ${words}`);
+   *   }
+   * } */
+  $renderFooter(footer: HTMLElement): void {
+    const count = this.countChars();
+    const max = (this.validations as WUP.TextArea.Options["validations"])?.max;
+    const isMax = typeof max === "number";
+    footer.textContent = isMax ? `${count} / ${max}` : `${count}`;
+    this.setAttr.call(footer, "invalid", isMax && count > max, true); // red if count exceeds max
+    footer.setAttribute(
+      "aria-label",
+      isMax ? __wupln(`Characters: ${count} of ${max}`, "aria") : __wupln(`Characters: ${count}`, "aria")
+    );
+  }
+
+  protected override gotInput(e: WUP.Text.GotInputEvent): void {
+    super.gotInput(e);
+    this.$refFooter && this.$renderFooter(this.$refFooter); // at once: $value is changed after $options.debounceMs
+  }
+
+  protected override setInputValue(v: string, reason: SetValueReasons): void {
+    super.setInputValue(v, reason);
+    this.$refFooter && this.$renderFooter(this.$refFooter);
   }
 
   protected override renderPrefix(): void {
