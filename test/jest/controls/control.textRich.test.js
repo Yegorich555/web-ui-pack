@@ -96,4 +96,24 @@ describe("control.textRich", () => {
       expect(toValue(expected)).toBe(expected); // value is the same after parsing back
     });
   });
+
+  test("click on link: browser doesn't follow it (readonly editor isn't contenteditable)", async () => {
+    el.$options.readOnly = true;
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.innerHTML = '<div>Text <a href="https://example.com/">link</a></div>';
+    const a = inp.querySelector("a");
+    const spyOpen = jest.spyOn(window, "open").mockImplementation(() => null);
+
+    expect(a.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }))).toBe(false);
+    expect(spyOpen).not.toBeCalled();
+
+    // Ctrl + Click opens link in new tab
+    expect(a.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true }))).toBe(false);
+    expect(spyOpen).toBeCalledWith("https://example.com/", "_blank", "noopener,noreferrer");
+
+    // click outside link isn't prevented
+    expect(inp.firstChild.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }))).toBe(true);
+    await h.wait();
+  });
 });

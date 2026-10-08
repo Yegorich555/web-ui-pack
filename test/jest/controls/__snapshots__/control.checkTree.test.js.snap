@@ -985,7 +985,7 @@ WUP-CHECKTREE textarea {
   margin: 0;
   cursor: inherit;
 }
-WUP-CHECKTREE [contenteditable=true] {
+WUP-CHECKTREE [contenteditable] {
   margin: var(--ctrl-padding);
   margin-left: 0;
   margin-right: 0;

@@ -470,7 +470,7 @@ WUP-SELECTMANY textarea {
   margin: 0;
   cursor: inherit;
 }
-WUP-SELECTMANY [contenteditable=true] {
+WUP-SELECTMANY [contenteditable] {
   margin: var(--ctrl-padding);
   margin-left: 0;
   margin-right: 0;
@@ -582,7 +582,7 @@ WUP-SELECTMANY [postfix] {
 }
 WUP-SELECTMANY input,
 WUP-SELECTMANY textarea,
-WUP-SELECTMANY [contenteditable=true],
+WUP-SELECTMANY [contenteditable],
 WUP-SELECTMANY [maskholder],
 WUP-SELECTMANY [postfix] {
   width: 100%;
@@ -618,7 +618,7 @@ WUP-SELECTMANY [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-SELECTMANY input:-webkit-autofill, WUP-SELECTMANY textarea:-webkit-autofill, WUP-SELECTMANY [contenteditable=true]:-webkit-autofill {
+WUP-SELECTMANY input:-webkit-autofill, WUP-SELECTMANY textarea:-webkit-autofill, WUP-SELECTMANY [contenteditable]:-webkit-autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -626,7 +626,7 @@ WUP-SELECTMANY input:-webkit-autofill, WUP-SELECTMANY textarea:-webkit-autofill,
 }
 WUP-SELECTMANY input:autofill,
 WUP-SELECTMANY textarea:autofill,
-WUP-SELECTMANY [contenteditable=true]:autofill {
+WUP-SELECTMANY [contenteditable]:autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -663,16 +663,16 @@ WUP-SELECTMANY textarea:not(:focus)::placeholder {
 WUP-SELECTMANY:focus-within strong,
 WUP-SELECTMANY input:not(:placeholder-shown) + strong,
 WUP-SELECTMANY textarea:not(:placeholder-shown) + strong,
-WUP-SELECTMANY [contenteditable=true]:not(:empty) + strong,
+WUP-SELECTMANY [contenteditable]:not(:empty) + strong,
 WUP-SELECTMANY legend {
   transform: var(--ctrl-label-active-pos);
 }
-WUP-SELECTMANY input:-webkit-autofill + strong, WUP-SELECTMANY textarea:-webkit-autofill + strong, WUP-SELECTMANY [contenteditable=true]:-webkit-autofill + strong {
+WUP-SELECTMANY input:-webkit-autofill + strong, WUP-SELECTMANY textarea:-webkit-autofill + strong, WUP-SELECTMANY [contenteditable]:-webkit-autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-SELECTMANY input:autofill + strong,
 WUP-SELECTMANY textarea:autofill + strong,
-WUP-SELECTMANY [contenteditable=true]:autofill + strong {
+WUP-SELECTMANY [contenteditable]:autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-SELECTMANY:focus-within [maskholder], WUP-SELECTMANY:focus-within [prefix], WUP-SELECTMANY:focus-within [postfix],

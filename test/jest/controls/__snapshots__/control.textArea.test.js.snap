@@ -443,7 +443,7 @@ WUP-TEXTAREA textarea {
   margin: 0;
   cursor: inherit;
 }
-WUP-TEXTAREA [contenteditable=true] {
+WUP-TEXTAREA [contenteditable] {
   margin: var(--ctrl-padding);
   margin-left: 0;
   margin-right: 0;
@@ -555,7 +555,7 @@ WUP-TEXTAREA [postfix] {
 }
 WUP-TEXTAREA input,
 WUP-TEXTAREA textarea,
-WUP-TEXTAREA [contenteditable=true],
+WUP-TEXTAREA [contenteditable],
 WUP-TEXTAREA [maskholder],
 WUP-TEXTAREA [postfix] {
   width: 100%;
@@ -591,7 +591,7 @@ WUP-TEXTAREA [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-TEXTAREA input:-webkit-autofill, WUP-TEXTAREA textarea:-webkit-autofill, WUP-TEXTAREA [contenteditable=true]:-webkit-autofill {
+WUP-TEXTAREA input:-webkit-autofill, WUP-TEXTAREA textarea:-webkit-autofill, WUP-TEXTAREA [contenteditable]:-webkit-autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -599,7 +599,7 @@ WUP-TEXTAREA input:-webkit-autofill, WUP-TEXTAREA textarea:-webkit-autofill, WUP
 }
 WUP-TEXTAREA input:autofill,
 WUP-TEXTAREA textarea:autofill,
-WUP-TEXTAREA [contenteditable=true]:autofill {
+WUP-TEXTAREA [contenteditable]:autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -636,16 +636,16 @@ WUP-TEXTAREA textarea:not(:focus)::placeholder {
 WUP-TEXTAREA:focus-within strong,
 WUP-TEXTAREA input:not(:placeholder-shown) + strong,
 WUP-TEXTAREA textarea:not(:placeholder-shown) + strong,
-WUP-TEXTAREA [contenteditable=true]:not(:empty) + strong,
+WUP-TEXTAREA [contenteditable]:not(:empty) + strong,
 WUP-TEXTAREA legend {
   transform: var(--ctrl-label-active-pos);
 }
-WUP-TEXTAREA input:-webkit-autofill + strong, WUP-TEXTAREA textarea:-webkit-autofill + strong, WUP-TEXTAREA [contenteditable=true]:-webkit-autofill + strong {
+WUP-TEXTAREA input:-webkit-autofill + strong, WUP-TEXTAREA textarea:-webkit-autofill + strong, WUP-TEXTAREA [contenteditable]:-webkit-autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-TEXTAREA input:autofill + strong,
 WUP-TEXTAREA textarea:autofill + strong,
-WUP-TEXTAREA [contenteditable=true]:autofill + strong {
+WUP-TEXTAREA [contenteditable]:autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-TEXTAREA:focus-within [maskholder], WUP-TEXTAREA:focus-within [prefix], WUP-TEXTAREA:focus-within [postfix],
@@ -725,7 +725,7 @@ WUP-TEXTAREA[disabled] button[clear], WUP-TEXTAREA[readonly] button[clear] {
 WUP-TEXTAREA strong {
   top: 1.6em;
 }
-WUP-TEXTAREA [contenteditable=true] {
+WUP-TEXTAREA [contenteditable] {
   min-height: 4em;
   max-height: 4em;
 }

@@ -67,4 +67,35 @@ export default function testTextAreaControl(
     expect(isPrevented).toBe(false);
     expect(onSubmit).toBeCalledTimes(0);
   });
+
+  test("readonly & disabled: input isn't editable", async () => {
+    const el = getEl();
+    const inp = el.$refInput;
+    const attrs = () =>
+      ["contenteditable", "tabindex", "aria-readonly", "aria-disabled"].map((a) => inp.getAttribute(a));
+    expect(attrs()).toStrictEqual(["true", null, null, null]);
+
+    el.$options.readOnly = true;
+    await h.wait(1);
+    expect(attrs()).toStrictEqual(["false", "0", "true", null]); // focusable to select & copy text
+
+    el.$options.disabled = true;
+    await h.wait(1);
+    expect(attrs()).toStrictEqual(["false", null, "true", "true"]); // not focusable
+
+    el.$options.readOnly = false;
+    await h.wait(1);
+    expect(attrs()).toStrictEqual(["false", null, null, "true"]);
+
+    el.$options.disabled = false;
+    await h.wait(1);
+    expect(attrs()).toStrictEqual(["true", null, null, null]);
+
+    // readonly before input is connected
+    const inp2 = document.createElement("wup-areainput") as WUPTextAreaControl["$refInput"];
+    inp2.readOnly = true;
+    document.body.appendChild(inp2);
+    expect(inp2.getAttribute("contenteditable")).toBe("false");
+    inp2.remove();
+  });
 }

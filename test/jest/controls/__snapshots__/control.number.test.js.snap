@@ -436,7 +436,7 @@ WUP-NUM textarea {
   margin: 0;
   cursor: inherit;
 }
-WUP-NUM [contenteditable=true] {
+WUP-NUM [contenteditable] {
   margin: var(--ctrl-padding);
   margin-left: 0;
   margin-right: 0;
@@ -548,7 +548,7 @@ WUP-NUM [postfix] {
 }
 WUP-NUM input,
 WUP-NUM textarea,
-WUP-NUM [contenteditable=true],
+WUP-NUM [contenteditable],
 WUP-NUM [maskholder],
 WUP-NUM [postfix] {
   width: 100%;
@@ -584,7 +584,7 @@ WUP-NUM [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-NUM input:-webkit-autofill, WUP-NUM textarea:-webkit-autofill, WUP-NUM [contenteditable=true]:-webkit-autofill {
+WUP-NUM input:-webkit-autofill, WUP-NUM textarea:-webkit-autofill, WUP-NUM [contenteditable]:-webkit-autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -592,7 +592,7 @@ WUP-NUM input:-webkit-autofill, WUP-NUM textarea:-webkit-autofill, WUP-NUM [cont
 }
 WUP-NUM input:autofill,
 WUP-NUM textarea:autofill,
-WUP-NUM [contenteditable=true]:autofill {
+WUP-NUM [contenteditable]:autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -629,16 +629,16 @@ WUP-NUM textarea:not(:focus)::placeholder {
 WUP-NUM:focus-within strong,
 WUP-NUM input:not(:placeholder-shown) + strong,
 WUP-NUM textarea:not(:placeholder-shown) + strong,
-WUP-NUM [contenteditable=true]:not(:empty) + strong,
+WUP-NUM [contenteditable]:not(:empty) + strong,
 WUP-NUM legend {
   transform: var(--ctrl-label-active-pos);
 }
-WUP-NUM input:-webkit-autofill + strong, WUP-NUM textarea:-webkit-autofill + strong, WUP-NUM [contenteditable=true]:-webkit-autofill + strong {
+WUP-NUM input:-webkit-autofill + strong, WUP-NUM textarea:-webkit-autofill + strong, WUP-NUM [contenteditable]:-webkit-autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-NUM input:autofill + strong,
 WUP-NUM textarea:autofill + strong,
-WUP-NUM [contenteditable=true]:autofill + strong {
+WUP-NUM [contenteditable]:autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-NUM:focus-within [maskholder], WUP-NUM:focus-within [prefix], WUP-NUM:focus-within [postfix],

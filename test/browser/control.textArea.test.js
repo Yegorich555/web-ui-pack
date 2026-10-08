@@ -87,4 +87,39 @@ describe("control.textArea", () => {
       [...rich, rich[1], rich[0], "", ...rich].map((v, i) => [caret[i], v])
     );
   });
+
+  test("readonly & disabled: user can't type (the same in TextRich)", async () => {
+    await page.evaluate(() => {
+      const tags = ["wup-textarea", "wup-textrich"];
+      renderHtml(`<button></button>${tags.map((t) => `<${t} readonly></${t}><${t} disabled></${t}>`).join("")}`);
+      document.querySelectorAll("[readonly],[disabled]").forEach((c) => (c.$value = "abc"));
+    });
+    await page.waitForTimeout(20);
+    const cdp = await page.target().createCDPSession();
+    // typing & IME composition: preventing beforeinput isn't enough since `insertCompositionText` isn't cancelable
+    const sels = ["[readonly]", "[disabled]"].flatMap((a) => [`wup-textarea${a}`, `wup-textrich${a}`]);
+    for (let i = 0; i < sels.length; ++i) {
+      await page.focus(`${sels[i]} [role=textbox]`); // it's ignored for disabled
+      await page.keyboard.type("XY");
+      await cdp.send("Input.imeSetComposition", { text: "に", selectionStart: 1, selectionEnd: 1 });
+      await cdp.send("Input.insertText", { text: "日" });
+    }
+    expect(await page.$$eval("[readonly],[disabled]", (arr) => arr.map((c) => c.$value))).toStrictEqual(
+      Array(4).fill("abc")
+    );
+
+    // readonly is focusable (to select & copy text), disabled isn't
+    await page.focus("button");
+    const order = [];
+    for (let i = 0; i < 3; ++i) {
+      await page.keyboard.press("Tab");
+      order.push(
+        await page.evaluate(() => {
+          const c = document.activeElement.closest("[readonly],[disabled]");
+          return c && `${c.tagName.toLowerCase()}${c.hasAttribute("readonly") ? "[readonly]" : "[disabled]"}`;
+        })
+      );
+    }
+    expect(order).toStrictEqual(["wup-textarea[readonly]", "wup-textrich[readonly]", null]);
+  });
 });

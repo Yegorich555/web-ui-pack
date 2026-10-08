@@ -288,7 +288,7 @@ WUP-TEXT textarea {
   margin: 0;
   cursor: inherit;
 }
-WUP-TEXT [contenteditable=true] {
+WUP-TEXT [contenteditable] {
   margin: var(--ctrl-padding);
   margin-left: 0;
   margin-right: 0;
@@ -400,7 +400,7 @@ WUP-TEXT [postfix] {
 }
 WUP-TEXT input,
 WUP-TEXT textarea,
-WUP-TEXT [contenteditable=true],
+WUP-TEXT [contenteditable],
 WUP-TEXT [maskholder],
 WUP-TEXT [postfix] {
   width: 100%;
@@ -436,7 +436,7 @@ WUP-TEXT [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-TEXT input:-webkit-autofill, WUP-TEXT textarea:-webkit-autofill, WUP-TEXT [contenteditable=true]:-webkit-autofill {
+WUP-TEXT input:-webkit-autofill, WUP-TEXT textarea:-webkit-autofill, WUP-TEXT [contenteditable]:-webkit-autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -444,7 +444,7 @@ WUP-TEXT input:-webkit-autofill, WUP-TEXT textarea:-webkit-autofill, WUP-TEXT [c
 }
 WUP-TEXT input:autofill,
 WUP-TEXT textarea:autofill,
-WUP-TEXT [contenteditable=true]:autofill {
+WUP-TEXT [contenteditable]:autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -481,16 +481,16 @@ WUP-TEXT textarea:not(:focus)::placeholder {
 WUP-TEXT:focus-within strong,
 WUP-TEXT input:not(:placeholder-shown) + strong,
 WUP-TEXT textarea:not(:placeholder-shown) + strong,
-WUP-TEXT [contenteditable=true]:not(:empty) + strong,
+WUP-TEXT [contenteditable]:not(:empty) + strong,
 WUP-TEXT legend {
   transform: var(--ctrl-label-active-pos);
 }
-WUP-TEXT input:-webkit-autofill + strong, WUP-TEXT textarea:-webkit-autofill + strong, WUP-TEXT [contenteditable=true]:-webkit-autofill + strong {
+WUP-TEXT input:-webkit-autofill + strong, WUP-TEXT textarea:-webkit-autofill + strong, WUP-TEXT [contenteditable]:-webkit-autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-TEXT input:autofill + strong,
 WUP-TEXT textarea:autofill + strong,
-WUP-TEXT [contenteditable=true]:autofill + strong {
+WUP-TEXT [contenteditable]:autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-TEXT:focus-within [maskholder], WUP-TEXT:focus-within [prefix], WUP-TEXT:focus-within [postfix],
