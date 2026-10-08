@@ -113,7 +113,6 @@ declare module "preact/jsx-runtime" {
  * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/time}
  * @tutorial Troubleshooting
  * * $options.format related only to displayed text, to work with other time-options like min/max use strict format 'hh:mm'
- * * if increase `--ctrl-icon-size`: change `ctrl-icon-img` to `--ctrl-icon-img: var(--wup-icon-time-lg)`: otherwise quality is ugly on larger icon
  * @example
   const el = document.createElement("wup-time");
   el.$options.name = "time";
