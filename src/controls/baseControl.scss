@@ -107,7 +107,7 @@
     cursor: inherit;
   }
 
-  [contenteditable="true"] {
+  [contenteditable] {
     margin: var(--ctrl-padding);
     margin-left: 0;
     margin-right: 0;

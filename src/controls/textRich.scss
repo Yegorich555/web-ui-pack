@@ -238,7 +238,7 @@ $tools: (
   }
 
   // editor: styles of content are defined globally via [wup-textrich]
-  [contenteditable="true"] {
+  [contenteditable] {
     margin-top: 0.5em; // the same as bottom of --ctrl-padding: top of --ctrl-padding is space for label but here label is placed above the border
     min-height: 8em;
     max-height: 16em;

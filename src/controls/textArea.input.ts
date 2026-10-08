@@ -108,7 +108,7 @@ export default class WUPTextAreaInput extends HTMLElement {
   #isInit = true;
   connectedCallback(): void {
     if (this.#isInit) {
-      this.setAttribute("contenteditable", "true");
+      this.setupEditable();
       this.setAttribute("role", "textbox");
       this.setAttribute("aria-multiline", "true");
       this.#isInit = false;
@@ -127,13 +127,33 @@ export default class WUPTextAreaInput extends HTMLElement {
     sel.addRange(range);
   }
 
-  /** Get/set readonly */
+  /** Get/set readonly: element is focusable (to select & copy text) but not editable */
   get readOnly(): boolean {
     return this.hasAttribute("aria-readonly");
   }
 
   set readOnly(v: boolean) {
     WUPBaseElement.prototype.setAttr.call(this, "aria-readonly", v);
+    this.setupEditable();
+  }
+
+  /** Get/set disabled: element is neither focusable nor editable */
+  get disabled(): boolean {
+    return this.hasAttribute("aria-disabled");
+  }
+
+  set disabled(v: boolean) {
+    WUPBaseElement.prototype.setAttr.call(this, "aria-disabled", v);
+    this.setupEditable();
+  }
+
+  /** Updates [contenteditable] & [tabindex] according to readOnly & disabled;
+   *  WARN: preventing beforeinput isn't enough since IME composition (`insertCompositionText`) isn't cancelable */
+  protected setupEditable(): void {
+    const ro = this.readOnly;
+    const d = this.disabled;
+    this.setAttribute("contenteditable", ro || d ? "false" : "true");
+    WUPBaseElement.prototype.setAttr.call(this, "tabindex", ro && !d && "0"); // otherwise it's focusable only while editable
   }
 
   _cached?: string;

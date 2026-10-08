@@ -26,17 +26,14 @@ export default function TextRichControlView() {
       }}
       features={[
         "Inheritted features from TextAreaControl",
-        "Toolbar with formats: headers, bold, italic, underline, strike, quote, code, link, lists, subscript & superscript, indentation, size, alignment & clean format",
-        "Value is html: it's sanitized & only supported formats are kept (pasted content as well)",
-        "Undo/redo for text & formatting (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y) including OS-native ones (Edit menu, shake on iPhone)",
-        "Keyboard shortcuts for every tool similar to Google Docs (Ctrl+Shift+7, Ctrl+Alt+1 etc.) & Alt+F10 to focus toolbar (Arrows to navigate, Esc to return)",
-        "Shortcuts are customizable via static $tools & shown in tooltips (Bold (Ctrl+B) or Bold (⌘B) on macOS/iOS) & in items of dropdowns",
-        "Inline format with collapsed selection is applied to the next typed text (Ctrl+B and type text)",
-        'Selected text is wrapped into typed quote or bracket like in code editors: "text", (text) etc. (customizable via static $wrapChars)',
-        "Validations min/max count visible chars only",
         "Uses own js-engine and doesn't depend on Browser (not used deprecated and not stable document.execCommand)",
         "All styles are globally defined except <pre/> and <blockquote/>: use <div [wup-textrich] /> to render content with same styles",
-        "Custom tools via static $tools: buttons, dropdowns, actions, new tags & embeds (see example below)",
+        "Customizable toolbar with formats",
+        "Value is sanitized html",
+        "Undo/redo for text & formatting (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y) including OS-native ones (Edit menu, shake on iPhone)",
+        "Customizable Hot-Keys for every tool Alt+F10 to focus toolbar (Arrows to navigate, Esc to return)",
+        'Selected text is wrapped into typed quote or bracket like in code editors: "text", (text) etc. (customizable via static $wrapChars)',
+        "Validations min/max count visible chars only",
       ]}
     >
       <wup-form

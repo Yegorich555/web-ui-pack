@@ -11,11 +11,12 @@
   - _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-prefix`, `w-postfix`_
   - _`$value` contains html-escaped chars (typed `a < b` gives `a &lt; b`) & html of `$value` is rendered (scripts of `<img onerror>` are executed)_
   - _Undo/redo after new line: line break is removed instead of typed text (`abc`, Enter, `d`, Ctrl+Z gives `abcd`); new line & pasted text aren't undone_
+  - _Readonly & disabled doesn't prevent editing_
 - [TimeControl](src/controls/time.ts). Improved quality of icon
 - [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
   - toggle button (direct child `wup-dropdown > button`) has neutral style: inherited font & color, no background, chevron icon at the right (rotated when menu is opened), hover/focus background via css-vars `--icon-hover-bg` & `--icon-focus-bg`
-  - buttons inside menu aren't styled anymore (it's custom content)
-  - to restore previous styles add the following code once (ex. in the entry file before/after `WUPDropdownElement.$use()`)
+  - buttons inside menu aren't styled anymore (it's custom content)`
+  - to restore previous styles add the following code once after `WUPDropdownElement.$use()`
 
     ```js
     import { useBuiltinStyle, WUPcssButton } from "web-ui-pack/styles";

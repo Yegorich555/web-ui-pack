@@ -726,10 +726,10 @@ export default class WUPTextRichControl<
     onEvent(inp, "pointerleave", (e) => e.pointerType !== "touch" && this.gotHoverLink(null));
     inp.addEventListener("click", (e) => {
       const a = (e.target as Element).closest("a");
+      a && e.preventDefault(); // browser follows any url (`javascript:` etc.) when [contenteditable=false] (readonly)
       const href = a && (e.ctrlKey || e.metaKey) && sanitizeUrl(a.href);
       if (href) {
         // Ctrl/Cmd + Click opens link in new tab: browser doesn't follow links inside contenteditable
-        e.preventDefault();
         window.open(href, "_blank", "noopener,noreferrer");
       } else {
         this.gotHoverLink(a); // tap on link shows popup on touch devices (nothing changes for mouse: it's hovered)
@@ -1654,10 +1654,6 @@ export default class WUPTextRichControl<
   }
 
   protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
-    if (this.$isReadOnly) {
-      e.preventDefault();
-      return;
-    }
     const t = e.inputType;
     if (t.startsWith("format")) {
       e.preventDefault(); // formatting by browser (menu of Safari, iOS etc.) is replaced with custom one: to save it in custom history

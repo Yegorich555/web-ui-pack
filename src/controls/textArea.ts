@@ -149,5 +149,3 @@ rr.forEach((k) => delete WUPTextAreaControl.$defaults[k as keyof WUP.TextArea.Op
 rr = undefined;
 
 customElements.define(tagName, WUPTextAreaControl);
-
-// todo readonly: user can type because only [aria-readonly] is set on contenteditable => prevent beforeinput when $isReadOnly (as TextRich does)
