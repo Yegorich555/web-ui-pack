@@ -260,7 +260,13 @@ $tools: (
     }
   }
 
-  // $ask popup (link url etc.)
+  // $ask popup (link url etc.): popup is the control itself (no own padding & corners)
+  > wup-popup:has(> wup-text) {
+    padding: 0;
+    border-radius: var(--ctrl-border-radius);
+    overflow: visible; // otherwise box-shadow of control (border, focus, invalid) is hidden
+  }
+
   > wup-popup > wup-text {
     width: min(40em, calc(100vw - 3em)); // long urls; small screens
     margin: 0;
