@@ -2,6 +2,7 @@
 import onEvent from "../helpers/onEvent";
 import WUPPopupElement from "../popup/popupElement";
 import { PopupAnimations, PopupOpenCases } from "../popup/popupElement.types";
+import { menuPlacements } from "../popup/popupPlacements";
 import { SetValueReasons, ValidationCases } from "./baseControl";
 
 /** Returns rect of range to place popup near it: collapsed range (caret) gets width 1px */
@@ -104,12 +105,10 @@ interface MenuOptions {
   /** Dropdown of toolbar: it gets `aria-expanded` */
   button: HTMLElement;
   /** Element that keeps focus (editor or dropdown focused via keyboard): it gets `aria-activedescendant`
-   *  & passes its keys via `onKey`; `null` - menu is opened by hover (keys aren't handled) */
+   *  & passes its keys via `onKey`; `null` - menu is opened by hover on target (keys aren't handled) */
   owner: HTMLElement | null;
   /** Element (dropdown, embed) or range of editor (caret, typed trigger) to place menu near it */
   target: HTMLElement | Range;
-  /** Element which value is edited via menu opened by hover (embed) */
-  hovered?: HTMLElement;
   values: WUP.TextRich.ToolValue[];
   /** Value of selected item */
   selected: unknown;
@@ -129,23 +128,14 @@ export default class TextRichMenu extends TextRichAsk {
   #offBlur?: () => void;
 
   constructor(o: MenuOptions) {
-    super(o.target instanceof Range ? o.button : o.target, o.hovered);
+    const t = o.target;
+    super(t instanceof Range ? o.button : t, o.owner ? undefined : (t as HTMLElement));
     this.#o = o;
     const p = this.popup;
-    const t = o.target;
     t instanceof Range && (p.getTargetRect = () => rectOf(t));
     p.setAttribute("menu", "");
     p.$options.animation = PopupAnimations.drawer;
-    p.$options.placement = [
-      WUPPopupElement.$placements.$bottom.$start,
-      WUPPopupElement.$placements.$bottom.$end,
-      WUPPopupElement.$placements.$top.$start,
-      WUPPopupElement.$placements.$top.$end,
-      WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
-      WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
-      WUPPopupElement.$placements.$top.$start.$resizeHeight,
-      WUPPopupElement.$placements.$top.$end.$resizeHeight,
-    ]; // the same as in select
+    p.$options.placement = [...menuPlacements]; // the same as in select
 
     const ul = p.appendChild(document.createElement("ul"));
     ul.id = WUPPopupElement.$uniqueId;

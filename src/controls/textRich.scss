@@ -142,6 +142,16 @@ $tools: (
     }
   }
 
+  // icon of value (`className` of value in static $tools): icon of the current value in dropdown or of item in its menu
+  // (label is shown via tooltip)
+  [role="combobox"][icon]:before,
+  > wup-popup[menu] li[icon]:before {
+    content: "";
+    --ctrl-icon-img: var(--icon-img);
+    --ctrl-icon-size: 15px; // the same as icons of tool buttons
+    @include wup-icon;
+  }
+
   // dropdown: button with label of the current value & chevron (menu is opened via askMenu)
   [role="combobox"] {
     display: inline-flex;
@@ -184,12 +194,8 @@ $tools: (
       box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
     }
 
-    // shows icon of the current value (class of value): label is shown via tooltip
     &[icon]:before {
-      content: "";
-      --ctrl-icon-size: 15px; // the same as icons of tool buttons
-      @include wup-icon;
-      background: currentColor;
+      background: currentColor; // the same color as label & chevron (hover etc.)
     }
 
     // fixed width by the widest item (with sans-serif fonts): otherwise toolbar is shifted when selection is changed
@@ -206,7 +212,6 @@ $tools: (
   @each $icon in ("align-left", "align-center", "align-right", "align-justify") {
     .wup-icon-#{$icon} {
       --icon-img: var(--wup-icon-#{$icon});
-      --ctrl-icon-img: var(--wup-icon-#{$icon});
     }
   }
 
@@ -236,14 +241,6 @@ $tools: (
       }
     }
 
-    // icon of value (`className` of value): label is shown via tooltip
-    li[icon]:before {
-      content: "";
-      --ctrl-icon-size: 15px;
-      @include wup-icon;
-      vertical-align: middle;
-    }
-
     // keyboard shortcut (`hotKey` of value) at the right side: before checkmark of selected item
     kbd {
       margin-left: auto;
@@ -258,12 +255,7 @@ $tools: (
     }
 
     // headings use default/global styles (the same as in editor)
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
+    :is(h1, h2, h3, h4, h5, h6) {
       margin: 0;
       padding: 0;
     }

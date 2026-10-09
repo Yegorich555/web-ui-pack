@@ -46,14 +46,8 @@ export default class TextRichHistory extends TextHistory {
       this._histPos = this._hist.length - 1;
       this.#head = toSnapshot(this.inputState);
     }
-    let snap: string;
-    if (isRedo) {
-      ++this._histPos;
-      snap = this._hist[this._histPos + 1] ?? this.#head; // state after changes is state before the next changes
-    } else {
-      snap = this._hist[this._histPos];
-      --this._histPos;
-    }
+    // redo: state after changes is state before the next changes
+    const snap = isRedo ? this._hist[++this._histPos + 1] ?? this.#head : this._hist[this._histPos--];
     const [pos1, pos2] = snap.split(",", 2); // the rest is html
     el.value = snap.substring(pos1.length + pos2.length + 2);
     el.setSelectionRange(+pos1, +pos2);

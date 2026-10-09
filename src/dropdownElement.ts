@@ -1,6 +1,7 @@
 import WUPBaseElement, { inheritDefaults } from "./baseElement";
 import WUPPopupElement from "./popup/popupElement";
 import { PopupAnimations, PopupCloseCases, PopupOpenCases } from "./popup/popupElement.types";
+import { menuPlacements } from "./popup/popupPlacements";
 
 const tagName = "wup-dropdown";
 declare global {
@@ -112,16 +113,7 @@ export default class WUPDropdownElement<
     closeOnPopupClick: true,
     minHeightByTarget: true,
     minWidthByTarget: true,
-    placement: [
-      WUPPopupElement.$placements.$bottom.$start,
-      WUPPopupElement.$placements.$bottom.$end,
-      WUPPopupElement.$placements.$top.$start,
-      WUPPopupElement.$placements.$top.$end,
-      WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
-      WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
-      WUPPopupElement.$placements.$top.$start.$resizeHeight,
-      WUPPopupElement.$placements.$top.$end.$resizeHeight,
-    ],
+    placement: [...menuPlacements],
   });
 
   /** Reference to the first nested HTMLElement (default target of popup) */

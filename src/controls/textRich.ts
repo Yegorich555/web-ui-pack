@@ -3,11 +3,10 @@ import onEvent from "../helpers/onEvent";
 import { stringPrettify } from "../helpers/string";
 import WUPPopupElement from "../popup/popupElement";
 import { useTooltipOnce } from "../popup/popupTooltip";
-import { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 import TextHistory from "./text.history";
 import WUPTextAreaControl from "./textArea";
-import { charsBefore } from "./textArea.input";
+import { charsBefore, pointAt } from "./textArea.input";
 import WUPTextRichInput, {
   addClass,
   createOf,
@@ -26,15 +25,14 @@ import TextRichMenu, { TextRichAsk, TextRichPrompt } from "./textRich.select";
 import {
   addInline,
   formatParents,
-  fromLinePos,
   getLines,
-  lineOf,
+  intersects,
   linesOf,
   removeInline,
   setLineTag,
   splitAt,
   splitRange,
-  toLinePos,
+  textAt,
   wrapLines,
 } from "./textRich.format";
 
@@ -316,8 +314,6 @@ const codeKeys = {
 };
 /** Codes of keys formatting via browser (Ctrl/Cmd + B, I, U): prevented so only shortcuts of $tools work */
 const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
-/** Positions of selection (anchor & focus): [line index, count of chars before position in the line] */
-type SelectionPos = [[number, number], [number, number]];
 
 /** Returns the 1st node inside the range (text node at the start or next one if range starts at the end of node) */
 function firstNode(r: Range): Node {
@@ -361,13 +357,25 @@ function typedValue(s: string, trigger: string, pair: string | undefined): strin
   return v && !/\s/.test(v) ? v : undefined;
 }
 
+/** Selects range (Range or StaticRange) */
+const selectRange = (r: AbstractRange): void =>
+  window.getSelection()!.setBaseAndExtent(r.startContainer, r.startOffset, r.endContainer, r.endOffset);
+
 /** Selects node: format of embed replaces it */
 function selectNode(n: Node): void {
   const r = document.createRange();
   r.selectNode(n);
-  const sel = window.getSelection()!;
-  sel.removeAllRanges();
-  sel.addRange(r);
+  selectRange(r);
+}
+
+/** Inserts text at point (in text node or before child of element)
+ * @returns point after inserted text */
+function insertText(n: Node, offset: number, s: string): [Node, number] {
+  if (n.nodeType === Node.TEXT_NODE) {
+    (n as Text).insertData(offset, s);
+    return [n, offset + s.length];
+  }
+  return [n.insertBefore(document.createTextNode(s), n.childNodes[offset] ?? null), s.length];
 }
 
 /** Form-control with rich text editor (WYSIWYG): text is formatted via toolbar; behavior & styles are similar to npm quill
@@ -427,6 +435,11 @@ export default class WUPTextRichControl<
 > extends WUPTextAreaControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
   #ctr = this.constructor as typeof WUPTextRichControl;
+
+  /** Returns static $tools by name of tool */
+  get #tools(): Record<string, WUP.TextRich.Tool> {
+    return this.#ctr.$tools;
+  }
 
   static get $styleRoot(): string {
     return "";
@@ -549,13 +562,8 @@ export default class WUPTextRichControl<
       kind: "inline",
       // link with unsafe url (`javascript:` etc.) is removed by sanitizer
       is: (el) => (el.tagName === "A" && sanitizeUrl(el.getAttribute("href") || "")) || undefined,
-      create: (url) => {
-        const a = document.createElement("a");
-        a.setAttribute("href", url);
-        a.setAttribute("target", "_blank");
-        a.setAttribute("rel", "noopener noreferrer");
-        return a;
-      },
+      create: (url) =>
+        Object.assign(document.createElement("a"), { href: url, target: "_blank", rel: "noopener noreferrer" }),
       // link is removed if selection starts inside it, otherwise url is asked via popup
       ask: (target, c, cur) => (cur === undefined ? c.askLink(target, "https://") : Promise.resolve("")),
       format: ({ range, value: url, editor, tool, control, applyDefault }) => {
@@ -589,9 +597,7 @@ export default class WUPTextRichControl<
             setLineTag(l, "DIV");
           } else if (l.parentElement!.tagName !== tag) {
             const li = setLineTag(l, "LI"); // item of another list is moved out of it at first
-            const list = document.createElement(tag);
-            li.replaceWith(list);
-            list.appendChild(li);
+            li.parentNode!.insertBefore(document.createElement(tag), li).appendChild(li);
           }
         });
         // merge neighbor lists of the same type: `<ol><li>a</li></ol><ol><li>b</li></ol>` => `<ol><li>a</li><li>b</li></ol>`
@@ -749,7 +755,6 @@ export default class WUPTextRichControl<
     bar.setAttribute("role", "toolbar");
     bar.setAttribute("aria-label", this.#ctr.$ariaToolbar);
     bar.addEventListener("click", (e) => this.gotToolbarClick(e));
-    bar.addEventListener("keydown", (e) => this.gotToolbarKeyDown(e));
     this.appendChild(bar); // placed after editor & moved to the top via css: otherwise form autofocus focuses toolbar
 
     // hint for screen-readers how to reach toolbar via keyboard
@@ -762,30 +767,24 @@ export default class WUPTextRichControl<
     inp.setAttribute("wup-textrich", ""); // styles of content are global: the same for value shown outside
 
     useTooltipOnce("w-tooltip"); // toolbar buttons show aria-label via tooltip
-    // hover on link shows popup to edit url, on embed - dropdown of its tool (see askMenu);
-    // skipped during selecting by mouse & for touch (it's pressed: buttons = 1)
-    onEvent(
-      inp,
-      "pointerover",
-      (e) => !e.buttons && !this.#isHoverOff && this.gotHover(this.hoverOf(e.target as Element))
-    );
+    // hover on link shows popup to edit url, on embed & token - dropdown of its tool (see askMenu): it's skipped during
+    // selecting by mouse & for touch (it's pressed: buttons = 1) & while pointer is over the same element
     onEvent(inp, "pointermove", (e) => {
-      if (this.#isHoverOff) {
-        this.#isHoverOff = false;
-        !e.buttons && this.gotHover(this.hoverOf(e.target as Element));
-      }
+      const el = !e.buttons && this.hoverOf(e.target as Element);
+      el !== false && el !== this.#under && this.gotHover((this.#under = el));
     });
     // touch leaves element right after tap: popup is closed by tap outside link or when focus leaves control
-    onEvent(inp, "pointerleave", (e) => e.pointerType !== "touch" && this.gotHover(null));
-    // click shows popup of element at once (the same as hover: caret is placed in text) & click in other place closes it;
-    // touch shows it on tap (see click): otherwise it's shown at the start of scrolling
-    onEvent(inp, "pointerdown", (e) => {
-      const el = e.pointerType !== "touch" && this.hoverOf(e.target as Element);
-      if (el !== false && el !== (this.#ask?.hovered ?? null)) {
-        clearTimeout(this.#hoverTimer);
-        el ? this.askHover(el) : this.#ask?.hovered && this.#ask.done();
+    onEvent(inp, "pointerleave", (e) => e.pointerType !== "touch" && this.gotHover((this.#under = null)));
+    // press on element shows its popup at once (the same as hover: caret is placed in text), in other place closes it
+    const press = (t: Element): void => {
+      const el = this.hoverOf(t);
+      clearTimeout(this.#hoverTimer);
+      if (el !== (this.#ask?.hovered ?? null)) {
+        el ? this.askHover(el) : this.#ask!.done();
       }
-    });
+    };
+    // touch presses on tap (see click): otherwise popup is shown at the start of scrolling
+    onEvent(inp, "pointerdown", (e) => e.pointerType !== "touch" && press(e.target as Element));
     inp.addEventListener("click", (e) => {
       const t = e.target as HTMLElement;
       const a = t.closest("a");
@@ -794,9 +793,14 @@ export default class WUPTextRichControl<
       if (href) {
         // Ctrl/Cmd + Click opens link in new tab: browser doesn't follow links inside contenteditable
         window.open(href, "_blank", "noopener,noreferrer");
-      } else if (!this.gotClickEmbed(t)) {
-        // tap on link or token shows popup on touch devices (nothing changes for mouse: it's hovered)
-        this.gotHover(this.hoverOf(t));
+        return;
+      }
+      press(t); // tap on touch devices (nothing changes for mouse: it's pressed on pointerdown)
+      // embed with `ask` (image etc.): asked value replaces it
+      const name = this.embedTool(t);
+      if (name && this.#tools[name].kind === "embed" && this.#tools[name].ask) {
+        selectNode(t);
+        this.applyFormat(name, undefined, false, t);
       }
     });
   }
@@ -831,7 +835,7 @@ export default class WUPTextRichControl<
   /** Renders toolbar item into group */
   protected renderTool(group: HTMLElement, item: WUP.TextRich.ToolbarItem): void {
     const [name, picked] = (typeof item === "string" ? [item] : Object.entries(item)[0]) as [string, unknown];
-    const tool = (this.#ctr.$tools as Record<string, WUP.TextRich.Tool>)[name];
+    const tool = this.#tools[name];
     // values pointed in toolbar are taken from tool: with labels, shortcuts & classes
     const valueOf = (v: unknown): WUP.TextRich.ToolValue => tool.values?.find((t) => t.value === v) ?? { value: v };
     if (!tool) {
@@ -842,29 +846,38 @@ export default class WUPTextRichControl<
         this.setClearLabel(b); // button isn't re-rendered: hint can be changed
         group.appendChild(b);
       }
-    } else if (Array.isArray(picked)) {
-      this.renderPicker(group, name, tool, picked.map(valueOf));
-    } else if (picked !== undefined) {
-      this.renderButton(group, name, tool, valueOf(picked));
-    } else if (tool.values) {
-      this.renderPicker(group, name, tool, tool.values);
+    } else if (picked === undefined || Array.isArray(picked)) {
+      this.renderButton(group, name, tool, undefined, (picked as unknown[] | undefined)?.map(valueOf) ?? tool.values);
     } else {
-      this.renderButton(group, name, tool);
+      this.renderButton(group, name, tool, valueOf(picked));
     }
   }
 
-  /** Renders button of toolbar: button with value applies it (ex. `list:ordered`), without value - toggles format or runs action */
-  protected renderButton(group: HTMLElement, name: string, tool: WUP.TextRich.Tool, v?: WUP.TextRich.ToolValue): void {
+  /** Renders button of toolbar: button with value applies it (ex. `list:ordered`), without value - toggles format or runs action;
+   *  with values - dropdown that shows label or icon of the current value & opens menu of values (see askMenu) */
+  protected renderButton(
+    group: HTMLElement,
+    name: string,
+    tool: WUP.TextRich.Tool,
+    v?: WUP.TextRich.ToolValue,
+    values?: WUP.TextRich.ToolValue[]
+  ): void {
     const b = group.appendChild(document.createElement("button")) as HTMLButtonElement & ToolElement;
     b.type = "button";
     b.tabIndex = -1; // toolbar is reachable via Alt+F10
     b.setAttribute("tool", v ? `${name}:${v.value}` : name);
     this.setToolLabel(b, v ? labelOf(v) : tool.label ?? name, v ? v.hotKey : tool.hotKey);
     addClass(b, tool.className, v?.className);
-    // tool without `is` doesn't have state: it's action (embed inserts element)
-    tool.is && tool.kind !== "embed" && b.setAttribute("aria-pressed", false);
+    if (values) {
+      b.setAttribute("role", "combobox"); // select-only combobox: it gets aria-activedescendant while menu is opened via keyboard
+      b.setAttribute("aria-expanded", false);
+      values.some((x) => x.className) && b.setAttribute("icon", ""); // button shows icon of the current value instead of label
+    } else if (tool.is && tool.kind !== "embed") {
+      b.setAttribute("aria-pressed", false); // tool without `is` doesn't have state: it's action (embed inserts element)
+    }
     b._format = name;
     b._value = v?.value;
+    b._values = values;
   }
 
   /** Sets `aria-label` & tooltip of toolbar button (or icon item of dropdown):
@@ -922,26 +935,6 @@ export default class WUPTextRichControl<
     return b;
   }
 
-  /** Renders dropdown of toolbar: button that shows label or icon of the current value & opens menu of values (see askMenu) */
-  protected renderPicker(
-    group: HTMLElement,
-    name: string,
-    tool: WUP.TextRich.Tool,
-    values: WUP.TextRich.ToolValue[]
-  ): void {
-    const b = group.appendChild(document.createElement("button")) as HTMLButtonElement & ToolElement;
-    b.type = "button";
-    b.tabIndex = -1; // toolbar is reachable via Alt+F10
-    b.setAttribute("tool", name);
-    b.setAttribute("role", "combobox"); // select-only combobox: it gets aria-activedescendant while menu is opened via keyboard
-    b.setAttribute("aria-expanded", false);
-    addClass(b, tool.className);
-    values.some((v) => v.className) && b.setAttribute("icon", ""); // button shows icon of the current value instead of label
-    this.setToolLabel(b, tool.label ?? name, tool.hotKey);
-    b._format = name;
-    b._values = values;
-  }
-
   /** Renders item of dropdown: label inside element of format (preview via `create`)
    *  or icon (if value has `className`: label is shown via tooltip) */
   protected renderItem(li: HTMLElement, tool: WUP.TextRich.Tool, v: WUP.TextRich.ToolValue): void {
@@ -978,16 +971,14 @@ export default class WUPTextRichControl<
       return;
     }
     this.#shown = shown;
-    const tools = this.#ctr.$tools as Record<string, WUP.TextRich.Tool>;
-    this.$refToolbar.querySelectorAll<ToolElement>("[tool]").forEach((el) => {
-      const name = el._format ?? el.getAttribute("tool")!; // dropdown & button clear don't have `_format`
-      const tool = tools[name];
+    // buttons with state & dropdowns
+    this.$refToolbar.querySelectorAll<ToolElement>("[aria-pressed],[aria-expanded]").forEach((el) => {
+      const name = el._format;
       const cur = formats.get(name) ?? false; // `false` - format isn't applied
-      if (el.hasAttribute("aria-pressed")) {
-        el.setAttribute("aria-pressed", el._value === undefined ? cur !== false : cur === el._value);
-      } else if (el._values) {
+      if (el._values) {
         // dropdown shows icon (class) or label of the current value (even if it isn't rendered in toolbar: `Heading 3`);
         // label of tool if format isn't applied & tool doesn't have value `false` (`Normal` of header)
+        const tool = this.#tools[name];
         const v = tool.values?.find((x) => x.value === cur);
         if (el.hasAttribute("icon")) {
           el.className = "";
@@ -996,6 +987,8 @@ export default class WUPTextRichControl<
           const label = cur === false ? tool.label ?? name : String(cur); // value out of values is shown as is: `someProp`
           el.textContent = v ? labelOf(v) : label;
         }
+      } else {
+        el.setAttribute("aria-pressed", el._value === undefined ? cur !== false : cur === el._value);
       }
     });
   }
@@ -1008,18 +1001,13 @@ export default class WUPTextRichControl<
     const sel = window.getSelection();
     const n = sel?.rangeCount ? firstNode(sel.getRangeAt(0)) : null;
     if (n && inp.contains(n)) {
-      const start = (n.nodeType === Node.ELEMENT_NODE ? n : n.parentElement) as HTMLElement;
-      const line = lineOf(start, inp);
-      Object.entries(this.#ctr.$tools as Record<string, WUP.TextRich.Tool>).forEach(([name, t]) => {
-        // line formats are checked only for line, others - for element at the start & its parents
-        const isLine = t.kind === "line" || t.kind === "lineStyle";
-        for (let el = isLine ? line : start; t.is && el && el !== inp; el = isLine ? null : el.parentElement) {
-          const v = t.is(el);
-          if (v !== undefined) {
-            m.set(name, v);
-            break;
-          }
-        }
+      // line: the nearest element placed directly into editor or item of list
+      const line = formatParents(n, (el) => el.parentElement === inp || el.tagName === "LI", inp)[0];
+      Object.entries(this.#tools).forEach(([name, t]) => {
+        // line formats are checked only for line, others - for the nearest element at the start of selection
+        const el = t.is && (t.kind === "line" || t.kind === "lineStyle" ? line : formatParents(n, isOf(t), inp)[0]);
+        const v = el ? t.is!(el as HTMLElement) : undefined;
+        v !== undefined && m.set(name, v);
       });
       this.#pending.forEach((v, k) => (v === false ? m.delete(k) : m.set(k, v)));
     }
@@ -1034,19 +1022,17 @@ export default class WUPTextRichControl<
     }
     inp.focus({ preventScroll: true });
     const r = this.#range;
-    if (r && inp.contains(r.startContainer)) {
-      window.getSelection()!.setBaseAndExtent(r.startContainer, r.startOffset, r.endContainer, r.endOffset);
-    }
+    r && inp.contains(r.startContainer) && selectRange(r);
   }
 
   /** Applies tool of toolbar item: button toggles format, dropdown opens menu of its values near itself */
   protected applyTool(el: ToolElement): void {
     const name = el._format;
-    if (el._values && document.activeElement === el) {
-      // dropdown focused via keyboard keeps focus: selection is restored on choosing
+    if (el._values) {
+      document.activeElement !== el && this.restoreSelection(); // dropdown focused via keyboard keeps focus
       this.askMenu(name, el).then((v) => v != null && this.applyFormat(name, v, true));
     } else {
-      this.applyFormat(name, el._value, false, el._values && el);
+      this.applyFormat(name, el._value, false);
     }
   }
 
@@ -1066,7 +1052,7 @@ export default class WUPTextRichControl<
    * (or via its dropdown if tool has values) if it isn't pointed;
    * inline format with collapsed selection is applied to the next typed text (the same as quill)
    * @param isSet value is chosen (item of dropdown, asked value etc.): it's set, otherwise format is toggled (button)
-   * @param target element to place popup near it to ask value: clicked embed or dropdown of toolbar (opens its menu) */
+   * @param target element to place popup near it to ask value (clicked embed) */
   protected applyFormat(name: string, value?: unknown, isSet?: boolean, target?: HTMLElement): void {
     if (this.$isDisabled || this.$isReadOnly) {
       return;
@@ -1077,13 +1063,12 @@ export default class WUPTextRichControl<
     if (!sel.rangeCount || !inp.contains(sel.anchorNode)) {
       return;
     }
-    const tools = this.#ctr.$tools as Record<string, WUP.TextRich.Tool>;
-    const tool = tools[name];
+    const tool = this.#tools[name];
     const f = this.getFormats();
     if (value === undefined && (tool.ask || tool.values)) {
       // selection is restored by positions: focus can be moved out of control (to modal etc.) & nodes can be re-rendered
       const pos = this.getSelectionPos();
-      (tool.ask && !(target as ToolElement | undefined)?._values // click on dropdown of toolbar opens its menu
+      (tool.ask
         ? tool.ask(target ?? this.findTool(name) ?? inp, this as WUPTextRichControl, f.get(name))
         : this.askMenu(name, target ?? sel.getRangeAt(0).cloneRange())
       ).then((v) => {
@@ -1100,7 +1085,7 @@ export default class WUPTextRichControl<
       // format for the next typed text (Ctrl+B and type text)
       const p = this.#pending;
       if (name === "clean") {
-        Object.entries(tools).forEach(
+        Object.entries(this.#tools).forEach(
           ([k, t]) => t.kind === "inline" && !t.ask && !t.trigger && f.has(k) && p.set(k, false)
         );
       } else {
@@ -1110,12 +1095,21 @@ export default class WUPTextRichControl<
       this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
       this.refreshToolbar();
     } else {
-      this.changeContent(() => this.keepSelection((r) => this.formatRange(tool, r, v, !!isSet)));
+      this.changeContent(() => this.formatSelection(tool, v, !!isSet));
     }
   }
 
-  /** Applies tool to range via its `format` or default one (see formatByKind) */
-  protected formatRange(tool: WUP.TextRich.Tool, range: Range, value: unknown, isSet: boolean): void {
+  /** Selection is placed by $insert: it isn't restored by formatSelection */
+  #isInserted = false;
+
+  /** Applies tool to selection via its `format` or default one (see formatByKind) & restores selection by positions
+   *  (format can move or split nodes) if content isn't inserted via $insert (caret is placed after it);
+   *  adjacent text nodes are joined (split by formatting: `"a""b"` => `"ab"`) & empty attributes `style` are removed
+   *  (left by changing styles: `el.style.textAlign = ""`) */
+  protected formatSelection(tool: WUP.TextRich.Tool, value: unknown, isSet: boolean): void {
+    const pos = this.getSelectionPos();
+    this.#isInserted = false;
+    const range = window.getSelection()!.getRangeAt(0); // after getSelectionPos: it wraps lines
     const editor: HTMLElement = this.$refInput;
     let lines = tool.format && linesOf(range, editor); // custom format gets lines before its changes: they move range
     let texts: Text[] | undefined;
@@ -1135,6 +1129,9 @@ export default class WUPTextRichControl<
       applyDefault: () => this.formatByKind(ctx),
     };
     tool.format ? tool.format(ctx) : this.formatByKind(ctx);
+    editor.normalize();
+    editor.querySelectorAll("[style='']").forEach((el) => el.removeAttribute("style"));
+    !this.#isInserted && this.setSelectionPos(pos);
   }
 
   /** Returns new element of token (`inline` of tool with `trigger`: placeholder, mention) via `create` of tool
@@ -1154,7 +1151,7 @@ export default class WUPTextRichControl<
         if (tool.trigger && isSet && value !== false) {
           // token (placeholder, mention) replaces selection or token with caret inside: `{firstName}`, `@john`
           const cur = formatParents(ctx.range.startContainer, isOf(tool), editor)[0];
-          cur && window.getSelection()!.getRangeAt(0).selectNode(cur);
+          cur && selectNode(cur);
           this.$insert(this.createToken(tool, value));
           break;
         }
@@ -1207,6 +1204,7 @@ export default class WUPTextRichControl<
     inp._cached = undefined;
     if (inp.value !== prev) {
       h?.save(prev, inp.value);
+      inp._keepCache = true; // value is cached already: otherwise it's sanitized again on input
       this.fireInput();
     } else if (isState) {
       h._stateBeforeInput = undefined;
@@ -1228,7 +1226,7 @@ export default class WUPTextRichControl<
     if (!sel.isCollapsed || !n) {
       return false;
     }
-    const tools = Object.values(this.#ctr.$tools as Record<string, WUP.TextRich.Tool>);
+    const tools = Object.values(this.#tools);
     const isToken = (el: Element): boolean =>
       tools.some((t) => t.kind === "inline" && t.trigger && t.is?.(el as HTMLElement) !== undefined);
     const off = sel.focusOffset;
@@ -1240,14 +1238,9 @@ export default class WUPTextRichControl<
     if (!el) {
       return false;
     }
-    // range is collapsed if caret is out of token: so text is empty at the edge
-    const r = document.createRange();
-    r.selectNodeContents(el);
-    r.setEnd(n, off);
-    const isStart = !r.toString();
-    r.selectNodeContents(el);
-    r.setStart(n, off);
-    if (!isStart && r.toString()) {
+    // text is empty at the edge (caret out of token is at the edge as well)
+    const isStart = !textAt(el, n, off, true);
+    if (!isStart && textAt(el, n, off)) {
       return false; // caret is inside token: text is edited
     }
     const t = document.createTextNode(text);
@@ -1263,39 +1256,12 @@ export default class WUPTextRichControl<
     if (!sel.isCollapsed || !n) {
       return [];
     }
-    const r = document.createRange();
-    return Object.entries(this.#ctr.$tools as Record<string, WUP.TextRich.Tool>)
+    return Object.entries(this.#tools)
       .filter(([, t]) => {
         const el = t.kind === "inline" && !t.trigger && formatParents(n, isOf(t), this.$refInput).pop(); // the outer one
-        if (!el) {
-          return false;
-        }
-        r.selectNodeContents(el);
-        r.setStart(n, sel.focusOffset);
-        return !r.toString(); // range is empty at the end
+        return el && !textAt(el, n, sel.focusOffset);
       })
       .map(([name]) => name);
-  }
-
-  /** Inserts typed text into formatted element when caret is at its end (toolbar shows format):
-   *  otherwise Chrome places text after link
-   * @returns false if caret isn't at end of formatted element */
-  protected insertAtEnd(text: string): boolean {
-    if (!this.formatsAtEnd().length) {
-      return false;
-    }
-    const sel = window.getSelection()!;
-    const n = sel.focusNode!;
-    const off = sel.focusOffset;
-    if (n.nodeType === Node.TEXT_NODE) {
-      (n as Text).insertData(off, text);
-      sel.collapse(n, off + text.length);
-    } else {
-      const t = document.createTextNode(text);
-      n.insertBefore(t, n.childNodes[off] ?? null);
-      sel.collapse(t, t.length);
-    }
-    return true;
   }
 
   /** Called on ArrowRight/ArrowLeft when caret is at end of formatted element: the next typed text is placed out of it
@@ -1314,11 +1280,18 @@ export default class WUPTextRichControl<
     return true;
   }
 
-  /** Inserts text with formats pointed for the next typed text */
-  protected insertPending(text: string): void {
-    const inp = this.$refInput;
-    const tools = this.#ctr.$tools as Record<string, WUP.TextRich.Tool>;
+  /** Inserts typed text with formats shown by toolbar: formats pointed for the next typed text
+   *  or formats of elements which end at caret (otherwise Chrome places text after link)
+   * @returns false if there are no such formats (text is inserted by browser) */
+  protected insertTyped(text: string): boolean {
     const sel = window.getSelection()!;
+    if (!this.#pending.size) {
+      const isEnd = !!this.formatsAtEnd().length;
+      isEnd && sel.collapse(...insertText(sel.focusNode!, sel.focusOffset, text));
+      return isEnd;
+    }
+    const inp = this.$refInput;
+    const tools = this.#tools;
     const r = sel.getRangeAt(0);
     r.deleteContents();
     // move caret out of elements of removed/changed formats: `true` means format without value is added
@@ -1338,6 +1311,7 @@ export default class WUPTextRichControl<
     r.insertNode(node);
     sel.collapse(t, t.length);
     this.#pending.clear();
+    return true;
   }
 
   /** Wraps selected content into typed char & its pair (see $wrapChars) & keeps selection on the content:
@@ -1351,11 +1325,11 @@ export default class WUPTextRichControl<
       return false;
     }
     const r = sel.getRangeAt(0);
-    const isEmbed = embedOf(this.#ctr.$tools);
+    const isEmbed = embedOf(this.#tools);
     const inner = document.createRange(); // from the 1st visible char (embed) to the last one: collapsed if there are no such
     const w = document.createTreeWalker(r.commonAncestorContainer, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
     for (let n: Node | null = w.currentNode; n; n = w.nextNode()) {
-      if (!r.intersectsNode(n)) {
+      if (!intersects(r, n)) {
         continue;
       }
       if (n.nodeType === Node.TEXT_NODE) {
@@ -1380,45 +1354,19 @@ export default class WUPTextRichControl<
       return false;
     }
     this.changeContent(() => {
-      /** Inserts text at point (in text node or before child of element): returns offset after text */
-      const insert = (n: Node, offset: number, s: string): number => {
-        if (n.nodeType === Node.TEXT_NODE) {
-          (n as Text).insertData(offset, s);
-          return offset + s.length;
-        }
-        n.insertBefore(document.createTextNode(s), n.childNodes[offset] ?? null);
-        return offset + 1;
-      };
       // range is live: its end stays before closing char & it's moved by opening char inserted before it
       const { startContainer, startOffset } = inner;
-      insert(inner.endContainer, inner.endOffset, close);
-      inner.setStart(startContainer, insert(startContainer, startOffset, open));
-      sel.removeAllRanges();
-      sel.addRange(inner);
+      insertText(inner.endContainer, inner.endOffset, close);
+      inner.setStart(...insertText(startContainer, startOffset, open));
+      selectRange(inner);
     });
     return true;
   }
 
-  /** Selection is placed by $insert: it isn't restored by keepSelection */
-  #isInserted = false;
-
-  /** Calls fn that changes editor & restores selection by lines & chars (fn can move or split nodes);
-   *  adjacent text nodes are joined (split by formatting: `"a""b"` => `"ab"`) & empty attributes `style` are removed
-   *  (left by changing styles: `el.style.textAlign = ""`);
-   *  selection isn't restored if content is inserted via $insert (caret is placed after it) */
-  protected keepSelection(fn: (r: Range) => void): void {
-    const pos = this.getSelectionPos();
-    this.#isInserted = false;
-    fn(window.getSelection()!.getRangeAt(0));
-    const inp = this.$refInput;
-    inp.normalize();
-    inp.querySelectorAll("[style='']").forEach((el) => el.removeAttribute("style"));
-    !this.#isInserted && this.setSelectionPos(pos);
-  }
-
-  /** Returns positions of selection in editor by lines & chars (embed is counted as 1 char):
-   *  they are valid even if nodes are moved, split or re-rendered; inline content placed directly into editor is wrapped into lines at first */
-  protected getSelectionPos(): SelectionPos {
+  /** Returns positions of selection (anchor & focus) by chars of editor (line break & embed are counted as 1 char):
+   *  they are valid even if nodes are moved, split or re-rendered; inline content placed directly into editor is wrapped into lines at first
+   *  (Chrome doesn't wrap the 1st line: `abc<div>def</div>`, `<div><br></div>abc`) */
+  protected getSelectionPos(): [number, number] {
     const inp = this.$refInput;
     const sel = window.getSelection()!;
     // position pointed by root (root, index) is converted into position inside child: otherwise index is wrong after wrapping
@@ -1430,31 +1378,26 @@ export default class WUPTextRichControl<
     const [fn1, fo] = childPos(sel.focusNode!, sel.focusOffset);
     // nodes are moved into lines; position pointed by root is converted again: empty root gets the 1st line (caret goes into it)
     wrapLines(inp) && sel.setBaseAndExtent(...childPos(an, ao), ...childPos(fn1, fo));
-    const lines = getLines(inp);
-    const isEmbed = embedOf(this.#ctr.$tools);
+    const isEmbed = embedOf(this.#tools);
     return [
-      toLinePos(lines, sel.anchorNode!, sel.anchorOffset, isEmbed),
-      toLinePos(lines, sel.focusNode!, sel.focusOffset, isEmbed),
+      charsBefore(inp, sel.anchorNode!, sel.anchorOffset, isEmbed),
+      charsBefore(inp, sel.focusNode!, sel.focusOffset, isEmbed),
     ];
   }
 
   /** Sets selection in editor by positions (see getSelectionPos) */
-  protected setSelectionPos([p1, p2]: SelectionPos): void {
-    const lines = getLines(this.$refInput);
-    if (lines.length) {
-      const isEmbed = embedOf(this.#ctr.$tools);
-      const [n1, o1] = fromLinePos(lines, p1, isEmbed);
-      const [n2, o2] = fromLinePos(lines, p2, isEmbed);
-      window.getSelection()!.setBaseAndExtent(n1, o1, n2, o2);
-    }
+  protected setSelectionPos([a, f]: [number, number]): void {
+    const inp = this.$refInput;
+    const isEmbed = embedOf(this.#tools);
+    window.getSelection()!.setBaseAndExtent(...pointAt(inp, a, isEmbed), ...pointAt(inp, f, isEmbed));
   }
 
   /** Popup to ask value: text control of $ask or menu of dropdown (see askMenu) */
   #ask?: TextRichAsk;
   #hoverTimer?: ReturnType<typeof setTimeout>;
-  /** Hover is skipped until pointer is moved: browser fires pointerover on element under pointer when popup is closed
-   *  (embed chosen via menu is new element under pointer) */
-  #isHoverOff = false;
+  /** Element under pointer editable via popup (see hoverOf): it's reset when popup is closed, so it's hovered again
+   *  when pointer is moved (but not when it's stationary: embed chosen via menu is new element under pointer) */
+  #under?: HTMLElement | null;
 
   /** Asks value via popup with text control placed near target (it's used by tool `link` to enter url):
    *  Enter submits, Escape or moving focus out cancels (resolves `null`); focus & selection are returned to editor on Enter/Escape
@@ -1484,7 +1427,7 @@ export default class WUPTextRichControl<
     return new Promise((resolve) => {
       a.onClose = (v, isBack) => {
         this.#ask = undefined;
-        this.#isHoverOff = true;
+        this.#under = undefined;
         clearTimeout(this.#hoverTimer);
         isBack && this.restoreSelection(); // otherwise focus is moved by user
         resolve(v);
@@ -1504,55 +1447,38 @@ export default class WUPTextRichControl<
   }
 
   /** Asks value of tool via menu of its dropdown of toolbar opened near target (see TextRichMenu): focus stays in editor
-   *  or dropdown (focused via keyboard) & menu is controlled by its keys
-   * @param target element of tool (embed, dropdown) or range of editor (selection, typed trigger)
-   * @param mode `typed` - target is typed trigger: items are filtered by text typed after it, menu is closed if caret leaves it,
-   * whitespace is typed or nothing matches; `hover` - menu is opened by hover on target: it's closed when pointer leaves target
-   * & menu (keys aren't handled except Escape); otherwise menu is closed when selection is changed
+   *  or dropdown (focused via keyboard) & menu is controlled by its keys; menu is closed when selection is changed
+   * @param target element of tool (embed, token, dropdown) or range of editor (selection, typed trigger)
+   * @param isHover menu is opened by hover on target: it's closed when pointer leaves target & menu (keys aren't handled except Escape)
+   * & it isn't related to selection (it's changed when editor is focused by click on item)
+   * @param onSelect called when selection is changed instead of closing menu: to filter it by typed text etc.
    * @returns chosen value or `null` if canceled or tool isn't rendered in toolbar as dropdown */
-  protected askMenu(name: string, target: HTMLElement | Range, mode?: "typed" | "hover"): Promise<unknown> {
+  protected askMenu(
+    name: string,
+    target: HTMLElement | Range,
+    isHover?: boolean,
+    onSelect?: (m: TextRichMenu) => void
+  ): Promise<unknown> {
     const b = this.findTool(name);
     if (!b?._values) {
       return Promise.resolve(null);
     }
-    const tool = (this.#ctr.$tools as Record<string, WUP.TextRich.Tool>)[name];
-    const isHover = mode === "hover";
+    const tool = this.#tools[name];
     const m = new TextRichMenu({
       button: b,
       // focus stays in editor or in dropdown focused via keyboard
       owner: isHover ? null : (document.activeElement === b && b) || this.$refInput,
       target,
-      hovered: isHover ? (target as HTMLElement) : undefined,
       values: b._values,
       selected: isHover ? tool.is?.(target as HTMLElement) : this.getFormats().get(name) ?? false, // value of hovered embed
       render: (li, v) => this.renderItem(li, tool, v),
     });
-    if (isHover) {
-      return this.openAsk(m); // isn't related to selection: it's changed when editor is focused by click on item
+    if (!isHover) {
+      const sel = window.getSelection()!;
+      const pos = (): unknown[] => [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset];
+      const at = pos();
+      m.onSelect = () => (onSelect ? onSelect(m) : pos().some((v, i) => v !== at[i]) && m.done());
     }
-    const sel = window.getSelection()!;
-    const at = [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset];
-    const trigger = mode === "typed" && (target as Range).toString();
-    m.onSelect = () => {
-      if (trigger === false) {
-        // menu opened by click or via $format: closed when selection is changed
-        [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset].some((v, i) => v !== at[i]) && m.done();
-        return;
-      }
-      // text typed from trigger to caret: caret before trigger collapses range
-      const r = document.createRange();
-      r.setStart((target as Range).startContainer, (target as Range).startOffset);
-      sel.isCollapsed && this.$refInput.contains(sel.focusNode) && r.setEnd(sel.focusNode!, sel.focusOffset);
-      const str = r.toString();
-      const q = str.startsWith(trigger) && !/\s/.test(str) && str.slice(trigger.length).toLowerCase();
-      if (q === false) {
-        m.done();
-        return;
-      }
-      // item is visible if its label or value contains typed text: `{name` & `{firstName` show `First Name`
-      const has = (s: string): boolean => s.toLowerCase().includes(q);
-      !m.filter((v) => has(labelOf(v)) || has(String(v.value))) && m.done(); // closed when nothing matches
-    };
     return this.openAsk(m);
   }
 
@@ -1565,20 +1491,30 @@ export default class WUPTextRichControl<
       return;
     }
     const s = n.data.slice(0, sel.focusOffset);
-    const tools = this.#ctr.$tools as Record<string, WUP.TextRich.Tool>;
-    const name = Object.keys(tools).find((k) => {
-      const t = tools[k].trigger;
-      return t && s.endsWith(t);
-    });
-    if (name) {
+    const found = Object.entries(this.#tools).find(([, t]) => t.trigger && s.endsWith(t.trigger));
+    if (found) {
+      const [name, tool] = found;
+      const tr = tool.trigger!;
       const r = document.createRange(); // typed trigger: range is live, so it isn't extended by typing after it
-      r.setStart(n, s.length - tools[name].trigger!.length);
+      r.setStart(n, s.length - tr.length);
       r.setEnd(n, s.length);
-      this.askMenu(name, r, "typed").then((v) => {
+      // menu is filtered by text typed after trigger: it's closed if caret leaves it, whitespace is typed or nothing matches
+      this.askMenu(name, r, false, (m) => {
+        const typed = document.createRange(); // text typed from trigger to caret: caret before trigger collapses range
+        typed.setStart(r.startContainer, r.startOffset);
+        sel.isCollapsed && this.$refInput.contains(sel.focusNode) && typed.setEnd(sel.focusNode!, sel.focusOffset);
+        const str = typed.toString();
+        const q = str.startsWith(tr) && !/\s/.test(str) && str.slice(tr.length).toLowerCase();
+        // item is visible if its label or value contains typed text: `{name` & `{firstName` show `First Name`
+        const has = (x: string): boolean => x.toLowerCase().includes(q as string);
+        (q === false || !m.filter((v) => has(labelOf(v)) || has(String(v.value)))) && m.done();
+      }).then((v) => {
         if (v != null) {
-          // typed text is replaced: embed & token replace selection, other formats are applied after removing it
+          // typed text is replaced: embed & token replace selection, line formats are applied after removing it,
+          // action gets it selected (`$insert` replaces it)
           sel.setBaseAndExtent(r.startContainer, r.startOffset, sel.focusNode!, sel.focusOffset);
-          tools[name].kind === "line" && this.changeContent(() => sel.getRangeAt(0).deleteContents());
+          const isLine = tool.kind === "line" || tool.kind === "lineStyle";
+          isLine && this.changeContent(() => sel.getRangeAt(0).deleteContents());
           this.applyFormat(name, v, true);
         }
       });
@@ -1595,34 +1531,32 @@ export default class WUPTextRichControl<
       return false;
     }
     const s = n.data.slice(0, sel.focusOffset) + data;
-    const tools = this.#ctr.$tools as Record<string, WUP.TextRich.Tool>;
     let typed: string | undefined;
-    const name = Object.keys(tools).find((k) => {
-      const t = tools[k];
-      const tr = t.trigger;
-      typed =
-        tr && t.kind === "inline" && this.findTool(k) ? typedValue(s, tr, this.#ctr.$wrapChars.get(tr)) : undefined;
-      return typed && t.is?.(this.createToken(t, typed)) !== undefined; // `is` can reject value: unknown placeholder etc.
+    const found = Object.entries(this.#tools).find(([k, t]) => {
+      const tr = t.kind === "inline" && t.trigger;
+      typed = tr ? typedValue(s, tr, this.#ctr.$wrapChars.get(tr)) : undefined;
+      // `is` can reject value: unknown placeholder etc.
+      return typed && this.findTool(k) && t.is?.(this.createToken(t, typed)) !== undefined;
     });
-    if (!name) {
+    if (!found) {
       return false;
     }
+    const [name, tool] = found;
     this.#ask?.done(); // menu of typed trigger
-    sel.setBaseAndExtent(n, sel.focusOffset - typed!.length - tools[name].trigger!.length, n, sel.focusOffset);
+    sel.setBaseAndExtent(n, sel.focusOffset - typed!.length - tool.trigger!.length, n, sel.focusOffset);
     this.applyFormat(name, typed, true); // token replaces typed text: it's a separate step of undo
     return true;
   }
 
   /** Returns name of tool if element is its embed or token (`inline` of tool with `trigger`: placeholder, mention)
    *  & value can be changed (tool is rendered in toolbar): via `ask` of tool on click (embed)
-   *  or via dropdown of tool on click (embed) & hover (`isHover`) */
+   *  or via dropdown of tool on hover & press (`isHover`) */
   protected embedTool(el: Element, isHover?: boolean): string | undefined {
-    const tools = this.#ctr.$tools as Record<string, WUP.TextRich.Tool>;
-    const name = Object.keys(tools).find((k) => {
-      const t = tools[k];
-      return (t.kind === "embed" || (t.kind === "inline" && t.trigger)) && t.is?.(el as HTMLElement) !== undefined;
-    });
-    const can = name && !this.$isReadOnly && !this.$isDisabled && (!isHover || !tools[name].ask) && this.findTool(name);
+    const [name, t] =
+      Object.entries(this.#tools).find(
+        ([, x]) => (x.kind === "embed" || (x.kind === "inline" && x.trigger)) && x.is?.(el as HTMLElement) !== undefined
+      ) ?? [];
+    const can = t && !this.$isReadOnly && !this.$isDisabled && (!isHover || !t.ask) && this.findTool(name!);
     return can ? name : undefined;
   }
 
@@ -1630,22 +1564,6 @@ export default class WUPTextRichControl<
    *  or link (url) */
   protected hoverOf(t: Element): HTMLElement | null {
     return this.embedTool(t, true) ? (t as HTMLElement) : t.closest("a");
-  }
-
-  /** Called on click in editor: click on embed (image etc.) asks new value via `ask` of its tool or its dropdown
-   *  (if tool is rendered in toolbar): asked value replaces embed; token is editable text, so click places caret in it
-   * @returns true if embed is clicked */
-  protected gotClickEmbed(el: HTMLElement): boolean {
-    const name = this.embedTool(el);
-    if (!name || (this.#ctr.$tools as Record<string, WUP.TextRich.Tool>)[name].kind !== "embed") {
-      return false;
-    }
-    clearTimeout(this.#hoverTimer); // clicked before hover delay: menu is opened by click
-    if (this.#ask?.hovered !== el) {
-      selectNode(el); // asked value replaces selected embed
-      this.applyFormat(name, undefined, false, el);
-    } // otherwise menu opened by hover stays opened
-    return true;
   }
 
   /** Called when pointer is over element editable via popup (link, embed: see hoverOf) or its popup (`el` is related element)
@@ -1670,7 +1588,7 @@ export default class WUPTextRichControl<
   protected askHover(el: HTMLElement): void {
     const name = this.embedTool(el, true);
     if (name) {
-      this.askMenu(name, el, "hover").then((v) => {
+      this.askMenu(name, el, true).then((v) => {
         if (v != null && el.isConnected) {
           this.$refInput.focus({ preventScroll: true }); // otherwise control restores its previous selection
           selectNode(el);
@@ -1703,7 +1621,7 @@ export default class WUPTextRichControl<
 
   /** Replaces selection with sanitized html: blocks are inserted after the current line (it's split by caret) */
   protected insertHTML(html: string): void {
-    const f = htmlToEditor(html, this.#ctr.$tools);
+    const f = htmlToEditor(html, this.#tools);
     const inp = this.$refInput;
     const r = window.getSelection()!.getRangeAt(0);
     r.deleteContents();
@@ -1748,11 +1666,11 @@ export default class WUPTextRichControl<
     if (!a || !b || a === b || a.contains(b) || b.parentElement!.closest("li")) {
       return false;
     }
-    const isEmbed = embedOf(this.#ctr.$tools);
-    const pos = toLinePos(lines, sr.startContainer, sr.startOffset, isEmbed);
+    const isEmbed = embedOf(this.#tools);
+    const pos = charsBefore(inp, sr.startContainer, sr.startOffset, isEmbed);
     const isRest = // the last line has content after range
       charsBefore(b, sr.endContainer, sr.endOffset, isEmbed) < charsBefore(b, b, b.childNodes.length, isEmbed);
-    const isKeep = !pos[1]; // the 1st line is deleted completely
+    const isKeep = !charsBefore(a, sr.startContainer, sr.startOffset, isEmbed); // the 1st line is deleted completely
     if (!isKeep && isRest && b.querySelector("ol,ul")) {
       return false;
     }
@@ -1798,50 +1716,23 @@ export default class WUPTextRichControl<
     }
   }
 
-  /** Handles keyboard on toolbar: Arrows to navigate, Esc to return to editor; menu of focused dropdown is controlled by its keys */
-  protected gotToolbarKeyDown(e: KeyboardEvent): void {
-    if (e.altKey || e.ctrlKey || e.metaKey || this.$isDisabled || this.$isReadOnly) {
-      return;
-    }
-    if (this.#ask?.onKey?.(e)) {
-      e.preventDefault(); // otherwise button is clicked by Enter/Space: menu is opened again
-      return;
-    }
+  /** Called on keydown on toolbar: Arrows to navigate, Esc to return to editor, ArrowDown/ArrowUp to open menu of dropdown
+   * @returns true if key is handled (event must be prevented) */
+  protected gotToolbarKey(e: KeyboardEvent): boolean {
     const el = e.target as ToolElement;
-    let next: HTMLElement | undefined;
-    switch (e.key) {
-      case "ArrowDown":
-      case "ArrowUp":
-        if (el._values) {
-          e.preventDefault(); // otherwise page is scrolled
-          this.applyTool(el); // opens menu of dropdown
-        }
-        return;
-      case "ArrowLeft":
-      case "ArrowRight":
-      case "Home":
-      case "End": {
-        const arr = Array.from(this.$refToolbar.querySelectorAll<HTMLElement>("[role=group] > button"));
-        const i = arr.indexOf(el);
-        const last = arr.length - 1;
-        if (e.key === "Home" || e.key === "End") {
-          next = arr[e.key === "Home" ? 0 : last];
-        } else {
-          next = e.key === "ArrowRight" ? arr[i < last ? i + 1 : 0] : arr[i > 0 ? i - 1 : last];
-        }
-        break;
-      }
-      case "Escape":
-        e.preventDefault(); // otherwise value is cleared
-        this.restoreSelection();
-        return;
-      default:
-        return;
+    const k = e.key;
+    if ((k === "ArrowDown" || k === "ArrowUp") && el._values) {
+      this.applyTool(el); // opens menu of dropdown: otherwise page is scrolled
+    } else if (k === "Escape") {
+      this.restoreSelection(); // otherwise value is cleared
+    } else if (k === "ArrowLeft" || k === "ArrowRight" || k === "Home" || k === "End") {
+      const arr = Array.from(this.$refToolbar.querySelectorAll<HTMLElement>("[role=group] > button"));
+      const i = arr.indexOf(el);
+      arr.at({ Home: 0, End: -1, ArrowLeft: i - 1, ArrowRight: (i + 1) % arr.length }[k])!.focus(); // Arrows cycle
+    } else {
+      return false;
     }
-    if (next) {
-      e.preventDefault();
-      next.focus();
-    }
+    return true;
   }
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
@@ -1876,16 +1767,6 @@ export default class WUPTextRichControl<
     return this.$refToolbar.querySelector(`[tool="${key}"]`);
   }
 
-  /** Returns items of dropdown of tool: values rendered in toolbar */
-  protected itemsOf(name: string): WUP.TextRich.ToolValue[] {
-    return this.findTool(name)?._values ?? [];
-  }
-
-  /** Returns true if value of tool is rendered in toolbar: button of value or item of dropdown */
-  protected hasValue(name: string, v: unknown): boolean {
-    return !!this.findTool(`${name}:${v}`) || this.itemsOf(name).some((x) => x.value === v);
-  }
-
   /** Applies toolbar item by key `format` or `format:value` (button or item of dropdown)
    * @returns false if it isn't rendered */
   protected applyKey(key: string): boolean {
@@ -1895,7 +1776,7 @@ export default class WUPTextRichControl<
       return true;
     }
     const [name, v] = key.split(":");
-    const item = this.itemsOf(name).find((x) => `${x.value}` === v);
+    const item = this.findTool(name)?._values?.find((x) => `${x.value}` === v); // item of dropdown
     item && this.applyFormat(name, item.value, true);
     return !!item;
   }
@@ -1924,7 +1805,7 @@ export default class WUPTextRichControl<
       this.$refToolbar.querySelector("button")?.focus();
       return true;
     }
-    const found = Object.entries(this.#ctr.$tools as Record<string, WUP.TextRich.Tool>).find(
+    const found = Object.entries(this.#tools).find(
       ([, t]) => match(t.hotKey) !== -1 || t.values?.some((v) => match(v.hotKey) !== -1)
     );
     if (!found) {
@@ -1937,13 +1818,16 @@ export default class WUPTextRichControl<
       return this.applyKey(val ? `${name}:${val.value}` : name); // false: tool isn't rendered, browser shortcut works as usual
     }
     // tool with values: the 1st shortcut selects the previous value (increases font size), the 2nd one - the next value;
-    // values are taken in order of $tools: the nearest one rendered in toolbar
+    // values are taken in order of $tools: the nearest one rendered in toolbar (button of value or item of dropdown)
     const { values } = tool;
-    const isRendered = (v: WUP.TextRich.ToolValue): boolean => this.hasValue(name, v.value);
+    const items = this.findTool(name)?._values;
+    const isRendered = (v: WUP.TextRich.ToolValue): boolean =>
+      !!this.findTool(`${name}:${v.value}`) || !!items?.some((x) => x.value === v.value);
     if (!values.some(isRendered)) {
       return false;
     }
-    const at = values.findIndex((v) => v.value === (this.getFormats().get(name) ?? false));
+    const cur = this.getFormats().get(name) ?? false;
+    const at = values.findIndex((v) => v.value === cur);
     const next = (i ? values.slice(at + 1) : values.slice(0, at < 0 ? undefined : at).reverse()).find(isRendered);
     next && this.applyFormat(name, next.value, true);
     return true;
@@ -1951,27 +1835,27 @@ export default class WUPTextRichControl<
 
   protected override gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
     const t = e.target as Node;
-    if ((t === this.$refInput || this.$refToolbar.contains(t)) && this.gotHotKey(e)) {
-      e.preventDefault(); // skipped for nested control in popup of link
-      return;
-    }
+    const isInp = t === this.$refInput;
+    const isBar = this.$refToolbar.contains(t);
     const l = this.#ask;
-    if (t === this.$refInput && l?.onKey?.(e)) {
-      e.preventDefault(); // menu is navigated via keys of editor: otherwise caret is moved, line is added etc.
-      return;
-    }
-    if (e.key === "Escape" && l?.hovered) {
+    const k = e.key;
+    const isMod = e.altKey || e.ctrlKey || e.metaKey;
+    const isArrow = !isMod && !e.shiftKey && (k === "ArrowRight" || k === "ArrowLeft");
+    if (
+      ((isInp || isBar) && this.gotHotKey(e)) || // skipped for nested control in popup of link
+      // menu is navigated via keys of editor or dropdown: otherwise caret is moved, line is added, button is clicked etc.
+      ((isInp || isBar) && l?.onKey?.(e)) ||
+      (isBar && !isMod && this.gotToolbarKey(e)) ||
+      // the 1st ArrowRight moves caret to end of format (bold, link), the 2nd one - out of it: caret stays visually
+      (isInp && isArrow && this.leaveFormats(k === "ArrowRight"))
+    ) {
+      e.preventDefault();
+    } else if (k === "Escape" && l?.hovered) {
       e.preventDefault(); // the 1st Escape closes popup opened by hover: otherwise value is cleared
       l.done();
-      return;
+    } else {
+      super.gotKeyDown(e);
     }
-    const isArrow = e.key === "ArrowRight" || e.key === "ArrowLeft";
-    const isPlain = !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey;
-    if (t === this.$refInput && isArrow && isPlain && this.leaveFormats(e.key === "ArrowRight")) {
-      e.preventDefault(); // the 1st ArrowRight moves caret to end of format (bold, link), the 2nd one - out of it: caret stays visually
-      return;
-    }
-    super.gotKeyDown(e);
   }
 
   protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
@@ -1995,6 +1879,11 @@ export default class WUPTextRichControl<
     if (e.defaultPrevented) {
       return;
     }
+    const s = t === "insertText" && e.data; // typed text
+    if (s && (this.wrapSelection(s) || this.gotTokenEnd(s))) {
+      e.preventDefault(); // history & $value are updated via changeContent: it's a separate step of undo
+      return;
+    }
     const isPaste = t === "insertFromPaste" || t === "insertFromPasteAsQuotation" || t === "insertFromDrop";
     const html = isPaste && e.dataTransfer?.getData("text/html");
     if (html) {
@@ -2002,22 +1891,12 @@ export default class WUPTextRichControl<
       e.preventDefault();
       const [r] = e.getTargetRanges();
       this.$refInput.focus({ preventScroll: true });
-      r && window.getSelection()!.setBaseAndExtent(r.startContainer, r.startOffset, r.endContainer, r.endOffset);
+      r && selectRange(r);
       this.insertHTML(html);
-    } else if (t === "insertText" && e.data && this.wrapSelection(e.data)) {
-      e.preventDefault(); // history & $value are updated via changeContent: wrapping is a separate step of undo
-      return;
-    } else if (t === "insertText" && e.data && this.gotTokenEnd(e.data)) {
-      e.preventDefault(); // history & $value are updated via changeContent
-      return;
-    } else if (t === "insertText" && e.data && this.insertOutOfToken(e.data)) {
-      e.preventDefault();
-    } else if (t === "insertText" && e.data && this.#pending.size) {
-      e.preventDefault();
-      this.insertPending(e.data);
-    } else if (t === "insertText" && e.data && this.insertAtEnd(e.data)) {
-      e.preventDefault();
-    } else if (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0])) {
+    } else if (
+      (s && (this.insertOutOfToken(s) || this.insertTyped(s))) ||
+      (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0]))
+    ) {
       e.preventDefault();
     } else {
       return;
@@ -2032,13 +1911,6 @@ export default class WUPTextRichControl<
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     super.gotInput(e);
     e.inputType === "insertText" && this.gotTrigger();
-  }
-
-  protected override setInputValue(v: string, reason: SetValueReasons): void {
-    if (v && v === this.$refInput.value) {
-      return; // skip re-rendering: it resets selection & scroll
-    }
-    super.setInputValue(v, reason);
   }
 
   protected override setClearState(): ValueType | undefined {

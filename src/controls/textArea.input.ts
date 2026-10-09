@@ -5,7 +5,7 @@ import WUPBaseElement from "../baseElement";
 const styledTags = new Set<string>();
 
 /** Lines: line break is placed before them (browser adds `<div>` on Enter) */
-const lineTags = new Set(["DIV", "P", "LI", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "PRE"]);
+export const lineTags = new Set(["DIV", "P", "LI", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "PRE"]);
 
 /** Walks parts of text inside root in order: text node, line break (before line except the 1st one & `<br>` except the last child)
  *  & embed (see `isEmbed`: counted as 1 char, its content is skipped); walking is stopped when fn returns true */
@@ -113,7 +113,8 @@ export default class WUPTextAreaInput extends HTMLElement {
       this.setAttribute("aria-multiline", "true");
       this.#isInit = false;
       this.oninput = () => {
-        this._cached = undefined;
+        !this._keepCache && (this._cached = undefined);
+        this._keepCache = false;
       };
     }
   }
@@ -157,6 +158,8 @@ export default class WUPTextAreaInput extends HTMLElement {
   }
 
   _cached?: string;
+  /** Cached value isn't reset on the next input event: it's cached right after changes (see TextRich changeContent) */
+  _keepCache?: boolean;
   /** Get/set plain text (getter converts `<br>` & lines added by browser on Enter into '\n'; setter assigns textContent) */
   get value(): string {
     if (this._cached == null) {
@@ -211,10 +214,8 @@ export default class WUPTextAreaInput extends HTMLElement {
     }
     const r = sel.getRangeAt(0);
     const isEmbed = this._embedOf?.();
-    return {
-      start: charsBefore(this, r.startContainer, r.startOffset, isEmbed),
-      end: charsBefore(this, r.endContainer, r.endOffset, isEmbed),
-    };
+    const start = charsBefore(this, r.startContainer, r.startOffset, isEmbed);
+    return { start, end: r.collapsed ? start : charsBefore(this, r.endContainer, r.endOffset, isEmbed) };
   }
 
   set selection(sel) {

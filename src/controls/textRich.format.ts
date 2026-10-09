@@ -1,5 +1,17 @@
-import { charsBefore, pointAt } from "./textArea.input";
 import { isBlockTag, listTags } from "./textRich.input";
+
+/** Returns true if node intersects with range: the same as `r.intersectsNode(n)` that walks previous siblings (slow for lines) */
+export const intersects = (r: Range, n: Node): boolean =>
+  r.comparePoint(n, 0) < 1 &&
+  r.comparePoint(n, n.nodeType === Node.TEXT_NODE ? (n as Text).length : n.childNodes.length) > -1;
+
+/** Returns text of element after point (before point if `isBefore`): empty if point is at the end (start) of element or out of it */
+export function textAt(el: Node, n: Node, offset: number, isBefore?: boolean): string {
+  const r = document.createRange();
+  r.selectNodeContents(el);
+  isBefore ? r.setEnd(n, offset) : r.setStart(n, offset);
+  return r.toString();
+}
 
 /** Returns elements of format (`is` returns true for them) that wrap node (from inner to outer) inside root */
 export function formatParents(n: Node, is: (el: Element) => boolean, root: Node): Element[] {
@@ -166,46 +178,11 @@ export function wrapLines(root: Element): boolean {
   return isChanged;
 }
 
-/** Returns line of element (the nearest element placed directly into root or item of list) */
-export function lineOf(el: HTMLElement | null, root: Element): HTMLElement | null {
-  for (; el && el !== root; el = el.parentElement) {
-    if (el.parentElement === root || el.tagName === "LI") {
-      return el;
-    }
-  }
-  return null;
-}
-
 /** Returns lines that intersect with range (line is skipped if range ends at the start of it: on triple click) */
 export function linesOf(r: Range, root: Element): HTMLElement[] {
-  const arr = getLines(root).filter((l) => r.intersectsNode(l));
-  if (!r.collapsed && arr.length > 1) {
-    const end = document.createRange();
-    end.setStart(arr.at(-1)!, 0);
-    end.setEnd(r.endContainer, r.endOffset);
-    !end.toString() && arr.pop();
-  }
+  const arr = getLines(root).filter((l) => intersects(r, l));
+  !r.collapsed && arr.length > 1 && !textAt(arr.at(-1)!, r.endContainer, r.endOffset, true) && arr.pop();
   return arr.filter((l, i) => !l.contains(arr[i + 1] ?? null)); // only nested items of lists: nested item follows its parent
-}
-
-/** Returns position as [line index, count of chars before position in the line]: embed (see `isEmbed`) is counted as 1 char */
-export function toLinePos(
-  lines: HTMLElement[],
-  n: Node,
-  offset: number,
-  isEmbed?: (el: Element) => boolean
-): [number, number] {
-  const i = lines.findLastIndex((l) => l.contains(n));
-  return i < 0 ? [0, 0] : [i, charsBefore(lines[i], n, offset, isEmbed)];
-}
-
-/** Returns node & offset by position [line index, count of chars before position in the line]: embed (see `isEmbed`) is counted as 1 char */
-export function fromLinePos(
-  lines: HTMLElement[],
-  [i, pos]: [number, number],
-  isEmbed?: (el: Element) => boolean
-): [Node, number] {
-  return pointAt(lines[Math.min(i, lines.length - 1)], pos, isEmbed);
 }
 
 /** Replaces line with element of pointed tag or with pointed element (style of line is kept: alignment etc.);

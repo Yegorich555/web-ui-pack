@@ -1,10 +1,8 @@
-import WUPTextAreaInput from "./textArea.input";
+import WUPTextAreaInput, { lineTags } from "./textArea.input";
 
 /** Tools of toolbar: formats of tools are kept by sanitizer (static $tools of control) */
 type Tools = Record<string, WUP.TextRich.Tool>;
 
-/** Lines: block elements with inline content only */
-const lineTags = new Set(["H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "PRE"]);
 /** Containers converted into paragraph (`<p>` in value, `<div>` in editor) or unwrapped if contain blocks */
 const paragraphTags = new Set([
   "P",
@@ -179,9 +177,8 @@ function toEmbed(el: HTMLElement, ctx: Ctx): HTMLElement | null {
   return m ? create(m[0], m[1], ctx) : null;
 }
 
-/** Returns true if element with tag is block */
-export const isBlockTag = (tag: string): boolean =>
-  lineTags.has(tag) || paragraphTags.has(tag) || listTags.has(tag) || tag === "LI";
+/** Returns true if element with tag is block: line (paragraph, heading, item of list etc.), container or list */
+export const isBlockTag = (tag: string): boolean => lineTags.has(tag) || paragraphTags.has(tag) || listTags.has(tag);
 
 /** Copies styles of line: formats of tools with kind `lineStyle` (alignment etc.) & indentation (margin-left) */
 function copyBlockStyle(src: HTMLElement, dst: HTMLElement, ctx: Ctx): void {
@@ -396,6 +393,9 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   override set value(v: string) {
+    if (v && v === this.value) {
+      return; // skip re-rendering: it resets selection & scroll (empty value clears empty lines)
+    }
     this._cached = undefined;
     this.replaceChildren(htmlToEditor(v, this._tools));
   }
