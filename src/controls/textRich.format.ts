@@ -1,11 +1,11 @@
 import { isBlockTag, listTags } from "./textRich.input";
 
-/** Returns true if node intersects with range: the same as `r.intersectsNode(n)` that walks previous siblings (slow for lines) */
+/** Fast `r.intersectsNode(n)`: it walks previous siblings (slow for lines) */
 export const intersects = (r: Range, n: Node): boolean =>
   r.comparePoint(n, 0) < 1 &&
   r.comparePoint(n, n.nodeType === Node.TEXT_NODE ? (n as Text).length : n.childNodes.length) > -1;
 
-/** Returns text of element after point (before point if `isBefore`): empty if point is at the end (start) of element or out of it */
+/** Returns text of element after point (or before if `isBefore`): empty at its edge or out of it */
 export function textAt(el: Node, n: Node, offset: number, isBefore?: boolean): string {
   const r = document.createRange();
   r.selectNodeContents(el);
@@ -13,7 +13,7 @@ export function textAt(el: Node, n: Node, offset: number, isBefore?: boolean): s
   return r.toString();
 }
 
-/** Returns elements of format (`is` returns true for them) that wrap node (from inner to outer) inside root */
+/** Returns ancestors of node matched by `is` (from inner to outer) inside root */
 export function formatParents(n: Node, is: (el: Element) => boolean, root: Node): Element[] {
   const arr: Element[] = [];
   for (let el = (n.nodeType === Node.ELEMENT_NODE ? n : n.parentElement) as Element | null; el && el !== root; ) {
@@ -23,7 +23,7 @@ export function formatParents(n: Node, is: (el: Element) => boolean, root: Node)
   return arr;
 }
 
-/** Returns text nodes inside range; text nodes at the boundaries are split so range starts/ends at edges of nodes */
+/** Returns text nodes inside range (edge nodes are split by range) */
 export function splitRange(r: Range): Text[] {
   const e = r.endContainer;
   if (e.nodeType === Node.TEXT_NODE && r.endOffset > 0 && r.endOffset < (e as Text).length) {
@@ -31,12 +31,12 @@ export function splitRange(r: Range): Text[] {
   }
   const s = r.startContainer;
   if (s.nodeType === Node.TEXT_NODE && r.startOffset > 0 && r.startOffset < (s as Text).length) {
-    r.setStart((s as Text).splitText(r.startOffset), 0); // end is moved into new node automatically if it's the same node
+    r.setStart((s as Text).splitText(r.startOffset), 0); // end in the same node moves automatically
   }
 
   const arr: Text[] = [];
   const w = document.createTreeWalker(r.commonAncestorContainer, NodeFilter.SHOW_TEXT);
-  w.currentNode = r.startContainer.childNodes[r.startOffset] ?? r.startContainer; // walk from start of range
+  w.currentNode = r.startContainer.childNodes[r.startOffset] ?? r.startContainer;
   let isIn = false;
   for (let n = w.currentNode.nodeType === Node.TEXT_NODE ? w.currentNode : w.nextNode(); n; n = w.nextNode()) {
     const t = n as Text;
@@ -54,7 +54,7 @@ export function splitRange(r: Range): Text[] {
   return arr;
 }
 
-/** Moves content of el before `first` & after `last` into copies of el: `<b>a[bc]d</b>` => `<b>a</b><b>[bc]</b><b>d</b>` */
+/** Moves content outside `first`..`last` into copies of el: `<b>a[bc]d</b>` => `<b>a</b><b>[bc]</b><b>d</b>` */
 function isolate(el: Element, first: Node, last: Node): void {
   const before = document.createRange();
   before.setStart(el, 0);
@@ -74,9 +74,9 @@ function isolate(el: Element, first: Node, last: Node): void {
   }
 }
 
-/** Removes inline format from text nodes: elements of format (`is` returns true for them) are unwrapped around nodes */
+/** Removes inline format from text nodes: unwraps matched ancestors around them */
 export function removeInline(nodes: Text[], is: (el: Element) => boolean, root: Node): void {
-  const groups = new Map<Element, Text[]>(); // element of format => text nodes inside
+  const groups = new Map<Element, Text[]>(); // format element => text nodes inside
   nodes.forEach((t) =>
     formatParents(t, is, root).forEach((el) => {
       const arr = groups.get(el);
@@ -89,7 +89,7 @@ export function removeInline(nodes: Text[], is: (el: Element) => boolean, root: 
   });
 }
 
-/** Merges element into previous sibling if they are equal (the same tag & attributes) */
+/** Merges element into previous sibling with the same tag & attributes */
 function mergePrev(el: Node | null): void {
   const prev = el?.previousSibling;
   if (prev?.nodeType === Node.ELEMENT_NODE && prev.cloneNode(false).isEqualNode(el!.cloneNode(false))) {
@@ -98,7 +98,7 @@ function mergePrev(el: Node | null): void {
   }
 }
 
-/** Wraps text nodes into new element of format (if they don't have format yet: `is` returns false for their parents) */
+/** Wraps not formatted text nodes into new element of format */
 export function addInline(nodes: Text[], is: (el: Element) => boolean, create: () => HTMLElement, root: Node): void {
   nodes.forEach((t) => {
     if (!formatParents(t, is, root).length) {
@@ -149,7 +149,7 @@ export function getLines(root: Element): HTMLElement[] {
   return arr;
 }
 
-/** Wraps inline content placed directly into root into <div> (Chrome doesn't wrap the 1st line); adds empty line if root is empty
+/** Wraps loose inline content into <div> (Chrome doesn't wrap the 1st line); adds empty line to empty root
  * @returns true if root is changed */
 export function wrapLines(root: Element): boolean {
   let isChanged = false;
@@ -159,7 +159,7 @@ export function wrapLines(root: Element): boolean {
       div = null;
     } else if (n.nodeName === "BR") {
       if (div) {
-        n.remove(); // line break after inline content means the next line
+        n.remove(); // after inline content it means the next line
       } else {
         root.insertBefore(document.createElement("div"), n).appendChild(n); // empty line
       }
@@ -178,16 +178,15 @@ export function wrapLines(root: Element): boolean {
   return isChanged;
 }
 
-/** Returns lines that intersect with range (line is skipped if range ends at the start of it: on triple click) */
+/** Returns lines in range (skips the last one if range ends at its start: triple click) */
 export function linesOf(r: Range, root: Element): HTMLElement[] {
   const arr = getLines(root).filter((l) => intersects(r, l));
   !r.collapsed && arr.length > 1 && !textAt(arr.at(-1)!, r.endContainer, r.endOffset, true) && arr.pop();
-  return arr.filter((l, i) => !l.contains(arr[i + 1] ?? null)); // only nested items of lists: nested item follows its parent
+  return arr.filter((l, i) => !l.contains(arr[i + 1] ?? null)); // skip parents of nested items (nested item follows parent)
 }
 
-/** Replaces line with element of pointed tag or with pointed element (style of line is kept: alignment etc.);
- * line with the same tag isn't replaced (if tag is pointed);
- * item of list is moved out of the list at first (list is split if item is in the middle) */
+/** Replaces line with element or tag (keeps line style: alignment etc.; skips the same tag);
+ *  list item is moved out of its list at first (splits list) */
 export function setLineTag(line: HTMLElement, tag: string | HTMLElement): HTMLElement {
   if (line.tagName === "LI") {
     const list = line.parentElement!;
@@ -207,7 +206,7 @@ export function setLineTag(line: HTMLElement, tag: string | HTMLElement): HTMLEl
   const el = typeof tag === "string" ? document.createElement(tag) : tag;
   el.append(...line.childNodes);
   const s = line.getAttribute("style");
-  s && el.setAttribute("style", s + (el.getAttribute("style") ?? "")); // style of element is applied after style of line
+  s && el.setAttribute("style", s + (el.getAttribute("style") ?? "")); // element style wins
   line.replaceWith(el);
   return el;
 }

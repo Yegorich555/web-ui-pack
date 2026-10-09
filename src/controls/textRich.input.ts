@@ -1,9 +1,9 @@
 import WUPTextAreaInput, { lineTags } from "./textArea.input";
 
-/** Tools of toolbar: formats of tools are kept by sanitizer (static $tools of control) */
+/** Static $tools of control: sanitizer keeps their formats */
 type Tools = Record<string, WUP.TextRich.Tool>;
 
-/** Containers converted into paragraph (`<p>` in value, `<div>` in editor) or unwrapped if contain blocks */
+/** Containers => paragraph (`<p>` in value, `<div>` in editor); unwrapped if they contain blocks */
 const paragraphTags = new Set([
   "P",
   "DIV",
@@ -35,7 +35,7 @@ const paragraphTags = new Set([
   "TD",
 ]);
 export const listTags = new Set(["OL", "UL"]);
-/** Elements skipped with content: unsafe or not supported */
+/** Removed with content: unsafe or not supported */
 const skipTags = new Set([
   "SCRIPT",
   "STYLE",
@@ -66,21 +66,21 @@ const skipTags = new Set([
   "LINK",
   "BASE",
 ]);
-/** Font size by value of format `size` */
+/** Value of `size` => font-size */
 export const sizes = { sm: "small", lg: "x-large", hg: "xxx-large" };
-/** Value of format `size` by font size (supported font sizes) */
+/** Supported font-size => value of `size` */
 export const sizeFormats = {
   small: "sm",
   "x-large": "lg",
   "xxx-large": "hg",
 } satisfies Record<string, WUP.TextRich.ToolValues["size"]>;
-/** Supported values of text-align ("left" is default) */
+/** Supported text-align ("left" is default) */
 export const textAligns = new Set(["center", "right", "justify"]);
 const safeProtocols = new Set(["http:", "https:", "mailto:", "tel:", "sms:"]);
-/** Positive length for margin-left (indentation) */
+/** Positive margin-left (indent) */
 const indentReg = /^\d+(\.\d+)?(px|em)$/;
 
-/** Returns url if its protocol is safe (http, https, mailto, tel, sms) otherwise empty string */
+/** Returns url if its protocol is safe, otherwise empty string */
 export function sanitizeUrl(url: string): string {
   // todo update when min Safari 18+ (URL.parse returns null instead of throwing, so without try/catch): return safeProtocols.has(URL.parse(url, document.baseURI)?.protocol ?? "") ? url : "";
   try {
@@ -90,41 +90,40 @@ export function sanitizeUrl(url: string): string {
   }
 }
 
-/** The last html converted to text & its text: validations min & max convert the same value (getter `value` sets it as well) */
+/** Cache [html, text]: validations min & max convert the same value (getter `value` fills it too) */
 let lastText = ["", ""];
 
-/** Returns text content of html (for validations) */
+/** Returns text of html (for validations) */
 export function htmlToText(html: string): string {
   if (html !== lastText[0]) {
     const t = document.createElement("template");
-    t.innerHTML = html; // inert: scripts & resources aren't executed/loaded
+    t.innerHTML = html; // inert: nothing is executed/loaded
     lastText = [html, t.content.textContent || ""];
   }
   return lastText[1];
 }
 
-/** Returns function that checks if element is embed (`<img>` etc. of tools with kind `embed`);
- *  `undefined` if tools don't have embeds */
+/** Returns checker of embed elements (`<img>` etc.); `undefined` if there are no embed tools */
 export function embedOf(tools: Tools): ((el: Element) => boolean) | undefined {
   const arr = Object.values(tools).filter((t) => t.kind === "embed" && t.is);
   return arr.length ? (el) => arr.some((t) => t.is!(el as HTMLElement) !== undefined) : undefined;
 }
 
-// WARN: during cleaning source nodes are never cloned or moved (they can be unsafe): only new nodes are created
+// WARN: sanitizer never clones or moves source nodes (they can be unsafe): it creates new ones only
 
-/** Context of cleaning: tools with formats grouped by kind & type of result */
+/** Sanitizer context: tools grouped by kind */
 interface Ctx {
-  /** Result for editor: paragraph as `<div>` (browser adds it on Enter), bold as `<b>` (`<strong>` is styled as label of control) */
+  /** Result for editor: paragraph as `<div>` (as browser adds on Enter), bold as `<b>` (`<strong>` is styled as control label) */
   isEditor: boolean;
   inline: WUP.TextRich.Tool[];
   line: WUP.TextRich.Tool[];
   lineStyle: WUP.TextRich.Tool[];
   embed: WUP.TextRich.Tool[];
-  /** Embed is added: result isn't empty even without text */
+  /** Result has embed: it isn't empty even without text */
   hasEmbed?: boolean;
 }
 
-/** Returns context of cleaning: tools grouped by kind (tool without `is`, `create` or `set` doesn't define format) */
+/** Returns sanitizer context (tools without `is`, `create`/`set` are skipped) */
 function ctxOf(tools: Tools, isEditor: boolean): Ctx {
   const ctx: Ctx = { isEditor, inline: [], line: [], lineStyle: [], embed: [] };
   Object.values(tools).forEach(
@@ -133,33 +132,32 @@ function ctxOf(tools: Tools, isEditor: boolean): Ctx {
   return ctx;
 }
 
-/** Returns value of format applied via element (`undefined` if it isn't applied: `false` means default value) */
+/** Returns value of format applied by element (`undefined` for default value `false` too) */
 function applied(t: WUP.TextRich.Tool, el: HTMLElement): unknown {
   const v = t.is!(el);
   return v === false ? undefined : v;
 }
 
-/** Returns the 1st tool which format is applied via element & its value */
+/** Returns the 1st tool applied by element & its value */
 function firstOf(tools: WUP.TextRich.Tool[], el: HTMLElement): [WUP.TextRich.Tool, unknown] | undefined {
   let v: unknown;
   const t = tools.find((x) => (v = applied(x, el)) !== undefined);
   return t && [t, v];
 }
 
-/** Adds classes to element: every argument can contain several classes separated by space (`"fa fa-bold"`) */
+/** Adds classes: every argument can be space-separated (`"fa fa-bold"`) */
 export function addClass(el: Element, ...classes: Array<string | undefined>): void {
   classes.forEach((c) => c && el.classList.add(...c.split(" ").filter(Boolean)));
 }
 
-/** Returns new element applying format of tool with value: `create` of tool is tag name or function;
- *  element gets `classNameTag` of tool & of value */
+/** Creates element of format via `create` & adds `classNameTag` of tool & value */
 export function createOf(t: WUP.TextRich.Tool, v: unknown): HTMLElement {
   const el = typeof t.create === "string" ? document.createElement(t.create) : t.create!(v);
   addClass(el, t.classNameTag, t.values?.find((x) => x.value === v)?.classNameTag);
   return el;
 }
 
-/** Returns new element of format: `<b>` is replaced with `<strong>` in value (in editor `<strong>` is styled as label of control) */
+/** Creates element of format: `<b>` => `<strong>` in value (in editor `<strong>` is styled as control label) */
 function create(t: WUP.TextRich.Tool, v: unknown, ctx: Ctx): HTMLElement {
   const el = createOf(t, v);
   if (ctx.isEditor || el.tagName !== "B") {
@@ -170,17 +168,17 @@ function create(t: WUP.TextRich.Tool, v: unknown, ctx: Ctx): HTMLElement {
   return s;
 }
 
-/** Returns new element of embed (`<img>` etc.) if element is embed of tools */
+/** Returns new embed if element is embed (`<img>` etc.) */
 function toEmbed(el: HTMLElement, ctx: Ctx): HTMLElement | null {
   const m = firstOf(ctx.embed, el);
   ctx.hasEmbed ||= !!m;
   return m ? create(m[0], m[1], ctx) : null;
 }
 
-/** Returns true if element with tag is block: line (paragraph, heading, item of list etc.), container or list */
+/** Returns true for block tag: line (paragraph, heading, list item etc.), container or list */
 export const isBlockTag = (tag: string): boolean => lineTags.has(tag) || paragraphTags.has(tag) || listTags.has(tag);
 
-/** Copies styles of line: formats of tools with kind `lineStyle` (alignment etc.) & indentation (margin-left) */
+/** Copies line styles: `lineStyle` formats (alignment etc.) & indent */
 function copyBlockStyle(src: HTMLElement, dst: HTMLElement, ctx: Ctx): void {
   ctx.lineStyle.forEach((t) => {
     const v = applied(t, src);
@@ -190,13 +188,13 @@ function copyBlockStyle(src: HTMLElement, dst: HTMLElement, ctx: Ctx): void {
   indentReg.test(ml) && parseFloat(ml) > 0 && (dst.style.marginLeft = ml);
 }
 
-/** Removes `<br>` at the end of line with content (browser adds it as placeholder) */
+/** Removes trailing `<br>` of non-empty line (browser placeholder) */
 function trimBr(el: HTMLElement): void {
   const last = el.lastChild;
   last && last !== el.firstChild && last.nodeName === "BR" && last.remove();
 }
 
-/** Appends cleaned inline node to dst; nested blocks are flattened into lines separated by `<br>` */
+/** Appends sanitized inline node; nested blocks are flattened into lines separated by `<br>` */
 function appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
   if (n.nodeType === Node.TEXT_NODE) {
     dst.append((n as Text).data);
@@ -220,12 +218,11 @@ function appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
     return;
   }
   if (isBlockTag(tag)) {
-    // nested block inside line: flatten into lines
     dst.lastChild && dst.lastChild.nodeName !== "BR" && dst.appendChild(document.createElement("br"));
     appendInline(el, dst, ctx);
     return;
   }
-  // inline formats of tools: element can apply several ones (`<span style="font-size; color">`) => nested elements
+  // element can apply several formats (`<span style="font-size; color">`) => nested elements
   const arr = ctx.inline.flatMap((t) => {
     const v = applied(t, el);
     return v === undefined ? [] : [create(t, v, ctx)];
@@ -235,16 +232,16 @@ function appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
     appendInline(el, inner, ctx);
     inner.firstChild && dst.appendChild(arr[0]);
   } else {
-    appendInline(el, dst, ctx); // unwrap not supported element: <span>, <font>, <code> etc.
+    appendInline(el, dst, ctx); // unwrap unsupported: <span>, <font>, <code> etc.
   }
 }
 
-/** Appends cleaned inline content of src to dst */
+/** Appends sanitized inline content */
 function appendInline(src: Node, dst: HTMLElement, ctx: Ctx): void {
   src.childNodes.forEach((n) => appendInlineNode(n, dst, ctx));
 }
 
-/** Returns line with cleaned inline content of src: element of format (heading etc.) or paragraph */
+/** Fills line `el` (heading, paragraph etc.) with sanitized content of src */
 function toLine(src: HTMLElement, el: HTMLElement, ctx: Ctx): HTMLElement {
   copyBlockStyle(src, el, ctx);
   appendInline(src, el, ctx);
@@ -252,7 +249,7 @@ function toLine(src: HTMLElement, el: HTMLElement, ctx: Ctx): HTMLElement {
   return el;
 }
 
-/** Appends cleaned list item to list: nested lists are kept, other content is flattened */
+/** Appends sanitized list item: nested lists are kept, other content is flattened */
 function appendListItem(src: HTMLElement, list: HTMLElement, ctx: Ctx): void {
   const li = list.appendChild(document.createElement("li"));
   copyBlockStyle(src, li, ctx);
@@ -263,10 +260,10 @@ function appendListItem(src: HTMLElement, list: HTMLElement, ctx: Ctx): void {
   !li.firstChild && li.appendChild(document.createElement("br"));
 }
 
-/** Returns cleaned list */
+/** Returns sanitized list */
 function toList(src: HTMLElement, ctx: Ctx): HTMLElement {
   const list = document.createElement(src.tagName);
-  let li: HTMLElement | null = null; // for content placed directly into list (invalid html)
+  let li: HTMLElement | null = null; // for content directly in list (invalid html)
   src.childNodes.forEach((n) => {
     const tag = n.nodeName;
     if (tag === "LI") {
@@ -274,7 +271,7 @@ function toList(src: HTMLElement, ctx: Ctx): HTMLElement {
       appendListItem(n as HTMLElement, list, ctx);
     } else if (listTags.has(tag)) {
       li = null;
-      list.appendChild(toList(n as HTMLElement, ctx)); // nested list produced by Chrome (indent)
+      list.appendChild(toList(n as HTMLElement, ctx)); // Chrome nests lists on indent
     } else if (n.nodeType === Node.ELEMENT_NODE || (n.nodeType === Node.TEXT_NODE && (n as Text).data.trim())) {
       li ??= list.appendChild(document.createElement("li"));
       appendInlineNode(n, li, ctx);
@@ -283,7 +280,7 @@ function toList(src: HTMLElement, ctx: Ctx): HTMLElement {
   return list;
 }
 
-/** Appends cleaned content of container (root, indentation) to dst: inline content is grouped into paragraphs */
+/** Appends sanitized blocks of container: loose inline content is grouped into paragraphs */
 function appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
   const pTag = ctx.isEditor ? "div" : "p";
   let p: HTMLElement | null = null; // current paragraph for inline content
@@ -298,7 +295,7 @@ function appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
       if (p || t.trim()) {
         p ??= dst.appendChild(document.createElement(pTag));
         p.append(t);
-      } // otherwise skip whitespaces between blocks
+      } // skip whitespaces between blocks
       return;
     }
     if (n.nodeType !== Node.ELEMENT_NODE) {
@@ -307,7 +304,7 @@ function appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
     const el = n as HTMLElement;
     const tag = el.tagName;
     if (tag === "BR") {
-      // line break after inline content means the next paragraph; otherwise it's an empty line
+      // after inline content - next paragraph, otherwise - empty line
       if (p) {
         closeParagraph();
       } else {
@@ -316,7 +313,7 @@ function appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
       return;
     }
     if (!isBlockTag(tag)) {
-      // inline content: not supported elements are skipped with content (<script> etc.) except embeds of tools (<img> etc.)
+      // skip unsupported with content (<script> etc.) except embeds (<img> etc.)
       const embed = toEmbed(el, ctx);
       if (embed || !skipTags.has(tag)) {
         p ??= dst.appendChild(document.createElement(pTag));
@@ -343,23 +340,23 @@ function appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
   closeParagraph();
 }
 
-/** Returns sanitized content for editor: only formats of tools & safe elements are kept */
+/** Returns sanitized content for editor */
 export function htmlToEditor(html: string, tools: Tools): DocumentFragment {
   const f = document.createDocumentFragment();
   if (html) {
-    const { body } = new DOMParser().parseFromString(html, "text/html"); // inert: scripts & resources aren't executed/loaded
+    const { body } = new DOMParser().parseFromString(html, "text/html"); // inert: nothing is executed/loaded
     appendBlocks(body, f, ctxOf(tools, true));
   }
   return f;
 }
 
-/** Returns true if node is the only paragraph without styles: `<p>` isn't required in value since sanitizer adds it back;
- *  it's required if paragraph contains `<br>` or starts with whitespaces (outside paragraph they're parsed differently) */
+/** Returns true if `<p>` can be dropped from value: the only paragraph without styles, `<br>` & leading whitespaces
+ *  (sanitizer adds it back) */
 function isPlainParagraph(p: HTMLElement): boolean {
   if (p.nextSibling || p.tagName !== "P" || p.attributes.length) {
     return false;
   }
-  p.normalize(); // join text nodes to check leading whitespaces
+  p.normalize(); // to check leading whitespaces
   const f = p.firstChild!;
   return (
     (f.nodeType !== Node.TEXT_NODE || !!(f as Text).data.trim()) &&
@@ -367,17 +364,16 @@ function isPlainParagraph(p: HTMLElement): boolean {
   );
 }
 
-/** Represents contenteditable element with rich text where value is html */
+/** Contenteditable element with html value */
 export default class WUPTextRichInput extends WUPTextAreaInput {
-  /** Tools of toolbar (static $tools of control): their formats are kept by sanitizer */
+  /** Static $tools of control: sanitizer keeps their formats */
   _tools: Tools = {};
 
-  /** Get/set html: getter returns clean html (empty string if there is no text or embeds): paragraphs as `<p>`,
-   *  inline formats as `<strong>`, `<em>` etc.; setter sanitizes html
+  /** Sanitized html (empty string if there is no text or embeds)
    * @tutorial Rules
-   * * `<p>` is used only if it's required: single paragraph without styles is returned without it (`text` instead of `<p>text</p>`)
-   * * only formats of tools are kept (see `is`, `create` & `set` of $tools): other elements are unwrapped
-   * (`<span>`, `<table>` etc.) or removed with content (`<script>`, `<img>` if it isn't embed of tools etc.)
+   * * single plain paragraph goes without `<p>` (`text` instead of `<p>text</p>`)
+   * * only formats of tools are kept: other elements are unwrapped (`<span>`, `<table>` etc.)
+   * or removed with content (`<script>`, `<img>` if it isn't embed etc.)
    * * links with unsafe protocols are removed (`javascript:` etc.) */
   override get value(): string {
     if (this._cached == null) {
@@ -387,14 +383,14 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       const text = div.textContent!;
       const p = div.firstChild as HTMLElement;
       this._cached = text.trim() || ctx.hasEmbed ? (isPlainParagraph(p) ? p : div).innerHTML : "";
-      lastText = [this._cached, this._cached && text]; // validations get text without parsing html
+      lastText = [this._cached, this._cached && text]; // validations skip parsing
     }
     return this._cached;
   }
 
   override set value(v: string) {
     if (v && v === this.value) {
-      return; // skip re-rendering: it resets selection & scroll (empty value clears empty lines)
+      return; // re-render resets selection & scroll (empty value still clears empty lines)
     }
     this._cached = undefined;
     this.replaceChildren(htmlToEditor(v, this._tools));

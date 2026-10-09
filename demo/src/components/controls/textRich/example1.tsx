@@ -98,11 +98,9 @@ WUPTextRichControl.$tools.image = {
 /** Names of placeholders: `{firstName}` etc. is replaced with real value by server (mail merge etc.) */
 const placeholders = ["firstName", "lastName", "email", "company", "date"];
 
-/** Returns name of placeholder: text inside braces (`{someProp}` => `someProp`);
- *  unknown name is rejected if it isn't allowed: typed `{someProp}` stays text & such element is unwrapped by sanitizer */
+/** Returns name of placeholder: text inside braces (`{someProp}` => `someProp`); */
 function placeholderOf(el: HTMLElement): string | undefined {
-  /** Placeholders out of `placeholders` are allowed: `{someProp}`; set `false` to allow only known ones */
-  const allowUnknown = true;
+  const allowUnknown = true; //  unknown name is rejected if it isn't allowed: typed `{someProp}` stays text & such element is unwrapped by sanitizer
 
   const t = el.textContent!;
   const v =

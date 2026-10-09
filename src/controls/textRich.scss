@@ -3,8 +3,8 @@
 :root {
   --ctrl-textrich-quote: #ccc;
   --ctrl-textrich-code-bg: #f0f0f0;
-  // icons are rendered at 15px (1.125em of default button font 13.33px): so viewBox 15x15 + lines on integer coords => crisp edges with 2px strokes
-  // WARN: any other size scales lines between pixels => blurry icons
+  // icons render at 15px (1.125em of button font 13.33px): viewBox 15x15 + integer coords => crisp 2px strokes
+  // WARN: any other size => blurry icons
   --wup-icon-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 3h4a2 2 0 0 1 0 4H4zm0 4h4.5a2.5 2.5 0 0 1 0 5H4z'/%3E%3C/svg%3E");
   --wup-icon-italic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M6 3h5M4 12h5m-2.5 0 2-9'/%3E%3C/svg%3E");
   --wup-icon-underline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 3v3.5a3.5 3.5 0 0 0 7 0V3'/%3E%3Crect width='11' height='1' x='2' y='12' fill='%23000' stroke='none' rx='.5'/%3E%3C/svg%3E");
@@ -29,7 +29,7 @@
     --ctrl-textrich-code-bg: #1d1d1d;
   }
 
-  // content of editor: global to show value outside control with the same styles via `<div wup-textrich>{value}</div>`
+  // editor content: global to show value outside via `<div wup-textrich>{value}</div>`
   [wup-textrich] {
     blockquote {
       margin: 5px 0;
@@ -48,7 +48,7 @@
   }
 }
 
-// icons of toolbar buttons: [tool] => --wup-icon-... (icons of dropdown values are pointed via `className` of static $tools)
+// toolbar button icons: [tool] => --wup-icon-... (dropdown values use `className` of static $tools)
 $tools: (
   "bold": "bold",
   "italic": "italic",
@@ -67,18 +67,18 @@ $tools: (
 );
 
 :host {
-  position: relative; // to position label relative to control instead of editor
+  position: relative; // for label
   display: flex;
   flex-direction: column;
-  margin-top: calc(var(--base-margin) + 1.75em); // space for label placed above the border: line-height of label + gap
+  margin-top: calc(var(--base-margin) + 1.75em); // space for label above the border
 
   &:has(> label strong:empty) {
     margin-top: var(--base-margin);
   }
 
-  // own label only: otherwise it affects <wup-text> in popup to enter link
+  // own label only: not <wup-text> in link popup
   > label {
-    --ctrl-label-active-pos: none; // label is always placed above the border like header
+    --ctrl-label-active-pos: none; // label is always above the border
 
     > span {
       position: static;
@@ -95,7 +95,7 @@ $tools: (
   }
 
   [role="toolbar"] {
-    order: -1; // toolbar is placed after editor in DOM
+    order: -1; // after editor in DOM
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -129,9 +129,9 @@ $tools: (
     }
   }
 
-  // button clear is always visible like other tools: in other controls it's visible on hover/focus only & hidden for readonly/disabled
+  // clear button is always visible like other tools (other controls show it on hover/focus only)
   [role="group"] > button[clear] {
-    --icon-size: 0.875em; // icons cross & back are bigger than icons of other tools
+    --icon-size: 0.875em; // cross & back icons are bigger
     display: inline-block;
     opacity: 1;
   }
@@ -142,17 +142,16 @@ $tools: (
     }
   }
 
-  // icon of value (`className` of value in static $tools): icon of the current value in dropdown or of item in its menu
-  // (label is shown via tooltip)
+  // value icon (`className` of value): in dropdown & its menu items (label is in tooltip)
   [role="combobox"][icon]:before,
   > wup-popup[menu] li[icon]:before {
     content: "";
     --ctrl-icon-img: var(--icon-img);
-    --ctrl-icon-size: 15px; // the same as icons of tool buttons
+    --ctrl-icon-size: 15px; // as tool buttons
     @include wup-icon;
   }
 
-  // dropdown: button with label of the current value & chevron (menu is opened via askMenu)
+  // dropdown: label of the current value & chevron
   [role="combobox"] {
     display: inline-flex;
     align-items: center;
@@ -176,7 +175,7 @@ $tools: (
       --ctrl-icon-size: 0.6em;
       @include wup-icon;
       align-self: center;
-      margin-left: auto; // at the right side when button is wider than content (ex. min-width)
+      margin-left: auto; // at the right when button is wider (min-width)
       background: currentColor;
     }
 
@@ -195,10 +194,10 @@ $tools: (
     }
 
     &[icon]:before {
-      background: currentColor; // the same color as label & chevron (hover etc.)
+      background: currentColor; // as label & chevron
     }
 
-    // fixed width by the widest item (with sans-serif fonts): otherwise toolbar is shifted when selection is changed
+    // width of the widest item: otherwise toolbar shifts on selection change
     &[tool="header"] {
       min-width: 6.25em;
     }
@@ -208,7 +207,7 @@ $tools: (
     }
   }
 
-  // icons of values (align): `className` of value in static $tools => icon of button `{ align: "center" }` or item of dropdown
+  // value icons (align) by `className` of value
   @each $icon in ("align-left", "align-center", "align-right", "align-justify") {
     .wup-icon-#{$icon} {
       --icon-img: var(--wup-icon-#{$icon});
@@ -224,7 +223,7 @@ $tools: (
     opacity: 0.5;
   }
 
-  // menu of dropdown (see askMenu)
+  // dropdown menu
   > wup-popup[menu] {
     @include wup-menu;
     z-index: 8010;
@@ -237,11 +236,11 @@ $tools: (
       white-space: nowrap;
 
       &[hidden] {
-        display: none; // filtered by text typed after trigger
+        display: none; // filtered by typed text
       }
     }
 
-    // keyboard shortcut (`hotKey` of value) at the right side: before checkmark of selected item
+    // shortcut at the right: before checkmark
     kbd {
       margin-left: auto;
       padding-left: 2em;
@@ -251,25 +250,25 @@ $tools: (
     }
 
     li:has(> kbd)[aria-selected="true"]:after {
-      margin-left: 0; // otherwise free space is shared with kbd
+      margin-left: 0; // otherwise it shares free space with kbd
     }
 
-    // headings use default/global styles (the same as in editor)
+    // headings keep global styles as in editor
     :is(h1, h2, h3, h4, h5, h6) {
       margin: 0;
       padding: 0;
     }
   }
 
-  // popup to enter value via $ask (url of link etc.)
+  // $ask popup (link url etc.)
   > wup-popup > wup-text {
-    width: min(40em, calc(100vw - 3em)); // long urls are visible entirely; fits small screens
+    width: min(40em, calc(100vw - 3em)); // long urls; small screens
     margin: 0;
   }
 
-  // editor: styles of content are defined globally via [wup-textrich]
+  // editor: content styles are global via [wup-textrich]
   [contenteditable] {
-    margin-top: 0.5em; // the same as bottom of --ctrl-padding: top of --ctrl-padding is space for label but here label is placed above the border
+    margin-top: 0.5em; // as bottom of --ctrl-padding (its top is space for label, but label is above the border here)
     min-height: 8em;
     max-height: 16em;
   }
