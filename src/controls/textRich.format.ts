@@ -111,18 +111,21 @@ export function addInline(nodes: Text[], is: (el: Element) => boolean, create: (
   });
 }
 
-/** Splits element at collapsed range & places range between parts: `<b>a|b</b>` => `<b>a</b>|<b>b</b>` */
-export function splitAt(el: Element, r: Range): void {
+/** Splits element at collapsed range & places range between parts: `<b>a|b</b>` => `<b>a</b>|<b>b</b>`;
+ *  parts without text & embeds (see `isEmbed`) are removed */
+export function splitAt(el: Element, r: Range, isEmbed?: (el: Element) => boolean): void {
+  const isEmpty = (x: Element): boolean =>
+    !x.textContent && !(isEmbed && Array.prototype.some.call(x.querySelectorAll("*"), isEmbed));
   const after = document.createRange();
   after.setStart(r.startContainer, r.startOffset);
   after.setEnd(el, el.childNodes.length);
   const c = el.cloneNode(false) as Element;
   c.appendChild(after.extractContents());
   el.after(c);
-  !c.textContent && c.remove();
+  isEmpty(c) && c.remove();
   r.setStartAfter(el);
   r.collapse(true);
-  !el.textContent && el.remove();
+  isEmpty(el) && el.remove();
 }
 
 /** Returns lines of editor: blocks placed directly into root & items of lists */

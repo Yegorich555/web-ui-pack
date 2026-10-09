@@ -1256,10 +1256,11 @@ export default class WUPTextRichControl<
     const tools = this.#tools;
     const r = sel.getRangeAt(0);
     r.deleteContents();
+    const isEmbed = embedOf(tools);
     // move caret out of elements of removed/changed formats (`true` - added toggle format)
     this.#pending.forEach((v, k) => {
       const el = v !== true && formatParents(r.startContainer, isOf(tools[k]), inp).pop(); // the outer one
-      el && splitAt(el, r);
+      el && splitAt(el, r, isEmbed);
     });
     const t = document.createTextNode(text);
     let node: Node = t;
@@ -1606,7 +1607,7 @@ export default class WUPTextRichControl<
       return;
     }
     const last = f.lastChild!;
-    splitAt(line, r); // empty parts are removed
+    splitAt(line, r, embedOf(this.#tools)); // empty parts are removed
     r.insertNode(f);
     window.getSelection()!.collapse(last, last.childNodes.length);
   }

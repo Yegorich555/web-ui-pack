@@ -171,6 +171,36 @@ describe("control.textRich", () => {
     expect(inp.innerHTML).toBe("<h1>T</h1><ul><li>x</li></ul>");
   });
 
+  test("split at caret keeps part with embed only", async () => {
+    WUPTextRichControl.$tools.image = {
+      kind: "embed",
+      is: (e) => (e.tagName === "IMG" ? e.getAttribute("src") : undefined),
+      create: (v) => Object.assign(document.createElement("img"), { src: v }),
+    };
+    try {
+      await h.wait(1);
+      const inp = el.$refInput;
+      inp.focus();
+      const img = '<img src="a.png">';
+
+      // paste of block splits line at caret
+      inp.innerHTML = `<div>${img}</div>`;
+      window.getSelection().collapse(inp.firstChild, 1);
+      el.insertHTML("<h1>T</h1>");
+      expect(inp.innerHTML).toBe(`<div>${img}</div><h1>T</h1>`); // otherwise image is removed
+
+      // typing with pending format splits format element at caret
+      inp.innerHTML = `<div><b>${img}</b></div>`;
+      window.getSelection().collapse(inp.querySelector("b"), 1);
+      el.applyFormat("bold"); // pending: not bold
+      const init = { inputType: "insertText", data: "x", bubbles: true, cancelable: true };
+      inp.dispatchEvent(new InputEvent("beforeinput", init));
+      expect(inp.innerHTML).toBe(`<div><b>${img}</b>x</div>`);
+    } finally {
+      delete WUPTextRichControl.$tools.image;
+    }
+  });
+
   test("value: <p> is used only if it's required", () => {
     const inp = document.createElement("wup-richinput"); // value of control's input is mocked by mockAreaInput
     inp._tools = WUPTextRichControl.$tools;
