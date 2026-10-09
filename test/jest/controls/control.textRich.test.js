@@ -235,6 +235,35 @@ describe("control.textRich", () => {
     expect(getHtml()).toBe("<h1>a <b>b|</b></h1>");
   });
 
+  test("format with caret placed at editor (between lines)", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Sets html, places caret at editor child index & applies format */
+    const format = (html, index, ...args) => {
+      inp.innerHTML = html;
+      window.getSelection().collapse(inp, index);
+      el.applyFormat(...args);
+      return getHtml();
+    };
+
+    // otherwise caret isn't inside any line: nothing is formatted
+    expect(format("<div>a</div>", 1, "header", 1, true)).toBe("<h1>a|</h1>");
+    expect(format("<div>a</div><div>b</div>", 1, "header", 1, true)).toBe("<div>a</div><h1>|b</h1>");
+    // list: into its item
+    expect(format("<ul><li>a</li><li>b</li></ul>", 0, "header", 1, true)).toBe("<h1>|a</h1><ul><li>b</li></ul>");
+    expect(format("<ul><li>a</li><li>b</li></ul>", 1, "header", 1, true)).toBe("<ul><li>a</li></ul><h1>b|</h1>");
+    expect(format("<ol><li>a<ol><li>b</li></ol></li></ol>", 1, "list", "ordered", false)).toBe(
+      "<ol><li>a</li></ol><div>b|</div>"
+    );
+    expect(format("<ul></ul>", 1, "header", 1, true)).toBe("|<ul></ul>"); // empty list: nothing to format
+    // selection by editor points (select all in Firefox)
+    inp.innerHTML = "<div>a</div><ul><li>b</li></ul>";
+    window.getSelection().setBaseAndExtent(inp, 0, inp, 2);
+    el.applyFormat("align", "center", true);
+    expect(getHtml()).toBe('<div style="text-align: center;">[a</div><ul><li style="text-align: center;">b]</li></ul>');
+  });
+
   test("typed trigger opens menu when text is inserted by control", async () => {
     const cleanup = usePlaceholder();
     try {

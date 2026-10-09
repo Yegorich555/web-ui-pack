@@ -1347,21 +1347,29 @@ export default class WUPTextRichControl<
   protected getSelectionPos(): [number, number] {
     const inp = this.$refInput;
     const sel = window.getSelection()!;
-    // (editor, index) => (child, 0), the end of editor => the end of the last child:
-    // otherwise index is wrong after wrapping (or out of editor: IndexSizeError)
+    // (editor, index) => (child, 0), the end of editor => the end of the last child: otherwise index is wrong
+    // after wrapping (or out of editor: IndexSizeError) & formats find no line (caret isn't inside it)
     const childPos = (n: Node, offset: number): [Node, number] => {
-      const c = n === inp && (inp.childNodes[offset] ?? inp.lastChild);
+      let c: Node | null = n === inp ? inp.childNodes[offset] ?? inp.lastChild : null;
       if (!c) {
         return [n, offset];
       }
-      return c === inp.childNodes[offset]
-        ? [c, 0]
-        : [c, c.nodeType === Node.TEXT_NODE ? (c as Text).length : c.childNodes.length];
+      const isEnd = c !== inp.childNodes[offset];
+      // list isn't line: into its 1st item or to the end of the last one (& of nested list at the end of item)
+      const inner = (x: Node): Node | null =>
+        listTags.has(x.nodeName)
+          ? (x as Element)[isEnd ? "lastElementChild" : "firstElementChild"]
+          : (isEnd && listTags.has(x.lastChild?.nodeName ?? "") && x.lastChild) || null;
+      for (let x = inner(c); x; x = inner(c)) {
+        c = x;
+      }
+      return isEnd ? [c, c.nodeType === Node.TEXT_NODE ? (c as Text).length : c.childNodes.length] : [c, 0];
     };
     const [an, ao] = childPos(sel.anchorNode!, sel.anchorOffset);
     const [fn1, fo] = childPos(sel.focusNode!, sel.focusOffset);
+    const isMoved = an !== sel.anchorNode || fn1 !== sel.focusNode;
     // again after wrapping: empty editor gets the 1st line (caret goes into it)
-    wrapLines(inp) && sel.setBaseAndExtent(...childPos(an, ao), ...childPos(fn1, fo));
+    (wrapLines(inp) || isMoved) && sel.setBaseAndExtent(...childPos(an, ao), ...childPos(fn1, fo));
     const isEmbed = this.#isEmbed;
     return [
       charsBefore(inp, sel.anchorNode!, sel.anchorOffset, isEmbed),
