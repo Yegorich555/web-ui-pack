@@ -1549,6 +1549,27 @@ describe("control.textRich", () => {
     }
   });
 
+  test("toolbar shows formats of the next line if selection starts at the end of line element", async () => {
+    el.$options.toolbar = [["header", "bold"]];
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    const header = el.querySelector("[tool=header]");
+    /** Sets html & selects from the end of the 1st line element to char of the last text */
+    const formatsAt = (html) => {
+      inp.innerHTML = html;
+      const t = inp.lastChild.lastChild;
+      window.getSelection().setBaseAndExtent(inp.firstChild, inp.firstChild.childNodes.length, t, 1);
+      document.dispatchEvent(new Event("selectionchange"));
+      return [header.textContent, el.querySelector("[tool=bold]").getAttribute("aria-pressed")];
+    };
+
+    // otherwise formats of the 1st line (its text is before selection): `Normal`
+    expect(formatsAt("<div>a</div><h2>b</h2>")).toEqual(["Heading 2", "false"]);
+    expect(formatsAt("<div><b>a</b></div><h2>b</h2>")).toEqual(["Heading 2", "false"]);
+    expect(formatsAt('<div>a<img src="a.png"></div><h3><b>b</b></h3>')).toEqual(["Heading 3", "true"]);
+  });
+
   test("toolbar", async () => {
     await h.wait(1);
     const inp = el.$refInput;

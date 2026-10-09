@@ -309,7 +309,11 @@ function firstNode(r: Range): Node {
     return n.childNodes[r.startOffset];
   }
   const w = document.createTreeWalker(r.commonAncestorContainer, NodeFilter.SHOW_TEXT);
-  w.currentNode = n;
+  let last = n;
+  while (last.lastChild) {
+    last = last.lastChild; // range starts at the end of element: otherwise its own text is next (it's before range)
+  }
+  w.currentNode = last;
   const next = w.nextNode();
   return next && r.intersectsNode(next) ? next : n;
 }
