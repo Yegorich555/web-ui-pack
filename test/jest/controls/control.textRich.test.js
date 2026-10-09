@@ -102,6 +102,51 @@ describe("control.textRich", () => {
     expect(sel.anchorOffset).toBe(2);
   });
 
+  test("typed trigger opens menu when text is inserted by control", async () => {
+    WUPTextRichControl.$tools.placeholder = {
+      values: [{ value: "firstName" }, { value: "email" }],
+      trigger: "{",
+      kind: "inline",
+      is: (e) => (e.classList.contains("placeholder") ? e.textContent.slice(1, -1) : undefined),
+      create: "span",
+      classNameTag: "placeholder",
+    };
+    // jsdom doesn't support it: menu is placed near typed trigger
+    const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
+    Range.prototype.getBoundingClientRect = () => rect;
+    try {
+      el.$options.toolbar = [["bold"], ["placeholder"]];
+      await h.wait(1);
+      const inp = el.$refInput;
+      inp.focus();
+      const btn = el.querySelector("[tool=placeholder]");
+      /** Sets html, places caret at the end of text & types trigger */
+      const typeTrigger = async (html, text) => {
+        inp.innerHTML = html;
+        const t = document.createTreeWalker(inp, NodeFilter.SHOW_TEXT);
+        while (t.nextNode().data !== text);
+        window.getSelection().collapse(t.currentNode, text.length);
+        const init = { inputType: "insertText", data: "{", bubbles: true, cancelable: true };
+        const ev = new InputEvent("beforeinput", init);
+        inp.dispatchEvent(ev);
+        await h.wait(1);
+        const isOpen = btn.getAttribute("aria-expanded") === "true";
+        el.$refInput.blur(); // closes menu
+        await h.wait(1);
+        inp.focus();
+        return [ev.defaultPrevented, isOpen];
+      };
+
+      // at the end of bold: typed text is inserted by control (otherwise Chrome types after link)
+      expect(await typeTrigger("<div><b>bold</b></div>", "bold")).toEqual([true, true]);
+      // after token: typed text is inserted out of it
+      expect(await typeTrigger('<div><span class="placeholder">{email}</span></div>', "{email}")).toEqual([true, true]);
+    } finally {
+      delete WUPTextRichControl.$tools.placeholder;
+      delete Range.prototype.getBoundingClientRect;
+    }
+  });
+
   test("value: <p> is used only if it's required", () => {
     const inp = document.createElement("wup-richinput"); // value of control's input is mocked by mockAreaInput
     inp._tools = WUPTextRichControl.$tools;

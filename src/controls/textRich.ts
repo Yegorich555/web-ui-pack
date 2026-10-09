@@ -1858,6 +1858,7 @@ export default class WUPTextRichControl<
       return;
     }
     this.fireInput(); // saves history by state before changes
+    s && this.gotTrigger(); // fired input has no inputType: gotInput skips it
   }
 
   protected override createHistory(): TextHistory {
