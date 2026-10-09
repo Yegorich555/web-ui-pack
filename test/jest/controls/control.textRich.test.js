@@ -87,6 +87,21 @@ describe("control.textRich", () => {
     );
   });
 
+  test("format of loose content with caret at the end of editor", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    // inline paste into empty editor leaves loose nodes & caret at (editor, childNodes.length)
+    inp.innerHTML = "a <b>b</b> c";
+    window.getSelection().collapse(inp, 3);
+    expect(() => el.applyFormat("header", 1, true)).not.toThrow(); // otherwise IndexSizeError after wrapping lines
+    expect(inp.innerHTML).toBe("<h1>a <b>b</b> c</h1>");
+    const sel = window.getSelection(); // caret stays at the end
+    expect(sel.isCollapsed).toBe(true);
+    expect(sel.anchorNode).toBe(inp.firstChild.lastChild);
+    expect(sel.anchorOffset).toBe(2);
+  });
+
   test("value: <p> is used only if it's required", () => {
     const inp = document.createElement("wup-richinput"); // value of control's input is mocked by mockAreaInput
     inp._tools = WUPTextRichControl.$tools;

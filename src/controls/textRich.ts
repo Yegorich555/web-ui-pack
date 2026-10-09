@@ -1329,10 +1329,16 @@ export default class WUPTextRichControl<
   protected getSelectionPos(): [number, number] {
     const inp = this.$refInput;
     const sel = window.getSelection()!;
-    // (editor, index) => (child, 0): otherwise index is wrong after wrapping
+    // (editor, index) => (child, 0), the end of editor => the end of the last child:
+    // otherwise index is wrong after wrapping (or out of editor: IndexSizeError)
     const childPos = (n: Node, offset: number): [Node, number] => {
-      const c = n === inp && inp.childNodes[offset];
-      return c ? [c, 0] : [n, offset];
+      const c = n === inp && (inp.childNodes[offset] ?? inp.lastChild);
+      if (!c) {
+        return [n, offset];
+      }
+      return c === inp.childNodes[offset]
+        ? [c, 0]
+        : [c, c.nodeType === Node.TEXT_NODE ? (c as Text).length : c.childNodes.length];
     };
     const [an, ao] = childPos(sel.anchorNode!, sel.anchorOffset);
     const [fn1, fo] = childPos(sel.focusNode!, sel.focusOffset);
