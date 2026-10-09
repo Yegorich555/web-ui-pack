@@ -4414,7 +4414,7 @@ WUP-DROPDOWN &gt; [menu] li[focused], WUP-DROPDOWN &gt; [menu] li:focus {
   --popup-bg: #fff;
   --popup-shadow: #0003;
   --tooltip-text: inherit;
-  --tooltip-bg: rgba(255, 255, 255, 0.9);
+  --tooltip-bg: #fff;
   --tooltip-shadow: #0003;
 }
 [wupdark] {
@@ -4422,7 +4422,7 @@ WUP-DROPDOWN &gt; [menu] li[focused], WUP-DROPDOWN &gt; [menu] li:focus {
   --popup-bg: #2b3645;
   --popup-shadow: #0006;
   --tooltip-text: #d8d8d8;
-  --tooltip-bg: rgba(16, 70, 82, 0.9);
+  --tooltip-bg: #104652;
   --tooltip-shadow: #0006;
 }
   

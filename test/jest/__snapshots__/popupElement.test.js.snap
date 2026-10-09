@@ -113,7 +113,7 @@ exports[`popupElement inheritance common tests render + styles 2`] = `
   --popup-bg: #fff;
   --popup-shadow: #0003;
   --tooltip-text: inherit;
-  --tooltip-bg: rgba(255, 255, 255, 0.9);
+  --tooltip-bg: #fff;
   --tooltip-shadow: #0003;
 }
 [wupdark] {
@@ -121,7 +121,7 @@ exports[`popupElement inheritance common tests render + styles 2`] = `
   --popup-bg: #2b3645;
   --popup-shadow: #0006;
   --tooltip-text: #d8d8d8;
-  --tooltip-bg: rgba(16, 70, 82, 0.9);
+  --tooltip-bg: #104652;
   --tooltip-shadow: #0006;
 }
   
@@ -459,7 +459,7 @@ exports[`popupElement me common tests render + styles 2`] = `
   --popup-bg: #fff;
   --popup-shadow: #0003;
   --tooltip-text: inherit;
-  --tooltip-bg: rgba(255, 255, 255, 0.9);
+  --tooltip-bg: #fff;
   --tooltip-shadow: #0003;
 }
 [wupdark] {
@@ -467,7 +467,7 @@ exports[`popupElement me common tests render + styles 2`] = `
   --popup-bg: #2b3645;
   --popup-shadow: #0006;
   --tooltip-text: #d8d8d8;
-  --tooltip-bg: rgba(16, 70, 82, 0.9);
+  --tooltip-bg: #104652;
   --tooltip-shadow: #0006;
 }
   
