@@ -14,6 +14,25 @@ initTestBaseControl({
   },
 });
 
+/** Adds token tool `placeholder` (trigger `{`) & mocks rect of range (jsdom doesn't support it: menu is placed near caret)
+ * @returns cleanup function */
+function usePlaceholder() {
+  WUPTextRichControl.$tools.placeholder = {
+    values: [{ value: "firstName" }, { value: "email" }],
+    trigger: "{",
+    kind: "inline",
+    is: (e) => (e.classList.contains("placeholder") ? e.textContent.slice(1, -1) : undefined),
+    create: "span",
+    classNameTag: "placeholder",
+  };
+  const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
+  Range.prototype.getBoundingClientRect = () => rect;
+  return () => {
+    delete WUPTextRichControl.$tools.placeholder;
+    delete Range.prototype.getBoundingClientRect;
+  };
+}
+
 describe("control.textRich", () => {
   testTextAreaControl(() => el, {
     attrs: {
@@ -103,17 +122,7 @@ describe("control.textRich", () => {
   });
 
   test("typed trigger opens menu when text is inserted by control", async () => {
-    WUPTextRichControl.$tools.placeholder = {
-      values: [{ value: "firstName" }, { value: "email" }],
-      trigger: "{",
-      kind: "inline",
-      is: (e) => (e.classList.contains("placeholder") ? e.textContent.slice(1, -1) : undefined),
-      create: "span",
-      classNameTag: "placeholder",
-    };
-    // jsdom doesn't support it: menu is placed near typed trigger
-    const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
-    Range.prototype.getBoundingClientRect = () => rect;
+    const cleanup = usePlaceholder();
     try {
       el.$options.toolbar = [["bold"], ["placeholder"]];
       await h.wait(1);
@@ -142,8 +151,7 @@ describe("control.textRich", () => {
       // after token: typed text is inserted out of it
       expect(await typeTrigger('<div><span class="placeholder">{email}</span></div>', "{email}")).toEqual([true, true]);
     } finally {
-      delete WUPTextRichControl.$tools.placeholder;
-      delete Range.prototype.getBoundingClientRect;
+      cleanup();
     }
   });
 
@@ -255,6 +263,31 @@ describe("control.textRich", () => {
       expect(format.mock.calls[1][0].value).toBe(times);
     } finally {
       delete WUPTextRichControl.$tools.font;
+    }
+  });
+
+  test("click on dropdown opens its menu instead of menu of typed trigger", async () => {
+    const cleanup = usePlaceholder();
+    try {
+      el.$options.toolbar = [["placeholder"]];
+      await h.wait(1);
+      const inp = el.$refInput;
+      inp.innerHTML = "<div>{</div>";
+      inp.focus();
+      window.getSelection().collapse(inp.firstChild.firstChild, 1);
+      el.gotTrigger(); // typed trigger opens menu near caret (popup target is dropdown)
+      const btn = el.querySelector("[tool=placeholder]");
+      expect(btn.getAttribute("aria-expanded")).toBe("true");
+
+      btn.click(); // otherwise menu of trigger is closed only
+      await h.wait(1);
+      expect(btn.getAttribute("aria-expanded")).toBe("true");
+      expect(el.querySelectorAll("wup-popup[menu]").length).toBe(1);
+      btn.click(); // the 2nd click closes it
+      await h.wait(1);
+      expect(btn.getAttribute("aria-expanded")).toBe("false");
+    } finally {
+      cleanup();
     }
   });
 

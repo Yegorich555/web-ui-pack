@@ -1673,7 +1673,8 @@ export default class WUPTextRichControl<
     if (el?._format) {
       const l = this.#ask;
       l?.done();
-      !(el._values && l?.popup.$options.target === el) && this.applyTool(el); // click on dropdown toggles its menu
+      // click on dropdown toggles its menu (not menu near range: typed trigger etc.)
+      !(el._values && l instanceof TextRichMenu && l.target === el) && this.applyTool(el);
     }
   }
 

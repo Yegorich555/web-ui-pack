@@ -146,6 +146,11 @@ export default class TextRichMenu extends TextRichAsk {
     o.owner && (this.onKey = this.handleKey);
   }
 
+  /** Element or range menu is placed near: popup target is dropdown for range */
+  get target(): HTMLElement | Range {
+    return this.#o.target;
+  }
+
   override open(parent: HTMLElement): void {
     const { button, owner, values, selected } = this.#o;
     button.setAttribute("aria-expanded", true);
