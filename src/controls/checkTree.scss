@@ -50,7 +50,6 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
   [expand] {
     --ctrl-icon-img: var(--wup-icon-chevron);
     @include wup-icon;
-    padding: 0;
     transform: rotate(-90deg);
   }
 

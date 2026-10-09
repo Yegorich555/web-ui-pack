@@ -1,4 +1,4 @@
-const enum InputTypes {
+export const enum InputTypes {
   /** Same as insert but possible with update last snapshot to merge several append to single */
   append,
   insert,
@@ -7,7 +7,7 @@ const enum InputTypes {
   replace,
 }
 
-interface InputState {
+export interface InputState {
   pos1: number;
   pos2: number;
   inserted: string | null;
@@ -81,7 +81,11 @@ export default class TextHistory {
   constructor(
     public refInput:
       | HTMLInputElement
-      | (HTMLElement & Pick<HTMLInputElement, "value" | "selectionStart" | "selectionEnd" | "setSelectionRange">)
+      | (HTMLElement &
+          Pick<HTMLInputElement, "value" | "selectionStart" | "selectionEnd" | "setSelectionRange"> & {
+            /** Start & end of selection calculated at once (contenteditable) */
+            selection?: { start: number; end: number } | null;
+          })
   ) {
     // call manually handlers instead to reduce event-listeners
     // this.refInput.addEventListener("keydown", (e) => this.handleKeyDown(e as KeyboardEvent));
@@ -149,15 +153,15 @@ export default class TextHistory {
   _stateBeforeInput?: InputState | false;
   /** Returns basic input state */
   get inputState(): InputState {
-    const pos1 = this.refInput.selectionStart || 0;
-    const pos2 = this.refInput.selectionEnd || 0;
-    const v = this.refInput.value;
+    const el = this.refInput;
+    // contenteditable: selectionStart & selectionEnd walk the whole text before caret (each of them)
+    const s = "selection" in el ? el.selection : { start: el.selectionStart, end: el.selectionEnd };
     return {
-      pos1,
-      pos2,
+      pos1: s?.start || 0,
+      pos2: s?.end || 0,
       action: InputTypes.replace,
       inserted: null,
-      value: v,
+      value: el.value,
     };
   }
 
@@ -187,7 +191,8 @@ export default class TextHistory {
       default:
         this._stateBeforeInput = this.inputState;
         // all types here: https://rawgit.com/w3c/input-events/v1/index.html#interface-InputEvent-Attributes
-        if (e.inputType.startsWith("insert")) {
+        // contenteditable: data is null on Enter, paste etc. => changes are defined by diff of values (action replace)
+        if (e.data != null && e.inputType.startsWith("insert")) {
           this._stateBeforeInput.action = e.inputType === "insertText" ? InputTypes.append : InputTypes.insert;
           this._stateBeforeInput.inserted = e.data;
         } else if (e.inputType.startsWith("delete")) {
@@ -281,6 +286,16 @@ export default class TextHistory {
       stateBefore = arg1;
     }
     this._stateBeforeInput = stateBefore;
+    this.saveSnapshot(stateBefore, arg2);
+    this._histTimeout = setTimeout(() => {
+      this._histTimeout = null;
+      this._stateBeforeInput = undefined;
+    }, 1);
+  }
+
+  /** Adds snapshot of changes to history or updates the last one (called by `save`)
+   * @param next value after changes (current value by default) */
+  saveSnapshot(stateBefore: InputState, next?: string): void {
     const { pos1, pos2, action, value: prev } = stateBefore;
 
     // init new snapshot or get/update previous
@@ -340,7 +355,7 @@ export default class TextHistory {
       default:
         {
           // replace
-          const diff = TextHistory.findDiff(prev, arg2 ?? this.refInput.value);
+          const diff = TextHistory.findDiff(prev, next ?? this.refInput.value);
           // extra case with number format: 123| => 1,234|: removed 23 inserted 34
           if (diff.inserted) {
             snap.inserted = diff.inserted.v;
@@ -362,10 +377,6 @@ export default class TextHistory {
     } else {
       this._hist.push(sn);
     }
-    this._histTimeout = setTimeout(() => {
-      this._histTimeout = null;
-      this._stateBeforeInput = undefined;
-    }, 1);
   }
 
   /** Returns last history index */

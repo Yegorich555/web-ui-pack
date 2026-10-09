@@ -43,7 +43,7 @@
 
   input,
   textarea,
-  [contenteditable="true"],
+  [contenteditable],
   [maskholder],
   [postfix] {
     width: 100%;
@@ -88,7 +88,7 @@
   // `:-webkit-autofill` is added by autoprefixer
   input:autofill,
   textarea:autofill,
-  [contenteditable="true"]:autofill {
+  [contenteditable]:autofill {
     font: inherit;
     background-clip: text;
     -webkit-text-fill-color: var(--ctrl-autofill);
@@ -126,7 +126,7 @@
   &:focus-within strong,
   input:not(:placeholder-shown) + strong,
   textarea:not(:placeholder-shown) + strong,
-  [contenteditable="true"]:not(:empty) + strong,
+  [contenteditable]:not(:empty) + strong,
   legend {
     transform: var(--ctrl-label-active-pos);
   }
@@ -135,7 +135,7 @@
   /* stylelint-disable-next-line no-descending-specificity */
   input:autofill + strong,
   textarea:autofill + strong,
-  [contenteditable="true"]:autofill + strong {
+  [contenteditable]:autofill + strong {
     transform: var(--ctrl-label-active-pos);
   }
 
@@ -153,7 +153,7 @@
   // style for icons
   label:after,
   label:before {
-    @include wup-icon;
+    @include wup-icon(5px);
     cursor: pointer;
     /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
     mask-image: none;

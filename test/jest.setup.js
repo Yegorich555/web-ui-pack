@@ -105,3 +105,4 @@ HTMLElement.prototype.dispatchEvent = function dispatchEventFix(/** @type Event 
 };
 
 Element.prototype.scrollIntoView ||= () => {};
+InputEvent.prototype.getTargetRanges ||= () => []; // browser returns [] for synthetic events

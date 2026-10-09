@@ -32,8 +32,7 @@ exports[`formElement common tests render + styles 2`] = `
   --wup-icon-eye-off: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 209.375c96.393 0 174.625 78.232 174.625 174.625 0 22.701-4.54 44.005-12.573 63.913l101.981 101.981C700.77 505.889 742.331 448.961 767.826 384c-60.42-153.321-209.55-261.938-384.174-261.938-48.895 0-95.695 8.731-139.001 24.448l75.438 75.438c19.907-8.032 41.212-12.573 63.913-12.573zM34.75 114.03l95.695 95.695C72.469 254.778 27.067 314.85-.174 384.001 60.246 537.322 209.376 645.938 384 645.938c54.133 0 105.823-10.477 152.971-29.337l14.668 14.668 102.33 101.981 44.355-44.355L79.105 69.676 34.75 114.031zm193.135 193.135 54.133 54.133c-1.746 7.334-2.794 15.018-2.794 22.701 0 57.976 46.799 104.775 104.775 104.775 7.684 0 15.367-1.048 22.701-2.794l54.134 54.134c-23.4 11.525-49.244 18.51-76.835 18.51-96.393 0-174.625-78.232-174.625-174.625 0-27.591 6.985-53.435 18.51-76.835zm150.527-27.242 110.014 110.014.698-5.588c0-57.976-46.799-104.775-104.775-104.775l-5.937.349z'/%3E%3C/svg%3E");
   --wup-icon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
   --wup-icon-date: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M652.801 76.8c42.24 0 76.8 34.56 76.8 76.8v537.601c0 42.24-34.56 76.8-76.8 76.8H115.2c-42.624 0-76.8-34.56-76.8-76.8l.384-537.601c0-42.24 33.792-76.8 76.416-76.8h38.4V0h76.8v76.8h307.2V0h76.8v76.8h38.4zM192 345.6h76.8v76.8H192v-76.8zm230.4 0v76.8h-76.8v-76.8h76.8zm153.601 0h-76.8v76.8h76.8v-76.8zM115.2 691.2h537.601V268.8H115.2v422.4z'/%3E%3C/svg%3E");
-  --wup-icon-time-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M383.615 0C171.647 0 0 172.032 0 384s171.648 384 383.615 384c212.352 0 384.383-172.032 384.383-384S595.966 0 383.615 0zM384 691.199C214.272 691.199 76.801 553.727 76.801 384S214.273 76.801 384 76.801c169.728 0 307.199 137.472 307.199 307.199S553.727 691.199 384 691.199zm-38.401-499.198h57.6v201.6l172.8 102.528-28.8 47.232-201.6-120.96v-230.4z' /%3E%3C/svg%3E");
-  --wup-icon-time: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAABOAAAATgGxzR8zAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAASxJREFUOI2V00kuRFEUBuCvXqLMrEBIRBeKxCIMrcFAYguMRMz13QYwESxAMxIjXYKEiIHYAQYSTRncU1JRT+FPbnLfOf9/unsetejHPK7wHOcSsyjl8L/QiBW84wMnWItzGrY3LKKYJz5AGZtoy0nQjq3g7H0PshqOiXolBiaDu1Ax9EXZmznkY4zm2LeldnozjKCA8T9kr2AMGUYyDEpDuvtHgFucYzBDC27+Ia7gGq2ZNJDCD6QXDKMnx1cg9fGArh8CDOFM2olpNFX5unEPc9KStNcpdwBHOIzvztDMkNbzTVqSeiigOe47oflqbVmaxeQvQWAquPPVxiL2w7GNjhxhZ2QuYxcN3wlFLEVpH9Lw1rER9zJepZnViKtRkn7dSzzhERfSK9Q85ye76kkmcVhDgAAAAABJRU5ErkJggg==");
+  --wup-icon-time: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.25' stroke-width='1.5'/%3E%3Cpath d='M7.5 3.5v5h4'/%3E%3C/svg%3E");
 }
 [wupdark] {
   --base-btn-focus: #bdbdbd;
@@ -289,7 +288,7 @@ WUP-TEXT textarea {
   margin: 0;
   cursor: inherit;
 }
-WUP-TEXT [contenteditable=true] {
+WUP-TEXT [contenteditable] {
   margin: var(--ctrl-padding);
   margin-left: 0;
   margin-right: 0;
@@ -401,7 +400,7 @@ WUP-TEXT [postfix] {
 }
 WUP-TEXT input,
 WUP-TEXT textarea,
-WUP-TEXT [contenteditable=true],
+WUP-TEXT [contenteditable],
 WUP-TEXT [maskholder],
 WUP-TEXT [postfix] {
   width: 100%;
@@ -437,7 +436,7 @@ WUP-TEXT [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-TEXT input:-webkit-autofill, WUP-TEXT textarea:-webkit-autofill, WUP-TEXT [contenteditable=true]:-webkit-autofill {
+WUP-TEXT input:-webkit-autofill, WUP-TEXT textarea:-webkit-autofill, WUP-TEXT [contenteditable]:-webkit-autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -445,7 +444,7 @@ WUP-TEXT input:-webkit-autofill, WUP-TEXT textarea:-webkit-autofill, WUP-TEXT [c
 }
 WUP-TEXT input:autofill,
 WUP-TEXT textarea:autofill,
-WUP-TEXT [contenteditable=true]:autofill {
+WUP-TEXT [contenteditable]:autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -482,16 +481,16 @@ WUP-TEXT textarea:not(:focus)::placeholder {
 WUP-TEXT:focus-within strong,
 WUP-TEXT input:not(:placeholder-shown) + strong,
 WUP-TEXT textarea:not(:placeholder-shown) + strong,
-WUP-TEXT [contenteditable=true]:not(:empty) + strong,
+WUP-TEXT [contenteditable]:not(:empty) + strong,
 WUP-TEXT legend {
   transform: var(--ctrl-label-active-pos);
 }
-WUP-TEXT input:-webkit-autofill + strong, WUP-TEXT textarea:-webkit-autofill + strong, WUP-TEXT [contenteditable=true]:-webkit-autofill + strong {
+WUP-TEXT input:-webkit-autofill + strong, WUP-TEXT textarea:-webkit-autofill + strong, WUP-TEXT [contenteditable]:-webkit-autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-TEXT input:autofill + strong,
 WUP-TEXT textarea:autofill + strong,
-WUP-TEXT [contenteditable=true]:autofill + strong {
+WUP-TEXT [contenteditable]:autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-TEXT:focus-within [maskholder], WUP-TEXT:focus-within [prefix], WUP-TEXT:focus-within [postfix],

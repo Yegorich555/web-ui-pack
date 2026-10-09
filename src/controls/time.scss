@@ -28,7 +28,6 @@
 }
 
 :host {
-  // --ctrl-icon-img: var(--wup-icon-time-lg);
   --ctrl-icon-img: var(--wup-icon-time);
 
   > [menu] {
@@ -152,7 +151,6 @@
       &:after {
         @include wup-icon;
         content: "";
-        padding: 0;
       }
     }
   }

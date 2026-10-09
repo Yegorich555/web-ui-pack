@@ -147,6 +147,10 @@ export default class WUPTextControl<
     return super.$style;
   }
 
+  static $isEmpty(v: unknown): boolean {
+    return v === "" || v == null;
+  }
+
   static $errorParse = __wupln("Invalid value", "validation");
   static $errorMask = __wupln("Incomplete value", "validation");
 
@@ -154,10 +158,8 @@ export default class WUPTextControl<
     selectOnFocus: false,
     clearButton: true,
     validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {
-      min: (v, setV) =>
-        (v === undefined || v.length < setV) && __wupln(`Min length is ${setV} characters`, "validation"),
-      max: (v, setV) =>
-        (v === undefined || v.length > setV) && __wupln(`Max length is ${setV} characters`, "validation"),
+      min: (v, setV) => (!v || v.length < setV) && __wupln(`Min length is ${setV} characters`, "validation"),
+      max: (v, setV) => (!v || v.length > setV) && __wupln(`Max length is ${setV} characters`, "validation"),
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && __wupln("Invalid email address", "validation"),
     }),
     debounceMs: 0,
@@ -294,11 +296,16 @@ export default class WUPTextControl<
 
   /** Custom history undo/redo */
   _refHistory?: TextHistory;
+  /** Returns custom history undo/redo (called if canHandleUndo() returns true) */
+  protected createHistory(): TextHistory {
+    return new TextHistory(this.$refInput);
+  }
+
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
 
     if (this.canHandleUndo()) {
-      this._refHistory ??= new TextHistory(this.$refInput);
+      this._refHistory ??= this.createHistory();
     }
 
     if (!this.$refInput.readOnly) {
@@ -373,8 +380,14 @@ export default class WUPTextControl<
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     const isUndoRedo = this._refHistory?.handleBeforeInput(e);
 
-    this.#declineInputEnd?.call(this);
-    this._beforeSnap = TextHistory.historyToSnapshot(this.$refInput.value, this.$refInput.selectionStart || 0);
+    const decline = this.#declineInputEnd;
+    decline?.call(this);
+    // state is captured by history already (selectionStart of contenteditable walks the whole text before caret)
+    const st = (!decline && this._refHistory?._stateBeforeInput) || {
+      value: this.$refInput.value,
+      pos1: this.$refInput.selectionStart || 0,
+    };
+    this._beforeSnap = TextHistory.historyToSnapshot(st.value, st.pos1);
     setTimeout(() => delete this._beforeSnap);
 
     if (!isUndoRedo && this._opts.mask) {
@@ -389,7 +402,7 @@ export default class WUPTextControl<
   protected gotInput(e: WUP.Text.GotInputEvent): void {
     const isBrowserAutofill = e.isTrusted && e.inputType == null;
     if (isBrowserAutofill && !this._refHistory && this.canHandleUndo()) {
-      this._refHistory = new TextHistory(this.$refInput);
+      this._refHistory = this.createHistory();
     }
     this._refHistory?.handleInput(e);
 
@@ -560,9 +573,9 @@ export default class WUPTextControl<
 
   protected override setClearState(): ValueType | undefined {
     const next = super.setClearState();
-    if (this.$refBtnClear) {
-      this.$refBtnClear.setAttribute("clear", this.#ctr.$isEmpty(next) ? "" : "back");
-    }
+    const b = this.$refBtnClear;
+    const v = this.#ctr.$isEmpty(next) ? "" : "back";
+    b && b.getAttribute("clear") !== v && b.setAttribute("clear", v); // it's called on every change: skip the same value
     return next;
   }
 

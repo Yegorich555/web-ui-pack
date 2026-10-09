@@ -1,25 +1,26 @@
 /* eslint-disable react/no-unescaped-entities */
 import Page from "src/elements/page";
-import { WUPTextareaControl } from "web-ui-pack";
-import styles from "./textarea.scss";
+import { WUPTextAreaControl } from "web-ui-pack";
+import styles from "./textArea.scss";
 
-WUPTextareaControl.$use();
+WUPTextAreaControl.$use();
 
-(window as any).myTextareaValidations = { min: 4 } as WUP.Textarea.Options["validations"];
+(window as any).myTextAreaValidations = { min: 4 } as WUP.TextArea.Options["validations"];
 
 export default function TextControlView() {
   return (
     <Page
-      header="TextareaControl"
-      link="src/controls/textarea.ts"
+      header="TextAreaControl"
+      link="src/controls/textArea.ts"
       details={{
         tag: "wup-textarea",
-        linkDemo: "demo/src/components/controls/textarea.tsx",
+        linkDemo: "demo/src/components/controls/textArea.tsx",
         cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
       }}
       features={[
         "Inheritted features from TextControl (mask, prefix, postfix are not supported)",
         "Autoheight (change css rule: wup-textarea [contenteditable] { max-height: none })",
+        "Footer with count of chars & validations.max (hidden via $options.hideFooter; override $renderFooter to customize)",
       ]}
     >
       <wup-form
@@ -33,9 +34,9 @@ export default function TextControlView() {
       >
         <wup-textarea
           w-name="email"
-          w-label="Textarea control"
+          w-label="TextArea control"
           w-initValue=""
-          w-validations="window.myTextareaValidations"
+          w-validations="window.myTextAreaValidations"
         />
         <wup-textarea
           id="testMe"
@@ -70,8 +71,9 @@ export default function TextControlView() {
         />
         <wup-textarea
           w-name="withoutClearButton"
-          w-label="Without clear button"
-          w-initValue="Use $options.clearButton"
+          w-label="Without clear button & footer"
+          w-initValue="Use $options.clearButton & $options.hideFooter"
+          w-hideFooter
           ref={(el) => {
             if (el) {
               el.$options.clearButton = false;

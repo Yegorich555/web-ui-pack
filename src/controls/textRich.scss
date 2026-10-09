@@ -1,0 +1,281 @@
+@import "../styles";
+
+:root {
+  --ctrl-textrich-quote: #ccc;
+  --ctrl-textrich-code-bg: #f0f0f0;
+  // icons render at 15px (1.125em of button font 13.33px): viewBox 15x15 + integer coords => crisp 2px strokes
+  // WARN: any other size => blurry icons
+  --wup-icon-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 3h4a2 2 0 0 1 0 4H4zm0 4h4.5a2.5 2.5 0 0 1 0 5H4z'/%3E%3C/svg%3E");
+  --wup-icon-italic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M6 3h5M4 12h5m-2.5 0 2-9'/%3E%3C/svg%3E");
+  --wup-icon-underline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 3v3.5a3.5 3.5 0 0 0 7 0V3'/%3E%3Crect width='11' height='1' x='2' y='12' fill='%23000' stroke='none' rx='.5'/%3E%3C/svg%3E");
+  --wup-icon-strike: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath stroke-width='1' d='M1.5 7.5h12'/%3E%3Cpath d='M11 4.5C10.6 3.6 9.3 3 7.5 3S4 3.9 4 5.25c0 .6.4 1 1 1.25m5 2.25c.6.3 1 .6 1 1.25 0 1.35-1.6 2-3.5 2-1.8 0-3.1-.6-3.5-1.5'/%3E%3C/svg%3E");
+  --wup-icon-blockquote: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath fill='%23000' d='M3 4h2v2H3zm7 0h2v2h-2z'/%3E%3Cpath d='M5 6c0 3.5-2 5-2 5m9-5c0 3.5-2 5-2 5'/%3E%3C/svg%3E");
+  --wup-icon-code: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 5.5 2 7.5l2 2m7-4 2 2-2 2M8.5 4l-2 7'/%3E%3C/svg%3E");
+  --wup-icon-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M7.405 3.298a3.302 3.302 0 0 1 .342 4.445A3.302 3.302 0 0 1 3.298 7.405c-1.322-1.33-2.415-2.375-.342-4.449S6.075 1.976 7.405 3.298M11.702 7.595a3.302 3.302 0 0 0-4.445-.342 3.302 3.302 0 0 0 .342 4.445c1.322 1.322 2.375 2.415 4.445 .342s.98-3.115-.342-4.445M5.6 5.6l3.8 3.8'/%3E%3C/svg%3E");
+  --wup-icon-clean: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 3h7M7.6 3 5 10m4-2 4 4m0-4-4 4'/%3E%3Crect width='5' height='1' x='1' y='12' fill='%23000' stroke='none' rx='.5'/%3E%3C/svg%3E");
+  --wup-icon-list-ordered: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M7 3h6M7 7h6m-6 4h6'/%3E%3Cpath stroke-width='1' d='M2.083 4.25h1.667M3.75 8.25H2.083c0-.195 1.542-.897 1.542-1.862a.8.8 0 0 0-1.542-.092m0 5.409a.8.8 0 0 0 1.542-.091.583.583 0 0 0-.5-.614.575.575 0 0 0 .5-.613.8.8 0 0 0-1.542-.091'/%3E%3Cpath fill='%23000' stroke='none' d='M2.917 4.667a.417.417 0 0 1-.417-.417V2.237l-.23.115a.417.417 0 0 1-.559-.185c-.103-.206-.019-.27.187-.372l.833-.417a.417.417 0 0 1 .602.372v2.5a.417.417 0 0 1-.417.417'/%3E%3C/svg%3E");
+  --wup-icon-list-bullet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M5 3h8M5 7h8m-8 4h8M2 3zm0 4zm0 4z'/%3E%3C/svg%3E");
+  --wup-icon-script-sub: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='m2 4 5 6m0-6-5 6'/%3E%3Cpath stroke-width='1' d='M10.5 10.5a1.5 1.5 0 0 1 3 0c0 .9-1.1 1.4-3 2h3'/%3E%3C/svg%3E");
+  --wup-icon-script-super: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='m2 4 5 6m0-6-5 6'/%3E%3Cpath stroke-width='1' d='M10.5 3.5a1.5 1.5 0 0 1 3 0c0 .9-1.1 1.4-3 2h3'/%3E%3C/svg%3E");
+  --wup-icon-indent: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M2 3h11M2 11h11M7 7h6'/%3E%3Cpath fill='%23000' stroke='none' d='M1 5v4l3-2z'/%3E%3C/svg%3E");
+  --wup-icon-outdent: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M2 3h11M2 11h11M2 7h6'/%3E%3Cpath fill='%23000' stroke='none' d='M14 5v4l-3-2z'/%3E%3C/svg%3E");
+  --wup-icon-align-left: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M2 7h11M2 11h8M2 3h5'/%3E%3C/svg%3E");
+  --wup-icon-align-center: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 7H2m10 4H3m7-8H5'/%3E%3C/svg%3E");
+  --wup-icon-align-right: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 7H2m11 4H5m8-8H8'/%3E%3C/svg%3E");
+  --wup-icon-align-justify: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 7H2m11 4H2m11-8H2'/%3E%3C/svg%3E");
+
+  [wupdark] {
+    --ctrl-textrich-quote: #555;
+    --ctrl-textrich-code-bg: #1d1d1d;
+  }
+
+  // editor content: global to show value outside via `<div wup-textrich>{value}</div>`
+  [wup-textrich] {
+    blockquote {
+      margin: 5px 0;
+      padding-left: 16px;
+      border-left: 4px solid var(--ctrl-textrich-quote);
+    }
+
+    pre {
+      margin: 5px 0;
+      padding: 5px 10px;
+      border-radius: 3px;
+      background: var(--ctrl-textrich-code-bg);
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  }
+}
+
+// toolbar button icons: [tool] => --wup-icon-... (dropdown values use `className` of static $tools)
+$tools: (
+  "bold": "bold",
+  "italic": "italic",
+  "underline": "underline",
+  "strike": "strike",
+  "blockquote": "blockquote",
+  "code": "code",
+  "link": "link",
+  "clean": "clean",
+  "list:ordered": "list-ordered",
+  "list:bullet": "list-bullet",
+  "script:sub": "script-sub",
+  "script:super": "script-super",
+  "indent:-1": "outdent",
+  "indent:1": "indent",
+);
+
+:host {
+  position: relative; // for label
+  display: flex;
+  flex-direction: column;
+  margin-top: calc(var(--base-margin) + 1.75em); // space for label above the border
+
+  &:has(> label strong:empty) {
+    margin-top: var(--base-margin);
+  }
+
+  // own label only: not <wup-text> in link popup
+  > label {
+    --ctrl-label-active-pos: none; // label is always above the border
+
+    > span {
+      position: static;
+    }
+
+    strong {
+      top: auto;
+      bottom: calc(100% + 0.25em);
+      left: 0;
+      transform: none;
+      line-height: 1.5;
+      font-weight: bold;
+    }
+  }
+
+  [role="toolbar"] {
+    order: -1; // after editor in DOM
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0 0.75em;
+    padding: 0.25em 0.5em;
+    border-bottom: 1px solid var(--ctrl-border);
+    cursor: default;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  [role="group"] {
+    display: flex;
+    align-items: center;
+  }
+
+  [role="group"] > button:not([role="combobox"]) {
+    --icon: var(--ctrl-icon);
+    --icon-size: 1.125em;
+    --icon-hover: var(--ctrl-selected);
+    --icon-hover-bg: none;
+    --icon-hover-r: 1.75em;
+    @include wup-btnIcon;
+    border-radius: 4px;
+
+    &[aria-pressed="true"] {
+      --icon: var(--ctrl-selected);
+    }
+  }
+
+  // clear button is always visible like other tools (other controls show it on hover/focus only)
+  [role="group"] > button[clear] {
+    --icon-size: 0.875em; // cross & back icons are bigger
+    display: inline-block;
+    opacity: 1;
+  }
+
+  @each $tool, $icon in $tools {
+    [tool="#{$tool}"] {
+      --icon-img: var(--wup-icon-#{$icon});
+    }
+  }
+
+  // value icon (`className` of value): in dropdown & its menu items (label is in tooltip)
+  [role="combobox"][icon]:before,
+  > wup-popup[menu] li[icon]:before {
+    content: "";
+    --ctrl-icon-img: var(--icon-img);
+    --ctrl-icon-size: 15px; // as tool buttons
+    @include wup-icon;
+  }
+
+  // dropdown: label of the current value & chevron
+  [role="combobox"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+    height: 1.75em;
+    margin: 0;
+    padding: 0.25em 0.25em 0.25em 0.5em;
+    border: none;
+    border-radius: 4px;
+    font: inherit;
+    color: var(--ctrl-icon);
+    background: none;
+    box-shadow: none;
+    outline: none;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:after {
+      content: "";
+      --ctrl-icon-img: var(--wup-icon-chevron);
+      --ctrl-icon-size: 0.6em;
+      @include wup-icon;
+      align-self: center;
+      margin-left: auto; // at the right when button is wider (min-width)
+      background: currentColor;
+    }
+
+    &[aria-expanded="true"]:after {
+      transform: rotate(180deg);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        color: var(--ctrl-selected);
+      }
+    }
+
+    &:focus {
+      box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+    }
+
+    &[icon]:before {
+      background: currentColor; // as label & chevron
+    }
+
+    // width of the widest item: otherwise toolbar shifts on selection change
+    &[tool="header"] {
+      min-width: 6.25em;
+    }
+
+    &[tool="size"] {
+      min-width: 4.875em;
+    }
+  }
+
+  // value icons (align) by `className` of value
+  @each $icon in ("align-left", "align-center", "align-right", "align-justify") {
+    .wup-icon-#{$icon} {
+      --icon-img: var(--wup-icon-#{$icon});
+    }
+  }
+
+  &[disabled] [role="toolbar"],
+  &[readonly] [role="toolbar"] {
+    pointer-events: none;
+  }
+
+  &[readonly] [role="toolbar"] {
+    opacity: 0.5;
+  }
+
+  // dropdown menu
+  > wup-popup[menu] {
+    @include wup-menu;
+    z-index: 8010;
+
+    li {
+      display: flex;
+      align-items: center;
+      padding: 0.4em 1em;
+      line-height: 1.2;
+      white-space: nowrap;
+
+      &[hidden] {
+        display: none; // filtered by typed text
+      }
+    }
+
+    // shortcut at the right: before checkmark
+    kbd {
+      margin-left: auto;
+      padding-left: 2em;
+      font: inherit;
+      font-size: 0.75em;
+      color: var(--ctrl-label);
+    }
+
+    li:has(> kbd)[aria-selected="true"]:after {
+      margin-left: 0; // otherwise it shares free space with kbd
+    }
+
+    // headings keep global styles as in editor
+    :is(h1, h2, h3, h4, h5, h6) {
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  // $ask popup (link url etc.): popup is the control itself (no own padding & corners)
+  > wup-popup:has(> wup-text) {
+    padding: 0;
+    border-radius: var(--ctrl-border-radius);
+    overflow: visible; // otherwise box-shadow of control (border, focus, invalid) is hidden
+  }
+
+  > wup-popup > wup-text {
+    width: min(40em, calc(100vw - 3em)); // long urls; small screens
+    margin: 0;
+  }
+
+  // editor: content styles are global via [wup-textrich]
+  [contenteditable] {
+    margin-top: 0.5em; // as bottom of --ctrl-padding (its top is space for label, but label is above the border here)
+    min-height: 8em;
+    max-height: 16em;
+  }
+}

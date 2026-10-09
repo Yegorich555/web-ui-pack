@@ -2,6 +2,7 @@ import { inheritDefaults } from "../baseElement";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { PopupOpenCases, PopupAnimations } from "../popup/popupElement.types";
+import { menuPlacements } from "../popup/popupPlacements";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 
@@ -98,6 +99,11 @@ export default abstract class WUPBaseComboControl<
 
   static get $style(): string {
     return super.$style;
+  }
+
+  /** `null` can be a valid value (menu item) so it isn't empty */
+  static override $isEmpty(v: unknown): boolean {
+    return WUPBaseControl.$isEmpty(v);
   }
 
   static $defaults: WUP.BaseCombo.Options<any> = inheritDefaults(WUPTextControl.$defaults, {
@@ -214,16 +220,7 @@ export default abstract class WUPBaseComboControl<
     p.$options.offsetFitElement = this._opts.popupOffsetFitElement;
     p.$options.minWidthByTarget = this._opts.popupMinWidthByTarget;
     p.$options.keepPosition = true; // avoid changing position when control-height is changed (ex. selectMany collapses items on focusOut)
-    p.$options.placement = [
-      WUPPopupElement.$placements.$bottom.$start,
-      WUPPopupElement.$placements.$bottom.$end,
-      WUPPopupElement.$placements.$top.$start,
-      WUPPopupElement.$placements.$top.$end,
-      WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
-      WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
-      WUPPopupElement.$placements.$top.$start.$resizeHeight,
-      WUPPopupElement.$placements.$top.$end.$resizeHeight,
-    ];
+    p.$options.placement = [...menuPlacements];
 
     p.setAttribute("menu", "");
     p.$options.animation = PopupAnimations.drawer;

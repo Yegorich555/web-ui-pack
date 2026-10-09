@@ -4,11 +4,52 @@
   contain: style;
   display: inline-block;
 
-  button {
-    @include wup-button;
-    min-width: initial;
+  // toggle button: neutral look with chevron; buttons inside menu aren't styled (custom content)
+  > button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
     margin: 0;
-    padding: 0.7em;
+    padding: 0.25em 0.25em 0.25em 0.5em;
+    border: none;
+    border-radius: var(--border-radius);
+    font: inherit;
+    color: inherit;
+    background: none;
+    box-shadow: none;
+    outline: none;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:after {
+      content: "";
+      --ctrl-icon-img: var(--wup-icon-chevron);
+      --ctrl-icon-size: 0.6em;
+      @include wup-icon;
+      align-self: center;
+      margin-left: auto; // at the right side when button is wider than content (ex. min-width)
+      background: currentColor;
+    }
+
+    &[aria-expanded="true"]:after {
+      transform: rotate(180deg);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+      }
+    }
+
+    // after :hover to keep focus-bg on hover
+    &:focus {
+      box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+    }
+
+    &[disabled] {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
   }
 
   > [menu] {

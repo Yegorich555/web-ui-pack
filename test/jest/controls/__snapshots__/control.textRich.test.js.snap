@@ -1,0 +1,5587 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`control.textRich $ariaDetails 1`] = `
+<wup-textrich>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt2"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      />
+      <span
+        class="wup-hidden"
+      >
+        Some details for screen-readers
+      </span>
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+</wup-textrich>
+`;
+
+exports[`control.textRich $ariaDetails 2`] = `
+<wup-textrich>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt2"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      />
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+</wup-textrich>
+`;
+
+exports[`control.textRich $ariaSpeak 1`] = `
+<wup-textrich>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="my-test-id txt3 my-test-id2"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      />
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt3"
+  >
+    Hello
+  </section>
+</wup-textrich>
+`;
+
+exports[`control.textRich $ariaSpeak 2`] = `
+<wup-textrich>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="my-test-id my-test-id2"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      />
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+</wup-textrich>
+`;
+
+exports[`control.textRich $show/$hide error 1`] = `
+<wup-textrich>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt2"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      />
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+</wup-textrich>
+`;
+
+exports[`control.textRich $show/$hide error 2`] = `
+<wup-textrich
+  invalid=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt3"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      />
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    role="alert"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
+</wup-textrich>
+`;
+
+exports[`control.textRich $show/$hide error 3`] = `
+<wup-textrich>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      />
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      Some custom message here
+    </span>
+  </wup-popup>
+</wup-textrich>
+`;
+
+exports[`control.textRich common tests render + styles 1`] = `<wup-textrich />`;
+
+exports[`control.textRich common tests render + styles 2`] = `
+<style>
+  :root {
+  --base-focus: #00778d;
+  --base-btn-bg: #009fbc;
+  --base-btn-text: #fff;
+  --base-btn-focus: #005766;
+  --base-btn2-bg: #6c757d;
+  --base-btn2-text: #fff;
+  --base-btn3-bg: none;
+  --base-btn3-text: inherit;
+  --base-sep: #e4e4e4;
+  --base-margin: 20px;
+  --border-radius: 6px;
+  --anim-t: 200ms;
+  --anim: var(--anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
+  --icon-hover-r: 30px;
+  --icon-hover-bg: #0001;
+  --icon-focus-bg: #0000001a;
+  --icon-size: 14px;
+  --menu-hover-text: inherit;
+  --menu-hover-bg: #f1f1f1;
+  --wup-icon-cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M674.515 93.949a45.925 45.925 0 0 0-65.022 0L384.001 318.981 158.509 93.487a45.928 45.928 0 0 0-65.022 0c-17.984 17.984-17.984 47.034 0 65.018l225.492 225.494L93.487 609.491c-17.984 17.984-17.984 47.034 0 65.018s47.034 17.984 65.018 0l225.492-225.492 225.492 225.492c17.984 17.984 47.034 17.984 65.018 0s17.984-47.034 0-65.018L449.015 383.999l225.492-225.494c17.521-17.521 17.521-47.034 0-64.559z'/%3E%3C/svg%3E");
+  --wup-icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M37.691 450.599 224.76 635.864c21.528 21.32 56.11 21.425 77.478 0l428.035-426.23c21.47-21.38 21.425-56.11 0-77.478s-56.11-21.425-77.478 0L263.5 519.647 115.168 373.12c-21.555-21.293-56.108-21.425-77.478 0s-21.425 56.108 0 77.478z'/%3E%3C/svg%3E");
+  --wup-icon-dot: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='20'/%3E%3C/svg%3E");
+  --wup-icon-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m509.8 16.068-329.14 329.14c-21.449 21.449-21.449 56.174 0 77.567l329.14 329.14c21.449 21.449 56.174 21.449 77.567 0s21.449-56.174 0-77.567l-290.36-290.36 290.36-290.36c21.449-21.449 21.449-56.173 0-77.567-21.449-21.394-56.173-21.449-77.567 0z'/%3E%3C/svg%3E");
+  --wup-icon-eye: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 122.182C209.455 122.182 60.392 230.749 0 384c60.392 153.251 209.455 261.818 384 261.818S707.608 537.251 768 384c-60.392-153.251-209.455-261.818-384-261.818zm0 436.363c-96.35 0-174.545-78.197-174.545-174.545S287.651 209.455 384 209.455 558.545 287.651 558.545 384 480.348 558.545 384 558.545zm0-279.272c-57.95 0-104.727 46.778-104.727 104.727S326.051 488.727 384 488.727 488.727 441.949 488.727 384 441.949 279.273 384 279.273z'/%3E%3C/svg%3E");
+  --wup-icon-eye-off: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M384 209.375c96.393 0 174.625 78.232 174.625 174.625 0 22.701-4.54 44.005-12.573 63.913l101.981 101.981C700.77 505.889 742.331 448.961 767.826 384c-60.42-153.321-209.55-261.938-384.174-261.938-48.895 0-95.695 8.731-139.001 24.448l75.438 75.438c19.907-8.032 41.212-12.573 63.913-12.573zM34.75 114.03l95.695 95.695C72.469 254.778 27.067 314.85-.174 384.001 60.246 537.322 209.376 645.938 384 645.938c54.133 0 105.823-10.477 152.971-29.337l14.668 14.668 102.33 101.981 44.355-44.355L79.105 69.676 34.75 114.031zm193.135 193.135 54.133 54.133c-1.746 7.334-2.794 15.018-2.794 22.701 0 57.976 46.799 104.775 104.775 104.775 7.684 0 15.367-1.048 22.701-2.794l54.134 54.134c-23.4 11.525-49.244 18.51-76.835 18.51-96.393 0-174.625-78.232-174.625-174.625 0-27.591 6.985-53.435 18.51-76.835zm150.527-27.242 110.014 110.014.698-5.588c0-57.976-46.799-104.775-104.775-104.775l-5.937.349z'/%3E%3C/svg%3E");
+  --wup-icon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
+  --wup-icon-date: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M652.801 76.8c42.24 0 76.8 34.56 76.8 76.8v537.601c0 42.24-34.56 76.8-76.8 76.8H115.2c-42.624 0-76.8-34.56-76.8-76.8l.384-537.601c0-42.24 33.792-76.8 76.416-76.8h38.4V0h76.8v76.8h307.2V0h76.8v76.8h38.4zM192 345.6h76.8v76.8H192v-76.8zm230.4 0v76.8h-76.8v-76.8h76.8zm153.601 0h-76.8v76.8h76.8v-76.8zM115.2 691.2h537.601V268.8H115.2v422.4z'/%3E%3C/svg%3E");
+  --wup-icon-time: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.25' stroke-width='1.5'/%3E%3Cpath d='M7.5 3.5v5h4'/%3E%3C/svg%3E");
+}
+[wupdark] {
+  --base-btn-focus: #bdbdbd;
+  --base-sep: #141414;
+  --icon: #fff;
+  --icon-hover-bg: #fff1;
+  --icon-focus-bg: #fff2;
+  --scroll: #fff2;
+  --scroll-hover: #fff3;
+  --menu-hover-text: inherit;
+  --menu-hover-bg: #222a36;
+}
+
+  .wup-hidden,
+[wup-hidden] {
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  min-width: initial;
+  padding: 0;
+}
+[wup-icon] {
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+}
+[wup-icon]:after {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: var(--icon, #000);
+  -webkit-mask-size: var(--icon-size, 1em);
+          mask-size: var(--icon-size, 1em);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--icon-img);
+          mask-image: var(--icon-img);
+}
+[wup-icon]:focus {
+  box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+[wup-icon]:focus:after {
+  background: var(--icon-hover, var(--icon, #000));
+}
+@media (hover: hover) and (pointer: fine) {
+  [wup-icon]:hover {
+    box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  [wup-icon]:hover:after {
+    background: var(--icon-hover, var(--icon, #000));
+  }
+  [wup-icon]:focus:hover {
+    opacity: 0.9;
+  }
+}
+  
+
+  :root {
+  --ctrl-padding: 1.5em 1em 0.5em 1em;
+  --ctrl-focus: var(--base-focus);
+  --ctrl-focus-label: var(--ctrl-focus);
+  --ctrl-selected: var(--ctrl-focus);
+  --ctrl-label: #5e5e5e;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-icon-size: 1em;
+  --ctrl-text: inherit;
+  --ctrl-bg: #fff;
+  --ctrl-border: #e6e6e6;
+  --ctrl-border-radius: var(--border-radius);
+  --ctrl-err: #ad0000;
+  --ctrl-err-bg: #fff4fa;
+  --ctrl-err-valid: green;
+  --ctrl-invalid-border: red;
+}
+[wupdark] {
+  --ctrl-bg: none;
+  --ctrl-border: #104652;
+  --ctrl-label: #919191;
+  --ctrl-icon: var(--ctrl-label);
+  --ctrl-focus-label: #25a1b6;
+  --ctrl-selected: #25a1b6;
+  --ctrl-err: #ff6666;
+  --ctrl-err-bg: #000;
+  --ctrl-err-valid: #54d754;
+}
+  :root {
+  --ctrl-autofill: #00869e;
+  --ctrl-clear: red;
+  --ctrl-clear-hover: rgba(255, 0, 0, 0.1);
+  --ctrl-label-active-pos: translateY(calc(-100% - 0.2em)) scale(0.9);
+}
+[wupdark] {
+  --ctrl-clear-hover: rgba(255, 0, 0, 0.2);
+  --ctrl-autofill: #89bc55;
+  --ctrl-autofill-caret: #fff;
+}
+  :root {
+  --ctrl-textrich-quote: #ccc;
+  --ctrl-textrich-code-bg: #f0f0f0;
+  --wup-icon-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 3h4a2 2 0 0 1 0 4H4zm0 4h4.5a2.5 2.5 0 0 1 0 5H4z'/%3E%3C/svg%3E");
+  --wup-icon-italic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M6 3h5M4 12h5m-2.5 0 2-9'/%3E%3C/svg%3E");
+  --wup-icon-underline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 3v3.5a3.5 3.5 0 0 0 7 0V3'/%3E%3Crect width='11' height='1' x='2' y='12' fill='%23000' stroke='none' rx='.5'/%3E%3C/svg%3E");
+  --wup-icon-strike: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath stroke-width='1' d='M1.5 7.5h12'/%3E%3Cpath d='M11 4.5C10.6 3.6 9.3 3 7.5 3S4 3.9 4 5.25c0 .6.4 1 1 1.25m5 2.25c.6.3 1 .6 1 1.25 0 1.35-1.6 2-3.5 2-1.8 0-3.1-.6-3.5-1.5'/%3E%3C/svg%3E");
+  --wup-icon-blockquote: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath fill='%23000' d='M3 4h2v2H3zm7 0h2v2h-2z'/%3E%3Cpath d='M5 6c0 3.5-2 5-2 5m9-5c0 3.5-2 5-2 5'/%3E%3C/svg%3E");
+  --wup-icon-code: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 5.5 2 7.5l2 2m7-4 2 2-2 2M8.5 4l-2 7'/%3E%3C/svg%3E");
+  --wup-icon-link: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M7.405 3.298a3.302 3.302 0 0 1 .342 4.445A3.302 3.302 0 0 1 3.298 7.405c-1.322-1.33-2.415-2.375-.342-4.449S6.075 1.976 7.405 3.298M11.702 7.595a3.302 3.302 0 0 0-4.445-.342 3.302 3.302 0 0 0 .342 4.445c1.322 1.322 2.375 2.415 4.445 .342s.98-3.115-.342-4.445M5.6 5.6l3.8 3.8'/%3E%3C/svg%3E");
+  --wup-icon-clean: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 3h7M7.6 3 5 10m4-2 4 4m0-4-4 4'/%3E%3Crect width='5' height='1' x='1' y='12' fill='%23000' stroke='none' rx='.5'/%3E%3C/svg%3E");
+  --wup-icon-list-ordered: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M7 3h6M7 7h6m-6 4h6'/%3E%3Cpath stroke-width='1' d='M2.083 4.25h1.667M3.75 8.25H2.083c0-.195 1.542-.897 1.542-1.862a.8.8 0 0 0-1.542-.092m0 5.409a.8.8 0 0 0 1.542-.091.583.583 0 0 0-.5-.614.575.575 0 0 0 .5-.613.8.8 0 0 0-1.542-.091'/%3E%3Cpath fill='%23000' stroke='none' d='M2.917 4.667a.417.417 0 0 1-.417-.417V2.237l-.23.115a.417.417 0 0 1-.559-.185c-.103-.206-.019-.27.187-.372l.833-.417a.417.417 0 0 1 .602.372v2.5a.417.417 0 0 1-.417.417'/%3E%3C/svg%3E");
+  --wup-icon-list-bullet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M5 3h8M5 7h8m-8 4h8M2 3zm0 4zm0 4z'/%3E%3C/svg%3E");
+  --wup-icon-script-sub: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='m2 4 5 6m0-6-5 6'/%3E%3Cpath stroke-width='1' d='M10.5 10.5a1.5 1.5 0 0 1 3 0c0 .9-1.1 1.4-3 2h3'/%3E%3C/svg%3E");
+  --wup-icon-script-super: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='m2 4 5 6m0-6-5 6'/%3E%3Cpath stroke-width='1' d='M10.5 3.5a1.5 1.5 0 0 1 3 0c0 .9-1.1 1.4-3 2h3'/%3E%3C/svg%3E");
+  --wup-icon-indent: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M2 3h11M2 11h11M7 7h6'/%3E%3Cpath fill='%23000' stroke='none' d='M1 5v4l3-2z'/%3E%3C/svg%3E");
+  --wup-icon-outdent: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M2 3h11M2 11h11M2 7h6'/%3E%3Cpath fill='%23000' stroke='none' d='M14 5v4l-3-2z'/%3E%3C/svg%3E");
+  --wup-icon-align-left: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M2 7h11M2 11h8M2 3h5'/%3E%3C/svg%3E");
+  --wup-icon-align-center: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 7H2m10 4H3m7-8H5'/%3E%3C/svg%3E");
+  --wup-icon-align-right: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 7H2m11 4H5m8-8H8'/%3E%3C/svg%3E");
+  --wup-icon-align-justify: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 7H2m11 4H2m11-8H2'/%3E%3C/svg%3E");
+}
+[wupdark] {
+  --ctrl-textrich-quote: #555;
+  --ctrl-textrich-code-bg: #1d1d1d;
+}
+[wup-textrich] blockquote {
+  margin: 5px 0;
+  padding-left: 16px;
+  border-left: 4px solid var(--ctrl-textrich-quote);
+}
+[wup-textrich] pre {
+  margin: 5px 0;
+  padding: 5px 10px;
+  border-radius: 3px;
+  background: var(--ctrl-textrich-code-bg);
+  font-family: monospace;
+  white-space: pre-wrap;
+}
+  
+WUP-TEXTRICH {
+  --ctrl-focus-border: var(--ctrl-focus);
+  contain: style;
+  display: block;
+  flex: 1;
+  margin: var(--base-margin) 0;
+  box-shadow: 0 0 0 1px var(--ctrl-border);
+  border-radius: var(--ctrl-border-radius);
+  color: var(--ctrl-text);
+  background: var(--ctrl-bg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+WUP-TEXTRICH strong,
+WUP-TEXTRICH legend {
+  color: var(--ctrl-label);
+  pointer-events: none;
+}
+WUP-TEXTRICH[invalid], WUP-TEXTRICH[invalid] &gt; [menu] {
+  --ctrl-focus-border: var(--ctrl-invalid-border);
+  box-shadow: 0 0 3px 0 var(--ctrl-focus-border);
+}
+WUP-TEXTRICH:focus-within, WUP-TEXTRICH:focus-within &gt; [menu] {
+  box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+}
+WUP-TEXTRICH:focus-within strong,
+WUP-TEXTRICH:focus-within legend {
+  color: var(--ctrl-focus-label);
+  pointer-events: initial;
+}
+[disabled] WUP-TEXTRICH, WUP-TEXTRICH[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  -webkit-user-select: none;
+          user-select: none;
+}
+WUP-TEXTRICH[busy] {
+  opacity: 0.8;
+  cursor: inherit;
+  -webkit-user-select: none;
+          user-select: none;
+}
+[disabled] WUP-TEXTRICH &gt; label, WUP-TEXTRICH[disabled] &gt; label, WUP-TEXTRICH[busy] &gt; label {
+  pointer-events: none;
+}
+WUP-TEXTRICH label {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  font: inherit;
+  cursor: inherit;
+  padding: var(--ctrl-padding);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+WUP-TEXTRICH input,
+WUP-TEXTRICH textarea {
+  padding: 0;
+  margin: 0;
+  cursor: inherit;
+}
+WUP-TEXTRICH [contenteditable] {
+  margin: var(--ctrl-padding);
+  margin-left: 0;
+  margin-right: 0;
+  cursor: inherit;
+}
+WUP-TEXTRICH strong {
+  cursor: inherit;
+}
+WUP-TEXTRICH strong:empty {
+  display: none;
+}
+WUP-TEXTRICH [aria-required=true] + strong:after,
+WUP-TEXTRICH fieldset[aria-required=true] &gt; legend:after {
+  content: "*";
+  font-size: larger;
+  font-weight: bolder;
+  line-height: 0;
+}
+WUP-TEXTRICH [error] {
+  cursor: pointer;
+  font-size: small;
+  color: var(--ctrl-err);
+  background: var(--ctrl-err-bg);
+  overflow: auto;
+  overflow: overlay;
+}
+WUP-TEXTRICH [error] ul {
+  margin: 0;
+  padding: 2px 4px 2px;
+}
+WUP-TEXTRICH [error] li {
+  display: flex;
+  align-items: center;
+  margin-left: -5px;
+}
+WUP-TEXTRICH [error] li:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-dot);
+  --ctrl-icon: var(--ctrl-err);
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+}
+WUP-TEXTRICH [error] li[valid] {
+  color: var(--ctrl-err-valid);
+}
+WUP-TEXTRICH [error] li[valid]:before {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  --ctrl-icon: var(--ctrl-err-valid);
+}
+WUP-TEXTRICH:focus-within [error] {
+  max-height: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-TEXTRICH:hover strong, WUP-TEXTRICH[hovered] strong {
+    color: var(--ctrl-focus-label);
+  }
+  WUP-TEXTRICH:hover, WUP-TEXTRICH:hover &gt; [menu], WUP-TEXTRICH[hovered], WUP-TEXTRICH[hovered] &gt; [menu] {
+    box-shadow: 0 0 2px 1px var(--ctrl-focus-border);
+  }
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-TEXTRICH {
+    transition: box-shadow var(--anim);
+  }
+}
+WUP-TEXTRICH {
+  cursor: text;
+  text-align: start;
+}
+WUP-TEXTRICH label &gt; span {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: row-reverse;
+}
+WUP-TEXTRICH input,
+WUP-TEXTRICH textarea,
+WUP-TEXTRICH [maskholder],
+WUP-TEXTRICH [prefix],
+WUP-TEXTRICH [postfix] {
+  padding: var(--ctrl-padding);
+  padding-left: 0;
+  padding-right: 0;
+  font: inherit;
+  text-align: inherit;
+  color: inherit;
+  margin: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+WUP-TEXTRICH input,
+WUP-TEXTRICH textarea,
+WUP-TEXTRICH [contenteditable],
+WUP-TEXTRICH [maskholder],
+WUP-TEXTRICH [postfix] {
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  background: none;
+  outline: none;
+}
+WUP-TEXTRICH [prefix],
+WUP-TEXTRICH [postfix] {
+  color: inherit;
+  flex-shrink: 0;
+}
+WUP-TEXTRICH [maskholder],
+WUP-TEXTRICH [prefix],
+WUP-TEXTRICH [postfix] {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+  text-overflow: initial;
+  white-space: pre;
+}
+WUP-TEXTRICH [postfix] {
+  position: absolute;
+}
+WUP-TEXTRICH [maskholder] {
+  position: absolute;
+  opacity: 0.65;
+}
+WUP-TEXTRICH [maskholder] &gt; i,
+WUP-TEXTRICH [postfix] &gt; i {
+  visibility: hidden;
+  font: inherit;
+  white-space: pre;
+}
+WUP-TEXTRICH input:-webkit-autofill, WUP-TEXTRICH textarea:-webkit-autofill, WUP-TEXTRICH [contenteditable]:-webkit-autofill {
+  font: inherit;
+  background-clip: text;
+  -webkit-text-fill-color: var(--ctrl-autofill);
+  caret-color: var(--ctrl-autofill-caret, auto);
+}
+WUP-TEXTRICH input:autofill,
+WUP-TEXTRICH textarea:autofill,
+WUP-TEXTRICH [contenteditable]:autofill {
+  font: inherit;
+  background-clip: text;
+  -webkit-text-fill-color: var(--ctrl-autofill);
+  caret-color: var(--ctrl-autofill-caret, auto);
+}
+WUP-TEXTRICH strong {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  transform-origin: top left;
+  transform: translateY(-50%);
+  font-weight: normal;
+  text-decoration: none;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-TEXTRICH strong {
+    transition: top var(--anim), transform var(--anim), color var(--anim);
+  }
+}
+WUP-TEXTRICH input:not(:focus)::placeholder,
+WUP-TEXTRICH textarea:not(:focus)::placeholder {
+  color: transparent;
+}
+WUP-TEXTRICH:focus-within strong,
+WUP-TEXTRICH input:not(:placeholder-shown) + strong,
+WUP-TEXTRICH textarea:not(:placeholder-shown) + strong,
+WUP-TEXTRICH [contenteditable]:not(:empty) + strong,
+WUP-TEXTRICH legend {
+  transform: var(--ctrl-label-active-pos);
+}
+WUP-TEXTRICH input:-webkit-autofill + strong, WUP-TEXTRICH textarea:-webkit-autofill + strong, WUP-TEXTRICH [contenteditable]:-webkit-autofill + strong {
+  transform: var(--ctrl-label-active-pos);
+}
+WUP-TEXTRICH input:autofill + strong,
+WUP-TEXTRICH textarea:autofill + strong,
+WUP-TEXTRICH [contenteditable]:autofill + strong {
+  transform: var(--ctrl-label-active-pos);
+}
+WUP-TEXTRICH:focus-within [maskholder], WUP-TEXTRICH:focus-within [prefix], WUP-TEXTRICH:focus-within [postfix],
+WUP-TEXTRICH input:not(:placeholder-shown) ~ [prefix],
+WUP-TEXTRICH input:not(:placeholder-shown) ~ [postfix],
+WUP-TEXTRICH textarea:not(:placeholder-shown) ~ [prefix],
+WUP-TEXTRICH textarea:not(:placeholder-shown) ~ [postfix] {
+  display: inline-block;
+  opacity: 1;
+}
+WUP-TEXTRICH label:after,
+WUP-TEXTRICH label:before {
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 5px;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  cursor: pointer;
+  -webkit-mask-image: none;
+          mask-image: none;
+}
+WUP-TEXTRICH label:after {
+  margin-right: calc(var(--ctrl-icon-size) / -2);
+}
+WUP-TEXTRICH label:before {
+  margin-left: calc(var(--ctrl-icon-size) / -2);
+}
+WUP-TEXTRICH label &gt; button {
+  z-index: 1;
+  contain: strict;
+  font-size: inherit;
+  flex: 0 0 auto;
+  align-self: center;
+}
+WUP-TEXTRICH button[clear] {
+  --icon-size: var(--ctrl-icon-size);
+  --icon-hover-r: 24px;
+  --icon-img: var(--wup-icon-cross);
+  --icon: var(--ctrl-label);
+  --icon-hover: var(--ctrl-clear);
+  --icon-hover-bg: var(--ctrl-clear-hover);
+  display: none;
+  opacity: 0;
+  margin-right: -0.5em;
+}
+WUP-TEXTRICH button[clear=back] {
+  --icon-img: var(--wup-icon-back);
+}
+WUP-TEXTRICH:focus-within button[clear] {
+  display: inline-block;
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-TEXTRICH:hover button[clear] {
+    display: inline-block;
+    opacity: 1;
+  }
+}
+WUP-TEXTRICH[disabled] button[clear], WUP-TEXTRICH[readonly] button[clear] {
+  display: none;
+  pointer-events: none;
+}
+WUP-TEXTRICH strong {
+  top: 1.6em;
+}
+WUP-TEXTRICH [contenteditable] {
+  min-height: 4em;
+  max-height: 4em;
+}
+WUP-TEXTRICH &gt; footer {
+  width: fit-content;
+  margin-left: auto;
+  padding: 0 0.5em 0.25em;
+  font-size: small;
+  color: var(--ctrl-label);
+  cursor: default;
+}
+WUP-TEXTRICH &gt; footer[invalid] {
+  color: var(--ctrl-err);
+}
+WUP-TEXTRICH {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-top: calc(var(--base-margin) + 1.75em);
+}
+WUP-TEXTRICH:has(&gt; label strong:empty) {
+  margin-top: var(--base-margin);
+}
+WUP-TEXTRICH &gt; label {
+  --ctrl-label-active-pos: none;
+}
+WUP-TEXTRICH &gt; label &gt; span {
+  position: static;
+}
+WUP-TEXTRICH &gt; label strong {
+  top: auto;
+  bottom: calc(100% + 0.25em);
+  left: 0;
+  transform: none;
+  line-height: 1.5;
+  font-weight: bold;
+}
+WUP-TEXTRICH [role=toolbar] {
+  order: -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0 0.75em;
+  padding: 0.25em 0.5em;
+  border-bottom: 1px solid var(--ctrl-border);
+  cursor: default;
+}
+WUP-TEXTRICH [role=toolbar]:empty {
+  display: none;
+}
+WUP-TEXTRICH [role=group] {
+  display: flex;
+  align-items: center;
+}
+WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]) {
+  --icon: var(--ctrl-icon);
+  --icon-size: 1.125em;
+  --icon-hover: var(--ctrl-selected);
+  --icon-hover-bg: none;
+  --icon-hover-r: 1.75em;
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  width: var(--icon-hover-r, 2em);
+  height: var(--icon-hover-r, 2em);
+  background: none;
+  outline: none;
+  border-radius: 50%;
+  border-radius: 4px;
+}
+WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):after {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  background: var(--icon, #000);
+  -webkit-mask-size: var(--icon-size, 1em);
+          mask-size: var(--icon-size, 1em);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--icon-img);
+          mask-image: var(--icon-img);
+}
+WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):focus {
+  box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):focus:after {
+  background: var(--icon-hover, var(--icon, #000));
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):hover {
+    box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
+  }
+  WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):hover:after {
+    background: var(--icon-hover, var(--icon, #000));
+  }
+  WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):focus:hover {
+    opacity: 0.9;
+  }
+}
+WUP-TEXTRICH [role=group] &gt; button:not([role=combobox])[aria-pressed=true] {
+  --icon: var(--ctrl-selected);
+}
+WUP-TEXTRICH [role=group] &gt; button[clear] {
+  --icon-size: 0.875em;
+  display: inline-block;
+  opacity: 1;
+}
+WUP-TEXTRICH [tool=bold] {
+  --icon-img: var(--wup-icon-bold);
+}
+WUP-TEXTRICH [tool=italic] {
+  --icon-img: var(--wup-icon-italic);
+}
+WUP-TEXTRICH [tool=underline] {
+  --icon-img: var(--wup-icon-underline);
+}
+WUP-TEXTRICH [tool=strike] {
+  --icon-img: var(--wup-icon-strike);
+}
+WUP-TEXTRICH [tool=blockquote] {
+  --icon-img: var(--wup-icon-blockquote);
+}
+WUP-TEXTRICH [tool=code] {
+  --icon-img: var(--wup-icon-code);
+}
+WUP-TEXTRICH [tool=link] {
+  --icon-img: var(--wup-icon-link);
+}
+WUP-TEXTRICH [tool=clean] {
+  --icon-img: var(--wup-icon-clean);
+}
+WUP-TEXTRICH [tool="list:ordered"] {
+  --icon-img: var(--wup-icon-list-ordered);
+}
+WUP-TEXTRICH [tool="list:bullet"] {
+  --icon-img: var(--wup-icon-list-bullet);
+}
+WUP-TEXTRICH [tool="script:sub"] {
+  --icon-img: var(--wup-icon-script-sub);
+}
+WUP-TEXTRICH [tool="script:super"] {
+  --icon-img: var(--wup-icon-script-super);
+}
+WUP-TEXTRICH [tool="indent:-1"] {
+  --icon-img: var(--wup-icon-outdent);
+}
+WUP-TEXTRICH [tool="indent:1"] {
+  --icon-img: var(--wup-icon-indent);
+}
+WUP-TEXTRICH [role=combobox][icon]:before,
+WUP-TEXTRICH &gt; wup-popup[menu] li[icon]:before {
+  content: "";
+  --ctrl-icon-img: var(--icon-img);
+  --ctrl-icon-size: 15px;
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+}
+WUP-TEXTRICH [role=combobox] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  height: 1.75em;
+  margin: 0;
+  padding: 0.25em 0.25em 0.25em 0.5em;
+  border: none;
+  border-radius: 4px;
+  font: inherit;
+  color: var(--ctrl-icon);
+  background: none;
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+WUP-TEXTRICH [role=combobox]:after {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-chevron);
+  --ctrl-icon-size: 0.6em;
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  align-self: center;
+  margin-left: auto;
+  background: currentColor;
+}
+WUP-TEXTRICH [role=combobox][aria-expanded=true]:after {
+  transform: rotate(180deg);
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-TEXTRICH [role=combobox]:hover {
+    color: var(--ctrl-selected);
+  }
+}
+WUP-TEXTRICH [role=combobox]:focus {
+  box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+WUP-TEXTRICH [role=combobox][icon]:before {
+  background: currentColor;
+}
+WUP-TEXTRICH [role=combobox][tool=header] {
+  min-width: 6.25em;
+}
+WUP-TEXTRICH [role=combobox][tool=size] {
+  min-width: 4.875em;
+}
+WUP-TEXTRICH .wup-icon-align-left {
+  --icon-img: var(--wup-icon-align-left);
+}
+WUP-TEXTRICH .wup-icon-align-center {
+  --icon-img: var(--wup-icon-align-center);
+}
+WUP-TEXTRICH .wup-icon-align-right {
+  --icon-img: var(--wup-icon-align-right);
+}
+WUP-TEXTRICH .wup-icon-align-justify {
+  --icon-img: var(--wup-icon-align-justify);
+}
+WUP-TEXTRICH[disabled] [role=toolbar], WUP-TEXTRICH[readonly] [role=toolbar] {
+  pointer-events: none;
+}
+WUP-TEXTRICH[readonly] [role=toolbar] {
+  opacity: 0.5;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] {
+  padding: 0;
+  overflow: hidden;
+  z-index: 8010;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  cursor: pointer;
+  overflow: auto;
+  max-height: 300px;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  cursor: pointer;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-corner {
+  background: none;
+  cursor: pointer;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  background-color: var(--scroll, rgba(0, 0, 0, 0.2));
+  border-radius: 999px;
+  cursor: pointer;
+}
+@media (hover: hover) {
+WUP-TEXTRICH&gt;wup-popup[menu] ul::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
+  cursor: pointer;
+}
+}
+WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-track-piece:vertical:start, WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-track-piece:vertical:end, WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-track-piece:horizontal:start, WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-track-piece:horizontal:end {
+  margin: 0;
+  cursor: pointer;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li {
+  padding: 1em;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-TEXTRICH &gt; wup-popup[menu] li:hover {
+    color: var(--menu-hover-text);
+    background: var(--menu-hover-bg);
+  }
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li[aria-selected=true] {
+  color: var(--ctrl-selected);
+  display: flex;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li[aria-selected=true]:after {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  background: var(--ctrl-selected);
+  margin-left: auto;
+  padding-left: 0.5em;
+  -webkit-mask-position: right center;
+          mask-position: right center;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li[focused], WUP-TEXTRICH &gt; wup-popup[menu] li:focus {
+  outline: none;
+  box-shadow: inset 0 0 4px 0 var(--base-focus);
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li {
+  display: flex;
+  align-items: center;
+  padding: 0.4em 1em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li[hidden] {
+  display: none;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] kbd {
+  margin-left: auto;
+  padding-left: 2em;
+  font: inherit;
+  font-size: 0.75em;
+  color: var(--ctrl-label);
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li:has(&gt; kbd)[aria-selected=true]:after {
+  margin-left: 0;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+  padding: 0;
+}
+WUP-TEXTRICH &gt; wup-popup:has(&gt; wup-text) {
+  padding: 0;
+  border-radius: var(--ctrl-border-radius);
+  overflow: visible;
+}
+WUP-TEXTRICH &gt; wup-popup &gt; wup-text {
+  width: min(40em, calc(100vw - 3em));
+  margin: 0;
+}
+WUP-TEXTRICH [contenteditable] {
+  margin-top: 0.5em;
+  min-height: 8em;
+  max-height: 16em;
+}
+  WUP-AREAINPUT {
+  display: inline-block;
+  cursor: text;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+}
+WUP-AREAINPUT::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  cursor: pointer;
+}
+WUP-AREAINPUT::-webkit-scrollbar-corner {
+  background: none;
+  cursor: pointer;
+}
+WUP-AREAINPUT::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  background-color: var(--scroll, rgba(0, 0, 0, 0.2));
+  border-radius: 999px;
+  cursor: pointer;
+}
+@media (hover: hover) {
+WUP-AREAINPUT::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
+  cursor: pointer;
+}
+}
+WUP-AREAINPUT::-webkit-scrollbar-track-piece:vertical:start, WUP-AREAINPUT::-webkit-scrollbar-track-piece:vertical:end, WUP-AREAINPUT::-webkit-scrollbar-track-piece:horizontal:start, WUP-AREAINPUT::-webkit-scrollbar-track-piece:horizontal:end {
+  margin: 0;
+  cursor: pointer;
+}
+  WUP-RICHINPUT {
+  display: inline-block;
+  cursor: text;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+}
+WUP-RICHINPUT::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  cursor: pointer;
+}
+WUP-RICHINPUT::-webkit-scrollbar-corner {
+  background: none;
+  cursor: pointer;
+}
+WUP-RICHINPUT::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  background-color: var(--scroll, rgba(0, 0, 0, 0.2));
+  border-radius: 999px;
+  cursor: pointer;
+}
+@media (hover: hover) {
+WUP-RICHINPUT::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
+  cursor: pointer;
+}
+}
+WUP-RICHINPUT::-webkit-scrollbar-track-piece:vertical:start, WUP-RICHINPUT::-webkit-scrollbar-track-piece:vertical:end, WUP-RICHINPUT::-webkit-scrollbar-track-piece:horizontal:start, WUP-RICHINPUT::-webkit-scrollbar-track-piece:horizontal:end {
+  margin: 0;
+  cursor: pointer;
+}
+</style>
+`;
+
+exports[`control.textRich common tests snapshot of $defaults 1`] = `
+{
+  "autoComplete": null,
+  "autoFocus": false,
+  "clearActions": 2,
+  "clearButton": true,
+  "debounceMs": 0,
+  "disabled": false,
+  "enableInitOnChange": false,
+  "focusDebounceMs": 100,
+  "hideFooter": false,
+  "hideHotKeysHint": false,
+  "label": null,
+  "name": null,
+  "readOnly": false,
+  "selectOnFocus": false,
+  "storage": "local",
+  "storageKey": "",
+  "toolbar": [
+    [
+      "header",
+    ],
+    [
+      "bold",
+      "italic",
+      "underline",
+      "strike",
+    ],
+    [
+      "blockquote",
+      "code",
+    ],
+    [
+      "link",
+    ],
+    [
+      {
+        "list": "ordered",
+      },
+      {
+        "list": "bullet",
+      },
+    ],
+    [
+      {
+        "script": "sub",
+      },
+      {
+        "script": "super",
+      },
+    ],
+    [
+      {
+        "indent": -1,
+      },
+      {
+        "indent": 1,
+      },
+    ],
+    [
+      "size",
+    ],
+    [
+      "align",
+    ],
+    [
+      "clean",
+    ],
+    [
+      "btnClear",
+    ],
+  ],
+  "validateDebounceMs": 500,
+  "validationCase": 13,
+  "validationRules": {
+    "$alwaysInvalid": [Function],
+    "$alwaysValid": [Function],
+    "email": [Function],
+    "max": [Function],
+    "min": [Function],
+    "required": [Function],
+  },
+  "validationShowAll": false,
+  "validations": null,
+}
+`;
+
+exports[`control.textRich common tests snapshot of $defaults 2`] = `undefined`;
+
+exports[`control.textRich common tests snapshot of $defaults 3`] = `
+[
+  "disabled",
+  "readonly",
+  "w-autocomplete",
+  "w-autofocus",
+  "w-clearactions",
+  "w-clearbutton",
+  "w-debouncems",
+  "w-disabled",
+  "w-enableinitonchange",
+  "w-focusdebouncems",
+  "w-hidefooter",
+  "w-hidehotkeyshint",
+  "w-initvalue",
+  "w-label",
+  "w-name",
+  "w-readonly",
+  "w-selectonfocus",
+  "w-storage",
+  "w-storagekey",
+  "w-toolbar",
+  "w-validatedebouncems",
+  "w-validationcase",
+  "w-validationrules",
+  "w-validations",
+  "w-validationshowall",
+]
+`;
+
+exports[`control.textRich options clearButton 1`] = `
+<wup-textrich>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt2 txt3"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      />
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt3"
+  />
+</wup-textrich>
+`;
+
+exports[`control.textRich options clearButton 2`] = `
+<wup-textrich>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt2 txt3"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      />
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+  <section
+    aria-atomic="true"
+    aria-live="off"
+    class="wup-hidden"
+    id="txt3"
+  />
+</wup-textrich>
+`;
+
+exports[`control.textRich validations $options.validationShowAll 1`] = `
+<wup-textrich
+  invalid=""
+  required=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt3"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        aria-required="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      />
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0 of 3"
+    role="note"
+    w-tooltip=""
+  >
+    0 / 3
+  </footer>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span>
+      This field is required
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li>
+        Min length is 2 characters
+      </li>
+      <li>
+        Max length is 3 characters
+      </li>
+      <li>
+        Invalid email address
+      </li>
+    </ul>
+  </wup-popup>
+</wup-textrich>
+`;
+
+exports[`control.textRich validations $options.validationShowAll 2`] = `
+<wup-textrich
+  invalid=""
+  required=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt3"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        aria-required="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      >
+        123
+      </wup-richinput>
+      <strong
+        id="txt1"
+      />
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 3 of 3"
+    role="note"
+    w-tooltip=""
+  >
+    3 / 3
+  </footer>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt3"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    />
+    <span
+      class="wup-hidden"
+    >
+      Invalid email address
+    </span>
+    <ul
+      aria-hidden="true"
+    >
+      <li
+        valid=""
+      >
+        Min length is 2 characters
+      </li>
+      <li
+        valid=""
+      >
+        Max length is 3 characters
+      </li>
+      <li>
+        Invalid email address
+      </li>
+    </ul>
+  </wup-popup>
+</wup-textrich>
+`;
+
+exports[`control.textRich validations $options.validationShowAll 3`] = `
+<wup-textrich
+  invalid=""
+  required=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt6"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        aria-required="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      >
+        First Name
+      </strong>
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt6"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Name:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-textrich>
+`;
+
+exports[`control.textRich validations options.validationCase 1`] = `
+<wup-textrich>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt2"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      >
+        123
+      </wup-richinput>
+      <strong
+        id="txt1"
+      />
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 3"
+    role="note"
+    w-tooltip=""
+  >
+    3
+  </footer>
+</wup-textrich>
+`;
+
+exports[`control.textRich validations options.validationCase 2`] = `
+<wup-textrich
+  invalid=""
+  required=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt4"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        aria-required="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      >
+        First Input
+      </strong>
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Restore"
+        clear="back"
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Restore (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt4"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-textrich>
+`;
+
+exports[`control.textRich validations options.validationCase 3`] = `
+<wup-textrich
+  invalid=""
+  required=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt5"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        aria-required="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      >
+        123
+      </wup-richinput>
+      <strong
+        id="txt1"
+      >
+        First Input
+      </strong>
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 3"
+    role="note"
+    w-tooltip=""
+  >
+    3
+  </footer>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt5"
+    open=""
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      custom err here
+    </span>
+  </wup-popup>
+</wup-textrich>
+`;
+
+exports[`control.textRich validations options.validationCase 4`] = `
+<wup-textrich
+  invalid=""
+  required=""
+>
+  <label
+    for="txt1"
+  >
+    <span>
+      <wup-richinput
+        aria-describedby="txt6"
+        aria-labelledby="txt1"
+        aria-multiline="true"
+        aria-required="true"
+        contenteditable="true"
+        role="textbox"
+        wup-textrich=""
+      />
+      <strong
+        id="txt1"
+      >
+        First Input
+      </strong>
+    </span>
+    <span
+      class="wup-hidden"
+      id="txt2"
+    >
+      press Alt + F10 to focus toolbar
+    </span>
+  </label>
+  <div
+    aria-label="Formatting"
+    role="toolbar"
+  >
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
+        tool="header"
+        type="button"
+        w-tooltip=""
+      >
+        Normal
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+B"
+        aria-label="Bold"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="bold"
+        type="button"
+        w-tooltip="Bold (Ctrl+B)"
+      />
+      <button
+        aria-keyshortcuts="Control+I"
+        aria-label="Italic"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="italic"
+        type="button"
+        w-tooltip="Italic (Ctrl+I)"
+      />
+      <button
+        aria-keyshortcuts="Control+U"
+        aria-label="Underline"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="underline"
+        type="button"
+        w-tooltip="Underline (Ctrl+U)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+X"
+        aria-label="Strikethrough"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="strike"
+        type="button"
+        w-tooltip="Strikethrough (Ctrl+Shift+X)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+9"
+        aria-label="Quote"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="blockquote"
+        type="button"
+        w-tooltip="Quote (Ctrl+Shift+9)"
+      />
+      <button
+        aria-keyshortcuts="Control+Alt+Shift+C"
+        aria-label="Code block"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="code"
+        type="button"
+        w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+K"
+        aria-label="Link"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="link"
+        type="button"
+        w-tooltip="Link (Ctrl+K)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+Shift+7"
+        aria-label="Numbered list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:ordered"
+        type="button"
+        w-tooltip="Numbered list (Ctrl+Shift+7)"
+      />
+      <button
+        aria-keyshortcuts="Control+Shift+8"
+        aria-label="Bulleted list"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="list:bullet"
+        type="button"
+        w-tooltip="Bulleted list (Ctrl+Shift+8)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+,"
+        aria-label="Subscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:sub"
+        type="button"
+        w-tooltip="Subscript (Ctrl+,)"
+      />
+      <button
+        aria-keyshortcuts="Control+."
+        aria-label="Superscript"
+        aria-pressed="false"
+        tabindex="-1"
+        tool="script:super"
+        type="button"
+        w-tooltip="Superscript (Ctrl+.)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+["
+        aria-label="Decrease indent"
+        tabindex="-1"
+        tool="indent:-1"
+        type="button"
+        w-tooltip="Decrease indent (Ctrl+[)"
+      />
+      <button
+        aria-keyshortcuts="Control+]"
+        aria-label="Increase indent"
+        tabindex="-1"
+        tool="indent:1"
+        type="button"
+        w-tooltip="Increase indent (Ctrl+])"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
+        tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+      >
+        Default
+      </button>
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
+        icon=""
+        role="combobox"
+        tabindex="-1"
+        tool="align"
+        type="button"
+        w-tooltip=""
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Control+\\"
+        aria-label="Clear formatting"
+        tabindex="-1"
+        tool="clean"
+        type="button"
+        w-tooltip="Clear formatting (Ctrl+\\)"
+      />
+    </div>
+    <div
+      role="group"
+    >
+      <button
+        aria-keyshortcuts="Escape"
+        aria-label="Clear content"
+        clear=""
+        tabindex="-1"
+        tool="btnClear"
+        type="button"
+        w-tooltip="Clear content (Esc)"
+      />
+    </div>
+  </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
+  <wup-popup
+    aria-atomic="true"
+    aria-live="off"
+    error=""
+    id="txt6"
+    open=""
+    role="alert"
+    show=""
+    style="display: none;"
+  >
+    <span
+      class="wup-hidden"
+    >
+      Error for First Input:
+    </span>
+    <span>
+      This field is required
+    </span>
+  </wup-popup>
+</wup-textrich>
+`;
+
+exports[`control.textRich with form 1`] = `
+<wup-form
+  role="form"
+>
+  <wup-textrich>
+    <label
+      for="txt1"
+    >
+      <span>
+        <wup-richinput
+          aria-describedby="txt2"
+          aria-labelledby="txt1"
+          aria-multiline="true"
+          contenteditable="true"
+          role="textbox"
+          wup-textrich=""
+        />
+        <strong
+          id="txt1"
+        >
+          First Input
+        </strong>
+      </span>
+      <span
+        class="wup-hidden"
+        id="txt2"
+      >
+        press Alt + F10 to focus toolbar
+      </span>
+    </label>
+    <div
+      aria-label="Formatting"
+      role="toolbar"
+    >
+      <div
+        role="group"
+      >
+        <button
+          aria-expanded="false"
+          aria-label="Heading"
+          role="combobox"
+          tabindex="-1"
+          tool="header"
+          type="button"
+          w-tooltip=""
+        >
+          Normal
+        </button>
+      </div>
+      <div
+        role="group"
+      >
+        <button
+          aria-keyshortcuts="Control+B"
+          aria-label="Bold"
+          aria-pressed="false"
+          tabindex="-1"
+          tool="bold"
+          type="button"
+          w-tooltip="Bold (Ctrl+B)"
+        />
+        <button
+          aria-keyshortcuts="Control+I"
+          aria-label="Italic"
+          aria-pressed="false"
+          tabindex="-1"
+          tool="italic"
+          type="button"
+          w-tooltip="Italic (Ctrl+I)"
+        />
+        <button
+          aria-keyshortcuts="Control+U"
+          aria-label="Underline"
+          aria-pressed="false"
+          tabindex="-1"
+          tool="underline"
+          type="button"
+          w-tooltip="Underline (Ctrl+U)"
+        />
+        <button
+          aria-keyshortcuts="Control+Shift+X"
+          aria-label="Strikethrough"
+          aria-pressed="false"
+          tabindex="-1"
+          tool="strike"
+          type="button"
+          w-tooltip="Strikethrough (Ctrl+Shift+X)"
+        />
+      </div>
+      <div
+        role="group"
+      >
+        <button
+          aria-keyshortcuts="Control+Shift+9"
+          aria-label="Quote"
+          aria-pressed="false"
+          tabindex="-1"
+          tool="blockquote"
+          type="button"
+          w-tooltip="Quote (Ctrl+Shift+9)"
+        />
+        <button
+          aria-keyshortcuts="Control+Alt+Shift+C"
+          aria-label="Code block"
+          aria-pressed="false"
+          tabindex="-1"
+          tool="code"
+          type="button"
+          w-tooltip="Code block (Ctrl+Alt+Shift+C)"
+        />
+      </div>
+      <div
+        role="group"
+      >
+        <button
+          aria-keyshortcuts="Control+K"
+          aria-label="Link"
+          aria-pressed="false"
+          tabindex="-1"
+          tool="link"
+          type="button"
+          w-tooltip="Link (Ctrl+K)"
+        />
+      </div>
+      <div
+        role="group"
+      >
+        <button
+          aria-keyshortcuts="Control+Shift+7"
+          aria-label="Numbered list"
+          aria-pressed="false"
+          tabindex="-1"
+          tool="list:ordered"
+          type="button"
+          w-tooltip="Numbered list (Ctrl+Shift+7)"
+        />
+        <button
+          aria-keyshortcuts="Control+Shift+8"
+          aria-label="Bulleted list"
+          aria-pressed="false"
+          tabindex="-1"
+          tool="list:bullet"
+          type="button"
+          w-tooltip="Bulleted list (Ctrl+Shift+8)"
+        />
+      </div>
+      <div
+        role="group"
+      >
+        <button
+          aria-keyshortcuts="Control+,"
+          aria-label="Subscript"
+          aria-pressed="false"
+          tabindex="-1"
+          tool="script:sub"
+          type="button"
+          w-tooltip="Subscript (Ctrl+,)"
+        />
+        <button
+          aria-keyshortcuts="Control+."
+          aria-label="Superscript"
+          aria-pressed="false"
+          tabindex="-1"
+          tool="script:super"
+          type="button"
+          w-tooltip="Superscript (Ctrl+.)"
+        />
+      </div>
+      <div
+        role="group"
+      >
+        <button
+          aria-keyshortcuts="Control+["
+          aria-label="Decrease indent"
+          tabindex="-1"
+          tool="indent:-1"
+          type="button"
+          w-tooltip="Decrease indent (Ctrl+[)"
+        />
+        <button
+          aria-keyshortcuts="Control+]"
+          aria-label="Increase indent"
+          tabindex="-1"
+          tool="indent:1"
+          type="button"
+          w-tooltip="Increase indent (Ctrl+])"
+        />
+      </div>
+      <div
+        role="group"
+      >
+        <button
+          aria-expanded="false"
+          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+          aria-label="Font size"
+          role="combobox"
+          tabindex="-1"
+          tool="size"
+          type="button"
+          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        >
+          Default
+        </button>
+      </div>
+      <div
+        role="group"
+      >
+        <button
+          aria-expanded="false"
+          aria-label="Alignment"
+          class="wup-icon-align-left"
+          icon=""
+          role="combobox"
+          tabindex="-1"
+          tool="align"
+          type="button"
+          w-tooltip=""
+        />
+      </div>
+      <div
+        role="group"
+      >
+        <button
+          aria-keyshortcuts="Control+\\"
+          aria-label="Clear formatting"
+          tabindex="-1"
+          tool="clean"
+          type="button"
+          w-tooltip="Clear formatting (Ctrl+\\)"
+        />
+      </div>
+      <div
+        role="group"
+      >
+        <button
+          aria-keyshortcuts="Escape"
+          aria-label="Clear content"
+          clear=""
+          tabindex="-1"
+          tool="btnClear"
+          type="button"
+          w-tooltip="Clear content (Esc)"
+        />
+      </div>
+    </div>
+    <footer
+      aria-label="Characters: 0"
+      role="note"
+      w-tooltip=""
+    >
+      0
+    </footer>
+  </wup-textrich>
+</wup-form>
+`;

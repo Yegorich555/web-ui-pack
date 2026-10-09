@@ -1,0 +1,28 @@
+// icon of custom tool `direction`: class is pointed via `className` of value in static $tools
+.iconRtl {
+  --icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 3H6m7 4H6m7 4H2m2-2-2 2 2 2'/%3E%3C/svg%3E");
+}
+
+// icon of custom tool `image`: class is pointed via `className` of tool in static $tools
+.iconImage {
+  --icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Crect width='11' height='9' x='2' y='3' rx='1.5'/%3E%3Cpath fill='%23000' stroke='none' d='M3 11h9l-2.5-2.5L8 10 5.5 7.5z'/%3E%3Cpath d='M10 6z'/%3E%3C/svg%3E");
+}
+
+// fixed width by the widest item: otherwise toolbar is shifted when selection is changed
+button.font {
+  min-width: 6.875em;
+}
+
+// the same for dropdown of custom tool `placeholder`: it's pointed via attribute `tool` instead of `className` of tool
+button[tool="placeholder"] {
+  min-width: 6.375em;
+}
+
+// custom tool `placeholder`: class is pointed via `classNameTag` of tool in static $tools;
+// [wup-textrich] - styles of content: in editor & in value shown outside control
+[wup-textrich] .placeholder {
+  padding: 0 0.25em;
+  border-radius: 0.25em;
+  color: #00778d;
+  background: #009fbc26;
+}
