@@ -185,20 +185,21 @@ export function linesOf(r: Range, root: Element): HTMLElement[] {
   return arr.filter((l, i) => !l.contains(arr[i + 1] ?? null)); // skip parents of nested items (nested item follows parent)
 }
 
+/** Returns true if element has neither text nor elements (whitespaces between list items etc.) */
+const isBlank = (el: Element): boolean => !el.firstElementChild && !el.textContent!.trim();
+
 /** Replaces line with element or tag (keeps line style: alignment etc.; skips the same tag);
- *  list item is moved out of its list at first (splits list) */
+ *  list item is moved out of its lists at first (splits lists & parent items of nested list) */
 export function setLineTag(line: HTMLElement, tag: string | HTMLElement): HTMLElement {
-  if (line.tagName === "LI") {
-    const list = line.parentElement!;
-    if (line.nextSibling) {
-      const rest = list.cloneNode(false);
-      while (line.nextSibling) {
-        rest.appendChild(line.nextSibling);
-      }
-      list.after(rest);
+  for (let p = line.parentElement!; line.tagName === "LI" && (listTags.has(p.tagName) || p.tagName === "LI"); ) {
+    const rest = p.cloneNode(false) as Element; // items after line (nested ones keep their level)
+    while (line.nextSibling) {
+      rest.appendChild(line.nextSibling);
     }
-    list.after(line);
-    !list.firstElementChild && list.remove();
+    !isBlank(rest) && p.after(rest);
+    p.after(line);
+    isBlank(p) && p.remove();
+    p = line.parentElement!;
   }
   if (line.tagName === tag) {
     return line;

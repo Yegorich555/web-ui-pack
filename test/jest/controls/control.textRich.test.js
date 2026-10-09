@@ -63,6 +63,30 @@ describe("control.textRich", () => {
     expect(sel.toString()).toBe("Text with bold,"); // selection is kept
   });
 
+  test("line format of nested list item moves it out of all lists", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Sets html, selects text of list item & applies format */
+    const format = (html, text, name, value) => {
+      inp.innerHTML = html;
+      const t = [...inp.querySelectorAll("li")].find((li) => li.firstChild.data === text).firstChild;
+      window.getSelection().selectAllChildren(t.parentElement);
+      el.applyFormat(name, value, true);
+      return inp.innerHTML;
+    };
+
+    const nested = "<ul><li>a<ul><li>b</li></ul></li></ul>";
+    // otherwise heading is placed inside parent item: `<li>a<ul></ul><h2>b</h2></li>`
+    expect(format(nested, "b", "header", 2)).toBe("<ul><li>a</li></ul><h2>b</h2>");
+    expect(format(nested, "b", "clean")).toBe("<ul><li>a</li></ul><div>b</div>");
+    expect(format(nested, "b", "list", "bullet")).toBe("<ul><li>a</li></ul><div>b</div>"); // list off
+    // items after line keep their level
+    expect(format("<ol><li>a<ol><li>b</li><li>c</li></ol></li><li>d</li></ol>", "b", "header", 2)).toBe(
+      "<ol><li>a</li></ol><h2>b</h2><ol><li><ol><li>c</li></ol></li><li>d</li></ol>"
+    );
+  });
+
   test("value: <p> is used only if it's required", () => {
     const inp = document.createElement("wup-richinput"); // value of control's input is mocked by mockAreaInput
     inp._tools = WUPTextRichControl.$tools;
