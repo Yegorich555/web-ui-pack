@@ -54,7 +54,7 @@ WUPTextRichControl.$tools.font = {
 /** Returns url of image if it's safe (it's called by sanitizer for pasted html): http(s), relative or data-url of image */
 function imageUrl(src: string | null): string | undefined {
   try {
-    // todo src could be relative url /someImage.png for example
+    // relative url `/someImage.png` is resolved via baseURI, so its protocol is http(s) too
     return src && (/^data:image\//i.test(src) || /^https?:$/.test(new URL(src, document.baseURI).protocol))
       ? src
       : undefined;
