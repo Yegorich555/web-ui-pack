@@ -419,6 +419,11 @@ export default class WUPTextRichControl<
     return this.#ctr.$tools;
   }
 
+  /** Entries of static $tools with checker of element by `is`: cached on toolbar render (see $tools) */
+  #entries: Array<[string, WUP.TextRich.Tool, ((el: Element) => boolean) | undefined]> = [];
+  /** Checker of embed elements: cached on toolbar render */
+  #isEmbed?: (el: Element) => boolean;
+
   static get $styleRoot(): string {
     return "";
   }
@@ -748,11 +753,18 @@ export default class WUPTextRichControl<
     // hover on link opens url popup, on embed & token - tool dropdown;
     // skipped while selecting by mouse & for touch (buttons = 1) & while pointer stays over the same element
     onEvent(inp, "pointermove", (e) => {
-      const el = !e.buttons && this.hoverOf(e.target as Element);
-      el !== false && el !== this.#under && this.gotHover((this.#under = el));
+      const t = e.target as Element;
+      if (!e.buttons) {
+        // the same target: without lookup of tools
+        const [, el] = this.#hoverAt?.[0] === t ? this.#hoverAt : (this.#hoverAt = [t, this.hoverOf(t)]);
+        el !== this.#under && this.gotHover((this.#under = el));
+      }
     });
     // touch leaves element right after tap: popup is closed by tap elsewhere or on blur
-    onEvent(inp, "pointerleave", (e) => e.pointerType !== "touch" && this.gotHover((this.#under = null)));
+    onEvent(inp, "pointerleave", (e) => {
+      this.#hoverAt = undefined;
+      e.pointerType !== "touch" && this.gotHover((this.#under = null));
+    });
     // press opens popup of element at once (caret is placed as usual), press elsewhere closes it
     const press = (t: Element): void => {
       const el = this.hoverOf(t);
@@ -785,6 +797,7 @@ export default class WUPTextRichControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.TextRich.Options> | null): void {
     super.gotChanges(propsChanged as any); // creates/removes $refBtnClear & footer
+    this.#hoverAt = undefined; // readonly, toolbar etc. change element with hover popup
     (!propsChanged ||
       propsChanged.includes("toolbar") ||
       propsChanged.includes("hideHotKeysHint") ||
@@ -798,6 +811,9 @@ export default class WUPTextRichControl<
 
   /** Renders toolbar according to $options.toolbar */
   protected renderToolbar(): void {
+    const tools = this.#tools;
+    this.#entries = Object.entries(tools).map(([k, t]) => [k, t, t.is && isOf(t)]);
+    this.#isEmbed = embedOf(tools);
     const bar = this.$refToolbar;
     bar.replaceChildren();
     this._opts.toolbar?.forEach((items) => {
@@ -976,8 +992,8 @@ export default class WUPTextRichControl<
     if (n && inp.contains(n)) {
       // line: child of editor or list item
       const line = formatParents(n, (el) => el.parentElement === inp || el.tagName === "LI", inp)[0];
-      Object.entries(this.#tools).forEach(([name, t]) => {
-        const el = t.is && (t.kind === "line" || t.kind === "lineStyle" ? line : formatParents(n, isOf(t), inp)[0]);
+      this.#entries.forEach(([name, t, is]) => {
+        const el = is && (t.kind === "line" || t.kind === "lineStyle" ? line : formatParents(n, is, inp)[0]);
         const v = el ? t.is!(el as HTMLElement) : undefined;
         v !== undefined && m.set(name, v);
       });
@@ -1056,9 +1072,7 @@ export default class WUPTextRichControl<
       // pending format for the next typed text (Ctrl+B and type)
       const p = this.#pending;
       if (name === "clean") {
-        Object.entries(this.#tools).forEach(
-          ([k, t]) => t.kind === "inline" && !t.ask && !t.trigger && f.has(k) && p.set(k, false)
-        );
+        this.#entries.forEach(([k, t]) => t.kind === "inline" && !t.ask && !t.trigger && f.has(k) && p.set(k, false));
       } else {
         const isOff = !v || (!isSet && isMatch(f.get(name), v)); // toggle
         p.set(name, !isOff && v);
@@ -1192,9 +1206,8 @@ export default class WUPTextRichControl<
     if (!sel.isCollapsed || !n) {
       return false;
     }
-    const tools = Object.values(this.#tools);
     const isToken = (el: Element): boolean =>
-      tools.some((t) => t.kind === "inline" && t.trigger && t.is?.(el as HTMLElement) !== undefined);
+      this.#entries.some(([, t, is]) => t.kind === "inline" && t.trigger && is?.(el));
     const off = sel.focusOffset;
     const kids = n.childNodes;
     // caret inside token (the outer one) or next to it (after insertion): browser types into the previous node
@@ -1221,9 +1234,9 @@ export default class WUPTextRichControl<
     if (!sel.isCollapsed || !n) {
       return [];
     }
-    return Object.entries(this.#tools)
-      .filter(([, t]) => {
-        const el = t.kind === "inline" && !t.trigger && formatParents(n, isOf(t), this.$refInput).pop(); // the outer one
+    return this.#entries
+      .filter(([, t, is]) => {
+        const el = is && t.kind === "inline" && !t.trigger && formatParents(n, is, this.$refInput).pop(); // the outer one
         return el && !textAt(el, n, sel.focusOffset);
       })
       .map(([name]) => name);
@@ -1258,11 +1271,10 @@ export default class WUPTextRichControl<
     const tools = this.#tools;
     const r = sel.getRangeAt(0);
     r.deleteContents();
-    const isEmbed = embedOf(tools);
     // move caret out of elements of removed/changed formats (`true` - added toggle format)
     this.#pending.forEach((v, k) => {
       const el = v !== true && formatParents(r.startContainer, isOf(tools[k]), inp).pop(); // the outer one
-      el && splitAt(el, r, isEmbed);
+      el && splitAt(el, r, this.#isEmbed);
     });
     const t = document.createTextNode(text);
     let node: Node = t;
@@ -1289,7 +1301,6 @@ export default class WUPTextRichControl<
       return false;
     }
     const r = sel.getRangeAt(0);
-    const isEmbed = embedOf(this.#tools);
     const inner = document.createRange(); // from the 1st visible char (or embed) to the last one
     const w = document.createTreeWalker(r.commonAncestorContainer, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
     for (let n: Node | null = w.currentNode; n; n = w.nextNode()) {
@@ -1305,7 +1316,7 @@ export default class WUPTextRichControl<
           inner.collapsed && inner.setStart(t, from + i);
           inner.setEnd(t, s.trimEnd().length);
         }
-      } else if (isEmbed?.(n as Element)) {
+      } else if (this.#isEmbed?.(n as Element)) {
         inner.collapsed && inner.setStartBefore(n);
         inner.setEndAfter(n);
         while (n.lastChild) {
@@ -1347,7 +1358,7 @@ export default class WUPTextRichControl<
     const [fn1, fo] = childPos(sel.focusNode!, sel.focusOffset);
     // again after wrapping: empty editor gets the 1st line (caret goes into it)
     wrapLines(inp) && sel.setBaseAndExtent(...childPos(an, ao), ...childPos(fn1, fo));
-    const isEmbed = embedOf(this.#tools);
+    const isEmbed = this.#isEmbed;
     return [
       charsBefore(inp, sel.anchorNode!, sel.anchorOffset, isEmbed),
       charsBefore(inp, sel.focusNode!, sel.focusOffset, isEmbed),
@@ -1357,7 +1368,7 @@ export default class WUPTextRichControl<
   /** Sets selection by char offsets (see getSelectionPos) */
   protected setSelectionPos([a, f]: [number, number]): void {
     const inp = this.$refInput;
-    const isEmbed = embedOf(this.#tools);
+    const isEmbed = this.#isEmbed;
     window.getSelection()!.setBaseAndExtent(...pointAt(inp, a, isEmbed), ...pointAt(inp, f, isEmbed));
   }
 
@@ -1367,6 +1378,8 @@ export default class WUPTextRichControl<
   /** Hovered element with popup (see hoverOf): reset on popup close, so pointer move hovers it again
    *  (but not a stationary pointer: embed chosen via menu is a new element under it) */
   #under?: HTMLElement | null;
+  /** The last target of pointer & its element with hover popup (see hoverOf) */
+  #hoverAt?: [Element, HTMLElement | null];
 
   /** Asks value via popup with text control near target (link url etc.):
    *  Enter submits, Escape or blur cancels (`null`); Enter/Escape return focus & selection to editor
@@ -1456,7 +1469,7 @@ export default class WUPTextRichControl<
       return;
     }
     const s = n.data.slice(0, sel.focusOffset);
-    const found = Object.entries(this.#tools).find(([, t]) => t.trigger && s.endsWith(t.trigger));
+    const found = this.#entries.find(([, t]) => t.trigger && s.endsWith(t.trigger));
     if (found) {
       const [name, tool] = found;
       const tr = tool.trigger!;
@@ -1496,7 +1509,7 @@ export default class WUPTextRichControl<
     }
     const s = n.data.slice(0, sel.focusOffset) + data;
     let typed: string | undefined;
-    const found = Object.entries(this.#tools).find(([k, t]) => {
+    const found = this.#entries.find(([k, t]) => {
       const tr = t.kind === "inline" && t.trigger;
       typed = tr ? typedValue(s, tr, this.#ctr.$wrapChars.get(tr)) : undefined;
       // `is` can reject value: unknown placeholder etc.
@@ -1516,9 +1529,7 @@ export default class WUPTextRichControl<
    *  via `ask` on click or via dropdown on hover (`isHover`) */
   protected embedTool(el: Element, isHover?: boolean): string | undefined {
     const [name, t] =
-      Object.entries(this.#tools).find(
-        ([, x]) => (x.kind === "embed" || (x.kind === "inline" && x.trigger)) && x.is?.(el as HTMLElement) !== undefined
-      ) ?? [];
+      this.#entries.find(([, x, is]) => (x.kind === "embed" || (x.kind === "inline" && x.trigger)) && is?.(el)) ?? [];
     const can = t && !this.$isReadOnly && !this.$isDisabled && (!isHover || !t.ask) && this.findTool(name!);
     return can ? name : undefined;
   }
@@ -1609,7 +1620,7 @@ export default class WUPTextRichControl<
       return;
     }
     const last = f.lastChild!;
-    splitAt(line, r, embedOf(this.#tools)); // empty parts are removed
+    splitAt(line, r, this.#isEmbed); // empty parts are removed
     r.insertNode(f);
     window.getSelection()!.collapse(last, last.childNodes.length);
   }
@@ -1628,7 +1639,7 @@ export default class WUPTextRichControl<
     if (!a || !b || a === b || a.contains(b) || b.parentElement!.closest("li")) {
       return false;
     }
-    const isEmbed = embedOf(this.#tools);
+    const isEmbed = this.#isEmbed;
     const pos = charsBefore(inp, sr.startContainer, sr.startOffset, isEmbed);
     const isRest = // content after range in the last line
       charsBefore(b, sr.endContainer, sr.endOffset, isEmbed) < charsBefore(b, b, b.childNodes.length, isEmbed);
@@ -1771,7 +1782,7 @@ export default class WUPTextRichControl<
       this.$refToolbar.querySelector("button")?.focus();
       return true;
     }
-    const found = Object.entries(this.#tools).find(
+    const found = this.#entries.find(
       ([, t]) => match(t.hotKey) !== -1 || t.values?.some((v) => match(v.hotKey) !== -1)
     );
     if (!found) {

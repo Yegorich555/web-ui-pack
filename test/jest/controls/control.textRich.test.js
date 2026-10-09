@@ -186,6 +186,7 @@ describe("control.textRich", () => {
       create: (v) => Object.assign(document.createElement("img"), { src: v }),
     };
     try {
+      el.$options.toolbar = [["bold"]]; // tools are applied on toolbar render
       await h.wait(1);
       const inp = el.$refInput;
       inp.focus();
@@ -307,6 +308,32 @@ describe("control.textRich", () => {
     expect(indent("96px", -1)).toBe("3em");
     expect(indent("6em", 1)).toBe("9em");
     expect(indent("6em", -1)).toBe("3em");
+  });
+
+  test("pointer move over the same element doesn't look up tools", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.innerHTML = '<div>Text <a href="https://x.com/">link</a></div>';
+    const a = inp.querySelector("a");
+    const spy = jest.spyOn(el, "hoverOf");
+    const move = (t) => t.dispatchEvent(new MouseEvent("pointermove", { bubbles: true }));
+
+    move(a);
+    move(a);
+    move(a);
+    expect(spy).toBeCalledTimes(1);
+    move(inp.firstChild);
+    move(inp.firstChild);
+    expect(spy).toBeCalledTimes(2);
+    // pointer returns: element is looked up again (readonly etc. can be changed)
+    inp.dispatchEvent(new MouseEvent("pointerleave"));
+    move(inp.firstChild);
+    expect(spy).toBeCalledTimes(3);
+    el.$options.readOnly = true;
+    await h.wait(1);
+    move(inp.firstChild);
+    expect(spy).toBeCalledTimes(4);
+    await h.wait(); // hover timers
   });
 
   test("value: <p> is used only if it's required", () => {
