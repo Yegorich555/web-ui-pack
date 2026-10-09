@@ -54,18 +54,27 @@ export function splitRange(r: Range): Text[] {
   return arr;
 }
 
-/** Moves content outside `first`..`last` into copies of el: `<b>a[bc]d</b>` => `<b>a</b><b>[bc]</b><b>d</b>` */
+/** Returns the outer ancestor of node inside el that starts with it (`isEnd` - ends with it): `<b><i>[a</i>b</b>` => `<i>` */
+function edgeOf(el: Element, n: Node, isEnd?: boolean): Node {
+  while (n.parentNode !== el && !(isEnd ? n.nextSibling : n.previousSibling)) {
+    n = n.parentNode!;
+  }
+  return n;
+}
+
+/** Moves content outside `first`..`last` into copies of el: `<b>a[bc]d</b>` => `<b>a</b><b>[bc]</b><b>d</b>`;
+ *  split at edges of nested elements: otherwise their empty copies stay (`<b><i></i></b>`) */
 function isolate(el: Element, first: Node, last: Node): void {
   const before = document.createRange();
   before.setStart(el, 0);
-  before.setEndBefore(first);
+  before.setEndBefore(edgeOf(el, first));
   if (!before.collapsed) {
     const c = el.cloneNode(false);
     c.appendChild(before.extractContents());
     el.before(c);
   }
   const after = document.createRange();
-  after.setStartAfter(last);
+  after.setStartAfter(edgeOf(el, last, true));
   after.setEnd(el, el.childNodes.length);
   if (!after.collapsed) {
     const c = el.cloneNode(false);

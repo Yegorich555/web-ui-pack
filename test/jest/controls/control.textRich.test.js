@@ -517,6 +517,32 @@ describe("control.textRich", () => {
     expect(el.$refInput.innerHTML).toBe("<div>a<b><em>b</em></b>c</div>");
   });
 
+  test("format removed at edge of nested element doesn't leave its empty copy", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Sets html, selects from char of the 1st text node to char of the last one & toggles bold */
+    const unbold = (html, start, end) => {
+      inp.innerHTML = html;
+      const w = document.createTreeWalker(inp, NodeFilter.SHOW_TEXT);
+      const arr = [];
+      while (w.nextNode()) {
+        arr.push(w.currentNode);
+      }
+      window.getSelection().setBaseAndExtent(arr[0], start, arr.at(-1), end);
+      el.applyFormat("bold");
+      return inp.innerHTML;
+    };
+
+    // otherwise `a<i>bc</i><b><i></i></b>` & `<b><i></i></b><i>ab</i>c`
+    expect(unbold("<div><b>a<i>bc</i></b></div>", 0, 2)).toBe("<div>a<i>bc</i></div>");
+    expect(unbold("<div><b><i>ab</i>c</b></div>", 0, 1)).toBe("<div><i>ab</i>c</div>");
+    expect(unbold("<div><b>x<i><u>ab</u></i></b></div>", 0, 2)).toBe("<div>x<i><u>ab</u></i></div>");
+    // the rest of nested element keeps format
+    expect(unbold("<div><b>a<i>bc</i></b></div>", 0, 1)).toBe("<div>a<i>b</i><b><i>c</i></b></div>");
+    expect(unbold("<div><b><i>ab</i>c</b></div>", 1, 1)).toBe("<div><b><i>a</i></b><i>b</i>c</div>");
+  });
+
   test("line formats", async () => {
     await h.wait(1);
     el.$refInput.focus();
