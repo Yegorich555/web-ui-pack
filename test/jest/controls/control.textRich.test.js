@@ -147,6 +147,30 @@ describe("control.textRich", () => {
     }
   });
 
+  test("paste over several lines merges them", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Sets html, selects from char of the 1st line to char of the last one & pastes html */
+    const paste = (html, [start, end], pasted) => {
+      inp.innerHTML = html;
+      window.getSelection().setBaseAndExtent(inp.firstChild.firstChild, start, inp.lastChild.firstChild, end);
+      el.insertHTML(pasted);
+      return inp.innerHTML;
+    };
+    // otherwise `<div>HeX</div><div>ld</div>`
+    expect(paste("<div>Hello</div><div>World</div>", [2, 3], "<b>X</b>")).toBe("<div>He<b>X</b>ld</div>");
+    expect(paste("<div>Hello</div><div>World</div>", [2, 3], "<h1>T</h1><p>x</p>")).toBe(
+      "<div>He</div><h1>T</h1><div>x</div><div>ld</div>"
+    );
+
+    // caret at editor root (empty editor): otherwise blocks are flattened into `T<br>x`
+    inp.innerHTML = "";
+    window.getSelection().collapse(inp, 0);
+    el.insertHTML("<h1>T</h1><ul><li>x</li></ul>");
+    expect(inp.innerHTML).toBe("<h1>T</h1><ul><li>x</li></ul>");
+  });
+
   test("value: <p> is used only if it's required", () => {
     const inp = document.createElement("wup-richinput"); // value of control's input is mocked by mockAreaInput
     inp._tools = WUPTextRichControl.$tools;

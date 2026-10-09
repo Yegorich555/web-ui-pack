@@ -1581,8 +1581,10 @@ export default class WUPTextRichControl<
   protected insertHTML(html: string): void {
     const f = htmlToEditor(html, this.#tools);
     const inp = this.$refInput;
-    const r = window.getSelection()!.getRangeAt(0);
-    r.deleteContents();
+    const sel = window.getSelection()!;
+    this.getSelectionPos(); // wraps loose content: otherwise caret at editor root has no line
+    this.deleteLines(sel.getRangeAt(0)) || sel.getRangeAt(0).deleteContents(); // the rest of the last line joins the 1st one
+    const r = sel.getRangeAt(0);
     const line = getLines(inp).findLast((l) => l.contains(r.startContainer));
     const first = f.firstElementChild;
     if (!first) {
@@ -1614,7 +1616,7 @@ export default class WUPTextRichControl<
    *  (triple click on heading + Delete doesn't turn the next paragraph into heading);
    *  if everything is deleted, the empty line becomes a plain paragraph
    * @returns false if range is in a single line or nested lists are involved (browser deletes it) */
-  protected deleteLines(sr: StaticRange | undefined): boolean {
+  protected deleteLines(sr: AbstractRange | undefined): boolean {
     const inp = this.$refInput;
     const lines = getLines(inp);
     const lineAt = (n: Node): HTMLElement | undefined => lines.findLast((l) => l.contains(n));
