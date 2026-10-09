@@ -37,131 +37,17 @@ exports[`control.textRich $ariaDetails 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -305,159 +191,33 @@ exports[`control.textRich $ariaDetails 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -485,6 +245,13 @@ exports[`control.textRich $ariaDetails 1`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
 </wup-textrich>
 `;
 
@@ -520,131 +287,17 @@ exports[`control.textRich $ariaDetails 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -788,159 +441,33 @@ exports[`control.textRich $ariaDetails 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -968,6 +495,13 @@ exports[`control.textRich $ariaDetails 2`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
 </wup-textrich>
 `;
 
@@ -1003,131 +537,17 @@ exports[`control.textRich $ariaSpeak 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -1271,159 +691,33 @@ exports[`control.textRich $ariaSpeak 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -1451,6 +745,13 @@ exports[`control.textRich $ariaSpeak 1`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -1494,131 +795,17 @@ exports[`control.textRich $ariaSpeak 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -1762,159 +949,33 @@ exports[`control.textRich $ariaSpeak 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -1942,6 +1003,13 @@ exports[`control.textRich $ariaSpeak 2`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
 </wup-textrich>
 `;
 
@@ -1977,131 +1045,17 @@ exports[`control.textRich $show/$hide error 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -2245,159 +1199,33 @@ exports[`control.textRich $show/$hide error 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -2425,6 +1253,13 @@ exports[`control.textRich $show/$hide error 1`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
 </wup-textrich>
 `;
 
@@ -2462,131 +1297,17 @@ exports[`control.textRich $show/$hide error 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -2730,159 +1451,33 @@ exports[`control.textRich $show/$hide error 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -2910,6 +1505,13 @@ exports[`control.textRich $show/$hide error 2`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -2958,131 +1560,17 @@ exports[`control.textRich $show/$hide error 3`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -3226,159 +1714,33 @@ exports[`control.textRich $show/$hide error 3`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -3406,6 +1768,13 @@ exports[`control.textRich $show/$hide error 3`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -3588,6 +1957,7 @@ exports[`control.textRich common tests render + styles 2`] = `
   --wup-icon-outdent: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M2 3h11M2 11h11M2 7h6'/%3E%3Cpath fill='%23000' stroke='none' d='M14 5v4l-3-2z'/%3E%3C/svg%3E");
   --wup-icon-align-left: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M2 7h11M2 11h8M2 3h5'/%3E%3C/svg%3E");
   --wup-icon-align-center: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 7H2m10 4H3m7-8H5'/%3E%3C/svg%3E");
+  --wup-icon-align-right: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 7H2m11 4H5m8-8H8'/%3E%3C/svg%3E");
   --wup-icon-align-justify: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 7H2m11 4H2m11-8H2'/%3E%3C/svg%3E");
 }
 [wupdark] {
@@ -3669,7 +2039,7 @@ WUP-TEXTRICH textarea {
   margin: 0;
   cursor: inherit;
 }
-WUP-TEXTRICH [contenteditable=true] {
+WUP-TEXTRICH [contenteditable] {
   margin: var(--ctrl-padding);
   margin-left: 0;
   margin-right: 0;
@@ -3781,7 +2151,7 @@ WUP-TEXTRICH [postfix] {
 }
 WUP-TEXTRICH input,
 WUP-TEXTRICH textarea,
-WUP-TEXTRICH [contenteditable=true],
+WUP-TEXTRICH [contenteditable],
 WUP-TEXTRICH [maskholder],
 WUP-TEXTRICH [postfix] {
   width: 100%;
@@ -3817,7 +2187,7 @@ WUP-TEXTRICH [postfix] &gt; i {
   font: inherit;
   white-space: pre;
 }
-WUP-TEXTRICH input:-webkit-autofill, WUP-TEXTRICH textarea:-webkit-autofill, WUP-TEXTRICH [contenteditable=true]:-webkit-autofill {
+WUP-TEXTRICH input:-webkit-autofill, WUP-TEXTRICH textarea:-webkit-autofill, WUP-TEXTRICH [contenteditable]:-webkit-autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -3825,7 +2195,7 @@ WUP-TEXTRICH input:-webkit-autofill, WUP-TEXTRICH textarea:-webkit-autofill, WUP
 }
 WUP-TEXTRICH input:autofill,
 WUP-TEXTRICH textarea:autofill,
-WUP-TEXTRICH [contenteditable=true]:autofill {
+WUP-TEXTRICH [contenteditable]:autofill {
   font: inherit;
   background-clip: text;
   -webkit-text-fill-color: var(--ctrl-autofill);
@@ -3862,16 +2232,16 @@ WUP-TEXTRICH textarea:not(:focus)::placeholder {
 WUP-TEXTRICH:focus-within strong,
 WUP-TEXTRICH input:not(:placeholder-shown) + strong,
 WUP-TEXTRICH textarea:not(:placeholder-shown) + strong,
-WUP-TEXTRICH [contenteditable=true]:not(:empty) + strong,
+WUP-TEXTRICH [contenteditable]:not(:empty) + strong,
 WUP-TEXTRICH legend {
   transform: var(--ctrl-label-active-pos);
 }
-WUP-TEXTRICH input:-webkit-autofill + strong, WUP-TEXTRICH textarea:-webkit-autofill + strong, WUP-TEXTRICH [contenteditable=true]:-webkit-autofill + strong {
+WUP-TEXTRICH input:-webkit-autofill + strong, WUP-TEXTRICH textarea:-webkit-autofill + strong, WUP-TEXTRICH [contenteditable]:-webkit-autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-TEXTRICH input:autofill + strong,
 WUP-TEXTRICH textarea:autofill + strong,
-WUP-TEXTRICH [contenteditable=true]:autofill + strong {
+WUP-TEXTRICH [contenteditable]:autofill + strong {
   transform: var(--ctrl-label-active-pos);
 }
 WUP-TEXTRICH:focus-within [maskholder], WUP-TEXTRICH:focus-within [prefix], WUP-TEXTRICH:focus-within [postfix],
@@ -3951,31 +2321,43 @@ WUP-TEXTRICH[disabled] button[clear], WUP-TEXTRICH[readonly] button[clear] {
 WUP-TEXTRICH strong {
   top: 1.6em;
 }
-WUP-TEXTRICH [contenteditable=true] {
+WUP-TEXTRICH [contenteditable] {
   min-height: 4em;
   max-height: 4em;
+}
+WUP-TEXTRICH &gt; footer {
+  width: fit-content;
+  margin-left: auto;
+  padding: 0 0.5em 0.25em;
+  font-size: small;
+  color: var(--ctrl-label);
+  cursor: default;
+}
+WUP-TEXTRICH &gt; footer[invalid] {
+  color: var(--ctrl-err);
 }
 WUP-TEXTRICH {
   position: relative;
   display: flex;
   flex-direction: column;
+  margin-top: calc(var(--base-margin) + 1.75em);
+}
+WUP-TEXTRICH:has(&gt; label strong:empty) {
+  margin-top: var(--base-margin);
 }
 WUP-TEXTRICH &gt; label {
-  --ctrl-label-active-pos: translateY(-50%) scale(0.9);
+  --ctrl-label-active-pos: none;
 }
 WUP-TEXTRICH &gt; label &gt; span {
   position: static;
 }
 WUP-TEXTRICH &gt; label strong {
-  top: 0;
-  left: calc(var(--ctrl-icon-size) - 0.25em);
-  max-width: calc(100% - 2 * var(--ctrl-icon-size));
-  padding: 0 0.25em;
-  transform-origin: center left;
-  transform: var(--ctrl-label-active-pos);
-  color: var(--ctrl-focus-label);
-  background: var(--ctrl-textrich-label-bg, var(--ctrl-bg));
-  border-radius: 0.5em;
+  top: auto;
+  bottom: calc(100% + 0.25em);
+  left: 0;
+  transform: none;
+  line-height: 1.5;
+  font-weight: bold;
 }
 WUP-TEXTRICH [role=toolbar] {
   order: -1;
@@ -3995,7 +2377,7 @@ WUP-TEXTRICH [role=group] {
   display: flex;
   align-items: center;
 }
-WUP-TEXTRICH [role=group] &gt; button {
+WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]) {
   --icon: var(--ctrl-icon);
   --icon-size: 1.125em;
   --icon-hover: var(--ctrl-selected);
@@ -4014,7 +2396,7 @@ WUP-TEXTRICH [role=group] &gt; button {
   border-radius: 50%;
   border-radius: 4px;
 }
-WUP-TEXTRICH [role=group] &gt; button:after {
+WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):after {
   content: "";
   display: inline-block;
   border-radius: 50%;
@@ -4030,24 +2412,24 @@ WUP-TEXTRICH [role=group] &gt; button:after {
   -webkit-mask-image: var(--icon-img);
           mask-image: var(--icon-img);
 }
-WUP-TEXTRICH [role=group] &gt; button:focus {
+WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):focus {
   box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
 }
-WUP-TEXTRICH [role=group] &gt; button:focus:after {
+WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):focus:after {
   background: var(--icon-hover, var(--icon, #000));
 }
 @media (hover: hover) and (pointer: fine) {
-  WUP-TEXTRICH [role=group] &gt; button:hover {
+  WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):hover {
     box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
   }
-  WUP-TEXTRICH [role=group] &gt; button:hover:after {
+  WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):hover:after {
     background: var(--icon-hover, var(--icon, #000));
   }
-  WUP-TEXTRICH [role=group] &gt; button:focus:hover {
+  WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]):focus:hover {
     opacity: 0.9;
   }
 }
-WUP-TEXTRICH [role=group] &gt; button[aria-pressed=true] {
+WUP-TEXTRICH [role=group] &gt; button:not([role=combobox])[aria-pressed=true] {
   --icon: var(--ctrl-selected);
 }
 WUP-TEXTRICH [role=group] &gt; button[clear] {
@@ -4097,27 +2479,11 @@ WUP-TEXTRICH [tool="indent:-1"] {
 WUP-TEXTRICH [tool="indent:1"] {
   --icon-img: var(--wup-icon-indent);
 }
-WUP-TEXTRICH wup-dropdown &gt; button {
-  --icon-hover-bg: none;
-  height: 1.75em;
-  border-radius: 4px;
-  color: var(--ctrl-icon);
-}
-@media (hover: hover) and (pointer: fine) {
-  WUP-TEXTRICH wup-dropdown &gt; button:hover {
-    color: var(--ctrl-selected);
-  }
-}
-WUP-TEXTRICH wup-dropdown[tool=header] &gt; button {
-  min-width: 6.25em;
-}
-WUP-TEXTRICH wup-dropdown[tool=size] &gt; button {
-  min-width: 4.875em;
-}
-WUP-TEXTRICH wup-dropdown[icon] &gt; button:before,
-WUP-TEXTRICH wup-dropdown li[icon]:before {
-  --ctrl-icon-size: 15px;
+WUP-TEXTRICH [role=combobox][icon]:before,
+WUP-TEXTRICH &gt; wup-popup[menu] li[icon]:before {
   content: "";
+  --ctrl-icon-img: var(--icon-img);
+  --ctrl-icon-size: 15px;
   display: inline-block;
   width: var(--ctrl-icon-size);
   min-height: var(--ctrl-icon-size);
@@ -4137,41 +2503,82 @@ WUP-TEXTRICH wup-dropdown li[icon]:before {
           mask-position: center;
   -webkit-mask-image: var(--ctrl-icon-img);
           mask-image: var(--ctrl-icon-img);
-  vertical-align: middle;
 }
-WUP-TEXTRICH wup-dropdown[icon] &gt; button:before {
-  align-self: center;
-  background: currentColor;
-}
-WUP-TEXTRICH wup-dropdown &gt; [menu] li {
-  display: flex;
+WUP-TEXTRICH [role=combobox] {
+  display: inline-flex;
   align-items: center;
-  padding: 0.4em 1em;
-  line-height: 1.2;
+  gap: 0.25em;
+  height: 1.75em;
+  margin: 0;
+  padding: 0.25em 0.25em 0.25em 0.5em;
+  border: none;
+  border-radius: 4px;
+  font: inherit;
+  color: var(--ctrl-icon);
+  background: none;
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
   white-space: nowrap;
 }
-WUP-TEXTRICH wup-dropdown &gt; [menu] kbd {
-  margin-left: auto;
-  padding-left: 2em;
-  font: inherit;
-  font-size: 0.75em;
-  color: var(--ctrl-label);
-}
-WUP-TEXTRICH wup-dropdown &gt; [menu] li:has(&gt; kbd)[aria-selected=true]:after {
-  margin-left: 0;
-}
-WUP-TEXTRICH wup-dropdown &gt; [menu] h1,
-WUP-TEXTRICH wup-dropdown &gt; [menu] h2,
-WUP-TEXTRICH wup-dropdown &gt; [menu] h3,
-WUP-TEXTRICH wup-dropdown &gt; [menu] h4,
-WUP-TEXTRICH wup-dropdown &gt; [menu] h5,
-WUP-TEXTRICH wup-dropdown &gt; [menu] h6 {
+WUP-TEXTRICH [role=combobox]:after {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-chevron);
+  --ctrl-icon-size: 0.6em;
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
   margin: 0;
   padding: 0;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  align-self: center;
+  margin-left: auto;
+  background: currentColor;
 }
-WUP-TEXTRICH wup-dropdown[tool=align] &gt; button[value=right]:before,
-WUP-TEXTRICH [tool="align:right"]:before {
-  transform: scaleX(-1);
+WUP-TEXTRICH [role=combobox][aria-expanded=true]:after {
+  transform: rotate(180deg);
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-TEXTRICH [role=combobox]:hover {
+    color: var(--ctrl-selected);
+  }
+}
+WUP-TEXTRICH [role=combobox]:focus {
+  box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
+}
+WUP-TEXTRICH [role=combobox][icon]:before {
+  background: currentColor;
+}
+WUP-TEXTRICH [role=combobox][tool=header] {
+  min-width: 6.25em;
+}
+WUP-TEXTRICH [role=combobox][tool=size] {
+  min-width: 4.875em;
+}
+WUP-TEXTRICH .wup-icon-align-left {
+  --icon-img: var(--wup-icon-align-left);
+}
+WUP-TEXTRICH .wup-icon-align-center {
+  --icon-img: var(--wup-icon-align-center);
+}
+WUP-TEXTRICH .wup-icon-align-right {
+  --icon-img: var(--wup-icon-align-right);
+}
+WUP-TEXTRICH .wup-icon-align-justify {
+  --icon-img: var(--wup-icon-align-justify);
 }
 WUP-TEXTRICH[disabled] [role=toolbar], WUP-TEXTRICH[readonly] [role=toolbar] {
   pointer-events: none;
@@ -4179,11 +2586,125 @@ WUP-TEXTRICH[disabled] [role=toolbar], WUP-TEXTRICH[readonly] [role=toolbar] {
 WUP-TEXTRICH[readonly] [role=toolbar] {
   opacity: 0.5;
 }
+WUP-TEXTRICH &gt; wup-popup[menu] {
+  padding: 0;
+  overflow: hidden;
+  z-index: 8010;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  cursor: pointer;
+  overflow: auto;
+  max-height: 300px;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  cursor: pointer;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-corner {
+  background: none;
+  cursor: pointer;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  background-color: var(--scroll, rgba(0, 0, 0, 0.2));
+  border-radius: 999px;
+  cursor: pointer;
+}
+@media (hover: hover) {
+WUP-TEXTRICH&gt;wup-popup[menu] ul::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
+  cursor: pointer;
+}
+}
+WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-track-piece:vertical:start, WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-track-piece:vertical:end, WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-track-piece:horizontal:start, WUP-TEXTRICH &gt; wup-popup[menu] ul::-webkit-scrollbar-track-piece:horizontal:end {
+  margin: 0;
+  cursor: pointer;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li {
+  padding: 1em;
+}
+@media (hover: hover) and (pointer: fine) {
+  WUP-TEXTRICH &gt; wup-popup[menu] li:hover {
+    color: var(--menu-hover-text);
+    background: var(--menu-hover-bg);
+  }
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li[aria-selected=true] {
+  color: var(--ctrl-selected);
+  display: flex;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li[aria-selected=true]:after {
+  content: "";
+  --ctrl-icon-img: var(--wup-icon-check);
+  display: inline-block;
+  width: var(--ctrl-icon-size);
+  min-height: var(--ctrl-icon-size);
+  box-sizing: content-box;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
+  align-self: stretch;
+  border: none;
+  box-shadow: none;
+  background: var(--ctrl-icon);
+  -webkit-mask-size: var(--ctrl-icon-size);
+          mask-size: var(--ctrl-icon-size);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-image: var(--ctrl-icon-img);
+          mask-image: var(--ctrl-icon-img);
+  background: var(--ctrl-selected);
+  margin-left: auto;
+  padding-left: 0.5em;
+  -webkit-mask-position: right center;
+          mask-position: right center;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li[focused], WUP-TEXTRICH &gt; wup-popup[menu] li:focus {
+  outline: none;
+  box-shadow: inset 0 0 4px 0 var(--base-focus);
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li {
+  display: flex;
+  align-items: center;
+  padding: 0.4em 1em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li[hidden] {
+  display: none;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] kbd {
+  margin-left: auto;
+  padding-left: 2em;
+  font: inherit;
+  font-size: 0.75em;
+  color: var(--ctrl-label);
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li:has(&gt; kbd)[aria-selected=true]:after {
+  margin-left: 0;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+  padding: 0;
+}
+WUP-TEXTRICH &gt; wup-popup:has(&gt; wup-text) {
+  padding: 0;
+  border-radius: var(--ctrl-border-radius);
+  overflow: visible;
+}
 WUP-TEXTRICH &gt; wup-popup &gt; wup-text {
   width: min(40em, calc(100vw - 3em));
   margin: 0;
 }
-WUP-TEXTRICH [contenteditable=true] {
+WUP-TEXTRICH [contenteditable] {
+  margin-top: 0.5em;
   min-height: 8em;
   max-height: 16em;
 }
@@ -4258,261 +2779,6 @@ WUP-RICHINPUT::-webkit-scrollbar-thumb:hover {
 WUP-RICHINPUT::-webkit-scrollbar-track-piece:vertical:start, WUP-RICHINPUT::-webkit-scrollbar-track-piece:vertical:end, WUP-RICHINPUT::-webkit-scrollbar-track-piece:horizontal:start, WUP-RICHINPUT::-webkit-scrollbar-track-piece:horizontal:end {
   margin: 0;
   cursor: pointer;
-}
-  
-WUP-DROPDOWN {
-  contain: style;
-  display: inline-block;
-}
-WUP-DROPDOWN &gt; button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25em;
-  margin: 0;
-  padding: 0.25em 0.25em 0.25em 0.5em;
-  border: none;
-  border-radius: var(--border-radius);
-  font: inherit;
-  color: inherit;
-  background: none;
-  box-shadow: none;
-  outline: none;
-  cursor: pointer;
-  white-space: nowrap;
-}
-WUP-DROPDOWN &gt; button:after {
-  content: "";
-  --ctrl-icon-img: var(--wup-icon-chevron);
-  --ctrl-icon-size: 0.6em;
-  display: inline-block;
-  width: var(--ctrl-icon-size);
-  min-height: var(--ctrl-icon-size);
-  box-sizing: content-box;
-  margin: 0;
-  padding: 0;
-  flex: 0 0 auto;
-  align-self: stretch;
-  border: none;
-  box-shadow: none;
-  background: var(--ctrl-icon);
-  -webkit-mask-size: var(--ctrl-icon-size);
-          mask-size: var(--ctrl-icon-size);
-  -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-          mask-position: center;
-  -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
-  align-self: center;
-  margin-left: auto;
-  background: currentColor;
-}
-WUP-DROPDOWN &gt; button[aria-expanded=true]:after {
-  transform: rotate(180deg);
-}
-@media (hover: hover) and (pointer: fine) {
-  WUP-DROPDOWN &gt; button:hover {
-    box-shadow: inset 0 0 0 99999px var(--icon-hover-bg);
-  }
-}
-WUP-DROPDOWN &gt; button:focus {
-  box-shadow: inset 0 0 0 99999px var(--icon-focus-bg);
-}
-WUP-DROPDOWN &gt; button[disabled] {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-WUP-DROPDOWN &gt; [menu] {
-  padding: 0;
-  overflow: hidden;
-}
-WUP-DROPDOWN &gt; [menu] ul {
-  margin: 0;
-  padding: 0;
-  list-style-type: none;
-  cursor: pointer;
-  overflow: auto;
-  max-height: 300px;
-}
-WUP-DROPDOWN &gt; [menu] ul::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-  cursor: pointer;
-}
-WUP-DROPDOWN &gt; [menu] ul::-webkit-scrollbar-corner {
-  background: none;
-  cursor: pointer;
-}
-WUP-DROPDOWN &gt; [menu] ul::-webkit-scrollbar-thumb {
-  border: 3px solid rgba(0, 0, 0, 0);
-  background-clip: padding-box;
-  background-color: var(--scroll, rgba(0, 0, 0, 0.2));
-  border-radius: 999px;
-  cursor: pointer;
-}
-@media (hover: hover) {
-WUP-DROPDOWN&gt;[menu] ul::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
-  cursor: pointer;
-}
-}
-WUP-DROPDOWN &gt; [menu] ul::-webkit-scrollbar-track-piece:vertical:start, WUP-DROPDOWN &gt; [menu] ul::-webkit-scrollbar-track-piece:vertical:end, WUP-DROPDOWN &gt; [menu] ul::-webkit-scrollbar-track-piece:horizontal:start, WUP-DROPDOWN &gt; [menu] ul::-webkit-scrollbar-track-piece:horizontal:end {
-  margin: 0;
-  cursor: pointer;
-}
-WUP-DROPDOWN &gt; [menu] li {
-  padding: 1em;
-}
-@media (hover: hover) and (pointer: fine) {
-  WUP-DROPDOWN &gt; [menu] li:hover {
-    color: var(--menu-hover-text);
-    background: var(--menu-hover-bg);
-  }
-}
-WUP-DROPDOWN &gt; [menu] li[aria-selected=true] {
-  color: var(--ctrl-selected);
-  display: flex;
-}
-WUP-DROPDOWN &gt; [menu] li[aria-selected=true]:after {
-  content: "";
-  --ctrl-icon-img: var(--wup-icon-check);
-  display: inline-block;
-  width: var(--ctrl-icon-size);
-  min-height: var(--ctrl-icon-size);
-  box-sizing: content-box;
-  margin: 0;
-  padding: 0;
-  flex: 0 0 auto;
-  align-self: stretch;
-  border: none;
-  box-shadow: none;
-  background: var(--ctrl-icon);
-  -webkit-mask-size: var(--ctrl-icon-size);
-          mask-size: var(--ctrl-icon-size);
-  -webkit-mask-repeat: no-repeat;
-          mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-          mask-position: center;
-  -webkit-mask-image: var(--ctrl-icon-img);
-          mask-image: var(--ctrl-icon-img);
-  background: var(--ctrl-selected);
-  margin-left: auto;
-  padding-left: 0.5em;
-  -webkit-mask-position: right center;
-          mask-position: right center;
-}
-WUP-DROPDOWN &gt; [menu] li[focused], WUP-DROPDOWN &gt; [menu] li:focus {
-  outline: none;
-  box-shadow: inset 0 0 4px 0 var(--base-focus);
-}
-  :root {
-  --modal-anim-t: 400ms;
-}
-  :root {
-  --popup-anim-t: 300ms;
-  --popup-text: inherit;
-  --popup-bg: #fff;
-  --popup-shadow: #0003;
-  --tooltip-text: inherit;
-  --tooltip-bg: #fff;
-  --tooltip-shadow: #0003;
-}
-[wupdark] {
-  --popup-text: #d8d8d8;
-  --popup-bg: #2b3645;
-  --popup-shadow: #0006;
-  --tooltip-text: #d8d8d8;
-  --tooltip-bg: #104652;
-  --tooltip-shadow: #0006;
-}
-  
-WUP-POPUP {
-  --modal-anim: var(--modal-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-  z-index: 8000;
-  display: none;
-  opacity: 0;
-  position: fixed !important;
-  border-radius: var(--border-radius);
-  padding: var(--base-margin);
-  box-sizing: border-box;
-  white-space: pre-line;
-  overflow: auto;
-  overflow: overlay;
-}
-WUP-POPUP[open] {
-  display: block;
-}
-WUP-POPUP[show] {
-  opacity: 1;
-}
-WUP-POPUP::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-  cursor: pointer;
-}
-WUP-POPUP::-webkit-scrollbar-corner {
-  background: none;
-  cursor: pointer;
-}
-WUP-POPUP::-webkit-scrollbar-thumb {
-  border: 3px solid rgba(0, 0, 0, 0);
-  background-clip: padding-box;
-  background-color: var(--scroll, rgba(0, 0, 0, 0.2));
-  border-radius: 999px;
-  cursor: pointer;
-}
-@media (hover: hover) {
-WUP-POPUP::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scroll-hover, rgba(0, 0, 0, 0.5));
-  cursor: pointer;
-}
-}
-WUP-POPUP::-webkit-scrollbar-track-piece:vertical:start, WUP-POPUP::-webkit-scrollbar-track-piece:vertical:end, WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:start, WUP-POPUP::-webkit-scrollbar-track-piece:horizontal:end {
-  margin: 0;
-  cursor: pointer;
-}
-@media not all and (prefers-reduced-motion) {
-  WUP-POPUP {
-    transition: opacity var(--modal-anim), transform var(--modal-anim);
-  }
-}
-WUP-POPUP,
-WUP-POPUP-arrow {
-  --popup-anim: var(--popup-anim-t) cubic-bezier(0, 0, 0.2, 1) 0ms;
-  opacity: 0;
-}
-WUP-POPUP {
-  top: 0;
-  left: 0;
-  padding: 4px;
-  margin: 0;
-  box-shadow: 0 1px 4px 0 var(--popup-shadow);
-  color: var(--popup-text);
-  background: var(--popup-bg);
-  text-overflow: ellipsis;
-}
-WUP-POPUP[tooltip] {
-  z-index: 99999;
-}
-WUP-POPUP[tooltip], WUP-POPUP[tooltip] + WUP-POPUP-arrow {
-  --popup: var(--tooltip-text);
-  --popup-bg: var(--tooltip-bg);
-  --popup-shadow: var(--tooltip-shadow);
-}
-WUP-POPUP[show] + WUP-POPUP-arrow {
-  opacity: 1;
-}
-@media not all and (prefers-reduced-motion) {
-  WUP-POPUP, WUP-POPUP + WUP-POPUP-arrow {
-    transition: opacity var(--popup-anim);
-  }
-}
-WUP-POPUP[w-animation] {
-  transition-property: none;
-  opacity: 1;
-}
-WUP-POPUP[w-animation=stack] {
-  overflow: visible;
 }
 </style>
 `;
@@ -4618,6 +2884,7 @@ exports[`control.textRich common tests snapshot of $defaults 3`] = `
   "w-disabled",
   "w-enableinitonchange",
   "w-focusdebouncems",
+  "w-hidefooter",
   "w-hidehotkeyshint",
   "w-initvalue",
   "w-label",
@@ -4667,131 +2934,17 @@ exports[`control.textRich options clearButton 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -4935,159 +3088,33 @@ exports[`control.textRich options clearButton 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -5115,6 +3142,13 @@ exports[`control.textRich options clearButton 1`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -5156,131 +3190,17 @@ exports[`control.textRich options clearButton 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd4"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd4"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd4"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -5424,159 +3344,33 @@ exports[`control.textRich options clearButton 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd5"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd5"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd5"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd6"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd6"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd6"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -5591,6 +3385,13 @@ exports[`control.textRich options clearButton 2`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <section
     aria-atomic="true"
     aria-live="off"
@@ -5636,131 +3437,17 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -5904,159 +3591,33 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -6084,6 +3645,13 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0 of 3"
+    role="note"
+    w-tooltip=""
+  >
+    0 / 3
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -6155,131 +3723,17 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -6423,159 +3877,33 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -6603,6 +3931,13 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 3 of 3"
+    role="note"
+    w-tooltip=""
+  >
+    3 / 3
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -6680,131 +4015,17 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -6948,159 +4169,33 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -7128,6 +4223,13 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -7184,131 +4286,17 @@ exports[`control.textRich validations options.validationCase 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -7452,159 +4440,33 @@ exports[`control.textRich validations options.validationCase 1`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -7632,6 +4494,13 @@ exports[`control.textRich validations options.validationCase 1`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 3"
+    role="note"
+    w-tooltip=""
+  >
+    3
+  </footer>
 </wup-textrich>
 `;
 
@@ -7673,131 +4542,17 @@ exports[`control.textRich validations options.validationCase 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -7941,159 +4696,33 @@ exports[`control.textRich validations options.validationCase 2`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -8121,6 +4750,13 @@ exports[`control.textRich validations options.validationCase 2`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -8183,131 +4819,17 @@ exports[`control.textRich validations options.validationCase 3`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -8451,159 +4973,33 @@ exports[`control.textRich validations options.validationCase 3`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -8631,6 +5027,13 @@ exports[`control.textRich validations options.validationCase 3`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 3"
+    role="note"
+    w-tooltip=""
+  >
+    3
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -8690,131 +5093,17 @@ exports[`control.textRich validations options.validationCase 4`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Heading"
+        role="combobox"
+        tabindex="-1"
         tool="header"
+        type="button"
+        w-tooltip=""
       >
-        <button
-          aria-controls="dd1"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Heading"
-          aria-owns="dd1"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        >
-          Normal
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd1"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Alt+1"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:1"
-              w-tooltip="Heading 1 (Ctrl+Alt+1)"
-            >
-              <h1
-                role="none"
-              >
-                Heading 1
-              </h1>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+2"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:2"
-              w-tooltip="Heading 2 (Ctrl+Alt+2)"
-            >
-              <h2
-                role="none"
-              >
-                Heading 2
-              </h2>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+3"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:3"
-              w-tooltip="Heading 3 (Ctrl+Alt+3)"
-            >
-              <h3
-                role="none"
-              >
-                Heading 3
-              </h3>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+4"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:4"
-              w-tooltip="Heading 4 (Ctrl+Alt+4)"
-            >
-              <h4
-                role="none"
-              >
-                Heading 4
-              </h4>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+5"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:5"
-              w-tooltip="Heading 5 (Ctrl+Alt+5)"
-            >
-              <h5
-                role="none"
-              >
-                Heading 5
-              </h5>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+6"
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="header:6"
-              w-tooltip="Heading 6 (Ctrl+Alt+6)"
-            >
-              <h6
-                role="none"
-              >
-                Heading 6
-              </h6>
-            </li>
-            <li
-              aria-keyshortcuts="Control+Alt+0"
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="header:false"
-              w-tooltip="Normal (Ctrl+Alt+0)"
-            >
-              <div
-                role="none"
-              >
-                Normal
-              </div>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Normal
+      </button>
     </div>
     <div
       role="group"
@@ -8958,159 +5247,33 @@ exports[`control.textRich validations options.validationCase 4`] = `
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-label="Font size"
+        role="combobox"
+        tabindex="-1"
         tool="size"
+        type="button"
+        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
       >
-        <button
-          aria-controls="dd2"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-          aria-label="Font size"
-          aria-owns="dd2"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-        >
-          Default
-        </button>
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd2"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:hg"
-            >
-              <span
-                role="none"
-              >
-                Huge
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:lg"
-            >
-              <span
-                role="none"
-                style="font-size: x-large;"
-              >
-                Large
-              </span>
-            </li>
-            <li
-              aria-selected="true"
-              role="option"
-              tabindex="-1"
-              tool="size:false"
-            >
-              <span
-                role="none"
-              >
-                Default
-              </span>
-            </li>
-            <li
-              aria-selected="false"
-              role="option"
-              tabindex="-1"
-              tool="size:sm"
-            >
-              <span
-                role="none"
-                style="font-size: small;"
-              >
-                Small
-              </span>
-            </li>
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        Default
+      </button>
     </div>
     <div
       role="group"
     >
-      <wup-dropdown
+      <button
+        aria-expanded="false"
+        aria-label="Alignment"
+        class="wup-icon-align-left"
         icon=""
+        role="combobox"
+        tabindex="-1"
         tool="align"
-      >
-        <button
-          aria-controls="dd3"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-label="Alignment"
-          aria-owns="dd3"
-          style="--ctrl-icon-img: var(--wup-icon-align-left);"
-          tabindex="-1"
-          type="button"
-          value="false"
-          w-tooltip=""
-        />
-        <wup-popup
-          menu=""
-        >
-          <ul
-            id="dd3"
-            role="listbox"
-            tabindex="-1"
-          >
-            <li
-              aria-keyshortcuts="Control+Shift+E"
-              aria-label="Center"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-center);"
-              tabindex="-1"
-              tool="align:center"
-              w-tooltip="Center (Ctrl+Shift+E)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+R"
-              aria-label="Right"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:right"
-              w-tooltip="Right (Ctrl+Shift+R)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+J"
-              aria-label="Justify"
-              aria-selected="false"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-              tabindex="-1"
-              tool="align:justify"
-              w-tooltip="Justify (Ctrl+Shift+J)"
-            />
-            <li
-              aria-keyshortcuts="Control+Shift+L"
-              aria-label="Left"
-              aria-selected="true"
-              icon=""
-              role="option"
-              style="--ctrl-icon-img: var(--wup-icon-align-left);"
-              tabindex="-1"
-              tool="align:false"
-              w-tooltip="Left (Ctrl+Shift+L)"
-            />
-          </ul>
-        </wup-popup>
-      </wup-dropdown>
+        type="button"
+        w-tooltip=""
+      />
     </div>
     <div
       role="group"
@@ -9138,6 +5301,13 @@ exports[`control.textRich validations options.validationCase 4`] = `
       />
     </div>
   </div>
+  <footer
+    aria-label="Characters: 0"
+    role="note"
+    w-tooltip=""
+  >
+    0
+  </footer>
   <wup-popup
     aria-atomic="true"
     aria-live="off"
@@ -9197,131 +5367,17 @@ exports[`control.textRich with form 1`] = `
       <div
         role="group"
       >
-        <wup-dropdown
+        <button
+          aria-expanded="false"
+          aria-label="Heading"
+          role="combobox"
+          tabindex="-1"
           tool="header"
+          type="button"
+          w-tooltip=""
         >
-          <button
-            aria-controls="dd4"
-            aria-expanded="false"
-            aria-haspopup="listbox"
-            aria-label="Heading"
-            aria-owns="dd4"
-            tabindex="-1"
-            type="button"
-            value="false"
-            w-tooltip=""
-          >
-            Normal
-          </button>
-          <wup-popup
-            menu=""
-          >
-            <ul
-              id="dd4"
-              role="listbox"
-              tabindex="-1"
-            >
-              <li
-                aria-keyshortcuts="Control+Alt+1"
-                aria-selected="false"
-                role="option"
-                tabindex="-1"
-                tool="header:1"
-                w-tooltip="Heading 1 (Ctrl+Alt+1)"
-              >
-                <h1
-                  role="none"
-                >
-                  Heading 1
-                </h1>
-              </li>
-              <li
-                aria-keyshortcuts="Control+Alt+2"
-                aria-selected="false"
-                role="option"
-                tabindex="-1"
-                tool="header:2"
-                w-tooltip="Heading 2 (Ctrl+Alt+2)"
-              >
-                <h2
-                  role="none"
-                >
-                  Heading 2
-                </h2>
-              </li>
-              <li
-                aria-keyshortcuts="Control+Alt+3"
-                aria-selected="false"
-                role="option"
-                tabindex="-1"
-                tool="header:3"
-                w-tooltip="Heading 3 (Ctrl+Alt+3)"
-              >
-                <h3
-                  role="none"
-                >
-                  Heading 3
-                </h3>
-              </li>
-              <li
-                aria-keyshortcuts="Control+Alt+4"
-                aria-selected="false"
-                role="option"
-                tabindex="-1"
-                tool="header:4"
-                w-tooltip="Heading 4 (Ctrl+Alt+4)"
-              >
-                <h4
-                  role="none"
-                >
-                  Heading 4
-                </h4>
-              </li>
-              <li
-                aria-keyshortcuts="Control+Alt+5"
-                aria-selected="false"
-                role="option"
-                tabindex="-1"
-                tool="header:5"
-                w-tooltip="Heading 5 (Ctrl+Alt+5)"
-              >
-                <h5
-                  role="none"
-                >
-                  Heading 5
-                </h5>
-              </li>
-              <li
-                aria-keyshortcuts="Control+Alt+6"
-                aria-selected="false"
-                role="option"
-                tabindex="-1"
-                tool="header:6"
-                w-tooltip="Heading 6 (Ctrl+Alt+6)"
-              >
-                <h6
-                  role="none"
-                >
-                  Heading 6
-                </h6>
-              </li>
-              <li
-                aria-keyshortcuts="Control+Alt+0"
-                aria-selected="true"
-                role="option"
-                tabindex="-1"
-                tool="header:false"
-                w-tooltip="Normal (Ctrl+Alt+0)"
-              >
-                <div
-                  role="none"
-                >
-                  Normal
-                </div>
-              </li>
-            </ul>
-          </wup-popup>
-        </wup-dropdown>
+          Normal
+        </button>
       </div>
       <div
         role="group"
@@ -9465,159 +5521,33 @@ exports[`control.textRich with form 1`] = `
       <div
         role="group"
       >
-        <wup-dropdown
+        <button
+          aria-expanded="false"
+          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+          aria-label="Font size"
+          role="combobox"
+          tabindex="-1"
           tool="size"
+          type="button"
+          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
         >
-          <button
-            aria-controls="dd5"
-            aria-expanded="false"
-            aria-haspopup="listbox"
-            aria-keyshortcuts="Control+Shift+. Control+Shift+,"
-            aria-label="Font size"
-            aria-owns="dd5"
-            tabindex="-1"
-            type="button"
-            value="false"
-            w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
-          >
-            Default
-          </button>
-          <wup-popup
-            menu=""
-          >
-            <ul
-              id="dd5"
-              role="listbox"
-              tabindex="-1"
-            >
-              <li
-                aria-selected="false"
-                role="option"
-                tabindex="-1"
-                tool="size:hg"
-              >
-                <span
-                  role="none"
-                >
-                  Huge
-                </span>
-              </li>
-              <li
-                aria-selected="false"
-                role="option"
-                tabindex="-1"
-                tool="size:lg"
-              >
-                <span
-                  role="none"
-                  style="font-size: x-large;"
-                >
-                  Large
-                </span>
-              </li>
-              <li
-                aria-selected="true"
-                role="option"
-                tabindex="-1"
-                tool="size:false"
-              >
-                <span
-                  role="none"
-                >
-                  Default
-                </span>
-              </li>
-              <li
-                aria-selected="false"
-                role="option"
-                tabindex="-1"
-                tool="size:sm"
-              >
-                <span
-                  role="none"
-                  style="font-size: small;"
-                >
-                  Small
-                </span>
-              </li>
-            </ul>
-          </wup-popup>
-        </wup-dropdown>
+          Default
+        </button>
       </div>
       <div
         role="group"
       >
-        <wup-dropdown
+        <button
+          aria-expanded="false"
+          aria-label="Alignment"
+          class="wup-icon-align-left"
           icon=""
+          role="combobox"
+          tabindex="-1"
           tool="align"
-        >
-          <button
-            aria-controls="dd6"
-            aria-expanded="false"
-            aria-haspopup="listbox"
-            aria-label="Alignment"
-            aria-owns="dd6"
-            style="--ctrl-icon-img: var(--wup-icon-align-left);"
-            tabindex="-1"
-            type="button"
-            value="false"
-            w-tooltip=""
-          />
-          <wup-popup
-            menu=""
-          >
-            <ul
-              id="dd6"
-              role="listbox"
-              tabindex="-1"
-            >
-              <li
-                aria-keyshortcuts="Control+Shift+E"
-                aria-label="Center"
-                aria-selected="false"
-                icon=""
-                role="option"
-                style="--ctrl-icon-img: var(--wup-icon-align-center);"
-                tabindex="-1"
-                tool="align:center"
-                w-tooltip="Center (Ctrl+Shift+E)"
-              />
-              <li
-                aria-keyshortcuts="Control+Shift+R"
-                aria-label="Right"
-                aria-selected="false"
-                icon=""
-                role="option"
-                style="--ctrl-icon-img: var(--wup-icon-align-left);"
-                tabindex="-1"
-                tool="align:right"
-                w-tooltip="Right (Ctrl+Shift+R)"
-              />
-              <li
-                aria-keyshortcuts="Control+Shift+J"
-                aria-label="Justify"
-                aria-selected="false"
-                icon=""
-                role="option"
-                style="--ctrl-icon-img: var(--wup-icon-align-justify);"
-                tabindex="-1"
-                tool="align:justify"
-                w-tooltip="Justify (Ctrl+Shift+J)"
-              />
-              <li
-                aria-keyshortcuts="Control+Shift+L"
-                aria-label="Left"
-                aria-selected="true"
-                icon=""
-                role="option"
-                style="--ctrl-icon-img: var(--wup-icon-align-left);"
-                tabindex="-1"
-                tool="align:false"
-                w-tooltip="Left (Ctrl+Shift+L)"
-              />
-            </ul>
-          </wup-popup>
-        </wup-dropdown>
+          type="button"
+          w-tooltip=""
+        />
       </div>
       <div
         role="group"
@@ -9645,6 +5575,13 @@ exports[`control.textRich with form 1`] = `
         />
       </div>
     </div>
+    <footer
+      aria-label="Characters: 0"
+      role="note"
+      w-tooltip=""
+    >
+      0
+    </footer>
   </wup-textrich>
 </wup-form>
 `;
