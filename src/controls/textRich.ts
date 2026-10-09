@@ -600,9 +600,10 @@ export default class WUPTextRichControl<
       ],
       format: ({ lines, value }) =>
         lines.forEach((l) => {
-          // 3em per level (the same as quill)
-          const m = /^(\d+(\.\d+)?)em$/.exec(l.style.marginLeft);
-          const level = Math.min(8, Math.max(0, Math.round((m ? +m[1] : 0) / 3) + value));
+          // 3em per level (the same as quill); pasted indent can be in px
+          const [, n, unit] = /^(\d+(?:\.\d+)?)(em|px)$/.exec(l.style.marginLeft) ?? [];
+          const em = unit === "px" ? +n / (parseFloat(getComputedStyle(l).fontSize) || 16) : +(n ?? 0);
+          const level = Math.min(8, Math.max(0, Math.round(em / 3) + value));
           l.style.marginLeft = level ? `${level * 3}em` : "";
         }),
     },

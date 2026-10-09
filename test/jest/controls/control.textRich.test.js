@@ -291,6 +291,24 @@ describe("control.textRich", () => {
     }
   });
 
+  test("indent of pasted line in px", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Sets line with margin & changes indent */
+    const indent = (margin, value) => {
+      inp.innerHTML = `<div style="margin-left: ${margin}; font-size: 16px;">x</div>`;
+      window.getSelection().collapse(inp.firstChild.firstChild, 1);
+      el.applyFormat("indent", value, true);
+      return inp.firstChild.style.marginLeft;
+    };
+    // 3em per level: 96px = 6em = level 2 (otherwise px is ignored: level 0)
+    expect(indent("96px", 1)).toBe("9em");
+    expect(indent("96px", -1)).toBe("3em");
+    expect(indent("6em", 1)).toBe("9em");
+    expect(indent("6em", -1)).toBe("3em");
+  });
+
   test("value: <p> is used only if it's required", () => {
     const inp = document.createElement("wup-richinput"); // value of control's input is mocked by mockAreaInput
     inp._tools = WUPTextRichControl.$tools;
