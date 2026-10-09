@@ -667,10 +667,11 @@ export default class WUPTextRichControl<
       label: __wupln("Clear formatting", "aria"),
       hotKey: "Control+\\",
       // collapsed selection: removes formats of the next typed text (see applyFormat)
-      format: ({ lines, texts, editor }) => {
-        Object.values(WUPTextRichControl.$tools as Record<string, WUP.TextRich.Tool>).forEach(
-          (t) => t.kind === "inline" && t.is && removeInline(texts, isOf(t), editor)
-        );
+      format: ({ lines, texts, editor, control }) => {
+        // tools of subclass
+        Object.values(
+          (control.constructor as typeof WUPTextRichControl).$tools as Record<string, WUP.TextRich.Tool>
+        ).forEach((t) => t.kind === "inline" && t.is && removeInline(texts, isOf(t), editor));
         // plain paragraph
         lines.forEach((l) => setLineTag(l, document.createElement("div")).removeAttribute("style"));
       },

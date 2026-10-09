@@ -201,6 +201,30 @@ describe("control.textRich", () => {
     }
   });
 
+  test("clean removes inline formats of subclass tools", async () => {
+    class TestTextRich extends WUPTextRichControl {
+      static $tools = {
+        ...WUPTextRichControl.$tools,
+        highlight: {
+          kind: "inline",
+          is: (e) => e.classList.contains("hl") || undefined,
+          create: "span",
+          classNameTag: "hl",
+        },
+      };
+    }
+    customElements.define("test-textrich", TestTextRich);
+    const c = document.body.appendChild(document.createElement("test-textrich"));
+    await h.wait(1);
+    const inp = c.$refInput;
+    inp.innerHTML = '<div><span class="hl">x</span> <b>y</b></div>';
+    inp.focus();
+    window.getSelection().selectAllChildren(inp.firstChild);
+    c.applyFormat("clean");
+    expect(inp.innerHTML).toBe("<div>x y</div>");
+    c.remove();
+  });
+
   test("value: <p> is used only if it's required", () => {
     const inp = document.createElement("wup-richinput"); // value of control's input is mocked by mockAreaInput
     inp._tools = WUPTextRichControl.$tools;
