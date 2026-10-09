@@ -1725,7 +1725,9 @@ export default class WUPTextRichControl<
 
   /** Returns rendered button or dropdown by key `name` or `name:value` */
   protected findTool(key: string): ToolElement | null {
-    return this.$refToolbar.querySelector(`[tool="${key}"]`);
+    // not via selector `[tool="${key}"]`: value can contain quotes (`"Times New Roman", serif`)
+    const arr = this.$refToolbar.querySelectorAll<ToolElement>("[tool]");
+    return Array.prototype.find.call(arr, (el: Element) => el.getAttribute("tool") === key) ?? null;
   }
 
   /** Applies rendered button or dropdown item by key `name` or `name:value`
@@ -1736,7 +1738,8 @@ export default class WUPTextRichControl<
       el._format ? this.applyTool(el) : el.click(); // clear button isn't ToolElement
       return true;
     }
-    const [name, v] = key.split(":");
+    const [name, ...rest] = key.split(":");
+    const v = rest.join(":"); // value can contain `:`
     const item = this.findTool(name)?._values?.find((x) => `${x.value}` === v);
     item && this.applyFormat(name, item.value, true);
     return !!item;

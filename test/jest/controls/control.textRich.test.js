@@ -225,6 +225,39 @@ describe("control.textRich", () => {
     c.remove();
   });
 
+  test("hotkeys of tool values with quotes", async () => {
+    const format = jest.fn();
+    const times = '"Times New Roman", serif';
+    WUPTextRichControl.$tools.font = {
+      hotKey: "Control+Alt+Shift+F Control+Alt+Shift+G", // previous & next value
+      values: [{ value: times, hotKey: "Control+Alt+Shift+1" }, { value: "monospace" }],
+      format,
+    };
+    try {
+      el.$options.toolbar = [[{ font: times }, { font: "monospace" }]];
+      await h.wait(1);
+      const inp = el.$refInput;
+      inp.innerHTML = "<div>text</div>";
+      inp.focus();
+      window.getSelection().selectAllChildren(inp.firstChild);
+      /** Presses Ctrl+Alt+Shift+{key} */
+      const press = (code) => {
+        const init = { code, ctrlKey: true, altKey: true, shiftKey: true, bubbles: true, cancelable: true };
+        return inp.dispatchEvent(new KeyboardEvent("keydown", init));
+      };
+
+      // otherwise querySelector throws SyntaxError: `[tool="font:"Times New Roman", serif"]`
+      expect(press("Digit1")).toBe(false); // value shortcut
+      expect(format).toBeCalledTimes(1);
+      expect(format.mock.calls[0][0].value).toBe(times);
+      expect(press("KeyG")).toBe(false); // the next value
+      expect(format).toBeCalledTimes(2);
+      expect(format.mock.calls[1][0].value).toBe(times);
+    } finally {
+      delete WUPTextRichControl.$tools.font;
+    }
+  });
+
   test("value: <p> is used only if it's required", () => {
     const inp = document.createElement("wup-richinput"); // value of control's input is mocked by mockAreaInput
     inp._tools = WUPTextRichControl.$tools;
