@@ -183,6 +183,7 @@ WUP-NOTIFY {
   color: var(--notify-text);
   background: var(--notify-bg);
   box-shadow: 0 1px 4px 0 var(--notify-shadow);
+  touch-action: pan-y;
 }
 WUP-NOTIFY[w-placement=top-left], WUP-NOTIFY[w-placement=bottom-left] {
   border-radius: 0 var(--border-radius) var(--border-radius) 0;
@@ -235,6 +236,7 @@ exports[`notifyElement common tests snapshot of $defaults 1`] = `
 {
   "autoClose": 5000,
   "closeOnClick": false,
+  "closeOnSwipe": true,
   "openCase": 1,
   "pauseOnHover": true,
   "pauseOnWinBlur": true,
@@ -247,6 +249,7 @@ exports[`notifyElement common tests snapshot of $defaults 2`] = `
 [
   "autoClose",
   "closeOnClick",
+  "closeOnSwipe",
   "openCase",
   "pauseOnHover",
   "pauseOnWinBlur",
@@ -259,6 +262,7 @@ exports[`notifyElement common tests snapshot of $defaults 3`] = `
 [
   "w-autoclose",
   "w-closeonclick",
+  "w-closeonswipe",
   "w-opencase",
   "w-pauseonhover",
   "w-pauseonwinblur",

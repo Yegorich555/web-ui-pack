@@ -15,6 +15,8 @@ export const enum NotifyCloseCases {
   onCloseClick = 1,
   /** When closed according to pointed show-time */
   onTimeEnd,
+  /** When swiped out by touch */
+  onSwipe,
 }
 
 const tagName = "wup-notify";
@@ -50,6 +52,10 @@ declare global {
       /** Close on element click
        * @defaultValue false */
       closeOnClick: boolean;
+      /** Close on horizontal swipe out (touch & pen) like messages in popular mobile apps:
+       * element follows the finger & closes when it's swiped for 40% of width or flung
+       * @defaultValue true */
+      closeOnSwipe: boolean;
       /** Remove itself after closing
        * @defaultValue true */
       selfRemove: boolean;
@@ -65,6 +71,7 @@ declare global {
       "w-placement"?: Options["placement"];
       "w-autoClose"?: number | "";
       "w-closeOnClick"?: boolean | "";
+      "w-closeOnSwipe"?: boolean | "";
       "w-selfRemove"?: boolean | "";
       "w-pauseOnHover"?: boolean | "";
       "w-pauseOnWinBlur"?: boolean | "";
@@ -123,7 +130,16 @@ export default class WUPNotifyElement<
   #ctr = this.constructor as typeof WUPNotifyElement;
 
   static get observedOptions(): Array<keyof WUP.Notify.Options> {
-    return ["autoClose", "closeOnClick", "openCase", "placement", "selfRemove", "pauseOnHover", "pauseOnWinBlur"];
+    return [
+      "autoClose",
+      "closeOnClick",
+      "closeOnSwipe",
+      "openCase",
+      "placement",
+      "selfRemove",
+      "pauseOnHover",
+      "pauseOnWinBlur",
+    ];
   }
 
   static get observedAttributes(): Array<string> {
@@ -146,6 +162,7 @@ export default class WUPNotifyElement<
     placement: "bottom-left",
     autoClose: 5000,
     closeOnClick: false,
+    closeOnSwipe: true,
     selfRemove: true,
     pauseOnHover: true,
     pauseOnWinBlur: true,
@@ -307,6 +324,7 @@ export default class WUPNotifyElement<
   /** Called on opening & refreshing: listens for close-events & starts closing by time (if option autoClose is set) */
   protected gotPlay(): void {
     this._opts.closeOnClick && this.appendEvent(this, "click", (ev) => this.gotClick(ev));
+    this._opts.closeOnSwipe && this.appendEvent(this, "pointerdown", (ev) => this.gotSwipe(ev));
 
     const ms = this._opts.autoClose;
     if (ms) {
@@ -402,9 +420,89 @@ export default class WUPNotifyElement<
     });
   }
 
+  /** Called on pointerdown when closeOnSwipe: element follows the horizontal swipe and closes when it's swiped out enough */
+  protected gotSwipe(e: PointerEvent): void {
+    if (e.pointerType === "mouse" || !e.isPrimary || this.$isClosing) {
+      return; // WARN: mouse is ignored because dragging by mouse selects text
+    }
+    const minDelta = 10; // movement in px to detect direction of swipe
+    const x0 = e.clientX;
+    const y0 = e.clientY;
+    let dx = 0;
+    let isSwiping = false;
+    let wasPlayed = false;
+    let prev = { x: x0, t: e.timeStamp }; // to calc velocity of fling
+    let v = 0;
+    const setX = (x: string): void => {
+      this.style.transform = `${x}${this._dy ? ` translateY(${this._dy}px)` : ""}`.trimStart(); // keep vertical position in the stack
+    };
+
+    const end = (ev: PointerEvent): void => {
+      removers.forEach((r) => r());
+      if (!isSwiping) {
+        return;
+      }
+      ev.type === "pointerup" && this.preventClick();
+      this.style.transition = "";
+      this.style.opacity = "";
+      const isOut =
+        ev.type === "pointerup" && (Math.abs(dx) > this.offsetWidth * 0.4 || (Math.abs(v) > 0.5 && v * dx > 0));
+      isOut && this.goClose(NotifyCloseCases.onSwipe, ev);
+      if (this.$isClosing) {
+        setX(`translateX(${Math.sign(dx) * 100}vw)`); // fly out
+      } else {
+        setX(""); // return back (also when closing is prevented)
+        wasPlayed && this.$play();
+      }
+    };
+
+    const removers = [
+      this.appendEvent(this, "pointermove", (ev) => {
+        if (ev.pointerId !== e.pointerId) {
+          return;
+        }
+        dx = ev.clientX - x0;
+        const dt = ev.timeStamp - prev.t;
+        dt > 0 && (v = (ev.clientX - prev.x) / dt);
+        prev = { x: ev.clientX, t: ev.timeStamp };
+        if (!isSwiping) {
+          const dy = ev.clientY - y0;
+          if (Math.abs(dy) > minDelta && Math.abs(dy) > Math.abs(dx)) {
+            removers.forEach((r) => r()); // vertical scroll
+          } else if (Math.abs(dx) > minDelta) {
+            isSwiping = true;
+            wasPlayed = this.$isPlayed;
+            this.$pause();
+            this.style.transition = "none"; // follow the pointer without delay
+          }
+          return; // WARN: touch & pen have implicit pointer capture so events are fired even when pointer is out of element
+        }
+        setX(`translateX(${dx}px)`);
+        this.style.opacity = `${Math.max(0, 1 - Math.abs(dx) / this.offsetWidth)}`;
+      }),
+      this.appendEvent(this, "pointerup", (ev) => ev.pointerId === e.pointerId && end(ev)),
+      this.appendEvent(this, "pointercancel", (ev) => ev.pointerId === e.pointerId && end(ev)),
+    ];
+  }
+
+  /** Prevent click fired right after pointerup (otherwise swipe triggers closeOnClick & clicks on inner buttons) */
+  protected preventClick(): void {
+    const r = this.appendEvent(
+      this,
+      "click",
+      (ev) => {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+      },
+      { capture: true, once: true }
+    );
+    setTimeout(r); // click is fired in the same task as pointerup (if it's fired)
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotClose(closeCase: NotifyCloseCases, ev: MouseEvent | null): void {
-    this.style.transform = this._dx ? `${this._dx} translateY(${this._dy}px)` : "";
+    closeCase !== NotifyCloseCases.onSwipe && // otherwise keep swiped out position
+      (this.style.transform = this._dx ? `${this._dx} translateY(${this._dy}px)` : "");
     this.disposeEvents(); // remove all events added on opening (for case when item is not removed and will be opened again)
   }
 
@@ -460,6 +558,5 @@ customElements.define(tagName, WUPNotifyElement);
 
 // todo bind with form
 // todo add Ctrl+Z hook ???
-// todo options: closeOnSwipe
 
 // NiceToHave: mirror progress bar animation (attach to right)

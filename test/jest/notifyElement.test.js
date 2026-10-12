@@ -26,6 +26,20 @@ Element.prototype.animate = function animateMock(keyframes, opts) {
   return anim;
 };
 
+/** Simulate pointer event: jsdom has no PointerEvent - so pointer-properties must be defined manually */
+function userPointer(trg, type, x, opts = {}) {
+  const ev = new MouseEvent(type, { clientX: x, clientY: opts.y ?? 0, cancelable: true, bubbles: true });
+  const p = { pointerId: 1, isPrimary: true, pointerType: "touch", timeStamp: 0, ...opts };
+  Object.keys(p).forEach((k) => Object.defineProperty(ev, k, { get: () => p[k] }));
+  trg.dispatchEvent(ev);
+}
+
+/** Simulate touch-swipe via pointer events: down at 1st point, move by others (every 100ms), up at the last one */
+function userSwipe(trg, points, end = "pointerup") {
+  points.forEach((x, i) => userPointer(trg, i ? "pointermove" : "pointerdown", x, { timeStamp: i * 100 }));
+  userPointer(trg, end, points[points.length - 1], { timeStamp: points.length * 100 });
+}
+
 /** Re-init body with single notify-element & wait for opening (without waiting for `autoClose`)
  * @returns {WUPNotifyElement} */
 async function initNotify(attrs = "", content = "Some text") {
@@ -61,6 +75,7 @@ describe("notifyElement", () => {
       "w-placement": { value: "bottom-left" },
       "w-autoclose": { value: 3000 },
       "w-closeonclick": { value: true },
+      "w-closeonswipe": { value: true },
       "w-selfremove": { value: true },
       "w-opencase": { value: 0 },
       "w-pauseonhover": { value: true },
@@ -553,6 +568,154 @@ describe("notifyElement", () => {
     await h.userClick("#in");
     await h.wait();
     expect(el3.$isOpened).toBe(true);
+  });
+
+  test("option: closeOnSwipe", async () => {
+    const el2 = await initNotify(`w-autoclose="1000" w-selfremove="false"`);
+    expect(el2.$options.closeOnSwipe).toBe(true);
+    jest.spyOn(el2, "offsetWidth", "get").mockReturnValue(300);
+    const onWillClose = jest.fn();
+    el2.$onWillClose = onWillClose;
+
+    // element follows the finger & returns back when swiped less than 40% of width
+    userPointer(el2, "pointerdown", 0);
+    userPointer(el2, "pointermove", 5, { timeStamp: 100 });
+    expect(el2.$isPlayed).toBe(true); // not swiping yet: movement is less than threshold
+    expect(el2.getAttribute("style")).toBeNull();
+    userPointer(el2, "pointermove", 50, { timeStamp: 200 });
+    expect(el2.$isPlayed).toBe(false); // paused during the swipe
+    expect(el2.style.transition).toBe("none");
+    userPointer(el2, "pointermove", 60, { timeStamp: 300, pointerId: 2 }); // another pointer is ignored
+    userPointer(el2, "pointermove", 60, { timeStamp: 300 });
+    userPointer(el2, "pointermove", 60, { timeStamp: 300 }); // the same time: velocity isn't changed
+    expect(el2.getAttribute("style")).toMatchInlineSnapshot(
+      `"transition: none; transform: translateX(60px); opacity: 0.8;"`
+    );
+    userPointer(el2, "pointerup", 60, { timeStamp: 1000, pointerId: 2 }); // another pointer is ignored
+    expect(el2.style.transition).toBe("none");
+    userPointer(el2, "pointerup", 60, { timeStamp: 1000 });
+    expect(el2.getAttribute("style")).toBe("");
+    expect(el2.$isPlayed).toBe(true); // resumed
+    await h.wait(10);
+    expect(el2.$isOpened).toBe(true);
+    expect(onWillClose).not.toBeCalled();
+
+    // listeners are removed after the gesture
+    userPointer(el2, "pointermove", 200, { timeStamp: 1100 });
+    expect(el2.getAttribute("style")).toBe("");
+
+    // swiped out for more than 40% of width
+    userSwipe(el2, [0, 50, 100, 130]);
+    expect(onWillClose).toBeCalledTimes(1);
+    expect(onWillClose.mock.calls[0][0].detail.closeCase).toBe(3); // NotifyCloseCases.onSwipe
+    expect(el2.$isClosing).toBe(true);
+    expect(el2.getAttribute("style")).toMatchInlineSnapshot(`"transform: translateX(100vw);"`); // fly out
+    userPointer(el2, "pointerdown", 0); // ignored during the closing
+    userPointer(el2, "pointermove", 50, { timeStamp: 100 });
+    expect(el2.style.transition).toBe("");
+    await h.wait();
+    expect(el2.$isOpened).toBe(false);
+    expect(el2.getAttribute("style")).toBe(""); // reset on resetState
+
+    // fling to the left: short but fast swipe
+    el2.$open();
+    await h.wait(10);
+    userPointer(el2, "pointerdown", 100);
+    userPointer(el2, "pointermove", 85, { timeStamp: 100 });
+    userPointer(el2, "pointermove", 50, { timeStamp: 110 }); // 3.5px/ms
+    userPointer(el2, "pointerup", 50, { timeStamp: 120 });
+    expect(el2.$isClosing).toBe(true);
+    expect(el2.getAttribute("style")).toMatchInlineSnapshot(`"transform: translateX(-100vw);"`);
+    await h.wait();
+
+    // fast movement back isn't fling
+    el2.$open();
+    await h.wait(10);
+    userPointer(el2, "pointerdown", 0);
+    userPointer(el2, "pointermove", 100, { timeStamp: 100 });
+    userPointer(el2, "pointermove", 50, { timeStamp: 110 }); // -5px/ms
+    userPointer(el2, "pointerup", 50, { timeStamp: 120 });
+    expect(el2.$isClosing).toBe(false);
+    expect(el2.getAttribute("style")).toBe("");
+
+    // pointercancel returns back
+    userSwipe(el2, [0, 50, 200], "pointercancel");
+    expect(el2.$isClosing).toBe(false);
+    expect(el2.getAttribute("style")).toBe("");
+    expect(el2.$isPlayed).toBe(true);
+
+    // vertical movement (scroll) is ignored
+    userPointer(el2, "pointerdown", 0);
+    userPointer(el2, "pointermove", 5, { y: 20, timeStamp: 100 });
+    userPointer(el2, "pointermove", 200, { y: 20, timeStamp: 200 });
+    userPointer(el2, "pointerup", 200, { y: 20, timeStamp: 300 });
+    expect(el2.$isClosing).toBe(false);
+    expect(el2.getAttribute("style")).toBe("");
+
+    // mouse & non-primary pointers are ignored
+    userPointer(el2, "pointerdown", 0, { pointerType: "mouse" });
+    userPointer(el2, "pointermove", 200, { pointerType: "mouse", timeStamp: 100 });
+    userPointer(el2, "pointerdown", 0, { isPrimary: false });
+    userPointer(el2, "pointermove", 200, { isPrimary: false, timeStamp: 100 });
+    expect(el2.getAttribute("style")).toBe("");
+
+    // returns back when closing is prevented
+    el2.$onWillClose = (e) => e.preventDefault();
+    userSwipe(el2, [0, 50, 200]);
+    expect(el2.$isOpened).toBe(true);
+    expect(el2.getAttribute("style")).toBe("");
+    expect(el2.$isPlayed).toBe(true);
+    el2.$onWillClose = undefined;
+
+    // keeps vertical position in the stack
+    el2._dy = -60;
+    userSwipe(el2, [0, 50, 60]);
+    expect(el2.style.transform).toBe("translateY(-60px)");
+    userPointer(el2, "pointerdown", 0);
+    userPointer(el2, "pointermove", 50, { timeStamp: 100 });
+    userPointer(el2, "pointermove", 60, { timeStamp: 1000 });
+    expect(el2.style.transform).toBe("translateX(60px) translateY(-60px)");
+    userPointer(el2, "pointermove", 200, { timeStamp: 2000 });
+    userPointer(el2, "pointerup", 200, { timeStamp: 2100 });
+    expect(el2.style.transform).toBe("translateX(100vw) translateY(-60px)");
+    await h.wait();
+
+    // closeOnSwipe: false
+    const el3 = await initNotify(`w-closeonswipe="false" w-autoclose="0" w-selfremove="false"`);
+    expect(el3.$options.closeOnSwipe).toBe(false);
+    userSwipe(el3, [0, 50, 200]);
+    expect(el3.$isOpened).toBe(true);
+    expect(el3.getAttribute("style")).toBeNull();
+  });
+
+  test("closeOnSwipe prevents click after swipe", async () => {
+    const el2 = await initNotify(`w-closeonclick w-autoclose="0" w-selfremove="false"`);
+    jest.spyOn(el2, "offsetWidth", "get").mockReturnValue(300);
+    const click = (trg) => trg.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    // swipe returns back: click fired right after pointerup must be ignored
+    userSwipe(el2, [0, 50, 60]);
+    click(el2);
+    await h.wait();
+    expect(el2.$isOpened).toBe(true);
+    // even on button[close]
+    userSwipe(el2, [0, 50, 60]);
+    click(el2.$refClose);
+    await h.wait();
+    expect(el2.$isOpened).toBe(true);
+    // without click: prevention is removed on the next tick
+    userSwipe(el2, [0, 50, 60]);
+    await h.wait(1);
+    click(el2);
+    await h.wait();
+    expect(el2.$isOpened).toBe(false);
+
+    // tap without swipe isn't affected
+    el2.$open();
+    await h.wait();
+    userSwipe(el2, [0, 5]);
+    click(el2);
+    await h.wait();
+    expect(el2.$isOpened).toBe(false);
   });
 
   test("gotClick (when closeOnClick: false)", async () => {

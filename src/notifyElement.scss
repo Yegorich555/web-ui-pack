@@ -25,6 +25,8 @@
   color: var(--notify-text);
   background: var(--notify-bg);
   box-shadow: 0 1px 4px 0 var(--notify-shadow);
+  /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+  touch-action: pan-y; // otherwise browser cancels pointer-events on horizontal swipe (see option closeOnSwipe)
 
   &[w-placement="top-left"],
   &[w-placement="bottom-left"] {
