@@ -285,6 +285,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
 - [**onScrollStop**](src/helpers/onScrollStop.ts) ⇒ `Returns callback when scrolling is stopped (via checking scroll position every frame-render)`
 - [**onFocusLost**](src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
 - [**onSpy**](src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
+- [**onSwipe**](src/helpers/onSwipe.ts) ⇒ `Handles horizontal swipe by touch & pen (shift, fling velocity, prevents click after swipe)`
 
 #### Helpers.String
 
