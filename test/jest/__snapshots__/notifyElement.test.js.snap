@@ -229,6 +229,9 @@ WUP-NOTIFY &gt; [progress] {
   background: var(--notify-progress);
   transform-origin: left;
 }
+WUP-NOTIFY[w-placement=top-right] &gt; [progress], WUP-NOTIFY[w-placement=bottom-right] &gt; [progress] {
+  transform-origin: right;
+}
 </style>
 `;
 

@@ -556,7 +556,4 @@ const __openedItems: Array<WUPNotifyElement> = [];
 
 customElements.define(tagName, WUPNotifyElement);
 
-// todo bind with form
 // todo add Ctrl+Z hook ???
-
-// NiceToHave: mirror progress bar animation (attach to right)

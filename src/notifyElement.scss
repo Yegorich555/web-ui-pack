@@ -86,4 +86,9 @@
     background: var(--notify-progress);
     transform-origin: left;
   }
+
+  &[w-placement="top-right"] > [progress],
+  &[w-placement="bottom-right"] > [progress] {
+    transform-origin: right; // mirror: shrinks to the attached side
+  }
 }
