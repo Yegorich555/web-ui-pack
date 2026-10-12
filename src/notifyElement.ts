@@ -555,5 +555,3 @@ export default class WUPNotifyElement<
 const __openedItems: Array<WUPNotifyElement> = [];
 
 customElements.define(tagName, WUPNotifyElement);
-
-// todo add Ctrl+Z hook ???
