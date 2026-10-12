@@ -41,6 +41,7 @@
 
 - [TextRichControl](src/controls/textRich.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textRich) (WYSIWYG editor)
 - [TextAreaControl](src/controls/textArea.ts). Added footer with count of chars `{count} / {max}` (see **$options.hideFooter** & **$renderFooter** to customize content)
+- [NotifyElement](src/notifyElement.ts). Added option **id** to `WUPNotifyElement.$show(...)`: if notification with the same id is shown then it's refreshed (content & options updated, closing-time restarted) instead of showing new one
 - [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts). Added customization of menu via HTML: place `<ul>` with items inside the control; `<li>` elements are bound to **$options.items** by index (see example in JSDoc & demo)
 
 ---

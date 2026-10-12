@@ -21,6 +21,13 @@ const tagName = "wup-notify";
 declare global {
   namespace WUP.Notify {
     interface ShowOptions {
+      /** Id of element; if notification with the same id is shown then it's refreshed (content updated & closing-time restarted) instead of showing new one
+       * @tutorial Troubleshooting
+       * * on refreshing `defaults` are merged with previous options
+       * @example
+       * WUPNotifyElement.$show({ id: "saving", textContent: "Saving...", defaults: { autoClose: 0 } });
+       * WUPNotifyElement.$show({ id: "saving", textContent: "Saved", defaults: { autoClose: 3000 } }); // replaces previous one */
+      id?: string;
       /** Message appended to element  */
       textContent: string;
       /** Options to override defaults */
@@ -144,22 +151,32 @@ export default class WUPNotifyElement<
     pauseOnWinBlur: true,
   };
 
-  /** Create & show notification
-   * @returns created element
+  /** Create & show notification OR refresh existed one with the same `id`
+   * @returns created (or refreshed) element
    * @tutorial Troubleshooting
    * * On close notify-element self-removed */
   static $show(opts: WUP.Notify.ShowOptions): WUPNotifyElement {
-    const me = document.createElement(tagName);
+    let prev = opts.id ? document.getElementById(opts.id) : null;
+    if (!(prev instanceof WUPNotifyElement)) {
+      prev = null;
+    } else if (prev.$isClosing) {
+      prev.removeAttribute("id"); // pass id to new one otherwise getElementById returns closing item till it's removed
+      prev = null;
+    }
+    const me = prev ?? document.createElement(tagName);
     opts.className && me.classList.add(opts.className);
-    me.$options.selfRemove = true;
+    prev || (me.$options.selfRemove = true);
     Object.assign(me.$options, opts.defaults);
     me.$options.openCase = NotifyOpenCases.onInit;
     // render
     me.textContent = opts.textContent;
-    // append to root
-    document.body.appendChild(me);
+    if (!prev) {
+      opts.id && (me.id = opts.id);
+      document.body.appendChild(me); // append to root
+    }
     // callback to allow user re-define it
     opts.onRender?.(me); // WARN: onRender called here but real render will be on gotOpen
+    prev?.gotRefresh();
     return me;
   }
 
@@ -265,9 +282,6 @@ export default class WUPNotifyElement<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotOpen(openCase: NotifyOpenCases, e: MouseEvent | null): void {
     this.gotRender(true);
-    // listen for close-events
-    this._opts.closeOnClick && this.appendEvent(this, "click", (ev) => this.gotClick(ev));
-
     this.resetPosition(); // WARN: required when $open() is called during the closing: in this case resetState is skipped
     const curNum = this._openedItems.push(this as WUPNotifyElement<any, any>);
     if (curNum > 1) {
@@ -287,6 +301,13 @@ export default class WUPNotifyElement<
       }
     }
 
+    this.gotPlay();
+  }
+
+  /** Called on opening & refreshing: listens for close-events & starts closing by time (if option autoClose is set) */
+  protected gotPlay(): void {
+    this._opts.closeOnClick && this.appendEvent(this, "click", (ev) => this.gotClick(ev));
+
     const ms = this._opts.autoClose;
     if (ms) {
       let allowByFocus = true;
@@ -299,16 +320,46 @@ export default class WUPNotifyElement<
       allowByFocus && this.$play(ms);
       // add other events
       if (this._opts.pauseOnHover) {
-        this.appendEvent(this, "mouseenter", () => {
-          const left = this.$pause();
-          this.appendEvent(this, "mouseleave", () => this.$play(left), { once: true });
-        });
+        const onEnter = (): void => {
+          this.$pause();
+          this.appendEvent(this, "mouseleave", () => this.$play(), { once: true }); // resume with stored left-time
+        };
+        this.appendEvent(this, "mouseenter", onEnter);
+        this.matches(":hover") && onEnter(); // possible on refreshing
         this.appendEvent(this, "touchstart", () => {
           // if (ev.type && ev.type !== "mouse") // allow only on touch & stylus: https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerType
           this.$isPlayed ? this.$pause() : this.$play();
         });
       }
     }
+  }
+
+  /** Called from $show when element with the same id exists: restores refs & restarts closing by time according to options */
+  protected gotRefresh(): void {
+    // restore refs removed by textContent changes
+    this.$refClose && this.prepend(this.$refClose);
+    this.$refProgress && this.append(this.$refProgress);
+    if (!this.$isOpened) {
+      this.$isReady && this.goOpen(NotifyOpenCases.onInit, null); // when it's closed but not removed (selfRemove: false)
+      return;
+    }
+    // stop previous playing
+    this.$pause();
+    this.#pauseRef?.anim.cancel();
+    this.#pauseRef = undefined;
+    this.disposeEvents();
+    if (!this._opts.autoClose && this.$refProgress) {
+      this.$refProgress.remove();
+      delete this.$refProgress;
+    }
+    const prevPlacement = this.getAttribute("w-placement");
+    this.gotRender(true); // render missed refs & placement
+    if (prevPlacement !== this._opts.placement) {
+      this.resetPosition(); // remove from previous stack
+      this._openedItems.push(this as WUPNotifyElement<any, any>);
+      this.refreshVertical();
+    }
+    this.gotPlay();
   }
 
   /** Returns if item is visible and has same placement option */
@@ -409,7 +460,6 @@ customElements.define(tagName, WUPNotifyElement);
 
 // todo bind with form
 // todo add Ctrl+Z hook ???
-// todo add ID to ability to refresh existed
 // todo options: closeOnSwipe
 
 // NiceToHave: mirror progress bar animation (attach to right)

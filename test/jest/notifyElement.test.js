@@ -717,4 +717,119 @@ describe("notifyElement", () => {
     await h.wait();
     expect(n2.isConnected).toBe(false);
   });
+
+  test("static $show with id", async () => {
+    document.body.innerHTML = "";
+    await h.wait(1);
+    const n = WUPNotifyElement.$show({ id: "saving", textContent: "Saving...", defaults: { autoClose: 0 } });
+    expect(WUPNotifyElement.$show({ id: "saving", textContent: "Saving 2" })).toBe(n); // the same even when not ready yet
+    await h.wait(10);
+    expect(n.$isOpened).toBe(true);
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<wup-notify id="saving" open="" role="alert" w-placement="bottom-left" show=""><button type="button" aria-label="close" wup-icon="" close=""></button>Saving 2</wup-notify>"`
+    );
+
+    // refresh with new content & options
+    const onRender = jest.fn();
+    const onWillOpen = jest.fn();
+    n.$onWillOpen = onWillOpen;
+    expect(
+      WUPNotifyElement.$show({
+        id: "saving",
+        textContent: "Saved",
+        className: "ok",
+        onRender,
+        defaults: { autoClose: 1000 },
+      })
+    ).toBe(n);
+    expect(onRender).toBeCalledTimes(1);
+    expect(onRender.mock.calls[0][0]).toBe(n);
+    await h.wait(10);
+    expect(onWillOpen).not.toBeCalled(); // refreshed without re-opening
+    expect(document.body.innerHTML).toMatchInlineSnapshot(
+      `"<wup-notify id="saving" open="" role="alert" w-placement="bottom-left" show="" class="ok"><button type="button" aria-label="close" wup-icon="" close=""></button>Saved<div progress="" role="progressbar"></div></wup-notify>"`
+    );
+    expect(n.$isPlayed).toBe(true);
+    expect(n._openedItems).toEqual([n]);
+
+    // refresh restarts closing by time
+    await h.wait(800);
+    const anim = animations[animations.length - 1];
+    WUPNotifyElement.$show({ id: "saving", textContent: "Saved 2" });
+    expect(anim.playState).toBe("idle"); // previous is cancelled
+    expect(animations[animations.length - 1]).not.toBe(anim);
+    expect(animations[animations.length - 1].playState).toBe("running");
+    await h.wait(800);
+    expect(n.$isOpened).toBe(true);
+    // events aren't duplicated on refreshing
+    n.dispatchEvent(new Event("mouseenter"));
+    expect(n.$isPlayed).toBe(false);
+    n.dispatchEvent(new Event("mouseleave"));
+    expect(n.$isPlayed).toBe(true);
+    await h.wait(300);
+    expect(n.$isOpened).toBe(false);
+    expect(n.isConnected).toBe(false);
+
+    // refresh while hovered keeps pause
+    const n2 = WUPNotifyElement.$show({ id: "saving", textContent: "Hovered", defaults: { autoClose: 1000 } });
+    expect(n2).not.toBe(n); // because prev is removed
+    await h.wait(10);
+    const spyHover = jest.spyOn(n2, "matches").mockImplementation((s) => s === ":hover");
+    WUPNotifyElement.$show({ id: "saving", textContent: "Hovered 2" });
+    spyHover.mockRestore();
+    expect(n2.$isPlayed).toBe(false);
+    await h.wait(5000);
+    expect(n2.$isOpened).toBe(true);
+    n2.dispatchEvent(new Event("mouseleave"));
+    expect(n2.$isPlayed).toBe(true);
+
+    // refresh with autoClose: 0 removes progress
+    WUPNotifyElement.$show({ id: "saving", textContent: "Static", defaults: { autoClose: 0 } });
+    expect(n2.$refProgress).toBeUndefined();
+    expect(n2.$isPlayed).toBe(false);
+    await h.wait(5000);
+    expect(n2.$isOpened).toBe(true);
+
+    // refresh with new placement moves item to another stack
+    const other = WUPNotifyElement.$show({ textContent: "Other", defaults: { placement: "top-left", autoClose: 0 } });
+    await h.wait(10);
+    jest.spyOn(other, "offsetHeight", "get").mockReturnValue(50);
+    jest.spyOn(n2, "offsetHeight", "get").mockReturnValue(50);
+    WUPNotifyElement.$show({ id: "saving", textContent: "Moved", defaults: { placement: "top-left" } });
+    expect(n2.getAttribute("w-placement")).toBe("top-left");
+    expect(n2._openedItems).toEqual([other, n2]);
+    expect(n2.style.transform).toBe("translateY(50px)"); // placed after other
+    await h.wait(10);
+
+    // closing item isn't refreshed
+    n2.$close();
+    const n3 = WUPNotifyElement.$show({ id: "saving", textContent: "New" });
+    expect(n3).not.toBe(n2);
+    expect(n3.id).toBe("saving");
+    expect(n2.id).toBe(""); // id is passed to new one
+    expect(WUPNotifyElement.$show({ id: "saving", textContent: "New 2" })).toBe(n3); // the same while prev is closing
+    document.body.appendChild(document.createElement("div")).id = "not-notify";
+    const n4 = WUPNotifyElement.$show({ id: "not-notify", textContent: "Not notify" });
+    expect(n4.tagName).toBe("WUP-NOTIFY"); // new one because element with the same id is not notify
+    await h.wait();
+    expect(n2.isConnected).toBe(false);
+
+    // closed but not removed item is re-opened
+    WUPNotifyElement.$show({ id: "saving", textContent: "Kept", defaults: { selfRemove: false } });
+    await h.wait(10);
+    n3.$close();
+    await h.wait();
+    expect(n3.$isClosed).toBe(true);
+    expect(n3.isConnected).toBe(true);
+    expect(WUPNotifyElement.$show({ id: "saving", textContent: "Reopened" })).toBe(n3);
+    expect(n3.$isOpened).toBe(true);
+    await h.wait(10);
+    expect(n3.textContent).toBe("Reopened");
+    expect(n3.$refClose.isConnected).toBe(true);
+
+    other.$close();
+    n4.$close();
+    n3.$close();
+    await h.wait();
+  });
 });
