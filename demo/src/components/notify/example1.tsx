@@ -42,11 +42,12 @@ export default function Example1() {
                   [0 /* 1, 100, 100, 1000, 101, 102, 402, 403, 404 */].forEach((t) => {
                     setTimeout(() => el.click(), t);
                   });
-                  setTimeout(() => {
-                    const all = document.querySelectorAll("wup-notify");
-                    all[all.length - 1].refreshVertical(); // just for checking the method
-                    all[all.length - 1].$options.pauseOnWinBlur = false;
-                  }, 1500);
+                  // uncomment for manual checking
+                  // setTimeout(() => {
+                  //   const all = document.querySelectorAll("wup-notify");
+                  //   all[all.length - 1].refreshVertical(); // just for checking the method
+                  //   all[all.length - 1].$options.pauseOnWinBlur = false;
+                  // }, 1500);
                 }
               }}
               className={`btn ${a.className}`}

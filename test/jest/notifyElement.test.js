@@ -72,7 +72,7 @@ afterEach(() => {
 describe("notifyElement", () => {
   h.baseTestComponent(() => document.createElement("wup-notify"), {
     attrs: {
-      "w-placement": { value: "bottom-left" },
+      "w-placement": { value: "bottom-left", skip: true }, // it's also rendered attr (see test "options changes on opened")
       "w-autoclose": { value: 3000 },
       "w-closeonclick": { value: true },
       "w-closeonswipe": { value: true },
@@ -361,6 +361,10 @@ describe("notifyElement", () => {
     await h.wait(200);
     expect(el3.$isOpened).toBe(false);
     expect(el3.isConnected).toBe(true); // because selfRemove: false
+
+    // time less than 100ms: progress duration can't be negative
+    await initNotify(`w-autoclose="50" w-selfremove="false"`);
+    expect(animations[animations.length - 1].opts.duration).toBe(0);
   });
 
   test("$pause & $play", async () => {
@@ -581,6 +585,7 @@ describe("notifyElement", () => {
   test("option: closeOnSwipe", async () => {
     const el2 = await initNotify(`w-autoclose="1000" w-selfremove="false"`);
     expect(el2.$options.closeOnSwipe).toBe(true);
+    expect(el2.style.touchAction).toBe("pan-y"); // otherwise browser cancels pointer-events on horizontal swipe
     jest.spyOn(el2, "offsetWidth", "get").mockReturnValue(300);
     const onWillClose = jest.fn();
     el2.$onWillClose = onWillClose;
@@ -689,6 +694,7 @@ describe("notifyElement", () => {
     // closeOnSwipe: false
     const el3 = await initNotify(`w-closeonswipe="false" w-autoclose="0" w-selfremove="false"`);
     expect(el3.$options.closeOnSwipe).toBe(false);
+    expect(el3.style.touchAction).toBeFalsy(); // vertical & horizontal scroll by touch is allowed
     userSwipe(el3, [0, 50, 200]);
     expect(el3.$isOpened).toBe(true);
     expect(el3.getAttribute("style")).toBeNull();
@@ -834,6 +840,37 @@ describe("notifyElement", () => {
     expect([d1.style.translate, d3.style.translate, d2.style.translate]).toEqual(["", "0 -60px", "0 -120px"]);
   });
 
+  test("options changes on opened", async () => {
+    const el2 = await initNotify(`w-autoclose="0" w-selfremove="false"`);
+    expect(el2.$refProgress).toBeUndefined();
+    // autoClose: progress is added & closing by time is started
+    el2.$options.autoClose = 1000;
+    await h.wait(1);
+    expect(el2.$refProgress.isConnected).toBe(true);
+    expect(el2.$isPlayed).toBe(true);
+    await h.wait(1100);
+    expect(el2.$isOpened).toBe(false);
+
+    // placement: rendered attr is kept & item is moved to another stack
+    el2.$options.autoClose = 0;
+    el2.$open();
+    const el3 = document.body.appendChild(document.createElement("wup-notify"));
+    el3.$options.autoClose = 0;
+    await h.wait();
+    [el2, el3].forEach((a) => jest.spyOn(a, "offsetHeight", "get").mockReturnValue(50));
+    el3.refreshVertical();
+    expect(el3.style.translate).toBe("0 -50px");
+    el2.$options.placement = "top-right";
+    await h.wait(1);
+    expect(el2.getAttribute("w-placement")).toBe("top-right");
+    expect(el3.style.translate).toBe(""); // gap in prev stack is closed
+    el2.setAttribute("w-placement", "top-left");
+    await h.wait(1);
+    expect(el2.$options.placement).toBe("top-left");
+    expect(el2.getAttribute("w-placement")).toBe("top-left");
+    expect(el2._openedItems).toEqual([el3, el2]);
+  });
+
   test("static $show", async () => {
     document.body.innerHTML = "";
     await h.wait(1);
@@ -962,30 +999,30 @@ describe("notifyElement", () => {
     await h.wait(10);
     expect(n2.getAttribute("w-placement")).toBe("top-left"); // isn't removed by options observer
 
-    // closing item isn't refreshed
+    // closing item is re-opened & refreshed
     n2.$close();
-    const n3 = WUPNotifyElement.$show({ id: "saving", textContent: "New" });
-    expect(n3).not.toBe(n2);
-    expect(n3.id).toBe("saving");
-    expect(n2.id).toBe(""); // id is passed to new one
-    expect(WUPNotifyElement.$show({ id: "saving", textContent: "New 2" })).toBe(n3); // the same while prev is closing
+    expect(n2.$isClosing).toBe(true);
+    const n3 = WUPNotifyElement.$show({ id: "saving", textContent: "Reopened", defaults: { selfRemove: false } });
+    expect(n3).toBe(n2);
+    expect(n2.$isClosing).toBeFalsy();
+    expect(n2.$isOpened).toBe(true);
+    await h.wait();
+    expect(n2.isConnected).toBe(true); // closing is interrupted
+    expect(n2.textContent).toBe("Reopened");
+    expect(n2.$refClose.isConnected).toBe(true);
     document.body.appendChild(document.createElement("div")).id = "not-notify";
     const n4 = WUPNotifyElement.$show({ id: "not-notify", textContent: "Not notify" });
     expect(n4.tagName).toBe("WUP-NOTIFY"); // new one because element with the same id is not notify
-    await h.wait();
-    expect(n2.isConnected).toBe(false);
 
     // closed but not removed item is re-opened
-    WUPNotifyElement.$show({ id: "saving", textContent: "Kept", defaults: { selfRemove: false } });
-    await h.wait(10);
     n3.$close();
     await h.wait();
     expect(n3.$isClosed).toBe(true);
     expect(n3.isConnected).toBe(true);
-    expect(WUPNotifyElement.$show({ id: "saving", textContent: "Reopened" })).toBe(n3);
+    expect(WUPNotifyElement.$show({ id: "saving", textContent: "Reopened 2" })).toBe(n3);
     expect(n3.$isOpened).toBe(true);
     await h.wait(10);
-    expect(n3.textContent).toBe("Reopened");
+    expect(n3.textContent).toBe("Reopened 2");
     expect(n3.$refClose.isConnected).toBe(true);
 
     other.$close();

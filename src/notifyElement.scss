@@ -24,8 +24,6 @@
   color: var(--notify-text);
   background: var(--notify-bg);
   box-shadow: 0 1px 4px 0 var(--notify-shadow);
-  /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
-  touch-action: pan-y; // otherwise browser cancels pointer-events on horizontal swipe (see option closeOnSwipe)
 
   &[w-placement$="-left"] {
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
@@ -79,14 +77,24 @@
     margin: 0.4em;
   }
 
+  // WARN: sticky with zero height (line is drawn by :after): otherwise it's scrolled with overflowed content
   > [progress] {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background: var(--notify-progress);
+    position: sticky;
+    top: 100%; // at the bottom when content is short
+    bottom: 0; // at the bottom when content is scrolled
+    height: 0;
+    margin: 0 calc(-1 * var(--base-margin)); // fit the padding of :host
     transform-origin: left;
+
+    &:after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(var(--base-margin) - 5px);
+      height: 5px;
+      background: var(--notify-progress);
+    }
   }
 
   &[w-placement$="-right"] > [progress] {

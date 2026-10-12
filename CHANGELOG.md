@@ -17,6 +17,9 @@
   - _Re-opened element is closed earlier by the timer of previous opening_
   - _Custom buttons `[close]` placed inside element don't close it_
   - _Repeated pause (ex. hover + window blur) shortens time left before closing_
+  - _Changing options of opened element is ignored (`$options.placement` removes position styles)_
+  - _Progress bar is scrolled with overflowed content_
+  - _Option **autoClose** less than `100` throws error_
 - [TimeControl](src/controls/time.ts). Improved quality of icon
 - [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
   - toggle button (direct child `wup-dropdown > button`) has neutral style: inherited font & color, no background, chevron icon at the right (rotated when menu is opened), hover/focus background via css-vars `--icon-hover-bg` & `--icon-focus-bg`
@@ -47,7 +50,7 @@
 - [TextRichControl](src/controls/textRich.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textRich) (WYSIWYG editor)
 - [TextAreaControl](src/controls/textArea.ts). Added footer with count of chars `{count} / {max}` (see **$options.hideFooter** & **$renderFooter** to customize content)
 - [NotifyElement](src/notifyElement.ts)
-  - Added option **id** to `WUPNotifyElement.$show(...)`: if notification with the same id is shown then it's refreshed (content & options updated, closing-time restarted) instead of showing new one
+  - Added option **id** to `WUPNotifyElement.$show(...)`: if notification with the same id exists then it's refreshed (content & options updated, closing-time restarted) instead of showing new one; closing (or closed but not removed) one is re-opened
   - Added option **closeOnSwipe** (`true` by default): on touch devices element follows the horizontal swipe & closes when it's swiped out (like messages in popular mobile apps)
   - Progress bar is mirrored for right placements (shrinks to the right side)
 - helper [onSwipe](src/helpers/onSwipe.ts)

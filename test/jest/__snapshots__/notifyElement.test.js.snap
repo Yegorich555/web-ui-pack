@@ -182,7 +182,6 @@ WUP-NOTIFY {
   color: var(--notify-text);
   background: var(--notify-bg);
   box-shadow: 0 1px 4px 0 var(--notify-shadow);
-  touch-action: pan-y;
 }
 WUP-NOTIFY[w-placement$=-left] {
   border-radius: 0 var(--border-radius) var(--border-radius) 0;
@@ -229,13 +228,21 @@ WUP-NOTIFY &gt; button[close] {
   margin: 0.4em;
 }
 WUP-NOTIFY &gt; [progress] {
-  position: absolute;
+  position: sticky;
+  top: 100%;
   bottom: 0;
+  height: 0;
+  margin: 0 calc(-1 * var(--base-margin));
+  transform-origin: left;
+}
+WUP-NOTIFY &gt; [progress]:after {
+  content: "";
+  position: absolute;
   left: 0;
-  width: 100%;
+  right: 0;
+  top: calc(var(--base-margin) - 5px);
   height: 5px;
   background: var(--notify-progress);
-  transform-origin: left;
 }
 WUP-NOTIFY[w-placement$=-right] &gt; [progress] {
   transform-origin: right;
