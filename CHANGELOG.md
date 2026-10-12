@@ -12,6 +12,11 @@
   - _`$value` contains html-escaped chars (typed `a < b` gives `a &lt; b`) & html of `$value` is rendered (scripts of `<img onerror>` are executed)_
   - _Undo/redo after new line: line break is removed instead of typed text (`abc`, Enter, `d`, Ctrl+Z gives `abcd`); new line & pasted text aren't undone_
   - _Readonly & disabled doesn't prevent editing_
+- [NotifyElement](src/notifyElement.ts)
+  - Improved performance: no forced re-layouts & extra timers on opening (position in the stack is defined via css `translate`)
+  - _Re-opened element is closed earlier by the timer of previous opening_
+  - _Custom buttons `[close]` placed inside element don't close it_
+  - _Repeated pause (ex. hover + window blur) shortens time left before closing_
 - [TimeControl](src/controls/time.ts). Improved quality of icon
 - [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
   - toggle button (direct child `wup-dropdown > button`) has neutral style: inherited font & color, no background, chevron icon at the right (rotated when menu is opened), hover/focus background via css-vars `--icon-hover-bg` & `--icon-focus-bg`

@@ -118,7 +118,6 @@ exports[`notifyElement common tests render + styles 2`] = `
 }
 [wupdark] {
   --notify-text: #d8d8d8;
-  --notify-bg: rgba(16, 70, 82, 0.9);
   --notify-shadow: #0006;
 }
   
@@ -185,31 +184,40 @@ WUP-NOTIFY {
   box-shadow: 0 1px 4px 0 var(--notify-shadow);
   touch-action: pan-y;
 }
-WUP-NOTIFY[w-placement=top-left], WUP-NOTIFY[w-placement=bottom-left] {
+WUP-NOTIFY[w-placement$=-left] {
   border-radius: 0 var(--border-radius) var(--border-radius) 0;
   left: 0;
   transform: translateX(-100%);
 }
-WUP-NOTIFY[w-placement=top-right], WUP-NOTIFY[w-placement=bottom-right] {
+WUP-NOTIFY[w-placement$=-right] {
   border-radius: var(--border-radius) 0 0 var(--border-radius);
   right: 0;
   transform: translateX(100%);
 }
-WUP-NOTIFY[w-placement=top-middle], WUP-NOTIFY[w-placement=bottom-middle] {
+WUP-NOTIFY[w-placement$=-middle] {
   margin-left: auto;
   margin-right: auto;
   left: 0;
   right: 0;
   transform: translateY(-100%);
 }
-WUP-NOTIFY[w-placement=top-left], WUP-NOTIFY[w-placement=top-middle], WUP-NOTIFY[w-placement=top-right] {
+WUP-NOTIFY[w-placement^=top-] {
   top: 0;
 }
-WUP-NOTIFY[w-placement=bottom-left], WUP-NOTIFY[w-placement=bottom-middle], WUP-NOTIFY[w-placement=bottom-right] {
+WUP-NOTIFY[w-placement^=bottom-] {
   bottom: 0;
 }
 WUP-NOTIFY[show] {
   transform: none;
+}
+@media not all and (prefers-reduced-motion) {
+  WUP-NOTIFY[show] {
+    transition: opacity var(--modal-anim), transform var(--modal-anim), translate var(--modal-anim);
+  }
+}
+WUP-NOTIFY[swiping] {
+  transition: none;
+  will-change: transform, opacity;
 }
 WUP-NOTIFY &gt; button[close] {
   --icon-img: var(--wup-icon-cross);
@@ -229,7 +237,7 @@ WUP-NOTIFY &gt; [progress] {
   background: var(--notify-progress);
   transform-origin: left;
 }
-WUP-NOTIFY[w-placement=top-right] &gt; [progress], WUP-NOTIFY[w-placement=bottom-right] &gt; [progress] {
+WUP-NOTIFY[w-placement$=-right] &gt; [progress] {
   transform-origin: right;
 }
 </style>
@@ -248,18 +256,7 @@ exports[`notifyElement common tests snapshot of $defaults 1`] = `
 }
 `;
 
-exports[`notifyElement common tests snapshot of $defaults 2`] = `
-[
-  "autoClose",
-  "closeOnClick",
-  "closeOnSwipe",
-  "openCase",
-  "pauseOnHover",
-  "pauseOnWinBlur",
-  "placement",
-  "selfRemove",
-]
-`;
+exports[`notifyElement common tests snapshot of $defaults 2`] = `undefined`;
 
 exports[`notifyElement common tests snapshot of $defaults 3`] = `
 [

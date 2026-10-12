@@ -9,7 +9,6 @@
 
   [wupdark] {
     --notify-text: #d8d8d8;
-    --notify-bg: rgba(16, 70, 82, 0.9);
     --notify-shadow: #0006;
   }
 }
@@ -28,22 +27,19 @@
   /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
   touch-action: pan-y; // otherwise browser cancels pointer-events on horizontal swipe (see option closeOnSwipe)
 
-  &[w-placement="top-left"],
-  &[w-placement="bottom-left"] {
+  &[w-placement$="-left"] {
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
     left: 0;
     transform: translateX(-100%);
   }
 
-  &[w-placement="top-right"],
-  &[w-placement="bottom-right"] {
+  &[w-placement$="-right"] {
     border-radius: var(--border-radius) 0 0 var(--border-radius);
     right: 0;
     transform: translateX(100%);
   }
 
-  &[w-placement="top-middle"],
-  &[w-placement="bottom-middle"] {
+  &[w-placement$="-middle"] {
     margin-left: auto;
     margin-right: auto;
     left: 0;
@@ -51,20 +47,26 @@
     transform: translateY(-100%);
   }
 
-  &[w-placement="top-left"],
-  &[w-placement="top-middle"],
-  &[w-placement="top-right"] {
+  &[w-placement^="top-"] {
     top: 0;
   }
 
-  &[w-placement="bottom-left"],
-  &[w-placement="bottom-middle"],
-  &[w-placement="bottom-right"] {
+  &[w-placement^="bottom-"] {
     bottom: 0;
   }
 
   &[show] {
     transform: none;
+
+    @media not all and (prefers-reduced-motion) {
+      // translate (position in the stack) only for shown: otherwise it's animated on opening
+      transition: opacity var(--modal-anim), transform var(--modal-anim), translate var(--modal-anim);
+    }
+  }
+
+  &[swiping] {
+    transition: none; // follow the pointer without delay
+    will-change: transform, opacity; // only during the swipe: otherwise extra layer per item
   }
 
   > button[close] {
@@ -87,8 +89,7 @@
     transform-origin: left;
   }
 
-  &[w-placement="top-right"] > [progress],
-  &[w-placement="bottom-right"] > [progress] {
+  &[w-placement$="-right"] > [progress] {
     transform-origin: right; // mirror: shrinks to the attached side
   }
 }

@@ -330,7 +330,6 @@ describe("notifyElement", () => {
     await h.wait();
     expect(el.$isOpened).toBe(true);
     expect(el.$isPlayed).toBe(true);
-    expect(el.$isPaused).toBe(false);
     expect(animations.length).toBe(1);
     expect(animations[0].el).toBe(el.$refProgress);
     expect(animations[0].opts).toEqual({ fill: "forwards", duration: 4900 }); // -100ms for more native effect
@@ -408,6 +407,15 @@ describe("notifyElement", () => {
     el2.$play(); // no stored left-time here: so takes it from $options.autoClose
     await h.wait(10);
     expect(el2.$isOpened).toBe(false);
+
+    // closing stops the timer: otherwise it closes re-opened item
+    const el3 = await initNotify(`w-autoclose="1000" w-selfremove="false"`);
+    await h.wait(500);
+    el3.$close();
+    el3.$open(); // interrupt the closing
+    await h.wait(600);
+    expect(el3.$isOpened).toBe(true);
+    expect(el3.$isPlayed).toBe(true);
   });
 
   test("option: pauseOnHover", async () => {
@@ -584,17 +592,16 @@ describe("notifyElement", () => {
     expect(el2.getAttribute("style")).toBeNull();
     userPointer(el2, "pointermove", 50, { timeStamp: 200 });
     expect(el2.$isPlayed).toBe(false); // paused during the swipe
-    expect(el2.style.transition).toBe("none");
+    expect(el2.hasAttribute("swiping")).toBe(true); // to disable transition
     userPointer(el2, "pointermove", 60, { timeStamp: 300, pointerId: 2 }); // another pointer is ignored
     userPointer(el2, "pointermove", 60, { timeStamp: 300 });
     userPointer(el2, "pointermove", 60, { timeStamp: 300 }); // the same time: velocity isn't changed
-    expect(el2.getAttribute("style")).toMatchInlineSnapshot(
-      `"transition: none; transform: translateX(60px); opacity: 0.8;"`
-    );
+    expect(el2.getAttribute("style")).toMatchInlineSnapshot(`"transform: translateX(60px); opacity: 0.8;"`);
     userPointer(el2, "pointerup", 60, { timeStamp: 1000, pointerId: 2 }); // another pointer is ignored
-    expect(el2.style.transition).toBe("none");
+    expect(el2.hasAttribute("swiping")).toBe(true);
     userPointer(el2, "pointerup", 60, { timeStamp: 1000 });
     expect(el2.getAttribute("style")).toBe("");
+    expect(el2.hasAttribute("swiping")).toBe(false);
     expect(el2.$isPlayed).toBe(true); // resumed
     await h.wait(10);
     expect(el2.$isOpened).toBe(true);
@@ -612,7 +619,7 @@ describe("notifyElement", () => {
     expect(el2.getAttribute("style")).toMatchInlineSnapshot(`"transform: translateX(100vw);"`); // fly out
     userPointer(el2, "pointerdown", 0); // ignored during the closing
     userPointer(el2, "pointermove", 50, { timeStamp: 100 });
-    expect(el2.style.transition).toBe("");
+    expect(el2.hasAttribute("swiping")).toBe(false);
     await h.wait();
     expect(el2.$isOpened).toBe(false);
     expect(el2.getAttribute("style")).toBe(""); // reset on resetState
@@ -667,17 +674,16 @@ describe("notifyElement", () => {
     expect(el2.$isPlayed).toBe(true);
     el2.$onWillClose = undefined;
 
-    // keeps vertical position in the stack
-    el2._dy = -60;
-    userSwipe(el2, [0, 50, 60]);
-    expect(el2.style.transform).toBe("translateY(-60px)");
+    // vertical position in the stack isn't affected: it's defined via style.translate
+    el2.style.translate = "0 -60px";
     userPointer(el2, "pointerdown", 0);
     userPointer(el2, "pointermove", 50, { timeStamp: 100 });
     userPointer(el2, "pointermove", 60, { timeStamp: 1000 });
-    expect(el2.style.transform).toBe("translateX(60px) translateY(-60px)");
+    expect(el2.style.transform).toBe("translateX(60px)");
     userPointer(el2, "pointermove", 200, { timeStamp: 2000 });
     userPointer(el2, "pointerup", 200, { timeStamp: 2100 });
-    expect(el2.style.transform).toBe("translateX(100vw) translateY(-60px)");
+    expect(el2.style.transform).toBe("translateX(100vw)");
+    expect(el2.style.translate).toBe("0 -60px");
     await h.wait();
 
     // closeOnSwipe: false
@@ -719,7 +725,6 @@ describe("notifyElement", () => {
   });
 
   test("gotClick (when closeOnClick: false)", async () => {
-    // WARN: gotClick is attached only when closeOnClick is enabled: so call it directly
     document.body.innerHTML = `<wup-notify w-autoclose="0" w-selfremove="false">
         <span id="txt">txt</span>
         <button close id="bc"><span id="bcin">x</span></button>
@@ -740,6 +745,13 @@ describe("notifyElement", () => {
     await h.wait();
     expect(el2.$isOpened).toBe(false);
 
+    // real click on custom button[close]
+    el2.$open();
+    await h.wait();
+    document.getElementById("bcin").click();
+    await h.wait();
+    expect(el2.$isOpened).toBe(false);
+
     // click on built-in button[close]
     el2.$open();
     await h.wait();
@@ -753,7 +765,6 @@ describe("notifyElement", () => {
     h.setupCssCompute((e) => e.tagName === "WUP-NOTIFY", {
       marginTop: "10px",
       marginBottom: "10px",
-      transform: "translateX(-100%)",
     });
     /** @returns {WUPNotifyElement} */
     const add = (placement, height = 50) => {
@@ -773,28 +784,17 @@ describe("notifyElement", () => {
     await h.wait();
     expect([a1.$isOpened, a2.$isOpened, a3.$isOpened]).toEqual([true, true, true]);
     expect([a1._dy, a2._dy, a3._dy]).toEqual([0, -60, -120]); // -50 (height) -10 (margin)
-    expect([a1.style.transform, a2.style.transform, a3.style.transform]).toMatchInlineSnapshot(`
-      [
-        "",
-        "translateY(-60px)",
-        "translateY(-120px)",
-      ]
-    `);
+    expect([a1.style.translate, a2.style.translate, a3.style.translate]).toEqual(["", "0 -60px", "0 -120px"]);
     expect(el._openedItems.length).toBe(3);
 
     // closing the middle one must re-position others
     a2.$close();
-    expect(a2.style.transform).toMatchInlineSnapshot(`"translateX(-100%) translateY(-60px)"`); // saved position (see gotClose)
+    expect(a2.style.translate).toBe("0 -60px"); // keeps position during the hiding
     await h.wait();
     expect(a2.$isOpened).toBe(false);
-    expect(a2.style.transform).toBe(""); // reset on resetState
+    expect(a2.style.translate).toBe(""); // reset on resetState
     expect([a1._dy, a3._dy]).toEqual([0, -60]);
-    expect([a1.style.transform, a3.style.transform]).toMatchInlineSnapshot(`
-      [
-        "",
-        "translateY(-60px)",
-      ]
-    `);
+    expect([a1.style.translate, a3.style.translate]).toEqual(["", "0 -60px"]);
     expect(el._openedItems.length).toBe(2);
 
     // top: every next item is shifted down
@@ -816,7 +816,7 @@ describe("notifyElement", () => {
     const c1 = add("bottom-middle");
     await h.wait();
     expect(c1._dy).toBe(0);
-    expect(c1.style.transform).toBe("");
+    expect(c1.style.translate).toBe("");
 
     // $open() during the closing: item must be moved to the end without duplicates
     document.body.innerHTML = "";
@@ -831,13 +831,7 @@ describe("notifyElement", () => {
     await h.wait();
     expect(el._openedItems).toHaveLength(3); // no duplicates
     expect([d1._dy, d3._dy, d2._dy]).toEqual([0, -60, -120]);
-    expect([d1.style.transform, d3.style.transform, d2.style.transform]).toMatchInlineSnapshot(`
-      [
-        "",
-        "translateY(-60px)",
-        "translateY(-120px)",
-      ]
-    `);
+    expect([d1.style.translate, d3.style.translate, d2.style.translate]).toEqual(["", "0 -60px", "0 -120px"]);
   });
 
   test("static $show", async () => {
@@ -955,14 +949,18 @@ describe("notifyElement", () => {
 
     // refresh with new placement moves item to another stack
     const other = WUPNotifyElement.$show({ textContent: "Other", defaults: { placement: "top-left", autoClose: 0 } });
+    const below = WUPNotifyElement.$show({ textContent: "Below", defaults: { autoClose: 0 } }); // after n2 in prev stack
     await h.wait(10);
-    jest.spyOn(other, "offsetHeight", "get").mockReturnValue(50);
-    jest.spyOn(n2, "offsetHeight", "get").mockReturnValue(50);
+    [other, n2, below].forEach((a) => jest.spyOn(a, "offsetHeight", "get").mockReturnValue(50));
+    below.refreshVertical();
+    expect(below.style.translate).toBe("0 -50px");
     WUPNotifyElement.$show({ id: "saving", textContent: "Moved", defaults: { placement: "top-left" } });
     expect(n2.getAttribute("w-placement")).toBe("top-left");
-    expect(n2._openedItems).toEqual([other, n2]);
-    expect(n2.style.transform).toBe("translateY(50px)"); // placed after other
+    expect(n2._openedItems).toEqual([other, below, n2]);
+    expect(n2.style.translate).toBe("0 50px"); // placed after other
+    expect(below.style.translate).toBe(""); // gap in prev stack is closed
     await h.wait(10);
+    expect(n2.getAttribute("w-placement")).toBe("top-left"); // isn't removed by options observer
 
     // closing item isn't refreshed
     n2.$close();
@@ -991,6 +989,7 @@ describe("notifyElement", () => {
     expect(n3.$refClose.isConnected).toBe(true);
 
     other.$close();
+    below.$close();
     n4.$close();
     n3.$close();
     await h.wait();

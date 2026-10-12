@@ -1,4 +1,5 @@
 import WUPBaseModal from "./baseModal";
+import onEvent from "./helpers/onEvent";
 import { px2Number } from "./helpers/styleHelpers";
 
 export const enum NotifyOpenCases {
@@ -129,24 +130,6 @@ export default class WUPNotifyElement<
 > extends WUPBaseModal<TOptions, Events> {
   #ctr = this.constructor as typeof WUPNotifyElement;
 
-  static get observedOptions(): Array<keyof WUP.Notify.Options> {
-    return [
-      "autoClose",
-      "closeOnClick",
-      "closeOnSwipe",
-      "openCase",
-      "placement",
-      "selfRemove",
-      "pauseOnHover",
-      "pauseOnWinBlur",
-    ];
-  }
-
-  static get observedAttributes(): Array<string> {
-    // use as observable to unify parse logic
-    return super.observedAttributes as Array<Lowercase<keyof WUP.Notify.JSXProps>>;
-  }
-
   // perfect bg color is: #121212c8
   // WARN: modal-anim shouldn't affect on animation of nested
   static get $styleRoot(): string {
@@ -173,24 +156,20 @@ export default class WUPNotifyElement<
    * @tutorial Troubleshooting
    * * On close notify-element self-removed */
   static $show(opts: WUP.Notify.ShowOptions): WUPNotifyElement {
-    let prev = opts.id ? document.getElementById(opts.id) : null;
-    if (!(prev instanceof WUPNotifyElement)) {
-      prev = null;
-    } else if (prev.$isClosing) {
-      prev.removeAttribute("id"); // pass id to new one otherwise getElementById returns closing item till it's removed
-      prev = null;
-    }
-    const me = prev ?? document.createElement(tagName);
+    const el = opts.id ? document.getElementById(opts.id) : null;
+    const isMine = el instanceof WUPNotifyElement;
+    isMine && el.$isClosing && el.removeAttribute("id"); // pass id to new one otherwise getElementById returns closing item till it's removed
+    const prev = isMine && !el.$isClosing ? el : null;
+    const me: WUPNotifyElement<any, any> = prev ?? document.createElement(tagName);
     opts.className && me.classList.add(opts.className);
-    prev || (me.$options.selfRemove = true);
-    Object.assign(me.$options, opts.defaults);
-    me.$options.openCase = NotifyOpenCases.onInit;
+    // WARN: _opts instead of $options: otherwise async gotOptionsChanged removes attr [w-placement] of opened item
+    prev || (me._opts.selfRemove = true);
+    Object.assign(me._opts, opts.defaults);
+    me._opts.openCase = NotifyOpenCases.onInit;
     // render
     me.textContent = opts.textContent;
-    if (!prev) {
-      opts.id && (me.id = opts.id);
-      document.body.appendChild(me); // append to root
-    }
+    opts.id && (me.id = opts.id);
+    prev || document.body.appendChild(me); // append to root
     // callback to allow user re-define it
     opts.onRender?.(me); // WARN: onRender called here but real render will be on gotOpen
     prev?.gotRefresh();
@@ -202,19 +181,20 @@ export default class WUPNotifyElement<
   /** Reference to progress bar  */
   $refProgress?: HTMLDivElement;
 
-  $isPaused = false;
   /** Pause progress bar & closing by time (if option autoClose is set)
    * @returns ms that left before closing */
   $pause(): number {
+    const r = this.#pauseRef;
+    if (r && this.#isPlayed) {
+      clearTimeout(r.t);
+      r.anim.pause();
+      r.left = r.end - Date.now();
+    }
     this.#isPlayed = false;
-    return this.#pauseRef?.pause() ?? -1;
+    return r?.left ?? -1;
   }
 
-  #pauseRef?: {
-    leftPlayTime?: number;
-    pause: () => number;
-    anim: Animation;
-  };
+  #pauseRef?: { anim: Animation; t: ReturnType<typeof setTimeout>; end: number; left?: number };
 
   #isPlayed = false;
   /** Returns whether element in play mode and will be closed after a time */
@@ -225,36 +205,19 @@ export default class WUPNotifyElement<
   /** Play/resume progress bar & close/hide by pointed time
    * @param ms time closing; if missed then will be used stored time from $pause OR from $options.autoClose */
   $play(ms?: number | null): void {
-    if (!ms) {
-      ms = this.#pauseRef?.leftPlayTime ?? (this._opts.autoClose || 0);
-    }
-
-    this.#isPlayed = true;
-
-    const now = Date.now();
-    const t1 = setTimeout(() => {
-      this.goClose(NotifyCloseCases.onTimeEnd, null);
-    }, ms);
-
+    const r = this.#pauseRef;
+    clearTimeout(r?.t); // prevent duplicated timers
+    ms ||= r?.left ?? (this._opts.autoClose || 0);
     const anim =
-      this.#pauseRef?.anim ??
+      r?.anim ??
       this.$refProgress!.animate([{ transform: "scaleX(100%)" }, { transform: "scaleX(0)" }], {
         fill: "forwards",
         duration: ms - 100, // less time for more native effect
       });
     anim.play();
-
-    const msConst = ms;
-    this.#pauseRef = {
-      anim,
-      pause: () => {
-        clearTimeout(t1);
-        anim.pause();
-        const left = msConst - Date.now() + now;
-        this.#pauseRef!.leftPlayTime = left;
-        return left;
-      },
-    };
+    this.#isPlayed = true;
+    const t = setTimeout(() => this.goClose(NotifyCloseCases.onTimeEnd, null), ms);
+    this.#pauseRef = { anim, t, end: Date.now() + ms };
   }
 
   /** Called on every opening */
@@ -265,7 +228,7 @@ export default class WUPNotifyElement<
     this.setAttribute("role", "alert");
     this.setAttribute("w-placement", this._opts.placement);
 
-    // init button[close]
+    // init button[close]: click is handled by gotClick
     if (!this.$refClose) {
       this.$refClose = document.createElement("button");
       const q = this.$refClose;
@@ -273,18 +236,19 @@ export default class WUPNotifyElement<
       q.setAttribute("aria-label", __wupln("close", "aria"));
       q.setAttribute(this.#ctr.classNameBtnIcon, "");
       q.setAttribute("close", "");
-      this.prepend(q);
-      q.onclick = (e) => this.goClose(NotifyCloseCases.onCloseClick, e);
     }
+    this.$refClose.parentNode !== this && this.prepend(this.$refClose); // WARN: refs are removed on textContent changes
 
     // init progress bar
-    if (!this.$refProgress && this._opts.autoClose) {
+    if (!this._opts.autoClose) {
+      this.$refProgress?.remove();
+      delete this.$refProgress;
+    } else if (!this.$refProgress) {
       this.$refProgress = document.createElement("div");
-      const q = this.$refProgress;
-      q.setAttribute("progress", "");
-      q.setAttribute("role", "progressbar");
-      this.appendChild(q);
+      this.$refProgress.setAttribute("progress", "");
+      this.$refProgress.setAttribute("role", "progressbar");
     }
+    this.$refProgress && this.$refProgress.parentNode !== this && this.appendChild(this.$refProgress);
   }
 
   protected override gotChanges(propsChanged: string[] | null): void {
@@ -292,91 +256,62 @@ export default class WUPNotifyElement<
     this._opts.openCase === NotifyOpenCases.onInit && this.goOpen(NotifyOpenCases.onInit, null);
   }
 
-  /** Saved dy position */
+  /** Saved dy position (vertical shift in the stack) */
   _dy = 0;
-  /** Saved dx position */
-  _dx = "";
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotOpen(openCase: NotifyOpenCases, e: MouseEvent | null): void {
     this.gotRender(true);
     this.resetPosition(); // WARN: required when $open() is called during the closing: in this case resetState is skipped
-    const curNum = this._openedItems.push(this as WUPNotifyElement<any, any>);
-    if (curNum > 1) {
-      this._dx = getComputedStyle(this).transform;
-      const lastI = curNum - 2;
-      const prev = this._openedItems.findLast((a, i) => i <= lastI && this.isSameSibling(a));
-      if (prev) {
-        this.style.transition = "none"; // temp disable animation otherwise 1st position will be wrong
-        this.refreshVertical([prev, this as WUPNotifyElement<any, any>], true);
-        const savedState = this.style.transform; // save position so later to process it animation
-        this.style.transform = `${this._dx} translateY(${this._dy}px)`; // set default position before showing to the user
-        // enable animation and move to position before
-        setTimeout(() => {
-          this.style.transition = "";
-          this.style.transform = savedState;
-        });
-      }
-    }
-
+    const prev = this._openedItems.findLast((a) => this.isSameSibling(a));
+    this._openedItems.push(this as WUPNotifyElement<any, any>);
+    // WARN: translate is animated only for [show] (see styles) so element appears at the shifted position
+    prev && this.refreshVertical([prev, this as WUPNotifyElement<any, any>], true);
     this.gotPlay();
   }
 
   /** Called on opening & refreshing: listens for close-events & starts closing by time (if option autoClose is set) */
   protected gotPlay(): void {
-    this._opts.closeOnClick && this.appendEvent(this, "click", (ev) => this.gotClick(ev));
-    this._opts.closeOnSwipe && this.appendEvent(this, "pointerdown", (ev) => this.gotSwipe(ev));
-
-    const ms = this._opts.autoClose;
-    if (ms) {
-      let allowByFocus = true;
-      if (this._opts.pauseOnWinBlur) {
-        this.appendEvent(window as any, "blur", () => this.$pause());
-        this.appendEvent(window as any, "focus", () => this.$play());
-        allowByFocus = document.hasFocus();
-      }
-      // play
-      allowByFocus && this.$play(ms);
-      // add other events
-      if (this._opts.pauseOnHover) {
-        const onEnter = (): void => {
-          this.$pause();
-          this.appendEvent(this, "mouseleave", () => this.$play(), { once: true }); // resume with stored left-time
-        };
-        this.appendEvent(this, "mouseenter", onEnter);
-        this.matches(":hover") && onEnter(); // possible on refreshing
-        this.appendEvent(this, "touchstart", () => {
-          // if (ev.type && ev.type !== "mouse") // allow only on touch & stylus: https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerType
-          this.$isPlayed ? this.$pause() : this.$play();
-        });
-      }
+    const o = this._opts;
+    this.appendEvent(this, "click", (ev) => this.gotClick(ev));
+    o.closeOnSwipe && this.appendEvent(this, "pointerdown", (ev) => this.gotSwipe(ev));
+    // reset previous playing (on re-opening & refreshing)
+    this.$pause();
+    this.#pauseRef?.anim.cancel();
+    this.#pauseRef = undefined;
+    if (!o.autoClose) {
+      return;
+    }
+    if (o.pauseOnWinBlur) {
+      this.appendEvent(window as any, "blur", () => this.$pause());
+      this.appendEvent(window as any, "focus", () => this.$play());
+    }
+    (!o.pauseOnWinBlur || document.hasFocus()) && this.$play(o.autoClose);
+    if (o.pauseOnHover) {
+      const onEnter = (): void => {
+        this.$pause();
+        this.appendEvent(this, "mouseleave", () => this.$play(), { once: true }); // resume with stored left-time
+      };
+      this.appendEvent(this, "mouseenter", onEnter);
+      this.matches(":hover") && onEnter(); // possible on refreshing
+      this.appendEvent(this, "touchstart", () => (this.$isPlayed ? this.$pause() : this.$play()));
     }
   }
 
-  /** Called from $show when element with the same id exists: restores refs & restarts closing by time according to options */
+  /** Called from $show when element with the same id exists: re-renders & restarts closing by time according to options */
   protected gotRefresh(): void {
-    // restore refs removed by textContent changes
-    this.$refClose && this.prepend(this.$refClose);
-    this.$refProgress && this.append(this.$refProgress);
     if (!this.$isOpened) {
       this.$isReady && this.goOpen(NotifyOpenCases.onInit, null); // when it's closed but not removed (selfRemove: false)
       return;
     }
-    // stop previous playing
-    this.$pause();
-    this.#pauseRef?.anim.cancel();
-    this.#pauseRef = undefined;
+    const was = this.getAttribute("w-placement");
     this.disposeEvents();
-    if (!this._opts.autoClose && this.$refProgress) {
-      this.$refProgress.remove();
-      delete this.$refProgress;
+    this.gotRender(true); // restore refs & apply options
+    const arr = this._openedItems;
+    if (was !== this._opts.placement) {
+      arr.push(...arr.splice(arr.indexOf(this as WUPNotifyElement<any, any>), 1)); // move to the end of new stack
+      arr.find((a) => a._opts.placement === was)?.refreshVertical(); // close the gap in previous stack
     }
-    const prevPlacement = this.getAttribute("w-placement");
-    this.gotRender(true); // render missed refs & placement
-    if (prevPlacement !== this._opts.placement) {
-      this.resetPosition(); // remove from previous stack
-      this._openedItems.push(this as WUPNotifyElement<any, any>);
-      this.refreshVertical();
-    }
+    this.refreshVertical(); // WARN: required even for the same placement because height can be changed
     this.gotPlay();
   }
 
@@ -386,37 +321,19 @@ export default class WUPNotifyElement<
   }
 
   /** Update vertical positions of all (or pointed) items + shift if something required */
-  refreshVertical(items?: WUPNotifyElement[], isInit = false): void {
-    let isBottom = false;
-    switch (this._opts.placement) {
-      case "bottom-left":
-      case "bottom-middle":
-      case "bottom-right":
-        isBottom = true;
-        break;
-      default:
-        break;
-    }
-    let prev: WUPNotifyElement;
-
-    if (!items) items = this._openedItems.filter((x) => this.isSameSibling(x));
-
-    const { marginBottom, marginTop } = getComputedStyle(this); // WARN: expected that every component has same options
-    items.forEach((a) => {
-      const isNext = !!prev;
-      if (isNext) {
-        const height = prev.offsetHeight;
-        a._dy = Math.round(
-          isBottom
-            ? prev._dy - height - px2Number(marginBottom) //
-            : prev._dy + height + px2Number(marginTop)
-        );
-        a.style.transform = `translateY(${a._dy}px)`;
+  refreshVertical(items = this._openedItems.filter((x) => this.isSameSibling(x)), isInit = false): void {
+    const isBottom = this._opts.placement.startsWith("bottom");
+    const s = getComputedStyle(this); // WARN: expected that every component has same options
+    const gap = px2Number(isBottom ? s.marginBottom : s.marginTop);
+    const hs = items.map((a) => a.offsetHeight); // read all before writing to prevent forced re-layouts
+    items.forEach((a, i) => {
+      if (i) {
+        a._dy = Math.round(items[i - 1]._dy + (isBottom ? -1 : 1) * (hs[i - 1] + gap));
+        a.style.translate = `0 ${a._dy}px`; // WARN: separate from transform that is used by show/hide animation & swipe
       } else if (!isInit) {
-        a.style.transform = "";
         a._dy = 0;
+        a.style.translate = "";
       }
-      prev = a;
     });
   }
 
@@ -426,90 +343,68 @@ export default class WUPNotifyElement<
       return; // WARN: mouse is ignored because dragging by mouse selects text
     }
     const minDelta = 10; // movement in px to detect direction of swipe
-    const x0 = e.clientX;
-    const y0 = e.clientY;
     let dx = 0;
-    let isSwiping = false;
+    let w = 0; // width of element: defined when swiping is started
+    let t = e.timeStamp;
+    let v = 0; // velocity of fling
     let wasPlayed = false;
-    let prev = { x: x0, t: e.timeStamp }; // to calc velocity of fling
-    let v = 0;
-    const setX = (x: string): void => {
-      this.style.transform = `${x}${this._dy ? ` translateY(${this._dy}px)` : ""}`.trimStart(); // keep vertical position in the stack
-    };
-
-    const end = (ev: PointerEvent): void => {
-      removers.forEach((r) => r());
-      if (!isSwiping) {
+    // WARN: onEvent instead of appendEvent: so listeners aren't removed by refreshing (via $show) during the swipe
+    const onPointer = (ev: PointerEvent): void => {
+      if (ev.pointerId !== e.pointerId) {
         return;
       }
-      ev.type === "pointerup" && this.preventClick();
-      this.style.transition = "";
-      this.style.opacity = "";
-      const isOut =
-        ev.type === "pointerup" && (Math.abs(dx) > this.offsetWidth * 0.4 || (Math.abs(v) > 0.5 && v * dx > 0));
-      isOut && this.goClose(NotifyCloseCases.onSwipe, ev);
-      if (this.$isClosing) {
-        setX(`translateX(${Math.sign(dx) * 100}vw)`); // fly out
-      } else {
-        setX(""); // return back (also when closing is prevented)
-        wasPlayed && this.$play();
+      if (ev.type === "pointermove") {
+        const dt = ev.timeStamp - t;
+        dt > 0 && (v = (ev.clientX - e.clientX - dx) / dt);
+        t = ev.timeStamp;
+        dx = ev.clientX - e.clientX;
+        if (w) {
+          this.style.transform = `translateX(${dx}px)`;
+          this.style.opacity = `${Math.max(0, 1 - Math.abs(dx) / w)}`;
+        } else if (Math.abs(ev.clientY - e.clientY) > Math.max(minDelta, Math.abs(dx))) {
+          off(); // vertical scroll
+        } else if (Math.abs(dx) > minDelta) {
+          w = this.offsetWidth; // single read: otherwise re-layout on every move
+          wasPlayed = this.$isPlayed;
+          this.$pause();
+          this.setAttribute("swiping", ""); // follow the pointer without delay
+        }
+        return; // WARN: touch & pen have implicit pointer capture so events are fired even when pointer is out of element
       }
+      off();
+      if (!w) {
+        return;
+      }
+      this.removeAttribute("swiping");
+      this.style.opacity = "";
+      if (ev.type === "pointerup") {
+        // prevent click fired right after pointerup (otherwise swipe triggers closeOnClick & clicks on inner buttons)
+        const prevent = (c: MouseEvent): void => {
+          c.preventDefault();
+          c.stopImmediatePropagation();
+        };
+        const r = onEvent(this, "click", prevent, { capture: true, once: true, passive: false });
+        setTimeout(r); // click is fired in the same task as pointerup (if it's fired)
+        (Math.abs(dx) > w * 0.4 || v * Math.sign(dx) > 0.5) && this.goClose(NotifyCloseCases.onSwipe, ev);
+      }
+      // fly out OR return back (also when closing is prevented)
+      this.style.transform = this.$isClosing ? `translateX(${Math.sign(dx) * 100}vw)` : "";
+      !this.$isClosing && wasPlayed && this.$play();
     };
-
-    const removers = [
-      this.appendEvent(this, "pointermove", (ev) => {
-        if (ev.pointerId !== e.pointerId) {
-          return;
-        }
-        dx = ev.clientX - x0;
-        const dt = ev.timeStamp - prev.t;
-        dt > 0 && (v = (ev.clientX - prev.x) / dt);
-        prev = { x: ev.clientX, t: ev.timeStamp };
-        if (!isSwiping) {
-          const dy = ev.clientY - y0;
-          if (Math.abs(dy) > minDelta && Math.abs(dy) > Math.abs(dx)) {
-            removers.forEach((r) => r()); // vertical scroll
-          } else if (Math.abs(dx) > minDelta) {
-            isSwiping = true;
-            wasPlayed = this.$isPlayed;
-            this.$pause();
-            this.style.transition = "none"; // follow the pointer without delay
-          }
-          return; // WARN: touch & pen have implicit pointer capture so events are fired even when pointer is out of element
-        }
-        setX(`translateX(${dx}px)`);
-        this.style.opacity = `${Math.max(0, 1 - Math.abs(dx) / this.offsetWidth)}`;
-      }),
-      this.appendEvent(this, "pointerup", (ev) => ev.pointerId === e.pointerId && end(ev)),
-      this.appendEvent(this, "pointercancel", (ev) => ev.pointerId === e.pointerId && end(ev)),
-    ];
-  }
-
-  /** Prevent click fired right after pointerup (otherwise swipe triggers closeOnClick & clicks on inner buttons) */
-  protected preventClick(): void {
-    const r = this.appendEvent(
-      this,
-      "click",
-      (ev) => {
-        ev.preventDefault();
-        ev.stopImmediatePropagation();
-      },
-      { capture: true, once: true }
-    );
-    setTimeout(r); // click is fired in the same task as pointerup (if it's fired)
+    const removers = (["pointermove", "pointerup", "pointercancel"] as const).map((k) => onEvent(this, k, onPointer));
+    const off = (): void => removers.forEach((r) => r());
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   gotClose(closeCase: NotifyCloseCases, ev: MouseEvent | null): void {
-    closeCase !== NotifyCloseCases.onSwipe && // otherwise keep swiped out position
-      (this.style.transform = this._dx ? `${this._dx} translateY(${this._dy}px)` : "");
+    this.$pause(); // otherwise timer closes re-opened item
     this.disposeEvents(); // remove all events added on opening (for case when item is not removed and will be opened again)
   }
 
   /** Reset saved position & remove itself from the list of opened items (+ update positions of the rest) */
   protected resetPosition(): void {
     this.style.transform = "";
-    this._dx = "";
+    this.style.translate = "";
     this._dy = 0;
     const i = this._openedItems.indexOf(this as WUPNotifyElement<any, any>);
     if (i > -1) {
@@ -526,24 +421,11 @@ export default class WUPNotifyElement<
 
   /** Called when handles click to check if was close-click */
   gotClick(e: MouseEvent): void {
-    const t = e.target;
-    if (e.defaultPrevented || (t === this && !this._opts.closeOnClick) || e.button) {
+    if (e.defaultPrevented || e.button) {
       return;
     }
-
-    if (this._opts.closeOnClick) {
-      this.goClose(NotifyCloseCases.onCloseClick, e);
-      return;
-    }
-
-    const all = this.querySelectorAll("[close]").values(); // allow to use any button with attr to close
-    // eslint-disable-next-line no-restricted-syntax
-    for (const el of all) {
-      if (this.itsMe.call(el, t)) {
-        this.goClose(NotifyCloseCases.onCloseClick, e);
-        return;
-      }
-    }
+    const c = (e.target as Element).closest("[close]"); // allow to use any button with attr to close
+    (this._opts.closeOnClick || (c !== this && this.contains(c))) && this.goClose(NotifyCloseCases.onCloseClick, e);
   }
 
   /** Singleton array with opened elements */
