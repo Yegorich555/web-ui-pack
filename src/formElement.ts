@@ -81,15 +81,15 @@ declare global {
 
     interface JSXProps extends WUP.Base.OnlyNames<Options> {
       "w-submitActions"?: SubmitActions | number;
-      "w-autoStore"?: boolean | string;
-      "w-autoFocus"?: boolean | "" | "true" | "false";
-      "w-autoComplete"?: boolean | "";
+      "w-autoStore"?: WUP.Base.JSXBoolAttr | string;
+      "w-autoFocus"?: WUP.Base.JSXBoolAttr;
+      "w-autoComplete"?: WUP.Base.JSXBoolAttr;
 
       /** @deprecated use [disabled] instead since related to CSS-styles */
-      "w-disabled"?: boolean | "";
+      "w-disabled"?: WUP.Base.JSXBoolAttr;
       disabled?: boolean | "";
       /** @deprecated use [readonly] instead since related to CSS-styles */
-      "w-readonly"?: boolean | "";
+      "w-readonly"?: WUP.Base.JSXBoolAttr;
       readonly?: boolean | "";
 
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */

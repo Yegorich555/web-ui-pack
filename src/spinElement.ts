@@ -23,8 +23,8 @@ declare global {
       overflowTarget: HTMLElement | "auto";
     }
     interface JSXProps extends WUP.Base.OnlyNames<Options> {
-      "w-inline"?: boolean | "";
-      "w-fit"?: boolean | "" | "auto";
+      "w-inline"?: WUP.Base.JSXBoolAttr;
+      "w-fit"?: WUP.Base.JSXBoolAttr | "auto";
       /** Virtual padding of parentElement [top, right, bottom, left] or [top/bottom, right/left] in px;
        * * Point Global reference to object with array
        * @example
@@ -34,7 +34,7 @@ declare global {
        * ```
        * @defaultValue [4,4] */
       "w-overflowOffset"?: string;
-      "w-overflowFade"?: boolean | "";
+      "w-overflowFade"?: WUP.Base.JSXBoolAttr;
       /** Anchor element that need to overflow by spinner
        * * Point querySelector to related element
        * @example

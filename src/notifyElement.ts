@@ -76,11 +76,11 @@ declare global {
       "w-placement"?: Options["placement"];
       "w-type"?: Options["type"];
       "w-autoClose"?: number | "";
-      "w-closeOnClick"?: boolean | "";
-      "w-closeOnSwipe"?: boolean | "";
-      "w-selfRemove"?: boolean | "";
-      "w-pauseOnHover"?: boolean | "";
-      "w-pauseOnWinBlur"?: boolean | "";
+      "w-closeOnClick"?: WUP.Base.JSXBoolAttr;
+      "w-closeOnSwipe"?: WUP.Base.JSXBoolAttr;
+      "w-selfRemove"?: WUP.Base.JSXBoolAttr;
+      "w-pauseOnHover"?: WUP.Base.JSXBoolAttr;
+      "w-pauseOnWinBlur"?: WUP.Base.JSXBoolAttr;
     }
   }
   interface HTMLElementTagNameMap {

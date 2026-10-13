@@ -245,7 +245,7 @@ declare global {
        * <wup-textrich w-toolbar="window.myToolbar"></wup-textrich>
        * ``` */
       "w-toolbar"?: string;
-      "w-hideHotKeysHint"?: boolean | "" | "true" | "false";
+      "w-hideHotKeysHint"?: WUP.Base.JSXBoolAttr;
     }
   }
 

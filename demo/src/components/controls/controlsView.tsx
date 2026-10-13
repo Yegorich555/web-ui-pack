@@ -69,8 +69,8 @@ export default function ControlsView() {
       details={{ tag: "wup-form", linkDemo: "demo/src/components/controls/controlsView.tsx", customHTML, customJS }}
     >
       <wup-form
-        w-autoComplete={false}
-        w-autoStore={false}
+        w-autoComplete="false"
+        w-autoStore="false"
         w-autoFocus
         disabled={false}
         readonly={false}

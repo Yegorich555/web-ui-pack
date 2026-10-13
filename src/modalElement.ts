@@ -70,11 +70,11 @@ declare global {
        * * point 'prev' to select previousSibling */
       "w-target"?: string;
       "w-placement"?: Options["placement"];
-      "w-autoFocus"?: boolean | "";
-      "w-autoClose"?: boolean | "";
-      "w-selfRemove"?: boolean | "";
-      "w-replace"?: boolean | "";
-      "w-confirmUnsaved"?: boolean | "";
+      "w-autoFocus"?: WUP.Base.JSXBoolAttr;
+      "w-autoClose"?: WUP.Base.JSXBoolAttr;
+      "w-selfRemove"?: WUP.Base.JSXBoolAttr;
+      "w-replace"?: WUP.Base.JSXBoolAttr;
+      "w-confirmUnsaved"?: WUP.Base.JSXBoolAttr;
     }
   }
   interface HTMLElement {

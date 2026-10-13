@@ -63,8 +63,8 @@ declare global {
     interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTextControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       "w-debounceMs"?: number;
-      "w-selectOnFocus"?: boolean | "";
-      "w-clearButton"?: boolean | "";
+      "w-selectOnFocus"?: WUP.Base.JSXBoolAttr;
+      "w-clearButton"?: WUP.Base.JSXBoolAttr;
       "w-mask"?: string;
       "w-maskholder"?: string | false;
       "w-prefix"?: string;

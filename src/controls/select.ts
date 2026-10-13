@@ -81,8 +81,8 @@ declare global {
        * <wup-select w-items="window.myItems"></wup-select>
        * ``` */
       "w-items"?: string;
-      "w-allowNewValue"?: boolean | "";
-      "w-multiple"?: boolean | "" | "true" | "false";
+      "w-allowNewValue"?: WUP.Base.JSXBoolAttr;
+      "w-multiple"?: WUP.Base.JSXBoolAttr;
     }
   }
 

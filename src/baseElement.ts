@@ -781,6 +781,11 @@ declare global {
     type toJSX<T> = {
       [P in keyof T]?: T[P] extends number | boolean | string | undefined ? T[P] : string;
     };
+    /** Boolean attribute: `true`, `""` & `"true"` mean `true`; point `"false"` for `false`
+     * @tutorial rules
+     * * React 19 & Preact remove attr with boolean `false` (so option falls back to $defaults); React <= 18 renders it as `"false"`
+     * * boolean `true` is rendered as `""` (React 19) or `"true"` (React <= 18, Preact) */
+    type JSXBoolAttr = true | "" | "true" | "false";
     type OnlyNames<T> = {
       // [K in keyof T]?: never;
       [K in keyof T as K extends string ? `w-${K}` : never]?: unknown; // watchfix https://github.com/microsoft/TypeScript/issues/50715

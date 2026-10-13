@@ -190,18 +190,18 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface JSXProps<C = WUPBaseControl> extends WUP.Base.OnlyNames<Options> {
       /** Default value in string/boolean/number representation (depends on `control.prototype.parse()`) */
-      "w-initValue"?: string | boolean | number;
+      "w-initValue"?: string | number | WUP.Base.JSXBoolAttr;
       "w-label"?: string;
       "w-name"?: string;
-      "w-autoFocus"?: boolean | "" | "true" | "false";
-      "w-autoComplete"?: string | boolean;
+      "w-autoFocus"?: WUP.Base.JSXBoolAttr;
+      "w-autoComplete"?: string | WUP.Base.JSXBoolAttr;
 
       /** @deprecated use [disabled] instead since related to CSS-styles */
-      "w-disabled"?: boolean | "";
+      "w-disabled"?: WUP.Base.JSXBoolAttr;
       /** Point string (reason) to show it via tooltip */
       disabled?: boolean | string;
       /** @deprecated use [readonly] instead since related to CSS-styles */
-      "w-readonly"?: boolean | "";
+      "w-readonly"?: WUP.Base.JSXBoolAttr;
       /** Point string (reason) to show it via tooltip */
       readonly?: boolean | string;
 
@@ -222,11 +222,11 @@ declare global {
        * @defaultValue null */
       "w-validations"?: string;
       "w-validateDebounceMs"?: number;
-      "w-validationShowAll"?: boolean | "";
+      "w-validationShowAll"?: WUP.Base.JSXBoolAttr;
       /** Expected 'true' for getting from w-name or another string to override default */
-      "w-storageKey"?: boolean | string;
+      "w-storageKey"?: WUP.Base.JSXBoolAttr | string;
       "w-storage"?: "local" | "session" | "url";
-      "w-enableInitOnChange"?: boolean | "";
+      "w-enableInitOnChange"?: WUP.Base.JSXBoolAttr;
       /** @readonly Use [required] for styling */
       readonly required?: "";
       /** @readonly Use [invalid] for styling */

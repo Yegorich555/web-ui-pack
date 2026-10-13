@@ -73,9 +73,9 @@ declare global {
        * <wup-checktree w-items="window.myItems"></wup-checktree>
        * ``` */
       "w-items"?: string;
-      "w-collapsible"?: boolean | "" | "true" | "false";
-      /** Point `"false"` to hide the main checkbox (React skips attr with boolean `false`) */
-      "w-checkable"?: boolean | "" | "true" | "false";
+      "w-collapsible"?: WUP.Base.JSXBoolAttr;
+      /** Point `"false"` to hide the main checkbox */
+      "w-checkable"?: WUP.Base.JSXBoolAttr;
     }
   }
 

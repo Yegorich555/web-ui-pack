@@ -74,7 +74,7 @@ declare global {
     interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       "w-openCase"?: MenuOpenCases | number;
-      "w-readOnlyInput"?: boolean | number;
+      "w-readOnlyInput"?: WUP.Base.JSXBoolAttr | number;
       /** Virtual padding of fitElement applied to popup-menu
        * @example
        * ```js
@@ -82,8 +82,8 @@ declare global {
        * <wup-select w-popupOffsetFitElement="window.offset"></wup-select>
        * ``` */
       "w-popupOffsetFitElement"?: string;
-      "w-popupMinWidthByTarget"?: boolean | "";
-      "w-menuEscRollback"?: boolean | "";
+      "w-popupMinWidthByTarget"?: WUP.Base.JSXBoolAttr;
+      "w-menuEscRollback"?: WUP.Base.JSXBoolAttr;
     }
   }
 }

@@ -79,7 +79,7 @@ declare global {
       /** Default value in strict format yyyy-MM-dd hh:mm:ss.fff */
       "w-initValue"?: string;
       "w-firstWeekDay"?: number;
-      "w-utc"?: boolean | "";
+      "w-utc"?: WUP.Base.JSXBoolAttr;
       /** Picker that must be rendered at first; if undefined & isEmpty - year, otherwise - day;
        * @tutorial
        * * point "2012" to start from year2012

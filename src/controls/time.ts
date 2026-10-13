@@ -56,7 +56,7 @@ declare global {
       "w-initValue"?: string;
       "w-format"?: WUPTimeFormat | (string & {});
       "w-step"?: number;
-      "w-menuButtonsOff"?: boolean | "";
+      "w-menuButtonsOff"?: WUP.Base.JSXBoolAttr;
       /** User can't select time less than min; format hh:mm */
       "w-min"?: string;
       /** User can't select time more than max; format hh:mm */

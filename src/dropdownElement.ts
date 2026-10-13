@@ -44,7 +44,7 @@ declare global {
     interface JSXProps {
       /** Close menu on popup click
        * @defaultValue true */
-      "w-closeOnPopupClick"?: boolean;
+      "w-closeOnPopupClick"?: WUP.Base.JSXBoolAttr;
     }
   }
 

@@ -33,8 +33,8 @@ declare global {
       postfix?: string | null | undefined;
     }
     interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      "w-hideSelected"?: boolean | "";
-      "w-sortable"?: boolean | "" | "true" | "false";
+      "w-hideSelected"?: WUP.Base.JSXBoolAttr;
+      "w-sortable"?: WUP.Base.JSXBoolAttr;
       /** @deprecated Not supported in SelectManyControl */
       "w-prefix"?: any;
       /** @deprecated Not supported in SelectManyControl */

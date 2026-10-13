@@ -6,6 +6,7 @@
 
 ### Fixes & Improvements
 
+- **Global**. Fixed TypeScript of boolean attributes for all elements & controls: `{false}` isn't allowed anymore (React 19 & Preact remove attribute with boolean `false` so option falls back to `$defaults`)
 - [TextAreaControl](src/controls/textArea.ts).
   - **BREAKING:** renamed `WUPTextareaControl` => `WUPTextAreaControl`, `WUP.Textarea` => `WUP.TextArea`, `web-ui-pack/controls/textarea` => `web-ui-pack/controls/textArea` (tag `wup-textarea` isn't changed)
   - _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-prefix`, `w-postfix`_

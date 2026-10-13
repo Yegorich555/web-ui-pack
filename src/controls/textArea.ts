@@ -23,7 +23,7 @@ declare global {
     interface JSXProps<C = WUPTextAreaControl>
       extends Omit<WUP.Text.JSXProps<C>, "w-mask" | "w-maskholder" | "w-prefix" | "w-postfix">,
         WUP.Base.OnlyNames<NewOptions> {
-      "w-hideFooter"?: boolean | "" | "true" | "false";
+      "w-hideFooter"?: WUP.Base.JSXBoolAttr;
     }
   }
 
