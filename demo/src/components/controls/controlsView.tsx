@@ -81,8 +81,19 @@ export default function ControlsView() {
             el.$onSubmit = (e) => {
               console.warn("submitted model", e.detail.model);
               console.warn("to convert model to FormData use helper: web-ui-pack/helpers/objectToFormData");
-              // eslint-disable-next-line no-promise-executor-return
-              return new Promise((resolve) => setTimeout(resolve, 1000));
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              return new Promise<WUP.Form.SubmitMessage>((resolve, _reject) =>
+                setTimeout(() => {
+                  resolve({
+                    notifyMessage: "This is success-message handles from $onSubmit<Promise<WUP.Form.SubmitMessage>>",
+                  });
+
+                  // eslint-disable-next-line prefer-promise-reject-errors
+                  // reject({
+                  //   notifyMessage: "This is fail-message handles from $onSubmit<Promise<WUP.Form.SubmitMessage>>",
+                  // });
+                }, 1000)
+              );
             };
           }
         }}
@@ -155,8 +166,17 @@ form.$onSubmit = (e) => {
   // post request here
   console.warn("submitted model", e.detail.model);
   // return promise to block form and show spinner
-  return new Promise<boolean>((resolve) => setTimeout(resolve, 1000));
-};
+  return new Promise<WUP.Form.SubmitMessage>((resolve, reject) =>
+  setTimeout(() => {
+    resolve({
+      notifyMessage: "This is success-message handles from $onSubmit<Promise<WUP.Form.SubmitMessage>>",
+    });
+
+    // eslint-disable-next-line prefer-promise-reject-errors
+    // reject({
+    //   notifyMessage: "This is fail-message handles from $onSubmit<Promise<WUP.Form.SubmitMessage>>",
+    // });
+  }, 1000)};
 
 const iFirstName = form.$controls[0] as WUPTextControl;
 iFirstName.$options.validations = { required: true };

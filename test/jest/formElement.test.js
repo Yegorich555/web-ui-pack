@@ -484,6 +484,96 @@ describe("formElement", () => {
       expect(el.$onSubmit).toBe(onSubmitOriginal);
     });
 
+    test("notify on submit result", async () => {
+      el.addEventListener("$submitEnd", $submitEvEnd);
+      const spyNotify = jest.spyOn(el, "$showNotify");
+      const getNotify = () => document.body.querySelector("wup-notify");
+      const submit = async (onSubmit, onEvent) => {
+        jest.clearAllMocks();
+        document.body.querySelectorAll("wup-notify").forEach((n) => n.remove());
+        el.$onSubmit = onSubmit;
+        onEvent && el.addEventListener("$submit", onEvent, { once: true });
+        btnSubmit.click();
+        await h.wait();
+      };
+
+      // success with message from $onSubmit
+      await submit(() => Promise.resolve({ notifyMessage: "Saved" }));
+      expect(spyNotify).toBeCalledTimes(1);
+      expect(spyNotify).lastCalledWith({ notifyMessage: "Saved" }, false);
+      expect(getNotify()).toBe(spyNotify.mock.results[0].value);
+      expect(getNotify().textContent).toBe("Saved");
+      expect(getNotify().$options.type).toBe("success");
+      expect(getNotify().$options.placement).toBe("bottom-right");
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(true);
+
+      // fail with message from $onSubmit
+      await submit(() => Promise.reject({ notifyMessage: "Oops" })); // eslint-disable-line prefer-promise-reject-errors
+      expect(spyNotify).toBeCalledTimes(1);
+      expect(spyNotify).lastCalledWith({ notifyMessage: "Oops" }, true);
+      expect(getNotify().textContent).toBe("Oops");
+      expect(getNotify().$options.type).toBe("error");
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(false);
+
+      // notifyMessage: true => default messages
+      await submit(() => Promise.resolve({ notifyMessage: true }));
+      expect(getNotify().textContent).toBe("Successful");
+      expect(getNotify().$options.type).toBe("success");
+      await submit(() => Promise.reject({ notifyMessage: true })); // eslint-disable-line prefer-promise-reject-errors
+      expect(getNotify().textContent).toBe("Failed");
+      expect(getNotify().$options.type).toBe("error");
+
+      // custom type
+      await submit(() => Promise.resolve({ notifyMessage: "Saved partially", type: "warning" }));
+      expect(getNotify().$options.type).toBe("warning");
+      await submit(() => Promise.reject({ notifyMessage: "Server is busy", type: "info" })); // eslint-disable-line prefer-promise-reject-errors
+      expect(getNotify().$options.type).toBe("info");
+
+      // message from e.detail.waitFor
+      await submit(undefined, (e) => (e.detail.waitFor = Promise.resolve({ notifyMessage: "From waitFor" })));
+      expect(spyNotify).lastCalledWith({ notifyMessage: "From waitFor" }, false);
+      expect(getNotify().textContent).toBe("From waitFor");
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(true);
+      // eslint-disable-next-line prefer-promise-reject-errors
+      await submit(undefined, (e) => (e.detail.waitFor = Promise.reject({ notifyMessage: "Fail from waitFor" })));
+      expect(spyNotify).lastCalledWith({ notifyMessage: "Fail from waitFor" }, true);
+      expect(getNotify().textContent).toBe("Fail from waitFor");
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(false);
+
+      // message from $onSubmit has priority over waitFor
+      await submit(
+        () => Promise.resolve({ notifyMessage: "From callback" }),
+        (e) => (e.detail.waitFor = Promise.resolve({ notifyMessage: "From waitFor" }))
+      );
+      expect(spyNotify).toBeCalledTimes(1);
+      expect(getNotify().textContent).toBe("From callback");
+
+      // no message => no notify
+      for (const v of [undefined, null, false, "", { notifyMessage: "" }, { notifyMessage: null }, { notifyMessage: false }]) {
+        await submit(() => Promise.resolve(v));
+        expect(spyNotify).not.toBeCalled();
+        expect(getNotify()).toBeNull();
+        expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(true);
+
+        await submit(() => Promise.reject(v));
+        expect(spyNotify).not.toBeCalled();
+        expect(getNotify()).toBeNull();
+        expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(false);
+      }
+      await submit(() => {}); // sync callback
+      expect(spyNotify).not.toBeCalled();
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(true);
+      await submit(() => Promise.reject(new Error("test reject")));
+      expect(spyNotify).not.toBeCalled();
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(false);
+
+      // $showNotify can be overridden
+      spyNotify.mockImplementation(() => null);
+      await submit(() => Promise.resolve({ notifyMessage: "Saved" }));
+      expect(spyNotify).toBeCalledTimes(1);
+      expect(getNotify()).toBeNull();
+    });
+
     test("prevent submit", async () => {
       el.addEventListener("$submit", $submitEv);
       const prevFn = (e) => e.preventDefault();

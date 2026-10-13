@@ -23,6 +23,7 @@
   - _Option **autoClose** less than `100` throws error_
 - [TimeControl](src/controls/time.ts). Improved quality of icon
 - [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
+
   - toggle button (direct child `wup-dropdown > button`) has neutral style: inherited font & color, no background, chevron icon at the right (rotated when menu is opened), hover/focus background via css-vars `--icon-hover-bg` & `--icon-focus-bg`
   - buttons inside menu aren't styled anymore (it's custom content)`
   - to restore previous styles add the following code once after `WUPDropdownElement.$use()`
@@ -57,6 +58,7 @@
   - Added option **type** (`info`, `success`, `warning`, `error`; attribute `[w-type]`): icon at the left side, background, text & progress bar in colors of the type (css-vars `--notify-{type}` for icon & progress, `--notify-{type}-bg`, `--notify-{type}-text`)
 - helper [onSwipe](src/helpers/onSwipe.ts)
 - [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts). Added customization of menu via HTML: place `<ul>` with items inside the control; `<li>` elements are bound to **$options.items** by index (see example in JSDoc & demo)
+- [Form](src/formElement.ts). Added notification for submit result (return `{notifyMessage: 'Success', type: "success"}` in $onSubmit Promise result/error to show wup-notify)
 
 ---
 

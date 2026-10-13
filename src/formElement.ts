@@ -1,6 +1,9 @@
 import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
+import WUPNotifyElement from "./notifyElement";
+
+WUPNotifyElement.$use();
 
 export const enum SubmitActions {
   /** Disable any action */
@@ -24,6 +27,12 @@ export const enum SubmitActions {
 const tagName = "wup-form";
 declare global {
   namespace WUP.Form {
+    interface SubmitMessage {
+      /** By default type is defined based on Promise, Promise.then - success, Promise.catch - fail */
+      type?: WUP.Notify.Options["type"];
+      /** Point to show success result in <wup-notify>, point bool to show default value "Successful" & "Failed" */
+      notifyMessage: string | boolean | null | undefined;
+    }
     interface SubmitDetails {
       /** Model collected from controls */
       model: Record<string | number, any>;
@@ -34,7 +43,7 @@ declare global {
       /** Element that produced submit event */
       submitter: HTMLElement | null;
       /** Point a promise as callback to allow form show pending state during the promise */
-      waitFor?: Promise<unknown>;
+      waitFor?: Promise<unknown | SubmitMessage>;
     }
 
     interface EventMap extends WUP.Base.EventMap {
@@ -247,6 +256,15 @@ export default class WUPFormElement<
     return prevModel;
   }
 
+  /** Change this to override styles/behavior of notify */
+  $showNotify(msg: WUP.Form.SubmitMessage, isFail: boolean): WUPNotifyElement {
+    return WUPNotifyElement.$show({
+      // eslint-disable-next-line no-nested-ternary
+      textContent: msg.notifyMessage === true ? (isFail ? "Failed" : "Successful") : (msg.notifyMessage as string),
+      defaults: { type: msg.type || (isFail ? "error" : "success"), placement: "bottom-right" },
+    });
+  }
+
   static get observedAttributes(): Array<string> {
     const a = super.observedAttributes;
     a.push("disabled", "readonly"); // support for `readonly` & `w-readonly`
@@ -274,7 +292,7 @@ export default class WUPFormElement<
    * @tutorial
    * * need to return promise to lock form and show spinner on http-request
    * * call `e.preventDefault()` to prevent dispatching `$submitEnd` & closing modal (if form in modal) */
-  $onSubmit?: (ev: WUP.Form.EventMap["$submit"]) => void | Promise<unknown>;
+  $onSubmit?: (ev: WUP.Form.EventMap["$submit"]) => void | Promise<unknown | WUP.Form.SubmitMessage>;
   /** Fires when submit is end (after http-response);
    * @tutorial
    * call `e.preventDefault()` to prevent closing modal (if form in modal) */
@@ -516,13 +534,22 @@ export default class WUPFormElement<
 
       let success = false;
       promiseWait(Promise.all([p1, ev.detail.waitFor]), 300, (v: boolean) => this.changePending(v))
-        .then(() => {
+        .then((arr) => {
           this._opts.autoStore && this.storageSave(null); // clear storage after submit
           if (needReset) {
             arrCtrl.forEach((v) => (v.$isDirty = false));
             this.$initModel = this.$model;
           }
           success = true;
+          if ((arr[0] as WUP.Form.SubmitMessage | undefined)?.notifyMessage) {
+            this.$showNotify(arr[0] as WUP.Form.SubmitMessage, false);
+          } else if ((arr[1] as WUP.Form.SubmitMessage | undefined)?.notifyMessage) {
+            this.$showNotify(arr[1] as WUP.Form.SubmitMessage, false);
+          }
+        })
+        .catch((err) => {
+          (err as WUP.Form.SubmitMessage | undefined)?.notifyMessage &&
+            this.$showNotify(err as WUP.Form.SubmitMessage, true);
         })
         .finally(() => {
           !ev.defaultPrevented &&
@@ -715,5 +742,4 @@ export default class WUPFormElement<
 
 customElements.define(tagName, WUPFormElement);
 
-// todo show success/error result in <wup-alert> at the left/right angle + add autoSubmit option + check autoSubmit on exit + check how it works on unmounted controls
-// Notify: add Ctrl+Z hook ???
+// todo autoSubmit option + autoSubmit on exit (preven exit till end) + check how it works on unmounted controls + add Ctrl+Z hook ???
