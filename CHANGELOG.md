@@ -20,6 +20,7 @@
   - _Repeated pause (ex. hover + window blur) shortens time left before closing_
   - _Changing options of opened element is ignored (`$options.placement` removes position styles)_
   - _Progress bar is scrolled with overflowed content_
+  - _Long words without spaces (urls etc.) aren't wrapped & overflow the element_
   - _Option **autoClose** less than `100` throws error_
 - [TimeControl](src/controls/time.ts). Improved quality of icon
 - [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
