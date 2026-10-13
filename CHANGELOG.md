@@ -53,6 +53,7 @@
   - Added option **id** to `WUPNotifyElement.$show(...)`: if notification with the same id exists then it's refreshed (content & options updated, closing-time restarted) instead of showing new one; closing (or closed but not removed) one is re-opened
   - Added option **closeOnSwipe** (`true` by default): on touch devices element follows the horizontal swipe & closes when it's swiped out (like messages in popular mobile apps)
   - Progress bar is mirrored for right placements (shrinks to the right side)
+  - Added option **type** (`info`, `success`, `warning`, `error`; attribute `[w-type]`): icon at the left side, background, text & progress bar in colors of the type (css-vars `--notify-{type}` for icon & progress, `--notify-{type}-bg`, `--notify-{type}-text`)
 - helper [onSwipe](src/helpers/onSwipe.ts)
 - [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts). Added customization of menu via HTML: place `<ul>` with items inside the control; `<li>` elements are bound to **$options.items** by index (see example in JSDoc & demo)
 

@@ -73,6 +73,7 @@ describe("notifyElement", () => {
   h.baseTestComponent(() => document.createElement("wup-notify"), {
     attrs: {
       "w-placement": { value: "bottom-left", skip: true }, // it's also rendered attr (see test "options changes on opened")
+      "w-type": { value: "error" },
       "w-autoclose": { value: 3000 },
       "w-closeonclick": { value: true },
       "w-closeonswipe": { value: true },
@@ -298,6 +299,49 @@ describe("notifyElement", () => {
     const el4 = await initNotify(`w-placement="top-middle" w-autoclose="0"`);
     expect(el4.getAttribute("w-placement")).toBe("top-middle");
     expect(el4.getAttribute("role")).toBe("alert");
+  });
+
+  test("option: type", async () => {
+    // default: without type
+    await h.wait();
+    expect(el.$options.type).toBe("");
+    expect(el.hasAttribute("w-type")).toBe(false);
+
+    // attr is parsed to option & rendered back
+    const el2 = await initNotify(`w-type="success" w-autoclose="0" w-selfremove="false"`);
+    expect(el2.$options.type).toBe("success");
+    expect(el2.outerHTML).toMatchInlineSnapshot(
+      `"<wup-notify w-type="success" w-autoclose="0" w-selfremove="false" open="" role="alert" w-placement="bottom-left" show=""><button type="button" aria-label="close" wup-icon="" close=""></button>Some text</wup-notify>"`
+    );
+    el2.setAttribute("w-type", "warning");
+    await h.wait(1);
+    expect(el2.$options.type).toBe("warning");
+    expect(el2.getAttribute("w-type")).toBe("warning");
+
+    // removing attr: rollback to default
+    el2.removeAttribute("w-type");
+    await h.wait(1);
+    expect(el2.$options.type).toBe("");
+    expect(el2.hasAttribute("w-type")).toBe(false);
+
+    // changing option on opened: attr is rendered
+    el2.$options.type = "error";
+    await h.wait(1);
+    expect(el2.getAttribute("w-type")).toBe("error");
+    el2.$options.type = "info";
+    await h.wait(1);
+    expect(el2.getAttribute("w-type")).toBe("info");
+    el2.$options.type = "";
+    await h.wait(1);
+    expect(el2.hasAttribute("w-type")).toBe(false);
+
+    // via $show
+    el2.remove();
+    const n = WUPNotifyElement.$show({ textContent: "Saved", defaults: { type: "success", autoClose: 0 } });
+    await h.wait();
+    expect(n.getAttribute("w-type")).toBe("success");
+    n.$close();
+    await h.wait();
   });
 
   test("option: openCase", async () => {

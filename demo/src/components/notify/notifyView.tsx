@@ -2,6 +2,7 @@ import Page from "src/elements/page";
 import WUPNotifyElement from "web-ui-pack/notifyElement";
 import Example1 from "./example1";
 import Example2 from "./example2";
+import Example3 from "./example3";
 
 WUPNotifyElement.$use();
 
@@ -17,6 +18,7 @@ export default function NotifyView() {
           `html
 <wup-notify
   w-placement="bottom-left"
+  w-type=""
   w-autoclose="5000"
   w-pauseonhover="true"
   w-selfremove="true"
@@ -35,6 +37,7 @@ export default function NotifyView() {
         "WARNING: this EXPERIMENTAL element that means hasn't been covered 100% tests yet",
         "Built-in styles & animation",
         "Notifications placed in stack",
+        "Different types with icons: info, success, warning, error",
         "Close via swipe on touch devices (like messages in popular mobile apps)",
         "Easy to use. Add to HTML or just call WUPNotifyElement.$show({textContent: 'Some text'}, ...)",
         "JS Native. Possible to use with any UI framerworks",
@@ -43,6 +46,7 @@ export default function NotifyView() {
     >
       <Example1 />
       <Example2 />
+      <Example3 />
     </Page>
   );
 }

@@ -48,6 +48,9 @@ declare global {
       /** Position on the screen
        * @defaultValue 'bottom-left' */
       placement: "top-left" | "top-middle" | "top-right" | "bottom-left" | "bottom-middle" | "bottom-right";
+      /** Type of message: defines icon & colors (rendered as attribute [w-type] for styling)
+       * @defaultValue '' (without icon) */
+      type: "" | "info" | "success" | "warning" | "error";
       /** Time (ms) after that Notify is closed; if provide `0` then it will be closed only by click event
        *  @defaultValue 5000 (ms) */
       autoClose: number | null | false;
@@ -71,6 +74,7 @@ declare global {
     interface EventMap extends WUP.BaseModal.EventMap<NotifyOpenCases, NotifyCloseCases> {}
     interface JSXProps extends WUP.BaseModal.JSXProps, WUP.Base.OnlyNames<Options> {
       "w-placement"?: Options["placement"];
+      "w-type"?: Options["type"];
       "w-autoClose"?: number | "";
       "w-closeOnClick"?: boolean | "";
       "w-closeOnSwipe"?: boolean | "";
@@ -144,6 +148,7 @@ export default class WUPNotifyElement<
   static $defaults: WUP.Notify.Options = {
     openCase: NotifyOpenCases.onInit,
     placement: "bottom-left",
+    type: "",
     autoClose: 5000,
     closeOnClick: false,
     closeOnSwipe: true,
@@ -226,8 +231,9 @@ export default class WUPNotifyElement<
     }
     this.setAttribute("role", "alert");
     this.#placement = this._opts.placement;
-    this._isStopChanges = true; // otherwise attribute is parsed back to options & triggers gotChanges (refreshing)
+    this._isStopChanges = true; // otherwise attributes are parsed back to options & trigger gotChanges (refreshing)
     this.setAttribute("w-placement", this.#placement);
+    this.setAttr("w-type", this._opts.type);
     this._isStopChanges = false;
 
     // init button[close]: click is handled by gotClick

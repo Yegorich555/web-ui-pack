@@ -6,6 +6,25 @@
   --notify-bg: rgba(16, 70, 82, 0.9);
   --notify-shadow: #0003;
   --notify-progress: #009fbc;
+  --notify-icon-size: 24px;
+  // types: icon & progress, background, text
+  --notify-info: #0dcaf0;
+  --notify-info-bg: #cff4fc;
+  --notify-info-text: #055160;
+  --notify-success: #008c45;
+  --notify-success-bg: #cff1dd;
+  --notify-success-text: #008c45;
+  --notify-warning: #ffc107;
+  --notify-warning-bg: #fff3cd;
+  --notify-warning-text: #664d03;
+  --notify-error: #ee4e4e;
+  --notify-error-bg: #fce3e5;
+  --notify-error-text: #58151c;
+  // icons from https://github.com/fkhadra/react-toastify (MIT)
+  --wup-icon-info: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0a12 12 0 1012 12A12.013 12.013 0 0012 0m.25 5a1.5 1.5 0 11-1.5 1.5 1.5 1.5 0 011.5-1.5m2.25 13.5h-4a1 1 0 010-2h.75a.25.25 0 00.25-.25v-4.5a.25.25 0 00-.25-.25h-.75a1 1 0 010-2h1a2 2 0 012 2v4.75a.25.25 0 00.25.25h.75a1 1 0 110 2'/%3E%3C/svg%3E");
+  --wup-icon-success: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0a12 12 0 1012 12A12.014 12.014 0 0012 0m6.927 8.2-6.845 9.289a1.01 1.01 0 01-1.43.188l-4.888-3.908a1 1 0 111.25-1.562l4.076 3.261 6.227-8.451a1 1 0 111.61 1.183'/%3E%3C/svg%3E");
+  --wup-icon-warning: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M23.32 17.191 15.438 2.184C14.728.833 13.416 0 11.996 0S9.263.833 8.553 2.184L.533 17.448a4.74 4.74 0 000 4.368C1.243 23.167 2.555 24 3.975 24h16.05C22.22 24 24 22.044 24 19.632a4.64 4.64 0 00-.68-2.44zm-9.622 1.46c0 1.033-.724 1.823-1.698 1.823s-1.698-.79-1.698-1.822v-.043c0-1.028.724-1.822 1.698-1.822s1.698.79 1.698 1.822v.043zm.039-12.285-.84 8.06c-.057.581-.408.943-.897.943s-.84-.367-.896-.942l-.84-8.065c-.057-.624.25-1.095.779-1.095h1.91c.528.005.84.476.784 1.1z'/%3E%3C/svg%3E");
+  --wup-icon-error: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M11.983 0a12.2 12.2 0 00-8.51 3.653A11.8 11.8 0 000 12.207 11.78 11.78 0 0011.8 24h.214A12.11 12.11 0 0024 11.791 11.766 11.766 0 0011.983 0M10.5 16.542a1.476 1.476 0 011.449-1.53h.027a1.527 1.527 0 011.523 1.47 1.475 1.475 0 01-1.449 1.53h-.027a1.53 1.53 0 01-1.523-1.47M11 12.5v-6a1 1 0 012 0v6a1 1 0 11-2 0'/%3E%3C/svg%3E");
 
   [wupdark] {
     --notify-text: #d8d8d8;
@@ -18,6 +37,7 @@
   z-index: 9010;
   min-height: 64px;
   max-height: 80vh;
+  align-content: safe center; // short content is centered vertically (the same as icon)
   width: var(--notify-w);
   max-width: 80vw;
   margin: var(--notify-margin);
@@ -99,5 +119,41 @@
 
   &[w-placement$="-right"] > [progress] {
     transform-origin: right; // mirror: shrinks to the attached side
+  }
+
+  @each $t in (info, success, warning, error) {
+    &[w-type="#{$t}"] {
+      --notify-type: var(--notify-#{$t});
+      --notify-type-img: var(--wup-icon-#{$t});
+      --notify-bg: var(--notify-#{$t}-bg);
+      --notify-text: var(--notify-#{$t}-text);
+    }
+  }
+
+  // type: icon at the left side (absolute: content can be any) & progress bar in the same color
+  &[w-type] {
+    --notify-progress: var(--notify-type);
+    --notify-pl: calc(1.5 * var(--base-margin) + var(--notify-icon-size));
+    padding-left: var(--notify-pl);
+
+    &:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: var(--base-margin);
+      width: var(--notify-icon-size);
+      background: var(--notify-type);
+      /* stylelint-disable plugin/no-unsupported-browser-features */
+      mask-image: var(--notify-type-img);
+      mask-size: var(--notify-icon-size);
+      mask-repeat: no-repeat;
+      mask-position: center; // vertically centered
+      /* stylelint-enable plugin/no-unsupported-browser-features */
+    }
+
+    > [progress] {
+      margin-left: calc(-1 * var(--notify-pl)); // fit the padding of :host
+    }
   }
 }
