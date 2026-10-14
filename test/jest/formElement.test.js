@@ -50,6 +50,7 @@ describe("formElement", () => {
       "w-autocomplete": { value: true },
       "w-autofocus": { value: true },
       "w-autostore": { value: true },
+      "w-autosubmit": { value: 500 },
       disabled: { value: true, equalValue: "" },
       "w-disabled": { value: true, equalValue: "", skip: true },
       readonly: { value: true, equalValue: "" },
@@ -1051,6 +1052,199 @@ describe("formElement", () => {
       // storage contains valid model but no matched controls
       window.localStorage.setItem("customKey", '{"missedControl":"Mrs"}');
       expect(el.storageGet()).toBe(null);
+    });
+
+    test("option 'autoSubmit'", async () => {
+      const onSubmit = jest.fn();
+      el.$onSubmit = onSubmit;
+      const spyNotify = jest.spyOn(el, "$showNotify");
+      const type = (i, text) => h.userTypeText(inputs[i].$refInput, text);
+      const lastModel = () => onSubmit.mock.lastCall[0].detail.model;
+
+      // works only if form has no submit button
+      expect(el.$options.autoSubmit).toBe(3000);
+      await type(0, "a@b.c");
+      await h.wait(5000);
+      expect(onSubmit).not.toBeCalled();
+      btnSubmit.remove();
+
+      // point false to disable
+      el.$options.autoSubmit = false;
+      await type(0, "a@b.c");
+      await h.wait(5000);
+      expect(onSubmit).not.toBeCalled();
+
+      // attribute: empty means `true`
+      el.setAttribute("w-autosubmit", "");
+      await h.wait(1);
+      expect(el.$options.autoSubmit).toBe(true);
+      el.setAttribute("w-autosubmit", "true");
+      await h.wait(1);
+      expect(el.$options.autoSubmit).toBe(true);
+      el.setAttribute("w-autosubmit", "false");
+      await h.wait(1);
+      expect(el.$options.autoSubmit).toBe(false);
+
+      // true: submit in 3000ms after the last change
+      el.$options.autoSubmit = true;
+      await type(1, "Mi");
+      await h.wait(2000);
+      await type(1, "Mike"); // debounce is restarted
+      await h.wait(2950);
+      expect(onSubmit).not.toBeCalled();
+      await h.wait(100);
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(lastModel()).toEqual({ email: "a@b.c", firstName: "Mike" });
+      expect(onSubmit.mock.lastCall[0].detail.submitter).toBe(inputs[1]);
+      expect(onSubmit.mock.lastCall[0].detail.relatedEvent.type).toBe("$change");
+      await h.wait(5000);
+      expect(onSubmit).toBeCalledTimes(1);
+      // with success notification: otherwise user doesn't see the result
+      expect(spyNotify).toBeCalledTimes(1);
+      expect(spyNotify).lastCalledWith({ notifyMessage: true }, false);
+      expect(document.body.querySelector("wup-notify").textContent).toBe("Successful");
+
+      // number: debounce in ms
+      onSubmit.mockClear();
+      el.$options.autoSubmit = 500;
+      await type(0, "b@b.c");
+      await h.wait(450);
+      expect(onSubmit).not.toBeCalled();
+      await h.wait(100);
+      expect(onSubmit).toBeCalledTimes(1);
+
+      // skip programmatic changes, controls without name & other elements
+      onSubmit.mockClear();
+      inputs[0].$value = "c@b.c";
+      await type(2, "without name");
+      el.appendChild(document.createElement("div")).dispatchEvent(
+        new CustomEvent("$change", { bubbles: true, detail: { reason: 3 } })
+      );
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
+
+      // any other submit cancels waiting auto-submit
+      await type(0, "d@b.c");
+      el.$submit();
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+
+      // disabled during the waiting
+      onSubmit.mockClear();
+      await type(0, "e@b.c");
+      el.$options.autoSubmit = false;
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
+
+      // form is validated silently: without showing errors & focusing invalid control
+      el.$options.autoSubmit = 500;
+      inputs[1].$options.validations = { required: true };
+      inputs[1].$value = "";
+      await type(0, "f@b.c");
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
+      expect(inputs[1].$refError).toBeFalsy();
+      expect(document.activeElement).toBe(inputs[0].$refInput);
+      await type(1, "Kate");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(lastModel()).toEqual({ email: "f@b.c", firstName: "Kate" });
+
+      // invisible & readonly controls are skipped like on submit (when form is visible)
+      onSubmit.mockClear();
+      inputs[1].$value = "";
+      h.setupLayout(el, { h: 100, w: 100, x: 1, y: 1 });
+      jest.spyOn(inputs[1], "offsetHeight", "get").mockReturnValue(0);
+      await type(0, "g@b.c");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      // but they are validated when form is hidden or removed (visibility of controls is unknown)
+      jest.spyOn(el, "offsetHeight", "get").mockReturnValue(0);
+      await type(0, "gg@b.c");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      jest.spyOn(el, "offsetHeight", "get").mockReturnValue(100);
+      jest.spyOn(inputs[1], "offsetHeight", "get").mockReturnValue(20);
+      inputs[1].$options.readOnly = true;
+      await type(0, "h@b.c");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(2);
+      // all controls are validated without SubmitActions.validateChangeable
+      onSubmit.mockClear();
+      el.$options.submitActions = SubmitActions.none;
+      await type(0, "i@b.c");
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
+      el.$options.submitActions = WUPFormElement.$defaults.submitActions;
+      inputs[1].$options.readOnly = false;
+      inputs[1].$value = "Kate";
+
+      // it isn't locked by the pending state of previous submit: otherwise changes are lost
+      onSubmit.mockClear();
+      onSubmit.mockImplementation(() => new Promise((res) => setTimeout(res, 2000)));
+      await type(0, "j@b.c");
+      await h.wait(500); // auto-submit is started here
+      expect(onSubmit).toBeCalledTimes(1);
+      await type(1, "Kitty"); // changed before the form is locked by the pending state (300ms)
+      await h.wait(1000);
+      expect(el.$isPending).toBe(true);
+      expect(onSubmit).toBeCalledTimes(2);
+      expect(lastModel()).toEqual({ email: "j@b.c", firstName: "Kitty" });
+      await h.wait(3000); // wait for the end of submits
+      expect(el.$isPending).toBe(false);
+      onSubmit.mockReset();
+
+      // message from $onSubmit has priority over default notification
+      spyNotify.mockClear();
+      onSubmit.mockImplementationOnce(() => Promise.resolve({ notifyMessage: "Saved" }));
+      await type(0, "l@b.c");
+      await h.wait(1000);
+      expect(spyNotify).lastCalledWith({ notifyMessage: "Saved" }, false);
+
+      // browser exit: waiting auto-submit is fired at once & browser asks to stay till the end of submit
+      const exit = () => {
+        const ev = new Event("beforeunload", { cancelable: true });
+        window.dispatchEvent(ev);
+        return ev.defaultPrevented;
+      };
+      expect(exit()).toBe(false); // nothing to wait
+      onSubmit.mockClear();
+      onSubmit.mockImplementation(() => new Promise((res) => setTimeout(res, 1000)));
+      await type(0, "o@b.c");
+      expect(exit()).toBe(true);
+      expect(onSubmit).toBeCalledTimes(1); // at once: page is paused while browser asks user
+      expect(lastModel()).toEqual({ email: "o@b.c", firstName: "Kitty" });
+      await h.wait(500);
+      expect(el.$isPending).toBe(true);
+      expect(exit()).toBe(true); // till the end of submit
+      await h.wait(1000);
+      expect(el.$isPending).toBe(false);
+      expect(exit()).toBe(false);
+      expect(onSubmit).toBeCalledTimes(1);
+      onSubmit.mockReset();
+
+      // removed form: waiting auto-submit is fired at once with the whole model
+      onSubmit.mockClear();
+      await type(0, "m@b.c");
+      el.remove();
+      await h.wait(1);
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(lastModel()).toEqual({ email: "m@b.c", firstName: "Kitty" });
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(exit()).toBe(false); // listener is removed with the form
+      // but only if it's valid
+      onSubmit.mockClear();
+      document.body.appendChild(el);
+      await h.wait(1);
+      inputs[1].$value = "";
+      await type(0, "n@b.c");
+      expect(exit()).toBe(true); // listener is added again: changes aren't saved because form is invalid
+      expect(onSubmit).not.toBeCalled();
+      await type(0, "nn@b.c");
+      el.remove();
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
     });
   });
 

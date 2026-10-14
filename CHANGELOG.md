@@ -59,7 +59,9 @@
   - Added option **type** (`info`, `success`, `warning`, `error`; attribute `[w-type]`): icon at the left side, background, text & progress bar in colors of the type (css-vars `--notify-{type}` for icon & progress, `--notify-{type}-bg`, `--notify-{type}-text`)
 - helper [onSwipe](src/helpers/onSwipe.ts)
 - [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts). Added customization of menu via HTML: place `<ul>` with items inside the control; `<li>` elements are bound to **$options.items** by index (see example in JSDoc & demo)
-- [Form](src/formElement.ts). Added notification for submit result (return `{notifyMessage: 'Success', type: "success"}` in $onSubmit Promise result/error to show wup-notify)
+- [Form](src/formElement.ts)
+  - Added notification for submit result (return `{notifyMessage: 'Success', type: "success"}` in $onSubmit Promise result/error to show wup-notify)
+  - Added option **autoSubmit** (attribute `[w-autosubmit]`): form without submit button is submitted automatically in pointed ms after the last change made by user (if it's valid; errors aren't shown) & success result is shown via wup-notify. On browser exit (closing tab, reload) waiting changes are submitted at once & browser asks user to stay till the end of submit. **BREAKING:** enabled by default (`3000`ms), point `false` to disable
 
 ---
 

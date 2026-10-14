@@ -105,4 +105,6 @@ HTMLElement.prototype.dispatchEvent = function dispatchEventFix(/** @type Event 
 };
 
 Element.prototype.scrollIntoView ||= () => {};
+// Web Animations API isn't implemented in jsdom: it's required for wup-notify (form shows it on submit)
+Element.prototype.animate ||= () => ({ play: () => {}, pause: () => {}, cancel: () => {} });
 InputEvent.prototype.getTargetRanges ||= () => []; // browser returns [] for synthetic events

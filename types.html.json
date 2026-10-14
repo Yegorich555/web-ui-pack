@@ -995,6 +995,18 @@
           "description": "Enable to store data in localStorage to prevent losing till submitted"
         },
         {
+          "name": "w-autosubmit",
+          "description": "Submit form automatically in pointed ms after the last change made by user (only if form has no submit button); `true` means 3000ms, `false` disables \n\r  @defaultValue 3000",
+          "values": [
+            {
+              "name": "false"
+            },
+            {
+              "name": "3000"
+            }
+          ]
+        },
+        {
           "name": "w-autofocus",
           "description": "Focus first possible element when it's appended to layout"
         },

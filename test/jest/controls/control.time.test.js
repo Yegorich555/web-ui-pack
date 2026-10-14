@@ -369,6 +369,7 @@ describe("control.time", () => {
 
   test("menu", async () => {
     const form = document.body.appendChild(document.createElement("wup-form"));
+    form.$options.autoSubmit = false; // otherwise pending state of auto-submit (readonly form) closes the menu
     form.appendChild(el);
     const onSubmit = jest.fn();
     form.$onSubmit = onSubmit;

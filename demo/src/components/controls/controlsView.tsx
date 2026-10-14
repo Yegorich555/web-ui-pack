@@ -65,12 +65,16 @@ export default function ControlsView() {
         <>
           Option <b>autoStore</b> prevents losing not-sumbitted data
         </>,
+        <>
+          Option <b>autoSubmit</b> submits changes automatically (debounced) without submit button
+        </>,
       ]}
       details={{ tag: "wup-form", linkDemo: "demo/src/components/controls/controlsView.tsx", customHTML, customJS }}
     >
       <wup-form
         w-autoComplete="false"
         w-autoStore="false"
+        w-autoSubmit={3000}
         w-autoFocus
         disabled={false}
         readonly={false}
@@ -138,6 +142,27 @@ export default function ControlsView() {
         <wup-textrich w-name="textRich" />
         <button type="submit">Submit (see result into browser console)</button>
       </wup-form>
+      <section>
+        <h3>Auto-submit</h3>
+        <small>
+          Changes are submitted in 1000ms after the last one (<b>w-autoSubmit="1000"</b>). Without submit button the
+          result is shown via notification
+        </small>
+        <wup-form
+          w-autoSubmit={1000}
+          ref={(el) => {
+            if (el) {
+              el.$onSubmit = (e) => {
+                console.warn("auto-submitted model", e.detail.model);
+                return new Promise((resolve) => setTimeout(resolve, 500));
+              };
+            }
+          }}
+        >
+          <wup-switch w-name="notifications" w-label="Email notifications" />
+          <wup-text w-name="nickname" />
+        </wup-form>
+      </section>
     </Page>
   );
 }
@@ -147,6 +172,7 @@ const customHTML = [
 <wup-form
   w-autocomplete="false"
   w-autostore="false"
+  w-autosubmit="3000"
   w-autofocus="false"
   readonly="false"
   disabled="false"
