@@ -18,7 +18,7 @@ export const enum SubmitActions {
   validateChangeable = 1 << 2,
   /** Collect to model only changed values */
   collectChanged = 1 << 3,
-  /** Reset isDirty and assign $value to $initValue for controls (on success only) */
+  /** Reset isDirty and assign submitted $value to $initValue for controls (on success only) */
   reset = 1 << 4,
   /** Lock the whole form during the pending state (set $isPending = true or provide `promise` to submitEvent.waitFor);
    * Otherwise user can submit several times in a short time;
@@ -97,6 +97,7 @@ declare global {
        * * works only if form has no submit button (`[type=submit]`)
        * * only changes made by user are handled (changes via `control.$value`, `form.$model`, storage etc. are skipped)
        * * form is validated silently: if it's invalid submit is skipped without showing errors & scrolling to invalid control
+       * * it's skipped if user changed values back: compared with submitted values (it's `$initValue` via `SubmitActions.reset`)
        * * when form is removed (unmounted) waiting auto-submit is fired at once otherwise changes are lost
        * * on browser exit (closing tab, reload, navigation to another site) waiting auto-submit is fired at once
        *   and browser asks user to stay ("Leave site?") while submit isn't finished (custom text isn't possible)
@@ -478,6 +479,11 @@ export default class WUPFormElement<
     // current submit includes changes that auto-submit waits for
     clearTimeout(this.#autoSubmitT);
     this.#autoSubmitEv = undefined;
+    // reject auto-submit if user changed values back: submitted values are $initValue (via SubmitActions.reset)
+    // WARN: during the pending state $initValue isn't updated yet
+    if (isAuto && this._opts.submitActions & SubmitActions.reset && !this.$isPending && !this.$isChanged) {
+      return;
+    }
 
     const willEv = this.fireEvent("$willSubmit", {
       bubbles: true,
@@ -529,6 +535,7 @@ export default class WUPFormElement<
     const m = this.#ctr.$modelFromControls({}, arrCtrl, "$value", !!onlyChanged);
     // fire events
     const needReset = this._opts.submitActions & SubmitActions.reset;
+    const submitted = { ...this.$model }; // copy: otherwise values changed during the pending state are considered as submitted
     const fire = (): void => {
       let p1: Promise<void> | unknown;
       const orig = this.$onSubmit;
@@ -564,7 +571,7 @@ export default class WUPFormElement<
           this._opts.autoStore && this.storageSave(null); // clear storage after submit
           if (needReset) {
             arrCtrl.forEach((v) => (v.$isDirty = false));
-            this.$initModel = this.$model;
+            this.$initModel = submitted;
           }
           success = true;
           if ((arr[0] as WUP.Form.SubmitMessage | undefined)?.notifyMessage) {
@@ -610,7 +617,7 @@ export default class WUPFormElement<
           (ev) => {
             const w = this.#autoSubmitEv; // submit at once otherwise changes are lost
             w && this._opts.autoSubmit && this.gotSubmit(w, w.target as HTMLElement);
-            (w || this.$isPending) && ev.preventDefault(); // browser asks user to stay till the end of submit
+            ((w && this.$isChanged) || this.$isPending) && ev.preventDefault(); // browser asks user to stay till the end of submit
           },
           { passive: false }
         );

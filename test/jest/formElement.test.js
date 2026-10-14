@@ -1113,6 +1113,22 @@ describe("formElement", () => {
       await h.wait(100);
       expect(onSubmit).toBeCalledTimes(1);
 
+      // rejected when user changed value back: it's compared with submitted values
+      onSubmit.mockClear();
+      await h.wait(1000); // end of submit: jsdom sets pending state even for resolved promise (timers & promises order)
+      expect(inputs[0].$initValue).toBe("b@b.c");
+      await type(0, "bb@b.c");
+      await type(0, "b@b.c");
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
+      // without SubmitActions.reset submitted values aren't stored: so it isn't rejected
+      el.$options.submitActions = SubmitActions.none;
+      await type(0, "bb@b.c");
+      await type(0, "b@b.c");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      el.$options.submitActions = WUPFormElement.$defaults.submitActions;
+
       // skip programmatic changes, controls without name & other elements
       onSubmit.mockClear();
       inputs[0].$value = "c@b.c";
@@ -1185,13 +1201,48 @@ describe("formElement", () => {
       await type(0, "j@b.c");
       await h.wait(500); // auto-submit is started here
       expect(onSubmit).toBeCalledTimes(1);
-      await type(1, "Kitty"); // changed before the form is locked by the pending state (300ms)
+      await type(1, "Kitty"); // changed during the pending state
       await h.wait(1000);
       expect(el.$isPending).toBe(true);
       expect(onSubmit).toBeCalledTimes(2);
       expect(lastModel()).toEqual({ email: "j@b.c", firstName: "Kitty" });
       await h.wait(3000); // wait for the end of submits
       expect(el.$isPending).toBe(false);
+      expect(inputs[0].$initValue).toBe("j@b.c"); // submitted value is $initValue after success
+      // value changed back during the pending state is submitted: otherwise server keeps the previous one
+      onSubmit.mockClear();
+      await type(0, "jj@b.c");
+      await h.wait(500); // auto-submit is started here
+      await type(0, "j@b.c"); // the same as $initValue: it's updated after success only
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(2);
+      expect(lastModel().email).toBe("j@b.c");
+      await h.wait(3000);
+
+      // value changed during the pending state isn't considered as submitted (when lockOnPending is off)
+      el.$options.submitActions = WUPFormElement.$defaults.submitActions & ~SubmitActions.lockOnPending;
+      onSubmit.mockClear();
+      onSubmit.mockImplementation(() => new Promise((res) => setTimeout(res, 200)));
+      await type(0, "s1@b.c");
+      await h.wait(500); // auto-submit is started here
+      await type(0, "s2@b.c"); // during the pending state
+      await h.wait(400); // 1st submit is finished
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(inputs[0].$initValue).toBe("s1@b.c");
+      expect(el.$isChanged).toBe(true);
+      await h.wait(500);
+      expect(onSubmit).toBeCalledTimes(2);
+      expect(lastModel().email).toBe("s2@b.c");
+      el.$options.submitActions = WUPFormElement.$defaults.submitActions;
+      onSubmit.mockReset();
+
+      // failed submit: values aren't saved so $initValue isn't changed
+      onSubmit.mockImplementationOnce(() => Promise.reject(new Error("test reject")));
+      await type(0, "s3@b.c");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(inputs[0].$initValue).toBe("s2@b.c");
+      expect(el.$isChanged).toBe(true);
       onSubmit.mockReset();
 
       // message from $onSubmit has priority over default notification
@@ -1219,6 +1270,11 @@ describe("formElement", () => {
       expect(exit()).toBe(true); // till the end of submit
       await h.wait(1000);
       expect(el.$isPending).toBe(false);
+      expect(exit()).toBe(false);
+      expect(onSubmit).toBeCalledTimes(1);
+      // nothing to submit & wait for when value is changed back
+      await type(0, "oo@b.c");
+      await type(0, "o@b.c");
       expect(exit()).toBe(false);
       expect(onSubmit).toBeCalledTimes(1);
       onSubmit.mockReset();

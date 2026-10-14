@@ -23,6 +23,7 @@
   - _Long words without spaces (urls etc.) aren't wrapped & overflow the element_
   - _Option **autoClose** less than `100` throws error_
 - [TimeControl](src/controls/time.ts). Improved quality of icon
+- [Form](src/formElement.ts). _**SubmitActions.reset**: values changed by user during the pending state are assigned to `$initValue`/`$initModel` on success (considered as submitted)_
 - [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
 
   - toggle button (direct child `wup-dropdown > button`) has neutral style: inherited font & color, no background, chevron icon at the right (rotated when menu is opened), hover/focus background via css-vars `--icon-hover-bg` & `--icon-focus-bg`
