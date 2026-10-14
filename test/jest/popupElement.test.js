@@ -925,6 +925,13 @@ describe("popupElement", () => {
 
     el.setAttribute("w-target", "#not-found-id");
     await expect(h.wait()).rejects.toThrow(); // because of target is defined but not HTMLELement
+
+    el.remove();
+    el.setAttribute("w-target", "prev"); // resolved on next tick because element isn't appended yet
+    trg.after(el);
+    await h.wait(1);
+    expect(el.$options.target).toBe(trg);
+    expect(el.$isOpened).toBe(true);
   });
 
   test("attr: placement", async () => {

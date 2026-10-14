@@ -451,6 +451,38 @@ describe("baseElement", () => {
     expect(el.$options.offset).toBe(prev);
   });
 
+  test("gotChanges throws", () => {
+    class TestThrowEl extends WUPBaseElement {
+      static $defaults = { label: "" };
+
+      gotChanges(propsChanged) {
+        super.gotChanges(propsChanged);
+        if (this._opts.label === "throw") {
+          throw new Error("Test error");
+        }
+      }
+    }
+    customElements.define("test-throw", TestThrowEl);
+    el = document.createElement("test-throw");
+    el.setAttribute("w-label", "throw");
+    document.body.appendChild(el);
+    // attributes must be parsed even if previous gotChanges is failed
+    expect(() => jest.advanceTimersByTime(1)).toThrow("Test error"); // on gotReady
+    el.setAttribute("w-label", "a");
+    expect(el.$options.label).toBe("a");
+    jest.advanceTimersByTime(1);
+
+    el.setAttribute("w-label", "throw");
+    expect(() => jest.advanceTimersByTime(1)).toThrow("Test error"); // on attribute change
+    el.setAttribute("w-label", "b");
+    expect(el.$options.label).toBe("b");
+    jest.advanceTimersByTime(1);
+
+    expect(() => (el.$options = { label: "throw" })).toThrow("Test error"); // on option change
+    el.setAttribute("w-label", "c");
+    expect(el.$options.label).toBe("c");
+  });
+
   test("fireEvent", () => {
     const evCallback = jest.fn();
     el.addEventListener("click", evCallback);
