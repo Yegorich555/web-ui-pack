@@ -8,6 +8,7 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
   --ctrl-checktree-gap: 0.5em;
   --ctrl-checktree-indent: 1.5em;
   --ctrl-checktree-mixed: var(--ctrl-check-on);
+  --wup-icon-minus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 7h8v2H4z'/%3E%3C/svg%3E");
 }
 
 :host {
@@ -92,18 +93,7 @@ $wup-check-mixins-only: true; // only mixin wup-check-icon-on is required
 
   > label > input:indeterminate ~ [icon],
   [aria-checked="mixed"] > [item] > [icon] {
-    display: grid;
-    place-items: center;
-    background: var(--ctrl-check-on-bg);
-
-    &:after {
-      content: "";
-      width: 50%;
-      height: 2px;
-      background: var(
-        --ctrl-checktree-mixed
-      ); // NiceToHave: use wup-icon mixin so later user can change icon via changing image
-    }
+    @include wup-check-icon-on(var(--wup-icon-minus), var(--ctrl-checktree-mixed));
   }
 
   [aria-checked="true"] > [item] > [icon] {

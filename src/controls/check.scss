@@ -3,12 +3,12 @@
 /// Checked state of the checkbox-icon [icon]
 /// @example :host[checked] [icon] { @include wup-check-icon-on; }
 /// @see checkTree.scss - it imports the mixin only via `$wup-check-mixins-only: true; @import "check";`
-@mixin wup-check-icon-on {
+@mixin wup-check-icon-on($img: var(--wup-icon-check), $color: var(--ctrl-check-on)) {
   background: var(--ctrl-check-on-bg);
 
   &:after {
-    --ctrl-icon: var(--ctrl-check-on);
-    --ctrl-icon-img: var(--wup-icon-check);
+    --ctrl-icon: #{$color};
+    --ctrl-icon-img: #{$img};
     @include wup-icon;
     content: "";
     top: 0;

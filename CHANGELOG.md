@@ -25,6 +25,7 @@
   - _Long words without spaces (urls etc.) aren't wrapped & overflow the element_
   - _Option **autoClose** less than `100` throws error_
 - [TimeControl](src/controls/time.ts). Improved quality of icon
+- [CheckTreeControl](src/controls/checkTree.ts). Icon of partially checked item is customizable via css-var `--wup-icon-minus` (previously it was drawn via css)
 - [Form](src/formElement.ts). _**SubmitActions.reset**: values changed by user during the pending state are assigned to `$initValue`/`$initModel` on success (considered as submitted)_
 - [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
 
