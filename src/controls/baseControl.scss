@@ -23,8 +23,8 @@
     --ctrl-border: #104652;
     --ctrl-label: #a6a6a6; // WCAG: AA (4.5:1) on popups #2b3645, AAA (7:1) on #161b24
     --ctrl-icon: var(--ctrl-label);
-    --ctrl-focus-label: #25a1b6;
-    --ctrl-selected: #25a1b6;
+    --ctrl-focus-label: #40c2d8; // WCAG AA (4.5:1) in popups: incl. time menu where current item has bg #fff1
+    --ctrl-selected: #40c2d8;
     --ctrl-err: #ff6666;
     --ctrl-err-bg: #000;
     --ctrl-err-valid: #54d754;

@@ -82,7 +82,7 @@ describe("spinElement", () => {
     expect(document.head.innerHTML).toMatchInlineSnapshot(`
       "<style>:root {
         --base-focus: #00778d;
-        --base-btn-bg: #009fbc;
+        --base-btn-bg: #007e95;
         --base-btn-text: #fff;
         --base-btn-focus: #005766;
         --base-btn2-bg: #6c757d;

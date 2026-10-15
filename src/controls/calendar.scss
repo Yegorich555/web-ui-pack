@@ -2,7 +2,7 @@
 
 :root {
   --ctrl-clr-selected: #fff;
-  --ctrl-clr-selected-bg: #009fbc;
+  --ctrl-clr-selected-bg: #007e95; // WCAG AA (4.5:1) with white text
   --ctrl-clr-w: 17em;
   --ctrl-clr-cell-gap: 0px;
   --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);

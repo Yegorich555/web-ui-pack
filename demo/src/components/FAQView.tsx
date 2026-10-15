@@ -215,7 +215,7 @@ const codeCssVars = `css
 body { /* Redefine css variables */
   background: #f3f6f9;
   color: black;
-  --base-btn-bg: #009fbc;
+  --base-btn-bg: #007e95;
   --border-radius: 0;
   --ctrl-label: #028198; /* etc. */
 }

@@ -26,3 +26,9 @@ button[tool="placeholder"] {
   color: #00778d;
   background: #009fbc26;
 }
+
+// the same colors as active link in the side menu: otherwise WCAG contrast is too low
+[wupdark] [wup-textrich] .placeholder {
+  color: $activeLinkColor;
+  background: $activeLinkBgColor;
+}

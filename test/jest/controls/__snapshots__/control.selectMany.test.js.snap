@@ -258,7 +258,7 @@ exports[`control.selectMany common tests render + styles 2`] = `
 <style>
   :root {
   --base-focus: #00778d;
-  --base-btn-bg: #009fbc;
+  --base-btn-bg: #007e95;
   --base-btn-text: #fff;
   --base-btn-focus: #005766;
   --base-btn2-bg: #6c757d;
@@ -378,8 +378,8 @@ exports[`control.selectMany common tests render + styles 2`] = `
   --ctrl-border: #104652;
   --ctrl-label: #a6a6a6;
   --ctrl-icon: var(--ctrl-label);
-  --ctrl-focus-label: #25a1b6;
-  --ctrl-selected: #25a1b6;
+  --ctrl-focus-label: #40c2d8;
+  --ctrl-selected: #40c2d8;
   --ctrl-err: #ff6666;
   --ctrl-err-bg: #000;
   --ctrl-err-valid: #54d754;

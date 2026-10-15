@@ -124,8 +124,11 @@ $tools: (
     @include wup-btnIcon;
     border-radius: 4px;
 
+    // bar under icon: otherwise pressed state is shown by color only (WCAG 1.4.1)
     &[aria-pressed="true"] {
       --icon: var(--ctrl-selected);
+      /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+      background: linear-gradient(var(--icon), var(--icon)) center bottom / var(--icon-size) 2px no-repeat;
     }
   }
 

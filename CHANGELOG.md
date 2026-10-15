@@ -9,6 +9,11 @@
 - **Global**
   - Fixed TypeScript of boolean attributes for all elements & controls: `{false}` isn't allowed anymore (React 19 & Preact remove attribute with boolean `false` so option falls back to `$defaults`)
   - _Changing of attributes is ignored forever after any error during applying options (ex. popup target isn't found)_
+  - Increased color contrast according to WCAG AA (text was below 4.5:1)
+    - `--base-btn-bg` (primary & submit buttons) and `--ctrl-clr-selected-bg` (selected day of calendar): `#009fbc` => `#007e95`
+    - dark mode. `--ctrl-label` (labels & icons of controls): `#919191` => `#a6a6a6`
+    - dark mode. `--ctrl-focus-label`, `--ctrl-selected`, `--ctrl-time-current`, `--sort-active-color`, `--sort-active-shadow`: `#25a1b6` => `#40c2d8`
+    - light mode. `--sort-active-color`, `--sort-active-shadow`: `#25a1b6` => `#00778d`
 - [TextAreaControl](src/controls/textArea.ts).
   - **BREAKING:** renamed `WUPTextareaControl` => `WUPTextAreaControl`, `WUP.Textarea` => `WUP.TextArea`, `web-ui-pack/controls/textarea` => `web-ui-pack/controls/textArea` (tag `wup-textarea` isn't changed)
   - _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-prefix`, `w-postfix`_
