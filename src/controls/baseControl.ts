@@ -1,5 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import WUPBaseElement, { AttributeMap, AttributeTypes } from "../baseElement";
+// eslint-disable-next-line import/no-cycle -- const enum only: values are inlined by TS so import is removed in build result
 import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";
 import nestedProperty from "../helpers/nestedProperty";

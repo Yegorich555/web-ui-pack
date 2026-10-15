@@ -52,9 +52,13 @@ declare global {
       /** Provide local or UTC date; min/max/exclude $initValue/$value must be provided according to this
        *  @defaultValue true */
       utc: boolean;
-      /** User can't select date less than min; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
+      /** User can't select date less than min (physically restricted); point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25)
+       * but validations.min - allows to select invalid date and shows error
+       * * DateControl: user can type date less than min, so option is assigned to `$options.validations.min` (overrides pointed one) */
       min: Date | null;
-      /** User can't select date more than max; point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25) */
+      /** User can't select date more than max (physically restricted); point new Date(Date.UTC(2022,1,25)) for `utc:true`, or new Date(2022,1,25)
+       * but validations.max - allows to select invalid date and shows error
+       * * DateControl: user can type date more than max, so option is assigned to `$options.validations.max` (overrides pointed one) */
       max: Date | null;
       /** Picker that must be rendered at first; if undefined & isEmpty - year, otherwise - day;
        * @tutorial
@@ -71,7 +75,8 @@ declare global {
        * * point `PickersEnum.Year` to select only year: value is the 1st January
        * * option `exclude` disables the whole month/year if it contains any excluded day */
       endWith: PickersEnum | null;
-      /** Dates that user can't choose (disabled dates) */
+      /** Dates that user can't choose (disabled dates)
+       * * DateControl: user can type excluded date, so option is assigned to `$options.validations.exclude` (overrides pointed one) */
       exclude: Date[] | null;
       /** Allow to select multiple dates; in this case $value & $initValue must be `Date[]`
        * @tutorial rules

@@ -14,11 +14,14 @@ declare global {
   namespace WUP.Time {
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {
-      /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min value is {x}` */
+      /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min value is {x}`
+       * * WARN: option `min` has higher priority: it's assigned to `$options.validations.min` (overrides pointed one) */
       min: WUPTimeObject;
-      /** Enabled if option [max] is pointed; if $value > pointed shows message 'Max value is {x}` */
+      /** Enabled if option [max] is pointed; if $value > pointed shows message 'Max value is {x}`
+       * * WARN: option `max` has higher priority: it's assigned to `$options.validations.max` (overrides pointed one) */
       max: WUPTimeObject;
-      /** User can't select time in excluded range */
+      /** Enabled if option [exclude] is pointed; If invalid shows "This value is disabled"
+       * * WARN: option `exclude` has higher priority: it's assigned to `$options.validations.exclude` (overrides pointed one) */
       exclude: { test: (v: WUPTimeObject, c: WUPTimeControl) => boolean };
     }
     interface NewOptions {
@@ -39,11 +42,14 @@ declare global {
        * but if press escape: menu closed and value reverted to that was before
        * @defaultValue false */
       menuButtonsOff: boolean;
-      /** User can't select time less than min */
+      /** User can't select time less than min (physically restricted) but validations.min - allows to select invalid time and shows error
+       * * user can type time less than min, so option is assigned to `$options.validations.min` (overrides pointed one) */
       min: WUPTimeObject | null;
-      /** User can't select time more than max */
+      /** User can't select time more than max (physically restricted) but validations.max - allows to select invalid time and shows error
+       * * user can type time more than max, so option is assigned to `$options.validations.max` (overrides pointed one) */
       max: WUPTimeObject | null;
-      /** User can't select time in excluded range */
+      /** User can't select time in excluded range
+       * * user can type excluded time, so option is assigned to `$options.validations.exclude` (overrides pointed one) */
       exclude: { test: (v: WUPTimeObject, c: WUPTimeControl) => boolean } | null;
     }
     interface Options<T = WUPTimeObject, VM = ValidityMap> extends WUP.BaseCombo.Options<T, VM>, NewOptions {

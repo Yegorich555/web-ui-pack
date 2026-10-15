@@ -21,11 +21,14 @@ declare global {
   namespace WUP.Date {
     interface EventMap extends WUP.BaseCombo.EventMap {}
     interface ValidityMap extends WUP.BaseCombo.ValidityMap {
-      /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min value is {x}` */
+      /** Enabled if option [min] is pointed; If $value < pointed shows message 'Min value is {x}`
+       * * WARN: option `min` has higher priority: it's assigned to `$options.validations.min` (overrides pointed one) */
       min: Date;
-      /** Enabled if option [max] is pointed; if $value > pointed shows message 'Max value is {x}` */
+      /** Enabled if option [max] is pointed; if $value > pointed shows message 'Max value is {x}`
+       * * WARN: option `max` has higher priority: it's assigned to `$options.validations.max` (overrides pointed one) */
       max: Date;
-      /** Enabled if option [exclude] is pointed; If invalid shows "This value is disabled" */
+      /** Enabled if option [exclude] is pointed; If invalid shows "This value is disabled"
+       * * WARN: option `exclude` has higher priority: it's assigned to `$options.validations.exclude` (overrides pointed one) */
       exclude: Date[];
     }
     interface NewOptions {
