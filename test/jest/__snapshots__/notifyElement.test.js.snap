@@ -197,6 +197,7 @@ WUP-NOTIFY {
   width: var(--notify-w);
   max-width: 80vw;
   margin: var(--notify-margin);
+  overflow-wrap: anywhere;
   color: var(--notify-text);
   background: var(--notify-bg);
   box-shadow: 0 1px 4px 0 var(--notify-shadow);
