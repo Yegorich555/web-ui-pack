@@ -241,6 +241,13 @@ declare global {
 /** Controls grouped by `storage:storageKey`: to sync value between controls pointed to the same storage & key */
 const storageSyncMap = new Map<string, Set<WUPBaseControl>>();
 
+/** Adds/removes id in `aria-describedby`: other descriptions of element are kept */
+function toggleDescribedBy(el: Element, id: string, isAdd: boolean): void {
+  const ids = (el.getAttribute("aria-describedby") ?? "").split(" ").filter((s) => s && s !== id);
+  isAdd && ids.push(id);
+  ids.length ? el.setAttribute("aria-describedby", ids.join(" ")) : el.removeAttribute("aria-describedby");
+}
+
 /** Base abstract form-control */
 export default abstract class WUPBaseControl<
     ValueType = any,
@@ -477,17 +484,12 @@ export default abstract class WUPBaseControl<
     el.className = this.#ctr.classNameHidden;
     el.id = this.#ctr.$uniqueId;
     const i = this.$refInput;
-    const an = "aria-describedby";
-    i.setAttribute(an, `${i.getAttribute(an) || ""} ${el.id}`.trimStart());
+    toggleDescribedBy(i, el.id, true);
     this.appendChild(el);
     setTimeout(() => (el.textContent = text), delayMs); // otherwise reader doesn't announce section
     setTimeout(() => {
       el.remove();
-      const a = i.getAttribute(an);
-      if (a != null) {
-        const aNext = a.replace(el.id, "").replace("  ", " ").trim();
-        aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
-      }
+      toggleDescribedBy(i, el.id, false);
     }, 500); // WARN: expected that 500ms is enough to get action from screen-reader
   }
 
@@ -902,7 +904,7 @@ export default abstract class WUPBaseControl<
     const renderedErr = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
     this.setAttr.call(el, "class", renderedErr ? this.#ctr.classNameHidden : null);
 
-    target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
+    toggleDescribedBy(target, this.$refError.id, true); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
     if (!this.$isFocused) {
       this.$refError!.setAttribute("role", "alert"); // force to announce error when focus is already missed
       renderedErr?.scrollIntoView();
@@ -919,7 +921,7 @@ export default abstract class WUPBaseControl<
       this.$refError = undefined;
 
       (this.#refErrTarget as HTMLInputElement).setCustomValidity?.call(this.#refErrTarget, "");
-      this.#refErrTarget!.removeAttribute("aria-describedby");
+      toggleDescribedBy(this.#refErrTarget!, p.id, false);
       this.removeAttribute("invalid");
       this.#refErrTarget = undefined;
     }

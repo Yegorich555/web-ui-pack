@@ -1272,7 +1272,7 @@ exports[`control.textRich $show/$hide error 2`] = `
   >
     <span>
       <wup-richinput
-        aria-describedby="txt3"
+        aria-describedby="txt2 txt3"
         aria-labelledby="txt1"
         aria-multiline="true"
         contenteditable="true"
@@ -1536,6 +1536,7 @@ exports[`control.textRich $show/$hide error 3`] = `
   >
     <span>
       <wup-richinput
+        aria-describedby="txt2"
         aria-labelledby="txt1"
         aria-multiline="true"
         contenteditable="true"
@@ -3412,7 +3413,7 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
   >
     <span>
       <wup-richinput
-        aria-describedby="txt3"
+        aria-describedby="txt2 txt3"
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"
@@ -3696,7 +3697,7 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
   >
     <span>
       <wup-richinput
-        aria-describedby="txt3"
+        aria-describedby="txt2 txt3"
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"
@@ -3988,7 +3989,7 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
   >
     <span>
       <wup-richinput
-        aria-describedby="txt6"
+        aria-describedby="txt2 txt6"
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"
@@ -4515,7 +4516,7 @@ exports[`control.textRich validations options.validationCase 2`] = `
   >
     <span>
       <wup-richinput
-        aria-describedby="txt4"
+        aria-describedby="txt2 txt4"
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"
@@ -4790,7 +4791,7 @@ exports[`control.textRich validations options.validationCase 3`] = `
   >
     <span>
       <wup-richinput
-        aria-describedby="txt5"
+        aria-describedby="txt2 txt5"
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"
@@ -5066,7 +5067,7 @@ exports[`control.textRich validations options.validationCase 4`] = `
   >
     <span>
       <wup-richinput
-        aria-describedby="txt6"
+        aria-describedby="txt2 txt6"
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"

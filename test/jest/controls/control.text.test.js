@@ -347,6 +347,16 @@ describe("control.text", () => {
     el.$refInput.removeAttribute("aria-describedby");
     expect(() => jest.advanceTimersByTime(10000)).not.toThrow();
     expect(el.outerHTML).toBe(prev); // input state must be returned to prev
+
+    // error shouldn't destroy the "aria-describedby" attribute
+    el.$refInput.setAttribute("aria-describedby", "someId");
+    el.$showError("Wrong");
+    const errId = el.$refError.id;
+    expect(el.$refInput.getAttribute("aria-describedby")).toBe(`someId ${errId}`);
+    el.$showError("Wrong again"); // id isn't duplicated
+    expect(el.$refInput.getAttribute("aria-describedby")).toBe(`someId ${errId}`);
+    el.$hideError();
+    expect(el.$refInput.getAttribute("aria-describedby")).toBe("someId");
   });
 
   test("browser autofill", async () => {

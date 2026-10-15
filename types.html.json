@@ -2729,7 +2729,11 @@
       "attributes": [
         {
           "name": "w-toolbar",
-          "description": "Global reference to object with array of toolbar groups (see WUP.TextRich.ToolbarGroup). Example: window.myToolbar = [[\"bold\", \"italic\"], [\"header\"], [\"clean\"]]"
+          "description": "Global reference to object with array of toolbar groups (see WUP.TextRich.ToolbarGroup); null or empty array hides toolbar. Example: window.myToolbar = [[\"bold\", \"italic\"], [\"header\"], [\"clean\"]]"
+        },
+        {
+          "name": "w-hidehotkeyshint",
+          "description": "Hide keyboard shortcuts in tooltips & dropdown items (`Bold (Ctrl+B)` => `Bold`); `aria-keyshortcuts` is set anyway"
         },
         {
           "name": "w-debouncems",

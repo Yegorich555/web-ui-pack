@@ -217,7 +217,7 @@ declare global {
     interface EventMap extends WUP.TextArea.EventMap {}
     interface ValidityMap extends WUP.TextArea.ValidityMap {}
     interface NewOptions {
-      /** Toolbar items split into groups (empty array hides toolbar); custom tools must be defined in static $tools
+      /** Toolbar items split into groups (`null` or empty array hides toolbar); custom tools must be defined in static $tools
        * @see {@link ToolbarItem}
        * @example
        * [
@@ -229,7 +229,7 @@ declare global {
        *   ["btnClear"], // clear button (if $options.clearButton is true)
        * ]
        * @defaultValue all built-in tools */
-      toolbar: ToolbarGroup[];
+      toolbar: ToolbarGroup[] | null;
       /** Hide keyboard shortcuts in tooltips & dropdown items (`Bold (Ctrl+B)` => `Bold`); `aria-keyshortcuts` is set anyway
        * @see {@link WUP.TextRich.Tool.hotKey}
        * @defaultValue false */
@@ -720,8 +720,15 @@ export default class WUPTextRichControl<
   static override cloneDefaults<T extends Record<string, any>>(): T {
     const d = super.cloneDefaults() as WUP.TextRich.Options;
     // otherwise changing $options.toolbar[i] mutates $defaults
-    d.toolbar = d.toolbar.slice();
+    d.toolbar = d.toolbar?.slice() ?? null;
     return d as unknown as T;
+  }
+
+  static override mergeDefaults<T extends Record<string, any>>(opts: T): T {
+    const isHidden = opts.toolbar === null;
+    super.mergeDefaults(opts);
+    isHidden && ((opts as Record<string, any>).toolbar = null); // otherwise null is replaced with default toolbar
+    return opts;
   }
 
   $refInput = Object.assign(document.createElement("wup-richinput") as WUPTextRichInput, {
@@ -735,6 +742,8 @@ export default class WUPTextRichControl<
   #shown?: string;
   /** Last selection in editor: restored when focus is on toolbar */
   #range?: Range;
+  /** Screen-reader hint: how to reach toolbar */
+  #hint = document.createElement("span");
 
   protected override renderControl(): void {
     super.renderControl();
@@ -744,12 +753,10 @@ export default class WUPTextRichControl<
     bar.addEventListener("click", (e) => this.gotToolbarClick(e));
     this.appendChild(bar); // after editor (moved up via css): otherwise form autofocus focuses toolbar
 
-    // screen-reader hint: how to reach toolbar
     const inp = this.$refInput;
-    const hint = this.$refLabel.appendChild(document.createElement("span"));
+    const hint = this.$refLabel.appendChild(this.#hint); // text is set on toolbar render
     hint.id = this.#ctr.$uniqueId;
     hint.className = this.#ctr.classNameHidden;
-    hint.textContent = this.#ctr.$ariaDescription;
     inp.setAttribute("aria-describedby", hint.id);
     inp.setAttribute("wup-textrich", ""); // global content styles
 
@@ -826,6 +833,7 @@ export default class WUPTextRichControl<
       items.forEach((item) => this.renderTool(g, item));
       g.firstChild && bar.appendChild(g);
     });
+    this.#hint.textContent = bar.firstChild ? this.#ctr.$ariaDescription : ""; // empty toolbar is hidden
     this.#shown = undefined; // force refresh of new items
     this.refreshToolbar();
   }

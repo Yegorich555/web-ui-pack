@@ -1623,6 +1623,27 @@ describe("control.textRich", () => {
       WUPTextRichControl.$tools.btnClear.label = label;
     }
 
+    // null hides toolbar (not replaced with default one) & hint how to reach it
+    const hint = document.getElementById(inp.getAttribute("aria-describedby"));
+    expect(hint.textContent).toBe("press Alt + F10 to focus toolbar");
+    el.$options.toolbar = null;
+    await h.wait(1);
+    expect(el.$options.toolbar).toBe(null);
+    expect(el.$refToolbar.innerHTML).toBe("");
+    expect(hint.textContent).toBe("");
+    el.$options.toolbar = [];
+    await h.wait(1);
+    expect(el.$refToolbar.innerHTML).toBe("");
+    window.testToolbar = null;
+    el.setAttribute("w-toolbar", "window.testToolbar");
+    await h.wait(1);
+    expect(el.$options.toolbar).toBe(null);
+    el.removeAttribute("w-toolbar"); // default toolbar
+    await h.wait(1);
+    expect(el.$refToolbar.childElementCount).toBe(WUPTextRichControl.$defaults.toolbar.length);
+    expect(hint.textContent).toBe("press Alt + F10 to focus toolbar");
+    delete window.testToolbar;
+
     // formats of the 1st selected char: selection starts at the end of line
     el.$options.toolbar = [["header"]];
     await h.wait(1);
