@@ -115,7 +115,8 @@ function changeDarkMode(isDark: boolean): void {
   window.onDarkModeChanged?.call(window, isDark);
 }
 // WARN: init darkMode required because $onChange triggers only after some timeout and blink visible on the screen
-changeDarkMode(!!localStorage.getItem("darkmode"));
+// darkMode by default: switch can't store `false` via w-storagekey (it removes the key) so storage is handled here
+changeDarkMode(localStorage.getItem("darkmode") !== "0");
 
 export default function AppContainer() {
   const navigate = useNavigate();
@@ -140,13 +141,16 @@ export default function AppContainer() {
         </MyLink>
         <wup-switch
           class={styles.darkMode}
-          w-storageKey="darkmode"
           ref={(el) => {
             if (el) {
-              // WARN: value from storage applies in gotReady (after timeout) so pre-set attr to prevent toggle animation on init
+              // WARN: value applies in gotReady (after timeout) so pre-set attr to prevent toggle animation on init
               el.toggleAttribute("checked", !!window.isDark);
+              el.$initValue = !!window.isDark;
               el.$refInput.ariaLabel = "toggle between light and darkmode";
-              el.$onChange = () => changeDarkMode(el.$value);
+              el.$onChange = () => {
+                localStorage.setItem("darkmode", el.$value ? "1" : "0");
+                changeDarkMode(el.$value);
+              };
             }
           }}
         />

@@ -118,6 +118,68 @@ code {
   .token.keyword {
     color: var(--cssVarColor, #07a);
   }
+
+  // colors from VSCode themes Light+ & Dark+
+  .language-js {
+    --js-keyword: #0000ff;
+    --js-property: #001080;
+    --js-string: #a31515;
+    --js-number: #098658;
+    --js-function: #795e26;
+    --js-class: #267f99;
+    --js-constant: #0070c1;
+    --js-comment: #008000;
+
+    .token.keyword,
+    .token.boolean {
+      color: var(--js-keyword);
+    }
+
+    .token.property,
+    .token.parameter {
+      color: var(--js-property);
+    }
+
+    .token.string {
+      color: var(--js-string);
+    }
+
+    .token.number {
+      color: var(--js-number);
+    }
+
+    .token.function {
+      color: var(--js-function);
+    }
+
+    .token.class-name {
+      color: var(--js-class);
+    }
+
+    .token.constant {
+      color: var(--js-constant);
+    }
+
+    .token.comment {
+      color: var(--js-comment);
+    }
+
+    .token.operator,
+    .token.punctuation {
+      color: inherit;
+    }
+  }
+}
+
+body[wupdark] .code .language-js {
+  --js-keyword: #569cd6;
+  --js-property: #9cdcfe;
+  --js-string: #ce9178;
+  --js-number: #b5cea8;
+  --js-function: #dcdcaa;
+  --js-class: #4ec9b0;
+  --js-constant: #4fc1ff;
+  --js-comment: #6a9955;
 }
 
 a {

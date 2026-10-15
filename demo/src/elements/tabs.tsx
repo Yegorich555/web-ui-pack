@@ -8,16 +8,24 @@ interface Item {
 }
 interface Props {
   items: Item[];
+  /** Key in localStorage to remember the opened tab (by label) & open it on other pages */
+  // eslint-disable-next-line react/require-default-props
+  storageKey?: string;
 }
 
 // todo rewrite with <wup-tabs />: https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-automatic/
 export default function Tabs(props: Props): React.JSX.Element {
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = useState(() => {
+    const saved = props.storageKey && localStorage.getItem(props.storageKey);
+    const i = props.items.findIndex((a) => a.label === saved);
+    return i === -1 ? 0 : i;
+  });
   const onClick = useCallback((e: React.MouseEvent) => {
     const ch = (e.currentTarget as HTMLElement).children;
     for (let i = 0; i < ch.length; ++i) {
       if (ch[i] === e.target || ch[i].contains(e.target as HTMLElement)) {
         setCurrent(i);
+        props.storageKey && localStorage.setItem(props.storageKey, props.items[i].label);
         break;
       }
     }

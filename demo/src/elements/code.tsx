@@ -2,6 +2,12 @@ import { useEffect } from "react";
 import Prism from "prismjs";
 import styles from "./code.scss";
 
+// highlight like VSCode: `WUPPopupElement.$placements.$top`: class & properties (Prism doesn't support it by default)
+Prism.languages.insertBefore("javascript", "operator", {
+  "pascal-class": { pattern: /\b[A-Z](?:[A-Z\d_]*[a-z])[$\w]*\b/, alias: "class-name" },
+  "property-access": { pattern: /(\.\s*)#?[_$a-zA-Z][$\w]*(?![$\w]|\s*\()/, lookbehind: true, alias: "property" },
+});
+
 interface Props {
   code: string;
 }
