@@ -355,7 +355,7 @@ exports[`control.number common tests render + styles 2`] = `
 [wupdark] {
   --ctrl-bg: none;
   --ctrl-border: #104652;
-  --ctrl-label: #919191;
+  --ctrl-label: #a6a6a6;
   --ctrl-icon: var(--ctrl-label);
   --ctrl-focus-label: #25a1b6;
   --ctrl-selected: #25a1b6;

@@ -21,7 +21,7 @@
   [wupdark] {
     --ctrl-bg: none;
     --ctrl-border: #104652;
-    --ctrl-label: #919191;
+    --ctrl-label: #a6a6a6; // WCAG: AA (4.5:1) on popups #2b3645, AAA (7:1) on #161b24
     --ctrl-icon: var(--ctrl-label);
     --ctrl-focus-label: #25a1b6;
     --ctrl-selected: #25a1b6;

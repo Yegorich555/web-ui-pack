@@ -222,7 +222,7 @@ body { /* Redefine css variables */
 body[wupdark] {
   background: #161b24;
   color: white;
-  --ctrl-label: #919191; /* etc. */
+  --ctrl-label: #a6a6a6; /* etc. */
 }`;
 
 const codeAttrs = `js
