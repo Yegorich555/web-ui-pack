@@ -55,7 +55,8 @@ export default class TextHistory {
       if (prev[i] !== next[i]) {
         // find last changed
         for (let iPrev = prev.length - 1, iNext = next.length - 1; ; --iPrev, --iNext) {
-          if (prev[iPrev] !== next[iNext]) {
+          // WARN: the same end can't overlap the same start: "a, " => "a, b, " is inserted "b, " (not removed ", ")
+          if (prev[iPrev] !== next[iNext] || iPrev < i || iNext < i) {
             if (iNext > -1) {
               inserted.pos = i;
               inserted.v = next.substring(i, iNext + 1);

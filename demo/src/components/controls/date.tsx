@@ -35,6 +35,7 @@ export default function DateControlView() {
         "Localized. Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
         "Smart mask. Don't worry about separators (it adds automatically); need only type numbers",
         "Select only month or year according to format: 'yyyy-mm' or 'yyyy' (see $options.endWith)",
+        "Select several dates (see $options.multiple)",
       ]}
     >
       <wup-form
@@ -55,6 +56,7 @@ export default function DateControlView() {
           w-startWith="day"
           w-utc
           w-validations="window.myDateValidations2"
+          w-multiple="false"
         />
         <div className={stylesCom.group}>
           <wup-date w-name="readonly" readonly w-initValue="2022-03-01 23:50" />
@@ -62,6 +64,13 @@ export default function DateControlView() {
           <wup-date w-name="required" w-validations="window.myDateValidations" />
         </div>
         <wup-date w-name="another" w-label="Another format: yyyy-m-d" w-format="yyyy-m-d" />
+        <wup-date
+          w-name="multiple"
+          w-label="Several dates (see $options.multiple)"
+          w-multiple="true"
+          w-initValue="2022-03-01, 2022-03-05"
+          w-exclude="window.myDateExcludeDays"
+        />
         <div className={stylesCom.group}>
           <wup-date w-name="month" w-label="Only month: mm/yyyy" w-format="mm/yyyy" w-initValue="2022-03-01" />
           <wup-date w-name="year" w-label="Only year: yyyy" w-format="yyyy" />

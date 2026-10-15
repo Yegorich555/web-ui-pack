@@ -31,6 +31,7 @@ export default function CalendarControlView() {
         "Static parser > WUPCalendarControl.$parse('2022-10-25', false) returns Date",
         "Saves hours. So $value='2022-11-06 23:50' & click on '20 Dec' => '2022-12-20 23:50'",
         "Select only month or year (see $options.endWith)",
+        "Select several dates (see $options.multiple)",
       ]}
     >
       <wup-form
@@ -51,8 +52,16 @@ export default function CalendarControlView() {
           w-startWith="day"
           w-utc
           w-validations="window.myCalendarValidations"
+          w-multiple="false"
         />
         <wup-calendar w-name="month" w-label="Select only month" w-endWith="month" w-utc />
+        <wup-calendar
+          w-name="multiple"
+          w-label="Several dates (see $options.multiple)"
+          w-multiple="true"
+          w-initValue="2022-03-01, 2022-03-05"
+          w-utc
+        />
         <wup-calendar w-name="disabled" w-label="Disabled" disabled w-utc w-startWith="1990-01-01" />
         <wup-calendar w-name="readonly" w-label="Readonly" readonly w-utc />
         <wup-calendar //

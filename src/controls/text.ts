@@ -391,8 +391,9 @@ export default class WUPTextControl<
     setTimeout(() => delete this._beforeSnap);
 
     if (!isUndoRedo && this._opts.mask) {
-      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
-      this.refMask.handleBeforeInput(e);
+      const offset = this.maskOffset;
+      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value.substring(offset));
+      this.refMask.handleBeforeInput(e, offset);
     }
   }
 
@@ -461,6 +462,12 @@ export default class WUPTextControl<
 
   /** Mask object to process mask on input */
   refMask?: MaskTextInput;
+  /** Returns count of chars at the beginning of input that mask isn't applied to
+   * @defaultValue 0 (mask is applied to the whole text) */
+  protected get maskOffset(): number {
+    return 0;
+  }
+
   /** Called to apply mask-behavior (on "input" event) */
   protected maskInputProcess(e: WUP.Text.GotInputEvent | null): string {
     const el = this.$refInput;
@@ -477,26 +484,29 @@ export default class WUPTextControl<
       return v; // ignore mask prefix/postfix if user isn't touched input; it appends only by focusGot
     }
 
+    const offset = this.maskOffset;
     let declinedAdd = 0;
     let pos = el.selectionStart || 0;
     if (!e) {
-      mi.parse(v);
+      mi.parse(v.substring(offset));
       pos = mi.value.length; // fix case: mask with prefix + call .clearValue()
     } else {
-      const r = mi.handleInput(e);
+      const r = mi.handleInput(e, offset);
       declinedAdd = r.declinedAdd;
       pos = r.position;
     }
+    pos += offset;
+    const next = v.substring(0, offset) + mi.value;
 
     if (declinedAdd) {
-      this.declineInput(pos, mi.value); // fix when ###: "12|" + "3b" => 123|
-    } else if (el.value !== mi.value) {
-      el.value = mi.value;
+      this.declineInput(pos, next); // fix when ###: "12|" + "3b" => 123|
+    } else if (el.value !== next) {
+      el.value = next;
       document.activeElement === el && el.setSelectionRange(pos, pos); // without checking on focus setSelectionRange sets focus on Safari
     }
     isFocused && this.renderMaskHolder(this._opts.maskholder, mi.leftLength - declinedAdd);
 
-    return mi.value;
+    return next;
   }
 
   /** Add/update maskholder or skip if it's not defined */

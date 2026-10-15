@@ -54,6 +54,7 @@ describe("control.calendar", () => {
       "w-startwith": { skip: true }, // tested manually
       "w-endwith": { skip: true }, // tested manually
       "w-firstweekday": { value: 1 },
+      "w-multiple": { value: true },
     },
     $options: { readOnly: { ignoreInput: true } },
   });
@@ -759,6 +760,108 @@ describe("control.calendar", () => {
     expect(animEl.getAttribute("zoom")).toBe(null);
     await h.wait();
     expect(el.$refCalendarTitle.textContent).toBe("January 2018");
+  });
+
+  test("option multiple", async () => {
+    const onChange = jest.fn();
+    const getSelected = () => Array.from(el.querySelectorAll("[aria-selected]")).map((li) => li.textContent);
+    const getDay = (day) =>
+      Array.from(el.$refCalendarItems.children).find(
+        (li) => li.textContent === `${day}` && !li.hasAttribute("prev") && !li.hasAttribute("next")
+      );
+    el.remove();
+    el = document.createElement("wup-calendar");
+    el.$onChange = onChange;
+    el.setAttribute("w-multiple", "");
+    el.setAttribute("w-min", "2022-10-02");
+    el.setAttribute("w-initvalue", "2022-10-05, 2022-10-25 13:40");
+    document.body.appendChild(el);
+    await h.wait();
+    expect(el.$options.min).toEqual(new Date("2022-10-02")); // single date even with option multiple
+    expect(el.$initValue).toEqual([new Date("2022-10-05"), new Date("2022-10-25T13:40:00.000Z")]);
+    expect(el.$refCalendarItems.getAttribute("aria-multiselectable")).toBe("true");
+    expect(el.$refCalendarTitle.textContent).toBe("October 2022"); // picker of the 1st selected date
+    expect(getSelected()).toEqual(["5", "25"]);
+    expect(el.$refInput.value).toBe("5 October 2022, 25 October 2022");
+
+    // click on date adds it OR removes if it's selected
+    await h.userClick(getDay(15));
+    await h.wait();
+    expect(el.$value).toEqual([new Date("2022-10-05"), new Date("2022-10-25T13:40:00.000Z"), new Date("2022-10-15")]); // added at the end
+    expect(el.$refInput.value).toBe("5 October 2022, 25 October 2022, 15 October 2022");
+    expect(getSelected()).toEqual(["5", "15", "25"]);
+    await h.userClick(getDay(25));
+    await h.wait();
+    expect(el.$value).toEqual([new Date("2022-10-05"), new Date("2022-10-15")]);
+    expect(getSelected()).toEqual(["5", "15"]);
+    expect(onChange).toBeCalledTimes(2);
+    await h.userClick(getDay(1)); // disabled by min
+    await h.wait();
+    expect(onChange).toBeCalledTimes(2);
+
+    // clear by Esc: back to $initValue > clear > back
+    el.focus();
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", cancelable: true, bubbles: true }));
+    jest.advanceTimersByTime(1);
+    expect(el.$value).toEqual(el.$initValue);
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", cancelable: true, bubbles: true }));
+    jest.advanceTimersByTime(1);
+    expect(el.$value).toBe(undefined);
+    expect(getSelected()).toEqual([]);
+    expect(el.$refInput.value).toBe("");
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", cancelable: true, bubbles: true }));
+    jest.advanceTimersByTime(1);
+    expect(getSelected()).toEqual(["5", "25"]);
+
+    // removing all dates makes value empty
+    await h.userClick(getDay(5));
+    await h.userClick(getDay(25));
+    await h.wait();
+    expect(el.$value).toBe(undefined);
+    expect(el.$isEmpty).toBe(true);
+
+    // the same dates in another order are equal
+    el.$initValue = [new Date("2022-10-05"), new Date("2022-10-25")];
+    el.$value = [new Date("2022-10-25"), new Date("2022-10-05")];
+    expect(el.$isChanged).toBe(false);
+    el.$value = [];
+    expect(el.$isEmpty).toBe(true);
+
+    // storage: dates are joined by '_'
+    el.$options.storageKey = "clnd";
+    el.$value = [new Date("2022-10-05"), new Date("2022-10-25T13:40:00.000Z")];
+    await h.wait(1);
+    expect(window.localStorage.getItem("clnd")).toBe("2022-10-05_2022-10-25");
+    el = document.createElement("wup-calendar");
+    el.$options.multiple = true;
+    el.$options.storageKey = "clnd";
+    document.body.appendChild(el);
+    await h.wait();
+    expect(el.$value).toEqual([new Date("2022-10-05"), new Date("2022-10-25")]);
+    expect(getSelected()).toEqual(["5", "25"]);
+    el.$options.utc = false;
+    el.$value = [new Date(2022, 9, 5), new Date(2022, 9, 7)];
+    await h.wait(1);
+    expect(window.localStorage.getItem("clnd")).toBe("2022-10-05_2022-10-07");
+    el.$options.utc = true;
+    window.localStorage.clear();
+
+    // with option endWith: compared by month
+    el.$options.endWith = PickersEnum.Month;
+    await h.wait();
+    expect(getSelected()).toEqual(["Oct"]);
+    expect(el.$refInput.value).toBe("October 2022, October 2022");
+    await h.userClick(el.$refCalendarItems.children[9]); // Oct
+    await h.wait();
+    expect(el.$value).toBe(undefined); // both dates are removed because they are in the same month
+    await h.userClick(el.$refCalendarItems.children[1]); // Feb
+    await h.wait();
+    expect(el.$value).toEqual([new Date("2022-02-01")]);
+    expect(el.$refInput.value).toBe("February 2022");
+
+    el.$options.multiple = false;
+    await h.wait();
+    expect(el.$refCalendarItems.getAttribute("aria-multiselectable")).toBe(null);
   });
 
   test("save hh even when no $value but has $initValue", async () => {

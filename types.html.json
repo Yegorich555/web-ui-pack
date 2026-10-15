@@ -156,8 +156,12 @@
           ]
         },
         {
+          "name": "w-multiple",
+          "description": "Allow to select multiple dates; in this case `$value` & `$initValue` must be `Date[]`"
+        },
+        {
           "name": "w-initvalue",
-          "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`"
+          "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`; with [w-multiple] dates are separated by comma: `2022-10-25, 2022-10-28 02:40`"
         },
         {
           "name": "w-label",
@@ -620,7 +624,7 @@
       "attributes": [
         {
           "name": "w-sync",
-          "description": "Anchor to TimeControl to sync with date",
+          "description": "Anchor to TimeControl to sync with date (ignored with [w-multiple])",
           "values": [
             {
               "name": "#timeId"
@@ -751,6 +755,10 @@
           ]
         },
         {
+          "name": "w-multiple",
+          "description": "Allow to select multiple dates; in this case `$value` & `$initValue` must be `Date[]`; user types the next date at the end of input"
+        },
+        {
           "name": "w-opencase",
           "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
           "references": [
@@ -846,7 +854,7 @@
         },
         {
           "name": "w-initvalue",
-          "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`"
+          "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`; with [w-multiple] dates are separated by comma: `2022-10-25, 2022-10-28 02:40`"
         },
         {
           "name": "w-label",

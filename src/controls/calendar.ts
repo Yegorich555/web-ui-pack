@@ -73,10 +73,17 @@ declare global {
       endWith: PickersEnum | null;
       /** Dates that user can't choose (disabled dates) */
       exclude: Date[] | null;
+      /** Allow to select multiple dates; in this case $value & $initValue must be `Date[]`
+       * @tutorial rules
+       * * click (or Enter) on date selects it OR removes if it's already selected
+       * * new date is added at the end; time isn't copied from previous value (new dates have time 00:00)
+       * @defaultValue false */
+      multiple: boolean;
     }
     interface Options<T = Date, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPCalendarControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      /** Default value in strict format yyyy-MM-dd hh:mm:ss.fff */
+      /** Default value in strict format yyyy-MM-dd hh:mm:ss.fff; with option `multiple` dates are separated by comma
+       * @example "2022-10-25" OR "2022-10-25, 2022-10-28 02:40" */
       "w-initValue"?: string;
       "w-firstWeekDay"?: number;
       "w-utc"?: WUP.Base.JSXBoolAttr;
@@ -101,6 +108,7 @@ declare global {
        * <wup-calendar w-exclude="window.exclude"></wup-calendar>
        * ``` */
       "w-exclude"?: string;
+      "w-multiple"?: WUP.Base.JSXBoolAttr;
     }
   }
 
@@ -161,7 +169,7 @@ const pickersMap = new Map([
   </wup-form>;
  */
 export default class WUPCalendarControl<
-  ValueType extends Date = Date,
+  ValueType extends Date | Date[] = Date,
   TOptions extends WUP.Calendar.Options = WUP.Calendar.Options,
   EventMap extends WUP.Calendar.EventMap = WUP.Calendar.EventMap
 > extends WUPBaseControl<ValueType, TOptions, EventMap> {
@@ -174,6 +182,20 @@ export default class WUPCalendarControl<
 
   static get $style(): string {
     return super.$style;
+  }
+
+  /** Returns true if value is empty; empty array (option `multiple`) is empty also */
+  static override $isEmpty(v: unknown): boolean {
+    return super.$isEmpty(v) || (Array.isArray(v) && !v.length);
+  }
+
+  /** Compares by valueOf(); arrays (option `multiple`) are equal if contain the same dates in any order */
+  static override $isEqual(v1: unknown, v2: unknown, c: WUPBaseControl): boolean {
+    if (Array.isArray(v1) && Array.isArray(v2)) {
+      const key = (arr: Date[]): string => arr.map(Number).sort().join();
+      return v1.length === v2.length && key(v1) === key(v2);
+    }
+    return super.$isEqual(v1, v2, c);
   }
 
   /** Returns days of pointed number-of-month with placeholders of prev, next months
@@ -245,6 +267,7 @@ export default class WUPCalendarControl<
     min: null,
     max: null,
     exclude: null,
+    multiple: false,
   });
 
   constructor() {
@@ -258,13 +281,27 @@ export default class WUPCalendarControl<
     this.changePicker(this._pickerValue, this._picker);
   }
 
-  /** Converts date-string into Date according (to $options.utc)
+  /** Converts date-string into Date according (to $options.utc);
+   * with option `multiple` returns array of dates from string where dates are separated by comma
    * @see {@link WUPCalendarControl.$parse} */
   override parse(text: string): ValueType | undefined {
     if (!text) {
       return undefined;
     }
-    return this.#ctr.$parse(text, !!this._opts.utc) as ValueType;
+    const utc = !!this._opts.utc;
+    if (this._opts.multiple) {
+      return text.split(",").map((s) => this.#ctr.$parse(s.trim(), utc)) as ValueType;
+    }
+    return this.#ctr.$parse(text, utc) as ValueType;
+  }
+
+  /** Called when need to parse attribute; attrs [min], [max] are single dates even with option `multiple` */
+  override parseAttr(type: AttributeTypes, attrValue: string, propName: string, attrName: string): any {
+    const { multiple } = this._opts;
+    this._opts.multiple = false;
+    const v = super.parseAttr(type, attrValue, propName, attrName);
+    this._opts.multiple = multiple;
+    return v;
   }
 
   /** Reference to calendar-container */
@@ -310,8 +347,17 @@ export default class WUPCalendarControl<
     // WARN: for render picker see gotReady
   }
 
+  /** Returns date in format `yyyy-MM-dd`; with option `multiple` dates are joined by `_` */
   override valueToStorage(v: ValueType): string {
-    return dateToString(v, "yyyy-MM-dd");
+    const f = `yyyy-MM-dd${this._opts.utc ? "Z" : ""}`;
+    return Array.isArray(v) ? v.map((d) => dateToString(d, f)).join("_") : dateToString(v, f);
+  }
+
+  override valueFromStorage(str: string): ValueType | undefined {
+    if (this._opts.multiple) {
+      return str.split("_").map((s) => this.#ctr.$parse(s, !!this._opts.utc)) as ValueType;
+    }
+    return super.valueFromStorage(str);
   }
 
   /** Appends calendar item to parent or replace previous */
@@ -337,6 +383,8 @@ export default class WUPCalendarControl<
 
   _pickerValue: Date = new Date();
   _picker: PickersEnum = 0;
+  /** Index function of the current picker: `getIndex(utcDate, 0)` is unique number of day/month/year */
+  #getIndex?: WUP.Calendar.IPickerResult["getIndex"];
   #refreshSelected?: () => void;
   #clearPicker?: (isIn: boolean) => Promise<void>;
   #scrollObj?: WUPScrolled;
@@ -374,6 +422,7 @@ export default class WUPCalendarControl<
 
     this.$refCalendar.setAttribute("calendar", type);
     this.#handleClickItem = r.onItemClick;
+    this.#getIndex = r.getIndex;
 
     const renderPicker = (next: Date): WUP.Calendar.IItemElement[] => {
       this._pickerValue = next;
@@ -382,18 +431,18 @@ export default class WUPCalendarControl<
 
       const first = a[0]._value;
       const now = this.#ctr.$dateToUTC(new Date());
-      let i = r.getIndex(now, first);
-      a[i]?.setAttribute("aria-current", "date");
+      a[r.getIndex(now, first)]?.setAttribute("aria-current", "date");
 
       this.#refreshSelected = () => {
-        let uv = this.$value as Date;
-        let item;
-        if (uv) {
-          uv = this.normalizeToUTC(uv);
-          i = r.getIndex(uv, first);
-          item = a[i];
+        const v = this.$value as Date | Date[] | undefined;
+        const getItem = (d: Date): WUP.Calendar.IItemElement | undefined =>
+          a[r.getIndex(this.normalizeToUTC(d), first)];
+        if (Array.isArray(v)) {
+          this.selectItem(undefined);
+          v.forEach((d) => this.selectItem(getItem(d), true));
+        } else {
+          this.selectItem(v && getItem(v));
         }
-        this.selectItem(item);
       };
       this.#refreshSelected();
 
@@ -528,16 +577,29 @@ export default class WUPCalendarControl<
     };
   }
 
-  /** Called when user selects item on the last picker (see $options.endWith) */
+  /** Called when user selects item on the last picker (see $options.endWith);
+   * with option `multiple` it adds date to value OR removes if it's already selected */
   protected selectDate(item: HTMLElement, utcVal: Date): void {
-    this.selectItem(item);
     let dt = utcVal;
     if (!this._opts.utc) {
       dt = new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate());
     }
-    const prev = this.$value || this.$initValue;
-    prev && dateCopyTime(dt, prev, !!this._opts.utc);
-    this.setValue(dt as ValueType, SetValueReasons.userSelect);
+    let v: Date | Date[] | undefined = dt;
+    if (this._opts.multiple) {
+      const was = (this.$value as Date[] | undefined) || [];
+      const getIndex = this.#getIndex!;
+      const i = getIndex(utcVal, 0);
+      const arr = was.filter((d) => getIndex(this.normalizeToUTC(d), 0) !== i);
+      if (arr.length === was.length) {
+        arr.push(dt); // nothing is removed so date wasn't selected
+      }
+      v = arr.length ? arr : undefined;
+    } else {
+      this.selectItem(item);
+      const prev = (this.$value || this.$initValue) as Date | undefined;
+      prev && dateCopyTime(dt, prev, !!this._opts.utc);
+    }
+    this.setValue(v as ValueType, SetValueReasons.userSelect);
     this.$ariaSpeak(this.$refInput.value);
     // this.focusItem(item);
   }
@@ -824,9 +886,9 @@ export default class WUPCalendarControl<
     return will as HTMLElement;
   }
 
-  /** Select item (set aria-selected) */
-  protected selectItem(el: HTMLElement | undefined): void {
-    this.querySelector("[aria-selected]")?.removeAttribute("aria-selected");
+  /** Select item (set aria-selected); point `isAdd` to keep previously selected items (option `multiple`) */
+  protected selectItem(el: HTMLElement | undefined, isAdd?: boolean): void {
+    !isAdd && this.querySelectorAll("[aria-selected]").forEach((a) => a.removeAttribute("aria-selected"));
     el?.setAttribute("aria-selected", "true");
   }
 
@@ -837,16 +899,19 @@ export default class WUPCalendarControl<
     return r;
   }
 
-  /** Called when need to update/announce value for input */
+  /** Called when need to update/announce value for input; with option `multiple` dates are joined by comma */
   setInputValue(v: ValueType | undefined | null): void {
-    if (v) {
-      const key = this._opts.utc ? "UTC" : "";
-      const p = this._opts.endWith;
-      const d = p ? "" : `${v[`get${key}Date`]()} `;
-      const m = p === PickersEnum.Year ? "" : `${localeInfo.namesMonth[v[`get${key}Month`]()]} `;
-      this.$refInput.value = `${d}${m}${v[`get${key}FullYear`]()}`;
+    const key = this._opts.utc ? "UTC" : "";
+    const p = this._opts.endWith;
+    const toStr = (dt: Date): string => {
+      const d = p ? "" : `${dt[`get${key}Date`]()} `;
+      const m = p === PickersEnum.Year ? "" : `${localeInfo.namesMonth[dt[`get${key}Month`]()]} `;
+      return `${d}${m}${dt[`get${key}FullYear`]()}`;
+    };
+    if (Array.isArray(v)) {
+      this.$refInput.value = v.map(toStr).join(", ");
     } else {
-      this.$refInput.value = "";
+      this.$refInput.value = v ? toStr(v) : "";
     }
   }
 
@@ -883,8 +948,10 @@ export default class WUPCalendarControl<
       }
     }
     startWith ??= this.$isEmpty ? PickersEnum.Year : PickersEnum.Day;
-    // define startDate
-    let v = this.$value ? this.normalizeToUTC(this.$value) : startDate || this.#ctr.$dateToUTC(new Date());
+    // define startDate: the first selected date for option `multiple`
+    const val = this.$value as Date | Date[] | undefined;
+    const dt = Array.isArray(val) ? (val[0] as Date | undefined) : val;
+    let v = dt ? this.normalizeToUTC(dt) : startDate || this.#ctr.$dateToUTC(new Date());
     const max = this.normalizeToUTC(this._opts.max);
     const min = this.normalizeToUTC(this._opts.min);
     v = max && max < v ? max : v; // don't allow to be in disabled area even if value is disabled
@@ -907,6 +974,7 @@ export default class WUPCalendarControl<
     } else {
       this.$refTitle.classList.remove(this.#ctr.classNameHidden);
     }
+    this.setAttr.call(this.$refCalendarItems, "aria-multiselectable", this._opts.multiple === true);
 
     if (!propsChanged || propsChanged.includes("exclude")) {
       this._opts.exclude?.sort((a, b) => a.valueOf() - b.valueOf());

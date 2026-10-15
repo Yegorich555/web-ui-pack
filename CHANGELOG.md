@@ -27,6 +27,8 @@
 - [TimeControl](src/controls/time.ts). Improved quality of icon
 - [CheckTreeControl](src/controls/checkTree.ts). Icon of partially checked item is customizable via css-var `--wup-icon-minus` (previously it was drawn via css)
 - [Form](src/formElement.ts). _**SubmitActions.reset**: values changed by user during the pending state are assigned to `$initValue`/`$initModel` on success (considered as submitted)_
+- [CalendarControl](src/controls/calendar.ts). _Option **storageKey** with **utc** saves date shifted by timezone (the previous day for timezones behind UTC)_
+- [TextControl](src/controls/text.ts) & inherited. _Ctrl+Z restores wrong text after text is changed programmatically when the new text ends with the same chars as before the change (ex. `"a, "` => `"a, b, "`)_
 - [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
 
   - toggle button (direct child `wup-dropdown > button`) has neutral style: inherited font & color, no background, chevron icon at the right (rotated when menu is opened), hover/focus background via css-vars `--icon-hover-bg` & `--icon-focus-bg`
@@ -62,6 +64,7 @@
   - Progress bar is mirrored for right placements (shrinks to the right side)
   - Added option **type** (`info`, `success`, `warning`, `error`; attribute `[w-type]`): icon at the left side, background, text & progress bar in colors of the type (css-vars `--notify-{type}` for icon & progress, `--notify-{type}-bg`, `--notify-{type}-text`)
 - helper [onSwipe](src/helpers/onSwipe.ts)
+- [DateControl](src/controls/date.ts) & [CalendarControl](src/controls/calendar.ts). Added option **multiple** (attribute `[w-multiple]`) to select several dates: `$value` is `Date[]`, click (or Enter) on date selects it or removes if it's already selected (menu stays opened); `[w-initvalue]` expects dates separated by comma (`"2022-10-25, 2022-10-28"`); for DateControl user types the next date at the end of input (with mask; completed date is added, already selected is ignored), Backspace/Delete removes the whole date & validations **min**, **max**, **exclude** are checked for every date
 - [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts). Added customization of menu via HTML: place `<ul>` with items inside the control; `<li>` elements are bound to **$options.items** by index (see example in JSDoc & demo)
 - [Form](src/formElement.ts)
   - Added notification for submit result (return `{notifyMessage: 'Success', type: "success"}` in $onSubmit Promise result/error to show wup-notify)

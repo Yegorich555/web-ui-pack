@@ -545,6 +545,25 @@ describe("control.text: mask", () => {
     expect(await h.userTypeText(el.$refInput, "8", { clearPrevious: false })).toBe("+8 (|");
   });
 
+  test("offset: mask is applied to the end of text", () => {
+    const inp = document.createElement("input");
+    const type = (text, char, offset) => {
+      inp.value = text;
+      inp.setSelectionRange(text.length, text.length);
+      mi.handleBeforeInput({ target: inp, inputType: "insertText", data: char }, offset);
+      inp.value += char; // browser inserts char
+      return mi.handleInput({ target: inp, inputType: "insertText" }, offset);
+    };
+    let mi = new MaskTextInput("0000-00-00", "2022-1");
+    expect(type("2022-10-05, 2022-1", "1", 12)).toEqual({ position: 8, declinedAdd: 0 }); // position is related to masked part
+    expect(mi.value).toBe("2022-11-");
+
+    // without offset the whole text is masked
+    mi = new MaskTextInput("0000-00-00", "2022-1");
+    expect(type("2022-1", "1")).toEqual({ position: 8, declinedAdd: 0 });
+    expect(mi.value).toBe("2022-11-");
+  });
+
   test("#.#", async () => {
     expect(new MaskTextInput("#.#", "2").isCompleted).toBe(true); // because others are optional
     expect(new MaskTextInput("#0.#", "2").isCompleted).toBe(true); // because others are optional

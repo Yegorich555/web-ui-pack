@@ -66,7 +66,7 @@ declare global {
       /** Set `true` to rollback value to that was before menu opened when user presses Escape (menu is closed in any case)
        * @tutorial Troubleshooting
        * * affects only if value is changed while menu is opened: by typing or via menu that stays opened
-       * (Select with `multiple: true`, SelectMany, Time with `menuButtonsOff: true`)
+       * (Select with `multiple: true`, SelectMany, Date with `multiple: true`, Time with `menuButtonsOff: true`)
        * * Time with `menuButtonsOff: true` always rollbacks value on Escape
        * @defaultValue false */
       menuEscRollback: boolean;

@@ -98,7 +98,7 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
         - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
         - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
           - [x] option `sync` to sync with TimeControl
-          - [ ] option `multiple`
+          - [x] option `multiple`
           - [ ] DateTimeControl
           - [ ] DateRangeControl
     - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)

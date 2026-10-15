@@ -323,36 +323,39 @@ export default class MaskTextInput {
     this.isCompletedFull = this.isCompleted && last.index === endIndex;
   }
 
-  /** Call it on 'beforeinput' event to improve logic */
-  handleBeforeInput(e: InputEvent): void {
+  /** Call it on 'beforeinput' event to improve logic
+   * @param offset count of chars at the beginning of input that mask isn't applied to */
+  handleBeforeInput(e: InputEvent, offset = 0): void {
     const el = e.target as WUP.Text.Mask.HandledInput;
     if (el.selectionStart !== el.selectionEnd) {
       delete el._maskPrev;
       return;
     }
-    let pos = el.selectionStart || 0;
+    let pos = (el.selectionStart || 0) - offset;
     // eslint-disable-next-line default-case
     switch (e!.inputType) {
       case "insertText":
       case "insertFromPaste": {
         const nPos = this.adjustCaret(pos);
-        nPos !== pos && el.setSelectionRange(nPos, nPos);
+        nPos !== pos && el.setSelectionRange(nPos + offset, nPos + offset);
         pos = nPos;
       }
     }
     el._maskPrev = {
-      position: el.selectionStart || 0,
+      position: pos,
       value: el.value,
       insertText: e.data,
     };
   }
 
-  /** Call it on 'input' event */
-  handleInput(e: InputEvent): { declinedAdd: number; position: number } {
+  /** Call it on 'input' event
+   * @param offset count of chars at the beginning of input that mask isn't applied to
+   * @returns position related to masked part */
+  handleInput(e: InputEvent, offset = 0): { declinedAdd: number; position: number } {
     const el = e.target as WUP.Text.Mask.HandledInput;
-    const v = el.value;
+    const v = el.value.substring(offset);
 
-    let pos = el.selectionStart || 0;
+    let pos = (el.selectionStart || 0) - offset;
     let declinedAdd = 0;
 
     let isProcessed = false;
