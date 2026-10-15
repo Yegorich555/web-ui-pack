@@ -50,6 +50,7 @@
   label {
     padding: var(--ctrl-radio-gap);
     gap: var(--ctrl-radio-gap);
+    user-select: none; // the same as for wup-switch: otherwise Chrome skips label click while page has selected text
   }
 
   &[w-reverse] label {

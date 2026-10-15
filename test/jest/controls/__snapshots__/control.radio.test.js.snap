@@ -1035,6 +1035,8 @@ WUP-RADIO strong {
 WUP-RADIO label {
   padding: var(--ctrl-radio-gap);
   gap: var(--ctrl-radio-gap);
+  -webkit-user-select: none;
+          user-select: none;
 }
 WUP-RADIO[w-reverse] label {
   flex-direction: row-reverse;

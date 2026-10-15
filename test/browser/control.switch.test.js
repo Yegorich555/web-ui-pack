@@ -30,4 +30,18 @@ describe("control.switch", () => {
     v = await page.evaluate(() => document.querySelector("wup-switch").$value);
     expect(v).toBe(true);
   });
+
+  test("click when page has selected text", async () => {
+    // Chrome skips label click while page has selected text (as if user selects label text); BaseControl prevents mousedown so click doesn't reset selection
+    await page.evaluate(() => {
+      const p = document.createElement("p");
+      p.textContent = "Some text";
+      testEl.before(p);
+      getSelection().selectAllChildren(p);
+    });
+    await page.click("wup-switch");
+    expect(await page.evaluate(() => document.querySelector("wup-switch").$value)).toBe(true);
+    await page.click("wup-switch");
+    expect(await page.evaluate(() => document.querySelector("wup-switch").$value)).toBe(false);
+  });
 });

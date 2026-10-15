@@ -1081,6 +1081,8 @@ WUP-CHECKTREE label {
   display: flex;
   gap: 0.5em;
   padding: var(--ctrl-switch-padding);
+  -webkit-user-select: none;
+          user-select: none;
 }
 WUP-CHECKTREE strong {
   box-sizing: border-box;

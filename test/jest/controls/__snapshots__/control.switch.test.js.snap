@@ -509,6 +509,8 @@ WUP-SWITCH label {
   display: flex;
   gap: 0.5em;
   padding: var(--ctrl-switch-padding);
+  -webkit-user-select: none;
+          user-select: none;
 }
 WUP-SWITCH strong {
   box-sizing: border-box;

@@ -29,6 +29,7 @@
 - [Form](src/formElement.ts). _**SubmitActions.reset**: values changed by user during the pending state are assigned to `$initValue`/`$initModel` on success (considered as submitted)_
 - [CalendarControl](src/controls/calendar.ts). _Option **storageKey** with **utc** saves date shifted by timezone (the previous day for timezones behind UTC)_
 - [TextControl](src/controls/text.ts) & inherited. _Ctrl+Z restores wrong text after text is changed programmatically when the new text ends with the same chars as before the change (ex. `"a, "` => `"a, b, "`)_
+- [SwitchControl](src/controls/switch.ts) & inherited, [RadioControl](src/controls/radio.ts). _Click does nothing in Chrome while the page has selected text (until selection is reset by click outside)_
 - [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
 
   - toggle button (direct child `wup-dropdown > button`) has neutral style: inherited font & color, no background, chevron icon at the right (rotated when menu is opened), hover/focus background via css-vars `--icon-hover-bg` & `--icon-focus-bg`
