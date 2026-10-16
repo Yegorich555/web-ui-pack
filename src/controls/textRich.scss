@@ -1,7 +1,7 @@
 @import "../styles";
 
 :root {
-  --ctrl-textrich-quote: #ccc;
+  --ctrl-textrich-quote: #888; // WCAG: non-text 3:1 on #fff
   --ctrl-textrich-code-bg: #f0f0f0;
   // icons render at 15px (1.125em of button font 13.33px): viewBox 15x15 + integer coords => crisp 2px strokes
   // WARN: any other size => blurry icons
@@ -25,8 +25,8 @@
   --wup-icon-align-justify: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 7H2m11 4H2m11-8H2'/%3E%3C/svg%3E");
 
   [wupdark] {
-    --ctrl-textrich-quote: #555;
-    --ctrl-textrich-code-bg: #1d1d1d;
+    --ctrl-textrich-quote: #748093; // WCAG: non-text 3:1 on #161b24, modal #222a36, popup #2b3645
+    --ctrl-textrich-code-bg: #26303d; // tone of dark theme (#1d1d1d was invisible on #161b24); text #bdbdbd 7:1 (AAA)
   }
 
   // editor content: global to show value outside via `<div wup-textrich>{value}</div>`
@@ -105,8 +105,10 @@ $tools: (
     border-bottom: 1px solid var(--ctrl-border);
     cursor: default;
 
-    &:empty {
-      display: none;
+    &:empty,
+    &[hidden],
+    [hidden] {
+      display: none !important; // tools with `hideToolbar` & their groups (otherwise styles of buttons win)
     }
   }
 
