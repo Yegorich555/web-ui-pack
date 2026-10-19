@@ -47,6 +47,46 @@ function useImage(ask) {
   return () => delete WUPTextRichControl.$tools.image;
 }
 
+/** Adds tools `phone`, `tag` & `mention` like demo textRich.custom.tsx does (classes `wup-tag`, `wup-mention`);
+ *  they're removed after each test */
+function useSocial() {
+  const t = WUPTextRichControl.$tools;
+  const telOf = (e) => {
+    const href = (e.tagName === "A" && e.getAttribute("href")) || "";
+    return (/^tel:/i.test(href) && href.slice(4)) || undefined;
+  };
+  t.phone = {
+    label: "Phone",
+    hideOnToolbar: true,
+    kind: "inline",
+    recognize: /(?<![\p{L}\p{N}+/.:-])\+\d \(\d{3}\) \d{3}-\d{2}-\d{2}$/u, // strict format `+1 (555) 123-45-67`
+    placeholder: "+1 (555) 123-45-67",
+    is: telOf,
+    create: (v) => Object.assign(document.createElement("a"), { href: `tel:${v.replace(/[^\d+]/g, "")}` }),
+  };
+  t.tag = {
+    label: "Hashtag",
+    hideOnToolbar: true,
+    kind: "inline",
+    recognize: /(?<![\p{L}\p{N}\p{M}_&/#])#(?![\p{N}_]+$)[\p{L}\p{N}\p{M}_]+$/u,
+    placeholder: "#tag",
+    is: (e) => (e.classList.contains("wup-tag") ? e.textContent.slice(1) : undefined),
+    create: "span",
+    classNameTag: "wup-tag",
+  };
+  t.mention = {
+    label: "Mention",
+    hideOnToolbar: true,
+    trigger: "@",
+    kind: "inline",
+    recognize: /(?<![\p{L}\p{N}\p{M}_.@/-])@[\p{L}\p{N}\p{M}_](?:[\p{L}\p{N}\p{M}_.-]*[\p{L}\p{N}\p{M}_])?$/u,
+    placeholder: "@name",
+    is: (e) => (e.classList.contains("wup-mention") ? e.textContent.slice(1) : undefined),
+    create: "span",
+    classNameTag: "wup-mention",
+  };
+}
+
 /** Sets editor html with selection: `[` - anchor, `]` - focus, `|` - caret (mark without text around it is point in element) */
 function setHtml(html) {
   const inp = el.$refInput;
@@ -135,7 +175,13 @@ function userPaste(html, targetRange) {
 }
 
 describe("control.textRich", () => {
-  afterEach(() => delete Range.prototype.getBoundingClientRect); // mocked by tests with menu near caret
+  afterEach(() => {
+    delete Range.prototype.getBoundingClientRect; // mocked by tests with menu near caret
+    // see useSocial
+    delete WUPTextRichControl.$tools.phone;
+    delete WUPTextRichControl.$tools.tag;
+    delete WUPTextRichControl.$tools.mention;
+  });
 
   testTextAreaControl(() => el, {
     attrs: {
@@ -290,7 +336,7 @@ describe("control.textRich", () => {
       };
 
       // at the end of bold: typed text is inserted by control (otherwise Chrome types after link)
-      expect(await typeTrigger("<div><b>bold</b></div>", "bold")).toEqual([true, true]);
+      expect(await typeTrigger("<div><b>bold </b></div>", "bold ")).toEqual([true, true]);
       // after token: typed text is inserted out of it
       expect(await typeTrigger('<div><span class="placeholder">{email}</span></div>', "{email}")).toEqual([true, true]);
     } finally {
@@ -789,7 +835,7 @@ describe("control.textRich", () => {
     expect(typeText("c")).toBe(false);
   });
 
-  test("ArrowRight at the end of format: the next typed text goes out of it", async () => {
+  test("arrows & line break at the edges of format: the next typed text goes out of it", async () => {
     await h.wait(1);
     const inp = el.$refInput;
     inp.focus();
@@ -811,6 +857,68 @@ describe("control.textRich", () => {
     expect(press("ArrowRight")).toBe(false);
     setHtml("<div><b>[bold]</b></div>");
     expect(press("ArrowRight")).toBe(false);
+    // typed text goes after format
+    setHtml("<div><b>bold|</b></div>");
+    press("ArrowRight");
+    userType("x");
+    expect(getHtml()).toBe("<div><b>bold</b>x|</div>");
+
+    // ArrowLeft at the start of format: the next typed text goes before it, ArrowRight returns into it
+    setHtml("<div>a<b>|bold</b></div>");
+    expect(press("ArrowLeft")).toBe(true);
+    expect(btnBold.getAttribute("aria-pressed")).toBe("false");
+    expect(press("ArrowLeft")).toBe(false); // the 2nd one moves caret
+    expect(press("ArrowRight")).toBe(true); // back into format
+    expect(btnBold.getAttribute("aria-pressed")).toBe("true");
+    expect(press("ArrowLeft")).toBe(true);
+    userType("x");
+    expect(getHtml()).toBe("<div>ax|<b>bold</b></div>");
+    setHtml("<div><b>|</b></div>"); // empty element: start & end at once
+    expect(press("ArrowRight")).toBe(true);
+    expect(press("ArrowLeft")).toBe(true); // back
+    expect(press("ArrowLeft")).toBe(true);
+    userType("x");
+    expect(getHtml()).toBe("<div>x|</div>"); // empty element is removed
+
+    /** Fires line break like Chrome: new line with copies of formats at caret (`copy` - its html), then input & selectionchange */
+    const lineBreak = (copy) => {
+      expect(typeText(null, "insertParagraph")).toBe(false); // browser adds line
+      inp.insertAdjacentHTML("beforeend", `<div>${copy}</div>`);
+      let n = inp.lastChild;
+      while (n.firstChild.nodeName !== "BR") {
+        n = n.firstChild;
+      }
+      window.getSelection().collapse(n, 0);
+      inp.dispatchEvent(new InputEvent("input", { inputType: "insertParagraph", bubbles: true }));
+      document.dispatchEvent(new Event("selectionchange")); // jsdom doesn't fire it
+    };
+    // Enter continues format in the new line
+    setHtml("<div><b>123|</b></div>");
+    lineBreak("<b><br></b>");
+    expect(getHtml()).toBe("<div><b>123</b></div><div><b>|<br></b></div>");
+    expect(btnBold.getAttribute("aria-pressed")).toBe("true");
+    // except format turned off before: Bold, 123, Bold, Enter, 234 => 234 isn't bold
+    setHtml("<div><b>123|</b></div>");
+    el.$format("bold"); // off for the next typed text
+    lineBreak("<b><br></b>");
+    expect(getHtml()).toBe("<div><b>123</b></div><div>|<br></div>");
+    expect(btnBold.getAttribute("aria-pressed")).toBe("false");
+    userType("234");
+    expect(getHtml()).toBe("<div><b>123</b></div><div>234|<br></div>");
+    // or left via ArrowRight
+    setHtml("<div><b>123|</b></div>");
+    press("ArrowRight");
+    lineBreak("<b><br></b>");
+    expect(getHtml()).toBe("<div><b>123</b></div><div>|<br></div>");
+    userType("234");
+    expect(getHtml()).toBe("<div><b>123</b></div><div>234|<br></div>");
+    // format turned on before: it's applied to text typed in the new line
+    setHtml("<div>123|</div>");
+    el.$format("bold");
+    lineBreak("<br>");
+    expect(btnBold.getAttribute("aria-pressed")).toBe("true");
+    userType("234");
+    expect(getHtml()).toBe("<div>123</div><div><b>234|</b><br></div>");
   });
 
   test("sanitizer", () => {
@@ -1036,6 +1144,475 @@ describe("control.textRich", () => {
       expect(type("<div>a {someProp|</div>", "}")[0]).toBe(false);
     } finally {
       cleanup();
+    }
+  });
+
+  test("text is recognized while typing: link, email & phone", async () => {
+    useSocial();
+    el.$options.toolbar = [["link", "email", "phone"]];
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Sets html with caret, types text like browser & returns html */
+    const rec = (html, data) => {
+      setHtml(html);
+      userType(data);
+      return getHtml();
+    };
+    /** Deletes char before caret like browser (Backspace) */
+    const userDelete = () => {
+      const sel = window.getSelection();
+      const t = sel.focusNode;
+      const offset = sel.focusOffset;
+      typeText(null, "deleteContentBackward");
+      t.deleteData(offset - 1, 1);
+      sel.collapse(t, offset - 1);
+      inp.dispatchEvent(new InputEvent("input", { inputType: "deleteContentBackward", bubbles: true }));
+    };
+    const a = (href, text = href) => `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    const b = (href, text) => `<a href="${href}">${text}</a>`; // email & phone
+    const isLink = (html, data = " ") => rec(html, data).includes("<a");
+
+    // element appears as soon as text is recognized & follows typed text
+    expect(rec("<div>see https://|</div>", "e")).toBe(`<div>see ${a("https://e", "https://e|")}</div>`);
+    userType("x.com/a?b=1");
+    expect(getHtml()).toBe(`<div>see ${a("https://ex.com/a?b=1", "https://ex.com/a?b=1|")}</div>`);
+    userType("."); // trailing punctuation & whitespace go out of it
+    expect(getHtml()).toBe(`<div>see ${a("https://ex.com/a?b=1")}.|</div>`);
+    expect(rec(`<div>see ${a("https://e", "https://e|")}</div>`, " ")).toBe(`<div>see ${a("https://e")} |</div>`);
+    // deleted chars
+    setHtml(`<div>see ${a("https://ex", "https://ex|")}</div>`);
+    userDelete();
+    expect(getHtml()).toBe(`<div>see ${a("https://e", "https://e|")}</div>`);
+    userDelete();
+    expect(getHtml()).toBe("<div>see https://|</div>");
+    // typed in the middle
+    expect(rec(`<div>${a("https://example.com", "https://exa|mple.com")}</div>`, "x")).toBe(
+      `<div>${a("https://exaxmple.com", "https://exax|mple.com")}</div>`
+    );
+    expect(rec(`<div>x|${a("https://a.com")}</div>`, "y")).toBe("<div>xy|https://a.com</div>"); // isn't link anymore
+    setHtml("<div>|ab</div>");
+    inp.dispatchEvent(new InputEvent("input", { inputType: "deleteContentBackward", bubbles: true }));
+    expect(getHtml()).toBe("<div>|ab</div>");
+    // element left via ArrowRight doesn't join text typed after it, the returned one follows typed text
+    const press = (key) => inp.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+    setHtml(`<div>${a("https://a.com", "https://a.com|")}</div>`);
+    press("ArrowRight");
+    userType("/x");
+    expect(getHtml()).toBe(`<div>${a("https://a.com")}/x|</div>`);
+    userType("y");
+    expect(getHtml()).toBe(`<div>${a("https://a.com")}/xy|</div>`);
+    setHtml(`<div>${a("https://a.com", "https://a.com|")}</div>`);
+    press("ArrowRight");
+    press("ArrowLeft"); // back into it
+    userType("/x");
+    expect(getHtml()).toBe(`<div>${a("https://a.com/x", "https://a.com/x|")}</div>`);
+
+    expect(rec("<div>www.example.co|</div>", "m")).toBe(
+      `<div>${a("https://www.example.com", "www.example.com|")}</div>`
+    );
+    // trailing punctuation stays outside, balanced brackets are inside
+    expect(rec("<div>(see https://en.wikipedia.org/wiki/A_(b))|</div>", ".")).toBe(
+      `<div>(see ${a("https://en.wikipedia.org/wiki/A_(b)")}).|</div>`
+    );
+    expect(rec("<div>mail someone@gmail.|</div>", "c")).toBe(
+      `<div>mail ${b("mailto:someone@gmail.c", "someone@gmail.c|")}</div>`
+    );
+    // phone in strict format: element appears when it's typed completely, extra digit removes it
+    expect(isLink("<div>call +1 (555) 123-45-|</div>", "6")).toBe(false);
+    expect(rec("<div>call +1 (555) 123-45-6|</div>", "7")).toBe(
+      `<div>call ${b("tel:+15551234567", "+1 (555) 123-45-67|")}</div>`
+    );
+    userType("8");
+    expect(getHtml()).toBe("<div>call +1 (555) 123-45-678|</div>");
+    // not phones: other formats, short, id, number, date
+    expect(isLink("<div>+1 (555) 123-456|</div>", "7")).toBe(false);
+    expect(isLink("<div>+44 20 7946 095|</div>", "8")).toBe(false);
+    expect(isLink("<div>555-123-45-6|</div>", "7")).toBe(false); // without country code
+    expect(isLink("<div>123-45-67|</div>")).toBe(false);
+    expect(isLink("<div>1234567890|</div>")).toBe(false);
+    expect(isLink("<div>2026-10-15 1234|</div>")).toBe(false);
+    // typed separator stays outside element, next chars join it: `a@b.co` + `-op.com`
+    expect(rec(`<div>${b("mailto:a@b.co", "a@b.co|")}</div>`, "-")).toBe(
+      `<div>${b("mailto:a@b.co", "a@b.co")}-|</div>`
+    );
+    userType("op.com");
+    expect(getHtml()).toBe(`<div>${b("mailto:a@b.co-op.com", "a@b.co-op.com|")}</div>`);
+    // not links
+    expect(isLink("<div>https:/|</div>", "/")).toBe(false);
+    expect(isLink("<div>xhttps://a.co|</div>", "m")).toBe(false);
+    expect(isLink("<div>mailto:me@example.co|</div>", "m")).toBe(false);
+    expect(isLink("<pre>https://a.co|</pre>", "m")).toBe(false); // code block
+    // text is formatted already: link around it or in it
+    expect(rec(`<div><a href="/x">https://a.co|</a></div>`, "m")).toBe(`<div><a href="/x">https://a.com|</a></div>`);
+    expect(rec(`<div><a href="/x">+1 (555)</a> 123-45-6|</div>`, "7")).toBe(
+      `<div><a href="/x">+1 (555)</a> 123-45-67|</div>`
+    );
+
+    // word from the last line break or embed to the next one
+    expect(rec("<div>a<br>https://a.co|<br>b</div>", "m")).toBe(
+      `<div>a<br>${a("https://a.com", "https://a.com|")}<br>b</div>`
+    );
+    expect(rec("<ul><li>https://a.co|<ul><li>b</li></ul></li></ul>", "m")).toBe(
+      `<ul><li>${a("https://a.com", "https://a.com|")}<ul><li>b</li></ul></li></ul>`
+    );
+    // loose content (Chrome doesn't wrap the 1st line)
+    expect(rec("https://a.co|<div>b</div>", "m")).toBe(`${a("https://a.com", "https://a.com|")}<div>b</div>`);
+    // text split by formats: element per part
+    expect(rec("<div><b>see https://a</b>.co|</div>", "m")).toBe(
+      `<div><b>see ${a("https://a.com", "https://a")}</b>${a("https://a.com", ".com|")}</div>`
+    );
+
+    // line break: caret goes out of element (otherwise browser adds line into it)
+    setHtml(`<div>${a("https://a.com", "https://a.com|")}</div>`);
+    expect(typeText(null, "insertParagraph")).toBe(false);
+    expect(getHtml()).toBe(`<div>${a("https://a.com")}|</div>`);
+    setHtml("<div><b>https://a.com|</b></div>"); // not recognized yet: pasted etc.
+    typeText(null, "insertLineBreak");
+    expect(getHtml()).toBe(`<div><b>${a("https://a.com")}|</b></div>`);
+    setHtml("<div>https://a.com!|</div>");
+    typeText(null, "insertParagraph");
+    expect(getHtml()).toBe(`<div>${a("https://a.com")}!|</div>`);
+    setHtml("<div>[https://a.com]</div>");
+    typeText(null, "insertParagraph");
+    expect(getHtml()).toBe("<div>[https://a.com]</div>");
+
+    // undo removes new element & pauses recognizing till caret leaves word
+    setHtml("<div>a |</div>");
+    await h.wait(1);
+    userType("https://a.c");
+    expect(getHtml()).toBe(`<div>a ${a("https://a.c", "https://a.c|")}</div>`);
+    await h.wait(1);
+    expect(typeText(null, "historyUndo")).toBe(true);
+    await h.wait(1);
+    expect(inp.innerHTML).toBe("<div>a https://a.c</div>");
+    expect(rec("<div>a https://a.c|</div>", "o")).toBe("<div>a https://a.co|</div>");
+    userType(" ");
+    expect(rec("<div>a https://a.c|</div>", "o")).toBe(`<div>a ${a("https://a.co", "https://a.co|")}</div>`);
+    const pause = () => typeText(null, "historyRedo");
+    const isResumed = () => rec("<div>https://a.c|</div>", "o").includes("<a");
+    pause();
+    inp.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }));
+    expect(isResumed()).toBe(true);
+    pause();
+    inp.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+    expect(isResumed()).toBe(true);
+    pause();
+    setHtml("<div>https://a.c|</div>");
+    typeText(null, "insertParagraph");
+    expect(isResumed()).toBe(true);
+    pause();
+    inp.blur();
+    await h.wait(1);
+    inp.focus();
+    expect(isResumed()).toBe(true);
+    // element of initial value follows its text too
+    el.$value = `go ${a("https://a.com")}`;
+    await h.wait(1);
+    expect(rec(`<div>go ${a("https://a.com", "https://a.com|")}</div>`, "/")).toBe(
+      `<div>go ${a("https://a.com/", "https://a.com/|")}</div>`
+    );
+
+    // custom tools: RegExp & function
+    const { $tools } = WUPTextRichControl;
+    $tools.marked = {
+      kind: "inline",
+      recognize: /(?<!\w)#\w+$/,
+      is: (e) => e.tagName === "MARK" || undefined,
+      create: "mark",
+    };
+    $tools.issue = {
+      hideOnToolbar: true,
+      kind: "inline",
+      recognize: (s) => /\b[A-Z]+-\d+$/.exec(s)?.[0],
+      is: (e) => (e.classList.contains("issue") ? e.title : undefined),
+      create: (v) => Object.assign(document.createElement("span"), { title: v }),
+      classNameTag: "issue",
+    };
+    $tools.wrong = {
+      kind: "inline",
+      recognize: (s) => s.endsWith("!") && "?", // recognized text isn't at the end
+      is: (e) => e.tagName === "I" || undefined,
+      create: "i",
+    };
+    try {
+      el.$options.toolbar = [["link", "marked", "issue", "wrong"]];
+      await h.wait(1);
+      expect(rec("<div>#ab #new|</div>", "s")).toBe("<div>#ab <mark>#news|</mark></div>");
+      expect(rec("<div>see WUP-1|</div>", "2")).toBe(
+        '<div>see <span title="WUP-12" class="issue">WUP-12|</span></div>'
+      );
+      expect(rec("<div>a|</div>", "!")).toBe("<div>a!|</div>");
+      expect(isLink("<div>a@b.co|</div>", "m")).toBe(false); // tool isn't in toolbar
+      expect(isLink("<div>www.|</div>", "[")).toBe(false); // `is` rejects element: invalid url
+      expect(el.$refToolbar.querySelector('[tool="issue"]').hidden).toBe(true);
+      el.$options.toolbar = [["bold"]];
+      await h.wait(1);
+      expect(isLink("<div>https://a.co|</div>", "m")).toBe(false); // without tools
+    } finally {
+      delete $tools.marked;
+      delete $tools.issue;
+      delete $tools.wrong;
+    }
+  });
+
+  test("hashtags & mentions", async () => {
+    useSocial();
+    el.$options.toolbar = [["link", "email", "tag", "mention"]];
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Sets html with caret, types text like browser & returns html */
+    const rec = (html, data) => {
+      setHtml(html);
+      userType(data);
+      return getHtml();
+    };
+    const tag = (s) => `<span class="wup-tag">${s}</span>`;
+    const mention = (s) => `<span class="wup-mention">${s}</span>`;
+
+    expect(rec("<div>see #new|</div>", "s")).toBe(`<div>see ${tag("#news|")}</div>`);
+    expect(rec("<div>(#café_|</div>", "2")).toBe(`<div>(${tag("#café_2|")}</div>`);
+    expect(rec("<div>hi @john.do|</div>", "e")).toBe(`<div>hi ${mention("@john.doe|")}</div>`);
+    expect(rec(`<div>hi ${mention("@john|")}</div>`, ".")).toBe(`<div>hi ${mention("@john")}.|</div>`);
+    userType("doe"); // joins element again
+    expect(getHtml()).toBe(`<div>hi ${mention("@john.doe|")}</div>`);
+    // not hashtags & mentions: digits only, in word, email, url
+    expect(rec("<div>#1|</div>", "2")).toBe("<div>#12|</div>");
+    expect(rec("<div>C|</div>", "#")).toBe("<div>C#|</div>");
+    expect(rec("<div>a&#|</div>", "x")).toBe("<div>a&amp;#x|</div>");
+    expect(rec("<div>a@|</div>", "b")).toBe("<div>a@b|</div>");
+    expect(rec("<div>a@b.|</div>", "c")).toBe('<div><a href="mailto:a@b.c">a@b.c|</a></div>');
+    expect(rec("<div>https://a.com/#to|</div>", "p")).toBe(
+      '<div><a href="https://a.com/#top" target="_blank" rel="noopener noreferrer">https://a.com/#top|</a></div>'
+    );
+    // sanitizer keeps them
+    const div = document.createElement("div");
+    div.append(
+      htmlToEditor(`<p>${mention("@john")} ${tag("#news")} <span class="x">@a</span></p>`, WUPTextRichControl.$tools)
+    );
+    expect(div.innerHTML).toBe(`<div>${mention("@john")} ${tag("#news")} @a</div>`);
+
+    // ArrowLeft at the start: typed text goes before element & doesn't join it
+    setHtml(`<div>${tag("|#news")}</div>`);
+    inp.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, cancelable: true }));
+    userType("x");
+    expect(getHtml()).toBe(`<div>x|${tag("#news")}</div>`);
+    // line break: recognized text & token aren't continued in the next line
+    setHtml(`<div>hi ${tag("#news|")}</div>`);
+    expect(typeText(null, "insertParagraph")).toBe(false); // caret goes out of element
+    expect(getHtml()).toBe(`<div>hi ${tag("#news")}|</div>`);
+    setHtml(`<div>hi ${mention("@john|")}</div>`);
+    typeText(null, "insertLineBreak");
+    expect(getHtml()).toBe(`<div>hi ${mention("@john")}|</div>`);
+    setHtml(`<div>${mention(tag("#news"))}</div><div>${mention(tag("|<br>"))}</div>`); // copied by Chrome
+    inp.dispatchEvent(new InputEvent("input", { inputType: "insertParagraph", bubbles: true }));
+    expect(getHtml()).toBe(`<div>${mention(tag("#news"))}</div><div>|<br></div>`);
+    setHtml("<div><b>bold</b></div><div><b>|<br></b></div>"); // formats are continued
+    inp.dispatchEvent(new InputEvent("input", { inputType: "insertLineBreak", bubbles: true }));
+    expect(getHtml()).toBe("<div><b>bold</b></div><div><b>|<br></b></div>");
+
+    // tool with values: menu on trigger at word start, typed text isn't recognized
+    const { mention: tool } = WUPTextRichControl.$tools;
+    tool.values = [{ value: "john", label: "John Smith" }];
+    const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
+    Range.prototype.getBoundingClientRect = () => rect; // jsdom: menu is placed near caret
+    try {
+      el.$options.toolbar = [["bold"], ["mention"]];
+      await h.wait(1);
+      const btn = el.querySelector("[tool=mention]");
+      expect(btn.hidden).toBe(true);
+      expect(rec("<div>hi @joh|</div>", "n")).toBe("<div>hi @john|</div>");
+      inp.blur();
+      await h.wait(1);
+      inp.focus();
+      setHtml("<div>a|</div>");
+      userType("@"); // in word: email
+      expect(btn.getAttribute("aria-expanded")).toBe("false");
+      setHtml("<div>hi |</div>");
+      userType("@");
+      expect(btn.getAttribute("aria-expanded")).toBe("true");
+      expect(el.querySelector("wup-popup[menu] li").textContent).toBe("John Smith");
+      inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+      await h.wait(1);
+      expect(getHtml()).toBe(`<div>hi ${mention("@john")}|</div>`);
+      // typed text after token isn't recognized & token stays
+      userType("x");
+      expect(getHtml()).toBe(`<div>hi ${mention("@john")}x|</div>`);
+    } finally {
+      delete tool.values;
+    }
+  });
+
+  test("slash commands", async () => {
+    useSocial();
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    // slash commands: menu at word start, chosen format replaces typed text
+    const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
+    Range.prototype.getBoundingClientRect = () => rect; // jsdom: menu is placed near caret
+    const btn = el.querySelector("[tool=command]");
+    const items = () => [...el.querySelectorAll("wup-popup[menu] li")].filter((li) => !li.hidden);
+    const choose = async (html, typed) => {
+      setHtml(html);
+      if (!html) {
+        // empty line: caret in empty text (otherwise userType has no text to type into)
+        const t = inp.appendChild(document.createElement("div")).appendChild(document.createTextNode(""));
+        window.getSelection().collapse(t, 0);
+      }
+      userType("/");
+      expect(btn.getAttribute("aria-expanded")).toBe("true");
+      typed && userType(typed);
+      inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+      await h.wait(1);
+      return inp.innerHTML;
+    };
+    expect(await choose("")).toBe("<h1><br></h1>"); // empty line keeps placeholder
+    expect(await choose("<div>item |</div>", "bul")).toBe("<ul><li>item </li></ul>");
+    expect(await choose("<div>a |</div>", "quo")).toBe("<blockquote>a </blockquote>");
+    setHtml("<div>https:|</div>");
+    userType("/"); // not at word start
+    expect(btn.getAttribute("aria-expanded")).toBe("false");
+    setHtml("<div>a |</div>");
+    userType("/");
+    userType("lin");
+    expect(items().map((li) => li.textContent)).toEqual(["UnderlineCtrl+U", "LinkCtrl+K"]); // with shortcuts
+    inp.blur(); // closes menu
+    await h.wait(1);
+    inp.focus();
+
+    // menu lists tools of toolbar (hidden ones too)
+    const { $tools } = WUPTextRichControl;
+    $tools.marked = {
+      kind: "inline",
+      placeholder: "text",
+      is: (e) => e.tagName === "MARK" || undefined,
+      create: "mark",
+    };
+    const spyErr = jest.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      el.$options.hideHotKeysHint = true;
+      el.$options.toolbar = [
+        ["bold", { size: ["lg", false, "xx"] }, { list: "ordered" }, { header: [1] }, "unknown"],
+        ["email", "mention", "marked", "command", "btnClear"],
+      ];
+      await h.wait(1);
+      const cmd = () => el.querySelector("[tool=command]"); // re-rendered with toolbar
+      setHtml("<div>a |</div>");
+      userType("/");
+      expect(items().map((li) => li.textContent)).toEqual([
+        "Bold",
+        "Font size: Large",
+        "Font size: Default",
+        "Font size: Xx",
+        "Numbered list",
+        "Heading 1",
+        "Email",
+        "Mention",
+        "marked",
+      ]);
+      inp.blur();
+      await h.wait(1);
+      inp.focus();
+      /** Chooses item of command menu by typed text & returns html with selection */
+      const pick = async (html, typed) => {
+        setHtml(html);
+        userType("/");
+        userType(typed);
+        expect(cmd().getAttribute("aria-expanded")).toBe("true");
+        inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+        await h.wait(1);
+        return getHtml();
+      };
+      // placeholder: recognized & selected to type over it
+      expect(await pick("<div>a |</div>", "ema")).toBe(
+        '<div>a [<a href="mailto:name@example.com">name@example.com]</a></div>'
+      );
+      userType("j"); // replaces element: text isn't recognized anymore
+      expect(getHtml()).toBe("<div>a j|</div>");
+      expect(await pick("<div>a |</div>", "menti")).toBe('<div>a [<span class="wup-mention">@name]</span></div>');
+      // placeholder without recognize: formatted by tool
+      expect(await pick("<div>a |</div>", "mark")).toBe("<div>a [<mark>text]</mark></div>");
+      // tool without placeholder: applied like $format (pending for the next typed text)
+      await pick("<div>a |</div>", "bol");
+      userType("B");
+      expect(getHtml()).toBe("<div>a <b>B|</b></div>");
+      expect(await pick("<div>a |</div>", "lar")).toBe("<div>a |</div>");
+      userType("L");
+      expect(getHtml()).toBe('<div>a <span style="font-size: x-large;">L|</span></div>');
+      // tool with menu: its trigger opens it
+      $tools.mention.values = [{ value: "john", label: "John Smith" }];
+      el.$options.toolbar = [["mention", "command"]];
+      await h.wait(1);
+      expect(await pick("<div>a |</div>", "menti")).toBe("<div>a @|</div>");
+      expect(items().map((li) => li.textContent)).toEqual(["John Smith"]);
+      // $format without value asks via menu
+      setHtml("<div>a |</div>");
+      el.$format("command");
+      await h.wait(1);
+      expect(cmd().getAttribute("aria-expanded")).toBe("true");
+      el.applyCommand("unknown"); // ignored
+    } finally {
+      delete $tools.marked;
+      delete $tools.mention.values;
+      el.$options.hideHotKeysHint = false;
+      spyErr.mockRestore();
+    }
+  });
+
+  test("$defaults.toolbar = null hides toolbar", async () => {
+    const { toolbar } = WUPTextRichControl.$defaults;
+    WUPTextRichControl.$defaults.toolbar = null;
+    try {
+      const c = document.body.appendChild(document.createElement("wup-textrich"));
+      await h.wait(1);
+      expect(c.$options.toolbar).toBe(null);
+      expect(c.$refToolbar.hidden).toBe(true);
+      c.remove();
+    } finally {
+      WUPTextRichControl.$defaults.toolbar = toolbar;
+    }
+  });
+
+  test("hideOnToolbar: tool works without button", async () => {
+    const { link } = WUPTextRichControl.$tools;
+    link.hideOnToolbar = true;
+    try {
+      el.$options.toolbar = [["bold", "email"], ["link"]];
+      await h.wait(1);
+      const bar = el.$refToolbar;
+      const groups = bar.querySelectorAll("[role=group]");
+      expect(groups.length).toBe(2);
+      expect([groups[0].hidden, groups[1].hidden]).toEqual([false, true]); // group with hidden tools only
+      expect(bar.hidden).toBe(false);
+      const hint = document.getElementById(el.$refInput.getAttribute("aria-describedby"));
+      expect(hint.textContent).toBeTruthy();
+
+      // keyboard: hidden buttons are skipped
+      el.$refInput.focus();
+      const key = (k, opts) =>
+        document.activeElement.dispatchEvent(
+          new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true, ...opts })
+        );
+      key("F10", { code: "F10", altKey: true });
+      expect(document.activeElement.getAttribute("tool")).toBe("bold");
+      key("ArrowRight");
+      expect(document.activeElement.getAttribute("tool")).toBe("bold");
+
+      // shortcut of hidden tool: popup is placed near editor
+      setHtml("<div>a |b</div>");
+      key("k", { code: "KeyK", ctrlKey: true });
+      await h.wait(1);
+      expect(el.querySelector("wup-popup")?.$options.target).toBe(el.$refInput);
+
+      // toolbar with hidden tools only is hidden
+      el.$options.toolbar = [["link", "email"]];
+      await h.wait(1);
+      expect(bar.hidden).toBe(true);
+      expect(hint.textContent).toBe("");
+    } finally {
+      delete link.hideOnToolbar;
     }
   });
 

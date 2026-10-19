@@ -123,6 +123,27 @@ exports[`control.textRich $ariaDetails 1`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -373,6 +394,27 @@ exports[`control.textRich $ariaDetails 2`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -623,6 +665,27 @@ exports[`control.textRich $ariaSpeak 1`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -881,6 +944,27 @@ exports[`control.textRich $ariaSpeak 2`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -1131,6 +1215,27 @@ exports[`control.textRich $show/$hide error 1`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -1383,6 +1488,27 @@ exports[`control.textRich $show/$hide error 2`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -1647,6 +1773,27 @@ exports[`control.textRich $show/$hide error 3`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -1940,7 +2087,7 @@ exports[`control.textRich common tests render + styles 2`] = `
   --ctrl-autofill-caret: #fff;
 }
   :root {
-  --ctrl-textrich-quote: #ccc;
+  --ctrl-textrich-quote: #888;
   --ctrl-textrich-code-bg: #f0f0f0;
   --wup-icon-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 3h4a2 2 0 0 1 0 4H4zm0 4h4.5a2.5 2.5 0 0 1 0 5H4z'/%3E%3C/svg%3E");
   --wup-icon-italic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M6 3h5M4 12h5m-2.5 0 2-9'/%3E%3C/svg%3E");
@@ -1962,8 +2109,8 @@ exports[`control.textRich common tests render + styles 2`] = `
   --wup-icon-align-justify: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 7H2m11 4H2m11-8H2'/%3E%3C/svg%3E");
 }
 [wupdark] {
-  --ctrl-textrich-quote: #555;
-  --ctrl-textrich-code-bg: #1d1d1d;
+  --ctrl-textrich-quote: #748093;
+  --ctrl-textrich-code-bg: #26303d;
 }
 [wup-textrich] blockquote {
   margin: 5px 0;
@@ -2371,8 +2518,9 @@ WUP-TEXTRICH [role=toolbar] {
   border-bottom: 1px solid var(--ctrl-border);
   cursor: default;
 }
-WUP-TEXTRICH [role=toolbar]:empty {
-  display: none;
+WUP-TEXTRICH [role=toolbar]:empty, WUP-TEXTRICH [role=toolbar][hidden],
+WUP-TEXTRICH [role=toolbar] [hidden] {
+  display: none !important;
 }
 WUP-TEXTRICH [role=group] {
   display: flex;
@@ -2819,6 +2967,8 @@ exports[`control.textRich common tests snapshot of $defaults 1`] = `
     ],
     [
       "link",
+      "email",
+      "command",
     ],
     [
       {
@@ -3022,6 +3172,27 @@ exports[`control.textRich options clearButton 1`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -3278,6 +3449,27 @@ exports[`control.textRich options clearButton 2`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -3525,6 +3717,27 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -3811,6 +4024,27 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -4103,6 +4337,27 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -4374,6 +4629,27 @@ exports[`control.textRich validations options.validationCase 1`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -4630,6 +4906,27 @@ exports[`control.textRich validations options.validationCase 2`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -4907,6 +5204,27 @@ exports[`control.textRich validations options.validationCase 3`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -5181,6 +5499,27 @@ exports[`control.textRich validations options.validationCase 4`] = `
         type="button"
         w-tooltip="Link (Ctrl+K)"
       />
+      <button
+        aria-label="Email"
+        aria-pressed="false"
+        hidden=""
+        tabindex="-1"
+        tool="email"
+        type="button"
+        w-tooltip=""
+      />
+      <button
+        aria-expanded="false"
+        aria-label="Commands"
+        hidden=""
+        role="combobox"
+        tabindex="-1"
+        tool="command"
+        type="button"
+        w-tooltip=""
+      >
+        Commands
+      </button>
     </div>
     <div
       role="group"
@@ -5455,6 +5794,27 @@ exports[`control.textRich with form 1`] = `
           type="button"
           w-tooltip="Link (Ctrl+K)"
         />
+        <button
+          aria-label="Email"
+          aria-pressed="false"
+          hidden=""
+          tabindex="-1"
+          tool="email"
+          type="button"
+          w-tooltip=""
+        />
+        <button
+          aria-expanded="false"
+          aria-label="Commands"
+          hidden=""
+          role="combobox"
+          tabindex="-1"
+          tool="command"
+          type="button"
+          w-tooltip=""
+        >
+          Commands
+        </button>
       </div>
       <div
         role="group"

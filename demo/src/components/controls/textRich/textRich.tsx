@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import Page from "src/elements/page";
 import { WUPTextRichControl } from "web-ui-pack";
-import Example1 from "./example1";
+import TextRichCustom from "./textRich.custom";
 import stylesCom from "../controls.scss";
 
 WUPTextRichControl.$use();
@@ -34,6 +34,8 @@ export default function TextRichControlView() {
         "Customizable Hot-Keys for every tool; use Alt+F10 to focus toolbar, Arrows to navigate, Esc to return",
         'Selected text is wrapped into typed quote or bracket like in code editors: "text", (text) etc. (customizable via static $wrapChars)',
         "Menu of values on typed char like mentions in messengers: { for placeholders, @ for users, / for commands (see `trigger` of static $tools)",
+        "Typed links & emails are recognized while typing (see `recognize` of static $tools)",
+        "Slash commands: type / at word start to choose any tool of toolbar (hidden ones too); link, email etc. insert example text to type over (see `command` & `placeholder` of static $tools)",
         "Validations min/max count visible chars only",
       ]}
     >
@@ -100,7 +102,7 @@ export default function TextRichControlView() {
             w-initValue="Disabled <strong>text</strong>"
           />
         </div>
-        <Example1 />
+        <TextRichCustom />
         <button type="submit">Submit</button>
       </wup-form>
     </Page>

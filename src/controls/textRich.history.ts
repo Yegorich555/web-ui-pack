@@ -35,6 +35,13 @@ export default class TextRichHistory extends TextHistory {
     this._histTimeout && clearTimeout(this._histTimeout);
   }
 
+  /** Ends the current change: the next one is a separate undo step (otherwise changes of the same tick are merged) */
+  commit(): void {
+    this._histTimeout && clearTimeout(this._histTimeout);
+    this._histTimeout = null;
+    this._stateBeforeInput = undefined;
+  }
+
   override undoRedo(isRedo: boolean): boolean {
     if (!this.canUndoRedo(isRedo)) {
       return false;

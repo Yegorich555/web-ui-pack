@@ -33,6 +33,7 @@ import {
   splitAt,
   splitRange,
   textAt,
+  textAround,
   wrapLines,
 } from "./textRich.format";
 
@@ -62,8 +63,13 @@ declare global {
       strike: true;
       blockquote: true;
       code: true;
-      /** Link url (asked via popup) */
+      /** Link url (asked via popup); typed url is recognized (`https://...`, `www...`) */
       link: string;
+      /** Email of link `mailto:`: typed email is recognized (tool is hidden in toolbar) */
+      email: string;
+      /** Menu of tools in toolbar (hidden ones too) on typing `/` at word start: value is tool & its value
+       *  (`header:1`, `bold`); typed text is replaced with chosen format or `placeholder` of tool (tool is hidden in toolbar) */
+      command: string;
       /** Removes formatting */
       clean: true;
       /** Clear button ($refBtnClear): rendered if `$options.clearButton` is true, works like Esc (see `$options.clearActions`) */
@@ -105,7 +111,7 @@ declare global {
        * @tutorial Rules
        * * `Control` is Cmd on macOS/iOS (shown as `⌘`)
        * * `Control` or `Alt` is required; key is matched by `KeyboardEvent.code`, so it works with any keyboard layout
-       * * works only if tool is rendered in toolbar
+       * * works only if tool is in toolbar (see `hideOnToolbar`)
        * * tool with values: the 1st shortcut selects the previous value, the 2nd one - the next value (`size`: bigger/smaller)
        * * `btnClear`: Escape clears value according to $options.clearActions */
       hotKey?: string;
@@ -114,6 +120,9 @@ declare global {
       className?: string;
       /** Class of element created via `create` (in editor, $value & dropdown preview): to style it & detect it in `is` */
       classNameTag?: string;
+      /** Hide button (or dropdown) in toolbar: tool works as rendered one (shortcuts, `trigger`, `recognize` etc.)
+       *  if it's in $options.toolbar; `label` is still used: item in menu of `command` & `aria-label` of menu of `trigger` */
+      hideOnToolbar?: boolean;
       /** Dropdown values in default order (toolbar item `"header"` = `{ header: [1, 2, 3, 4, 5, 6, false] }`);
        *  `false` - format isn't applied (`Normal` of `header`);
        *  without `ask` value is asked via this dropdown opened near editor (on `trigger`, hover on `embed`, $format without value) */
@@ -122,7 +131,8 @@ declare global {
        *  text typed after it filters items by label or value; chosen value replaces typed text;
        *  Arrows - navigate, Enter/Tab/click - choose, Escape/whitespace/caret out - close
        * @tutorial Rules
-       * * works only if tool is rendered in toolbar as dropdown
+       * * works only if tool is in toolbar as dropdown (see `hideOnToolbar`)
+       * * works at word start only: after whitespace, bracket or quote (`@` of email doesn't open mentions)
        * * typed pair of trigger (see static $wrapChars) applies typed text even if it isn't in values:
        * `{someProp}` gives placeholder `someProp` (`is` can return `undefined` to reject it)
        * * `inline` tool with trigger inserts token (placeholder, mention): `create` element with text `{trigger}{value}{pair}`
@@ -138,6 +148,19 @@ declare global {
        *   classNameTag: "placeholder",
        * }; */
       trigger?: string;
+      /** Recognizes text while user types: word at caret is wrapped into element of `create(text)` as soon as it's matched
+       *  (`someone@gmail.c` => email link); element follows its text on typing & deleting (it's removed if text isn't
+       *  recognized anymore); undo (Ctrl+Z) returns plain text & pauses recognizing till caret leaves word
+       * @tutorial Rules
+       * * RegExp must match the end of text (use `$`); function returns the recognized end of text or nothing
+       * * tool with `values` isn't recognized: value is chosen via menu (see `trigger`), like mentions in messengers
+       * * point `placeholder` too: otherwise tool chosen in menu of `command` does nothing visible
+       * @example
+       * recognize: /(?<!\w)#\w+$/, // hashtags: `#news`
+       * recognize: (s) => /\b[A-Z]+-\d+$/.exec(s)?.[0], // Jira issues: `WUP-123` */
+      recognize?: RegExp | ((text: string) => string | null | undefined);
+      /** Text that inserted as example when user selects this command (type '/' and chose command with this) */
+      placeholder?: string;
       /** Kind of format: defines default `format`, sanitizing & behavior with collapsed selection
        * * `inline` - wraps text (`<b>`, `<a>`, `<span style>`); with collapsed selection it's applied to the next typed text
        * (if no `ask`); removed by `clean`
@@ -153,10 +176,9 @@ declare global {
        *  `line` & `lineStyle` get lines only (paragraph, heading, list item etc.)
        *  WARN: sanitizer calls it for untrusted html (paste etc.): return only safe values (see `sanitizeUrl`) */
       is?: (el: HTMLElement) => V | undefined;
-      /** Creates element of format with value: for default format, sanitizer & dropdown preview (heading etc.);
-       *  tag name = `() => document.createElement(tag)`
+      /** Creates element to wrap related part of text
        * @example
-       * create: "mark",
+       * create: "div", // equal to () => document.createElement("div")
        * create: (v) => document.createElement(v === "sub" ? "sub" : "sup"), */
       create?: keyof HTMLElementTagNameMap | ((value: V) => HTMLElement);
       /** Sets value to line (`undefined` removes it): for default format & sanitizer of `lineStyle`;
@@ -341,6 +363,9 @@ function typedValue(s: string, trigger: string, pair: string | undefined): strin
   return v && !/\s/.test(v) ? v : undefined;
 }
 
+/** Returns true if elements have the same tag & attributes */
+const isSame = (a: Node, b: Node): boolean => a.cloneNode(false).isEqualNode(b.cloneNode(false));
+
 /** Selects range (Range or StaticRange) */
 const selectRange = (r: AbstractRange): void =>
   window.getSelection()!.setBaseAndExtent(r.startContainer, r.startOffset, r.endContainer, r.endOffset);
@@ -390,6 +415,9 @@ function insertText(n: Node, offset: number, s: string): [Node, number] {
  * * shortcuts are similar to Google Docs: Ctrl+B, Ctrl+Shift+7, Ctrl+Alt+1 etc. (Cmd on macOS/iOS);
  * they're shown in tooltips & dropdown items (see $options.hideHotKeysHint); Alt+F10 focuses toolbar (Arrows - navigate, Esc - return)
  * * inline format (bold etc.) with collapsed selection is applied to the next typed text
+ * * ArrowRight at the end of inline format (bold, link etc.) or ArrowLeft at its start: the next typed text goes out of it
+ * (caret stays visually), the opposite arrow returns into it
+ * * Enter continues inline formats in the next line except turned off (Bold toggled off), left via arrow, recognized text & tokens
  * * typed quote or bracket wraps selected text like in code editors: `"text"`, `(text)` (see static $wrapChars)
  * * typed `trigger` opens tool dropdown near caret: `{` for placeholders, `@` for mentions etc.
  * * content styles are global: use `<div wup-textrich>{$value}</div>` to show value outside control
@@ -546,10 +574,21 @@ export default class WUPTextRichControl<
       label: __wupln("Link", "aria"),
       hotKey: "Control+K",
       kind: "inline",
-      // unsafe url (`javascript:` etc.) => sanitizer removes link
-      is: (el) => (el.tagName === "A" && sanitizeUrl(el.getAttribute("href") || "")) || undefined,
+      placeholder: "https://example.com",
+      // brackets are balanced (`wiki/Foo_(bar)`), the last char isn't punctuation
+      recognize:
+        /(?<![\w@./:-])(?:https?:\/\/|www\.)(?:[^\s<>()]|\([^\s<>()]*\))*(?:[^\s<>().,;:!?'"]|\([^\s<>()]*\))$/i,
+      // unsafe url (`javascript:` etc.) => sanitizer removes link; emails are own tool
+      is: (el) => {
+        const url = el.tagName === "A" && sanitizeUrl(el.getAttribute("href") || "");
+        return (url && !/^mailto:/i.test(url) && url) || undefined;
+      },
       create: (url) =>
-        Object.assign(document.createElement("a"), { href: url, target: "_blank", rel: "noopener noreferrer" }),
+        Object.assign(document.createElement("a"), {
+          href: /^www\./i.test(url) ? `https://${url}` : url,
+          target: "_blank",
+          rel: "noopener noreferrer",
+        }),
       // selection inside link removes it, otherwise asks url
       ask: (target, c, cur) => (cur === undefined ? c.askLink(target, "https://") : Promise.resolve("")),
       format: ({ range, value: url, editor, tool, control, applyDefault }) => {
@@ -563,6 +602,33 @@ export default class WUPTextRichControl<
           const a = formatParents(range.startContainer, isOf(tool), editor)[0]; // remove the whole link
           a?.replaceWith(...a.childNodes);
         }
+      },
+    },
+    email: {
+      label: __wupln("Email", "aria"), // item in menu of command
+      hideOnToolbar: true,
+      kind: "inline",
+      // `someone@gmail.c` is recognized while typing
+      recognize: /(?<![\p{L}\p{N}._%+:/-])[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)*\.\p{L}+$/u,
+      placeholder: "name@example.com",
+      is: (el) => {
+        const href = (el.tagName === "A" && el.getAttribute("href")) || "";
+        return (/^mailto:/i.test(href) && href.slice(7)) || undefined;
+      },
+      create: (v) => Object.assign(document.createElement("a"), { href: `mailto:${v}` }),
+    },
+    command: {
+      label: __wupln("Commands", "aria"), // aria-label of menu
+      hideOnToolbar: true,
+      trigger: "/", // menu of commands like in Notion & Slack
+      // menu lists tools of toolbar (see commandValues): value is tool & its value (`header:1`)
+      format: ({ value, lines: [line], control }) => {
+        control.$insert(document.createDocumentFragment()); // removes typed `/text`
+        if (line && !line.textContent && !line.firstElementChild) {
+          line.replaceChildren(document.createElement("br")); // empty line: otherwise caret goes to the previous one
+          window.getSelection()!.collapse(line, 0);
+        }
+        Promise.resolve().then(() => control.applyCommand(value)); // after this change
       },
     },
     list: {
@@ -704,7 +770,7 @@ export default class WUPTextRichControl<
       ["header"], // = [{ header: [1, 2, 3, 4, 5, 6, false] }]
       ["bold", "italic", "underline", "strike"],
       ["blockquote", "code"],
-      ["link"],
+      ["link", "email", "command"], // hidden except link: typed email is recognized, `/` opens menu of tools
       [{ list: "ordered" }, { list: "bullet" }], // buttons; ["list"] is dropdown
       [{ script: "sub" }, { script: "super" }],
       [{ indent: -1 }, { indent: 1 }],
@@ -778,6 +844,7 @@ export default class WUPTextRichControl<
     });
     // press opens popup of element at once (caret is placed as usual), press elsewhere closes it
     const press = (t: Element): void => {
+      this.#isAutoPaused = false; // caret leaves word
       const el = this.hoverOf(t);
       clearTimeout(this.#hoverTimer);
       if (el !== (this.#ask?.hovered ?? null)) {
@@ -831,9 +898,15 @@ export default class WUPTextRichControl<
       const g = document.createElement("div");
       g.setAttribute("role", "group");
       items.forEach((item) => this.renderTool(g, item));
+      g.hidden = !g.querySelector(":scope > :not([hidden])"); // tools with `hideOnToolbar` only
       g.firstChild && bar.appendChild(g);
     });
-    this.#hint.textContent = bar.firstChild ? this.#ctr.$ariaDescription : ""; // empty toolbar is hidden
+    bar.hidden = !bar.querySelector(":scope > :not([hidden])");
+    this.#hint.textContent = bar.hidden ? "" : this.#ctr.$ariaDescription;
+    // tool with values (mentions of users etc.): value is chosen via menu (`trigger`)
+    this.#recognizers = this.#entries
+      .filter(([k, t]) => t.recognize && !t.values?.length && this.findTool(k))
+      .map(([, t]) => t);
     this.#shown = undefined; // force refresh of new items
     this.refreshToolbar();
   }
@@ -853,7 +926,14 @@ export default class WUPTextRichControl<
         group.appendChild(b);
       }
     } else if (picked === undefined || Array.isArray(picked)) {
-      this.renderButton(group, name, tool, undefined, (picked as unknown[] | undefined)?.map(valueOf) ?? tool.values);
+      const values = (picked as unknown[] | undefined)?.map(valueOf) ?? tool.values;
+      this.renderButton(
+        group,
+        name,
+        tool,
+        undefined,
+        values ?? (name === "command" ? this.commandValues() : undefined)
+      );
     } else {
       this.renderButton(group, name, tool, valueOf(picked));
     }
@@ -871,6 +951,7 @@ export default class WUPTextRichControl<
     b.type = "button";
     b.tabIndex = -1; // reachable via Alt+F10
     b.setAttribute("tool", v ? `${name}:${v.value}` : name);
+    tool.hideOnToolbar && (b.hidden = true); // works as rendered one
     this.setToolLabel(b, v ? labelOf(v) : tool.label ?? name, v ? v.hotKey : tool.hotKey);
     addClass(b, tool.className, v?.className);
     if (values) {
@@ -1064,11 +1145,12 @@ export default class WUPTextRichControl<
     }
     const tool = this.#tools[name];
     const f = this.getFormats();
-    if (value === undefined && (tool.ask || tool.values)) {
+    const b = this.findTool(name);
+    if (value === undefined && (tool.ask || tool.values || b?._values)) {
       // restore by positions: focus can move out (to modal etc.) & nodes can be re-rendered
       const pos = this.getSelectionPos();
       (tool.ask
-        ? tool.ask(target ?? this.findTool(name) ?? inp, this as WUPTextRichControl, f.get(name))
+        ? tool.ask(target ?? (b && !b.hidden ? b : inp), this as WUPTextRichControl, f.get(name))
         : this.askMenu(name, target ?? sel.getRangeAt(0).cloneRange())
       ).then((v) => {
         if (v != null) {
@@ -1239,31 +1321,42 @@ export default class WUPTextRichControl<
     return true;
   }
 
-  /** Returns inline formats (except tokens) whose elements end at caret */
-  protected formatsAtEnd(): string[] {
+  /** Returns inline formats (except tokens) whose elements end at caret (or start if `isStart`): tool & the outer element */
+  protected formatsAt(isStart?: boolean): Array<[string, Element]> {
     const sel = window.getSelection()!;
     const n = sel.focusNode;
-    if (!sel.isCollapsed || !n) {
-      return [];
-    }
-    return this.#entries
-      .filter(([, t, is]) => {
+    const arr: Array<[string, Element]> = [];
+    if (sel.isCollapsed && n) {
+      this.#entries.forEach(([name, t, is]) => {
         const el = is && t.kind === "inline" && !t.trigger && formatParents(n, is, this.$refInput).pop(); // the outer one
-        return el && !textAt(el, n, sel.focusOffset);
-      })
-      .map(([name]) => name);
+        el && !textAt(el, n, sel.focusOffset, isStart) && arr.push([name, el]);
+      });
+    }
+    return arr;
   }
 
-  /** ArrowRight/ArrowLeft at the end of formatted element: the next typed text goes out of it / back into it (caret stays)
+  /** Elements left via arrows (see leaveFormats): text typed out of them isn't joined on recognizing (see `recognize`) */
+  #left = new WeakSet<Element>();
+
+  /** ArrowRight at the end of formatted element (bold, link etc.) or ArrowLeft at its start: the next typed text goes out of it,
+   *  the opposite arrow returns into it (caret stays visually)
    * @returns false if there is nothing to leave/return */
-  protected leaveFormats(isLeave: boolean): boolean {
+  protected leaveFormats(isRight: boolean): boolean {
     const p = this.#pending;
-    const arr = this.formatsAtEnd().filter((k) => (p.get(k) === false) !== isLeave);
+    const back = this.formatsAt(isRight).filter(([k]) => p.get(k) === false); // left via the opposite arrow
+    const arr = back.length ? back : this.formatsAt(!isRight).filter(([k]) => p.get(k) !== false);
     if (!arr.length) {
       return false;
     }
+    arr.forEach(([k, el]) => {
+      if (back.length) {
+        p.delete(k);
+      } else {
+        p.set(k, false);
+        this.#left.add(el);
+      }
+    });
     const sel = window.getSelection()!;
-    arr.forEach((k) => (isLeave ? p.set(k, false) : p.delete(k)));
     this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
     this.refreshToolbar();
     return true;
@@ -1275,7 +1368,7 @@ export default class WUPTextRichControl<
   protected insertTyped(text: string): boolean {
     const sel = window.getSelection()!;
     if (!this.#pending.size) {
-      const isEnd = !!this.formatsAtEnd().length;
+      const isEnd = !!this.formatsAt().length;
       isEnd && sel.collapse(...insertText(sel.focusNode!, sel.focusOffset, text));
       return isEnd;
     }
@@ -1481,6 +1574,68 @@ export default class WUPTextRichControl<
     return this.openAsk(m);
   }
 
+  /** Returns items of menu of tool `command`: tools of toolbar (hidden ones too) except itself & clear button;
+   *  dropdown gives item per value (`Font size: Huge`), tool with menu (mention etc.) - single item */
+  protected commandValues(): WUP.TextRich.ToolValue[] {
+    const arr: WUP.TextRich.ToolValue[] = [];
+    this._opts.toolbar!.flat().forEach((item) => {
+      // called on toolbar render
+      const [name, picked] = (typeof item === "string" ? [item] : Object.entries(item)[0]) as [string, unknown];
+      const t = this.#tools[name];
+      if (!t || name === "command" || name === "btnClear") {
+        return;
+      }
+      const label = t.label ?? name;
+      const values =
+        picked === undefined
+          ? t.values
+          : [picked].flat().map((v) => t.values?.find((x) => x.value === v) ?? { value: v });
+      if (!values || t.trigger) {
+        arr.push({ value: name, label, hotKey: t.hotKey });
+        return;
+      }
+      values.forEach((v) => {
+        const l = labelOf(v);
+        // `Heading 1` as is, `Huge` => `Font size: Huge`
+        const full = t.label && !l.toLowerCase().includes(t.label.toLowerCase()) ? `${t.label}: ${l}` : l;
+        arr.push({ value: `${name}:${v.value}`, label: full, hotKey: v.hotKey });
+      });
+    });
+    return arr;
+  }
+
+  /** Applies tool chosen in menu of `command` (value `header:1`, `bold` etc.): tool with menu (`trigger` & values)
+   *  inserts its trigger, tool with `placeholder` inserts it formatted & selected, other one is applied like $format */
+  protected applyCommand(key: string): void {
+    const [name, ...rest] = key.split(":");
+    const tool = this.#tools[name];
+    if (!tool) {
+      return;
+    }
+    const s = rest.join(":"); // value can contain `:`
+    const v = rest.length ? tool.values?.find((x) => `${x.value}` === s)?.value : undefined;
+    const isMenu = !rest.length && !!tool.trigger && !!this.findTool(name)?._values;
+    const text = isMenu ? tool.trigger : tool.placeholder;
+    if (!text) {
+      this.applyFormat(name, v, !!rest.length);
+      return;
+    }
+    const [pos] = this.getSelectionPos();
+    this.collectAuto(); // before changes: see recognize
+    const t = document.createTextNode(text);
+    this.changeContent(() => this.$insert(t));
+    if (isMenu) {
+      window.getSelection()!.collapse(t, t.length); // in text: like typed trigger
+      this.gotTrigger(); // menu of tool
+    } else if (tool.recognize) {
+      this.recognize();
+      this.setSelectionPos([pos, pos + text.length]); // to type over it
+    } else {
+      this.setSelectionPos([pos, pos + text.length]);
+      this.applyFormat(name, v, !!rest.length);
+    }
+  }
+
   /** Called on typing: typed `trigger` opens tool dropdown; chosen value replaces trigger & text typed after it */
   protected gotTrigger(): void {
     const sel = window.getSelection()!;
@@ -1489,7 +1644,14 @@ export default class WUPTextRichControl<
       return;
     }
     const s = n.data.slice(0, sel.focusOffset);
-    const found = this.#entries.find(([, t]) => t.trigger && s.endsWith(t.trigger));
+    // at word start (`@` of email isn't mention) & tool has menu
+    const found = this.#entries.find(
+      ([k, t]) =>
+        t.trigger &&
+        s.endsWith(t.trigger) &&
+        /(?:^|[\s([{"'])$/.test(s.slice(0, -t.trigger.length)) &&
+        this.findTool(k)?._values
+    );
     if (found) {
       const [name, tool] = found;
       const tr = tool.trigger!;
@@ -1543,6 +1705,188 @@ export default class WUPTextRichControl<
     sel.setBaseAndExtent(n, sel.focusOffset - typed!.length - tool.trigger!.length, n, sel.focusOffset);
     this.applyFormat(name, typed, true); // separate undo step
     return true;
+  }
+
+  /** Tools with `recognize` in toolbar: cached on toolbar render */
+  #recognizers: WUP.TextRich.Tool[] = [];
+  /** Elements of recognized text in line at caret (`<a href="https://a.com">https://a.com</a>`): taken before input,
+   *  so they follow their text after it */
+  #auto: Element[] = [];
+  /** Undo/redo pauses recognizing of new text till caret leaves word (whitespace, Enter, navigation keys, click, blur) */
+  #isAutoPaused = false;
+
+  /** Returns line of node: block in editor or list item (editor itself for loose content: Chrome doesn't wrap the 1st line) */
+  protected lineOf(n: Node): HTMLElement {
+    const inp = this.$refInput;
+    return (
+      (formatParents(
+        n,
+        (el) => (el.parentElement === inp && isBlockTag(el.tagName)) || el.tagName === "LI",
+        inp
+      )[0] as HTMLElement) ?? inp
+    );
+  }
+
+  /** Remembers elements of recognized text in line at caret (their text gives the same element): see `recognize` */
+  protected collectAuto(): void {
+    const tools = this.#recognizers;
+    const n = window.getSelection()?.focusNode;
+    this.#auto = [];
+    if (tools.length && n && this.$refInput.contains(n)) {
+      this.lineOf(n)
+        .querySelectorAll("*")
+        .forEach(
+          (x) =>
+            tools.some((t) => t.is!(x as HTMLElement) !== undefined && isSame(createOf(t, x.textContent!), x)) &&
+            this.#auto.push(x)
+        );
+    }
+  }
+
+  /** Wraps recognized word at caret into element of tool while user types: link, email etc. (see `Tool.recognize`);
+   *  element of recognized text follows its text: it's updated on typing & removed if text isn't recognized anymore;
+   *  new element is a separate undo step (after undo text isn't recognized till caret leaves word)
+   * @returns false if nothing is changed */
+  protected recognize(): boolean {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode;
+    const tools = this.#recognizers;
+    if (!tools.length || !sel.isCollapsed || !n || !this.$refInput.contains(n)) {
+      return false;
+    }
+    const line = this.lineOf(n);
+    if (line.tagName === "PRE") {
+      return false; // code block
+    }
+    const isEmbed = this.#isEmbed;
+    const [before, rest] = textAround(line, n, sel.focusOffset, isEmbed);
+    const after = /^\S*/.exec(rest)![0]; // the rest of word
+    let s = before + after;
+    let found = this.recognizeEnd(s, tools);
+    while (!found && /[\s.,;:!?'")\]}-]$/.test(s)) {
+      s = s.slice(0, -1); // `(see https://example.com).`, typed whitespace or separator (`+1 (359) 232-`)
+      found = this.recognizeEnd(s, tools);
+    }
+    const at = charsBefore(line, n, sel.focusOffset, isEmbed); // caret
+    const end = at - before.length + s.length; // without punctuation
+    const start = found ? end - found[0].length : Math.max(0, at - 1);
+    // elements of recognized text around caret (with typed whitespace etc.): replaced or removed
+    const r = document.createRange();
+    r.setStart(...pointAt(line, start, isEmbed));
+    r.setEnd(...pointAt(line, Math.max(end, at + after.length), isEmbed));
+    // element left via arrow joins text typed only inside it
+    const olds = this.#auto.filter(
+      (x) => line.contains(x) && intersects(r, x) && (!this.#left.has(x) || x.contains(n))
+    );
+    const update = (fn?: () => void): true => {
+      this.changeContent(() => {
+        olds.forEach((x) => x.replaceWith(...x.childNodes));
+        fn?.(); // wraps new text
+        line.normalize();
+        sel.collapse(...pointAt(line, at, isEmbed));
+      });
+      return true;
+    };
+    if (!found) {
+      return !!olds.length && update();
+    }
+    const [text, el] = found;
+    r.setEnd(...pointAt(line, end, isEmbed));
+    if (
+      // the same tag (link with other text etc.): text is formatted already
+      Array.prototype.some.call(line.getElementsByTagName(el.tagName), (x) => !olds.includes(x) && intersects(r, x)) ||
+      (olds.length === 1 && olds[0].textContent === text && isSame(olds[0], el)) || // nothing is changed
+      (!olds.length && this.#isAutoPaused)
+    ) {
+      return false;
+    }
+    !olds.length && (this._refHistory as TextRichHistory | undefined)?.commit(); // new element: separate undo step
+    return update(() => {
+      r.setStart(...pointAt(line, start, isEmbed));
+      r.setEnd(...pointAt(line, end, isEmbed));
+      // element per part: text can be split by formats
+      addInline(
+        splitRange(r),
+        () => false,
+        () => el.cloneNode(false) as HTMLElement,
+        line
+      );
+    });
+  }
+
+  /** Inserts typed text instead of selection with element of recognized text (placeholder of command etc.) as plain text:
+   *  otherwise Chrome keeps element (link with the previous url); typed text is recognized again (see `recognize`)
+   * @returns false if selection has no such elements */
+  protected replaceAuto(text: string): boolean {
+    const sel = window.getSelection()!;
+    if (sel.isCollapsed) {
+      return false;
+    }
+    const r = sel.getRangeAt(0);
+    const arr = this.#auto.filter((x) => intersects(r, x));
+    if (!arr.length) {
+      return false;
+    }
+    r.deleteContents();
+    arr.forEach((x) => x.isConnected && x.replaceWith(...x.childNodes));
+    const t = document.createTextNode(text);
+    r.insertNode(t);
+    sel.collapse(t, t.length);
+    return true;
+  }
+
+  /** Called after typing or deleting: syncs recognized text with its element (see `recognize`) */
+  protected gotRecognize(data: string | null): void {
+    this.recognize();
+    data && !data.trim() && (this.#isAutoPaused = false); // caret leaves word
+  }
+
+  /** Returns true if element is recognized text (link etc.) or token (mention etc.): it isn't continued in the next line */
+  #isWrapped = (x: Element): boolean =>
+    this.#entries.some(([, t, is]) => t.kind === "inline" && (!!t.recognize || !!t.trigger) && is!(x));
+
+  /** Called after line break: Chrome copies formats of caret into the new line, so empty copies of recognized text, tokens
+   *  & formats turned off (Bold toggled off, left via arrow) are removed; pending formats stay for the next typed text */
+  protected gotLineBreak(): void {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode!; // in editor: it's called on input of line break
+    const p = this.#pending;
+    const isOff = (x: Element): boolean => Array.from(p).some(([k, v]) => v === false && isOf(this.#tools[k])(x));
+    formatParents(n, (x) => !x.textContent && (this.#isWrapped(x) || isOff(x)), this.lineOf(n)).forEach((x) =>
+      x.replaceWith(...x.childNodes)
+    );
+    p.size && (this.#pendingAt = [sel.anchorNode!, sel.anchorOffset]); // otherwise caret moved to the new line resets them
+  }
+
+  /** Called before line break: caret at the end of recognized text (link etc.) goes out of its element,
+   *  otherwise browser adds line break into it */
+  protected leaveAuto(): void {
+    this.recognize();
+    this.#isAutoPaused = false;
+    const sel = window.getSelection()!;
+    const n = sel.focusNode;
+    if (!sel.isCollapsed || !n || !this.$refInput.contains(n)) {
+      return;
+    }
+    const el = formatParents(n, this.#isWrapped, this.lineOf(n)).pop();
+    if (el && !textAt(el, n, sel.focusOffset)) {
+      const r = document.createRange();
+      r.setStartAfter(el);
+      sel.collapse(r.startContainer, r.startOffset);
+    }
+  }
+
+  /** Returns recognized end of text & its element by the 1st matched tool (see `Tool.recognize`) */
+  protected recognizeEnd(s: string, tools: WUP.TextRich.Tool[]): [string, HTMLElement] | undefined {
+    let found: [string, HTMLElement] | undefined;
+    tools.some((t) => {
+      const r = t.recognize!;
+      const text = typeof r === "function" ? r(s) : r.exec(s)?.[0];
+      const el = text && s.endsWith(text) && createOf(t, text);
+      found = el && t.is!(el) !== undefined ? [text, el] : undefined; // invalid url etc.
+      return found;
+    });
+    return found;
   }
 
   /** Returns tool name if element is its embed or token & it's editable (tool is rendered):
@@ -1604,10 +1948,8 @@ export default class WUPTextRichControl<
     const last = node.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? node.lastChild : node;
     r.deleteContents();
     r.insertNode(node);
-    if (last) {
-      r.setStartAfter(last);
-      sel.collapse(r.startContainer, r.startOffset);
-    }
+    last && r.setStartAfter(last);
+    sel.collapse(r.startContainer, r.startOffset); // empty fragment (deletion): Chrome keeps selection not collapsed
     this.#isInserted = true;
   }
 
@@ -1720,7 +2062,7 @@ export default class WUPTextRichControl<
     } else if (k === "Escape") {
       this.restoreSelection(); // otherwise value is cleared
     } else if (k === "ArrowLeft" || k === "ArrowRight" || k === "Home" || k === "End") {
-      const arr = Array.from(this.$refToolbar.querySelectorAll<HTMLElement>("[role=group] > button"));
+      const arr = Array.from(this.$refToolbar.querySelectorAll<HTMLElement>("[role=group] > button:not([hidden])"));
       const i = arr.indexOf(el);
       arr.at({ Home: 0, End: -1, ArrowLeft: i - 1, ArrowRight: (i + 1) % arr.length }[k])!.focus(); // Arrows cycle
     } else {
@@ -1753,6 +2095,7 @@ export default class WUPTextRichControl<
     (l?.hovered || l?.onKey) && l.done();
     this.#range = undefined;
     this.#pending.clear();
+    this.#isAutoPaused = false;
     this.refreshToolbar(new Map());
   }
 
@@ -1799,7 +2142,7 @@ export default class WUPTextRichControl<
         );
       }) ?? -1;
     if (match(this.#ctr.$hotKeyToolbar) !== -1) {
-      this.$refToolbar.querySelector("button")?.focus();
+      this.$refToolbar.querySelector<HTMLElement>("button:not([hidden])")?.focus();
       return true;
     }
     const found = this.#entries.find(
@@ -1837,12 +2180,13 @@ export default class WUPTextRichControl<
     const k = e.key;
     const isMod = e.altKey || e.ctrlKey || e.metaKey;
     const isArrow = !isMod && !e.shiftKey && (k === "ArrowRight" || k === "ArrowLeft");
+    /^(Arrow|Home$|End$|Page)/.test(k) && (this.#isAutoPaused = false); // caret leaves word
     if (
       ((isInp || isBar) && this.gotHotKey(e)) || // not for control in link popup
       // menu keys: otherwise caret moves, line is added, button is clicked etc.
       ((isInp || isBar) && l?.onKey?.(e)) ||
       (isBar && !isMod && this.gotToolbarKey(e)) ||
-      // the 1st ArrowRight moves caret to the end of format (bold, link), the 2nd one - out of it (caret stays visually)
+      // arrow at the edge of format (bold, link): the next typed text goes out of it (caret stays visually)
       (isInp && isArrow && this.leaveFormats(k === "ArrowRight"))
     ) {
       e.preventDefault();
@@ -1871,6 +2215,11 @@ export default class WUPTextRichControl<
       this.applyKey(k); // rendered tools only
       return;
     }
+    if (t.startsWith("history")) {
+      this.#isAutoPaused = true; // otherwise undone link is recognized again on typing
+    } else {
+      this.collectAuto(); // before changes
+    }
     super.gotBeforeInput(e); // undo/redo & state before changes
     if (e.defaultPrevented) {
       return;
@@ -1880,6 +2229,7 @@ export default class WUPTextRichControl<
       e.preventDefault(); // done via changeContent: separate undo step
       return;
     }
+    (t === "insertParagraph" || t === "insertLineBreak") && this.leaveAuto();
     const isPaste = t === "insertFromPaste" || t === "insertFromPasteAsQuotation" || t === "insertFromDrop";
     const html = isPaste && e.dataTransfer?.getData("text/html");
     if (html) {
@@ -1890,7 +2240,7 @@ export default class WUPTextRichControl<
       r && selectRange(r);
       this.insertHTML(html);
     } else if (
-      (s && (this.insertOutOfToken(s) || this.insertTyped(s))) ||
+      (s && (this.replaceAuto(s) || this.insertOutOfToken(s) || this.insertTyped(s))) ||
       (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0]))
     ) {
       e.preventDefault();
@@ -1898,7 +2248,9 @@ export default class WUPTextRichControl<
       return;
     }
     this.fireInput(); // saves history by state before changes
-    s && this.gotTrigger(); // fired input has no inputType: gotInput skips it
+    // fired input has no inputType: gotInput skips it
+    s && this.gotTrigger();
+    s && this.gotRecognize(s);
   }
 
   protected override createHistory(): TextHistory {
@@ -1907,7 +2259,10 @@ export default class WUPTextRichControl<
 
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
     super.gotInput(e);
-    e.inputType === "insertText" && this.gotTrigger();
+    const t = e.inputType;
+    t === "insertText" && this.gotTrigger();
+    (t === "insertText" || t === "insertReplacementText" || t?.startsWith("delete")) && this.gotRecognize(e.data);
+    (t === "insertParagraph" || t === "insertLineBreak") && this.gotLineBreak();
   }
 
   protected override setClearState(): ValueType | undefined {
@@ -1920,3 +2275,5 @@ export default class WUPTextRichControl<
 }
 
 customElements.define(tagName, WUPTextRichControl);
+
+// todo add tool.mask behavior - must works with trigger & recognize, so when user types 3 chars that fits mask then show maskPlaceholder as it works for text

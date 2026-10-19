@@ -13,6 +13,33 @@ export function textAt(el: Node, n: Node, offset: number, isBefore?: boolean): s
   return r.toString();
 }
 
+/** Returns text of line before & after point: from the last line break, embed or block (nested list etc.) to the next one */
+export function textAround(
+  line: Element,
+  n: Node,
+  offset: number,
+  isEmbed?: (el: Element) => boolean
+): [string, string] {
+  const a = document.createRange();
+  a.setStart(line, 0);
+  a.setEnd(n, offset);
+  const b = document.createRange();
+  b.setStart(n, offset);
+  b.setEnd(line, line.childNodes.length);
+  const w = document.createTreeWalker(line, NodeFilter.SHOW_ELEMENT);
+  for (let el = w.nextNode() as Element | null; el; el = w.nextNode() as Element | null) {
+    if ((el.tagName === "BR" || isBlockTag(el.tagName) || isEmbed?.(el)) && !el.contains(n)) {
+      if (b.comparePoint(el, 0) < 0) {
+        a.setStartAfter(el); // elements are in order: the last one before point wins
+      } else {
+        b.setEndBefore(el);
+        break;
+      }
+    }
+  }
+  return [a.toString(), b.toString()];
+}
+
 /** Returns ancestors of node matched by `is` (from inner to outer) inside root */
 export function formatParents(n: Node, is: (el: Element) => boolean, root: Node): Element[] {
   const arr: Element[] = [];
@@ -121,20 +148,26 @@ export function addInline(nodes: Text[], is: (el: Element) => boolean, create: (
 }
 
 /** Splits element at collapsed range & places range between parts: `<b>a|b</b>` => `<b>a</b>|<b>b</b>`;
- *  parts without text & embeds (see `isEmbed`) are removed */
+ *  parts without text & embeds (see `isEmbed`) are removed; at element start it stays after range (the same element) */
 export function splitAt(el: Element, r: Range, isEmbed?: (el: Element) => boolean): void {
-  const isEmpty = (x: Element): boolean =>
+  const isEmpty = (x: Element | DocumentFragment): boolean =>
     !x.textContent && !(isEmbed && Array.prototype.some.call(x.querySelectorAll("*"), isEmbed));
   const after = document.createRange();
   after.setStart(r.startContainer, r.startOffset);
   after.setEnd(el, el.childNodes.length);
-  const c = el.cloneNode(false) as Element;
-  c.appendChild(after.extractContents());
-  el.after(c);
-  isEmpty(c) && c.remove();
-  r.setStartAfter(el);
+  const f = after.extractContents();
+  if (!isEmpty(el)) {
+    if (!isEmpty(f)) {
+      const c = el.cloneNode(false) as Element;
+      c.appendChild(f);
+      el.after(c);
+    }
+    r.setStartAfter(el);
+  } else {
+    r.setStartBefore(el);
+    isEmpty(f) ? el.remove() : el.replaceChildren(f);
+  }
   r.collapse(true);
-  isEmpty(el) && el.remove();
 }
 
 /** Returns lines of editor: blocks placed directly into root & items of lists */

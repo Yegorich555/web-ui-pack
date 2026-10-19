@@ -18,9 +18,10 @@ button[tool="placeholder"] {
   min-width: 6.375em;
 }
 
-// custom tool `placeholder`: class is pointed via `classNameTag` of tool in static $tools;
+// custom tools `placeholder` & `mention`: class is pointed via `classNameTag` of tool in static $tools;
 // [wup-textrich] - styles of content: in editor & in value shown outside control
-[wup-textrich] .placeholder {
+[wup-textrich] .placeholder,
+[wup-textrich] .mention {
   padding: 0 0.25em;
   border-radius: 0.25em;
   color: #00778d;
@@ -28,7 +29,26 @@ button[tool="placeholder"] {
 }
 
 // the same colors as active link in the side menu: otherwise WCAG contrast is too low
-[wupdark] [wup-textrich] .placeholder {
+[wupdark] [wup-textrich] .placeholder,
+[wupdark] [wup-textrich] .mention {
   color: $activeLinkColor;
   background: $activeLinkBgColor;
+}
+
+// custom tool `tag`: hashtag `#news`
+[wup-textrich] .tag {
+  color: var(--ctrl-selected);
+}
+
+// custom tool `colorCode`: swatch before color `#ff0000` (css-var is set via `create` of tool)
+[wup-textrich] .color:before {
+  content: "";
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-right: 0.25em;
+  border-radius: 2px;
+  vertical-align: -0.05em;
+  background: var(--color);
+  box-shadow: 0 0 0 1px var(--ctrl-border); // visible on the same background
 }

@@ -108,7 +108,7 @@ $tools: (
     &:empty,
     &[hidden],
     [hidden] {
-      display: none !important; // tools with `hideToolbar` & their groups (otherwise styles of buttons win)
+      display: none !important; // tools with `hideOnToolbar` & their groups (otherwise styles of buttons win)
     }
   }
 

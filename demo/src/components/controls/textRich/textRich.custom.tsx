@@ -4,7 +4,7 @@ import { WUPTextRichControl } from "web-ui-pack";
 import imageConvert from "web-ui-pack/helpers/files/imageConvert";
 import selectFiles from "web-ui-pack/helpers/files/selectFiles";
 import imgLogo from "../../../assets/logo-small.png";
-import styles from "./example1.scss";
+import styles from "./textRich.custom.scss";
 
 WUPTextRichControl.$use();
 
@@ -20,6 +20,14 @@ declare global {
       image: string;
       /** Name of placeholder `{firstName}`: it's chosen from menu shown on typing `{` */
       placeholder: string;
+      /** Phone of link `tel:`: typed phone in format `+1 (555) 123-45-67` is recognized */
+      phone: string;
+      /** Css color `#ff0000` shown with swatch: typed color is recognized */
+      colorCode: string;
+      /** Hashtag `#news` (text without `#`): typed hashtag is recognized */
+      tag: string;
+      /** Mention `@john` (name without `@`): it's chosen from menu shown on typing `@` */
+      mention: string;
     }
   }
 }
@@ -119,13 +127,101 @@ WUPTextRichControl.$tools.placeholder = {
   classNameTag: styles.placeholder, // highlighted via css
 };
 
-(window as any).myTextRichToolbarCustom = [
-  ["bold", "italic", "underline"],
-  ["size", "font"], // font - custom tool
-  ["align", { direction: "rtl" }], // direction - custom tool
-  ["image", "placeholder"], // custom tools: placeholder is rendered as dropdown (tool with values)
-  ["clean"],
-] as WUP.TextRich.Options["toolbar"];
+/** Returns phone of link `tel:` */
+function telOf(el: HTMLElement): string | undefined {
+  const href = (el.tagName === "A" && el.getAttribute("href")) || "";
+  return (/^tel:/i.test(href) && href.slice(4)) || undefined;
+}
+
+// built-in link keeps any safe link: `tel:` ones belong to custom tool phone (otherwise sanitizer nests elements of both)
+const { link } = WUPTextRichControl.$tools;
+const isLink = link.is!;
+link.is = (el) => (telOf(el) ? undefined : isLink(el));
+
+WUPTextRichControl.$tools.phone = {
+  label: "Phone", // item in menu of commands (`/`)
+  hideOnToolbar: true, // without button: typed phone is recognized
+  kind: "inline",
+  // strict format `+1 (555) 123-45-67` (mask `+0 (000) 000-00-00`): element appears when phone is typed completely
+  recognize: /(?<![\p{L}\p{N}+/.:-])\+\d \(\d{3}\) \d{3}-\d{2}-\d{2}$/u,
+  placeholder: "+1 (555) 123-45-67", // inserted when phone is chosen in menu of commands
+  is: telOf,
+  create: (v) => Object.assign(document.createElement("a"), { href: `tel:${v.replace(/[^\d+]/g, "")}` }),
+};
+
+/** Returns true for css hex color: `#f00`, `#ff0000`, `#ff000080` */
+const isHexColor = (s: string): boolean => /^#(?:[\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})$/i.test(s);
+
+// before tag: tools are recognized in order of $tools
+WUPTextRichControl.$tools.colorCode = {
+  label: "Color code",
+  hideOnToolbar: true,
+  kind: "inline",
+  // `#f00`, `#ff0000`, `#ff000080` with digit or one repeated char (`#fff`), otherwise it's hashtag (`#cafe`)
+  recognize: (s) => {
+    const m = /(?<![\p{L}\p{N}\p{M}_&/#])#[\da-f]+$/iu.exec(s)?.[0];
+    return m && isHexColor(m) && (/\d/.test(m) || /^#(.)\1+$/i.test(m)) ? m : undefined;
+  },
+  placeholder: "#ff0000",
+  is: (el) => (el.classList.contains(styles.color) ? el.textContent! : undefined),
+  create: (v) => {
+    const el = document.createElement("span");
+    // swatch via css: color is validated, so style can't get unsafe css (`url()` etc.)
+    isHexColor(v) && el.style.setProperty("--color", v);
+    return el;
+  },
+  classNameTag: styles.color,
+};
+
+WUPTextRichControl.$tools.tag = {
+  label: "Hashtag",
+  hideOnToolbar: true,
+  kind: "inline",
+  // `#news`, `#café_2`: not digits only (`#1`), not in word (`C#`) or url
+  recognize: /(?<![\p{L}\p{N}\p{M}_&/#])#(?![\p{N}_]+$)[\p{L}\p{N}\p{M}_]+$/u,
+  placeholder: "#tag",
+  is: (el) => (el.classList.contains(styles.tag) ? el.textContent!.slice(1) : undefined),
+  create: "span",
+  classNameTag: styles.tag,
+};
+
+WUPTextRichControl.$tools.mention = {
+  label: "Mention", // aria-label of menu & item in menu of commands
+  hideOnToolbar: true,
+  // menu on typing `@` at word start (not in email); without values typed `@name` is recognized via `recognize`
+  values: [
+    { value: "john", label: "John Smith" },
+    { value: "kate", label: "Kate Brown" },
+    { value: "alex", label: "Alex Green" },
+  ],
+  trigger: "@",
+  kind: "inline",
+  recognize: /(?<![\p{L}\p{N}\p{M}_.@/-])@[\p{L}\p{N}\p{M}_](?:[\p{L}\p{N}\p{M}_.-]*[\p{L}\p{N}\p{M}_])?$/u,
+  is: (el) => (el.classList.contains(styles.mention) ? el.textContent!.slice(1) : undefined),
+  create: "span", // chosen value is inserted as `<span>@john</span>`
+  classNameTag: styles.mention,
+};
+
+/** Default toolbar extended with custom tools */
+const toolbar = WUPTextRichControl.$defaults.toolbar!.map((group): WUP.TextRich.ToolbarGroup => {
+  switch (group[0]) {
+    case "link":
+      return [...group, "phone", "colorCode", "tag", "mention"]; // hidden (see `hideOnToolbar`): typed text is recognized
+    case "size":
+      return [...group, "font"];
+    case "align":
+      return [...group, { direction: "rtl" }];
+    default:
+      return group;
+  }
+});
+// placeholder is rendered as dropdown (tool with values)
+toolbar.splice(
+  toolbar.findIndex(([first]) => first === "clean"),
+  0,
+  ["image", "placeholder"]
+);
+(window as any).myTextRichToolbarCustom = toolbar;
 (window as any).myTextRichValidationsMax = { max: 500 } as WUP.TextRich.Options["validations"];
 
 /** Called once on mount/unmount: function is defined outside of component, so React doesn't call it on every render */
@@ -139,15 +235,19 @@ function gotRef(el: WUPTextRichControl | null): void {
   }
 }
 
-export default function Example1() {
+export default function TextRichCustom() {
   return (
-    <Example header="Custom tools" link="demo/src/components/controls/textRich/example1.tsx">
+    <Example header="Custom tools" link="demo/src/components/controls/textRich/textRich.custom.tsx">
       <small>
-        Font, direction, image & placeholder (type <b>{"{"}</b> to choose it or <b>{"{someProp}"}</b>) are added via
-        static $tools. See details in{" "}
-        <MyLink href="/demo/src/components/controls/textRich/example1.tsx">textRich/example1.tsx</MyLink> &{" "}
-        <MyLink href="/demo/src/components/controls/textRich/example1.scss">textRich/example1.scss</MyLink>. Footer
-        shows count of chars & validations.max (hidden via $options.hideFooter)
+        Font, direction, image & placeholder (type <b>{"{"}</b> to choose it or <b>{"{someProp}"}</b>), phone (
+        <b>+1 (555) 123-45-67</b>), color code (<b>#ff0000</b>), hashtag & mention (type <b>@</b> to choose it) are
+        added via static $tools; type <b>/</b> to choose any tool. See details in{" "}
+        <MyLink href="/demo/src/components/controls/textRich/textRich.custom.tsx">textRich/textRich.custom.tsx</MyLink>{" "}
+        &{" "}
+        <MyLink href="/demo/src/components/controls/textRich/textRich.custom.scss">
+          textRich/textRich.custom.scss
+        </MyLink>
+        . Footer shows count of chars & validations.max (hidden via $options.hideFooter)
       </small>
       <wup-textrich
         w-name="customTools"
@@ -159,6 +259,8 @@ export default function Example1() {
           '<p style="direction: rtl;">Right-to-left line</p>',
           `<p>Image <img src="${imgLogo}" alt="" style="max-width: 100%;"> inside text (click on it to change)</p>`,
           `<p>Dear <span class="${styles.placeholder}">{firstName}</span>, thank you for your order</p>`,
+          `<p>Call <a href="tel:+15551234567">+1 (555) 123-45-67</a> about color <span class="${styles.color}">#ff0000</span>,`,
+          ` <span class="${styles.tag}">#news</span> by <span class="${styles.mention}">@john</span></p>`,
         ].join("")}
         ref={gotRef}
       />
