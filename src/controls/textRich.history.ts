@@ -14,8 +14,6 @@ export default class TextRichHistory extends TextHistory {
   #lastPos = 0;
   /** State before the 1st undo (to redo the last changes) */
   #head = "";
-  /** Last change added snapshot (otherwise it's merged into the previous one): removeLast drops it */
-  #isAdded = false;
 
   override saveSnapshot(st: InputState, next?: string): void {
     // skip repeated save for the same changes: custom changes after input etc.
@@ -31,7 +29,6 @@ export default class TextRichHistory extends TextHistory {
         this._hist.push(toSnapshot(st));
         this._hist.length > TextRichHistory.maxSnapshots && this._hist.shift();
       }
-      this.#isAdded = !canMerge;
       this.#lastChar = ch;
       this.#lastPos = st.pos1 + (ch?.length ?? 0); // used only after typing (reading selection is expensive)
     }
@@ -43,12 +40,6 @@ export default class TextRichHistory extends TextHistory {
     this._histTimeout && clearTimeout(this._histTimeout);
     this._histTimeout = null;
     this._stateBeforeInput = undefined;
-  }
-
-  override removeLast(): void {
-    this.#isAdded && this._hist.pop();
-    this.#isAdded = false;
-    this.#lastChar = null;
   }
 
   override undoRedo(isRedo: boolean): boolean {
@@ -66,7 +57,6 @@ export default class TextRichHistory extends TextHistory {
     el.value = snap.substring(pos1.length + pos2.length + 2);
     el.setSelectionRange(+pos1, +pos2);
     this.#lastChar = null; // don't merge the next typing into an old snapshot
-    this.#isAdded = false;
     return true;
   }
 }
