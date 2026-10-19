@@ -644,7 +644,7 @@ export default class WUPTextRichControl<
     clean: {
       label: __wupln("Clear formatting", "aria"),
       hotKey: "Control+\\",
-      // collapsed selection: removes formats of the next typed text (see applyFormat)
+      // collapsed selection: removes formats of the next typed text (see $format)
       format: ({ lines, texts, editor, control }) => {
         // tools of subclass
         Object.values((control.constructor as typeof WUPTextRichControl).$tools).forEach(
@@ -778,7 +778,7 @@ export default class WUPTextRichControl<
       const name = this.embedTool(t);
       if (name && this.#ctr.$tools[name].kind === "embed" && this.#ctr.$tools[name].ask) {
         Utils.Ranges.selectNode(t);
-        this.applyFormat(name, undefined, false, t);
+        this.$format(name, undefined, false, t);
       }
     });
   }
@@ -1004,35 +1004,27 @@ export default class WUPTextRichControl<
     const name = el._format;
     if (el._values) {
       document.activeElement !== el && this.restoreSelection(); // dropdown focused via keyboard keeps focus
-      this.askMenu(name, el).then((v) => v != null && this.applyFormat(name, v, true));
+      this.askMenu(name, el).then((v) => v != null && this.$format(name, v, true));
     } else {
-      this.applyFormat(name, el._value, false);
+      this.$format(name, el._value, false);
     }
   }
 
   /** Applies tool to selection like toolbar does (tool may be not rendered): sets value if passed,
-   *  otherwise asks it (`ask` or dropdown) or toggles format
+   *  otherwise asks it (via `ask` or dropdown) or toggles format;
+   *  inline format with collapsed selection is pending for the next typed text (like quill)
+   * @param isSet set value (dropdown item, asked value etc.), otherwise toggle format (button); default: value is passed
    * @example
    * el.$format("bold"); // toggles bold
    * el.$format("header", 2); // sets heading 2
+   * el.$format("list", "ordered", false); // toggles ordered list
    * el.$format("link"); // asks url via popup
    * el.$format("link", "https://example.com"); // wraps selection into link
    * el.$format("header"); // asks value via dropdown near selection */
-  $format<K extends keyof WUP.TextRich.ToolValues>(name: K, value?: WUP.TextRich.ToolValues[K]): void {
-    this.applyFormat(name, value, value !== undefined);
-  }
-
-  /** Applies tool to selection; asks value if it's missing (via `ask` or dropdown);
-   *  inline format with collapsed selection is pending for the next typed text (like quill)
-   * @param isSet set value (dropdown item, asked value etc.), otherwise toggle format (button)
-   * @param target element to place popup near (clicked embed) */
-  protected applyFormat(
-    name: keyof WUP.TextRich.ToolValues,
-    value?: unknown,
-    isSet?: boolean,
-    target?: HTMLElement
-  ): void {
-    // todo drop $format above and rename it to $format
+  $format<K extends keyof WUP.TextRich.ToolValues>(name: K, value?: WUP.TextRich.ToolValues[K], isSet?: boolean): void;
+  /** @param target element to place popup near (clicked embed) */
+  $format(name: keyof WUP.TextRich.ToolValues, value: unknown, isSet: boolean, target?: HTMLElement): void;
+  $format(name: keyof WUP.TextRich.ToolValues, value?: unknown, isSet?: boolean, target?: HTMLElement): void {
     if (this.$isDisabled || this.$isReadOnly) {
       return;
     }
@@ -1055,12 +1047,12 @@ export default class WUPTextRichControl<
         if (v != null) {
           inp.focus({ preventScroll: true });
           inp.setSelectionPos(pos);
-          this.applyFormat(name, v, true);
+          this.$format(name, v, true);
         }
       });
       return;
     }
-    inp.applyFormat(name, value ?? true, !!isSet, this as WUPTextRichControl); // `true` for tool without values
+    inp.applyFormat(name, value ?? true, isSet ?? value !== undefined, this as WUPTextRichControl); // `true` for tool without values
   }
 
   /** Opened popup: $ask or dropdown menu */
@@ -1198,7 +1190,7 @@ export default class WUPTextRichControl<
     const isMenu = !rest.length && !!tool.trigger && !!this.findTool(name)?._values;
     const text = isMenu ? tool.trigger : tool.placeholder;
     if (!text) {
-      this.applyFormat(name, v, !!rest.length);
+      this.$format(name, v, !!rest.length);
       return;
     }
     const inp = this.$refInput;
@@ -1214,7 +1206,7 @@ export default class WUPTextRichControl<
       inp.setSelectionPos([pos, pos + text.length]); // to type over it
     } else {
       inp.setSelectionPos([pos, pos + text.length]);
-      this.applyFormat(name, v, !!rest.length);
+      this.$format(name, v, !!rest.length);
     }
   }
 
@@ -1259,7 +1251,7 @@ export default class WUPTextRichControl<
           sel.setBaseAndExtent(r.startContainer, r.startOffset, sel.focusNode!, sel.focusOffset);
           const isLine = tool.kind === "line" || tool.kind === "lineStyle";
           isLine && inp.changeContent(() => sel.getRangeAt(0).deleteContents());
-          this.applyFormat(name, v, true);
+          this.$format(name, v, true);
         }
       });
     }
@@ -1274,7 +1266,7 @@ export default class WUPTextRichControl<
       return false;
     }
     this.#ask?.done(); // trigger menu
-    this.applyFormat(found[0], found[1], true); // separate undo step
+    this.$format(found[0], found[1], true); // separate undo step
     return true;
   }
 
@@ -1320,7 +1312,7 @@ export default class WUPTextRichControl<
         if (v != null && el.isConnected) {
           this.$refInput.focus({ preventScroll: true }); // otherwise control restores previous selection
           Utils.Ranges.selectNode(el);
-          this.applyFormat(name, v, true); // replaces element, caret goes after it
+          this.$format(name, v, true); // replaces element, caret goes after it
         }
       });
     } else if (el.tagName === "A") {
@@ -1406,7 +1398,7 @@ export default class WUPTextRichControl<
     const [name, ...rest] = key.split(":") as [keyof WUP.TextRich.ToolValues, ...string[]];
     const v = rest.join(":"); // value can contain `:`
     const item = this.findTool(name)?._values?.find((x) => `${x.value}` === v);
-    item && this.applyFormat(name, item.value, true);
+    item && this.$format(name, item.value, true);
     return !!item;
   }
 
@@ -1457,7 +1449,7 @@ export default class WUPTextRichControl<
     const cur = this.$refInput.getFormats().get(name) ?? false;
     const at = values.findIndex((v) => v.value === cur);
     const next = (i ? values.slice(at + 1) : values.slice(0, at < 0 ? undefined : at).reverse()).find(isRendered);
-    next && this.applyFormat(name, next.value, true);
+    next && this.$format(name, next.value, true);
     return true;
   }
 

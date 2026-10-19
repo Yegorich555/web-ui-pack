@@ -224,7 +224,7 @@ describe("control.textRich", () => {
     inp.focus();
     window.getSelection().selectAllChildren(inp.firstChild);
 
-    el.applyFormat("clean");
+    el.$format("clean");
     expect(inp.innerHTML).toBe("<div>Text with bold,</div>");
     expect(inp.firstChild.childNodes.length).toBe(1); // "Text with " "bold" "," => "Text with bold,"
     const sel = window.getSelection();
@@ -240,7 +240,7 @@ describe("control.textRich", () => {
       inp.innerHTML = html;
       const t = [...inp.querySelectorAll("li")].find((li) => li.firstChild.data === text).firstChild;
       window.getSelection().selectAllChildren(t.parentElement);
-      el.applyFormat(name, value, true);
+      el.$format(name, value, true);
       return inp.innerHTML;
     };
 
@@ -262,7 +262,7 @@ describe("control.textRich", () => {
     // inline paste into empty editor leaves loose nodes & caret at (editor, childNodes.length)
     inp.innerHTML = "a <b>b</b> c";
     window.getSelection().collapse(inp, 3);
-    expect(() => el.applyFormat("header", 1, true)).not.toThrow(); // otherwise IndexSizeError after wrapping lines
+    expect(() => el.$format("header", 1, true)).not.toThrow(); // otherwise IndexSizeError after wrapping lines
     expect(inp.innerHTML).toBe("<h1>a <b>b</b> c</h1>");
     const sel = window.getSelection(); // caret stays at the end
     expect(sel.isCollapsed).toBe(true);
@@ -272,12 +272,12 @@ describe("control.textRich", () => {
     // <br> after inline content is the next line, otherwise empty line; whitespaces between lines are skipped
     inp.innerHTML = "a<br><br>b<div>c</div> ";
     window.getSelection().collapse(inp.firstChild, 1);
-    el.applyFormat("header", 1, true);
+    el.$format("header", 1, true);
     expect(getHtml()).toBe("<h1>a|</h1><div><br></div><div>b</div><div>c</div> ");
     // caret at the end of editor after element
     inp.innerHTML = "a <b>b</b>";
     window.getSelection().collapse(inp, 2);
-    el.applyFormat("header", 1, true);
+    el.$format("header", 1, true);
     expect(getHtml()).toBe("<h1>a <b>b|</b></h1>");
   });
 
@@ -289,7 +289,7 @@ describe("control.textRich", () => {
     const format = (html, index, ...args) => {
       inp.innerHTML = html;
       window.getSelection().collapse(inp, index);
-      el.applyFormat(...args);
+      el.$format(...args);
       return getHtml();
     };
 
@@ -306,7 +306,7 @@ describe("control.textRich", () => {
     // selection by editor points (select all in Firefox)
     inp.innerHTML = "<div>a</div><ul><li>b</li></ul>";
     window.getSelection().setBaseAndExtent(inp, 0, inp, 2);
-    el.applyFormat("align", "center", true);
+    el.$format("align", "center", true);
     expect(getHtml()).toBe('<div style="text-align: center;">[a</div><ul><li style="text-align: center;">b]</li></ul>');
   });
 
@@ -390,7 +390,7 @@ describe("control.textRich", () => {
       // typing with pending format splits format element at caret
       inp.innerHTML = `<div><b>${img}</b></div>`;
       window.getSelection().collapse(inp.querySelector("b"), 1);
-      el.applyFormat("bold"); // pending: not bold
+      el.$format("bold"); // pending: not bold
       const init = { inputType: "insertText", data: "x", bubbles: true, cancelable: true };
       inp.dispatchEvent(new InputEvent("beforeinput", init));
       expect(inp.innerHTML).toBe(`<div><b>${img}</b>x</div>`);
@@ -418,7 +418,7 @@ describe("control.textRich", () => {
     inp.innerHTML = '<div><span class="hl">x</span> <b>y</b></div>';
     inp.focus();
     window.getSelection().selectAllChildren(inp.firstChild);
-    c.applyFormat("clean");
+    c.$format("clean");
     expect(inp.innerHTML).toBe("<div>x y</div>");
     c.remove();
   });
@@ -489,7 +489,7 @@ describe("control.textRich", () => {
     const indent = (margin, value) => {
       inp.innerHTML = `<div style="margin-left: ${margin}; font-size: 16px;">x</div>`;
       window.getSelection().collapse(inp.firstChild.firstChild, 1);
-      el.applyFormat("indent", value, true);
+      el.$format("indent", value, true);
       return inp.firstChild.style.marginLeft;
     };
     // 3em per level: 96px = 6em = level 2 (otherwise px is ignored: level 0)
@@ -498,7 +498,7 @@ describe("control.textRich", () => {
     expect(indent("6em", 1)).toBe("9em");
     inp.innerHTML = '<div style="margin-left: 48px;">x</div>'; // default font size: 16px
     window.getSelection().collapse(inp.firstChild.firstChild, 1);
-    el.applyFormat("indent", 1, true);
+    el.$format("indent", 1, true);
     expect(inp.firstChild.style.marginLeft).toBe("6em");
     expect(indent("6em", -1)).toBe("3em");
   });
@@ -563,7 +563,7 @@ describe("control.textRich", () => {
     /** Sets html with selection & applies format */
     const format = (html, ...args) => {
       setHtml(html);
-      el.applyFormat(...args);
+      el.$format(...args);
       return getHtml();
     };
 
@@ -588,7 +588,7 @@ describe("control.textRich", () => {
     setHtml("<div>a<b>b</b>c</div>");
     const [a, , c] = [...el.$refInput.firstChild.childNodes];
     window.getSelection().setBaseAndExtent(a, 1, c, 0);
-    el.applyFormat("italic");
+    el.$format("italic");
     expect(el.$refInput.innerHTML).toBe("<div>a<b><em>b</em></b>c</div>");
   });
 
@@ -605,7 +605,7 @@ describe("control.textRich", () => {
         arr.push(w.currentNode);
       }
       window.getSelection().setBaseAndExtent(arr[0], start, arr.at(-1), end);
-      el.applyFormat("bold");
+      el.$format("bold");
       return inp.innerHTML;
     };
 
@@ -624,7 +624,7 @@ describe("control.textRich", () => {
     /** Sets html with selection & applies format */
     const format = (html, ...args) => {
       setHtml(html);
-      el.applyFormat(...args);
+      el.$format(...args);
       return getHtml();
     };
 
@@ -647,7 +647,7 @@ describe("control.textRich", () => {
     setHtml("<div>a</div><div>b</div>");
     const inp = el.$refInput;
     window.getSelection().setBaseAndExtent(inp.firstChild.firstChild, 0, inp.lastChild, 0);
-    el.applyFormat("header", 1, true);
+    el.$format("header", 1, true);
     expect(inp.innerHTML).toBe("<h1>a</h1><div>b</div>");
     // custom line tool: element style wins
     WUPTextRichControl.$tools.note = {
@@ -657,7 +657,7 @@ describe("control.textRich", () => {
     };
     try {
       setHtml('<div style="text-align: center;">a|</div>');
-      el.applyFormat("note");
+      el.$format("note");
       expect(inp.firstChild.tagName).toBe("ASIDE");
       expect(inp.firstChild.style.textAlign).toBe("left");
       expect(inp.firstChild.style.color).toBe("red");
@@ -672,7 +672,7 @@ describe("control.textRich", () => {
     /** Sets html with selection & applies format */
     const format = (html, value) => {
       setHtml(html);
-      el.applyFormat("list", value, false);
+      el.$format("list", value, false);
       return getHtml();
     };
 
@@ -799,7 +799,7 @@ describe("control.textRich", () => {
     const btnBold = el.querySelector("[tool=bold]");
 
     setHtml("<div>a|</div>");
-    el.applyFormat("bold");
+    el.$format("bold");
     expect(btnBold.getAttribute("aria-pressed")).toBe("true");
     expect(inp.innerHTML).toBe("<div>a</div>"); // nothing is changed till typing
     expect(typeText("b")).toBe(true);
@@ -807,15 +807,15 @@ describe("control.textRich", () => {
 
     // toggle twice: off
     setHtml("<div>a|</div>");
-    el.applyFormat("bold");
-    el.applyFormat("bold");
+    el.$format("bold");
+    el.$format("bold");
     expect(btnBold.getAttribute("aria-pressed")).toBe("false");
     expect(typeText("b")).toBe(true);
     expect(getHtml()).toBe("<div>ab|</div>");
 
     // clean removes formats of caret
     setHtml("<div><b><em>a|</em></b></div>");
-    el.applyFormat("clean");
+    el.$format("clean");
     expect(btnBold.getAttribute("aria-pressed")).toBe("false");
     expect(typeText("b")).toBe(true);
     expect(getHtml()).toBe("<div><b><em>a</em></b>b|</div>");
@@ -828,7 +828,7 @@ describe("control.textRich", () => {
 
     // caret moves: pending formats are reset
     setHtml("<div>ab|</div>");
-    el.applyFormat("bold");
+    el.$format("bold");
     window.getSelection().collapse(inp.firstChild.firstChild, 1);
     document.dispatchEvent(new Event("selectionchange"));
     expect(btnBold.getAttribute("aria-pressed")).toBe("false");
@@ -1753,7 +1753,7 @@ describe("control.textRich", () => {
     await h.wait(1);
     const inp = el.$refInput;
     inp.focus();
-    const spy = jest.spyOn(el, "applyFormat");
+    const spy = jest.spyOn(el, "$format");
     [
       ["formatBold", ["bold", undefined, false]],
       ["formatStrikeThrough", ["strike", undefined, false]],
@@ -2184,7 +2184,7 @@ describe("control.textRich", () => {
       const dropdown = el.querySelector("[tool=mark]");
       expect(dropdown.hasAttribute("icon")).toBe(true);
       setHtml("<div>a[b]c</div>");
-      el.applyFormat("mark", "yellow", true);
+      el.$format("mark", "yellow", true);
       expect(getHtml()).toBe('<div>a[<mark class="yellow">b]</mark>c</div>'); // classNameTag of value
       document.dispatchEvent(new Event("selectionchange"));
       expect(dropdown.className).toBe("ic-mark ic-yellow");
@@ -2406,7 +2406,7 @@ describe("control.textRich", () => {
     inp.focus();
     await h.wait(1);
     setHtml("<div>[a]</div>");
-    el.applyFormat("bold");
+    el.$format("bold");
     expect(inp.innerHTML).toBe("<div><b>a</b></div>");
     await h.wait(1);
     expect(typeText(null, "historyUndo")).toBe(true);
