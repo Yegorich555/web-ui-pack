@@ -3,18 +3,18 @@ import TextRichHistory from "./textRich.history";
 import * as Utils from "./textRich.utils";
 
 /** Tool name, tool & checker of element by `is` */
-type ToolEntry = [string, WUP.TextRich.Tool, ((el: Element) => boolean) | undefined];
+type ToolEntry = [keyof WUP.TextRich.ToolValues, WUP.TextRich.Tool, ((el: Element) => boolean) | undefined];
 
 /** Contenteditable element with html value: applies formats & handles typing (pending formats, tokens, recognizing etc.) */
 export default class WUPTextRichInput extends WUPTextAreaInput {
-  /** Static $tools of control: sanitizer keeps their formats (see setTools) */
-  _tools: Utils.Tools = {};
+  /** Static $tools of control (by name): sanitizer keeps their formats (see setTools) */
+  _tools = {} as WUP.TextRich.Tools;
   /** Static $wrapChars of control: opening => closing char */
   _wrapChars = new Map<string, string>();
   /** History of control: custom changes are saved via it (see changeContent) */
   _history?: TextRichHistory;
   /** Returns true if tool works: it's rendered in toolbar (hidden ones too); otherwise it isn't recognized & typed as token */
-  _isActive?: (name: string) => boolean;
+  _isActive?: (name: keyof WUP.TextRich.ToolValues) => boolean;
   /** Called when formats at caret can be changed without selection change: content or pending formats */
   _onFormats?: () => void;
   /** Entries of `_tools` with checker of element by `is`: cached via setTools */
@@ -41,13 +41,11 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Sets tools & updates their caches: call it when tools or toolbar are changed (see `_isActive`) */
-  setTools(tools: Utils.Tools): void {
+  setTools(tools: WUP.TextRich.Tools): void {
     this._tools = tools;
-    this._entries = Object.entries(tools).map(([k, t]) => [
-      k,
-      t,
-      t.is && ((el) => t.is!(el as HTMLElement) !== undefined),
-    ]);
+    this._entries = (Object.entries(tools) as Array<[keyof WUP.TextRich.ToolValues, WUP.TextRich.Tool]>).map(
+      ([k, t]) => [k, t, t.is && ((el) => t.is!(el as HTMLElement) !== undefined)]
+    );
     this.#isEmbed = Utils.Formats.embedOf(tools);
     // tool with values (mentions of users etc.): value is chosen via menu (`trigger`)
     this.#recognizers = this._entries
@@ -97,8 +95,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
 
   /** Returns formats of selection (+ pending ones for the next typed text): tool => value
    *  of the nearest element at selection start or of its line (see `is` & `kind`) */
-  getFormats(): Map<string, unknown> {
-    const m = new Map<string, unknown>();
+  getFormats(): Map<keyof WUP.TextRich.ToolValues, unknown> {
+    const m = new Map<keyof WUP.TextRich.ToolValues, unknown>();
     const sel = window.getSelection();
     const n = sel?.rangeCount ? Utils.Ranges.firstNode(sel.getRangeAt(0)) : null;
     if (n && this.contains(n)) {
@@ -118,7 +116,12 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
    *  (like quill), otherwise `format` of tool or default one is applied (see formatSelection)
    * @param isSet set value (dropdown item, asked value etc.), otherwise toggle format (button)
    * @param control for `format` of tool */
-  applyFormat(name: string, value: unknown, isSet: boolean, control: WUP.TextRich.FormatContext["control"]): void {
+  applyFormat(
+    name: keyof WUP.TextRich.ToolValues,
+    value: unknown,
+    isSet: boolean,
+    control: WUP.TextRich.FormatContext["control"]
+  ): void {
     const tool = this._tools[name];
     const sel = window.getSelection()!;
     if (sel.isCollapsed && ((tool.kind === "inline" && !tool.ask && !tool.trigger) || name === "clean")) {
@@ -269,7 +272,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Pending formats for the next typed text: tool => value (`false` removes format) */
-  #pending = new Map<string, unknown>();
+  #pending = new Map<keyof WUP.TextRich.ToolValues, unknown>();
   /** Caret position of pending formats: they're reset when caret moves */
   #pendingAt?: [Node, number];
 
@@ -316,10 +319,10 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Returns inline formats (except tokens) whose elements end at caret (or start if `isStart`): tool & the outer element */
-  protected formatsAt(isStart?: boolean): Array<[string, Element]> {
+  protected formatsAt(isStart?: boolean): Array<[keyof WUP.TextRich.ToolValues, Element]> {
     const sel = window.getSelection()!;
     const n = sel.focusNode;
-    const arr: Array<[string, Element]> = [];
+    const arr: Array<[keyof WUP.TextRich.ToolValues, Element]> = [];
     if (sel.isCollapsed && n) {
       this._entries.forEach(([name, t, is]) => {
         const el = is && t.kind === "inline" && !t.trigger && Utils.Formats.parents(n, is, this).pop(); // the outer one
@@ -453,7 +456,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   /** Returns token completed by typed pair of trigger (see `_wrapChars`) even if it isn't in values
    *  (`{someProp` + `}` gives placeholder `someProp`) unless `is` rejects it; typed text is selected to be replaced
    * @returns tool name & value or `undefined` if typed text isn't token */
-  tokenEnd(data: string): [string, string] | undefined {
+  tokenEnd(data: string): [keyof WUP.TextRich.ToolValues, string] | undefined {
     const sel = window.getSelection()!;
     const n = sel.focusNode as Text | null;
     if (!sel.isCollapsed || n?.nodeType !== Node.TEXT_NODE) {

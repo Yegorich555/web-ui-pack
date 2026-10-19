@@ -276,7 +276,11 @@ declare module "preact/jsx-runtime" {
 }
 
 /** Toolbar button: `_format` - tool name, `_value` - value of button (`"ordered"` for list), `_values` - dropdown values */
-type ToolElement = HTMLElement & { _format: string; _value?: unknown; _values?: WUP.TextRich.ToolValue[] };
+type ToolElement = HTMLElement & {
+  _format: keyof WUP.TextRich.ToolValues;
+  _value?: unknown;
+  _values?: WUP.TextRich.ToolValue[];
+};
 
 /** Cmd instead of Ctrl (iPadOS reports Macintosh, iOS - like Mac OS X) */
 const isMac = navigator.userAgent.includes("Mac");
@@ -348,7 +352,7 @@ export default class WUPTextRichControl<
   EventMap extends WUP.TextRich.EventMap = WUP.TextRich.EventMap
 > extends WUPTextAreaControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
-  #ctr = this.constructor as typeof WUPTextRichControl & { $tools: Utils.Tools }; // $tools by name
+  #ctr = this.constructor as typeof WUPTextRichControl;
 
   static get $styleRoot(): string {
     return "";
@@ -643,9 +647,7 @@ export default class WUPTextRichControl<
       // collapsed selection: removes formats of the next typed text (see applyFormat)
       format: ({ lines, texts, editor, control }) => {
         // tools of subclass
-        Object.values(
-          (control.constructor as typeof WUPTextRichControl).$tools as Record<string, WUP.TextRich.Tool>
-        ).forEach(
+        Object.values((control.constructor as typeof WUPTextRichControl).$tools).forEach(
           (t) =>
             t.kind === "inline" &&
             t.is &&
@@ -705,7 +707,7 @@ export default class WUPTextRichControl<
   $refInput = Object.assign(document.createElement("wup-richinput") as WUPTextRichInput & HTMLInputElement, {
     _tools: this.#ctr.$tools, // sanitizer keeps their formats
     _wrapChars: this.#ctr.$wrapChars,
-    _isActive: (name: string) => !!this.findTool(name),
+    _isActive: (name: keyof WUP.TextRich.ToolValues) => !!this.findTool(name),
     _onFormats: () => this.refreshToolbar(),
   });
 
@@ -815,8 +817,11 @@ export default class WUPTextRichControl<
 
   /** Renders toolbar item into group */
   protected renderTool(group: HTMLElement, item: WUP.TextRich.ToolbarItem): void {
-    const [name, picked] = (typeof item === "string" ? [item] : Object.entries(item)[0]) as [string, unknown];
-    const tool = this.#ctr.$tools[name];
+    const [name, picked] = (typeof item === "string" ? [item] : Object.entries(item)[0]) as [
+      keyof WUP.TextRich.ToolValues,
+      unknown
+    ];
+    const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
     // value from tool: with label, shortcut & class
     const valueOf = (v: unknown): WUP.TextRich.ToolValue => tool.values?.find((t) => t.value === v) ?? { value: v };
     if (!tool) {
@@ -844,7 +849,7 @@ export default class WUPTextRichControl<
   /** Renders toolbar button: `v` - button of value (`list:ordered`), `values` - dropdown, otherwise toggle or action */
   protected renderButton(
     group: HTMLElement,
-    name: string,
+    name: keyof WUP.TextRich.ToolValues,
     tool: WUP.TextRich.Tool,
     v?: WUP.TextRich.ToolValue,
     values?: WUP.TextRich.ToolValue[]
@@ -967,7 +972,7 @@ export default class WUPTextRichControl<
       const cur = formats.get(name) ?? false;
       if (el._values) {
         // dropdown shows icon or label of the current value (even if value isn't rendered: `Heading 3`)
-        const tool = this.#ctr.$tools[name];
+        const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
         const v = tool.values?.find((x) => x.value === cur);
         if (el.hasAttribute("icon")) {
           el.className = "";
@@ -1021,7 +1026,12 @@ export default class WUPTextRichControl<
    *  inline format with collapsed selection is pending for the next typed text (like quill)
    * @param isSet set value (dropdown item, asked value etc.), otherwise toggle format (button)
    * @param target element to place popup near (clicked embed) */
-  protected applyFormat(name: string, value?: unknown, isSet?: boolean, target?: HTMLElement): void {
+  protected applyFormat(
+    name: keyof WUP.TextRich.ToolValues,
+    value?: unknown,
+    isSet?: boolean,
+    target?: HTMLElement
+  ): void {
     // todo drop $format above and rename it to $format
     if (this.$isDisabled || this.$isReadOnly) {
       return;
@@ -1032,7 +1042,7 @@ export default class WUPTextRichControl<
     if (!sel.rangeCount || !inp.contains(sel.anchorNode)) {
       return;
     }
-    const tool = this.#ctr.$tools[name];
+    const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
     const b = this.findTool(name);
     if (value === undefined && (tool.ask || tool.values || b?._values)) {
       const cur = inp.getFormats().get(name);
@@ -1115,7 +1125,7 @@ export default class WUPTextRichControl<
    * @param onSelect called on selection change instead of closing: to filter by typed text etc.
    * @returns chosen value or `null` if canceled or tool isn't rendered as dropdown */
   protected askMenu(
-    name: string,
+    name: keyof WUP.TextRich.ToolValues,
     target: HTMLElement | Range,
     isHover?: boolean,
     onSelect?: (m: TextRichMenu) => void
@@ -1124,7 +1134,7 @@ export default class WUPTextRichControl<
     if (!b?._values) {
       return Promise.resolve(null);
     }
-    const tool = this.#ctr.$tools[name];
+    const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
     const m = new TextRichMenu({
       button: b,
       owner: isHover ? null : (document.activeElement === b && b) || this.$refInput,
@@ -1148,8 +1158,11 @@ export default class WUPTextRichControl<
     const arr: WUP.TextRich.ToolValue[] = [];
     this._opts.toolbar!.flat().forEach((item) => {
       // called on toolbar render
-      const [name, picked] = (typeof item === "string" ? [item] : Object.entries(item)[0]) as [string, unknown];
-      const t = this.#ctr.$tools[name];
+      const [name, picked] = (typeof item === "string" ? [item] : Object.entries(item)[0]) as [
+        keyof WUP.TextRich.ToolValues,
+        unknown
+      ];
+      const t: WUP.TextRich.Tool = this.#ctr.$tools[name];
       if (!t || name === "command" || name === "btnClear") {
         return;
       }
@@ -1175,8 +1188,8 @@ export default class WUPTextRichControl<
   /** Applies tool chosen in menu of `command` (value `header:1`, `bold` etc.): tool with menu (`trigger` & values)
    *  inserts its trigger, tool with `placeholder` inserts it formatted & selected, other one is applied like $format */
   protected applyCommand(key: string): void {
-    const [name, ...rest] = key.split(":");
-    const tool = this.#ctr.$tools[name];
+    const [name, ...rest] = key.split(":") as [keyof WUP.TextRich.ToolValues, ...string[]];
+    const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
     if (!tool) {
       return;
     }
@@ -1267,7 +1280,7 @@ export default class WUPTextRichControl<
 
   /** Returns tool name if element is its embed or token & it's editable (tool is rendered):
    *  via `ask` on click or via dropdown on hover (`isHover`) */
-  protected embedTool(el: Element, isHover?: boolean): string | undefined {
+  protected embedTool(el: Element, isHover?: boolean): keyof WUP.TextRich.ToolValues | undefined {
     const [name, t] =
       this.$refInput._entries.find(
         ([, x, is]) => (x.kind === "embed" || (x.kind === "inline" && x.trigger)) && is?.(el)
@@ -1390,7 +1403,7 @@ export default class WUPTextRichControl<
       el._format ? this.applyTool(el) : el.click(); // clear button isn't ToolElement
       return true;
     }
-    const [name, ...rest] = key.split(":");
+    const [name, ...rest] = key.split(":") as [keyof WUP.TextRich.ToolValues, ...string[]];
     const v = rest.join(":"); // value can contain `:`
     const item = this.findTool(name)?._values?.find((x) => `${x.value}` === v);
     item && this.applyFormat(name, item.value, true);

@@ -1,8 +1,5 @@
 import { lineTags } from "./textArea.input";
 
-/** Tools by name (static $tools of control) */
-export type Tools = Record<string, WUP.TextRich.Tool>;
-
 /** Containers => paragraph (`<p>` in value, `<div>` in editor); unwrapped if they contain blocks */
 const paragraphTags = new Set([
   "P",
@@ -197,7 +194,7 @@ export const Formats = {
   },
 
   /** Returns checker of embed elements (`<img>` etc.); `undefined` if there are no embed tools */
-  embedOf(tools: Tools): ((el: Element) => boolean) | undefined {
+  embedOf(tools: WUP.TextRich.Tools): ((el: Element) => boolean) | undefined {
     const arr = Object.values(tools).filter((t) => t.kind === "embed" && t.is);
     return arr.length ? (el) => arr.some((t) => t.is!(el as HTMLElement) !== undefined) : undefined;
   },
@@ -398,7 +395,7 @@ let lastText = ["", ""];
 /** Html of value & editor: sanitizer (only formats of tools are kept), url check & text for validations */
 export const Html = {
   /** Returns sanitized content for editor */
-  toEditor(html: string, tools: Tools): DocumentFragment {
+  toEditor(html: string, tools: WUP.TextRich.Tools): DocumentFragment {
     const f = document.createDocumentFragment();
     if (html) {
       const { body } = new DOMParser().parseFromString(html, "text/html"); // inert: nothing is executed/loaded
@@ -413,7 +410,7 @@ export const Html = {
    * * only formats of tools are kept: other elements are unwrapped (`<span>`, `<table>` etc.)
    * or removed with content (`<script>`, `<img>` if it isn't embed etc.)
    * * links with unsafe protocols are removed (`javascript:` etc.) */
-  fromEditor(root: Node, tools: Tools): string {
+  fromEditor(root: Node, tools: WUP.TextRich.Tools): string {
     const div = document.createElement("div");
     const ctx = Internal.ctxOf(tools, false);
     Internal.appendBlocks(root, div, ctx);
@@ -497,7 +494,7 @@ const Internal = {
   // Html: sanitizer
 
   /** Returns sanitizer context (tools without `is`, `create`/`set` are skipped) */
-  ctxOf(tools: Tools, isEditor: boolean): Ctx {
+  ctxOf(tools: WUP.TextRich.Tools, isEditor: boolean): Ctx {
     const ctx: Ctx = { isEditor, inline: [], line: [], lineStyle: [], embed: [] };
     Object.values(tools).forEach(
       (t) => t.kind && t.is && (t.kind === "lineStyle" ? t.set : t.create) && ctx[t.kind].push(t)
