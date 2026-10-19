@@ -34,12 +34,13 @@ interface Snapshot {
 export default class TextHistory {
   /** Convert values to history-snapshot; required for undo/redo logic of input */
   static historyToSnapshot(s: string, pos: number): string {
-    return String.fromCharCode(pos) + s;
+    return `${pos},${s}`;
   }
 
   /** Parse history-snapshot; required for undo/redo logic of input */
   static historyFromSnapshot(h: string): { v: string; pos: number } {
-    return { pos: h.charCodeAt(0), v: h.substring(1) };
+    const i = h.indexOf(",");
+    return { pos: +h.substring(0, i), v: h.substring(i + 1) };
   }
 
   /** Returns simple changes for 2 strings */
@@ -96,20 +97,20 @@ export default class TextHistory {
 
   /** Converts snapshot to string representation */
   snapshotEncode(snap: Snapshot): string {
-    return `${String.fromCharCode(snap.action, snap.pos1, snap.pos2, snap.posIns) + (snap.removed ?? "")}\0${
-      snap.inserted ?? ""
-    }`;
+    return `${snap.action},${snap.pos1},${snap.pos2},${snap.posIns},${snap.removed ?? ""}\0${snap.inserted ?? ""}`;
   }
 
   /** Converts snapshot from string representation */
   snapshotDecode(snap: string): Required<Snapshot> {
-    const i = snap.indexOf("\0", 4);
+    const [action, pos1, pos2, posIns] = snap.split(",", 4);
+    const start = action.length + pos1.length + pos2.length + posIns.length + 4;
+    const i = snap.indexOf("\0", start);
     return {
-      action: snap.charCodeAt(0),
-      pos1: snap.charCodeAt(1),
-      pos2: snap.charCodeAt(2),
-      posIns: snap.charCodeAt(3),
-      removed: snap.substring(4, i),
+      action: +action,
+      pos1: +pos1,
+      pos2: +pos2,
+      posIns: +posIns,
+      removed: snap.substring(start, i),
       inserted: snap.substring(i + 1),
     };
   }
