@@ -79,12 +79,13 @@ export const indentReg = /^(\d+(?:\.\d+)?)(px|em)$/;
 
 /** Helpers of DOM ranges, points (node & offset) & selection */
 export const Ranges = {
-  /** Fast `r.intersectsNode(n)`: it walks previous siblings (slow for lines) */
-  intersects(r: Range, n: Node): boolean {
-    return (
-      r.comparePoint(n, 0) < 1 &&
-      r.comparePoint(n, n.nodeType === Node.TEXT_NODE ? (n as Text).length : n.childNodes.length) > -1
-    );
+  /** Fast `r.intersectsNode(n)`: it walks previous siblings (slow for lines); `end` - offset where content of node ends */
+  intersects(
+    r: Range,
+    n: Node,
+    end = n.nodeType === Node.TEXT_NODE ? (n as Text).length : n.childNodes.length
+  ): boolean {
+    return r.comparePoint(n, 0) < 1 && r.comparePoint(n, end) > -1;
   },
 
   /** Returns the 1st node inside range (skips node if range starts at its end) */
@@ -302,11 +303,15 @@ export const Lines = {
     )[0] as HTMLElement | undefined;
   },
 
-  /** Returns lines in range (skips the last one if range ends at its start: triple click) */
+  /** Returns lines in range (skips the last one if range ends at its start: triple click);
+   *  item with nested list is in range if its own content is (till nested list): otherwise selected nested item gives parent */
   of(r: Range, root: Element): HTMLElement[] {
-    const arr = Lines.all(root).filter((l) => Ranges.intersects(r, l));
+    const arr = Lines.all(root).filter((l) => {
+      const i = Array.prototype.findIndex.call(l.childNodes, (n: Node) => listTags.has(n.nodeName));
+      return Ranges.intersects(r, l, i < 0 ? undefined : i);
+    });
     !r.collapsed && arr.length > 1 && !Ranges.textAt(arr.at(-1)!, r.endContainer, r.endOffset, true) && arr.pop();
-    return arr.filter((l, i) => !l.contains(arr[i + 1] ?? null)); // skip parents of nested items (nested item follows parent)
+    return arr;
   },
 
   /** Wraps loose inline content into <div> (Chrome doesn't wrap the 1st line); adds empty line to empty root
@@ -338,22 +343,14 @@ export const Lines = {
     return isChanged;
   },
 
-  /** Replaces line with element or tag (keeps line style: alignment etc.; skips the same tag);
-   *  list item is moved out of its lists at first (splits lists & parent items of nested list) */
+  /** Replaces line with element or tag (keeps line style: alignment etc.);
+   *  list item is moved out of its lists at first (see `lift`), its nested lists stay in list after it (keep their level) */
   setTag(line: HTMLElement, tag: string | HTMLElement): HTMLElement {
-    for (let p = line.parentElement!; line.tagName === "LI" && (listTags.has(p.tagName) || p.tagName === "LI"); ) {
-      // items before line (nested ones keep their level): lines are set in order, so the rest isn't moved for each one
-      const head = p.cloneNode(false) as Element;
-      while (line.previousSibling) {
-        head.prepend(line.previousSibling);
+    if (line.tagName === "LI") {
+      line.after(...line.querySelectorAll(":scope > ol, :scope > ul"));
+      while (line.parentElement!.matches("ol,ul,li")) {
+        Lines.lift(line);
       }
-      p.before(head, line);
-      // parts without items are removed: without text & elements (whitespaces between items etc.)
-      [head, p].forEach((x) => !x.firstElementChild && !x.textContent!.trim() && x.remove());
-      p = line.parentElement!;
-    }
-    if (line.tagName === tag) {
-      return line;
     }
     const el = typeof tag === "string" ? document.createElement(tag) : tag;
     el.append(...line.childNodes);
@@ -361,6 +358,54 @@ export const Lines = {
     s && el.setAttribute("style", s + (el.getAttribute("style") ?? "")); // element style wins
     line.replaceWith(el);
     return el;
+  },
+
+  /** Moves list item out of its parent (list or item of nested list): items before it stay in a copy of parent
+   *  (`<ol><li>a</li><li>b</li><li>c</li></ol>`, `b` => `<ol><li>a</li></ol><li>b</li><ol><li>c</li></ol>`);
+   *  parts without content are removed (see Internal.dropEmpty)
+   * @returns the same item */
+  lift(li: HTMLElement): HTMLElement {
+    const p = li.parentElement!;
+    // items before line: lines are set in order (see setTag), so the rest isn't moved for each one
+    const head = p.cloneNode(false) as Element;
+    while (li.previousSibling) {
+      head.prepend(li.previousSibling);
+    }
+    p.before(head, li);
+    Internal.dropEmpty(head);
+    Internal.dropEmpty(p);
+    return li;
+  },
+
+  /** Moves list item into nested list of the previous item (with its nested items) or back after parent item if `isOut`
+   *  (the next items stay below it: they become its nested items)
+   * @returns false if there is no level to move: the 1st item of list or item of top-level list */
+  nest(li: HTMLElement, isOut?: boolean): boolean {
+    const list = li.parentElement!;
+    // parent item or the previous one; list: Chrome places nested list directly into list
+    const x = isOut ? list.parentElement : li.previousElementSibling;
+    if (!x?.matches("li,ol,ul")) {
+      return false;
+    }
+    const isItem = x.tagName === "LI";
+    if (isOut) {
+      Lines.lift(li); // the next items stay in list after it
+      for (let n = li.nextSibling; n && (isItem || n === list); n = li.nextSibling) {
+        li.appendChild(n); // the next items & other nested lists of parent item
+      }
+      Formats.mergePrev(list); // into nested list of item
+      isItem && x.after(li);
+      Internal.dropEmpty(x);
+      return true;
+    }
+    // nested list of the previous item or nested list without parent item
+    let sub = isItem ? x.lastElementChild : x;
+    if (sub?.tagName !== list.tagName) {
+      sub = document.createElement(list.tagName);
+      isItem ? x.appendChild(sub) : x.after(sub);
+    }
+    sub.appendChild(li);
+    return true;
   },
 
   /** Returns text of line before & after point: from the last line break, embed or block (nested list etc.) to the next one */
@@ -490,6 +535,18 @@ const Internal = {
         isEnd ? el.after(c) : el.before(c);
       }
     });
+  },
+
+  // Lines
+
+  /** Removes list without items (whitespaces between items etc.) or unwraps item without own content: its nested lists
+   *  go into parent list (keep their level; otherwise item without text is shown as empty line with bullet) */
+  dropEmpty(el: Element): void {
+    const isItem = el.tagName === "LI";
+    Array.prototype.every.call(
+      el.childNodes,
+      (n: Node) => (isItem && listTags.has(n.nodeName)) || (n.nodeType === Node.TEXT_NODE && !(n as Text).data.trim())
+    ) && el.replaceWith(...el.children);
   },
 
   // Html: sanitizer

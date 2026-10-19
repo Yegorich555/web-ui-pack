@@ -249,9 +249,9 @@ describe("control.textRich", () => {
     expect(format(nested, "b", "header", 2)).toBe("<ul><li>a</li></ul><h2>b</h2>");
     expect(format(nested, "b", "clean")).toBe("<ul><li>a</li></ul><div>b</div>");
     expect(format(nested, "b", "list", "bullet")).toBe("<ul><li>a</li></ul><div>b</div>"); // list off
-    // items after line keep their level
+    // items after line keep their level: list without parent item (otherwise item without text is shown as empty bullet)
     expect(format("<ol><li>a<ol><li>b</li><li>c</li></ol></li><li>d</li></ol>", "b", "header", 2)).toBe(
-      "<ol><li>a</li></ol><h2>b</h2><ol><li><ol><li>c</li></ol></li><li>d</li></ol>"
+      "<ol><li>a</li></ol><h2>b</h2><ol><ol><li>c</li></ol><li>d</li></ol>"
     );
   });
 
@@ -707,9 +707,194 @@ describe("control.textRich", () => {
       "<ol><li>[a<b>b</b></li><li>c]</li></ol>"
     );
     expect(format("<ul><li>[a</li><li>b]</li></ul>", "bullet")).toBe("<div>[a</div><div>b]</div>"); // toggle off
-    // item is moved out of another list
+    // item of another list is nested into the previous item: Enter in numbered list & bulleted list
+    expect(format("<ol><li>a</li><li>|<br></li></ol>", "bullet")).toBe("<ol><li>a<ul><li>|<br></li></ul></li></ol>");
     expect(format("<ol><li>a</li><li>b|</li><li>c</li></ol>", "bullet")).toBe(
-      "<ol><li>a</li></ol><ul><li>b|</li></ul><ol><li>c</li></ol>"
+      "<ol><li>a<ul><li>b|</li></ul></li><li>c</li></ol>"
+    );
+    expect(format("<ol><li>a</li><li>[b</li><li>c]</li></ol>", "bullet")).toBe(
+      "<ol><li>a<ul><li>[b</li><li>c]</li></ul></li></ol>"
+    );
+    // into nested list of the previous item
+    expect(format("<ol><li>a<ul><li>x</li></ul></li><li>b|</li></ol>", "bullet")).toBe(
+      "<ol><li>a<ul><li>x</li><li>b|</li></ul></li></ol>"
+    );
+    expect(format("<ol><li>a<ol><li>x</li></ol></li><li>b|</li></ol>", "bullet")).toBe(
+      "<ol><li>a<ol><li>x</li></ol><ul><li>b|</li></ul></li></ol>"
+    );
+    expect(format("<ul><li>a<ul><li>x</li><li>b|</li></ul></li></ul>", "ordered")).toBe(
+      "<ul><li>a<ul><li>x<ol><li>b|</li></ol></li></ul></li></ul>"
+    );
+    // the 1st item keeps its level: it's moved out of its list (whole list is converted if it's selected)
+    expect(format("<ol><li>a|</li><li>b</li></ol>", "bullet")).toBe("<ul><li>a|</li></ul><ol><li>b</li></ol>");
+    expect(format("<ul><li>a<ul><li>b|</li><li>y</li></ul></li></ul>", "ordered")).toBe(
+      "<ul><li>a<ol><li>b|</li></ol><ul><li>y</li></ul></li></ul>"
+    );
+    expect(format("<ul><li>a<ul><li>b|</li></ul></li></ul>", "bullet")).toBe("<ul><li>a</li></ul><div>b|</div>"); // off
+    // parent item & nested one
+    expect(format("<ul><li>[a<ul><li>b]</li></ul></li></ul>", "ordered")).toBe(
+      "<ol><li>[a<ol><li>b]</li></ol></li></ol>"
+    );
+  });
+
+  test("nested lists: indent of list item changes its level", async () => {
+    await h.wait(1);
+    el.$refInput.focus();
+    /** Sets html with selection & changes indent */
+    const indent = (html, value) => {
+      setHtml(html);
+      el.$format("indent", value, true);
+      return getHtml();
+    };
+
+    // into nested list of the previous item & back
+    expect(indent("<ul><li>a</li><li>b|</li></ul>", 1)).toBe("<ul><li>a<ul><li>b|</li></ul></li></ul>");
+    expect(indent(getHtml(), 1)).toBe("<ul><li>a<ul><li>b|</li></ul></li></ul>"); // the 1st item of nested list
+    expect(indent(getHtml(), -1)).toBe("<ul><li>a</li><li>b|</li></ul>");
+    expect(indent(getHtml(), -1)).toBe("<ul><li>a</li><li>b|</li></ul>"); // top level
+    expect(indent("<ul><li>a|</li><li>b</li></ul>", 1)).toBe("<ul><li>a|</li><li>b</li></ul>"); // the 1st item
+    // existing nested list of the previous item; type of list is kept
+    expect(indent("<ul><li>a<ul><li>x</li></ul></li><li>b|</li></ul>", 1)).toBe(
+      "<ul><li>a<ul><li>x</li><li>b|</li></ul></li></ul>"
+    );
+    expect(indent("<ol><li>a<ul><li>x</li></ul></li><li>b|</li></ol>", 1)).toBe(
+      "<ol><li>a<ul><li>x</li></ul><ol><li>b|</li></ol></li></ol>"
+    );
+    // nested items are moved with item
+    expect(indent("<ul><li>a</li><li>b|<ul><li>c</li></ul></li></ul>", 1)).toBe(
+      "<ul><li>a<ul><li>b|<ul><li>c</li></ul></li></ul></li></ul>"
+    );
+    expect(indent(getHtml(), -1)).toBe("<ul><li>a</li><li>b|<ul><li>c</li></ul></li></ul>");
+    // decrease: the next items stay below item (become its nested ones), other nested lists of parent too
+    expect(
+      indent("<ul><li>a<ul><li>b|<ul><li>x</li></ul></li><li>c</li></ul><ol><li>d</li></ol></li><li>e</li></ul>", -1)
+    ).toBe("<ul><li>a</li><li>b|<ul><li>x</li><li>c</li></ul><ol><li>d</li></ol></li><li>e</li></ul>");
+    // list without parent item (Chrome places nested list into list)
+    expect(indent("<ul><li>a</li><ul><li>b|</li><li>c</li></ul><li>d</li></ul>", -1)).toBe(
+      "<ul><li>a</li><li>b|<ul><li>c</li></ul></li><li>d</li></ul>"
+    );
+    expect(indent("<ul><ul><li>a</li></ul><li>b|</li></ul>", 1)).toBe("<ul><ul><li>a</li><li>b|</li></ul></ul>");
+    expect(indent("<ul><ol><li>a</li></ol><li>b|</li></ul>", 1)).toBe(
+      "<ul><ol><li>a</li></ol><ul><li>b|</li></ul></ul>"
+    );
+    // item without own content is removed: otherwise it's shown as empty bullet
+    expect(indent("<ul><li><ul><li>a|</li></ul></li></ul>", -1)).toBe("<ul><li>a|</li></ul>");
+
+    // several items
+    expect(indent("<ul><li>a</li><li>[b</li><li>c]</li></ul>", 1)).toBe(
+      "<ul><li>a<ul><li>[b</li><li>c]</li></ul></li></ul>"
+    );
+    expect(indent(getHtml(), -1)).toBe("<ul><li>a</li><li>[b</li><li>c]</li></ul>");
+    // the next items aren't nested into the 1st one (it isn't moved)
+    expect(indent("<div>[p</div><ul><li>a</li><li>b]</li></ul>", 1)).toBe(
+      '<div style="margin-left: 3em;">[p</div><ul><li>a</li><li>b]</li></ul>'
+    );
+    // parent & its nested item: each one changes level once
+    expect(indent("<ul><li>z</li><li>[a<ul><li>b]</li></ul></li></ul>", 1)).toBe(
+      "<ul><li>z<ul><li>[a<ul><li>b]</li></ul></li></ul></li></ul>"
+    );
+    expect(indent(getHtml(), -1)).toBe("<ul><li>z</li><li>[a<ul><li>b]</li></ul></li></ul>");
+    // nested item without parent: it's moved alone
+    expect(indent("<ul><li>a<ul><li>b</li><li>[c</li></ul></li><li>d]</li></ul>", 1)).toBe(
+      "<ul><li>a<ul><li>b<ul><li>[c</li></ul></li><li>d]</li></ul></li></ul>"
+    );
+  });
+
+  test("nested lists: Tab & Shift+Tab in list item", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Sets html with selection & presses Tab
+     * @returns true if event is prevented (otherwise focus goes to the next element) */
+    const tab = (html, shiftKey) => {
+      html && setHtml(html);
+      const e = new KeyboardEvent("keydown", { key: "Tab", shiftKey, bubbles: true, cancelable: true });
+      return !inp.dispatchEvent(e);
+    };
+
+    expect(tab("<ul><li>a</li><li>b|</li></ul>")).toBe(true);
+    expect(getHtml()).toBe("<ul><li>a<ul><li>b|</li></ul></li></ul>");
+    expect(tab()).toBe(false); // nothing is changed
+    expect(tab(null, true)).toBe(true);
+    expect(getHtml()).toBe("<ul><li>a</li><li>b|</li></ul>");
+    expect(tab(null, true)).toBe(false);
+    expect(tab("<div>a|</div>")).toBe(false); // not list: focus goes out
+    expect(getHtml()).toBe("<div>a|</div>");
+    // undo
+    tab("<ul><li>a</li><li>b|</li></ul>");
+    await h.wait(1);
+    expect(typeText(null, "historyUndo")).toBe(true);
+    await h.wait(1);
+    expect(inp.innerHTML).toBe("<ul><li>a</li><li>b</li></ul>");
+
+    // tool isn't rendered
+    el.$options.toolbar = [["bold"], [{ list: "bullet" }]];
+    await h.wait(1);
+    expect(tab("<ul><li>a</li><li>b|</li></ul>")).toBe(false);
+    // readonly
+    el.$options.toolbar = [[{ indent: -1 }, { indent: 1 }]];
+    el.$options.readOnly = true;
+    await h.wait(1);
+    expect(tab("<ul><li>a</li><li>b|</li></ul>")).toBe(false);
+    expect(getHtml()).toBe("<ul><li>a</li><li>b|</li></ul>");
+  });
+
+  test("nested lists: Enter in empty nested item moves it to parent list", async () => {
+    await h.wait(1);
+    el.$refInput.focus();
+    /** Sets html with selection & fires `beforeinput` of Enter
+     * @returns html or false if browser handles it */
+    const enter = (html) => {
+      setHtml(html);
+      return typeText(null, "insertParagraph") && getHtml();
+    };
+
+    expect(enter("<ul><li>a<ul><li>b</li><li>|<br></li><li>c</li></ul></li></ul>")).toBe(
+      "<ul><li>a<ul><li>b</li></ul></li><li>|<br><ul><li>c</li></ul></li></ul>"
+    );
+    expect(enter("<ul><li>a<ul><li>|<br><ul><li>b</li></ul></li></ul></li></ul>")).toBe(
+      "<ul><li>a</li><li>|<br><ul><li>b</li></ul></li></ul>"
+    );
+    // browser handles it: text, top level (empty line instead of item)
+    expect(enter("<ul><li>a<ul><li>b|</li></ul></li></ul>")).toBe(false);
+    expect(enter("<ul><li>a</li><li>|<br></li></ul>")).toBe(false);
+    // embed is content
+    const cleanup = useImage();
+    try {
+      el.$options.toolbar = [["bold"]]; // tools are applied on toolbar render
+      await h.wait(1);
+      expect(enter('<ul><li>a<ul><li><img src="x.png">|</li></ul></li></ul>')).toBe(false);
+      expect(enter('<ul><li>a<ul><li><b><img src="x.png"></b>|</li></ul></li></ul>')).toBe(false);
+    } finally {
+      cleanup();
+    }
+  });
+
+  test("nested lists: line formats of parent item & nested one", async () => {
+    await h.wait(1);
+    el.$refInput.focus();
+    /** Sets html with selection & applies format */
+    const format = (html, ...args) => {
+      setHtml(html);
+      el.$format(...args);
+      return getHtml();
+    };
+
+    // parent selected with nested item: both are formatted
+    expect(format("<ul><li>[a<ul><li>b]</li></ul></li></ul>", "align", "center", true)).toBe(
+      '<ul><li style="text-align: center;">[a<ul><li style="text-align: center;">b]</li></ul></li></ul>'
+    );
+    // nested item only: parent isn't formatted
+    expect(format("<ul><li>a<ul><li>[b]</li></ul></li></ul>", "align", "center", true)).toBe(
+      '<ul><li>a<ul><li style="text-align: center;">[b]</li></ul></li></ul>'
+    );
+    // nested items keep their level: otherwise list is placed into heading
+    expect(format("<ul><li>a|<ul><li>b</li></ul></li><li>c</li></ul>", "header", 2, true)).toBe(
+      "<h2>a|</h2><ul><ul><li>b</li></ul><li>c</li></ul>"
+    );
+    // list without parent item: decreasing moves it back
+    expect(format("<h2>a</h2><ul><ul><li>b|</li></ul><li>c</li></ul>", "indent", -1, true)).toBe(
+      "<h2>a</h2><ul><li>b|</li><li>c</li></ul>"
     );
   });
 

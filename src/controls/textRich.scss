@@ -45,6 +45,15 @@
       font-family: monospace;
       white-space: pre-wrap;
     }
+
+    // nested numbers: 1. => a. => i. (as in Google Docs & quill); nested bullets change by browser
+    :is(ol, ul) ol {
+      list-style-type: lower-alpha;
+    }
+
+    :is(ol, ul) :is(ol, ul) ol {
+      list-style-type: lower-roman;
+    }
   }
 }
 

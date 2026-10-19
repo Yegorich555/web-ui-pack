@@ -499,12 +499,12 @@ export default class WUPModalElement<
 
   /** Called on keydown event */
   gotKeyDown(e: KeyboardEvent): void {
-    if (e.altKey || e.ctrlKey || e.metaKey) {
-      return;
+    if (e.altKey || e.ctrlKey || e.metaKey || e.defaultPrevented) {
+      return; // handled by content: TextRich changes level of list item on Tab etc.
     }
     switch (e.key) {
       case "Escape":
-        if (!e.shiftKey && !e.defaultPrevented) {
+        if (!e.shiftKey) {
           e.preventDefault();
           this.goClose(ModalCloseCases.onPressEsc, e);
         }

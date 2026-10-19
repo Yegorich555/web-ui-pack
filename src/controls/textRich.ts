@@ -543,19 +543,25 @@ export default class WUPTextRichControl<
         const t = el.tagName === "LI" && el.parentElement?.tagName;
         return (t === "OL" && "ordered") || (t === "UL" && "bullet") || undefined;
       },
-      format: ({ lines, value, editor }) => {
+      format: ({ lines, value }) => {
         const tag = value === "ordered" ? "OL" : "UL";
         const isOn = lines.every((l) => l.parentElement!.tagName === tag);
         lines.forEach((l) => {
           if (isOn) {
             Utils.Lines.setTag(l, "DIV");
           } else if (l.parentElement!.tagName !== tag) {
-            const li = Utils.Lines.setTag(l, "LI"); // moves item out of another list
-            li.parentNode!.insertBefore(document.createElement(tag), li).appendChild(li);
+            // item of another list is nested into the previous item (Enter in numbered list & bulleted list),
+            // the 1st one keeps its level (whole list is converted): it's moved out of its list only
+            const isItem = l.tagName === "LI";
+            isItem && Utils.Lines.nest(l);
+            const li = isItem ? Utils.Lines.lift(l) : Utils.Lines.setTag(l, "LI");
+            const list = li.parentNode!.insertBefore(document.createElement(tag), li);
+            list.appendChild(li);
+            // merge adjacent lists: `<ol><li>a</li></ol><ol><li>b</li></ol>` => `<ol><li>a</li><li>b</li></ol>`
+            Utils.Formats.mergePrev(list.nextSibling);
+            Utils.Formats.mergePrev(list);
           }
         });
-        // merge adjacent lists: `<ol><li>a</li></ol><ol><li>b</li></ol>` => `<ol><li>a</li><li>b</li></ol>`
-        editor.querySelectorAll(":scope > ol + ol, :scope > ul + ul").forEach(Utils.Formats.mergePrev);
       },
     },
     script: {
@@ -572,14 +578,25 @@ export default class WUPTextRichControl<
         { value: -1, label: __wupln("Decrease indent", "aria"), hotKey: "Control+[" },
         { value: 1, label: __wupln("Increase indent", "aria"), hotKey: "Control+]" },
       ],
-      format: ({ lines, value }) =>
-        lines.forEach((l) => {
+      // list item changes level of nesting, other lines get margin
+      format: ({ lines, value }) => {
+        const isOut = value < 0;
+        let moved: HTMLElement | undefined; // its nested items are moved with it (lines are in order: only last can be)
+        const fixed = new Set<Element | null>(); // the 1st item of list: the next selected items aren't nested into it
+        // decreasing goes from the end: the next items become nested in moved one
+        (isOut ? lines.slice().reverse() : lines).forEach((l) => {
+          if (l.tagName === "LI") {
+            const isSkip = !isOut && (fixed.has(l.previousElementSibling) || !!moved?.contains(l));
+            !isSkip && Utils.Lines.nest(l, isOut) ? (moved = l) : fixed.add(l);
+            return;
+          }
           // 3em per level (the same as quill); pasted indent can be in px
           const [, n, unit] = Utils.indentReg.exec(l.style.marginLeft) ?? [];
           const em = unit === "px" ? +n / (parseFloat(getComputedStyle(l).fontSize) || 16) : +(n ?? 0);
           const level = Math.min(8, Math.max(0, Math.round(em / 3) + value));
           l.style.marginLeft = level ? `${level * 3}em` : "";
-        }),
+        });
+      },
     },
     size: {
       label: __wupln("Font size", "aria"),
@@ -1450,6 +1467,18 @@ export default class WUPTextRichControl<
     return true;
   }
 
+  /** Tab/Shift+Tab in list item: moves selected items to the next/previous level (via rendered tool `indent`)
+   * @returns false if nothing is changed: focus goes to the next/previous element as usual */
+  protected gotTab(isOut: boolean): boolean {
+    const inp = this.$refInput;
+    const sel = window.getSelection()!;
+    if (!sel.rangeCount || !Utils.Lines.of(sel.getRangeAt(0), inp).some((l) => l.tagName === "LI")) {
+      return false;
+    }
+    const prev = inp.value;
+    return this.applyKey(`indent:${isOut ? -1 : 1}`) && inp.value !== prev;
+  }
+
   protected override gotKeyDown(e: KeyboardEvent & { submitPrevented?: boolean }): void {
     const t = e.target as Node;
     const inp = this.$refInput;
@@ -1465,6 +1494,7 @@ export default class WUPTextRichControl<
       // menu keys: otherwise caret moves, line is added, button is clicked etc.
       ((isInp || isBar) && l?.onKey?.(e)) ||
       (isBar && !isMod && this.gotToolbarKey(e)) ||
+      (isInp && k === "Tab" && !isMod && this.gotTab(e.shiftKey)) ||
       // arrow at the edge of format (bold, link): the next typed text goes out of it (caret stays visually)
       (isInp && isArrow && inp.leaveFormats(k === "ArrowRight"))
     ) {
@@ -1531,5 +1561,4 @@ export default class WUPTextRichControl<
 
 customElements.define(tagName, WUPTextRichControl);
 
-// todo allow nested lists
 // todo allow to move from list with icons arrowLeft & arrowRight how it works with inline tools like Bold

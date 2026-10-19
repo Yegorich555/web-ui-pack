@@ -2125,6 +2125,12 @@ exports[`control.textRich common tests render + styles 2`] = `
   font-family: monospace;
   white-space: pre-wrap;
 }
+[wup-textrich] :is(ol, ul) ol {
+  list-style-type: lower-alpha;
+}
+[wup-textrich] :is(ol, ul) :is(ol, ul) ol {
+  list-style-type: lower-roman;
+}
   
 WUP-TEXTRICH {
   --ctrl-focus-border: var(--ctrl-focus);

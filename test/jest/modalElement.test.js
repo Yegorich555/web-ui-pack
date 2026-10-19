@@ -285,6 +285,12 @@ describe("modalElement", () => {
     expect(document.activeElement.id).toBe("bclose");
     await h.userPressTab(document.body, { shiftKey: true });
     expect(document.activeElement.id).toBe("b2");
+    // Tab handled by content (TextRich changes level of list item): focus isn't moved
+    const b2 = document.getElementById("b2");
+    b2.addEventListener("keydown", (e) => e.preventDefault(), { once: true });
+    expect(b2.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }))).toBe(false);
+    await h.wait();
+    expect(document.activeElement.id).toBe("b2");
 
     el.$close();
     await h.wait();

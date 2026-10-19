@@ -35,6 +35,7 @@ export default function TextRichControlView() {
         'Selected text is wrapped into typed quote or bracket like in code editors: "text", (text) etc. (customizable via static $wrapChars)',
         "Menu of values on typed char like mentions in messengers: { for placeholders, @ for users, / for commands (see `trigger` of static $tools)",
         "Typed links & emails are recognized while typing (see `recognize` of static $tools)",
+        "Nested lists: Tab/Shift+Tab (or indent buttons) changes level of list item, Enter in empty nested item moves it to the parent list",
         "Slash commands: type / at word start to choose any tool of toolbar (hidden ones too); link, email etc. insert example text to type over (see `command` & `placeholder` of static $tools)",
         "Validations min/max count visible chars only",
       ]}
@@ -63,8 +64,8 @@ export default function TextRichControlView() {
                 '<a href="https://github.com/Yegorich555/web-ui-pack">link</a></p>',
                 "<blockquote>Quote</blockquote>",
                 "<pre>const code = true;</pre>",
-                "<ol><li>Numbered</li><li>List</li></ol>",
-                "<ul><li>Bulleted</li><li>List</li></ul>",
+                "<ol><li>Numbered<ol><li>Nested (Tab/Shift+Tab)</li></ol></li><li>List</li></ol>",
+                "<ul><li>Bulleted<ul><li>Nested</li></ul></li><li>List</li></ul>",
                 '<p style="text-align: center;">Centered text with <span style="font-size: x-large">large</span> size</p>',
               ].join("");
 

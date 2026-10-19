@@ -730,6 +730,27 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return true;
   }
 
+  /** Enter in empty nested list item moves it to the parent list (see Utils.Lines.nest);
+   *  Chrome does it too but moves nested lists out of items: `<ul><li>a</li><ul><li>b</li></ul></ul>`
+   * @returns false if caret isn't in empty nested item */
+  protected liftEmpty(): boolean {
+    const sel = window.getSelection()!;
+    const li = sel.isCollapsed ? Utils.Lines.at(sel.focusNode!, this) : undefined;
+    const isEmbed = this._isEmbed;
+    const isEmpty = // own content: without nested lists
+      li?.tagName === "LI" &&
+      Array.prototype.every.call(li.childNodes, (n: Node) => Utils.listTags.has(n.nodeName) || !n.textContent) &&
+      !(
+        isEmbed &&
+        Array.prototype.some.call(li.querySelectorAll(":scope > :not(ol,ul), :scope > :not(ol,ul) *"), isEmbed)
+      );
+    if (!isEmpty || !Utils.Lines.nest(li, true)) {
+      return false;
+    }
+    sel.collapse(li, 0);
+    return true;
+  }
+
   /** Called on `beforeinput` before changes: undo/redo pauses recognizing (otherwise undone link is recognized again
    *  on typing), other input collects elements of recognized text (see `recognize`) */
   gotBeforeInput(e: InputEvent): void {
@@ -737,7 +758,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Replaces browser input with custom changes: sanitized paste, typed text (pending formats, out of tokens & recognized
-   *  text), deleting across lines; line break leaves recognized text
+   *  text), deleting across lines, Enter in empty nested list item; line break leaves recognized text
    * @returns true if input is replaced: event is prevented & `input` is fired (without inputType) */
   replaceInput(e: InputEvent): boolean {
     const t = e.inputType;
@@ -754,7 +775,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       this.insertHTML(html);
     } else if (
       (s && (this.replaceAuto(s) || this.insertOutOfToken(s) || this.insertTyped(s))) ||
-      (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0]))
+      (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0])) ||
+      (t === "insertParagraph" && this.liftEmpty())
     ) {
       e.preventDefault();
     } else {
