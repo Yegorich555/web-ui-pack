@@ -1530,3 +1530,6 @@ export default class WUPTextRichControl<
 }
 
 customElements.define(tagName, WUPTextRichControl);
+
+// todo allow nested lists
+// todo allow to move from list with icons arrowLeft & arrowRight how it works with inline tools like Bold
