@@ -65,10 +65,6 @@ export class TextRichAsk {
  * @tutorial innerHTML @example
  * <wup-popup><wup-text/></wup-popup> */
 export class TextRichPrompt extends TextRichAsk {
-  /**
-   * @param value initial value
-   * @param opts options of text control: label, validations etc.
-   * @param hovered hover popup (link): text control isn't focused, clearing value resolves `""` (to remove link) */
   constructor(target: HTMLElement, value: string, opts: Partial<WUP.Text.Options>, hovered?: HTMLElement) {
     super(target, hovered);
     const p = this.popup;
@@ -93,7 +89,10 @@ export class TextRichPrompt extends TextRichAsk {
     };
     // WARN: there is no `onfocusout` in HTML spec
     // browser window blur keeps focused element active (relatedTarget is null)
-    p.addEventListener("focusout", (e) => !p.contains((e.relatedTarget || document.activeElement) as Node) && this.done());
+    p.addEventListener(
+      "focusout",
+      (e) => !p.contains((e.relatedTarget || document.activeElement) as Node) && this.done()
+    );
   }
 }
 

@@ -1,6 +1,6 @@
 import WUPTextRichControl from "web-ui-pack/controls/textRich";
 import TextRichHistory from "web-ui-pack/controls/textRich.history";
-import { htmlToEditor } from "web-ui-pack/controls/textRich.input";
+import { htmlToEditor } from "web-ui-pack/controls/textRich.utils";
 import { initTestBaseControl } from "./baseControlTest";
 import testTextAreaControl, { mockAreaInput } from "./control.textAreaTest";
 import * as h from "../../testHelper";
@@ -352,7 +352,7 @@ describe("control.textRich", () => {
     const paste = (html, [start, end], pasted) => {
       inp.innerHTML = html;
       window.getSelection().setBaseAndExtent(inp.firstChild.firstChild, start, inp.lastChild.firstChild, end);
-      el.insertHTML(pasted);
+      inp.insertHTML(pasted);
       return inp.innerHTML;
     };
     // otherwise `<div>HeX</div><div>ld</div>`
@@ -364,7 +364,7 @@ describe("control.textRich", () => {
     // caret at editor root (empty editor): otherwise blocks are flattened into `T<br>x`
     inp.innerHTML = "";
     window.getSelection().collapse(inp, 0);
-    el.insertHTML("<h1>T</h1><ul><li>x</li></ul>");
+    inp.insertHTML("<h1>T</h1><ul><li>x</li></ul>");
     expect(inp.innerHTML).toBe("<h1>T</h1><ul><li>x</li></ul>");
   });
 
@@ -384,7 +384,7 @@ describe("control.textRich", () => {
       // paste of block splits line at caret
       inp.innerHTML = `<div>${img}</div>`;
       window.getSelection().collapse(inp.firstChild, 1);
-      el.insertHTML("<h1>T</h1>");
+      inp.insertHTML("<h1>T</h1>");
       expect(inp.innerHTML).toBe(`<div>${img}</div><h1>T</h1>`); // otherwise image is removed
 
       // typing with pending format splits format element at caret
@@ -721,7 +721,7 @@ describe("control.textRich", () => {
     const cleanup = usePlaceholder();
     const cleanupImg = useImage();
     WUPTextRichControl.$tools.action = { label: "Action" };
-    WUPTextRichControl.$tools.del = { format: ({ control }) => control.$insert(document.createDocumentFragment()) };
+    WUPTextRichControl.$tools.del = { format: ({ editor }) => editor.$insert(document.createDocumentFragment()) };
     WUPTextRichControl.$tools.mention = {
       values: [{ value: "john" }],
       trigger: "@",

@@ -1,390 +1,67 @@
-import WUPTextAreaInput, { lineTags } from "./textArea.input";
+import WUPTextAreaInput, { charsBefore, pointAt } from "./textArea.input";
+import TextRichHistory from "./textRich.history";
+import {
+  Tools,
+  addInline,
+  createOf,
+  embedOf,
+  firstNode,
+  formatParents,
+  getLines,
+  htmlFromEditor,
+  htmlToEditor,
+  insertText,
+  intersects,
+  isBlockTag,
+  isMatch,
+  isSame,
+  linesOf,
+  listTags,
+  removeInline,
+  selectNode,
+  selectRange,
+  setLineTag,
+  splitAt,
+  splitRange,
+  textAround,
+  textAt,
+  wrapLines,
+} from "./textRich.utils";
 
-/** Static $tools of control: sanitizer keeps their formats */
-type Tools = Record<string, WUP.TextRich.Tool>;
+/** Tool name, tool & checker of element by `is` */
+type ToolEntry = [string, WUP.TextRich.Tool, ((el: Element) => boolean) | undefined];
 
-/** Containers => paragraph (`<p>` in value, `<div>` in editor); unwrapped if they contain blocks */
-const paragraphTags = new Set([
-  "P",
-  "DIV",
-  "SECTION",
-  "ARTICLE",
-  "HEADER",
-  "FOOTER",
-  "MAIN",
-  "ASIDE",
-  "NAV",
-  "ADDRESS",
-  "FIGURE",
-  "FIGCAPTION",
-  "DETAILS",
-  "SUMMARY",
-  "FIELDSET",
-  "FORM",
-  "CENTER",
-  "DL",
-  "DT",
-  "DD",
-  "TABLE",
-  "CAPTION",
-  "THEAD",
-  "TBODY",
-  "TFOOT",
-  "TR",
-  "TH",
-  "TD",
-]);
-export const listTags = new Set(["OL", "UL"]);
-/** Removed with content: unsafe or not supported */
-const skipTags = new Set([
-  "SCRIPT",
-  "STYLE",
-  "TEMPLATE",
-  "NOSCRIPT",
-  "IFRAME",
-  "FRAME",
-  "OBJECT",
-  "EMBED",
-  "SVG",
-  "MATH",
-  "CANVAS",
-  "AUDIO",
-  "VIDEO",
-  "IMG",
-  "PICTURE",
-  "SOURCE",
-  "TRACK",
-  "MAP",
-  "AREA",
-  "INPUT",
-  "TEXTAREA",
-  "SELECT",
-  "BUTTON",
-  "HR",
-  "TITLE",
-  "META",
-  "LINK",
-  "BASE",
-]);
-/** Value of `size` => font-size */
-export const sizes = { sm: "small", lg: "x-large", hg: "xxx-large" };
-/** Supported font-size => value of `size` */
-export const sizeFormats = {
-  small: "sm",
-  "x-large": "lg",
-  "xxx-large": "hg",
-} satisfies Record<string, WUP.TextRich.ToolValues["size"]>;
-/** Supported text-align ("left" is default) */
-export const textAligns = new Set(["center", "right", "justify"]);
-const safeProtocols = new Set(["http:", "https:", "mailto:", "tel:", "sms:"]);
-/** Positive margin-left (indent) */
-const indentReg = /^\d+(\.\d+)?(px|em)$/;
-
-/** Returns url if its protocol is safe, otherwise empty string */
-export function sanitizeUrl(url: string): string {
-  // todo update when min Safari 18+ (URL.parse returns null instead of throwing, so without try/catch): return safeProtocols.has(URL.parse(url, document.baseURI)?.protocol ?? "") ? url : "";
-  try {
-    return safeProtocols.has(new URL(url, document.baseURI).protocol) ? url : "";
-  } catch {
-    return "";
+/** Returns text between trigger & pair at the end of string (`{someProp}` => `someProp`)
+ * @returns `undefined` if there is no pair at the end or text is empty or has whitespaces */
+function typedValue(s: string, trigger: string, pair: string | undefined): string | undefined {
+  if (!pair || !s.endsWith(pair)) {
+    return undefined;
   }
+  const i = s.lastIndexOf(trigger, s.length - pair.length - 1);
+  const v = i < 0 ? "" : s.slice(i + trigger.length, -pair.length);
+  return v && !/\s/.test(v) ? v : undefined;
 }
 
-/** Cache [html, text]: validations min & max convert the same value (getter `value` fills it too) */
-let lastText = ["", ""];
-
-/** Returns text of html (for validations) */
-export function htmlToText(html: string): string {
-  if (html !== lastText[0]) {
-    const t = document.createElement("template");
-    t.innerHTML = html; // inert: nothing is executed/loaded
-    lastText = [html, t.content.textContent || ""];
-  }
-  return lastText[1];
-}
-
-/** Returns checker of embed elements (`<img>` etc.); `undefined` if there are no embed tools */
-export function embedOf(tools: Tools): ((el: Element) => boolean) | undefined {
-  const arr = Object.values(tools).filter((t) => t.kind === "embed" && t.is);
-  return arr.length ? (el) => arr.some((t) => t.is!(el as HTMLElement) !== undefined) : undefined;
-}
-
-// WARN: sanitizer never clones or moves source nodes (they can be unsafe): it creates new ones only
-
-/** Sanitizer context: tools grouped by kind */
-interface Ctx {
-  /** Result for editor: paragraph as `<div>` (as browser adds on Enter), bold as `<b>` (`<strong>` is styled as control label) */
-  isEditor: boolean;
-  inline: WUP.TextRich.Tool[];
-  line: WUP.TextRich.Tool[];
-  lineStyle: WUP.TextRich.Tool[];
-  embed: WUP.TextRich.Tool[];
-  /** Result has embed: it isn't empty even without text */
-  hasEmbed?: boolean;
-}
-
-/** Returns sanitizer context (tools without `is`, `create`/`set` are skipped) */
-function ctxOf(tools: Tools, isEditor: boolean): Ctx {
-  const ctx: Ctx = { isEditor, inline: [], line: [], lineStyle: [], embed: [] };
-  Object.values(tools).forEach(
-    (t) => t.kind && t.is && (t.kind === "lineStyle" ? t.set : t.create) && ctx[t.kind].push(t)
-  );
-  return ctx;
-}
-
-/** Returns value of format applied by element (`undefined` for default value `false` too) */
-function applied(t: WUP.TextRich.Tool, el: HTMLElement): unknown {
-  const v = t.is!(el);
-  return v === false ? undefined : v;
-}
-
-/** Returns the 1st tool applied by element & its value */
-function firstOf(tools: WUP.TextRich.Tool[], el: HTMLElement): [WUP.TextRich.Tool, unknown] | undefined {
-  let v: unknown;
-  const t = tools.find((x) => (v = applied(x, el)) !== undefined);
-  return t && [t, v];
-}
-
-/** Adds classes: every argument can be space-separated (`"fa fa-bold"`) */
-export function addClass(el: Element, ...classes: Array<string | undefined>): void {
-  classes.forEach((c) => c && el.classList.add(...c.split(" ").filter(Boolean)));
-}
-
-/** Creates element of format via `create` & adds `classNameTag` of tool & value */
-export function createOf(t: WUP.TextRich.Tool, v: unknown): HTMLElement {
-  const el = typeof t.create === "string" ? document.createElement(t.create) : t.create!(v);
-  addClass(el, t.classNameTag, t.values?.find((x) => x.value === v)?.classNameTag);
-  return el;
-}
-
-/** Creates element of format: `<b>` => `<strong>` in value (in editor `<strong>` is styled as control label) */
-function create(t: WUP.TextRich.Tool, v: unknown, ctx: Ctx): HTMLElement {
-  const el = createOf(t, v);
-  if (ctx.isEditor || el.tagName !== "B") {
-    return el;
-  }
-  const s = document.createElement("strong");
-  el.className && (s.className = el.className); // classNameTag
-  return s;
-}
-
-/** Returns new embed if element is embed (`<img>` etc.) */
-function toEmbed(el: HTMLElement, ctx: Ctx): HTMLElement | null {
-  const m = firstOf(ctx.embed, el);
-  ctx.hasEmbed ||= !!m;
-  return m ? create(m[0], m[1], ctx) : null;
-}
-
-/** Returns true for block tag: line (paragraph, heading, list item etc.), container or list */
-export const isBlockTag = (tag: string): boolean => lineTags.has(tag) || paragraphTags.has(tag) || listTags.has(tag);
-
-/** Copies line styles: `lineStyle` formats (alignment etc.) & indent */
-function copyBlockStyle(src: HTMLElement, dst: HTMLElement, ctx: Ctx): void {
-  ctx.lineStyle.forEach((t) => {
-    const v = applied(t, src);
-    v !== undefined && t.set!(dst, v);
-  });
-  const ml = src.style.marginLeft;
-  indentReg.test(ml) && parseFloat(ml) > 0 && (dst.style.marginLeft = ml);
-}
-
-/** Removes trailing `<br>` of non-empty line (browser placeholder) */
-function trimBr(el: HTMLElement): void {
-  const last = el.lastChild;
-  last && last !== el.firstChild && last.nodeName === "BR" && last.remove();
-}
-
-/** Appends sanitized inline node; nested blocks are flattened into lines separated by `<br>` */
-function appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
-  if (n.nodeType === Node.TEXT_NODE) {
-    dst.append((n as Text).data);
-    return;
-  }
-  if (n.nodeType !== Node.ELEMENT_NODE) {
-    return;
-  }
-  const el = n as HTMLElement;
-  const tag = el.tagName;
-  const embed = toEmbed(el, ctx);
-  if (embed) {
-    dst.appendChild(embed);
-    return;
-  }
-  if (skipTags.has(tag)) {
-    return;
-  }
-  if (tag === "BR") {
-    dst.appendChild(document.createElement("br"));
-    return;
-  }
-  if (isBlockTag(tag)) {
-    dst.lastChild && dst.lastChild.nodeName !== "BR" && dst.appendChild(document.createElement("br"));
-    appendInline(el, dst, ctx);
-    return;
-  }
-  // element can apply several formats (`<span style="font-size; color">`) => nested elements
-  const arr = ctx.inline.flatMap((t) => {
-    const v = applied(t, el);
-    return v === undefined ? [] : [create(t, v, ctx)];
-  });
-  if (arr.length) {
-    const inner = arr.reduce((a, b) => a.appendChild(b));
-    appendInline(el, inner, ctx);
-    inner.firstChild && dst.appendChild(arr[0]);
-  } else {
-    appendInline(el, dst, ctx); // unwrap unsupported: <span>, <font>, <code> etc.
-  }
-}
-
-/** Appends sanitized inline content */
-function appendInline(src: Node, dst: HTMLElement, ctx: Ctx): void {
-  src.childNodes.forEach((n) => appendInlineNode(n, dst, ctx));
-}
-
-/** Fills line `el` (heading, paragraph etc.) with sanitized content of src */
-function toLine(src: HTMLElement, el: HTMLElement, ctx: Ctx): HTMLElement {
-  copyBlockStyle(src, el, ctx);
-  appendInline(src, el, ctx);
-  !ctx.isEditor && trimBr(el);
-  return el;
-}
-
-/** Appends sanitized list item: nested lists are kept, other content is flattened */
-function appendListItem(src: HTMLElement, list: HTMLElement, ctx: Ctx): void {
-  const li = list.appendChild(document.createElement("li"));
-  copyBlockStyle(src, li, ctx);
-  src.childNodes.forEach((n) => {
-    listTags.has(n.nodeName) ? li.appendChild(toList(n as HTMLElement, ctx)) : appendInlineNode(n, li, ctx);
-  });
-  !ctx.isEditor && trimBr(li);
-  !li.firstChild && li.appendChild(document.createElement("br"));
-}
-
-/** Returns sanitized list */
-function toList(src: HTMLElement, ctx: Ctx): HTMLElement {
-  const list = document.createElement(src.tagName);
-  let li: HTMLElement | null = null; // for content directly in list (invalid html)
-  src.childNodes.forEach((n) => {
-    const tag = n.nodeName;
-    if (tag === "LI") {
-      li = null;
-      appendListItem(n as HTMLElement, list, ctx);
-    } else if (listTags.has(tag)) {
-      li = null;
-      list.appendChild(toList(n as HTMLElement, ctx)); // Chrome nests lists on indent
-    } else if (n.nodeType === Node.ELEMENT_NODE || (n.nodeType === Node.TEXT_NODE && (n as Text).data.trim())) {
-      li ??= list.appendChild(document.createElement("li"));
-      appendInlineNode(n, li, ctx);
-    }
-  });
-  return list;
-}
-
-/** Appends sanitized blocks of container: loose inline content is grouped into paragraphs */
-function appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
-  const pTag = ctx.isEditor ? "div" : "p";
-  let p: HTMLElement | null = null; // current paragraph for inline content
-  const closeParagraph = (): void => {
-    p && !ctx.isEditor && trimBr(p);
-    p = null;
-  };
-
-  src.childNodes.forEach((n) => {
-    if (n.nodeType === Node.TEXT_NODE) {
-      const t = (n as Text).data;
-      if (p || t.trim()) {
-        p ??= dst.appendChild(document.createElement(pTag));
-        p.append(t);
-      } // skip whitespaces between blocks
-      return;
-    }
-    if (n.nodeType !== Node.ELEMENT_NODE) {
-      return;
-    }
-    const el = n as HTMLElement;
-    const tag = el.tagName;
-    if (tag === "BR") {
-      // after inline content - next paragraph, otherwise - empty line
-      if (p) {
-        closeParagraph();
-      } else {
-        dst.appendChild(document.createElement(pTag)).appendChild(document.createElement("br"));
-      }
-      return;
-    }
-    if (!isBlockTag(tag)) {
-      // skip unsupported with content (<script> etc.) except embeds (<img> etc.)
-      const embed = toEmbed(el, ctx);
-      if (embed || !skipTags.has(tag)) {
-        p ??= dst.appendChild(document.createElement(pTag));
-        embed ? p.appendChild(embed) : appendInlineNode(el, p, ctx);
-      }
-      return;
-    }
-
-    closeParagraph();
-    const line = firstOf(ctx.line, el); // heading, blockquote etc.
-    if (line) {
-      dst.appendChild(toLine(el, create(line[0], line[1], ctx), ctx));
-    } else if (listTags.has(tag)) {
-      dst.appendChild(toList(el, ctx));
-    } else if (tag === "LI") {
-      appendListItem(el, dst.appendChild(document.createElement("ul")), ctx); // <li> without list
-    } else if (Array.prototype.some.call(el.children, (c: Element) => isBlockTag(c.tagName))) {
-      appendBlocks(el, dst, ctx); // unwrap: `<div><ol>...</ol></div>`
-    } else {
-      const paragraph = toLine(el, document.createElement(pTag), ctx);
-      paragraph.firstChild && dst.appendChild(paragraph);
-    }
-  });
-  closeParagraph();
-}
-
-/** Returns sanitized content for editor */
-export function htmlToEditor(html: string, tools: Tools): DocumentFragment {
-  const f = document.createDocumentFragment();
-  if (html) {
-    const { body } = new DOMParser().parseFromString(html, "text/html"); // inert: nothing is executed/loaded
-    appendBlocks(body, f, ctxOf(tools, true));
-  }
-  return f;
-}
-
-/** Returns true if `<p>` can be dropped from value: the only paragraph without styles, `<br>` & leading whitespaces
- *  (sanitizer adds it back) */
-function isPlainParagraph(p: HTMLElement): boolean {
-  if (p.nextSibling || p.tagName !== "P" || p.attributes.length) {
-    return false;
-  }
-  p.normalize(); // to check leading whitespaces
-  const f = p.firstChild!;
-  return (
-    (f.nodeType !== Node.TEXT_NODE || !!(f as Text).data.trim()) &&
-    !Array.prototype.some.call(p.childNodes, (n: Node) => n.nodeName === "BR")
-  );
-}
-
-/** Contenteditable element with html value */
+/** Contenteditable element with html value: applies formats & handles typing (pending formats, tokens, recognizing etc.) */
 export default class WUPTextRichInput extends WUPTextAreaInput {
-  /** Static $tools of control: sanitizer keeps their formats */
+  /** Static $tools of control: sanitizer keeps their formats (see setTools) */
   _tools: Tools = {};
+  /** Static $wrapChars of control: opening => closing char */
+  _wrapChars = new Map<string, string>();
+  /** History of control: custom changes are saved via it (see changeContent) */
+  _history?: TextRichHistory;
+  /** Returns true if tool works: it's rendered in toolbar (hidden ones too); otherwise it isn't recognized & typed as token */
+  _isActive?: (name: string) => boolean;
+  /** Called when formats at caret can be changed without selection change: content or pending formats */
+  _onFormats?: () => void;
+  /** Entries of `_tools` with checker of element by `is`: cached via setTools */
+  _entries: ToolEntry[] = [];
+  /** Checker of embed elements: cached via setTools */
+  #isEmbed?: (el: Element) => boolean;
 
-  /** Sanitized html (empty string if there is no text or embeds)
-   * @tutorial Rules
-   * * single plain paragraph goes without `<p>` (`text` instead of `<p>text</p>`)
-   * * only formats of tools are kept: other elements are unwrapped (`<span>`, `<table>` etc.)
-   * or removed with content (`<script>`, `<img>` if it isn't embed etc.)
-   * * links with unsafe protocols are removed (`javascript:` etc.) */
+  /** Sanitized html (empty string if there is no text or embeds): see htmlFromEditor */
   override get value(): string {
-    if (this._cached == null) {
-      const div = document.createElement("div");
-      const ctx = ctxOf(this._tools, false);
-      appendBlocks(this, div, ctx);
-      const text = div.textContent!;
-      const p = div.firstChild as HTMLElement;
-      this._cached = text.trim() || ctx.hasEmbed ? (isPlainParagraph(p) ? p : div).innerHTML : "";
-      lastText = [this._cached, this._cached && text]; // validations skip parsing
-    }
+    this._cached ??= htmlFromEditor(this, this._tools);
     return this._cached;
   }
 
@@ -398,6 +75,736 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
 
   override _embedOf(): ((el: Element) => boolean) | undefined {
     return embedOf(this._tools);
+  }
+
+  /** Sets tools & updates their caches: call it when tools or toolbar are changed (see `_isActive`) */
+  setTools(tools: Tools): void {
+    this._tools = tools;
+    this._entries = Object.entries(tools).map(([k, t]) => [
+      k,
+      t,
+      t.is && ((el) => t.is!(el as HTMLElement) !== undefined),
+    ]);
+    this.#isEmbed = embedOf(tools);
+    // tool with values (mentions of users etc.): value is chosen via menu (`trigger`)
+    this.#recognizers = this._entries
+      .filter(([k, t]) => t.recognize && !t.values?.length && this._isActive?.(k))
+      .map(([, t]) => t);
+  }
+
+  /** Returns selection (anchor & focus) as char offsets (line break & embed = 1 char): valid even if nodes are re-rendered;
+   *  wraps loose inline content into lines at first (Chrome doesn't wrap the 1st line: `abc<div>def</div>`, `<div><br></div>abc`) */
+  getSelectionPos(): [number, number] {
+    const sel = window.getSelection()!;
+    // (editor, index) => (child, 0), the end of editor => the end of the last child: otherwise index is wrong
+    // after wrapping (or out of editor: IndexSizeError) & formats find no line (caret isn't inside it)
+    const childPos = (n: Node, offset: number): [Node, number] => {
+      let c: Node | null = n === this ? this.childNodes[offset] ?? this.lastChild : null;
+      if (!c) {
+        return [n, offset];
+      }
+      const isEnd = c !== this.childNodes[offset];
+      // list isn't line: into its 1st item or to the end of the last one (& of nested list at the end of item)
+      const inner = (x: Node): Node | null =>
+        listTags.has(x.nodeName)
+          ? (x as Element)[isEnd ? "lastElementChild" : "firstElementChild"]
+          : (isEnd && listTags.has(x.lastChild?.nodeName ?? "") && x.lastChild) || null;
+      for (let x = inner(c); x; x = inner(c)) {
+        c = x;
+      }
+      return isEnd ? [c, c.nodeType === Node.TEXT_NODE ? (c as Text).length : c.childNodes.length] : [c, 0];
+    };
+    const [an, ao] = childPos(sel.anchorNode!, sel.anchorOffset);
+    const [fn1, fo] = childPos(sel.focusNode!, sel.focusOffset);
+    const isMoved = an !== sel.anchorNode || fn1 !== sel.focusNode;
+    // again after wrapping: empty editor gets the 1st line (caret goes into it)
+    (wrapLines(this) || isMoved) && sel.setBaseAndExtent(...childPos(an, ao), ...childPos(fn1, fo));
+    const isEmbed = this.#isEmbed;
+    return [
+      charsBefore(this, sel.anchorNode!, sel.anchorOffset, isEmbed),
+      charsBefore(this, sel.focusNode!, sel.focusOffset, isEmbed),
+    ];
+  }
+
+  /** Sets selection by char offsets (see getSelectionPos) */
+  setSelectionPos([a, f]: [number, number]): void {
+    const isEmbed = this.#isEmbed;
+    window.getSelection()!.setBaseAndExtent(...pointAt(this, a, isEmbed), ...pointAt(this, f, isEmbed));
+  }
+
+  /** Returns formats of selection (+ pending ones for the next typed text): tool => value
+   *  of the nearest element at selection start or of its line (see `is` & `kind`) */
+  getFormats(): Map<string, unknown> {
+    const m = new Map<string, unknown>();
+    const sel = window.getSelection();
+    const n = sel?.rangeCount ? firstNode(sel.getRangeAt(0)) : null;
+    if (n && this.contains(n)) {
+      // line: child of editor or list item
+      const line = formatParents(n, (el) => el.parentElement === this || el.tagName === "LI", this)[0];
+      this._entries.forEach(([name, t, is]) => {
+        const el = is && (t.kind === "line" || t.kind === "lineStyle" ? line : formatParents(n, is, this)[0]);
+        const v = el ? t.is!(el as HTMLElement) : undefined;
+        v !== undefined && m.set(name, v);
+      });
+      this.#pending.forEach((v, k) => (v === false ? m.delete(k) : m.set(k, v)));
+    }
+    return m;
+  }
+
+  /** Applies tool with value to selection: inline format with collapsed selection is pending for the next typed text
+   *  (like quill), otherwise `format` of tool or default one is applied (see formatSelection)
+   * @param isSet set value (dropdown item, asked value etc.), otherwise toggle format (button)
+   * @param control for `format` of tool */
+  applyFormat(name: string, value: unknown, isSet: boolean, control: WUP.TextRich.FormatContext["control"]): void {
+    const tool = this._tools[name];
+    const sel = window.getSelection()!;
+    if (sel.isCollapsed && ((tool.kind === "inline" && !tool.ask && !tool.trigger) || name === "clean")) {
+      // pending format for the next typed text (Ctrl+B and type)
+      const f = this.getFormats();
+      const p = this.#pending;
+      if (name === "clean") {
+        this._entries.forEach(([k, t]) => t.kind === "inline" && !t.ask && !t.trigger && f.has(k) && p.set(k, false));
+      } else {
+        const isOff = !value || (!isSet && isMatch(f.get(name), value)); // toggle
+        p.set(name, !isOff && value);
+      }
+      this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
+      this._onFormats?.();
+    } else {
+      this.changeContent(() => this.formatSelection(tool, value, isSet, control));
+    }
+  }
+
+  /** $insert placed caret: formatSelection doesn't restore selection */
+  #isInserted = false;
+
+  /** Applies `format` of tool or default one & restores selection by positions (format can move or split nodes);
+   *  then joins split text nodes & removes empty `style` attributes */
+  protected formatSelection(
+    tool: WUP.TextRich.Tool,
+    value: unknown,
+    isSet: boolean,
+    control: WUP.TextRich.FormatContext["control"]
+  ): void {
+    const pos = this.getSelectionPos();
+    this.#isInserted = false;
+    const range = window.getSelection()!.getRangeAt(0); // after getSelectionPos: it wraps lines
+    let lines = tool.format && linesOf(range, this); // before custom format: it can move range
+    let texts: Text[] | undefined;
+    const editor = this;
+    const ctx: WUP.TextRich.FormatContext = {
+      range,
+      value,
+      isSet,
+      get lines() {
+        return (lines ??= linesOf(range, editor));
+      },
+      get texts() {
+        return (texts ??= splitRange(range));
+      },
+      editor,
+      tool,
+      control,
+      applyDefault: () => this.formatByKind(ctx),
+    };
+    tool.format ? tool.format(ctx) : this.formatByKind(ctx);
+    this.normalize();
+    this.querySelectorAll("[style='']").forEach((el) => el.removeAttribute("style"));
+    !this.#isInserted && this.setSelectionPos(pos);
+  }
+
+  /** Creates token (placeholder, mention): `{firstName}`, `@john` */
+  protected createToken(tool: WUP.TextRich.Tool, value: unknown): HTMLElement {
+    const el = createOf(tool, value);
+    el.textContent = tool.trigger! + value + (this._wrapChars.get(tool.trigger!) ?? "");
+    return el;
+  }
+
+  /** Applies default format by `kind`: sets value if `isSet`, otherwise toggles format */
+  protected formatByKind(ctx: WUP.TextRich.FormatContext): void {
+    const { tool, value, isSet, editor } = ctx; // lines & texts are lazy: read below only where needed
+    switch (tool.kind) {
+      case "inline": {
+        const any = (el: Element): boolean => tool.is!(el as HTMLElement) !== undefined;
+        if (tool.trigger && isSet && value !== false) {
+          // token replaces selection or token around caret
+          const cur = formatParents(ctx.range.startContainer, any, editor)[0];
+          cur && selectNode(cur);
+          this.$insert(this.createToken(tool, value));
+          break;
+        }
+        const { texts } = ctx;
+        const f = (el: Element): boolean => isMatch(tool.is!(el as HTMLElement), value);
+        const create = (): HTMLElement => createOf(tool, value);
+        if (isSet || !value) {
+          removeInline(texts, any, editor);
+          value && addInline(texts, f, create, editor);
+        } else {
+          // single value only: remove other values (sub vs super)
+          value !== true && removeInline(texts, (el) => any(el) && !f(el), editor);
+          texts.every((t) => formatParents(t, f, editor).length)
+            ? removeInline(texts, f, editor)
+            : addInline(texts, f, create, editor);
+        }
+        break;
+      }
+      case "line":
+      case "lineStyle": {
+        const { lines } = ctx;
+        const isOff = !value || (!isSet && lines.every((l) => isMatch(tool.is?.(l), value)));
+        lines.forEach((l) => {
+          if (tool.kind === "line") {
+            // new element: otherwise <div> keeps attributes of format (class etc.)
+            setLineTag(l, isOff ? document.createElement("div") : createOf(tool, value));
+          } else {
+            tool.set!(l, isOff ? undefined : value);
+          }
+        });
+        break;
+      }
+      case "embed":
+        this.$insert(createOf(tool, value)); // caret goes after it
+        break;
+      default: // action
+    }
+  }
+
+  /** Runs custom change of editor: saves history, updates value (fires `input`) & toolbar */
+  changeContent(fn: () => void): void {
+    const h = this._history;
+    const prev = this.value;
+    // otherwise history saves selection after changes (wrong for insertion)
+    const isState = h && !h._stateBeforeInput;
+    isState && (h._stateBeforeInput = h.inputState);
+    fn();
+    this._cached = undefined;
+    if (this.value !== prev) {
+      h?.save(prev, this.value);
+      this._keepCache = true; // value is sanitized already: skip it on input
+      this.fireInput();
+    } else if (isState) {
+      h._stateBeforeInput = undefined;
+    }
+    this._onFormats?.();
+  }
+
+  /** Replaces selection with node & places caret after it */
+  $insert(node: Node): void {
+    const sel = window.getSelection()!;
+    const r = sel.getRangeAt(0);
+    const last = node.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? node.lastChild : node;
+    r.deleteContents();
+    r.insertNode(node);
+    last && r.setStartAfter(last);
+    sel.collapse(r.startContainer, r.startOffset); // empty fragment (deletion): Chrome keeps selection not collapsed
+    this.#isInserted = true;
+  }
+
+  /** Fires `input` to update value of control after custom changes */
+  protected fireInput(): void {
+    this.dispatchEvent(new InputEvent("input", { bubbles: true }));
+  }
+
+  /** Pending formats for the next typed text: tool => value (`false` removes format) */
+  #pending = new Map<string, unknown>();
+  /** Caret position of pending formats: they're reset when caret moves */
+  #pendingAt?: [Node, number];
+
+  /** Called on selection change inside editor: pending formats are reset if caret moves */
+  gotSelect(): void {
+    const sel = window.getSelection()!;
+    const p = this.#pendingAt;
+    p && (sel.anchorNode !== p[0] || sel.anchorOffset !== p[1]) && this.#pending.clear();
+  }
+
+  /** Called when control loses focus: pending formats are reset & recognizing is resumed */
+  gotFocusLost(): void {
+    this.#pending.clear();
+    this.#isAutoPaused = false;
+  }
+
+  /** Inserts text typed at token edge outside it: otherwise browser extends token (`{firstName}x`)
+   * @returns false if caret isn't at token edge */
+  protected insertOutOfToken(text: string): boolean {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode;
+    if (!sel.isCollapsed || !n) {
+      return false;
+    }
+    const isToken = (el: Element): boolean =>
+      this._entries.some(([, t, is]) => t.kind === "inline" && t.trigger && is?.(el));
+    const off = sel.focusOffset;
+    const kids = n.childNodes;
+    // caret inside token (the outer one) or next to it (after insertion): browser types into the previous node
+    const el =
+      formatParents(n, isToken, this).pop() ??
+      [kids[off - 1], kids[off]].find((x): x is Element => x instanceof Element && isToken(x));
+    if (!el) {
+      return false;
+    }
+    const isStart = !textAt(el, n, off, true);
+    if (!isStart && textAt(el, n, off)) {
+      return false; // caret in the middle: edit token text
+    }
+    const t = document.createTextNode(text);
+    isStart ? el.before(t) : el.after(t);
+    sel.collapse(t, t.length);
+    return true;
+  }
+
+  /** Returns inline formats (except tokens) whose elements end at caret (or start if `isStart`): tool & the outer element */
+  protected formatsAt(isStart?: boolean): Array<[string, Element]> {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode;
+    const arr: Array<[string, Element]> = [];
+    if (sel.isCollapsed && n) {
+      this._entries.forEach(([name, t, is]) => {
+        const el = is && t.kind === "inline" && !t.trigger && formatParents(n, is, this).pop(); // the outer one
+        el && !textAt(el, n, sel.focusOffset, isStart) && arr.push([name, el]);
+      });
+    }
+    return arr;
+  }
+
+  /** Elements left via arrows (see leaveFormats): text typed out of them isn't joined on recognizing (see `recognize`) */
+  #left = new WeakSet<Element>();
+
+  /** ArrowRight at the end of formatted element (bold, link etc.) or ArrowLeft at its start: the next typed text goes out of it,
+   *  the opposite arrow returns into it (caret stays visually)
+   * @returns false if there is nothing to leave/return */
+  leaveFormats(isRight: boolean): boolean {
+    const p = this.#pending;
+    const back = this.formatsAt(isRight).filter(([k]) => p.get(k) === false); // left via the opposite arrow
+    const arr = back.length ? back : this.formatsAt(!isRight).filter(([k]) => p.get(k) !== false);
+    if (!arr.length) {
+      return false;
+    }
+    arr.forEach(([k, el]) => {
+      if (back.length) {
+        p.delete(k);
+      } else {
+        p.set(k, false);
+        this.#left.add(el);
+      }
+    });
+    const sel = window.getSelection()!;
+    this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
+    this._onFormats?.();
+    return true;
+  }
+
+  /** Inserts typed text with formats shown by toolbar: pending ones or of elements ending at caret
+   *  (otherwise Chrome types after link)
+   * @returns false if browser can insert it as usual */
+  protected insertTyped(text: string): boolean {
+    const sel = window.getSelection()!;
+    if (!this.#pending.size) {
+      const isEnd = !!this.formatsAt().length;
+      isEnd && sel.collapse(...insertText(sel.focusNode!, sel.focusOffset, text));
+      return isEnd;
+    }
+    const tools = this._tools;
+    const r = sel.getRangeAt(0);
+    r.deleteContents();
+    // move caret out of elements of removed/changed formats (`true` - added toggle format)
+    this.#pending.forEach((v, k) => {
+      const is = (x: Element): boolean => tools[k].is!(x as HTMLElement) !== undefined;
+      const el = v !== true && formatParents(r.startContainer, is, this).pop(); // the outer one
+      el && splitAt(el, r, this.#isEmbed);
+    });
+    const t = document.createTextNode(text);
+    let node: Node = t;
+    this.#pending.forEach((v, k) => {
+      const is = (x: Element): boolean => isMatch(tools[k].is!(x as HTMLElement), v);
+      if (v !== false && !formatParents(r.startContainer, is, this).length) {
+        const el = createOf(tools[k], v);
+        el.appendChild(node);
+        node = el;
+      }
+    });
+    r.insertNode(node);
+    sel.collapse(t, t.length);
+    this.#pending.clear();
+    return true;
+  }
+
+  /** Wraps selection into typed char & its pair (see `_wrapChars`), keeps content selected;
+   *  edge whitespaces stay outside (double click on Windows selects trailing space, triple click - line break)
+   * @returns false if char has no pair or selection has no visible content */
+  wrapSelection(open: string): boolean {
+    const close = this._wrapChars.get(open);
+    const sel = window.getSelection()!;
+    if (sel.isCollapsed || !close) {
+      return false;
+    }
+    const r = sel.getRangeAt(0);
+    const inner = document.createRange(); // from the 1st visible char (or embed) to the last one
+    const w = document.createTreeWalker(r.commonAncestorContainer, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    for (let n: Node | null = w.currentNode; n; n = w.nextNode()) {
+      if (!intersects(r, n)) {
+        continue;
+      }
+      if (n.nodeType === Node.TEXT_NODE) {
+        const t = n as Text;
+        const from = t === r.startContainer ? r.startOffset : 0;
+        const s = t.data.slice(0, t === r.endContainer ? r.endOffset : undefined);
+        const i = s.slice(from).search(/\S/);
+        if (i !== -1) {
+          inner.collapsed && inner.setStart(t, from + i);
+          inner.setEnd(t, s.trimEnd().length);
+        }
+      } else if (this.#isEmbed?.(n as Element)) {
+        inner.collapsed && inner.setStartBefore(n);
+        inner.setEndAfter(n);
+        while (n.lastChild) {
+          n = n.lastChild; // skip embed content
+        }
+        w.currentNode = n;
+      }
+    }
+    if (inner.collapsed) {
+      return false;
+    }
+    this.changeContent(() => {
+      // live range: its end stays before closing char & shifts by inserted opening char
+      const { startContainer, startOffset } = inner;
+      insertText(inner.endContainer, inner.endOffset, close);
+      inner.setStart(...insertText(startContainer, startOffset, open));
+      selectRange(inner);
+    });
+    return true;
+  }
+
+  /** Returns token completed by typed pair of trigger (see `_wrapChars`) even if it isn't in values
+   *  (`{someProp` + `}` gives placeholder `someProp`) unless `is` rejects it; typed text is selected to be replaced
+   * @returns tool name & value or `undefined` if typed text isn't token */
+  tokenEnd(data: string): [string, string] | undefined {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode as Text | null;
+    if (!sel.isCollapsed || n?.nodeType !== Node.TEXT_NODE) {
+      return undefined;
+    }
+    const s = n.data.slice(0, sel.focusOffset) + data;
+    let typed: string | undefined;
+    const found = this._entries.find(([k, t]) => {
+      const tr = t.kind === "inline" && t.trigger;
+      typed = tr ? typedValue(s, tr, this._wrapChars.get(tr)) : undefined;
+      // `is` can reject value: unknown placeholder etc.
+      return typed && this._isActive?.(k) && t.is?.(this.createToken(t, typed)) !== undefined;
+    });
+    if (!found) {
+      return undefined;
+    }
+    sel.setBaseAndExtent(n, sel.focusOffset - typed!.length - found[1].trigger!.length, n, sel.focusOffset);
+    return [found[0], typed!];
+  }
+
+  /** Tools with `recognize` that work (see `_isActive`): cached via setTools */
+  #recognizers: WUP.TextRich.Tool[] = [];
+  /** Elements of recognized text in line at caret (`<a href="https://a.com">https://a.com</a>`): taken before input,
+   *  so they follow their text after it */
+  #auto: Element[] = [];
+  /** Undo/redo pauses recognizing of new text till caret leaves word (whitespace, Enter, navigation keys, click, blur) */
+  #isAutoPaused = false;
+
+  /** Resumes recognizing paused by undo/redo: caret leaves word (navigation keys, click) */
+  resumeRecognize(): void {
+    this.#isAutoPaused = false;
+  }
+
+  /** Returns line of node: block in editor or list item (editor itself for loose content: Chrome doesn't wrap the 1st line) */
+  protected lineOf(n: Node): HTMLElement {
+    return (
+      (formatParents(
+        n,
+        (el) => (el.parentElement === this && isBlockTag(el.tagName)) || el.tagName === "LI",
+        this
+      )[0] as HTMLElement) ?? this
+    );
+  }
+
+  /** Remembers elements of recognized text in line at caret (their text gives the same element): see `recognize` */
+  collectAuto(): void {
+    const tools = this.#recognizers;
+    const n = window.getSelection()?.focusNode;
+    this.#auto = [];
+    if (tools.length && n && this.contains(n)) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const x of this.lineOf(n).getElementsByTagName("*")) {
+        tools.some((t) => t.is!(x as HTMLElement) !== undefined && isSame(createOf(t, x.textContent!), x)) &&
+          this.#auto.push(x);
+      }
+    }
+  }
+
+  /** Wraps recognized word at caret into element of tool while user types: link, email etc. (see `Tool.recognize`);
+   *  element of recognized text follows its text: it's updated on typing & removed if text isn't recognized anymore;
+   *  new element is a separate undo step (after undo text isn't recognized till caret leaves word)
+   * @returns false if nothing is changed */
+  recognize(): boolean {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode;
+    const tools = this.#recognizers;
+    if (!tools.length || !sel.isCollapsed || !n || !this.contains(n)) {
+      return false;
+    }
+    const line = this.lineOf(n);
+    if (line.tagName === "PRE") {
+      return false; // code block
+    }
+    const isEmbed = this.#isEmbed;
+    const [before, rest] = textAround(line, n, sel.focusOffset, isEmbed);
+    const after = /^\S*/.exec(rest)![0]; // the rest of word
+    let s = before + after;
+    let found = this.recognizeEnd(s, tools);
+    while (!found && /[\s.,;:!?'")\]}-]$/.test(s)) {
+      s = s.slice(0, -1); // `(see https://example.com).`, typed whitespace or separator (`+1 (359) 232-`)
+      found = this.recognizeEnd(s, tools);
+    }
+    const at = charsBefore(line, n, sel.focusOffset, isEmbed); // caret
+    const end = at - before.length + s.length; // without punctuation
+    const start = found ? end - found[0].length : Math.max(0, at - 1);
+    // elements of recognized text around caret (with typed whitespace etc.): replaced or removed
+    const r = document.createRange();
+    r.setStart(...pointAt(line, start, isEmbed));
+    r.setEnd(...pointAt(line, Math.max(end, at + after.length), isEmbed));
+    // element left via arrow joins text typed only inside it
+    const olds = this.#auto.filter(
+      (x) => line.contains(x) && intersects(r, x) && (!this.#left.has(x) || x.contains(n))
+    );
+    const update = (fn?: () => void): true => {
+      this.changeContent(() => {
+        olds.forEach((x) => x.replaceWith(...x.childNodes));
+        fn?.(); // wraps new text
+        line.normalize();
+        sel.collapse(...pointAt(line, at, isEmbed));
+      });
+      return true;
+    };
+    if (!found) {
+      return !!olds.length && update();
+    }
+    const [text, el] = found;
+    r.setEnd(...pointAt(line, end, isEmbed));
+    if (
+      // the same tag (link with other text etc.): text is formatted already
+      Array.prototype.some.call(line.getElementsByTagName(el.tagName), (x) => !olds.includes(x) && intersects(r, x)) ||
+      (olds.length === 1 && olds[0].textContent === text && isSame(olds[0], el)) || // nothing is changed
+      (!olds.length && this.#isAutoPaused)
+    ) {
+      return false;
+    }
+    !olds.length && this._history?.commit(); // new element: separate undo step
+    return update(() => {
+      r.setStart(...pointAt(line, start, isEmbed));
+      r.setEnd(...pointAt(line, end, isEmbed));
+      // element per part: text can be split by formats
+      addInline(
+        splitRange(r),
+        () => false,
+        () => el.cloneNode(false) as HTMLElement,
+        line
+      );
+    });
+  }
+
+  /** Inserts typed text instead of selection with element of recognized text (placeholder of command etc.) as plain text:
+   *  otherwise Chrome keeps element (link with the previous url); typed text is recognized again (see `recognize`)
+   * @returns false if selection has no such elements */
+  protected replaceAuto(text: string): boolean {
+    const sel = window.getSelection()!;
+    if (sel.isCollapsed) {
+      return false;
+    }
+    const r = sel.getRangeAt(0);
+    const arr = this.#auto.filter((x) => intersects(r, x));
+    if (!arr.length) {
+      return false;
+    }
+    r.deleteContents();
+    arr.forEach((x) => x.isConnected && x.replaceWith(...x.childNodes));
+    const t = document.createTextNode(text);
+    r.insertNode(t);
+    sel.collapse(t, t.length);
+    return true;
+  }
+
+  /** Called after typing or deleting: syncs recognized text with its element (see `recognize`) */
+  gotRecognize(data: string | null): void {
+    this.recognize();
+    data && !data.trim() && (this.#isAutoPaused = false); // caret leaves word
+  }
+
+  /** Returns true if element is recognized text (link etc.) or token (mention etc.): it isn't continued in the next line */
+  #isWrapped = (x: Element): boolean =>
+    this._entries.some(([, t, is]) => t.kind === "inline" && (!!t.recognize || !!t.trigger) && is!(x));
+
+  /** Called after line break: Chrome copies formats of caret into the new line, so empty copies of recognized text, tokens
+   *  & formats turned off (Bold toggled off, left via arrow) are removed; pending formats stay for the next typed text */
+  protected gotLineBreak(): void {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode!; // in editor: it's called on input of line break
+    const p = this.#pending;
+    const isOff = (x: Element): boolean =>
+      Array.from(p).some(([k, v]) => v === false && this._tools[k].is!(x as HTMLElement) !== undefined);
+    formatParents(n, (x) => !x.textContent && (this.#isWrapped(x) || isOff(x)), this.lineOf(n)).forEach((x) =>
+      x.replaceWith(...x.childNodes)
+    );
+    p.size && (this.#pendingAt = [sel.anchorNode!, sel.anchorOffset]); // otherwise caret moved to the new line resets them
+  }
+
+  /** Called before line break: caret at the end of recognized text (link etc.) goes out of its element,
+   *  otherwise browser adds line break into it */
+  protected leaveAuto(): void {
+    this.recognize();
+    this.#isAutoPaused = false;
+    const sel = window.getSelection()!;
+    const n = sel.focusNode;
+    if (!sel.isCollapsed || !n || !this.contains(n)) {
+      return;
+    }
+    const el = formatParents(n, this.#isWrapped, this.lineOf(n)).pop();
+    if (el && !textAt(el, n, sel.focusOffset)) {
+      const r = document.createRange();
+      r.setStartAfter(el);
+      sel.collapse(r.startContainer, r.startOffset);
+    }
+  }
+
+  /** Returns recognized end of text & its element by the 1st matched tool (see `Tool.recognize`) */
+  protected recognizeEnd(s: string, tools: WUP.TextRich.Tool[]): [string, HTMLElement] | undefined {
+    let found: [string, HTMLElement] | undefined;
+    tools.some((t) => {
+      const r = t.recognize!;
+      const text = typeof r === "function" ? r(s) : r.exec(s)?.[0];
+      const el = text && s.endsWith(text) && createOf(t, text);
+      found = el && t.is!(el) !== undefined ? [text, el] : undefined; // invalid url etc.
+      return found;
+    });
+    return found;
+  }
+
+  /** Replaces selection with sanitized html: blocks split the current line at caret */
+  insertHTML(html: string): void {
+    const f = htmlToEditor(html, this._tools);
+    const sel = window.getSelection()!;
+    this.getSelectionPos(); // wraps loose content: otherwise caret at editor root has no line
+    this.deleteLines(sel.getRangeAt(0)) || sel.getRangeAt(0).deleteContents(); // the rest of the last line joins the 1st one
+    const r = sel.getRangeAt(0);
+    const line = getLines(this).findLast((l) => l.contains(r.startContainer));
+    const first = f.firstElementChild;
+    if (!first) {
+      return;
+    }
+    if ((f.childNodes.length === 1 && first.tagName === "DIV") || !line || line.tagName === "LI") {
+      // inline content: lines are separated by <br>
+      const frag = document.createDocumentFragment();
+      const flatten = (el: Element): void => {
+        if (listTags.has(el.tagName)) {
+          Array.from(el.children).forEach(flatten);
+          return;
+        }
+        frag.lastChild && frag.append(document.createElement("br"));
+        Array.from(el.childNodes).forEach((n) => (listTags.has(n.nodeName) ? flatten(n as Element) : frag.append(n)));
+      };
+      Array.from(f.children).forEach(flatten);
+      this.$insert(frag);
+      return;
+    }
+    const last = f.lastChild!;
+    splitAt(line, r, this.#isEmbed); // empty parts are removed
+    r.insertNode(f);
+    window.getSelection()!.collapse(last, last.childNodes.length);
+  }
+
+  /** Deletes range across lines instead of browser (it wraps moved content into `<span style>`):
+   *  the rest of the last line joins the 1st one; if the 1st line is deleted from its start, the last line keeps its tag
+   *  (triple click on heading + Delete doesn't turn the next paragraph into heading);
+   *  if everything is deleted, the empty line becomes a plain paragraph
+   * @returns false if range is in a single line or nested lists are involved (browser deletes it) */
+  protected deleteLines(sr: AbstractRange | undefined): boolean {
+    const lines = getLines(this);
+    const lineAt = (n: Node): HTMLElement | undefined => lines.findLast((l) => l.contains(n));
+    const a = sr && lineAt(sr.startContainer);
+    const b = sr && lineAt(sr.endContainer);
+    if (!a || !b || a === b || a.contains(b) || b.parentElement!.closest("li")) {
+      return false;
+    }
+    const isEmbed = this.#isEmbed;
+    const pos = charsBefore(this, sr.startContainer, sr.startOffset, isEmbed);
+    const isRest = // content after range in the last line
+      charsBefore(b, sr.endContainer, sr.endOffset, isEmbed) < charsBefore(b, b, b.childNodes.length, isEmbed);
+    const isKeep = !charsBefore(a, sr.startContainer, sr.startOffset, isEmbed); // the 1st line is deleted entirely
+    if (!isKeep && isRest && b.querySelector("ol,ul")) {
+      return false;
+    }
+    const r = document.createRange();
+    r.setStart(sr.startContainer, sr.startOffset);
+    r.setEnd(sr.endContainer, sr.endOffset);
+    r.deleteContents();
+    const remove = (l: HTMLElement): void => {
+      const list = l.parentElement!;
+      l.remove();
+      listTags.has(list.tagName) && !list.firstElementChild && list.remove();
+    };
+    if (isKeep) {
+      if (!isRest) {
+        // everything is deleted: plain paragraph without leftovers
+        b.replaceChildren(document.createElement("br"));
+        setLineTag(b, document.createElement("div")).removeAttribute("style");
+      }
+      remove(a);
+    } else {
+      if (isRest) {
+        a.lastChild?.nodeName === "BR" && a.lastChild.remove(); // otherwise it breaks merged line
+        a.append(...b.childNodes);
+      }
+      remove(b);
+    }
+    this.normalize();
+    this.setSelectionPos([pos, pos]);
+    return true;
+  }
+
+  /** Called on `beforeinput` before changes: undo/redo pauses recognizing (otherwise undone link is recognized again
+   *  on typing), other input collects elements of recognized text (see `recognize`) */
+  gotBeforeInput(e: InputEvent): void {
+    e.inputType.startsWith("history") ? (this.#isAutoPaused = true) : this.collectAuto();
+  }
+
+  /** Replaces browser input with custom changes: sanitized paste, typed text (pending formats, out of tokens & recognized
+   *  text), deleting across lines; line break leaves recognized text
+   * @returns true if input is replaced: event is prevented & `input` is fired (without inputType) */
+  replaceInput(e: InputEvent): boolean {
+    const t = e.inputType;
+    const s = t === "insertText" && e.data;
+    (t === "insertParagraph" || t === "insertLineBreak") && this.leaveAuto();
+    const isPaste = t === "insertFromPaste" || t === "insertFromPasteAsQuotation" || t === "insertFromDrop";
+    const html = isPaste && e.dataTransfer?.getData("text/html");
+    if (html) {
+      // sanitized: otherwise browser pastes anything (images, colors etc.)
+      e.preventDefault();
+      const [r] = e.getTargetRanges();
+      this.focus({ preventScroll: true });
+      r && selectRange(r);
+      this.insertHTML(html);
+    } else if (
+      (s && (this.replaceAuto(s) || this.insertOutOfToken(s) || this.insertTyped(s))) ||
+      (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0]))
+    ) {
+      e.preventDefault();
+    } else {
+      return false;
+    }
+    this.fireInput(); // saves history by state before changes
+    return true;
+  }
+
+  /** Called on `input`: syncs recognized text with its element (see `recognize`), cleans the new line (see gotLineBreak) */
+  gotInput(e: InputEvent): void {
+    const t = e.inputType;
+    (t === "insertText" || t === "insertReplacementText" || t?.startsWith("delete")) && this.gotRecognize(e.data);
+    (t === "insertParagraph" || t === "insertLineBreak") && this.gotLineBreak();
   }
 }
 
