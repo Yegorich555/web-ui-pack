@@ -1815,6 +1815,10 @@ describe("control.textRich", () => {
     expect(txt.isConnected).toBe(false);
     expect(getHtml()).toBe("<div>a [b] c</div>");
     txt = await ask("<div>a [b] c</div>");
+    expect(document.activeElement).toBe(txt.$refInput);
+    txt.$refInput.dispatchEvent(new FocusEvent("focusout", { bubbles: true })); // browser window blur: input stays active
+    await h.wait();
+    expect(txt.isConnected).toBe(true);
     txt.$refInput.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: document.body }));
     await h.wait();
     expect(txt.isConnected).toBe(false);
@@ -2069,6 +2073,9 @@ describe("control.textRich", () => {
     expect(menu()).toBe(null);
     el.$format("header");
     await h.wait(1);
+    inp.dispatchEvent(new FocusEvent("blur")); // browser window blur: editor stays active
+    await h.wait();
+    expect(menu()).toBeTruthy();
     inp.blur();
     await h.wait();
     expect(menu()).toBe(null);

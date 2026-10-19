@@ -92,7 +92,8 @@ export class TextRichPrompt extends TextRichAsk {
       hovered && e.detail.reason === SetValueReasons.clear && el.$value === undefined && this.done("", true);
     };
     // WARN: there is no `onfocusout` in HTML spec
-    p.addEventListener("focusout", (e) => !p.contains(e.relatedTarget as Node) && this.done());
+    // browser window blur keeps focused element active (relatedTarget is null)
+    p.addEventListener("focusout", (e) => !p.contains((e.relatedTarget || document.activeElement) as Node) && this.done());
   }
 }
 
@@ -156,7 +157,8 @@ export default class TextRichMenu extends TextRichAsk {
     button.setAttribute("aria-expanded", true);
     if (owner) {
       owner.setAttribute("aria-controls", this.popup.firstElementChild!.id);
-      this.#offBlur = onEvent(owner, "blur", () => this.done());
+      // browser window blur keeps owner active
+      this.#offBlur = onEvent(owner, "blur", () => document.activeElement !== owner && this.done());
       this.focus(this.#items[values.findIndex((v) => v.value === selected)] ?? this.#items[0]);
     }
     super.open(parent);
