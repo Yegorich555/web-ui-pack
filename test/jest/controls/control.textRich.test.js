@@ -1,6 +1,6 @@
 import WUPTextRichControl from "web-ui-pack/controls/textRich";
 import TextRichHistory from "web-ui-pack/controls/textRich.history";
-import { htmlToEditor } from "web-ui-pack/controls/textRich.utils";
+import { Html } from "web-ui-pack/controls/textRich.utils";
 import { initTestBaseControl } from "./baseControlTest";
 import testTextAreaControl, { mockAreaInput } from "./control.textAreaTest";
 import * as h from "../../testHelper";
@@ -934,7 +934,7 @@ describe("control.textRich", () => {
       /** Returns sanitized html for editor */
       const toEditor = (html) => {
         const div = document.createElement("div");
-        div.appendChild(htmlToEditor(html, tools));
+        div.appendChild(Html.toEditor(html, tools));
         return div.innerHTML;
       };
       /** Returns value of editor with html */
@@ -1389,7 +1389,7 @@ describe("control.textRich", () => {
     // sanitizer keeps them
     const div = document.createElement("div");
     div.append(
-      htmlToEditor(`<p>${mention("@john")} ${tag("#news")} <span class="x">@a</span></p>`, WUPTextRichControl.$tools)
+      Html.toEditor(`<p>${mention("@john")} ${tag("#news")} <span class="x">@a</span></p>`, WUPTextRichControl.$tools)
     );
     expect(div.innerHTML).toBe(`<div>${mention("@john")} ${tag("#news")} @a</div>`);
 

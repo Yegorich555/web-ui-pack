@@ -9,21 +9,7 @@ import WUPTextAreaControl from "./textArea";
 import TextRichHistory from "./textRich.history";
 import WUPTextRichInput from "./textRich.input";
 import TextRichMenu, { TextRichAsk, TextRichPrompt } from "./textRich.select";
-import {
-  createOf,
-  formatParents,
-  htmlToText,
-  isBlockTag,
-  removeInline,
-  sanitizeUrl,
-  selectNode,
-  selectRange,
-  setLineTag,
-  sizeFormats,
-  sizes,
-  textAligns,
-  type Tools,
-} from "./textRich.utils";
+import * as Utils from "./textRich.utils";
 
 WUPTextRichInput.$use();
 
@@ -162,7 +148,7 @@ declare global {
       kind?: "inline" | "line" | "lineStyle" | "embed";
       /** Returns value of format applied by element or `undefined`: toolbar shows state of the nearest element at selection start;
        *  `line` & `lineStyle` get lines only (paragraph, heading, list item etc.)
-       *  WARN: sanitizer calls it for untrusted html (paste etc.): return only safe values (see `sanitizeUrl`) */
+       *  WARN: sanitizer calls it for untrusted html (paste etc.): return only safe values (see `Html.sanitizeUrl`) */
       is?: (el: HTMLElement) => V | undefined;
       /** Creates element to wrap related part of text
        * @example
@@ -362,7 +348,7 @@ export default class WUPTextRichControl<
   EventMap extends WUP.TextRich.EventMap = WUP.TextRich.EventMap
 > extends WUPTextAreaControl<ValueType, TOptions, EventMap> {
   /** Returns this.constructor // watch-fix: https://github.com/Microsoft/TypeScript/issues/3841#issuecomment-337560146 */
-  #ctr = this.constructor as typeof WUPTextRichControl & { $tools: Tools }; // $tools by name
+  #ctr = this.constructor as typeof WUPTextRichControl & { $tools: Utils.Tools }; // $tools by name
 
   static get $styleRoot(): string {
     return "";
@@ -488,7 +474,7 @@ export default class WUPTextRichControl<
         /(?<![\w@./:-])(?:https?:\/\/|www\.)(?:[^\s<>()]|\([^\s<>()]*\))*(?:[^\s<>().,;:!?'"]|\([^\s<>()]*\))$/i,
       // unsafe url (`javascript:` etc.) => sanitizer removes link; emails are own tool
       is: (el) => {
-        const url = el.tagName === "A" && sanitizeUrl(el.getAttribute("href") || "");
+        const url = el.tagName === "A" && Utils.Html.sanitizeUrl(el.getAttribute("href") || "");
         return (url && !/^mailto:/i.test(url) && url) || undefined;
       },
       create: (url) =>
@@ -503,11 +489,15 @@ export default class WUPTextRichControl<
         if (!range.collapsed) {
           applyDefault(); // empty url removes link
         } else if (url) {
-          const a = createOf(tool, url); // url as text
+          const a = Utils.Formats.create(tool, url); // url as text
           a.textContent = url;
           editor.$insert(a);
         } else {
-          const a = formatParents(range.startContainer, (el) => tool.is!(el as HTMLElement) !== undefined, editor)[0]; // remove the whole link
+          const a = Utils.Formats.parents(
+            range.startContainer,
+            (el) => tool.is!(el as HTMLElement) !== undefined,
+            editor
+          )[0]; // remove the whole link
           a?.replaceWith(...a.childNodes);
         }
       },
@@ -554,9 +544,9 @@ export default class WUPTextRichControl<
         const isOn = lines.every((l) => l.parentElement!.tagName === tag);
         lines.forEach((l) => {
           if (isOn) {
-            setLineTag(l, "DIV");
+            Utils.Lines.setTag(l, "DIV");
           } else if (l.parentElement!.tagName !== tag) {
-            const li = setLineTag(l, "LI"); // moves item out of another list
+            const li = Utils.Lines.setTag(l, "LI"); // moves item out of another list
             li.parentNode!.insertBefore(document.createElement(tag), li).appendChild(li);
           }
         });
@@ -603,11 +593,11 @@ export default class WUPTextRichControl<
       // unsupported font size is shown as default
       is: (el) => {
         const size = el.tagName === "SPAN" && el.style.fontSize;
-        return size ? sizeFormats[size as keyof typeof sizeFormats] ?? false : undefined;
+        return size ? Utils.sizeFormats[size as keyof typeof Utils.sizeFormats] ?? false : undefined;
       },
       create: (v) => {
         const el = document.createElement("span");
-        el.style.fontSize = sizes[v as keyof typeof sizes] ?? "";
+        el.style.fontSize = Utils.sizes[v as keyof typeof Utils.sizes] ?? "";
         return el;
       },
     },
@@ -643,7 +633,7 @@ export default class WUPTextRichControl<
       kind: "lineStyle",
       is: (el) => {
         const a = el.style.textAlign;
-        return textAligns.has(a) ? (a as WUP.TextRich.ToolValues["align"]) : undefined;
+        return Utils.textAligns.has(a) ? (a as WUP.TextRich.ToolValues["align"]) : undefined;
       },
       set: (el, v) => (el.style.textAlign = v || ""),
     },
@@ -657,10 +647,12 @@ export default class WUPTextRichControl<
           (control.constructor as typeof WUPTextRichControl).$tools as Record<string, WUP.TextRich.Tool>
         ).forEach(
           (t) =>
-            t.kind === "inline" && t.is && removeInline(texts, (el) => t.is!(el as HTMLElement) !== undefined, editor)
+            t.kind === "inline" &&
+            t.is &&
+            Utils.Formats.removeInline(texts, (el) => t.is!(el as HTMLElement) !== undefined, editor)
         );
         // plain paragraph
-        lines.forEach((l) => setLineTag(l, document.createElement("div")).removeAttribute("style"));
+        lines.forEach((l) => Utils.Lines.setTag(l, document.createElement("div")).removeAttribute("style"));
       },
     },
     btnClear: {
@@ -674,8 +666,10 @@ export default class WUPTextRichControl<
   static $defaults: WUP.TextRich.Options = inheritDefaults(WUPTextAreaControl.$defaults, {
     validationRules: inheritDefaults(WUPTextAreaControl.$defaults.validationRules, {
       // WARN: validations min/max must depend on visible chars only
-      min: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.min!.call!(c, v && htmlToText(v), setV, c, r),
-      max: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.max!.call!(c, v && htmlToText(v), setV, c, r),
+      min: (v, setV, c, r) =>
+        WUPTextControl.$defaults.validationRules.min!.call!(c, v && Utils.Html.toText(v), setV, c, r),
+      max: (v, setV, c, r) =>
+        WUPTextControl.$defaults.validationRules.max!.call!(c, v && Utils.Html.toText(v), setV, c, r),
     }),
     toolbar: [
       ["header"], // = [{ header: [1, 2, 3, 4, 5, 6, false] }]
@@ -771,7 +765,7 @@ export default class WUPTextRichControl<
       const t = e.target as HTMLElement;
       const a = t.closest("a");
       a && e.preventDefault(); // readonly (contenteditable=false): browser follows any url (`javascript:` etc.)
-      const href = a && (e.ctrlKey || e.metaKey) && sanitizeUrl(a.href);
+      const href = a && (e.ctrlKey || e.metaKey) && Utils.Html.sanitizeUrl(a.href);
       if (href) {
         // Ctrl/Cmd+Click opens link: browser doesn't follow links in contenteditable
         window.open(href, "_blank", "noopener,noreferrer");
@@ -781,7 +775,7 @@ export default class WUPTextRichControl<
       // embed with `ask` (image etc.): asked value replaces it
       const name = this.embedTool(t);
       if (name && this.#ctr.$tools[name].kind === "embed" && this.#ctr.$tools[name].ask) {
-        selectNode(t);
+        Utils.Ranges.selectNode(t);
         this.applyFormat(name, undefined, false, t);
       }
     });
@@ -798,7 +792,7 @@ export default class WUPTextRichControl<
   }
 
   protected override countChars(): number {
-    return htmlToText(this.$refInput.value).length;
+    return Utils.Html.toText(this.$refInput.value).length;
   }
 
   /** Renders toolbar according to $options.toolbar */
@@ -945,14 +939,14 @@ export default class WUPTextRichControl<
     let preview: HTMLElement | undefined;
     if (tool.create && tool.kind !== "embed") {
       // inner element: otherwise checkmark of selected item is scaled too
-      preview = li.appendChild(createOf(tool, v.value));
+      preview = li.appendChild(Utils.Formats.create(tool, v.value));
       preview.setAttribute("role", "none"); // hides semantics: heading etc.
       preview.textContent = label;
     } else {
       li.textContent = label;
     }
     const hint = this.setHotKeys(li, v.hotKey);
-    if (preview && isBlockTag(preview.tagName)) {
+    if (preview && Utils.Lines.isBlockTag(preview.tagName)) {
       hint && li.setAttribute("w-tooltip", `${label} (${hint})`); // headings are big: hint only in tooltip
     } else if (hint) {
       const kbd = li.appendChild(document.createElement("kbd")); // at the right like in OS menus
@@ -997,7 +991,7 @@ export default class WUPTextRichControl<
     }
     inp.focus({ preventScroll: true });
     const r = this.#range;
-    r && inp.contains(r.startContainer) && selectRange(r);
+    r && inp.contains(r.startContainer) && Utils.Ranges.select(r);
   }
 
   /** Applies toolbar button: toggles format or opens dropdown menu */
@@ -1028,6 +1022,7 @@ export default class WUPTextRichControl<
    * @param isSet set value (dropdown item, asked value etc.), otherwise toggle format (button)
    * @param target element to place popup near (clicked embed) */
   protected applyFormat(name: string, value?: unknown, isSet?: boolean, target?: HTMLElement): void {
+    // todo drop $format above and rename it to $format
     if (this.$isDisabled || this.$isReadOnly) {
       return;
     }
@@ -1110,7 +1105,7 @@ export default class WUPTextRichControl<
   /** Asks link url via $ask: `hovered` - hovered link (empty url removes it) */
   protected askLink(target: HTMLElement, url: string, hovered?: HTMLElement): Promise<string | null> {
     const { $textLink, $errorLink } = this.#ctr;
-    const validations = { required: !hovered, url: (v?: string) => !!v && !sanitizeUrl(v) && $errorLink };
+    const validations = { required: !hovered, url: (v?: string) => !!v && !Utils.Html.sanitizeUrl(v) && $errorLink };
     return this.$ask(target, url, { label: $textLink, validations }, hovered);
   }
 
@@ -1311,7 +1306,7 @@ export default class WUPTextRichControl<
       this.askMenu(name, el, true).then((v) => {
         if (v != null && el.isConnected) {
           this.$refInput.focus({ preventScroll: true }); // otherwise control restores previous selection
-          selectNode(el);
+          Utils.Ranges.selectNode(el);
           this.applyFormat(name, v, true); // replaces element, caret goes after it
         }
       });
