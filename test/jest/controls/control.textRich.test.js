@@ -2162,6 +2162,38 @@ describe("control.textRich", () => {
     }
   });
 
+  test("className & classNameTag of tool and values", async () => {
+    WUPTextRichControl.$tools.mark = {
+      kind: "inline",
+      create: "mark",
+      is: (e) => (e.tagName === "MARK" ? (e.classList.contains("red") ? "red" : "yellow") : undefined),
+      className: "ic-mark",
+      values: [
+        { value: "yellow", className: "ic-yellow", classNameTag: "yellow" },
+        { value: "red", className: "ic-red", classNameTag: "red" },
+      ],
+    };
+    try {
+      el.$options.toolbar = [["mark", { mark: "red" }, "bold"]];
+      await h.wait(1);
+      el.$refInput.focus();
+      // button of value: classes of tool & value
+      const btn = el.querySelector('[tool="mark:red"]');
+      expect(btn.className).toBe("ic-mark ic-red");
+      // dropdown with icons: classes of tool & current value
+      const dropdown = el.querySelector("[tool=mark]");
+      expect(dropdown.hasAttribute("icon")).toBe(true);
+      setHtml("<div>a[b]c</div>");
+      el.applyFormat("mark", "yellow", true);
+      expect(getHtml()).toBe('<div>a[<mark class="yellow">b]</mark>c</div>'); // classNameTag of value
+      document.dispatchEvent(new Event("selectionchange"));
+      expect(dropdown.className).toBe("ic-mark ic-yellow");
+      expect(btn.getAttribute("aria-pressed")).toBe("false");
+    } finally {
+      delete WUPTextRichControl.$tools.mark;
+    }
+  });
+
   test("toolbar shows formats of the next line if selection starts at the end of line element", async () => {
     el.$options.toolbar = [["header", "bold"]];
     await h.wait(1);

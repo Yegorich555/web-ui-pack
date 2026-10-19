@@ -236,7 +236,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Runs custom change of editor: saves history, updates value (fires `input`) & toolbar */
-  protected changeContent(fn: () => void): void {
+  changeContent(fn: () => void): void {
     const h = this._history;
     const prev = this.value;
     // otherwise history saves selection after changes (wrong for insertion)
