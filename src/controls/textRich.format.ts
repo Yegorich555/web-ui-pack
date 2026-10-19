@@ -40,6 +40,28 @@ export function textAround(
   return [a.toString(), b.toString()];
 }
 
+/** Selects range (Range or StaticRange) */
+export function selectRange(r: AbstractRange): void {
+  window.getSelection()!.setBaseAndExtent(r.startContainer, r.startOffset, r.endContainer, r.endOffset);
+}
+
+/** Selects node (embed format replaces it) */
+export function selectNode(n: Node): void {
+  const r = document.createRange();
+  r.selectNode(n);
+  selectRange(r);
+}
+
+/** Inserts text at point
+ * @returns point after inserted text */
+export function insertText(n: Node, offset: number, s: string): [Node, number] {
+  if (n.nodeType === Node.TEXT_NODE) {
+    (n as Text).insertData(offset, s);
+    return [n, offset + s.length];
+  }
+  return [n.insertBefore(document.createTextNode(s), n.childNodes[offset] ?? null), s.length];
+}
+
 /** Returns ancestors of node matched by `is` (from inner to outer) inside root */
 export function formatParents(n: Node, is: (el: Element) => boolean, root: Node): Element[] {
   const arr: Element[] = [];

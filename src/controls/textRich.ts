@@ -26,9 +26,12 @@ import {
   addInline,
   formatParents,
   getLines,
+  insertText,
   intersects,
   linesOf,
   removeInline,
+  selectNode,
+  selectRange,
   setLineTag,
   splitAt,
   splitRange,
@@ -341,16 +344,9 @@ function firstNode(r: Range): Node {
 }
 
 /** Returns true if applied value `v` matches `value` (`true` matches any value) */
-const isMatch = (v: unknown, value: unknown): boolean => v !== undefined && (value === true || v === value);
-
-/** Returns checker: element applies format of tool with value (`true` - any value) */
-function isOf(t: WUP.TextRich.Tool, value: unknown = true): (el: Element) => boolean {
-  return (el) => isMatch(t.is!(el as HTMLElement), value);
+function isMatch(v: unknown, value: unknown): boolean {
+  return v !== undefined && (value === true || v === value);
 }
-
-/** Returns label or prettified value (`sans-serif` => `Sans Serif`) */
-const labelOf = (v: WUP.TextRich.ToolValue): string =>
-  v.label ?? __wupln(stringPrettify(String(v.value), true, true), "content");
 
 /** Returns text between trigger & pair at the end of string (`{someProp}` => `someProp`)
  * @returns `undefined` if there is no pair at the end or text is empty or has whitespaces */
@@ -364,27 +360,8 @@ function typedValue(s: string, trigger: string, pair: string | undefined): strin
 }
 
 /** Returns true if elements have the same tag & attributes */
-const isSame = (a: Node, b: Node): boolean => a.cloneNode(false).isEqualNode(b.cloneNode(false));
-
-/** Selects range (Range or StaticRange) */
-const selectRange = (r: AbstractRange): void =>
-  window.getSelection()!.setBaseAndExtent(r.startContainer, r.startOffset, r.endContainer, r.endOffset);
-
-/** Selects node (embed format replaces it) */
-function selectNode(n: Node): void {
-  const r = document.createRange();
-  r.selectNode(n);
-  selectRange(r);
-}
-
-/** Inserts text at point
- * @returns point after inserted text */
-function insertText(n: Node, offset: number, s: string): [Node, number] {
-  if (n.nodeType === Node.TEXT_NODE) {
-    (n as Text).insertData(offset, s);
-    return [n, offset + s.length];
-  }
-  return [n.insertBefore(document.createTextNode(s), n.childNodes[offset] ?? null), s.length];
+function isSame(a: Node, b: Node): boolean {
+  return a.cloneNode(false).isEqualNode(b.cloneNode(false));
 }
 
 /** Form-control with rich text editor (WYSIWYG) & toolbar; behavior & styles are similar to npm quill
@@ -599,7 +576,7 @@ export default class WUPTextRichControl<
           a.textContent = url;
           control.$insert(a);
         } else {
-          const a = formatParents(range.startContainer, isOf(tool), editor)[0]; // remove the whole link
+          const a = formatParents(range.startContainer, (el) => tool.is!(el as HTMLElement) !== undefined, editor)[0]; // remove the whole link
           a?.replaceWith(...a.childNodes);
         }
       },
@@ -747,7 +724,10 @@ export default class WUPTextRichControl<
         // tools of subclass
         Object.values(
           (control.constructor as typeof WUPTextRichControl).$tools as Record<string, WUP.TextRich.Tool>
-        ).forEach((t) => t.kind === "inline" && t.is && removeInline(texts, isOf(t), editor));
+        ).forEach(
+          (t) =>
+            t.kind === "inline" && t.is && removeInline(texts, (el) => t.is!(el as HTMLElement) !== undefined, editor)
+        );
         // plain paragraph
         lines.forEach((l) => setLineTag(l, document.createElement("div")).removeAttribute("style"));
       },
@@ -890,7 +870,11 @@ export default class WUPTextRichControl<
   /** Renders toolbar according to $options.toolbar */
   protected renderToolbar(): void {
     const tools = this.#tools;
-    this.#entries = Object.entries(tools).map(([k, t]) => [k, t, t.is && isOf(t)]);
+    this.#entries = Object.entries(tools).map(([k, t]) => [
+      k,
+      t,
+      t.is && ((el) => t.is!(el as HTMLElement) !== undefined),
+    ]);
     this.#isEmbed = embedOf(tools);
     const bar = this.$refToolbar;
     bar.replaceChildren();
@@ -952,7 +936,11 @@ export default class WUPTextRichControl<
     b.tabIndex = -1; // reachable via Alt+F10
     b.setAttribute("tool", v ? `${name}:${v.value}` : name);
     tool.hideOnToolbar && (b.hidden = true); // works as rendered one
-    this.setToolLabel(b, v ? labelOf(v) : tool.label ?? name, v ? v.hotKey : tool.hotKey);
+    this.setToolLabel(
+      b,
+      v ? v.label ?? stringPrettify(String(v.value), true, true) : tool.label ?? name,
+      v ? v.hotKey : tool.hotKey
+    );
     addClass(b, tool.className, v?.className);
     if (values) {
       b.setAttribute("role", "combobox"); // select-only combobox
@@ -1022,7 +1010,7 @@ export default class WUPTextRichControl<
 
   /** Renders dropdown item: icon (if `className`) or label inside element of format (preview via `create`) */
   protected renderItem(li: HTMLElement, tool: WUP.TextRich.Tool, v: WUP.TextRich.ToolValue): void {
-    const label = labelOf(v);
+    const label = v.label ?? stringPrettify(String(v.value), true, true);
     if (v.className) {
       li.setAttribute("icon", "");
       addClass(li, v.className);
@@ -1067,7 +1055,7 @@ export default class WUPTextRichControl<
           addClass(el, tool.className, v?.className);
         } else {
           const label = cur === false ? tool.label ?? name : String(cur); // unknown value as is: `someProp`
-          el.textContent = v ? labelOf(v) : label;
+          el.textContent = v ? v.label ?? stringPrettify(String(v.value), true, true) : label;
         }
       } else {
         el.setAttribute("aria-pressed", el._value === undefined ? cur !== false : cur === el._value);
@@ -1223,16 +1211,16 @@ export default class WUPTextRichControl<
     const { tool, value, isSet, editor } = ctx; // lines & texts are lazy: read below only where needed
     switch (tool.kind) {
       case "inline": {
+        const any = (el: Element): boolean => tool.is!(el as HTMLElement) !== undefined;
         if (tool.trigger && isSet && value !== false) {
           // token replaces selection or token around caret
-          const cur = formatParents(ctx.range.startContainer, isOf(tool), editor)[0];
+          const cur = formatParents(ctx.range.startContainer, any, editor)[0];
           cur && selectNode(cur);
           this.$insert(this.createToken(tool, value));
           break;
         }
         const { texts } = ctx;
-        const any = isOf(tool);
-        const f = isOf(tool, value);
+        const f = (el: Element): boolean => isMatch(tool.is!(el as HTMLElement), value);
         const create = (): HTMLElement => createOf(tool, value);
         if (isSet || !value) {
           removeInline(texts, any, editor);
@@ -1378,13 +1366,15 @@ export default class WUPTextRichControl<
     r.deleteContents();
     // move caret out of elements of removed/changed formats (`true` - added toggle format)
     this.#pending.forEach((v, k) => {
-      const el = v !== true && formatParents(r.startContainer, isOf(tools[k]), inp).pop(); // the outer one
+      const is = (x: Element): boolean => tools[k].is!(x as HTMLElement) !== undefined;
+      const el = v !== true && formatParents(r.startContainer, is, inp).pop(); // the outer one
       el && splitAt(el, r, this.#isEmbed);
     });
     const t = document.createTextNode(text);
     let node: Node = t;
     this.#pending.forEach((v, k) => {
-      if (v !== false && !formatParents(r.startContainer, isOf(tools[k], v), inp).length) {
+      const is = (x: Element): boolean => isMatch(tools[k].is!(x as HTMLElement), v);
+      if (v !== false && !formatParents(r.startContainer, is, inp).length) {
         const el = createOf(tools[k], v);
         el.appendChild(node);
         node = el;
@@ -1595,7 +1585,7 @@ export default class WUPTextRichControl<
         return;
       }
       values.forEach((v) => {
-        const l = labelOf(v);
+        const l = v.label ?? stringPrettify(String(v.value), true, true);
         // `Heading 1` as is, `Huge` => `Font size: Huge`
         const full = t.label && !l.toLowerCase().includes(t.label.toLowerCase()) ? `${t.label}: ${l}` : l;
         arr.push({ value: `${name}:${v.value}`, label: full, hotKey: v.hotKey });
@@ -1667,7 +1657,9 @@ export default class WUPTextRichControl<
         const q = str.startsWith(tr) && !/\s/.test(str) && str.slice(tr.length).toLowerCase();
         // label or value contains typed text: `{name` & `{firstName` show `First Name`
         const has = (x: string): boolean => x.toLowerCase().includes(q as string);
-        (q === false || !m.filter((v) => has(labelOf(v)) || has(String(v.value)))) && m.done();
+        (q === false ||
+          !m.filter((v) => has(v.label ?? stringPrettify(String(v.value), true, true)) || has(String(v.value)))) &&
+          m.done();
       }).then((v) => {
         if (v != null) {
           // select typed text: embed & token replace it, line formats delete it at first, action gets it selected
@@ -1733,13 +1725,11 @@ export default class WUPTextRichControl<
     const n = window.getSelection()?.focusNode;
     this.#auto = [];
     if (tools.length && n && this.$refInput.contains(n)) {
-      this.lineOf(n)
-        .querySelectorAll("*")
-        .forEach(
-          (x) =>
-            tools.some((t) => t.is!(x as HTMLElement) !== undefined && isSame(createOf(t, x.textContent!), x)) &&
-            this.#auto.push(x)
-        );
+      // eslint-disable-next-line no-restricted-syntax
+      for (const x of this.lineOf(n).getElementsByTagName("*")) {
+        tools.some((t) => t.is!(x as HTMLElement) !== undefined && isSame(createOf(t, x.textContent!), x)) &&
+          this.#auto.push(x);
+      }
     }
   }
 
@@ -1851,7 +1841,8 @@ export default class WUPTextRichControl<
     const sel = window.getSelection()!;
     const n = sel.focusNode!; // in editor: it's called on input of line break
     const p = this.#pending;
-    const isOff = (x: Element): boolean => Array.from(p).some(([k, v]) => v === false && isOf(this.#tools[k])(x));
+    const isOff = (x: Element): boolean =>
+      Array.from(p).some(([k, v]) => v === false && this.#tools[k].is!(x as HTMLElement) !== undefined);
     formatParents(n, (x) => !x.textContent && (this.#isWrapped(x) || isOff(x)), this.lineOf(n)).forEach((x) =>
       x.replaceWith(...x.childNodes)
     );
