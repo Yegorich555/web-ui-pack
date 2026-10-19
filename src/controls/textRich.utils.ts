@@ -243,7 +243,7 @@ export const Formats = {
     const isEmpty = (x: Element | DocumentFragment): boolean =>
       !x.textContent && !(isEmbed && Array.prototype.some.call(x.querySelectorAll("*"), isEmbed));
     const after = document.createRange();
-    after.setStart(r.startContainer, r.startOffset);
+    after.setStart(...Internal.edgeOf(el, r.startContainer, r.startOffset));
     after.setEnd(el, el.childNodes.length);
     const f = after.extractContents();
     if (!isEmpty(el)) {
@@ -446,27 +446,33 @@ export const Html = {
 const Internal = {
   // Formats
 
-  /** Returns the outer ancestor of node inside el that starts with it (`isEnd` - ends with it): `<b><i>[a</i>b</b>` => `<i>` */
-  edgeOf(el: Element, n: Node, isEnd?: boolean): Node {
-    while (n.parentNode !== el && !(isEnd ? n.nextSibling : n.previousSibling)) {
-      n = n.parentNode!;
+  /** Returns point moved out of nested elements of el while it's at their start or end:
+   *  (`<b>a<i>|bc</i></b>`, `<b>`) => (`<b>`, 1); split at it doesn't leave their empty copies (`<b>a<i></i></b>`) */
+  edgeOf(el: Element, n: Node, offset: number): [Node, number] {
+    while (
+      n !== el &&
+      (!offset || offset === (n.nodeType === Node.TEXT_NODE ? (n as Text).length : n.childNodes.length))
+    ) {
+      const p = n.parentNode!;
+      offset = Array.prototype.indexOf.call(p.childNodes, n) + (offset ? 1 : 0);
+      n = p;
     }
-    return n;
+    return [n, offset];
   },
 
   /** Moves content outside `first`..`last` into copies of el: `<b>a[bc]d</b>` => `<b>a</b><b>[bc]</b><b>d</b>`;
    *  split at edges of nested elements: otherwise their empty copies stay (`<b><i></i></b>`) */
-  isolate(el: Element, first: Node, last: Node): void {
+  isolate(el: Element, first: Text, last: Text): void {
     const before = document.createRange();
     before.setStart(el, 0);
-    before.setEndBefore(Internal.edgeOf(el, first));
+    before.setEnd(...Internal.edgeOf(el, first, 0));
     if (!before.collapsed) {
       const c = el.cloneNode(false);
       c.appendChild(before.extractContents());
       el.before(c);
     }
     const after = document.createRange();
-    after.setStartAfter(Internal.edgeOf(el, last, true));
+    after.setStart(...Internal.edgeOf(el, last, last.length));
     after.setEnd(el, el.childNodes.length);
     if (!after.collapsed) {
       const c = el.cloneNode(false);

@@ -399,6 +399,30 @@ describe("control.textRich", () => {
     }
   });
 
+  test("split at edge of nested element doesn't leave its empty copy", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Sets html with caret, toggles bold (pending: not bold) & types text */
+    const type = (html) => {
+      setHtml(html);
+      el.$format("bold");
+      const init = { inputType: "insertText", data: "x", bubbles: true, cancelable: true };
+      inp.dispatchEvent(new InputEvent("beforeinput", init));
+      return getHtml();
+    };
+
+    // otherwise `<b>a<i></i></b>x|<b><i>bc</i></b>` & `<b><i>ab</i></b>x|<b><i></i>c</b>`
+    expect(type("<div><b>a<i>|bc</i></b></div>")).toBe("<div><b>a</b>x|<b><i>bc</i></b></div>");
+    expect(type("<div><b><i>ab|</i>c</b></div>")).toBe("<div><b><i>ab</i></b>x|<b>c</b></div>");
+    expect(type("<div><b>a<i>b|c</i></b></div>")).toBe("<div><b>a<i>b</i></b>x|<b><i>c</i></b></div>");
+
+    // paste of block splits line at caret: otherwise `<div>a<b></b></div>`
+    setHtml("<div>a<b>|bc</b></div>");
+    inp.insertHTML("<h1>T</h1>");
+    expect(inp.innerHTML).toBe("<div>a</div><h1>T</h1><div><b>bc</b></div>");
+  });
+
   test("clean removes inline formats of subclass tools", async () => {
     class TestTextRich extends WUPTextRichControl {
       static $tools = {
