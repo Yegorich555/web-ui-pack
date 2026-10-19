@@ -19,8 +19,6 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   _onFormats?: () => void;
   /** Entries of `_tools` with checker of element by `is`: cached via setTools */
   _entries: ToolEntry[] = [];
-  /** Checker of embed elements: cached via setTools */
-  #isEmbed?: (el: Element) => boolean;
 
   /** Sanitized html (empty string if there is no text or embeds): see Utils.Html.fromEditor */
   override get value(): string {
@@ -36,17 +34,14 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     this.replaceChildren(Utils.Html.toEditor(v, this._tools));
   }
 
-  override _embedOf(): ((el: Element) => boolean) | undefined {
-    return Utils.Formats.embedOf(this._tools);
-  }
-
   /** Sets tools & updates their caches: call it when tools or toolbar are changed (see `_isActive`) */
   setTools(tools: WUP.TextRich.Tools): void {
     this._tools = tools;
     this._entries = (Object.entries(tools) as Array<[keyof WUP.TextRich.ToolValues, WUP.TextRich.Tool]>).map(
       ([k, t]) => [k, t, t.is && ((el) => t.is!(el as HTMLElement) !== undefined)]
     );
-    this.#isEmbed = Utils.Formats.embedOf(tools);
+    const embeds = this._entries.filter(([, t, is]) => t.kind === "embed" && is);
+    this._isEmbed = embeds.length ? (el) => embeds.some(([, , is]) => is!(el)) : undefined;
     // tool with values (mentions of users etc.): value is chosen via menu (`trigger`)
     this.#recognizers = this._entries
       .filter(([k, t]) => t.recognize && !t.values?.length && this._isActive?.(k))
@@ -80,7 +75,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     const isMoved = an !== sel.anchorNode || fn1 !== sel.focusNode;
     // again after wrapping: empty editor gets the 1st line (caret goes into it)
     (Utils.Lines.wrap(this) || isMoved) && sel.setBaseAndExtent(...childPos(an, ao), ...childPos(fn1, fo));
-    const isEmbed = this.#isEmbed;
+    const isEmbed = this._isEmbed;
     return [
       charsBefore(this, sel.anchorNode!, sel.anchorOffset, isEmbed),
       charsBefore(this, sel.focusNode!, sel.focusOffset, isEmbed),
@@ -89,7 +84,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
 
   /** Sets selection by char offsets (see getSelectionPos) */
   setSelectionPos([a, f]: [number, number]): void {
-    const isEmbed = this.#isEmbed;
+    const isEmbed = this._isEmbed;
     window.getSelection()!.setBaseAndExtent(...pointAt(this, a, isEmbed), ...pointAt(this, f, isEmbed));
   }
 
@@ -100,8 +95,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     const sel = window.getSelection();
     const n = sel?.rangeCount ? Utils.Ranges.firstNode(sel.getRangeAt(0)) : null;
     if (n && this.contains(n)) {
-      // line: child of editor or list item
-      const line = Utils.Formats.parents(n, (el) => el.parentElement === this || el.tagName === "LI", this)[0];
+      const line = Utils.Lines.at(n, this);
       this._entries.forEach(([name, t, is]) => {
         const el = is && (t.kind === "line" || t.kind === "lineStyle" ? line : Utils.Formats.parents(n, is, this)[0]);
         const v = el ? t.is!(el as HTMLElement) : undefined;
@@ -195,22 +189,21 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
         if (tool.trigger && isSet && value !== false) {
           // token replaces selection or token around caret
           const cur = Utils.Formats.parents(ctx.range.startContainer, any, editor)[0];
-          cur && Utils.Ranges.selectNode(cur);
+          cur && Utils.Ranges.select(cur);
           this.$insert(this.createToken(tool, value));
           break;
         }
         const { texts } = ctx;
         const f = (el: Element): boolean => Utils.Formats.isMatch(tool.is!(el as HTMLElement), value);
-        const create = (): HTMLElement => Utils.Formats.create(tool, value);
         if (isSet || !value) {
           Utils.Formats.removeInline(texts, any, editor);
-          value && Utils.Formats.addInline(texts, f, create, editor);
+          value && Utils.Formats.addInline(texts, Utils.Formats.create(tool, value), editor, f);
         } else {
           // single value only: remove other values (sub vs super)
           value !== true && Utils.Formats.removeInline(texts, (el) => any(el) && !f(el), editor);
           texts.every((t) => Utils.Formats.parents(t, f, editor).length)
             ? Utils.Formats.removeInline(texts, f, editor)
-            : Utils.Formats.addInline(texts, f, create, editor);
+            : Utils.Formats.addInline(texts, Utils.Formats.create(tool, value), editor, f);
         }
         break;
       }
@@ -376,7 +369,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     this.#pending.forEach((v, k) => {
       const is = (x: Element): boolean => tools[k].is!(x as HTMLElement) !== undefined;
       const el = v !== true && Utils.Formats.parents(r.startContainer, is, this).pop(); // the outer one
-      el && Utils.Formats.splitAt(el, r, this.#isEmbed);
+      el && Utils.Formats.splitAt(el, r, this._isEmbed);
     });
     const t = document.createTextNode(text);
     let node: Node = t;
@@ -419,7 +412,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
           inner.collapsed && inner.setStart(t, from + i);
           inner.setEnd(t, s.trimEnd().length);
         }
-      } else if (this.#isEmbed?.(n as Element)) {
+      } else if (this._isEmbed?.(n as Element)) {
         inner.collapsed && inner.setStartBefore(n);
         inner.setEndAfter(n);
         while (n.lastChild) {
@@ -490,15 +483,9 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     this.#isAutoPaused = false;
   }
 
-  /** Returns line of node: block in editor or list item (editor itself for loose content: Chrome doesn't wrap the 1st line) */
+  /** Returns line of node (see Utils.Lines.at) or editor for loose content: Chrome doesn't wrap the 1st line */
   protected lineOf(n: Node): HTMLElement {
-    return (
-      (Utils.Formats.parents(
-        n,
-        (el) => (el.parentElement === this && Utils.Lines.isBlockTag(el.tagName)) || el.tagName === "LI",
-        this
-      )[0] as HTMLElement) ?? this
-    );
+    return Utils.Lines.at(n, this) ?? this;
   }
 
   /** Remembers elements of recognized text in line at caret (their text gives the same element): see `recognize` */
@@ -532,7 +519,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     if (line.tagName === "PRE") {
       return false; // code block
     }
-    const isEmbed = this.#isEmbed;
+    const isEmbed = this._isEmbed;
     const [before, rest] = Utils.Lines.textAround(line, n, sel.focusOffset, isEmbed);
     const after = /^\S*/.exec(rest)![0]; // the rest of word
     let s = before + after;
@@ -581,13 +568,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return update(() => {
       r.setStart(...pointAt(line, start, isEmbed));
       r.setEnd(...pointAt(line, end, isEmbed));
-      // element per part: text can be split by formats
-      Utils.Formats.addInline(
-        Utils.Ranges.split(r),
-        () => false,
-        () => el.cloneNode(false) as HTMLElement,
-        line
-      );
+      Utils.Formats.addInline(Utils.Ranges.split(r), el, line); // element per part: text can be split by formats
     });
   }
 
@@ -674,7 +655,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     this.getSelectionPos(); // wraps loose content: otherwise caret at editor root has no line
     this.deleteLines(sel.getRangeAt(0)) || sel.getRangeAt(0).deleteContents(); // the rest of the last line joins the 1st one
     const r = sel.getRangeAt(0);
-    const line = Utils.Lines.all(this).findLast((l) => l.contains(r.startContainer));
+    const line = Utils.Lines.at(r.startContainer, this);
     const first = f.firstElementChild;
     if (!first) {
       return;
@@ -697,7 +678,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       return;
     }
     const last = f.lastChild!;
-    Utils.Formats.splitAt(line, r, this.#isEmbed); // empty parts are removed
+    Utils.Formats.splitAt(line, r, this._isEmbed); // empty parts are removed
     r.insertNode(f);
     window.getSelection()!.collapse(last, last.childNodes.length);
   }
@@ -708,14 +689,12 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
    *  if everything is deleted, the empty line becomes a plain paragraph
    * @returns false if range is in a single line or nested lists are involved (browser deletes it) */
   protected deleteLines(sr: AbstractRange | undefined): boolean {
-    const lines = Utils.Lines.all(this);
-    const lineAt = (n: Node): HTMLElement | undefined => lines.findLast((l) => l.contains(n));
-    const a = sr && lineAt(sr.startContainer);
-    const b = sr && lineAt(sr.endContainer);
+    const a = sr && Utils.Lines.at(sr.startContainer, this);
+    const b = sr && Utils.Lines.at(sr.endContainer, this);
     if (!a || !b || a === b || a.contains(b) || b.parentElement!.closest("li")) {
       return false;
     }
-    const isEmbed = this.#isEmbed;
+    const isEmbed = this._isEmbed;
     const pos = charsBefore(this, sr.startContainer, sr.startOffset, isEmbed);
     const isRest = // content after range in the last line
       charsBefore(b, sr.endContainer, sr.endOffset, isEmbed) < charsBefore(b, b, b.childNodes.length, isEmbed);

@@ -1010,6 +1010,7 @@ describe("control.textRich", () => {
         '<p><strong class="b">a</strong></p><p><br></p>'
       );
       expect(toValue("<ul><li>a<br></li></ul><h1>b<br></h1>")).toBe("<ul><li>a</li></ul><h1>b</h1>");
+      expect(toValue("<ul>a<br></ul>")).toBe("<ul><li>a</li></ul>"); // loose content of list (invalid html)
       expect(toValue('<div><img src="a.png"></div>')).toBe('<img src="a.png">'); // embed without text isn't empty
       expect(toValue("<div> </div>")).toBe("");
       expect(toValue("a<br>b")).toBe("<p>a</p><p>b</p>"); // loose content (Chrome doesn't wrap the 1st line)

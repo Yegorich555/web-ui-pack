@@ -74,8 +74,8 @@ export const sizeFormats = {
 /** Supported text-align ("left" is default) */
 export const textAligns = new Set(["center", "right", "justify"]);
 const safeProtocols = new Set(["http:", "https:", "mailto:", "tel:", "sms:"]);
-/** Positive margin-left (indent) */
-const indentReg = /^\d+(\.\d+)?(px|em)$/;
+/** Margin-left of indent: number & unit */
+export const indentReg = /^(\d+(?:\.\d+)?)(px|em)$/;
 
 /** Helpers of DOM ranges, points (node & offset) & selection */
 export const Ranges = {
@@ -107,7 +107,7 @@ export const Ranges = {
     }
     w.currentNode = last;
     const next = w.nextNode();
-    return next && r.intersectsNode(next) ? next : n;
+    return next && Ranges.intersects(r, next) ? next : n;
   },
 
   /** Returns text nodes inside range (edge nodes are split by range) */
@@ -127,7 +127,7 @@ export const Ranges = {
     let isIn = false;
     for (let n = w.currentNode.nodeType === Node.TEXT_NODE ? w.currentNode : w.nextNode(); n; n = w.nextNode()) {
       const t = n as Text;
-      if (r.intersectsNode(t)) {
+      if (Ranges.intersects(r, t)) {
         isIn = true;
         const isOut =
           !t.length ||
@@ -159,16 +159,14 @@ export const Ranges = {
     return [n.insertBefore(document.createTextNode(s), n.childNodes[offset] ?? null), s.length];
   },
 
-  /** Selects range (Range or StaticRange) */
-  select(r: AbstractRange): void {
+  /** Selects range (Range or StaticRange) or node (embed format replaces it) */
+  select(r: AbstractRange | Node): void {
+    if (r instanceof Node) {
+      const x = document.createRange();
+      x.selectNode(r);
+      r = x;
+    }
     window.getSelection()!.setBaseAndExtent(r.startContainer, r.startOffset, r.endContainer, r.endOffset);
-  },
-
-  /** Selects node (embed format replaces it) */
-  selectNode(n: Node): void {
-    const r = document.createRange();
-    r.selectNode(n);
-    Ranges.select(r);
   },
 };
 
@@ -190,13 +188,16 @@ export const Formats = {
 
   /** Returns true if elements have the same tag & attributes */
   isSame(a: Node, b: Node): boolean {
-    return a.cloneNode(false).isEqualNode(b.cloneNode(false));
+    return a.nodeName === b.nodeName && a.cloneNode(false).isEqualNode(b.cloneNode(false));
   },
 
-  /** Returns checker of embed elements (`<img>` etc.); `undefined` if there are no embed tools */
-  embedOf(tools: WUP.TextRich.Tools): ((el: Element) => boolean) | undefined {
-    const arr = Object.values(tools).filter((t) => t.kind === "embed" && t.is);
-    return arr.length ? (el) => arr.some((t) => t.is!(el as HTMLElement) !== undefined) : undefined;
+  /** Merges element into previous sibling with the same tag & attributes: `<b>a</b><b>b</b>` => `<b>ab</b>` */
+  mergePrev(el: Node | null): void {
+    const prev = el?.previousSibling;
+    if (prev?.nodeType === Node.ELEMENT_NODE && Formats.isSame(prev, el!)) {
+      (prev as Element).append(...el!.childNodes);
+      (el as Element).remove();
+    }
   },
 
   /** Returns ancestors of node matched by `is` (from inner to outer) inside root */
@@ -224,15 +225,15 @@ export const Formats = {
     });
   },
 
-  /** Wraps not formatted text nodes into new element of format */
-  addInline(nodes: Text[], is: (el: Element) => boolean, create: () => HTMLElement, root: Node): void {
+  /** Wraps text nodes into copies of element of format (text inside element matched by `is` is skipped) */
+  addInline(nodes: Text[], el: Element, root: Node, is?: (el: Element) => boolean): void {
     nodes.forEach((t) => {
-      if (!Formats.parents(t, is, root).length) {
-        const el = create();
-        t.before(el);
-        el.appendChild(t);
-        Internal.mergePrev(el.nextSibling);
-        Internal.mergePrev(el); // `<b>a</b><b>b</b>` => `<b>ab</b>`
+      if (!is || !Formats.parents(t, is, root).length) {
+        const c = el.cloneNode(false) as Element;
+        t.before(c);
+        c.appendChild(t);
+        Formats.mergePrev(c.nextSibling);
+        Formats.mergePrev(c);
       }
     });
   },
@@ -242,10 +243,9 @@ export const Formats = {
   splitAt(el: Element, r: Range, isEmbed?: (el: Element) => boolean): void {
     const isEmpty = (x: Element | DocumentFragment): boolean =>
       !x.textContent && !(isEmbed && Array.prototype.some.call(x.querySelectorAll("*"), isEmbed));
-    const after = document.createRange();
-    after.setStart(...Internal.edgeOf(el, r.startContainer, r.startOffset));
-    after.setEnd(el, el.childNodes.length);
-    const f = after.extractContents();
+    r.setStart(...Internal.edgeOf(el, r.startContainer, r.startOffset));
+    r.setEnd(el, el.childNodes.length);
+    const f = r.extractContents(); // range is collapsed at split point
     if (!isEmpty(el)) {
       if (!isEmpty(f)) {
         const c = el.cloneNode(false) as Element;
@@ -292,6 +292,16 @@ export const Lines = {
     return arr;
   },
 
+  /** Returns line of node: the nearest list item or block placed directly into root (`undefined` for loose content) */
+  at(n: Node, root: Element): HTMLElement | undefined {
+    return Formats.parents(
+      n,
+      (el) =>
+        el.tagName === "LI" || (el.parentElement === root && Lines.isBlockTag(el.tagName) && !listTags.has(el.tagName)),
+      root
+    )[0] as HTMLElement | undefined;
+  },
+
   /** Returns lines in range (skips the last one if range ends at its start: triple click) */
   of(r: Range, root: Element): HTMLElement[] {
     const arr = Lines.all(root).filter((l) => Ranges.intersects(r, l));
@@ -332,13 +342,14 @@ export const Lines = {
    *  list item is moved out of its lists at first (splits lists & parent items of nested list) */
   setTag(line: HTMLElement, tag: string | HTMLElement): HTMLElement {
     for (let p = line.parentElement!; line.tagName === "LI" && (listTags.has(p.tagName) || p.tagName === "LI"); ) {
-      const rest = p.cloneNode(false) as Element; // items after line (nested ones keep their level)
-      while (line.nextSibling) {
-        rest.appendChild(line.nextSibling);
+      // items before line (nested ones keep their level): lines are set in order, so the rest isn't moved for each one
+      const head = p.cloneNode(false) as Element;
+      while (line.previousSibling) {
+        head.prepend(line.previousSibling);
       }
-      !Internal.isBlank(rest) && p.after(rest);
-      p.after(line);
-      Internal.isBlank(p) && p.remove();
+      p.before(head, line);
+      // parts without items are removed: without text & elements (whitespaces between items etc.)
+      [head, p].forEach((x) => !x.firstElementChild && !x.textContent!.trim() && x.remove());
       p = line.parentElement!;
     }
     if (line.tagName === tag) {
@@ -361,16 +372,17 @@ export const Lines = {
     b.setStart(n, offset);
     b.setEnd(line, line.childNodes.length);
     const w = document.createTreeWalker(line, NodeFilter.SHOW_ELEMENT);
+    let prev: Element | undefined; // elements are in order: the last one before point wins
     for (let el = w.nextNode() as Element | null; el; el = w.nextNode() as Element | null) {
       if ((el.tagName === "BR" || Lines.isBlockTag(el.tagName) || isEmbed?.(el)) && !el.contains(n)) {
-        if (b.comparePoint(el, 0) < 0) {
-          a.setStartAfter(el); // elements are in order: the last one before point wins
-        } else {
+        if (b.comparePoint(el, 0) >= 0) {
           b.setEndBefore(el);
           break;
         }
+        prev = el; // range isn't moved here: setStartAfter walks previous siblings
       }
     }
+    prev && a.setStartAfter(prev);
     return [a.toString(), b.toString()];
   },
 };
@@ -409,11 +421,16 @@ export const Html = {
    * * single plain paragraph goes without `<p>` (`text` instead of `<p>text</p>`)
    * * only formats of tools are kept: other elements are unwrapped (`<span>`, `<table>` etc.)
    * or removed with content (`<script>`, `<img>` if it isn't embed etc.)
-   * * links with unsafe protocols are removed (`javascript:` etc.) */
+   * * links with unsafe protocols are removed (`javascript:` etc.)
+   * * trailing `<br>` of non-empty line is removed (browser adds it to show empty line) */
   fromEditor(root: Node, tools: WUP.TextRich.Tools): string {
     const div = document.createElement("div");
     const ctx = Internal.ctxOf(tools, false);
     Internal.appendBlocks(root, div, ctx);
+    div.querySelectorAll(":scope > *, li").forEach((l) => {
+      const last = l.lastChild;
+      last && last !== l.firstChild && last.nodeName === "BR" && last.remove();
+    });
     const text = div.textContent!;
     const p = div.firstChild as HTMLElement;
     const html = text.trim() || ctx.hasEmbed ? (Internal.isPlainParagraph(p) ? p : div).innerHTML : "";
@@ -463,38 +480,16 @@ const Internal = {
   /** Moves content outside `first`..`last` into copies of el: `<b>a[bc]d</b>` => `<b>a</b><b>[bc]</b><b>d</b>`;
    *  split at edges of nested elements: otherwise their empty copies stay (`<b><i></i></b>`) */
   isolate(el: Element, first: Text, last: Text): void {
-    const before = document.createRange();
-    before.setStart(el, 0);
-    before.setEnd(...Internal.edgeOf(el, first, 0));
-    if (!before.collapsed) {
-      const c = el.cloneNode(false);
-      c.appendChild(before.extractContents());
-      el.before(c);
-    }
-    const after = document.createRange();
-    after.setStart(...Internal.edgeOf(el, last, last.length));
-    after.setEnd(el, el.childNodes.length);
-    if (!after.collapsed) {
-      const c = el.cloneNode(false);
-      c.appendChild(after.extractContents());
-      el.after(c);
-    }
-  },
-
-  /** Merges element into previous sibling with the same tag & attributes */
-  mergePrev(el: Node | null): void {
-    const prev = el?.previousSibling;
-    if (prev?.nodeType === Node.ELEMENT_NODE && Formats.isSame(prev, el!)) {
-      (prev as Element).append(...el!.childNodes);
-      (el as Element).remove();
-    }
-  },
-
-  // Lines
-
-  /** Returns true if element has neither text nor elements (whitespaces between list items etc.) */
-  isBlank(el: Element): boolean {
-    return !el.firstElementChild && !el.textContent!.trim();
+    [first, last].forEach((t, isEnd) => {
+      const r = document.createRange();
+      r.selectNodeContents(el);
+      isEnd ? r.setStart(...Internal.edgeOf(el, t, t.length)) : r.setEnd(...Internal.edgeOf(el, t, 0));
+      if (!r.collapsed) {
+        const c = el.cloneNode(false);
+        c.appendChild(r.extractContents());
+        isEnd ? el.after(c) : el.before(c);
+      }
+    });
   },
 
   // Html: sanitizer
@@ -508,17 +503,14 @@ const Internal = {
     return ctx;
   },
 
-  /** Returns value of format applied by element (`undefined` for default value `false` too) */
-  applied(t: WUP.TextRich.Tool, el: HTMLElement): unknown {
-    const v = t.is!(el);
-    return v === false ? undefined : v;
-  },
-
-  /** Returns the 1st tool applied by element & its value */
-  firstOf(tools: WUP.TextRich.Tool[], el: HTMLElement): [WUP.TextRich.Tool, unknown] | undefined {
-    let v: unknown;
-    const t = tools.find((x) => (v = Internal.applied(x, el)) !== undefined);
-    return t && [t, v];
+  /** Returns tools applied by element & their values (default value `false` isn't applied) */
+  applied(tools: WUP.TextRich.Tool[], el: HTMLElement): Array<[WUP.TextRich.Tool, unknown]> {
+    const arr: Array<[WUP.TextRich.Tool, unknown]> = [];
+    tools.forEach((t) => {
+      const v = t.is!(el);
+      v !== undefined && v !== false && arr.push([t, v]);
+    });
+    return arr;
   },
 
   /** Creates element of format: `<b>` => `<strong>` in value (in editor `<strong>` is styled as control label) */
@@ -532,30 +524,8 @@ const Internal = {
     return s;
   },
 
-  /** Returns new embed if element is embed (`<img>` etc.) */
-  toEmbed(el: HTMLElement, ctx: Ctx): HTMLElement | null {
-    const m = Internal.firstOf(ctx.embed, el);
-    ctx.hasEmbed ||= !!m;
-    return m ? Internal.createFor(m[0], m[1], ctx) : null;
-  },
-
-  /** Copies line styles: `lineStyle` formats (alignment etc.) & indent */
-  copyBlockStyle(src: HTMLElement, dst: HTMLElement, ctx: Ctx): void {
-    ctx.lineStyle.forEach((t) => {
-      const v = Internal.applied(t, src);
-      v !== undefined && t.set!(dst, v);
-    });
-    const ml = src.style.marginLeft;
-    indentReg.test(ml) && parseFloat(ml) > 0 && (dst.style.marginLeft = ml);
-  },
-
-  /** Removes trailing `<br>` of non-empty line (browser placeholder) */
-  trimBr(el: HTMLElement): void {
-    const last = el.lastChild;
-    last && last !== el.firstChild && last.nodeName === "BR" && last.remove();
-  },
-
-  /** Appends sanitized inline node; nested blocks are flattened into lines separated by `<br>` */
+  /** Appends sanitized inline node: embed (`<img>` etc.) is created again, unsupported elements are unwrapped
+   *  or removed with content (see skipTags); nested blocks are flattened into lines separated by `<br>` */
   appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
     if (n.nodeType === Node.TEXT_NODE) {
       dst.append((n as Text).data);
@@ -566,9 +536,10 @@ const Internal = {
     }
     const el = n as HTMLElement;
     const tag = el.tagName;
-    const embed = Internal.toEmbed(el, ctx);
+    const [embed] = Internal.applied(ctx.embed, el);
     if (embed) {
-      dst.appendChild(embed);
+      ctx.hasEmbed = true;
+      dst.appendChild(Internal.createFor(...embed, ctx));
       return;
     }
     if (skipTags.has(tag)) {
@@ -578,60 +549,43 @@ const Internal = {
       dst.appendChild(document.createElement("br"));
       return;
     }
-    if (Lines.isBlockTag(tag)) {
-      dst.lastChild && dst.lastChild.nodeName !== "BR" && dst.appendChild(document.createElement("br"));
-      Internal.appendInline(el, dst, ctx);
-      return;
+    const isBlock = Lines.isBlockTag(tag);
+    isBlock && dst.lastChild && dst.lastChild.nodeName !== "BR" && dst.appendChild(document.createElement("br"));
+    // element can apply several formats (`<span style="font-size; color">`) => nested elements;
+    // blocks & unsupported elements are unwrapped: <span>, <font>, <code> etc.
+    const arr = isBlock ? [] : Internal.applied(ctx.inline, el).map(([t, v]) => Internal.createFor(t, v, ctx));
+    const inner = arr.length ? arr.reduce((a, b) => a.appendChild(b)) : dst;
+    for (let c = el.firstChild; c; c = c.nextSibling) {
+      Internal.appendInlineNode(c, inner, ctx);
     }
-    // element can apply several formats (`<span style="font-size; color">`) => nested elements
-    const arr = ctx.inline.flatMap((t) => {
-      const v = Internal.applied(t, el);
-      return v === undefined ? [] : [Internal.createFor(t, v, ctx)];
-    });
-    if (arr.length) {
-      const inner = arr.reduce((a, b) => a.appendChild(b));
-      Internal.appendInline(el, inner, ctx);
-      inner.firstChild && dst.appendChild(arr[0]);
-    } else {
-      Internal.appendInline(el, dst, ctx); // unwrap unsupported: <span>, <font>, <code> etc.
-    }
+    inner !== dst && inner.firstChild && dst.appendChild(arr[0]);
   },
 
-  /** Appends sanitized inline content */
-  appendInline(src: Node, dst: HTMLElement, ctx: Ctx): void {
-    src.childNodes.forEach((n) => Internal.appendInlineNode(n, dst, ctx));
-  },
-
-  /** Fills line `el` (heading, paragraph etc.) with sanitized content of src */
+  /** Fills line `el` (paragraph, heading, list item etc.) with sanitized content of src: copies line styles (`lineStyle`
+   *  formats & indent); nested lists of list item are kept (empty item gets `<br>`), other blocks are flattened */
   toLine(src: HTMLElement, el: HTMLElement, ctx: Ctx): HTMLElement {
-    Internal.copyBlockStyle(src, el, ctx);
-    Internal.appendInline(src, el, ctx);
-    !ctx.isEditor && Internal.trimBr(el);
+    Internal.applied(ctx.lineStyle, src).forEach(([t, v]) => t.set!(el, v));
+    const ml = src.style.marginLeft;
+    indentReg.test(ml) && parseFloat(ml) > 0 && (el.style.marginLeft = ml);
+    const isItem = el.tagName === "LI";
+    for (let n = src.firstChild; n; n = n.nextSibling) {
+      isItem && listTags.has(n.nodeName)
+        ? el.appendChild(Internal.toList(n as HTMLElement, ctx))
+        : Internal.appendInlineNode(n, el, ctx);
+    }
+    isItem && !el.firstChild && el.appendChild(document.createElement("br"));
     return el;
-  },
-
-  /** Appends sanitized list item: nested lists are kept, other content is flattened */
-  appendListItem(src: HTMLElement, list: HTMLElement, ctx: Ctx): void {
-    const li = list.appendChild(document.createElement("li"));
-    Internal.copyBlockStyle(src, li, ctx);
-    src.childNodes.forEach((n) => {
-      listTags.has(n.nodeName)
-        ? li.appendChild(Internal.toList(n as HTMLElement, ctx))
-        : Internal.appendInlineNode(n, li, ctx);
-    });
-    !ctx.isEditor && Internal.trimBr(li);
-    !li.firstChild && li.appendChild(document.createElement("br"));
   },
 
   /** Returns sanitized list */
   toList(src: HTMLElement, ctx: Ctx): HTMLElement {
     const list = document.createElement(src.tagName);
     let li: HTMLElement | null = null; // for content directly in list (invalid html)
-    src.childNodes.forEach((n) => {
+    for (let n = src.firstChild; n; n = n.nextSibling) {
       const tag = n.nodeName;
       if (tag === "LI") {
         li = null;
-        Internal.appendListItem(n as HTMLElement, list, ctx);
+        Internal.toLine(n as HTMLElement, list.appendChild(document.createElement("li")), ctx);
       } else if (listTags.has(tag)) {
         li = null;
         list.appendChild(Internal.toList(n as HTMLElement, ctx)); // Chrome nests lists on indent
@@ -639,7 +593,7 @@ const Internal = {
         li ??= list.appendChild(document.createElement("li"));
         Internal.appendInlineNode(n, li, ctx);
       }
-    });
+    }
     return list;
   },
 
@@ -647,60 +601,51 @@ const Internal = {
   appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
     const pTag = ctx.isEditor ? "div" : "p";
     let p: HTMLElement | null = null; // current paragraph for inline content
-    const closeParagraph = (): void => {
-      p && !ctx.isEditor && Internal.trimBr(p);
-      p = null;
-    };
-
-    src.childNodes.forEach((n) => {
+    for (let n = src.firstChild; n; n = n.nextSibling) {
       if (n.nodeType === Node.TEXT_NODE) {
         const t = (n as Text).data;
         if (p || t.trim()) {
           p ??= dst.appendChild(document.createElement(pTag));
           p.append(t);
         } // skip whitespaces between blocks
-        return;
+        continue;
       }
       if (n.nodeType !== Node.ELEMENT_NODE) {
-        return;
+        continue;
       }
       const el = n as HTMLElement;
       const tag = el.tagName;
       if (tag === "BR") {
         // after inline content - next paragraph, otherwise - empty line
-        if (p) {
-          closeParagraph();
-        } else {
-          dst.appendChild(document.createElement(pTag)).appendChild(document.createElement("br"));
-        }
-        return;
+        !p && dst.appendChild(document.createElement(pTag)).appendChild(document.createElement("br"));
+        p = null;
+        continue;
       }
       if (!Lines.isBlockTag(tag)) {
-        // skip unsupported with content (<script> etc.) except embeds (<img> etc.)
-        const embed = Internal.toEmbed(el, ctx);
-        if (embed || !skipTags.has(tag)) {
+        // skip unsupported with content (<script> etc.) except embeds (<img> etc.): otherwise empty paragraph stays
+        if (!skipTags.has(tag) || Internal.applied(ctx.embed, el).length) {
           p ??= dst.appendChild(document.createElement(pTag));
-          embed ? p.appendChild(embed) : Internal.appendInlineNode(el, p, ctx);
+          Internal.appendInlineNode(el, p, ctx);
         }
-        return;
+        continue;
       }
 
-      closeParagraph();
-      const line = Internal.firstOf(ctx.line, el); // heading, blockquote etc.
+      p = null;
+      const [line] = Internal.applied(ctx.line, el); // heading, blockquote etc.
       if (line) {
-        dst.appendChild(Internal.toLine(el, Internal.createFor(line[0], line[1], ctx), ctx));
+        dst.appendChild(Internal.toLine(el, Internal.createFor(...line, ctx), ctx));
       } else if (listTags.has(tag)) {
         dst.appendChild(Internal.toList(el, ctx));
       } else if (tag === "LI") {
-        Internal.appendListItem(el, dst.appendChild(document.createElement("ul")), ctx); // <li> without list
+        const ul = dst.appendChild(document.createElement("ul")); // <li> without list
+        Internal.toLine(el, ul.appendChild(document.createElement("li")), ctx);
       } else if (Array.prototype.some.call(el.children, (c: Element) => Lines.isBlockTag(c.tagName))) {
         Internal.appendBlocks(el, dst, ctx); // unwrap: `<div><ol>...</ol></div>`
       } else {
         const paragraph = Internal.toLine(el, document.createElement(pTag), ctx);
         paragraph.firstChild && dst.appendChild(paragraph);
       }
-    });
-    closeParagraph();
+    }
   },
 
   /** Returns true if `<p>` can be dropped from value: the only paragraph without styles, `<br>` & leading whitespaces

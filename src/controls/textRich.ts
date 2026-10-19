@@ -555,10 +555,7 @@ export default class WUPTextRichControl<
           }
         });
         // merge adjacent lists: `<ol><li>a</li></ol><ol><li>b</li></ol>` => `<ol><li>a</li><li>b</li></ol>`
-        editor.querySelectorAll(":scope > ol + ol, :scope > ul + ul").forEach((el) => {
-          el.previousElementSibling!.append(...el.childNodes);
-          el.remove();
-        });
+        editor.querySelectorAll(":scope > ol + ol, :scope > ul + ul").forEach(Utils.Formats.mergePrev);
       },
     },
     script: {
@@ -578,7 +575,7 @@ export default class WUPTextRichControl<
       format: ({ lines, value }) =>
         lines.forEach((l) => {
           // 3em per level (the same as quill); pasted indent can be in px
-          const [, n, unit] = /^(\d+(?:\.\d+)?)(em|px)$/.exec(l.style.marginLeft) ?? [];
+          const [, n, unit] = Utils.indentReg.exec(l.style.marginLeft) ?? [];
           const em = unit === "px" ? +n / (parseFloat(getComputedStyle(l).fontSize) || 16) : +(n ?? 0);
           const level = Math.min(8, Math.max(0, Math.round(em / 3) + value));
           l.style.marginLeft = level ? `${level * 3}em` : "";
@@ -777,7 +774,7 @@ export default class WUPTextRichControl<
       // embed with `ask` (image etc.): asked value replaces it
       const name = this.embedTool(t);
       if (name && this.#ctr.$tools[name].kind === "embed" && this.#ctr.$tools[name].ask) {
-        Utils.Ranges.selectNode(t);
+        Utils.Ranges.select(t);
         this.$format(name, undefined, false, t);
       }
     });
@@ -1311,7 +1308,7 @@ export default class WUPTextRichControl<
       this.askMenu(name, el, true).then((v) => {
         if (v != null && el.isConnected) {
           this.$refInput.focus({ preventScroll: true }); // otherwise control restores previous selection
-          Utils.Ranges.selectNode(el);
+          Utils.Ranges.select(el);
           this.$format(name, v, true); // replaces element, caret goes after it
         }
       });

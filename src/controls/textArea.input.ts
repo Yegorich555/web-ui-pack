@@ -62,7 +62,8 @@ export function charsBefore(root: Node, node: Node, offset: number, isEmbed?: (e
  *  point at the boundary of parts is placed at the end of the previous one (at the start of line - into its text);
  *  position out of range - at the end of root */
 export function pointAt(root: Node, pos: number, isEmbed?: (el: Element) => boolean): [Node, number] {
-  let last: [Node, number] = [root, 0];
+  // node: point after it (its index is found at the end: it walks previous siblings)
+  let last = [root, 0] as [Node, number] | Node;
   walkText(
     root,
     (n, len) => {
@@ -72,15 +73,18 @@ export function pointAt(root: Node, pos: number, isEmbed?: (el: Element) => bool
       } else if (len && !pos) {
         return true; // before line break or embed
       } else {
-        const p = n.parentNode!;
-        last = isLine ? [n, 0] : [p, Array.prototype.indexOf.call(p.childNodes, n) + 1];
+        last = isLine ? [n, 0] : n;
       }
       pos -= len;
       return pos < 0 || (!pos && !isLine);
     },
     isEmbed
   );
-  return last;
+  if (Array.isArray(last)) {
+    return last;
+  }
+  const p = last.parentNode!;
+  return [p, Array.prototype.indexOf.call(p.childNodes, last) + 1];
 }
 
 /** Represents contenteditable element with custom input props as value, select etc. */
@@ -178,8 +182,8 @@ export default class WUPTextAreaInput extends HTMLElement {
     v.endsWith("\n") && this.append(document.createElement("br")); // otherwise browser doesn't show the last empty line
   }
 
-  /** Returns function that checks if element is embed (`<img>` etc.): it's counted as 1 char in positions of selection */
-  _embedOf?(): ((el: Element) => boolean) | undefined;
+  /** Checker of embed elements (`<img>` etc.): embed is counted as 1 char in positions of selection */
+  _isEmbed?: (el: Element) => boolean;
 
   /** Sets the start and end positions of a selection in a text field.
    * @param start The offset into the text field for the start of the selection.
@@ -213,7 +217,7 @@ export default class WUPTextAreaInput extends HTMLElement {
       return null;
     }
     const r = sel.getRangeAt(0);
-    const isEmbed = this._embedOf?.();
+    const isEmbed = this._isEmbed;
     const start = charsBefore(this, r.startContainer, r.startOffset, isEmbed);
     return { start, end: r.collapsed ? start : charsBefore(this, r.endContainer, r.endOffset, isEmbed) };
   }
@@ -222,7 +226,7 @@ export default class WUPTextAreaInput extends HTMLElement {
     if (document.activeElement !== this) {
       return;
     }
-    const isEmbed = this._embedOf?.();
+    const isEmbed = this._isEmbed;
     const [n1, o1] = pointAt(this, sel?.start ?? 0, isEmbed);
     const [n2, o2] = pointAt(this, sel?.end ?? 0, isEmbed);
     window.getSelection()!.setBaseAndExtent(n1, o1, n2, o2);
