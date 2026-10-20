@@ -452,8 +452,8 @@ describe("control.textRich", () => {
     const format = jest.fn();
     const times = '"Times New Roman", serif';
     WUPTextRichControl.$tools.font = {
-      hotKey: "Control+Alt+Shift+F Control+Alt+Shift+G", // previous & next value
-      values: [{ value: times, hotKey: "Control+Alt+Shift+1" }, { value: "monospace" }],
+      hotKey: { prev: ["Control", "Alt", "Shift", "F"], next: ["Control", "Alt", "Shift", "G"] }, // previous & next value
+      values: [{ value: times, hotKey: ["Control", "Alt", "Shift", "1"] }, { value: "monospace" }],
       format,
     };
     try {
@@ -2543,7 +2543,7 @@ describe("control.textRich", () => {
   });
 
   test("dropdown items", async () => {
-    WUPTextRichControl.$tools.image = { kind: "embed", values: [{ value: "a.png", hotKey: "Control+Alt+I" }] };
+    WUPTextRichControl.$tools.image = { kind: "embed", values: [{ value: "a.png", hotKey: ["Control", "Alt", "I"] }] };
     try {
       el.$options.toolbar = [["align", { list: ["ordered", "check"] }, "header", "size", "image"]];
       await h.wait(1);
@@ -2770,7 +2770,7 @@ describe("control.textRich", () => {
     expect(press("Period", { shiftKey: true })).toBe(false);
     // browser formatting is blocked if shortcut is redefined
     const { hotKey } = WUPTextRichControl.$tools.bold;
-    WUPTextRichControl.$tools.bold.hotKey = "Control+Shift+B";
+    WUPTextRichControl.$tools.bold.hotKey = ["Control", "Shift", "B"];
     try {
       el.$options.toolbar = [["bold"]];
       await h.wait(1);
@@ -2783,7 +2783,7 @@ describe("control.textRich", () => {
     }
 
     // clear button
-    WUPTextRichControl.$tools.btnClear.hotKey = "Control+Shift+Delete";
+    WUPTextRichControl.$tools.btnClear.hotKey = ["Control", "Shift", "Delete"];
     try {
       el.$options.toolbar = [["btnClear"]];
       await h.wait(1);
@@ -2799,7 +2799,7 @@ describe("control.textRich", () => {
     // current value isn't in values: the 1st shortcut selects the last value
     const format = jest.fn();
     WUPTextRichControl.$tools.font = {
-      hotKey: "Control+Alt+Shift+F Control+Alt+Shift+G",
+      hotKey: { prev: ["Control", "Alt", "Shift", "F"], next: ["Control", "Alt", "Shift", "G"] },
       values: [{ value: "serif" }, { value: "monospace" }],
       is: (e) => e.style.fontFamily || undefined,
       format,
@@ -2926,8 +2926,11 @@ describe("control.textRich", () => {
     expect(inp.innerHTML).toBe("<div><b>a</b></div>");
     // hints in order of macOS menus
     const b = document.createElement("button");
-    expect(c.setHotKeys(b, "Control+Alt+Shift+C Control+Escape Alt+Shift+5")).toBe("⌥⇧⌘C / ⌘Esc / ⌥⇧5");
-    expect(b.getAttribute("aria-keyshortcuts")).toBe("Meta+Alt+Shift+C Meta+Escape Alt+Shift+5");
+    expect(c.setHotKeys(b, { prev: ["Control", "Alt", "Shift", "C"], next: ["Control", "Escape"] })).toBe(
+      "⌥⇧⌘C / ⌘Esc"
+    );
+    expect(b.getAttribute("aria-keyshortcuts")).toBe("Meta+Alt+Shift+C Meta+Escape");
+    expect(c.setHotKeys(b, ["Alt", "Shift", "5"])).toBe("⌥⇧5");
   });
 
   test("click on link: browser doesn't follow it (readonly editor isn't contenteditable)", async () => {

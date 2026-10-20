@@ -60,6 +60,12 @@ declare global {
       /** `false` - left (default) */
       align: "center" | "right" | "justify" | false;
     }
+    /** Keys of shortcut: modifiers & key matched by `KeyboardEvent.code` (`KeyB` => `B`, `Comma` => `,`) */
+    // prettier-ignore
+    type KnownKeys = "Control" | "Alt" | "Shift" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "," | "." | "/" | ";" | "'" | "[" | "]" | "\\" | "`" | "-" | "=" | "F1" | "F2" | "F3" | "F4" | "F5" | "F6" | "F7" | "F8" | "F9" | "F10" | "F11" | "F12" | "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight" | "Escape" | "Enter" | "Space" | "Backspace" | "Delete" | "Insert" | "Home" | "End" | "PageUp" | "PageDown";
+    /** Shortcut: modifiers & key at the end `["Control", "Shift", "X"]`
+     * @see {@link Tool.hotKey} */
+    type HotKey = KnownKeys[];
     /** Dropdown item or button for a single value (toolbar item `{ list: "ordered" }`) */
     interface ToolValue<V = any> {
       /** Ex. `1` for `header` */
@@ -67,7 +73,7 @@ declare global {
       /** Text of dropdown item or `aria-label` & tooltip of button; @defaultValue prettified value (`sans-serif` => `Sans Serif`) */
       label?: string;
       /** Keyboard shortcut (see Tool.hotKey) */
-      hotKey?: string;
+      hotKey?: HotKey;
       /** Text typed at line start that applies this value like markdown (`1. ` gives numbered list): RegExp must match
        *  the whole text before caret; typed text is removed; works if tool is in toolbar (see `hideOnToolbar`);
        *  undo (Ctrl+Z or Escape right after it) returns typed text */
@@ -86,13 +92,13 @@ declare global {
     interface Tool<V = any> {
       /** `aria-label` & tooltip; @defaultValue tool name */
       label?: string;
-      /** Keyboard shortcut in `aria-keyshortcuts` format: `Control+Shift+X`; several ones are separated by space
+      /** Keyboard shortcut: modifiers & key `["Control", "Shift", "X"]`; tool with values can select the previous/next value
+       *  `{ prev: ["Control", "Shift", "."], next: ["Control", "Shift", ","] }` (`size`: bigger/smaller)
        * @tutorial Rules
        * * `Control` is Cmd on macOS/iOS (shown as `⌘`)
        * * `Control` or `Alt` is required; key is matched by `KeyboardEvent.code`, so it works with any keyboard layout
-       * * works only if tool is in toolbar (see `hideOnToolbar`)
-       * * tool with values: the 1st shortcut selects the previous value, the 2nd one - the next value (`size`: bigger/smaller) */
-      hotKey?: string;
+       * * works only if tool is in toolbar (see `hideOnToolbar`) */
+      hotKey?: HotKey | { prev: HotKey; next: HotKey };
       /** Class of toolbar button or dropdown (single class): to set icon via css-var `--icon-img`
        *  (`.my-icon-upper { --icon-img: url("data:image/svg+xml,...") }`); or use `wup-textrich [tool="upper"]` selector instead */
       className?: string;
@@ -297,9 +303,23 @@ const codeKeys = {
   BracketLeft: "[",
   BracketRight: "]",
   Backslash: "\\",
+  Slash: "/",
+  Semicolon: ";",
+  Quote: "'",
+  Backquote: "`",
+  Minus: "-",
+  Equal: "=",
 };
 /** Browser formatting shortcuts (Ctrl/Cmd + B, I, U): prevented so only $tools shortcuts work */
 const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
+
+/** Returns list of shortcuts: `["Control", "B"]` => `[["Control", "B"]]`, `{ prev, next }` => `[prev, next]` */
+function shortcuts(hk: WUP.TextRich.Tool["hotKey"]): WUP.TextRich.HotKey[] {
+  if (!hk) {
+    return [];
+  }
+  return Array.isArray(hk) ? [hk] : [hk.prev, hk.next];
+}
 
 /** Form-control with rich text editor (WYSIWYG) & toolbar; behavior & styles are similar to npm quill
  * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textRich}
@@ -381,8 +401,8 @@ export default class WUPTextRichControl<
   static $ariaToolbar = __wupln("Formatting", "aria");
   /** Shortcut to focus toolbar (Arrows - navigate, Esc - return)
    * @see {@link WUP.TextRich.Tool.hotKey}
-   * @defaultValue `Alt+F10` */
-  static $hotKeyToolbar = "Alt+F10";
+   * @defaultValue `["Alt", "F10"]` */
+  static $hotKeyToolbar: WUP.TextRich.HotKey = ["Alt", "F10"];
   /** Opening => closing char: typed over selection wraps it like in code editors (`(` gives `(text)`, `text` stays selected);
    *  remove pair (or clear map) to replace selection as usual
    * @defaultValue quotes & brackets */
@@ -401,7 +421,7 @@ export default class WUPTextRichControl<
    * @see {@link WUP.TextRich.Tool}
    * @example
    * WUPTextRichControl.$tools.strike.label = "Crossed out";
-   * WUPTextRichControl.$tools.strike.hotKey = "Control+Shift+S";
+   * WUPTextRichControl.$tools.strike.hotKey = ["Control", "Shift", "S"];
    * delete WUPTextRichControl.$tools.header.values![5].hotKey; // disable shortcut of `Heading 6`
    * // custom tools (TS: add `highlight: true; upper: true;` to WUP.TextRich.ToolValues)
    * WUPTextRichControl.$tools.highlight = {
@@ -423,13 +443,13 @@ export default class WUPTextRichControl<
     header: {
       label: __wupln("Heading", "aria"),
       values: [
-        { value: 1, label: __wupln("Heading 1", "content"), hotKey: "Control+Alt+1" },
-        { value: 2, label: __wupln("Heading 2", "content"), hotKey: "Control+Alt+2" },
-        { value: 3, label: __wupln("Heading 3", "content"), hotKey: "Control+Alt+3" },
-        { value: 4, label: __wupln("Heading 4", "content"), hotKey: "Control+Alt+4" },
-        { value: 5, label: __wupln("Heading 5", "content"), hotKey: "Control+Alt+5" },
-        { value: 6, label: __wupln("Heading 6", "content"), hotKey: "Control+Alt+6" },
-        { value: false, label: __wupln("Normal", "content"), hotKey: "Control+Alt+0" },
+        { value: 1, label: __wupln("Heading 1", "content"), hotKey: ["Control", "Alt", "1"] },
+        { value: 2, label: __wupln("Heading 2", "content"), hotKey: ["Control", "Alt", "2"] },
+        { value: 3, label: __wupln("Heading 3", "content"), hotKey: ["Control", "Alt", "3"] },
+        { value: 4, label: __wupln("Heading 4", "content"), hotKey: ["Control", "Alt", "4"] },
+        { value: 5, label: __wupln("Heading 5", "content"), hotKey: ["Control", "Alt", "5"] },
+        { value: 6, label: __wupln("Heading 6", "content"), hotKey: ["Control", "Alt", "6"] },
+        { value: false, label: __wupln("Normal", "content"), hotKey: ["Control", "Alt", "0"] },
       ],
       kind: "line",
       is: (el) => (/^H[1-6]$/.test(el.tagName) ? (+el.tagName[1] as WUP.TextRich.ToolValues["header"]) : undefined),
@@ -437,49 +457,49 @@ export default class WUPTextRichControl<
     },
     bold: {
       label: __wupln("Bold", "aria"),
-      hotKey: "Control+B",
+      hotKey: ["Control", "B"],
       kind: "inline",
       is: ({ tagName: t }) => t === "B" || t === "STRONG" || undefined,
       create: "b", // <strong> is styled as control label
     },
     italic: {
       label: __wupln("Italic", "aria"),
-      hotKey: "Control+I",
+      hotKey: ["Control", "I"],
       kind: "inline",
       is: ({ tagName: t }) => t === "I" || t === "EM" || undefined,
       create: "em",
     },
     underline: {
       label: __wupln("Underline", "aria"),
-      hotKey: "Control+U",
+      hotKey: ["Control", "U"],
       kind: "inline",
       is: (el) => el.tagName === "U" || undefined,
       create: "u",
     },
     strike: {
       label: __wupln("Strikethrough", "aria"),
-      hotKey: "Control+Shift+X", // or "Control+Shift+X Alt+Shift+5" (Alt+Shift+5 as in Google Docs)
+      hotKey: ["Control", "Shift", "X"], // or ["Alt", "Shift", "5"] as in Google Docs
       kind: "inline",
       is: ({ tagName: t }) => t === "S" || t === "STRIKE" || t === "DEL" || undefined, // undefined - not applied (false is a value)
       create: "s",
     },
     blockquote: {
       label: __wupln("Quote", "aria"),
-      hotKey: "Control+Shift+9",
+      hotKey: ["Control", "Shift", "9"],
       kind: "line",
       is: (el) => el.tagName === "BLOCKQUOTE" || undefined,
       create: "blockquote",
     },
     code: {
       label: __wupln("Code block", "aria"),
-      hotKey: "Control+Alt+Shift+C",
+      hotKey: ["Control", "Alt", "Shift", "C"],
       kind: "line",
       is: (el) => el.tagName === "PRE" || undefined,
       create: "pre",
     },
     link: {
       label: __wupln("Link", "aria"),
-      hotKey: "Control+K",
+      hotKey: ["Control", "K"],
       kind: "inline",
       placeholder: "https://example.com",
       // brackets are balanced (`wiki/Foo_(bar)`), the last char isn't punctuation
@@ -544,10 +564,15 @@ export default class WUPTextRichControl<
         {
           value: "ordered",
           label: __wupln("Numbered list", "aria"),
-          hotKey: "Control+Shift+7",
+          hotKey: ["Control", "Shift", "7"],
           recognize: /^1[.)]\s$/,
         },
-        { value: "bullet", label: __wupln("Bulleted list", "aria"), hotKey: "Control+Shift+8", recognize: /^[-*]\s$/ },
+        {
+          value: "bullet",
+          label: __wupln("Bulleted list", "aria"),
+          hotKey: ["Control", "Shift", "8"],
+          recognize: /^[-*]\s$/,
+        },
       ],
       kind: "line",
       is: (el) => {
@@ -577,8 +602,8 @@ export default class WUPTextRichControl<
     },
     script: {
       values: [
-        { value: "sub", label: __wupln("Subscript", "aria"), hotKey: "Control+," },
-        { value: "super", label: __wupln("Superscript", "aria"), hotKey: "Control+." },
+        { value: "sub", label: __wupln("Subscript", "aria"), hotKey: ["Control", ","] },
+        { value: "super", label: __wupln("Superscript", "aria"), hotKey: ["Control", "."] },
       ],
       kind: "inline",
       is: ({ tagName: t }) => (t === "SUB" && "sub") || (t === "SUP" && "super") || undefined,
@@ -586,8 +611,8 @@ export default class WUPTextRichControl<
     },
     indent: {
       values: [
-        { value: -1, label: __wupln("Decrease indent", "aria"), hotKey: "Control+[" },
-        { value: 1, label: __wupln("Increase indent", "aria"), hotKey: "Control+]" },
+        { value: -1, label: __wupln("Decrease indent", "aria"), hotKey: ["Control", "["] },
+        { value: 1, label: __wupln("Increase indent", "aria"), hotKey: ["Control", "]"] },
       ],
       // list item changes level of nesting, other lines get margin
       format: ({ lines, value }) => {
@@ -611,7 +636,7 @@ export default class WUPTextRichControl<
     },
     size: {
       label: __wupln("Font size", "aria"),
-      hotKey: "Control+Shift+. Control+Shift+,", // increase & decrease
+      hotKey: { prev: ["Control", "Shift", "."], next: ["Control", "Shift", ","] }, // increase & decrease
       values: [
         { value: "hg", label: __wupln("Huge", "content") },
         { value: "lg", label: __wupln("Large", "content") },
@@ -637,25 +662,25 @@ export default class WUPTextRichControl<
         {
           value: "center",
           label: __wupln("Center", "aria"),
-          hotKey: "Control+Shift+E",
+          hotKey: ["Control", "Shift", "E"],
           className: "wup-icon-align-center",
         },
         {
           value: "right",
           label: __wupln("Right", "aria"),
-          hotKey: "Control+Shift+R",
+          hotKey: ["Control", "Shift", "R"],
           className: "wup-icon-align-right",
         },
         {
           value: "justify",
           label: __wupln("Justify", "aria"),
-          hotKey: "Control+Shift+J",
+          hotKey: ["Control", "Shift", "J"],
           className: "wup-icon-align-justify",
         },
         {
           value: false,
           label: __wupln("Left", "aria"),
-          hotKey: "Control+Shift+L",
+          hotKey: ["Control", "Shift", "L"],
           className: "wup-icon-align-left",
         },
       ],
@@ -668,7 +693,7 @@ export default class WUPTextRichControl<
     },
     clean: {
       label: __wupln("Clear formatting", "aria"),
-      hotKey: "Control+\\",
+      hotKey: ["Control", "\\"],
       // collapsed selection: removes formats of the next typed text (see $format)
       format: ({ lines, texts, editor, control }) => {
         // tools of subclass
@@ -904,7 +929,7 @@ export default class WUPTextRichControl<
   }
 
   /** Sets `aria-label` & tooltip `{label} ({hotKey})` of button or icon item of dropdown */
-  protected setToolLabel(b: HTMLElement, label: string, hotKey: string | undefined): void {
+  protected setToolLabel(b: HTMLElement, label: string, hotKey: WUP.TextRich.Tool["hotKey"]): void {
     b.setAttribute("aria-label", label);
     const hint = this.setHotKeys(b, hotKey);
     b.setAttribute("w-tooltip", hint && `${label} (${hint})`); // empty - tooltip shows aria-label
@@ -918,22 +943,22 @@ export default class WUPTextRichControl<
 
   /** Sets `aria-keyshortcuts` (`Control` => `Meta` on macOS/iOS)
    * @returns hint: `Ctrl+Shift+X / Alt+Shift+5` or `⇧⌘X` on macOS/iOS (empty if $options.hideHotKeysHint) */
-  protected setHotKeys(el: HTMLElement, hk: string | undefined): string {
-    if (!hk) {
+  protected setHotKeys(el: HTMLElement, hotKey: WUP.TextRich.Tool["hotKey"]): string {
+    const list = shortcuts(hotKey);
+    if (!list.length) {
       return "";
     }
+    const hk = list.map((keys) => keys.join("+")).join(" ");
     el.setAttribute("aria-keyshortcuts", isMac ? hk.replace(/Control/g, "Meta") : hk);
     if (this._opts.hideHotKeysHint) {
       return "";
     }
-    return hk
-      .replace(/Escape/g, "Esc")
-      .split(" ")
+    return list
       .map((s) => {
+        const keys = s.map((k) => (k === "Escape" ? "Esc" : k));
         if (!isMac) {
-          return s.replace("Control", "Ctrl");
+          return keys.join("+").replace("Control", "Ctrl");
         }
-        const keys = s.split("+");
         const k = keys.pop();
         // order of macOS menus
         return `${keys.includes("Alt") ? "⌥" : ""}${keys.includes("Shift") ? "⇧" : ""}${
@@ -1189,7 +1214,7 @@ export default class WUPTextRichControl<
           ? t.values
           : [picked].flat().map((v) => t.values?.find((x) => x.value === v) ?? { value: v });
       if (!values || t.trigger) {
-        arr.push({ value: name, label, hotKey: t.hotKey });
+        arr.push({ value: name, label, hotKey: Array.isArray(t.hotKey) ? t.hotKey : undefined }); // prev/next are for values
         return;
       }
       values.forEach((v) => {
@@ -1436,17 +1461,15 @@ export default class WUPTextRichControl<
       return false;
     }
     const key = (codeKeys[e.code as keyof typeof codeKeys] ?? e.code.replace(/^(Key|Digit)/, "")).toUpperCase();
-    /** Returns index of matched shortcut or `-1` */
-    const match = (hk: string | undefined): number =>
-      hk?.split(" ").findIndex((s) => {
-        const keys = s.split("+");
-        return (
-          keys.pop()!.toUpperCase() === key &&
+    /** Returns index of matched shortcut or `-1`: `0` - prev, `1` - next for `{ prev, next }` */
+    const match = (hotKey: WUP.TextRich.Tool["hotKey"]): number =>
+      shortcuts(hotKey).findIndex(
+        (keys) =>
+          keys[keys.length - 1].toUpperCase() === key &&
           keys.includes("Control") === mod &&
           keys.includes("Alt") === e.altKey &&
           keys.includes("Shift") === e.shiftKey
-        );
-      }) ?? -1;
+      );
     if (match(this.#ctr.$hotKeyToolbar) !== -1) {
       this.$refToolbar.querySelector<HTMLElement>("button:not([hidden])")?.focus();
       return true;
@@ -1463,7 +1486,7 @@ export default class WUPTextRichControl<
     if (!tool.values || val) {
       return this.applyKey(val ? `${name}:${val.value}` : name); // not rendered: browser handles shortcut
     }
-    // tool shortcut: the 1st one selects the previous rendered value (bigger font), the 2nd one - the next value
+    // tool shortcut: `prev` selects the previous rendered value (bigger font), `next` - the next value
     const { values } = tool;
     const items = this.findTool(name)?._values;
     const isRendered = (v: WUP.TextRich.ToolValue): boolean =>
@@ -1574,5 +1597,3 @@ export default class WUPTextRichControl<
 }
 
 customElements.define(tagName, WUPTextRichControl);
-
-// todo prop hotKeys replace to KnownKeys[] - is there any type-list of keyboard keys?
