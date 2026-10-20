@@ -361,14 +361,34 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   #left = new WeakSet<Element>();
 
   /** ArrowRight at the end of formatted element (bold, link etc.) or ArrowLeft at its start: the next typed text goes out of it,
-   *  the opposite arrow returns into it (caret stays visually)
+   *  the opposite arrow returns into it (caret stays visually); without such element ArrowRight at the end of the last block
+   *  (list, quote etc.) goes into new line after it: `<li><b>Note:</b>|</li>` + ArrowRight continues item with plain text,
+   *  the 2nd one adds line
    * @returns false if there is nothing to leave/return */
   leaveFormats(isRight: boolean): boolean {
     const p = this.#pending;
+    const sel = window.getSelection()!;
     const back = this.formatsAt(isRight).filter(([k]) => p.get(k) === false); // left via the opposite arrow
     const arr = back.length ? back : this.formatsAt(!isRight).filter(([k]) => p.get(k) !== false);
     if (!arr.length) {
-      return false;
+      const n = sel.focusNode;
+      const line = isRight && !this.readOnly && sel.isCollapsed && n && this.contains(n) && Utils.Lines.at(n, this);
+      const isEmbed = this._isEmbed;
+      if (
+        !line ||
+        !this._entries.some(([, t, is]) => t.kind === "line" && is?.(line)) || // aligned paragraph isn't block
+        Utils.Formats.parents(line, (el) => !!el.nextSibling, this).length || // arrow moves caret into the next line
+        // text, empty nested item, <br> or embed after caret
+        charsBefore(line, n!, sel.focusOffset, isEmbed) !== charsBefore(line, line, line.childNodes.length, isEmbed)
+      ) {
+        return false;
+      }
+      // caret has nowhere to move: new line after block (separate undo step)
+      this.changeContent(() => {
+        const div = this.appendChild(document.createElement("div"));
+        div.appendChild(document.createElement("br"));
+        sel.collapse(div, 0);
+      });
     }
     arr.forEach(([k, el]) => {
       if (back.length) {
@@ -378,8 +398,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
         this.#left.add(el);
       }
     });
-    const sel = window.getSelection()!;
-    this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
+    this.#pendingAt = [sel.anchorNode!, sel.anchorOffset]; // the new line keeps pending formats too
     this._onFormats?.();
     return true;
   }

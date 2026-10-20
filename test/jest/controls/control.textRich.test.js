@@ -1167,6 +1167,90 @@ describe("control.textRich", () => {
     expect(getHtml()).toBe("<div>123</div><div><b>234|</b><br></div>");
   });
 
+  test("ArrowRight at the end of the last block (list etc.): caret goes into new line after it", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    const btnList = el.querySelector('[tool="list:ordered"]');
+    const btnBold = el.querySelector("[tool=bold]");
+    /** Presses key on editor @returns true if it's prevented */
+    const press = (key) => !inp.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+
+    // list applied to empty line
+    setHtml("<ol><li>|<br></li></ol>");
+    expect(btnList.getAttribute("aria-pressed")).toBe("true");
+    expect(press("ArrowRight")).toBe(true);
+    expect(getHtml()).toBe("<ol><li><br></li></ol><div>|<br></div>");
+    expect(btnList.getAttribute("aria-pressed")).toBe("false");
+    expect(press("ArrowRight")).toBe(false); // plain line: nothing to go out of
+    await h.wait(1);
+    expect(typeText(null, "historyUndo")).toBe(true); // separate undo step
+    await h.wait(1);
+    expect(inp.innerHTML).toBe("<ol><li><br></li></ol>");
+    // the end of nested list; inline formats are left at first: `Note:` + ArrowRight continues item with plain text
+    setHtml("<ul><li>a<ul><li><b>Note:|</b></li></ul></li></ul>");
+    expect(press("ArrowRight")).toBe(true);
+    expect(btnBold.getAttribute("aria-pressed")).toBe("false");
+    expect(getHtml()).toBe("<ul><li>a<ul><li><b>Note:|</b></li></ul></li></ul>");
+    expect(press("ArrowRight")).toBe(true);
+    expect(getHtml()).toBe("<ul><li>a<ul><li><b>Note:</b></li></ul></li></ul><div>|<br></div>");
+    // other blocks
+    setHtml("<blockquote>q|</blockquote>");
+    expect(press("ArrowRight")).toBe(true);
+    expect(getHtml()).toBe("<blockquote>q</blockquote><div>|<br></div>");
+    setHtml("<h1>a</h1><pre>code|</pre>");
+    expect(press("ArrowRight")).toBe(true);
+    expect(getHtml()).toBe("<h1>a</h1><pre>code</pre><div>|<br></div>");
+    // pending formats stay for the next typed text
+    setHtml("<pre>code|</pre>");
+    el.$format("bold");
+    expect(press("ArrowRight")).toBe(true);
+    document.dispatchEvent(new Event("selectionchange")); // jsdom doesn't fire it
+    expect(btnBold.getAttribute("aria-pressed")).toBe("true");
+    userType("x");
+    expect(getHtml()).toBe("<pre>code</pre><div><b>x|</b><br></div>");
+
+    // not the end of the last block: arrow moves caret as usual
+    setHtml("<ol><li>a|</li></ol><div>next</div>"); // caret goes into the next line
+    expect(press("ArrowRight")).toBe(false);
+    setHtml("<ol><li>a|</li><li><br></li></ol>"); // empty item after caret
+    expect(press("ArrowRight")).toBe(false);
+    setHtml("<ol><li>a|b</li></ol>");
+    expect(press("ArrowRight")).toBe(false);
+    setHtml("<ol><li>a|<br><br></li></ol>"); // empty line via Shift+Enter
+    expect(press("ArrowRight")).toBe(false);
+    setHtml("<ol><li>a|<ul><li>b</li></ul></li></ol>");
+    expect(press("ArrowRight")).toBe(false);
+    setHtml("<ol><li>[a]</li></ol>");
+    expect(press("ArrowRight")).toBe(false);
+    setHtml("<div>a|</div>"); // plain or aligned paragraph isn't block
+    expect(press("ArrowRight")).toBe(false);
+    setHtml('<div style="text-align: center;">a|</div>');
+    expect(press("ArrowRight")).toBe(false);
+    setHtml("a|"); // Chrome doesn't wrap the 1st line
+    expect(press("ArrowRight")).toBe(false);
+    setHtml("<ol><li>a|</li></ol>");
+    expect(press("ArrowLeft")).toBe(false); // ArrowRight only
+    window.getSelection().collapse(document.body, 0);
+    expect(press("ArrowRight")).toBe(false);
+    window.getSelection().removeAllRanges();
+    expect(press("ArrowRight")).toBe(false);
+    const cleanup = useImage();
+    try {
+      el.$options.toolbar = [["bold"]]; // tools are applied on toolbar render
+      await h.wait(1);
+      setHtml('<ol><li>a|<img src="a.png"></li></ol>'); // embed after caret
+      expect(press("ArrowRight")).toBe(false);
+    } finally {
+      cleanup();
+    }
+    el.$options.readOnly = true;
+    await h.wait(1);
+    setHtml("<ol><li>a|</li></ol>");
+    expect(press("ArrowRight")).toBe(false);
+    expect(inp.innerHTML).toBe("<ol><li>a</li></ol>");
+  });
+
   test("sanitizer", () => {
     const cleanup = useImage();
     try {

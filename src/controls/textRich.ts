@@ -330,7 +330,8 @@ const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
  * they're shown in tooltips & dropdown items (see $options.hideHotKeysHint); Alt+F10 focuses toolbar (Arrows - navigate, Esc - return)
  * * inline format (bold etc.) with collapsed selection is applied to the next typed text
  * * ArrowRight at the end of inline format (bold, link etc.) or ArrowLeft at its start: the next typed text goes out of it
- * (caret stays visually), the opposite arrow returns into it
+ * (caret stays visually), the opposite arrow returns into it; then ArrowRight at the end of the last block (list, quote,
+ * code, heading) adds new line after it
  * * Enter continues inline formats in the next line except turned off (Bold toggled off), left via arrow, recognized text & tokens
  * * typed quote or bracket wraps selected text like in code editors: `"text"`, `(text)` (see static $wrapChars)
  * * typed `trigger` opens tool dropdown near caret: `{` for placeholders, `@` for mentions etc.
@@ -1505,7 +1506,7 @@ export default class WUPTextRichControl<
       ((isInp || isBar) && l?.onKey?.(e)) ||
       (isBar && !isMod && this.gotToolbarKey(e)) ||
       (isInp && k === "Tab" && !isMod && this.gotTab(e.shiftKey)) ||
-      // arrow at the edge of format (bold, link): the next typed text goes out of it (caret stays visually)
+      // arrow at the edge of format (bold, link) or ArrowRight at the end of the last block (list etc.): see leaveFormats
       (isInp && isArrow && inp.leaveFormats(k === "ArrowRight"))
     ) {
       e.preventDefault();
@@ -1574,5 +1575,4 @@ export default class WUPTextRichControl<
 
 customElements.define(tagName, WUPTextRichControl);
 
-// todo allow to move from list with icons arrowLeft & arrowRight how it works with inline tools like Bold
 // todo prop hotKeys replace to KnownKeys[] - is there any type-list of keyboard keys?
