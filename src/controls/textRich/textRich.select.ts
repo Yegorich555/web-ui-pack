@@ -1,9 +1,9 @@
 // eslint-disable-next-line max-classes-per-file
-import onEvent from "../helpers/onEvent";
-import WUPPopupElement from "../popup/popupElement";
-import { PopupAnimations, PopupOpenCases } from "../popup/popupElement.types";
-import { menuPlacements } from "../popup/popupPlacements";
-import { SetValueReasons, ValidationCases } from "./baseControl";
+import onEvent from "../../helpers/onEvent";
+import WUPPopupElement from "../../popup/popupElement";
+import { PopupAnimations, PopupOpenCases } from "../../popup/popupElement.types";
+import { menuPlacements } from "../../popup/popupPlacements";
+import { SetValueReasons, ValidationCases } from "../baseControl";
 
 /** Returns rect of range to place popup near (caret gets width 1px) */
 function rectOf(r: Range): DOMRect {

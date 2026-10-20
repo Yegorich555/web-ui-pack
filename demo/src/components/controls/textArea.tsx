@@ -11,7 +11,7 @@ export default function TextControlView() {
   return (
     <Page
       header="TextAreaControl"
-      link="src/controls/textArea.ts"
+      link="src/controls/textArea/textArea.ts"
       details={{
         tag: "wup-textarea",
         linkDemo: "demo/src/components/controls/textArea.tsx",

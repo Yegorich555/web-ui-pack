@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const WUPTextAreaControl = require("web-ui-pack/controls/textArea").default;
+const WUPTextAreaControl = require("web-ui-pack/controls/textArea/textArea").default;
 
 /** @type WUPTextAreaControl */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

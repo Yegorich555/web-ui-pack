@@ -1,5 +1,5 @@
 import { WUPTextAreaControl } from "web-ui-pack";
-import { charsBefore, pointAt } from "web-ui-pack/controls/textArea.input";
+import { charsBefore, pointAt } from "web-ui-pack/controls/textArea/textArea.input";
 import { initTestBaseControl } from "./baseControlTest";
 import testTextAreaControl, { mockAreaInput } from "./control.textAreaTest";
 import * as h from "../../testHelper";

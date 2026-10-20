@@ -1,4 +1,4 @@
-import TextHistory, { InputState, InputTypes } from "./text.history";
+import TextHistory, { InputState, InputTypes } from "../text.history";
 
 /** Snapshot: `${selectionStart},${selectionEnd},${html}` */
 const toSnapshot = (st: InputState): string => `${st.pos1},${st.pos2},${st.value}`;

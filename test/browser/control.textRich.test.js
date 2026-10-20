@@ -1,4 +1,4 @@
-/** @type {import("web-ui-pack/controls/textRich").default} */
+/** @type {import("web-ui-pack/controls/textRich/textRich").default} */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let el;
 

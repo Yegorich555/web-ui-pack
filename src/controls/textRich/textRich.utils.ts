@@ -1,4 +1,4 @@
-import { lineTags } from "./textArea.input";
+import { lineTags } from "../textArea/textArea.input";
 
 /** Containers => paragraph (`<p>` in value, `<div>` in editor); unwrapped if they contain blocks */
 const paragraphTags = new Set([

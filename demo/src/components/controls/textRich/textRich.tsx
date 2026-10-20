@@ -18,7 +18,7 @@ export default function TextRichControlView() {
   return (
     <Page
       header="TextRichControl"
-      link="src/controls/textRich.ts"
+      link="src/controls/textRich/textRich.ts"
       details={{
         tag: "wup-textrich",
         linkDemo: "demo/src/components/controls/textRich/textRich.tsx",

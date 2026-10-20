@@ -1,4 +1,4 @@
-import WUPTextAreaInput, { charsBefore, pointAt } from "./textArea.input";
+import WUPTextAreaInput, { charsBefore, pointAt } from "../textArea/textArea.input";
 import TextRichHistory from "./textRich.history";
 import * as Utils from "./textRich.utils";
 

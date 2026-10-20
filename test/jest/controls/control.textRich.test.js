@@ -1,6 +1,6 @@
-import WUPTextRichControl from "web-ui-pack/controls/textRich";
-import TextRichHistory from "web-ui-pack/controls/textRich.history";
-import { Html } from "web-ui-pack/controls/textRich.utils";
+import WUPTextRichControl from "web-ui-pack/controls/textRich/textRich";
+import TextRichHistory from "web-ui-pack/controls/textRich/textRich.history";
+import { Html } from "web-ui-pack/controls/textRich/textRich.utils";
 import { initTestBaseControl } from "./baseControlTest";
 import testTextAreaControl, { mockAreaInput } from "./control.textAreaTest";
 import * as h from "../../testHelper";
@@ -2905,7 +2905,7 @@ describe("control.textRich", () => {
     // WARN: 'isMac' is resolved on import so module must be re-imported after mocks are applied
     jest.isolateModules(() => {
       // eslint-disable-next-line global-require
-      require("web-ui-pack/controls/textRich");
+      require("web-ui-pack/controls/textRich/textRich");
     });
     customElements.define = define;
     spyUA.mockRestore();

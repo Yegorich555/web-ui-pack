@@ -1,7 +1,7 @@
-import { inheritDefaults } from "../baseElement";
-import { useTooltipOnce } from "../popup/popupTooltip";
-import { SetValueReasons } from "./baseControl";
-import WUPTextControl from "./text";
+import { inheritDefaults } from "../../baseElement";
+import { useTooltipOnce } from "../../popup/popupTooltip";
+import { SetValueReasons } from "../baseControl";
+import WUPTextControl from "../text";
 import WUPTextAreaInput from "./textArea.input";
 
 WUPTextAreaInput.$use();

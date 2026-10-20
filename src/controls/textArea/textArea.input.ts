@@ -1,5 +1,5 @@
-// import WUPBaseElement from "../baseElement";
-import WUPBaseElement from "../baseElement";
+// import WUPBaseElement from "../../baseElement";
+import WUPBaseElement from "../../baseElement";
 
 /** Tags with appended styles (the class can be inherited by another element) */
 const styledTags = new Set<string>();

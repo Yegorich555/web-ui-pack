@@ -14,7 +14,7 @@
     - dark mode. `--ctrl-label` (labels & icons of controls): `#919191` => `#a6a6a6`
     - dark mode. `--ctrl-focus-label`, `--ctrl-selected`, `--ctrl-time-current`, `--sort-active-color`, `--sort-active-shadow`: `#25a1b6` => `#40c2d8`
     - light mode. `--sort-active-color`, `--sort-active-shadow`: `#25a1b6` => `#00778d`
-- [TextAreaControl](src/controls/textArea.ts).
+- [TextAreaControl](src/controls/textArea/textArea.ts).
   - **BREAKING:** renamed `WUPTextareaControl` => `WUPTextAreaControl`, `WUP.Textarea` => `WUP.TextArea`, `web-ui-pack/controls/textarea` => `web-ui-pack/controls/textArea` (tag `wup-textarea` isn't changed)
   - _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-prefix`, `w-postfix`_
   - _`$value` contains html-escaped chars (typed `a < b` gives `a &lt; b`) & html of `$value` is rendered (scripts of `<img onerror>` are executed)_
@@ -62,8 +62,8 @@
 
 ### New Features
 
-- [TextRichControl](src/controls/textRich.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textRich) (WYSIWYG editor)
-- [TextAreaControl](src/controls/textArea.ts). Added footer with count of chars `{count} / {max}` (see **$options.hideFooter** & **$renderFooter** to customize content)
+- [TextRichControl](src/controls/textRich/textRich.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textRich) (WYSIWYG editor)
+- [TextAreaControl](src/controls/textArea/textArea.ts). Added footer with count of chars `{count} / {max}` (see **$options.hideFooter** & **$renderFooter** to customize content)
 - [NotifyElement](src/notifyElement.ts)
   - Added option **id** to `WUPNotifyElement.$show(...)`: if notification with the same id exists then it's refreshed (content & options updated, closing-time restarted) instead of showing new one; closing (or closed but not removed) one is re-opened
   - Added option **closeOnSwipe** (`true` by default): on touch devices element follows the horizontal swipe & closes when it's swiped out (like messages in popular mobile apps)
@@ -581,7 +581,7 @@
   - _Wrong size of monthPicker if previously scroll dayPicker to min/max date_
   - _User can't scroll when `$initValue` > `$options.max`_
 - [DateControl](src/controls/date.ts). _Menu isn't closed if click on the selected date_
-- [TextAreaControl](src/controls/textArea.ts)
+- [TextAreaControl](src/controls/textArea/textArea.ts)
   - _Exception when try to clear empty control_
   - _`Ctrl + Z` doesn't revert changes_
 - [NumberControl](src/controls/number.ts). _option `format` isn't applied on init_
@@ -712,7 +712,7 @@
 - helper [onFocusLost](src/helpers/onFocusLost.ts). _Isn't fired if stopPropagation is called_
 - [TimeControl](src/controls/time.ts). _Extra margin for menu-buttons on Safari_
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _Attribute `initvalue=''` sets value to `true` (expected `false`)_
-- [TextAreaControl](src/controls/textArea.ts). _`Ctrl + B` makes text bold but it's unexpected for plain textarea_
+- [TextAreaControl](src/controls/textArea/textArea.ts). _`Ctrl + B` makes text bold but it's unexpected for plain textarea_
 - **Controls**. _Hover effect on Android devices (expected: no-hover on touch-screens)_
 - **Controls**. _Focus frame isn't rounded on Safari_
 - **Controls**. _Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)_
@@ -810,7 +810,7 @@
 - Controls **Number, Date, Calendar** are locale based and depends on [localeInfo](src/objects/localeInfo.ts) helper
 - Added elements
   - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
-  - [TextAreaControl](src/controls/textArea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textArea)
+  - [TextAreaControl](src/controls/textArea/textArea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textArea)
 - Added [helpers](README.md#helpers)
   - [onScroll](src/helpers/onScroll.ts)
   - [localeInfo](src/objects/localeInfo.ts)
