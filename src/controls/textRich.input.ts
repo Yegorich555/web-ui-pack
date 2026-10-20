@@ -15,6 +15,9 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   _history?: TextRichHistory;
   /** Returns true if tool works: it's rendered in toolbar (hidden ones too); otherwise it isn't recognized & typed as token */
   _isActive?: (name: keyof WUP.TextRich.ToolValues) => boolean;
+  /** Applies rendered tool by key `name:value` (see recognizeLine)
+   * @returns false if it isn't rendered */
+  _applyKey?: (key: string) => boolean;
   /** Called when formats at caret can be changed without selection change: content or pending formats */
   _onFormats?: () => void;
   /** Entries of `_tools` with checker of element by `is`: cached via setTools */
@@ -170,7 +173,12 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     tool.format ? tool.format(ctx) : this.formatByKind(ctx);
     this.normalize();
     this.querySelectorAll("[style='']").forEach((el) => el.removeAttribute("style"));
-    !this.#isInserted && this.setSelectionPos(pos);
+    if (!this.#isInserted) {
+      this.setSelectionPos(pos);
+      // caret stays: pending formats too (line format replaces line, otherwise caret in new element resets them)
+      const sel = window.getSelection()!;
+      this.#pending.size && (this.#pendingAt = [sel.anchorNode!, sel.anchorOffset]);
+    }
   }
 
   /** Creates token (placeholder, mention): `{firstName}`, `@john` */
@@ -232,6 +240,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   changeContent(fn: () => void): void {
     const h = this._history;
     const prev = this.value;
+    this.#autoAt = undefined; // the last change isn't recognizing
     // otherwise history saves selection after changes (wrong for insertion)
     const isState = h && !h._stateBeforeInput;
     isState && (h._stateBeforeInput = h.inputState);
@@ -247,15 +256,31 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     this._onFormats?.();
   }
 
-  /** Replaces selection with node & places caret after it */
+  /** Replaces selection with node & places caret after it; empty fragment deletes selection: inline formats of deleted
+   *  text stay for the next typed text like on Enter (typed `- ` in bold gives list item with bold text) */
   $insert(node: Node): void {
     const sel = window.getSelection()!;
     const r = sel.getRangeAt(0);
     const last = node.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? node.lastChild : node;
+    const was = !last && !r.collapsed ? this.getFormats() : undefined; // of deleted text
     r.deleteContents();
     r.insertNode(node);
     last && r.setStartAfter(last);
     sel.collapse(r.startContainer, r.startOffset); // empty fragment (deletion): Chrome keeps selection not collapsed
+    const line = !last && Utils.Lines.at(r.startContainer, this);
+    if (line && Utils.Lines.isEmpty(line, this._isEmbed)) {
+      // deletion leaves empty line (& empty formats): otherwise caret goes to the previous line
+      line.replaceChildren(document.createElement("br"), ...line.querySelectorAll(":scope > ol, :scope > ul"));
+      sel.collapse(line, 0);
+    }
+    if (was) {
+      const now = this.getFormats();
+      was.forEach((v, k) => {
+        const t = this._tools[k]; // recognized text & tokens aren't continued (see gotLineBreak)
+        t.kind === "inline" && !t.recognize && !t.trigger && now.get(k) !== v && this.#pending.set(k, v);
+      });
+      this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
+    }
     this.#isInserted = true;
   }
 
@@ -269,17 +294,21 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   /** Caret position of pending formats: they're reset when caret moves */
   #pendingAt?: [Node, number];
 
-  /** Called on selection change inside editor: pending formats are reset if caret moves */
+  /** Called on selection change inside editor: pending formats are reset if caret moves, recognizing can't be undone
+   *  via Escape (see undoAuto) */
   gotSelect(): void {
     const sel = window.getSelection()!;
     const p = this.#pendingAt;
     p && (sel.anchorNode !== p[0] || sel.anchorOffset !== p[1]) && this.#pending.clear();
+    const a = this.#autoAt;
+    a && (!sel.isCollapsed || sel.focusNode !== a[0] || sel.focusOffset !== a[1]) && (this.#autoAt = undefined);
   }
 
   /** Called when control loses focus: pending formats are reset & recognizing is resumed */
   gotFocusLost(): void {
     this.#pending.clear();
     this.#isAutoPaused = false;
+    this.#autoAt = undefined;
   }
 
   /** Inserts text typed at token edge outside it: otherwise browser extends token (`{firstName}x`)
@@ -477,10 +506,25 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   #auto: Element[] = [];
   /** Undo/redo pauses recognizing of new text till caret leaves word (whitespace, Enter, navigation keys, click, blur) */
   #isAutoPaused = false;
+  /** Caret right after recognizing (new element or line format): Escape undoes it (see undoAuto);
+   *  reset by any change, caret move & blur */
+  #autoAt?: [Node, number];
 
   /** Resumes recognizing paused by undo/redo: caret leaves word (navigation keys, click) */
   resumeRecognize(): void {
     this.#isAutoPaused = false;
+  }
+
+  /** Undoes recognizing right after it (Escape) like Ctrl+Z: plain text is returned & recognizing is paused
+   * @returns false if caret moved or something is changed after recognizing */
+  undoAuto(): boolean {
+    if (!this.#autoAt) {
+      return false;
+    }
+    this.#autoAt = undefined;
+    // the same as Ctrl+Z (see TextHistory.handleKeyDown): recognizing is a separate undo step
+    this.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType: "historyUndo" }));
+    return true;
   }
 
   /** Returns line of node (see Utils.Lines.at) or editor for loose content: Chrome doesn't wrap the 1st line */
@@ -564,12 +608,48 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     ) {
       return false;
     }
-    !olds.length && this._history?.commit(); // new element: separate undo step
-    return update(() => {
+    const isNew = !olds.length;
+    isNew && this._history?.commit(); // new element: separate undo step
+    update(() => {
       r.setStart(...pointAt(line, start, isEmbed));
       r.setEnd(...pointAt(line, end, isEmbed));
       Utils.Formats.addInline(Utils.Ranges.split(r), el, line); // element per part: text can be split by formats
     });
+    isNew && (this.#autoAt = [sel.focusNode!, sel.focusOffset]); // Escape right after it undoes it
+    return true;
+  }
+
+  /** Applies value of rendered tool recognized in text typed at line start (see `ToolValue.recognize`): `1. ` gives
+   *  numbered list; typed text is removed; it's a separate undo step (Ctrl+Z or Escape right after it returns typed text) */
+  protected recognizeLine(): void {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode;
+    if (!sel.isCollapsed || !n || !this.contains(n)) {
+      return;
+    }
+    const line = this.lineOf(n);
+    const isEmbed = this._isEmbed;
+    const [s] = Utils.Lines.textAround(line, n, sel.focusOffset, isEmbed);
+    let key = "";
+    this._entries.some(([k, t]) => {
+      const v = t.values?.find((x) => x.recognize?.exec(s)?.[0] === s);
+      v && !Utils.Formats.isMatch(t.is?.(line), v.value) && (key = `${k}:${v.value}`); // not applied yet
+      return v;
+    });
+    if (
+      !key ||
+      line.tagName === "PRE" || // code block
+      charsBefore(line, n, sel.focusOffset, isEmbed) !== s.length // text from line start: not after <br> or embed
+    ) {
+      return;
+    }
+    this._history?.commit(); // separate undo step
+    if (this._applyKey?.(key)) {
+      const end = [sel.focusNode!, sel.focusOffset] as const; // caret is restored after typed text
+      sel.setBaseAndExtent(this.lineOf(end[0]), 0, ...end);
+      this.changeContent(() => this.$insert(document.createDocumentFragment())); // merged with format: the same tick
+      this.#autoAt = [sel.focusNode!, sel.focusOffset]; // Escape right after it undoes it
+    }
   }
 
   /** Inserts typed text instead of selection with element of recognized text (placeholder of command etc.) as plain text:
@@ -593,9 +673,11 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return true;
   }
 
-  /** Called after typing or deleting: syncs recognized text with its element (see `recognize`) */
+  /** Called after typing or deleting: syncs recognized text with its element (see `recognize`),
+   *  typed text at line start can apply line format (see `recognizeLine`) */
   gotRecognize(data: string | null): void {
     this.recognize();
+    data && this.recognizeLine();
     data && !data.trim() && (this.#isAutoPaused = false); // caret leaves word
   }
 
@@ -736,15 +818,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   protected liftEmpty(): boolean {
     const sel = window.getSelection()!;
     const li = sel.isCollapsed ? Utils.Lines.at(sel.focusNode!, this) : undefined;
-    const isEmbed = this._isEmbed;
-    const isEmpty = // own content: without nested lists
-      li?.tagName === "LI" &&
-      Array.prototype.every.call(li.childNodes, (n: Node) => Utils.listTags.has(n.nodeName) || !n.textContent) &&
-      !(
-        isEmbed &&
-        Array.prototype.some.call(li.querySelectorAll(":scope > :not(ol,ul), :scope > :not(ol,ul) *"), isEmbed)
-      );
-    if (!isEmpty || !Utils.Lines.nest(li, true)) {
+    if (li?.tagName !== "LI" || !Utils.Lines.isEmpty(li, this._isEmbed) || !Utils.Lines.nest(li, true)) {
       return false;
     }
     sel.collapse(li, 0);
@@ -754,6 +828,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   /** Called on `beforeinput` before changes: undo/redo pauses recognizing (otherwise undone link is recognized again
    *  on typing), other input collects elements of recognized text (see `recognize`) */
   gotBeforeInput(e: InputEvent): void {
+    this.#autoAt = undefined; // the last change isn't recognizing
     e.inputType.startsWith("history") ? (this.#isAutoPaused = true) : this.collectAuto();
   }
 

@@ -74,6 +74,8 @@ interface TestOptions<T> extends BaseTestOptions {
   autoCompleteOff?: "off" | "new-password";
   /** Set true to ignore select in input text */
   noInputSelection?: boolean;
+  /** Clears value like user (see $options.clearActions); by default it presses Escape */
+  clear?: (el: WUPBaseControl) => void;
   /** Set true if control normalizes value so `$value` is a new instance: then it's compared via `toStrictEqual` instead of `toBe` */
   isValueNormalized?: boolean;
   onCreateNew: (el: WUPBaseControl) => void;
@@ -89,6 +91,8 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
   cfg.autoCompleteOff = cfg.autoCompleteOff || "off";
   cfg.emptyValue = "emptyValue" in cfg ? cfg.emptyValue : undefined;
   const hasVldRequired = !cfg.validationsSkip?.includes("required");
+  const userClear =
+    cfg.clear ?? ((c: WUPBaseControl) => c.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })));
   /** Checks $value by reference (or by content if control normalizes value) */
   const expectValue = (v: unknown, expected: unknown): void => {
     if (cfg.isValueNormalized) {
@@ -304,14 +308,14 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
 
       el.focus();
       await h.wait(1);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       (el as any).$refPopup && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
 
@@ -322,13 +326,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$initValue = initVal;
       el.$options.clearActions = ClearActions.clearBack | 0;
       await h.wait(1);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
       expectValue(el.$value, val);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
       if (!cfg.noInputSelection) {
@@ -341,16 +345,16 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       el.$initValue = initVal;
       el.$value = val;
       await h.wait();
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
       expectValue(el.$value, initVal);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
       expectValue(el.$value, initVal);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(cfg.emptyValue);
     });
@@ -855,7 +859,7 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       expect(el).toMatchSnapshot();
       el.focus();
       await h.wait(1);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+      userClear(el); // simulate change event
       (el as any).$refPopup && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened and prev-Esc closed it but not affect on input clearing
       jest.advanceTimersByTime(1);
 
@@ -927,13 +931,13 @@ export function testBaseControl<T>(cfg: TestOptions<T>) {
       if (cfg.emptyValue === cfg.emptyInitValue) {
         el.focus();
         await h.wait(1);
-        el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+        userClear(el); // simulate change event
         (el as any).$refPopup && el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // again because menu was opened
         jest.advanceTimersByTime(1);
         expect(el.$isEmpty).toBe(true);
         await h.wait();
         expect(el.$refError).toBeDefined(); // because previously was valid and now need to show invalid state
-        el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); // simulate change event
+        userClear(el); // simulate change event
         jest.advanceTimersByTime(1);
         expect(el.$isEmpty).toBe(false);
         await h.wait();

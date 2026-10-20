@@ -184,6 +184,7 @@ describe("control.textRich", () => {
   });
 
   testTextAreaControl(() => el, {
+    clear: (c) => c.clearValue(), // Escape doesn't clear rich text
     attrs: {
       "w-toolbar": {
         value: [
@@ -1042,6 +1043,38 @@ describe("control.textRich", () => {
     document.dispatchEvent(new Event("selectionchange"));
     expect(btnBold.getAttribute("aria-pressed")).toBe("false");
     expect(typeText("c")).toBe(false);
+
+    // line format replaces line, but caret stays: pending formats too
+    setHtml("<div>a|</div>");
+    el.$format("bold");
+    el.$format("header", 1, true);
+    document.dispatchEvent(new Event("selectionchange"));
+    expect(btnBold.getAttribute("aria-pressed")).toBe("true");
+    expect(typeText("b")).toBe(true);
+    expect(getHtml()).toBe("<h1>a<b>b|</b></h1>");
+
+    // deleted text: its inline formats stay for the next typed text (recognized text & tokens aren't continued)
+    /** Sets html with selection, deletes it via $insert & returns formats at caret */
+    const del = (html) => {
+      setHtml(html);
+      inp.changeContent(() => inp.$insert(document.createDocumentFragment()));
+      return inp.getFormats();
+    };
+    expect(del("<div>a[<b>b</b>]</div>").get("bold")).toBe(true);
+    expect(btnBold.getAttribute("aria-pressed")).toBe("true");
+    expect(typeText("c")).toBe(true);
+    expect(getHtml()).toBe("<div>a<b>c|</b></div>");
+    expect(del("<div><b>a[b]</b></div>").get("bold")).toBe(true); // format is at caret yet
+    expect(del("<div>a|</div>").get("bold")).toBe(undefined); // nothing is deleted
+    expect(del('<div>a[<a href="mailto:a@b.c">a@b.c</a>]</div>').has("email")).toBe(false);
+    const cleanup = usePlaceholder();
+    try {
+      el.$options.toolbar = [["placeholder"]]; // tools are applied on toolbar render
+      await h.wait(1);
+      expect(del('<div>a[<span class="placeholder">{email}</span>]</div>').has("placeholder")).toBe(false);
+    } finally {
+      cleanup();
+    }
   });
 
   test("arrows & line break at the edges of format: the next typed text goes out of it", async () => {
@@ -1652,6 +1685,100 @@ describe("control.textRich", () => {
     } finally {
       delete tool.values;
     }
+  });
+
+  test("lists are recognized by typed text at line start: `1. ` & `- `", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Sets html with caret, types text like browser & returns html */
+    const rec = (html, data = " ") => {
+      setHtml(html);
+      userType(data);
+      return getHtml();
+    };
+    const nbsp = String.fromCharCode(160); // Chrome types it at the end of line
+
+    expect(rec("<div>1.|</div>")).toBe("<ol><li>|<br></li></ol>");
+    expect(rec("<div>1)|</div>", nbsp)).toBe("<ol><li>|<br></li></ol>");
+    expect(rec("<div>-|</div>", nbsp)).toBe("<ul><li>|<br></li></ul>");
+    expect(rec("<div>*|abc</div>")).toBe("<ul><li>|abc</li></ul>"); // text after caret stays
+    expect(rec("<h2>1.|</h2>")).toBe("<ol><li>|<br></li></ol>");
+    expect(rec("1.|<div>b</div>")).toBe("<ol><li>|<br></li></ol><div>b</div>"); // loose content (Chrome)
+    expect(rec("<div><b>-|</b></div>")).toBe("<ul><li>|<br></li></ul>"); // empty format is removed
+    userType("z"); // format of typed text stays for the next one
+    expect(getHtml()).toBe("<ul><li><b>z|</b><br></li></ul>");
+    // works like button: joins the previous list, item of another list is nested into the previous item
+    expect(rec("<ul><li>a</li></ul><div>-|</div>")).toBe("<ul><li>a</li><li>|<br></li></ul>");
+    expect(rec("<ol><li>a</li><li>-|</li></ol>")).toBe("<ol><li>a<ul><li>|<br></li></ul></li></ol>");
+    // not recognized
+    expect(rec("<div>1|</div>", ".")).toBe("<div>1.|</div>"); // without space: `1.5 kg`
+    expect(rec("<div>2.|</div>")).toBe("<div>2. |</div>");
+    expect(rec("<div>a -|</div>")).toBe("<div>a - |</div>"); // not at line start
+    expect(rec("<div>a<br>-|</div>")).toBe("<div>a<br>- |</div>");
+    expect(rec("<pre>-|</pre>")).toBe("<pre>- |</pre>"); // code block
+    expect(rec("<ul><li>-|</li></ul>")).toBe("<ul><li>- |</li></ul>"); // applied already
+    el.$options.toolbar = [["bold"]]; // tool isn't rendered
+    await h.wait(1);
+    expect(rec("<div>-|</div>")).toBe("<div>- |</div>");
+  });
+
+  test("Escape right after recognizing undoes it like Ctrl+Z (value isn't cleared via Escape)", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** @returns true if Escape isn't prevented */
+    const esc = () =>
+      inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+
+    // recognized link: plain text is returned (recognizing is paused like after Ctrl+Z)
+    setHtml("<div>a@b.|</div>");
+    await h.wait(1);
+    userType("c");
+    expect(getHtml()).toBe('<div><a href="mailto:a@b.c">a@b.c|</a></div>');
+    expect(esc()).toBe(false);
+    await h.wait(1);
+    expect(inp.innerHTML).toBe("<div>a@b.c</div>");
+
+    // list: separate undo step returns typed text
+    setHtml("<div>-|</div>");
+    await h.wait(1);
+    userType(" ");
+    expect(getHtml()).toBe("<ul><li>|<br></li></ul>");
+    await h.wait(1);
+    expect(typeText(null, "historyUndo")).toBe(true);
+    await h.wait(1);
+    expect(inp.innerHTML).toBe("<div>- </div>"); // jsdom: selection isn't restored (see mockAreaInput)
+    setHtml("<div>1.|</div>");
+    await h.wait(1);
+    userType(" ");
+    expect(esc()).toBe(false);
+    await h.wait(1);
+    expect(inp.innerHTML).toBe("<div>1. </div>");
+    expect(esc()).toBe(true); // nothing to undo: value isn't cleared
+    await h.wait();
+    expect(inp.innerHTML).toBe("<div>1. </div>");
+
+    // not right after it: caret moved, other input, blur
+    const recognized = async () => {
+      setHtml("<div>-|</div>");
+      await h.wait(1);
+      userType(" ");
+    };
+    await recognized();
+    window.getSelection().collapse(inp.querySelector("li"), 1);
+    document.dispatchEvent(new Event("selectionchange"));
+    expect(esc()).toBe(true);
+    await recognized();
+    typeText(null, "deleteContentForward");
+    expect(esc()).toBe(true);
+    await recognized();
+    inp.blur();
+    await h.wait(1);
+    inp.focus();
+    expect(esc()).toBe(true);
+    await h.wait();
+    expect(inp.innerHTML).toBe("<ul><li><br></li></ul>");
   });
 
   test("slash commands", async () => {
@@ -2575,7 +2702,7 @@ describe("control.textRich", () => {
       await h.wait(1);
       expect(el.$value).toBe(undefined);
     } finally {
-      WUPTextRichControl.$tools.btnClear.hotKey = "Escape";
+      delete WUPTextRichControl.$tools.btnClear.hotKey;
     }
 
     // current value isn't in values: the 1st shortcut selects the last value

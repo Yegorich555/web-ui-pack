@@ -6,6 +6,8 @@ import * as h from "../../testHelper";
 // eslint-disable-next-line jest/no-export
 export default function testTextControl(getEl: () => WUPTextControl, opts: Parameters<typeof testBaseControl>[0]) {
   const initV = "some init val";
+  const userClear =
+    opts?.clear ?? ((c: WUPTextControl) => c.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })));
 
   testBaseControl({
     ...opts,
@@ -151,10 +153,10 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       el.$refInput.selectionEnd = 0;
       expect(el.$refInput.selectionEnd).toBe(0);
 
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(undefined);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
 
       expect(el.$value).toBe(initV);
@@ -173,8 +175,8 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
 
       // checking if select by clear not depends on $options.selectOnFocus
       expect(el.$value).toBe(initV);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
+      userClear(el);
       jest.advanceTimersByTime(1);
 
       expect(el.$value).toBe(initV);

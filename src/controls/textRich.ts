@@ -46,7 +46,8 @@ declare global {
       command: string;
       /** Removes formatting */
       clean: true;
-      /** Clear button ($refBtnClear): rendered if `$options.clearButton` is true, works like Esc (see `$options.clearActions`) */
+      /** Clear button ($refBtnClear): rendered if `$options.clearButton` is true (see `$options.clearActions`);
+       *  Escape doesn't clear rich text (it undoes recognizing right after it) */
       btnClear: true;
       /** Heading level; `false` - paragraph */
       header: 1 | 2 | 3 | 4 | 5 | 6 | false;
@@ -67,6 +68,10 @@ declare global {
       label?: string;
       /** Keyboard shortcut (see Tool.hotKey) */
       hotKey?: string;
+      /** Text typed at line start that applies this value like markdown (`1. ` gives numbered list): RegExp must match
+       *  the whole text before caret; typed text is removed; works if tool is in toolbar (see `hideOnToolbar`);
+       *  undo (Ctrl+Z or Escape right after it) returns typed text */
+      recognize?: RegExp;
       /** Class of button or dropdown item: to show icon via `--icon-img` instead of label */
       className?: string;
       /** Class of element created via `create` */
@@ -86,8 +91,7 @@ declare global {
        * * `Control` is Cmd on macOS/iOS (shown as `⌘`)
        * * `Control` or `Alt` is required; key is matched by `KeyboardEvent.code`, so it works with any keyboard layout
        * * works only if tool is in toolbar (see `hideOnToolbar`)
-       * * tool with values: the 1st shortcut selects the previous value, the 2nd one - the next value (`size`: bigger/smaller)
-       * * `btnClear`: Escape clears value according to $options.clearActions */
+       * * tool with values: the 1st shortcut selects the previous value, the 2nd one - the next value (`size`: bigger/smaller) */
       hotKey?: string;
       /** Class of toolbar button or dropdown (single class): to set icon via css-var `--icon-img`
        *  (`.my-icon-upper { --icon-img: url("data:image/svg+xml,...") }`); or use `wup-textrich [tool="upper"]` selector instead */
@@ -124,10 +128,12 @@ declare global {
       trigger?: string;
       /** Recognizes text while user types: word at caret is wrapped into element of `create(text)` as soon as it's matched
        *  (`someone@gmail.c` => email link); element follows its text on typing & deleting (it's removed if text isn't
-       *  recognized anymore); undo (Ctrl+Z) returns plain text & pauses recognizing till caret leaves word
+       *  recognized anymore); undo (Ctrl+Z or Escape right after recognizing) returns plain text & pauses recognizing
+       *  till caret leaves word
        * @tutorial Rules
        * * RegExp must match the end of text (use `$`); function returns the recognized end of text or nothing
-       * * tool with `values` isn't recognized: value is chosen via menu (see `trigger`), like mentions in messengers
+       * * tool with `values` isn't recognized: value is chosen via menu (see `trigger`), like mentions in messengers;
+       * text typed at line start can apply value (see `ToolValue.recognize`): `1. ` gives numbered list
        * * point `placeholder` too: otherwise tool chosen in menu of `command` does nothing visible
        * @example
        * recognize: /(?<!\w)#\w+$/, // hashtags: `#news`
@@ -328,6 +334,8 @@ const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
  * * Enter continues inline formats in the next line except turned off (Bold toggled off), left via arrow, recognized text & tokens
  * * typed quote or bracket wraps selected text like in code editors: `"text"`, `(text)` (see static $wrapChars)
  * * typed `trigger` opens tool dropdown near caret: `{` for placeholders, `@` for mentions etc.
+ * * typed text is recognized: links, emails (see `recognize` of $tools), lists by `1. ` & `- ` at line start;
+ * undo (Ctrl+Z or Escape right after recognizing) returns typed text; Escape doesn't clear value (clear button only)
  * * content styles are global: use `<div wup-textrich>{$value}</div>` to show value outside control
  * @tutorial innerHTML @example
  * <label>
@@ -524,19 +532,21 @@ export default class WUPTextRichControl<
       hideOnToolbar: true,
       trigger: "/", // menu of commands like in Notion & Slack
       // menu lists tools of toolbar (see commandValues): value is tool & its value (`header:1`)
-      format: ({ value, lines: [line], editor, control }) => {
+      format: ({ value, editor, control }) => {
         editor.$insert(document.createDocumentFragment()); // removes typed `/text`
-        if (line && !line.textContent && !line.firstElementChild) {
-          line.replaceChildren(document.createElement("br")); // empty line: otherwise caret goes to the previous one
-          window.getSelection()!.collapse(line, 0);
-        }
         Promise.resolve().then(() => control.applyCommand(value)); // after this change
       },
     },
     list: {
       values: [
-        { value: "ordered", label: __wupln("Numbered list", "aria"), hotKey: "Control+Shift+7" },
-        { value: "bullet", label: __wupln("Bulleted list", "aria"), hotKey: "Control+Shift+8" },
+        // typed `1. ` & `- ` like in Google Docs & Notion: space confirms it (`1.5 kg` isn't list)
+        {
+          value: "ordered",
+          label: __wupln("Numbered list", "aria"),
+          hotKey: "Control+Shift+7",
+          recognize: /^1[.)]\s$/,
+        },
+        { value: "bullet", label: __wupln("Bulleted list", "aria"), hotKey: "Control+Shift+8", recognize: /^[-*]\s$/ },
       ],
       kind: "line",
       is: (el) => {
@@ -674,7 +684,6 @@ export default class WUPTextRichControl<
     btnClear: {
       label: __wupln("Clear content", "aria"),
       labelBack: __wupln("Restore", "aria"),
-      hotKey: "Escape",
     },
   };
 
@@ -722,6 +731,7 @@ export default class WUPTextRichControl<
     _tools: this.#ctr.$tools, // sanitizer keeps their formats
     _wrapChars: this.#ctr.$wrapChars,
     _isActive: (name: keyof WUP.TextRich.ToolValues) => !!this.findTool(name),
+    _applyKey: (key: string) => this.applyKey(key),
     _onFormats: () => this.refreshToolbar(),
   });
 
@@ -1500,8 +1510,11 @@ export default class WUPTextRichControl<
     ) {
       e.preventDefault();
     } else if (k === "Escape" && l?.hovered) {
-      e.preventDefault(); // closes hover popup instead of clearing value
+      e.preventDefault(); // closes hover popup instead of closing modal etc.
       l.done();
+    } else if (k === "Escape") {
+      // right after recognizing (link, list by `1. ` etc.) it's undone like via Ctrl+Z; value isn't cleared (clear button only)
+      isInp && inp.undoAuto() && e.preventDefault();
     } else {
       super.gotKeyDown(e);
     }
@@ -1562,3 +1575,4 @@ export default class WUPTextRichControl<
 customElements.define(tagName, WUPTextRichControl);
 
 // todo allow to move from list with icons arrowLeft & arrowRight how it works with inline tools like Bold
+// todo prop hotKeys replace to KnownKeys[] - is there any type-list of keyboard keys?

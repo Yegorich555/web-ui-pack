@@ -256,13 +256,12 @@ exports[`control.textRich $ariaDetails 1`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -527,13 +526,12 @@ exports[`control.textRich $ariaDetails 2`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -798,13 +796,12 @@ exports[`control.textRich $ariaSpeak 1`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -1077,13 +1074,12 @@ exports[`control.textRich $ariaSpeak 2`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -1348,13 +1344,12 @@ exports[`control.textRich $show/$hide error 1`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -1621,13 +1616,12 @@ exports[`control.textRich $show/$hide error 2`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -1906,13 +1900,12 @@ exports[`control.textRich $show/$hide error 3`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -3311,13 +3304,12 @@ exports[`control.textRich options clearButton 1`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -3856,13 +3848,12 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -4163,13 +4154,12 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -4476,13 +4466,12 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -4768,13 +4757,12 @@ exports[`control.textRich validations options.validationCase 1`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -5045,13 +5033,12 @@ exports[`control.textRich validations options.validationCase 2`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Restore"
         clear="back"
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Restore (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -5343,13 +5330,12 @@ exports[`control.textRich validations options.validationCase 3`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -5638,13 +5624,12 @@ exports[`control.textRich validations options.validationCase 4`] = `
       role="group"
     >
       <button
-        aria-keyshortcuts="Escape"
         aria-label="Clear content"
         clear=""
         tabindex="-1"
         tool="btnClear"
         type="button"
-        w-tooltip="Clear content (Esc)"
+        w-tooltip=""
       />
     </div>
   </div>
@@ -5933,13 +5918,12 @@ exports[`control.textRich with form 1`] = `
         role="group"
       >
         <button
-          aria-keyshortcuts="Escape"
           aria-label="Clear content"
           clear=""
           tabindex="-1"
           tool="btnClear"
           type="button"
-          w-tooltip="Clear content (Esc)"
+          w-tooltip=""
         />
       </div>
     </div>

@@ -303,6 +303,16 @@ export const Lines = {
     )[0] as HTMLElement | undefined;
   },
 
+  /** Returns true if line has no own text & embeds (nested lists of item aren't counted) */
+  isEmpty(line: Element, isEmbed?: (el: Element) => boolean): boolean {
+    return Array.prototype.every.call(
+      line.childNodes,
+      (n: Node) =>
+        listTags.has(n.nodeName) ||
+        (!n.textContent && !(isEmbed && n instanceof Element && [n, ...n.querySelectorAll("*")].some(isEmbed)))
+    );
+  },
+
   /** Returns lines in range (skips the last one if range ends at its start: triple click);
    *  item with nested list is in range if its own content is (till nested list): otherwise selected nested item gives parent */
   of(r: Range, root: Element): HTMLElement[] {

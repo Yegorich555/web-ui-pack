@@ -34,7 +34,7 @@ export default function TextRichControlView() {
         "Customizable Hot-Keys for every tool; use Alt+F10 to focus toolbar, Arrows to navigate, Esc to return",
         'Selected text is wrapped into typed quote or bracket like in code editors: "text", (text) etc. (customizable via static $wrapChars)',
         "Menu of values on typed char like mentions in messengers: { for placeholders, @ for users, / for commands (see `trigger` of static $tools)",
-        "Typed links & emails are recognized while typing (see `recognize` of static $tools)",
+        "Typed links & emails are recognized while typing (see `recognize` of static $tools); `1. ` or `- ` typed at line start begins list (see `recognize` of tool values); Ctrl+Z or Esc right after recognizing returns typed text (Esc doesn't clear value)",
         "Nested lists: Tab/Shift+Tab (or indent buttons) changes level of list item, Enter in empty nested item moves it to the parent list",
         "Slash commands: type / at word start to choose any tool of toolbar (hidden ones too); link, email etc. insert example text to type over (see `command` & `placeholder` of static $tools)",
         "Validations min/max count visible chars only",
