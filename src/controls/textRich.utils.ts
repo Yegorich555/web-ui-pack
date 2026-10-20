@@ -243,7 +243,7 @@ export const Formats = {
    *  parts without text & embeds (see `isEmbed`) are removed; at element start it stays after range (the same element) */
   splitAt(el: Element, r: Range, isEmbed?: (el: Element) => boolean): void {
     const isEmpty = (x: Element | DocumentFragment): boolean =>
-      !x.textContent && !(isEmbed && Array.prototype.some.call(x.querySelectorAll("*"), isEmbed));
+      !x.textContent && !(isEmbed && Lines.elements(x).some(isEmbed));
     r.setStart(...Internal.edgeOf(el, r.startContainer, r.startOffset));
     r.setEnd(el, el.childNodes.length);
     const f = r.extractContents(); // range is collapsed at split point
@@ -305,12 +305,25 @@ export const Lines = {
 
   /** Returns true if line has no own text & embeds (nested lists of item aren't counted) */
   isEmpty(line: Element, isEmbed?: (el: Element) => boolean): boolean {
-    return Array.prototype.every.call(
-      line.childNodes,
-      (n: Node) =>
-        listTags.has(n.nodeName) ||
-        (!n.textContent && !(isEmbed && n instanceof Element && [n, ...n.querySelectorAll("*")].some(isEmbed)))
+    return (
+      Array.prototype.every.call(line.childNodes, (n: Node) => listTags.has(n.nodeName) || !n.textContent) &&
+      !(isEmbed && Lines.elements(line).some(isEmbed))
     );
+  },
+
+  /** Returns elements of line content in document order (nested lists of item are skipped) */
+  elements(line: ParentNode): HTMLElement[] {
+    const arr: HTMLElement[] = [];
+    const walk = (parent: ParentNode): void => {
+      for (let el = parent.firstElementChild; el; el = el.nextElementSibling) {
+        if (parent !== line || !listTags.has(el.tagName)) {
+          arr.push(el as HTMLElement);
+          walk(el);
+        }
+      }
+    };
+    walk(line);
+    return arr;
   },
 
   /** Returns lines in range (skips the last one if range ends at its start: triple click);
@@ -357,7 +370,7 @@ export const Lines = {
    *  list item is moved out of its lists at first (see `lift`), its nested lists stay in list after it (keep their level) */
   setTag(line: HTMLElement, tag: string | HTMLElement): HTMLElement {
     if (line.tagName === "LI") {
-      line.after(...line.querySelectorAll(":scope > ol, :scope > ul"));
+      line.after(...Array.prototype.filter.call(line.children, (el: Element) => listTags.has(el.tagName)));
       while (line.parentElement!.matches("ol,ul,li")) {
         Lines.lift(line);
       }
@@ -482,7 +495,7 @@ export const Html = {
     const div = document.createElement("div");
     const ctx = Internal.ctxOf(tools, false);
     Internal.appendBlocks(root, div, ctx);
-    div.querySelectorAll(":scope > *, li").forEach((l) => {
+    Lines.all(div).forEach((l) => {
       const last = l.lastChild;
       last && last !== l.firstChild && last.nodeName === "BR" && last.remove();
     });

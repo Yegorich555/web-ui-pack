@@ -866,6 +866,10 @@ describe("control.textRich", () => {
       await h.wait(1);
       expect(enter('<ul><li>a<ul><li><img src="x.png">|</li></ul></li></ul>')).toBe(false);
       expect(enter('<ul><li>a<ul><li><b><img src="x.png"></b>|</li></ul></li></ul>')).toBe(false);
+      expect(enter('<ul><li>a<ul><li><b><i><img src="x.png"></i></b>|</li></ul></li></ul>')).toBe(false);
+      expect(enter("<ul><li>a<ul><li><b><br></b>|</li></ul></li></ul>")).toBe(
+        "<ul><li>a</li><li>|<b><br></b></li></ul>"
+      ); // empty format isn't content
     } finally {
       cleanup();
     }
@@ -1499,6 +1503,9 @@ describe("control.textRich", () => {
     expect(rec("<ul><li>https://a.co|<ul><li>b</li></ul></li></ul>", "m")).toBe(
       `<ul><li>${a("https://a.com", "https://a.com|")}<ul><li>b</li></ul></li></ul>`
     );
+    expect(rec(`<ul><li>https://a.co|<ul><li>${a("https://b.com")}</li></ul></li></ul>`, "m")).toBe(
+      `<ul><li>${a("https://a.com", "https://a.com|")}<ul><li>${a("https://b.com")}</li></ul></li></ul>`
+    ); // link of nested item isn't touched
     // loose content (Chrome doesn't wrap the 1st line)
     expect(rec("https://a.co|<div>b</div>", "m")).toBe(`${a("https://a.com", "https://a.com|")}<div>b</div>`);
     // text split by formats: element per part

@@ -270,7 +270,10 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     const line = !last && Utils.Lines.at(r.startContainer, this);
     if (line && Utils.Lines.isEmpty(line, this._isEmbed)) {
       // deletion leaves empty line (& empty formats): otherwise caret goes to the previous line
-      line.replaceChildren(document.createElement("br"), ...line.querySelectorAll(":scope > ol, :scope > ul"));
+      line.replaceChildren(
+        document.createElement("br"),
+        ...Array.prototype.filter.call(line.children, (el: Element) => Utils.listTags.has(el.tagName))
+      );
       sel.collapse(line, 0);
     }
     if (was) {
@@ -536,16 +539,14 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   collectAuto(): void {
     const tools = this.#recognizers;
     const n = window.getSelection()?.focusNode;
-    this.#auto = [];
-    if (tools.length && n && this.contains(n)) {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const x of this.lineOf(n).getElementsByTagName("*")) {
-        tools.some(
-          (t) =>
-            t.is!(x as HTMLElement) !== undefined && Utils.Formats.isSame(Utils.Formats.create(t, x.textContent!), x)
-        ) && this.#auto.push(x);
-      }
-    }
+    this.#auto =
+      tools.length && n && this.contains(n)
+        ? Utils.Lines.elements(this.lineOf(n)).filter((x) =>
+            tools.some(
+              (t) => t.is!(x) !== undefined && Utils.Formats.isSame(Utils.Formats.create(t, x.textContent!), x)
+            )
+          )
+        : [];
   }
 
   /** Wraps recognized word at caret into element of tool while user types: link, email etc. (see `Tool.recognize`);
@@ -598,13 +599,12 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     const [text, el] = found;
     r.setEnd(...pointAt(line, end, isEmbed));
     if (
-      // the same tag (link with other text etc.): text is formatted already
-      Array.prototype.some.call(
-        line.getElementsByTagName(el.tagName),
-        (x) => !olds.includes(x) && Utils.Ranges.intersects(r, x)
-      ) ||
+      (!olds.length && this.#isAutoPaused) ||
       (olds.length === 1 && olds[0].textContent === text && Utils.Formats.isSame(olds[0], el)) || // nothing is changed
-      (!olds.length && this.#isAutoPaused)
+      // the same tag (link with other text etc.): text is formatted already
+      Utils.Lines.elements(line).some(
+        (x) => x.tagName === el.tagName && !olds.includes(x) && Utils.Ranges.intersects(r, x)
+      )
     ) {
       return false;
     }
