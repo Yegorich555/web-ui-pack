@@ -801,6 +801,50 @@ WUP-TEXTAREA [contenteditable] {
   min-height: 4em;
   max-height: 4em;
 }
+@media (hover: hover) and (pointer: fine) {
+  WUP-TEXTAREA [contenteditable] {
+    scrollbar-gutter: stable;
+    width: calc(100% + 10px);
+    margin-right: -10px;
+  }
+}
+WUP-TEXTAREA label {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+}
+WUP-TEXTAREA label:before {
+  grid-area: 1/1;
+}
+WUP-TEXTAREA label &gt; span {
+  grid-area: 1/2/auto/5;
+}
+WUP-TEXTAREA label:after {
+  grid-area: 1/5;
+}
+WUP-TEXTAREA label &gt; button {
+  align-self: start;
+}
+WUP-TEXTAREA label &gt; button[copy] {
+  grid-area: 1/3;
+}
+WUP-TEXTAREA label &gt; button[clear] {
+  grid-area: 1/4;
+}
+WUP-TEXTAREA[w-allowresizeh]:not([disabled]) [contenteditable] {
+  resize: vertical;
+}
+WUP-TEXTAREA[w-allowresizew]:not([disabled]) [contenteditable] {
+  resize: horizontal;
+}
+WUP-TEXTAREA[w-allowresizeh][w-allowresizew]:not([disabled]) [contenteditable] {
+  resize: both;
+}
+WUP-TEXTAREA[w-allowresizeh] [contenteditable][style*=height] {
+  max-height: none;
+}
+WUP-TEXTAREA[w-allowresizew]:has([contenteditable][style*=width]) {
+  width: fit-content;
+}
 WUP-TEXTAREA &gt; footer {
   width: fit-content;
   margin-left: auto;
@@ -853,6 +897,8 @@ WUP-AREAINPUT::-webkit-scrollbar-track-piece:vertical:start, WUP-AREAINPUT::-web
 
 exports[`control.textArea common tests snapshot of $defaults 1`] = `
 {
+  "allowResizeH": false,
+  "allowResizeW": false,
   "autoComplete": null,
   "autoFocus": false,
   "clearActions": 2,
@@ -890,6 +936,8 @@ exports[`control.textArea common tests snapshot of $defaults 3`] = `
 [
   "disabled",
   "readonly",
+  "w-allowresizeh",
+  "w-allowresizew",
   "w-autocomplete",
   "w-autofocus",
   "w-clearactions",

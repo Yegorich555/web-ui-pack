@@ -64,19 +64,19 @@ describe("spinElement", () => {
     expect(t.html).toMatchInlineSnapshot(`
       "<button aria-busy="true" style="position: relative;">
               <span>Some text</span>
-              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(18px, -9px) scale(0.425);">
+              <wup-spin aria-label="Loading. Please wait" style="position: absolute; transform: translate(26px, -1px) scale(0.425);">
             <div></div><div fade="" style="border-radius: 0px; transform: translate(-18px, 9px) scale(2.35294); width: 76px; height: 21px;"></div></wup-spin></button>"
     `);
     expect(t.rect).toMatchInlineSnapshot(`
       {
-        "bottom": 29.5,
+        "bottom": 37.5,
         "height": 17,
-        "left": 39.5,
-        "right": 56.5,
-        "top": 12.5,
+        "left": 47.5,
+        "right": 64.5,
+        "top": 20.5,
         "width": 17,
-        "x": 39.5,
-        "y": 12.5,
+        "x": 47.5,
+        "y": 20.5,
       }
     `);
   });

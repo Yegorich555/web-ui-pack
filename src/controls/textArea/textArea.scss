@@ -6,6 +6,46 @@
   [contenteditable] {
     min-height: 4em;
     max-height: 4em;
+
+    // scrollbar is placed over right padding of control: its appearing doesn't change width of content
+    // only for mouse devices: on touch devices scrollbar overlays content (gutter isn't reserved)
+    @media (hover: hover) and (pointer: fine) {
+      scrollbar-gutter: stable;
+      width: calc(100% + 10px); // 10px - width of scrollbar (see wup-scrollSmall)
+      margin-right: -10px;
+    }
+  }
+
+  // btnClear & btnCopy are placed at the top right corner (row of label) over input: they don't take width of content
+  // columns: label:before, span (till the end of buttons), btnCopy, btnClear, label:after
+  label {
+    display: grid;
+    /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+    grid-template-columns: auto 1fr auto auto auto;
+
+    &:before {
+      grid-area: 1 / 1;
+    }
+
+    > span {
+      grid-area: 1 / 2 / auto / 5;
+    }
+
+    &:after {
+      grid-area: 1 / 5;
+    }
+
+    > button {
+      align-self: start;
+    }
+
+    > button[copy] {
+      grid-area: 1 / 3;
+    }
+
+    > button[clear] {
+      grid-area: 1 / 4;
+    }
   }
 
   // $options.allowResizeH & allowResizeW

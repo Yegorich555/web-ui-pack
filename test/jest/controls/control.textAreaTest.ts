@@ -47,6 +47,8 @@ export default function testTextAreaControl(
       "w-prefix": null,
       "w-postfix": null,
       "w-hidefooter": { value: true },
+      "w-allowresizeh": { value: true, equalValue: "" },
+      "w-allowresizew": { value: true, equalValue: "" },
       ...opts?.attrs,
     },
   });
@@ -67,6 +69,30 @@ export default function testTextAreaControl(
     await h.wait(1);
     expect(isPrevented).toBe(false);
     expect(onSubmit).toBeCalledTimes(0);
+  });
+
+  test("option allowResizeH & allowResizeW", async () => {
+    const el = getEl();
+    const inp = el.$refInput;
+    const attrs = () => ["w-allowresizeh", "w-allowresizew"].map((a) => el.getAttribute(a));
+    expect(attrs()).toStrictEqual([null, null]);
+
+    el.$options.allowResizeH = true;
+    el.$options.allowResizeW = true;
+    await h.wait(1);
+    expect(attrs()).toStrictEqual(["", ""]); // for styling
+
+    inp.style.height = "100px"; // set by browser on resizing by user
+    inp.style.width = "200px";
+    el.$options.allowResizeH = false;
+    await h.wait(1);
+    expect(attrs()).toStrictEqual([null, ""]);
+    expect(inp.getAttribute("style")).toBe("width: 200px;"); // size set by user is reset
+
+    el.$options.allowResizeW = false;
+    await h.wait(1);
+    expect(attrs()).toStrictEqual([null, null]);
+    expect(inp.getAttribute("style")).toBe("");
   });
 
   test("readonly & disabled: input isn't editable", async () => {

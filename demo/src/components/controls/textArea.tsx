@@ -48,6 +48,7 @@ export default function TextControlView() {
             if (el) {
               el.$options.name = "longName";
               el.$options.label = "With scroll";
+              el.$options.copyButton = true;
               el.$options.validations = {
                 required: true,
                 max: 250,

@@ -2497,6 +2497,50 @@ WUP-TEXTRICH [contenteditable] {
   min-height: 4em;
   max-height: 4em;
 }
+@media (hover: hover) and (pointer: fine) {
+  WUP-TEXTRICH [contenteditable] {
+    scrollbar-gutter: stable;
+    width: calc(100% + 10px);
+    margin-right: -10px;
+  }
+}
+WUP-TEXTRICH label {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+}
+WUP-TEXTRICH label:before {
+  grid-area: 1/1;
+}
+WUP-TEXTRICH label &gt; span {
+  grid-area: 1/2/auto/5;
+}
+WUP-TEXTRICH label:after {
+  grid-area: 1/5;
+}
+WUP-TEXTRICH label &gt; button {
+  align-self: start;
+}
+WUP-TEXTRICH label &gt; button[copy] {
+  grid-area: 1/3;
+}
+WUP-TEXTRICH label &gt; button[clear] {
+  grid-area: 1/4;
+}
+WUP-TEXTRICH[w-allowresizeh]:not([disabled]) [contenteditable] {
+  resize: vertical;
+}
+WUP-TEXTRICH[w-allowresizew]:not([disabled]) [contenteditable] {
+  resize: horizontal;
+}
+WUP-TEXTRICH[w-allowresizeh][w-allowresizew]:not([disabled]) [contenteditable] {
+  resize: both;
+}
+WUP-TEXTRICH[w-allowresizeh] [contenteditable][style*=height] {
+  max-height: none;
+}
+WUP-TEXTRICH[w-allowresizew]:has([contenteditable][style*=width]) {
+  width: fit-content;
+}
 WUP-TEXTRICH &gt; footer {
   width: fit-content;
   margin-left: auto;
@@ -2771,6 +2815,9 @@ WUP-TEXTRICH[disabled] [role=toolbar] {
 WUP-TEXTRICH[readonly] [role=toolbar] {
   display: none;
 }
+WUP-TEXTRICH[w-allowresizew] [role=toolbar] {
+  contain: inline-size;
+}
 WUP-TEXTRICH &gt; wup-popup[menu] {
   padding: 0;
   overflow: hidden;
@@ -2976,6 +3023,8 @@ WUP-RICHINPUT::-webkit-scrollbar-track-piece:vertical:start, WUP-RICHINPUT::-web
 
 exports[`control.textRich common tests snapshot of $defaults 1`] = `
 {
+  "allowResizeH": false,
+  "allowResizeW": false,
   "autoComplete": null,
   "autoFocus": false,
   "clearActions": 2,
@@ -3070,6 +3119,8 @@ exports[`control.textRich common tests snapshot of $defaults 3`] = `
 [
   "disabled",
   "readonly",
+  "w-allowresizeh",
+  "w-allowresizew",
   "w-autocomplete",
   "w-autofocus",
   "w-clearactions",
