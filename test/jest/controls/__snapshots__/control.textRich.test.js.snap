@@ -2105,6 +2105,9 @@ exports[`control.textRich common tests render + styles 2`] = `
   --ctrl-textrich-quote: #748093;
   --ctrl-textrich-code-bg: #26303d;
 }
+[wup-textrich] {
+  white-space: pre-wrap;
+}
 [wup-textrich] blockquote {
   margin: 5px 0;
   padding-left: 16px;

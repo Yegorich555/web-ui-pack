@@ -31,6 +31,8 @@
 
   // editor content: global to show value outside via `<div wup-textrich>{value}</div>`
   [wup-textrich] {
+    white-space: pre-wrap; // as in editor: line breaks `\n` (Shift+Enter) & several spaces
+
     blockquote {
       margin: 5px 0;
       padding-left: 16px;
