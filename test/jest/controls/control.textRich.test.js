@@ -1060,6 +1060,13 @@ describe("control.textRich", () => {
     expect(typeText("b")).toBe(true);
     expect(getHtml()).toBe("<h1>a<b>b|</b></h1>");
 
+    // caret at editor root (value is replaced): typed text goes into line
+    setHtml("<div>a</div><div>b</div>");
+    window.getSelection().collapse(inp, 1);
+    el.$format("bold");
+    expect(typeText("c")).toBe(true);
+    expect(getHtml()).toBe("<div>a</div><div><b>c|</b>b</div>");
+
     // deleted text: its inline formats stay for the next typed text (recognized text & tokens aren't continued)
     /** Sets html with selection, deletes it via $insert & returns formats at caret */
     const del = (html) => {
@@ -1082,6 +1089,28 @@ describe("control.textRich", () => {
     } finally {
       cleanup();
     }
+  });
+
+  test("tool is applied while editor isn't focused: the last selection is restored", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    setHtml("<div>ab|c</div>");
+    // the real input skips the same value on blur, the mocked one renders it again (selection is lost)
+    const spy = jest.spyOn(el, "setInputValue").mockImplementation(() => {});
+    inp.blur();
+    await h.wait();
+    spy.mockRestore();
+    window.getSelection().removeAllRanges(); // click out of editor
+    // like Chrome: focus places caret at editor start
+    inp.focus = (opts) => {
+      window.getSelection().collapse(inp.firstChild.firstChild, 0);
+      HTMLElement.prototype.focus.call(inp, opts);
+    };
+    el.querySelector("[tool=bold]").click();
+    expect(document.activeElement).toBe(inp);
+    expect(typeText("x")).toBe(true);
+    expect(getHtml()).toBe("<div>ab<b>x|</b>c</div>");
   });
 
   test("arrows & line break at the edges of format: the next typed text goes out of it", async () => {

@@ -769,7 +769,7 @@ export default class WUPTextRichControl<
 
   /** Formats shown by toolbar: to skip refresh if nothing changed */
   #shown?: string;
-  /** Last selection in editor: restored when focus is on toolbar */
+  /** Last selection in editor (kept after blur): restored when tool is applied while focus is out of editor (toolbar etc.) */
   #range?: Range;
   /** Screen-reader hint: how to reach toolbar */
   #hint = document.createElement("span");
@@ -1041,14 +1041,14 @@ export default class WUPTextRichControl<
     });
   }
 
-  /** Focuses editor & restores the last selection (if focus is on toolbar) */
+  /** Focuses editor & restores the last selection (focus is on toolbar or out of control) */
   protected restoreSelection(): void {
     const inp = this.$refInput;
     if (document.activeElement === inp) {
       return;
     }
+    const r = this.#range; // before focus: browser places caret at editor start & it's saved on focus
     inp.focus({ preventScroll: true });
-    const r = this.#range;
     r && inp.contains(r.startContainer) && Utils.Ranges.select(r);
   }
 
@@ -1431,7 +1431,6 @@ export default class WUPTextRichControl<
     const l = this.#ask;
     // hover/tap popup & menu (focus stays in editor)
     (l?.hovered || l?.onKey) && l.done();
-    this.#range = undefined;
     this.$refInput.gotFocusLost();
     this.refreshToolbar(new Map());
   }

@@ -414,6 +414,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       return isEnd;
     }
     const tools = this._tools;
+    this.getSelectionPos(); // caret at editor root (value is replaced) goes into line: otherwise text is a new line
     const r = sel.getRangeAt(0);
     r.deleteContents();
     // move caret out of elements of removed/changed formats (`true` - added toggle format)

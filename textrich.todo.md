@@ -4,7 +4,6 @@ End-user review (2026-10-20): Chrome 154 vs Google Docs, Notion, Slack, GitHub, 
 
 ## Bugs
 
-7. [textRich.ts:1045](src/controls/textRich/textRich.ts#L1045). Toolbar click (Bold) while editor isn't focused, then typing: text is inserted at the start of editor as a new line (`<b>Q</b><div>abc</div>`). Expected: caret at the last position or at the end
 8. Paste of list from MS Word (`mso-list`): items become paragraphs with literal `·` bullet
 
 ## Editing behavior
