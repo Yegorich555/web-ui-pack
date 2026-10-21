@@ -2299,6 +2299,101 @@ describe("control.textRich", () => {
     expect(inp.innerHTML).toBe("<pre>ac</pre>");
   });
 
+  test("pasted text is recognized: link, email; url over selected text makes it link", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    const a = (href, text = href) => `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    /** Sets html with caret, pastes html & returns html */
+    const paste = (html, pasted, text) => {
+      setHtml(html);
+      userPaste(pasted, undefined, text);
+      return getHtml();
+    };
+
+    // every url & email of pasted html
+    expect(paste("<div>see |</div>", "https://a.com, <b>a@b.co</b>.<p>(www.c.org)</p>")).toBe(
+      `<div>see </div><div>${a("https://a.com")}, <b><a href="mailto:a@b.co">a@b.co</a></b>.</div><div>(${a(
+        "https://www.c.org",
+        "www.c.org"
+      )})|</div>`
+    );
+    // text before caret is joined (`see https://` + `a.com`), not touched one isn't recognized
+    expect(paste("<div>https://x.com see https://|</div>", "a.com")).toBe(
+      `<div>https://x.com see ${a("https://a.com", "https://a.com|")}</div>`
+    );
+    // pasted link stays as is; code block isn't recognized
+    expect(paste("<div>|</div>", '<a href="https://x.com">https://y.com</a> z')).toBe(
+      `<div>${a("https://x.com", "https://y.com")} z|</div>`
+    );
+    expect(paste("<pre>|</pre>", "https://a.com", "https://a.com")).toBe("<pre>https://a.com|</pre>");
+
+    // separate undo step: Escape right after it returns pasted text
+    setHtml("<div>a |</div>");
+    await h.wait(1);
+    userPaste("https://b.com");
+    expect(getHtml()).toBe(`<div>a ${a("https://b.com", "https://b.com|")}</div>`); // like typed one
+    await h.wait(1);
+    expect(inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }))).toBe(
+      false
+    );
+    await h.wait(1);
+    expect(inp.innerHTML).toBe("<div>a https://b.com</div>");
+
+    // plain text: browser pastes it
+    setHtml("<div>a |</div>");
+    expect(userPaste("", undefined, "https://b.com c")).toBe(false);
+    const sel = window.getSelection();
+    sel.focusNode.appendData("https://b.com c");
+    sel.collapse(sel.focusNode, sel.focusNode.length);
+    inp.dispatchEvent(new InputEvent("input", { inputType: "insertFromPaste", bubbles: true }));
+    expect(getHtml()).toBe(`<div>a ${a("https://b.com")} c|</div>`);
+
+    // url over selected text: it becomes link (selection stays)
+    expect(paste("<div>see [docs] here</div>", "", " https://a.com ")).toBe(
+      `<div>see [${a("https://a.com", "docs]")} here</div>`
+    );
+    expect(paste("<div>[mail]</div>", "", "a@b.co")).toBe('<div><a href="mailto:a@b.co">[mail]</a></div>');
+    // link is changed
+    expect(paste(`<div>${a("https://x.com", "[do]cs")}</div>`, "", "https://a.com")).toBe(
+      `<div>${a("https://a.com", "[do]cs")}</div>`
+    );
+    // otherwise pasted text replaces selection
+    expect(paste("<div>[docs]</div>", "see https://a.com", "see https://a.com")).toBe(
+      `<div>see ${a("https://a.com", "https://a.com|")}</div>`
+    );
+    expect(paste("<pre>[docs]</pre>", "x", "https://a.com")).toBe("<pre>https://a.com|</pre>");
+    setHtml("<div>[docs]</div>");
+    expect(typeText(null, "insertFromPaste")).toBe(false); // without dataTransfer: browser pastes it
+
+    const cleanup = useImage();
+    WUPTextRichControl.$tools.underline.recognize = /\d+ \d+$/;
+    try {
+      el.$options.toolbar = [["link", "underline"]]; // tools are applied on toolbar render
+      await h.wait(1);
+      // text is split by embeds, line breaks & nested lists (their items are own lines)
+      expect(
+        paste(
+          "<div>|</div>",
+          '<ul><li>https://a.com<img src="a.png">www.b.com<br>c.com<ul><li>a 1 2 3</li></ul></li></ul>'
+        )
+      ).toBe(
+        `<ul><li>${a("https://a.com")}<img src="a.png">${a(
+          "https://www.b.com",
+          "www.b.com"
+        )}<br>c.com<ul><li>a 1 <u>2 3|</u></li></ul></li></ul>` // the last recognized text wins like on typing
+      );
+      // nothing to recognize
+      el.$options.toolbar = [["bold"]];
+      await h.wait(1);
+      expect(paste("<div>|</div>", "https://a.com")).toBe("<div>https://a.com|</div>");
+      expect(paste("<div>[docs]</div>", "https://a.com", "https://a.com")).toBe("<div>https://a.com|</div>");
+    } finally {
+      cleanup();
+      delete WUPTextRichControl.$tools.underline.recognize;
+    }
+  });
+
   test("delete over several lines", async () => {
     await h.wait(1);
     const inp = el.$refInput;

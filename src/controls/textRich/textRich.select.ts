@@ -5,22 +5,6 @@ import { PopupAnimations, PopupOpenCases } from "../../popup/popupElement.types"
 import { menuPlacements } from "../../popup/popupPlacements";
 import { SetValueReasons, ValidationCases } from "../baseControl";
 
-/** Returns rect of range to place popup near (caret gets width 1px) */
-function rectOf(r: Range): DOMRect {
-  const rect = r.getBoundingClientRect();
-  if (rect.height) {
-    return rect.width ? rect : new DOMRect(rect.x, rect.y, 1, rect.height);
-  }
-  // caret between nodes has empty rect: take the end of previous node (embed, end of line) or start of node (empty line)
-  const n = r.startContainer;
-  const prev = n.childNodes[r.startOffset - 1];
-  const x = document.createRange();
-  x.selectNode(prev ?? n);
-  const rects = x.getClientRects();
-  const b = rects[prev ? rects.length - 1 : 0] ?? rect;
-  return new DOMRect(prev ? b.right : b.x, b.y, 1, b.height);
-}
-
 /** TextRich popup near target to ask value: text control (TextRichPrompt) or dropdown menu (TextRichMenu) */
 export class TextRichAsk {
   popup = document.createElement("wup-popup");
@@ -128,7 +112,22 @@ export default class TextRichMenu extends TextRichAsk {
     super(t instanceof Range ? o.button : t, o.owner ? undefined : (t as HTMLElement));
     this.#o = o;
     const p = this.popup;
-    t instanceof Range && (p.getTargetRect = () => rectOf(t));
+    // rect of range to place popup near (caret gets width 1px)
+    t instanceof Range &&
+      (p.getTargetRect = () => {
+        const rect = t.getBoundingClientRect();
+        if (rect.height) {
+          return rect.width ? rect : new DOMRect(rect.x, rect.y, 1, rect.height);
+        }
+        // caret between nodes has empty rect: take the end of previous node (embed, end of line) or start of node (empty line)
+        const n = t.startContainer;
+        const prev = n.childNodes[t.startOffset - 1];
+        const x = document.createRange();
+        x.selectNode(prev ?? n);
+        const rects = x.getClientRects();
+        const b = rects[prev ? rects.length - 1 : 0] ?? rect;
+        return new DOMRect(prev ? b.right : b.x, b.y, 1, b.height);
+      });
     p.setAttribute("menu", "");
     p.$options.animation = PopupAnimations.drawer;
     p.$options.placement = [...menuPlacements]; // the same as in select

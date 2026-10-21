@@ -1,4 +1,4 @@
-import { lineTags } from "../textArea/textArea.input";
+import { lineTags, pointAt } from "../textArea/textArea.input";
 
 /** Containers => paragraph (`<p>` in value, `<div>` in editor); unwrapped if they contain blocks */
 const paragraphTags = new Set([
@@ -168,6 +168,30 @@ export const Ranges = {
       r = x;
     }
     window.getSelection()!.setBaseAndExtent(r.startContainer, r.startOffset, r.endContainer, r.endOffset);
+  },
+
+  /** Returns range between char positions inside root (see pointAt) */
+  at(root: Node, a: number, b: number, isEmbed?: (el: Element) => boolean): Range {
+    const r = document.createRange();
+    r.setStart(...pointAt(root, a, isEmbed));
+    r.setEnd(...pointAt(root, b, isEmbed));
+    return r;
+  },
+};
+
+/** Helpers of tool options: shortcuts & recognizing */
+export const Tools = {
+  /** Returns list of shortcuts: `["Control", "B"]` => `[["Control", "B"]]`, `{ prev, next }` => `[prev, next]` */
+  shortcuts(hk: WUP.TextRich.Tool["hotKey"]): WUP.TextRich.HotKey[] {
+    if (!hk) {
+      return [];
+    }
+    return Array.isArray(hk) ? [hk] : [hk.prev, hk.next];
+  },
+
+  /** Returns text recognized by RegExp (the whole match) or by function (see `Tool.recognize`) */
+  recognized(r: WUP.TextRich.Tool["recognize"], s: string): string | null | undefined {
+    return typeof r === "function" ? r(s) : r?.exec(s)?.[0];
   },
 };
 

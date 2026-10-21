@@ -37,9 +37,10 @@ declare global {
       strike: true;
       blockquote: true;
       code: true;
-      /** Link url (asked via popup); typed url is recognized (`https://...`, `www...`) */
+      /** Link url (asked via popup); typed & pasted url is recognized (`https://...`, `www...`), pasted over selected
+       *  text makes it link */
       link: string;
-      /** Email of link `mailto:`: typed email is recognized (tool is hidden in toolbar) */
+      /** Email of link `mailto:`: typed & pasted email is recognized (tool is hidden in toolbar) */
       email: string;
       /** Menu of tools in toolbar (hidden ones too) on typing `/` at word start: value is tool & its value
        *  (`header:1`, `bold`); typed text is replaced with chosen format or `placeholder` of tool (tool is hidden in toolbar) */
@@ -135,7 +136,8 @@ declare global {
       /** Recognizes text while user types: word at caret is wrapped into element of `create(text)` as soon as it's matched
        *  (`someone@gmail.c` => email link); element follows its text on typing & deleting (it's removed if text isn't
        *  recognized anymore); undo (Ctrl+Z or Escape right after recognizing) returns plain text & pauses recognizing
-       *  till caret leaves word
+       *  till caret leaves word; pasted (dropped) text is recognized too: every matched word, text pasted over selection
+       *  formats it (selected text becomes link)
        * @tutorial Rules
        * * RegExp must match the end of text (use `$`); function returns the recognized end of text or nothing
        * * markdown - RegExp with group: text of group is formatted once (`**bold**` gives bold `bold`), the rest of
@@ -318,14 +320,6 @@ const codeKeys = {
 /** Browser formatting shortcuts (Ctrl/Cmd + B, I, U): prevented so only $tools shortcuts work */
 const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
 
-/** Returns list of shortcuts: `["Control", "B"]` => `[["Control", "B"]]`, `{ prev, next }` => `[prev, next]` */
-function shortcuts(hk: WUP.TextRich.Tool["hotKey"]): WUP.TextRich.HotKey[] {
-  if (!hk) {
-    return [];
-  }
-  return Array.isArray(hk) ? [hk] : [hk.prev, hk.next];
-}
-
 /** Form-control with rich text editor (WYSIWYG) & toolbar; behavior & styles are similar to npm quill
  * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/textRich}
  * @example
@@ -363,7 +357,8 @@ function shortcuts(hk: WUP.TextRich.Tool["hotKey"]): WUP.TextRich.HotKey[] {
  * removes format
  * * typed quote or bracket wraps selected text like in code editors: `"text"`, `(text)` (see static $wrapChars)
  * * typed `trigger` opens tool dropdown near caret: `{` for placeholders, `@` for mentions etc.
- * * typed text is recognized: links, emails (see `recognize` of $tools), lists by `1. ` & `- ` at line start,
+ * * typed & pasted text is recognized: links, emails (see `recognize` of $tools), pasted url over selected text makes
+ * it link; lists by `1. ` & `- ` at line start,
  * custom markdown (`**bold**`, `> `: see `recognize` of $tools);
  * undo (Ctrl+Z or Escape right after recognizing) returns typed text; Escape doesn't clear value (clear button only)
  * * content styles are global: use `<div wup-textrich>{$value}</div>` to show value outside control
@@ -957,7 +952,7 @@ export default class WUPTextRichControl<
   /** Sets `aria-keyshortcuts` (`Control` => `Meta` on macOS/iOS)
    * @returns hint: `Ctrl+Shift+X / Alt+Shift+5` or `⇧⌘X` on macOS/iOS (empty if $options.hideHotKeysHint) */
   protected setHotKeys(el: HTMLElement, hotKey: WUP.TextRich.Tool["hotKey"]): string {
-    const list = shortcuts(hotKey);
+    const list = Utils.Tools.shortcuts(hotKey);
     if (!list.length) {
       return "";
     }
@@ -1478,7 +1473,7 @@ export default class WUPTextRichControl<
     const key = (codeKeys[e.code as keyof typeof codeKeys] ?? e.code.replace(/^(Key|Digit)/, "")).toUpperCase();
     /** Returns index of matched shortcut or `-1`: `0` - prev, `1` - next for `{ prev, next }` */
     const match = (hotKey: WUP.TextRich.Tool["hotKey"]): number =>
-      shortcuts(hotKey).findIndex(
+      Utils.Tools.shortcuts(hotKey).findIndex(
         (keys) =>
           keys[keys.length - 1].toUpperCase() === key &&
           keys.includes("Control") === mod &&
@@ -1584,8 +1579,12 @@ export default class WUPTextRichControl<
       return;
     }
     const s = t === "insertText" && e.data;
+    const f = inp.pasteFormat(e); // url pasted over selected text makes it link
     if (s && (inp.wrapSelection(s) || this.gotTokenEnd(s))) {
       e.preventDefault(); // done via changeContent: separate undo step
+    } else if (f) {
+      e.preventDefault();
+      this.$format(f[0], f[1], true);
     } else if (inp.replaceInput(e)) {
       // fired input has no inputType: gotInput skips it
       s && this.gotTrigger();

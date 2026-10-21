@@ -9,7 +9,11 @@ export const lineTags = new Set(["DIV", "P", "LI", "H1", "H2", "H3", "H4", "H5",
 
 /** Walks parts of text inside root in order: text node, line break (before line except the 1st one & `<br>` except the last child)
  *  & embed (see `isEmbed`: counted as 1 char, its content is skipped); walking is stopped when fn returns true */
-function walkText(root: Node, fn: (n: Node, len: number) => boolean | void, isEmbed?: (el: Element) => boolean): void {
+export function walkText(
+  root: Node,
+  fn: (n: Node, len: number) => boolean | void,
+  isEmbed?: (el: Element) => boolean
+): void {
   const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
   let isStarted = false;
   for (let n = w.nextNode(); n; n = w.nextNode()) {

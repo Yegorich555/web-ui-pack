@@ -1,22 +1,12 @@
-import WUPTextAreaInput, { charsBefore, pointAt } from "../textArea/textArea.input";
+import WUPTextAreaInput, { charsBefore, pointAt, walkText } from "../textArea/textArea.input";
 import TextRichHistory from "./textRich.history";
 import * as Utils from "./textRich.utils";
 
 /** Tool name, tool & checker of element by `is` */
 type ToolEntry = [keyof WUP.TextRich.ToolValues, WUP.TextRich.Tool, ((el: Element) => boolean) | undefined];
 
-/** Returns text recognized by RegExp (the whole match) or by function (see `Tool.recognize`) */
-function recognized(r: WUP.TextRich.Tool["recognize"], s: string): string | null | undefined {
-  return typeof r === "function" ? r(s) : r?.exec(s)?.[0];
-}
-
-/** Returns copy of markdown RegExp (with group) with indices (flag `d`, without `g`) or `undefined` (see `Tool.recognize`) */
-function markdownOf(r: WUP.TextRich.Tool["recognize"]): RegExp | undefined {
-  // empty alternative matches empty string, so result has item per group
-  return r instanceof RegExp && new RegExp(`${r.source}|`, r.flags).exec("")!.length > 1
-    ? new RegExp(r.source, `${r.flags.replace(/[gd]/g, "")}d`)
-    : undefined;
-}
+/** Input types of inserted content: paste or drop */
+const insertTypes = /^insertFrom(Paste|Drop)/;
 
 /** Contenteditable element with html value: applies formats & handles typing (pending formats, tokens, recognizing etc.) */
 export default class WUPTextRichInput extends WUPTextAreaInput {
@@ -60,8 +50,13 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     this._isEmbed = embeds.length ? (el) => embeds.some(([, , is]) => is!(el)) : undefined;
     this.#markdown = new Map();
     this._entries.forEach(([, t]) => {
-      const r = t.kind === "inline" && markdownOf(t.recognize);
-      r && this.#markdown.set(t, r);
+      const r = t.recognize;
+      // RegExp with group (empty alternative matches empty string, so result has item per group):
+      // its copy with indices (flag `d`, without `g`)
+      t.kind === "inline" &&
+        r instanceof RegExp &&
+        new RegExp(`${r.source}|`, r.flags).exec("")!.length > 1 &&
+        this.#markdown.set(t, new RegExp(r.source, `${r.flags.replace(/[gd]/g, "")}d`));
     });
     // tool with values (mentions of users etc.): value is chosen via menu (`trigger`)
     const isWorking = ([k, t]: ToolEntry): boolean => !t.values?.length && !!this._isActive?.(k);
@@ -619,8 +614,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   recognize(): boolean {
     const sel = window.getSelection()!;
     const n = sel.focusNode;
-    const tools = this.#recognizers;
-    if (!tools.length || !sel.isCollapsed || !n || !this.contains(n)) {
+    if (!this.#recognizers.length || !sel.isCollapsed || !n || !this.contains(n)) {
       return false;
     }
     const line = this.lineOf(n);
@@ -630,19 +624,12 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     const isEmbed = this._isEmbed;
     const [before, rest] = Utils.Lines.textAround(line, n, sel.focusOffset, isEmbed);
     const after = /^\S*/.exec(rest)![0]; // the rest of word
-    let s = before + after;
-    let found = this.recognizeEnd(s, tools);
-    while (!found && /[\s.,;:!?'")\]}-]$/.test(s)) {
-      s = s.slice(0, -1); // `(see https://example.com).`, typed whitespace or separator (`+1 (359) 232-`)
-      found = this.recognizeEnd(s, tools);
-    }
+    const found = this.recognizeEnd(before + after);
     const at = charsBefore(line, n, sel.focusOffset, isEmbed); // caret
-    const end = at - before.length + s.length; // without punctuation
+    const end = at - before.length + (found?.[2] ?? 0); // without punctuation
     const start = found ? end - found[0].length : Math.max(0, at - 1);
     // elements of recognized text around caret (with typed whitespace etc.): replaced or removed
-    const r = document.createRange();
-    r.setStart(...pointAt(line, start, isEmbed));
-    r.setEnd(...pointAt(line, Math.max(end, at + after.length), isEmbed));
+    const r = Utils.Ranges.at(line, start, Math.max(end, at + after.length), isEmbed);
     // element left via arrow joins text typed only inside it
     const olds = this.#auto.filter(
       (x) => line.contains(x) && Utils.Ranges.intersects(r, x) && (!this.#left.has(x) || x.contains(n))
@@ -673,11 +660,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     }
     const isNew = !olds.length;
     isNew && this._history?.commit(); // new element: separate undo step
-    update(() => {
-      r.setStart(...pointAt(line, start, isEmbed));
-      r.setEnd(...pointAt(line, end, isEmbed));
-      Utils.Formats.addInline(Utils.Ranges.split(r), el, line); // element per part: text can be split by formats
-    });
+    // element per part: text can be split by formats
+    update(() => Utils.Formats.addInline(Utils.Ranges.split(Utils.Ranges.at(line, start, end, isEmbed)), el, line));
     isNew && (this.#autoAt = [sel.focusNode!, sel.focusOffset]); // Escape right after it undoes it
     return true;
   }
@@ -707,8 +691,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     let key = "";
     this._entries.some(([k, t]) => {
       const v = t.values
-        ? t.values.find((x) => recognized(x.recognize, s) === s)
-        : t.kind === "line" && recognized(t.recognize, s) === s && { value: true };
+        ? t.values.find((x) => Utils.Tools.recognized(x.recognize, s) === s)
+        : t.kind === "line" && Utils.Tools.recognized(t.recognize, s) === s && { value: true };
       // not applied yet
       v && !Utils.Formats.isMatch(t.is?.(line), v.value) && (key = t.values ? `${k}:${v.value}` : k);
       return v;
@@ -754,12 +738,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     const sel = window.getSelection()!;
     const isEmbed = this._isEmbed;
     const at = charsBefore(line, n, sel.focusOffset, isEmbed) - s.length; // text after line break or embed
-    const rangeOf = (a: number, b: number): Range => {
-      const r = document.createRange();
-      r.setStart(...pointAt(line, at + a, isEmbed));
-      r.setEnd(...pointAt(line, at + b, isEmbed));
-      return r;
-    };
+    const rangeOf = (a: number, b: number): Range => Utils.Ranges.at(line, at + a, at + b, isEmbed);
     const h = this._history;
     h?.commit(); // separate undo step
     h && (h._stateBeforeInput = h.inputState); // undo restores caret: text is selected to format it below
@@ -845,16 +824,111 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     }
   }
 
-  /** Returns recognized end of text & its element by the 1st matched tool (see `Tool.recognize`) */
-  protected recognizeEnd(s: string, tools: WUP.TextRich.Tool[]): [string, HTMLElement] | undefined {
-    let found: [string, HTMLElement] | undefined;
-    tools.some((t) => {
-      const text = recognized(t.recognize, s);
-      const el = text && s.endsWith(text) && Utils.Formats.create(t, text);
-      found = el && t.is!(el) !== undefined ? [text, el] : undefined; // invalid url etc.
-      return found;
+  /** Returns recognized end of text by the 1st matched tool that works (see `Tool.recognize`); it's retried without
+   *  trailing whitespace & punctuation: `(see https://example.com).`, typed whitespace or separator (`+1 (359) 232-`)
+   * @returns recognized text, its element, length of text till its end & tool */
+  protected recognizeEnd(s: string): [string, HTMLElement, number, WUP.TextRich.Tool] | undefined {
+    for (let str = s; ; str = str.slice(0, -1)) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const t of this.#recognizers) {
+        const text = Utils.Tools.recognized(t.recognize, str);
+        const el = text && str.endsWith(text) && Utils.Formats.create(t, text);
+        if (el && t.is!(el) !== undefined) {
+          return [text, el, str.length, t]; // otherwise invalid url etc.
+        }
+      }
+      if (!/[\s.,;:!?'")\]}-]$/.test(str)) {
+        return undefined;
+      }
+    }
+  }
+
+  /** Start of content inserted by paste or drop: char position (see recognizeInserted) */
+  #insertAt = 0;
+
+  /** Wraps text recognized in content inserted from `#insertAt` to caret (paste, drop) like typed one (see `recognize`):
+   *  every url, email etc. touching inserted text (`see https://` + pasted `example.com`); code block & text formatted
+   *  by the same tag (pasted link etc.) are skipped; it's a separate undo step (Ctrl+Z or Escape right after it returns
+   *  plain text) */
+  protected recognizeInserted(): void {
+    const sel = window.getSelection()!;
+    if (!this.#recognizers.length || !sel.isCollapsed || !this.contains(sel.focusNode)) {
+      return;
+    }
+    const pos = this.getSelectionPos(); // wraps loose content into lines
+    const isEmbed = this._isEmbed;
+    const ins = Utils.Ranges.at(this, this.#insertAt, pos[1], isEmbed);
+    const found: Array<[HTMLElement, number, number, HTMLElement]> = []; // line, start, end & element
+    Utils.Lines.of(ins, this).forEach((line) => {
+      if (line.tagName === "PRE") {
+        return;
+      }
+      // inserted text in line
+      const has = (n: Node): boolean => line.contains(n);
+      const from = has(ins.startContainer) ? charsBefore(line, ins.startContainer, ins.startOffset, isEmbed) : 0;
+      const to = has(ins.endContainer) ? charsBefore(line, ins.endContainer, ins.endOffset, isEmbed) : Infinity;
+      const els = Utils.Lines.elements(line);
+      // text parts split by line breaks & embeds: text & char position of its start in line
+      const parts: Array<[string, number]> = [];
+      let cur: [string, number] | undefined;
+      let chars = 0;
+      walkText(
+        line,
+        (n, len) => {
+          if (n.nodeName === "LI") {
+            return true; // nested list (the end of item): its items are own lines
+          }
+          n.nodeType === Node.TEXT_NODE
+            ? ((cur ??= parts[parts.push(["", chars]) - 1])[0] += (n as Text).data)
+            : (cur = undefined);
+          chars += len;
+          return false;
+        },
+        isEmbed
+      );
+      parts.forEach(([s, at]) => {
+        let min = Infinity; // from the end: the last recognized text wins like on typing (`+1 (555) 123-45-67`)
+        for (let i = s.length; i > 0 && at + i >= from; --i) {
+          // at the end of word: the same as typed whitespace after it
+          const f = /\S/.test(s[i - 1]) && !/\S/.test(s[i] ?? " ") && this.recognizeEnd(s.slice(0, i));
+          const end = f ? at + f[2] : 0;
+          if (f && end <= min) {
+            min = end - f[0].length;
+            const r = end >= from && min <= to && Utils.Ranges.at(line, min, end, isEmbed); // touches inserted text
+            // the same tag (pasted link etc.): text is formatted already
+            r &&
+              !els.some((x) => x.tagName === f[1].tagName && Utils.Ranges.intersects(r, x)) &&
+              found.push([line, min, end, f[1]]);
+          }
+        }
+      });
     });
-    return found;
+    if (!found.length) {
+      return;
+    }
+    this._history?.commit(); // separate undo step
+    this.changeContent(() => {
+      // element per part: text can be split by formats
+      found.forEach(([line, a, b, el]) =>
+        Utils.Formats.addInline(Utils.Ranges.split(Utils.Ranges.at(line, a, b, isEmbed)), el, line)
+      );
+      this.normalize();
+      this.setSelectionPos(pos);
+    });
+    this.#autoAt = [sel.focusNode!, sel.focusOffset]; // Escape right after it undoes it
+  }
+
+  /** Returns tool & value of url, email etc. pasted over selected text: it formats selected text like toolbar button
+   *  instead of replacing it (Notion, Slack, GitHub): selected text becomes link
+   * @returns `undefined` if selection is collapsed or in code block, pasted text isn't recognized as a whole */
+  pasteFormat(e: InputEvent): [keyof WUP.TextRich.ToolValues, unknown] | undefined {
+    const s = e.inputType === "insertFromPaste" && e.dataTransfer?.getData("text/plain").trim();
+    const sel = window.getSelection()!;
+    if (!s || !sel.toString().trim() || Utils.Lines.of(sel.getRangeAt(0), this).some((l) => l.tagName === "PRE")) {
+      return undefined;
+    }
+    const f = this.recognizeEnd(s);
+    return f?.[0] === s ? [this._entries.find(([, t]) => t === f[3])![0], f[3].is!(f[1])] : undefined;
   }
 
   /** Replaces selection with sanitized html: blocks split the current line at caret;
@@ -1037,23 +1111,29 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Called on `beforeinput` before changes: undo/redo pauses recognizing (otherwise undone link is recognized again
-   *  on typing), other input collects elements of recognized text (see `recognize`) */
+   *  on typing), other input collects elements of recognized text (see `recognize`); paste & drop remember start of
+   *  inserted content (see recognizeInserted) */
   gotBeforeInput(e: InputEvent): void {
     this.#autoAt = undefined; // the last change isn't recognizing
-    e.inputType.startsWith("history") ? (this.#isAutoPaused = true) : this.collectAuto();
+    const t = e.inputType;
+    t.startsWith("history") ? (this.#isAutoPaused = true) : this.collectAuto();
+    const r =
+      insertTypes.test(t) &&
+      this.#recognizers.length &&
+      (e.getTargetRanges()[0] ?? window.getSelection()!.getRangeAt(0));
+    r && (this.#insertAt = charsBefore(this, r.startContainer, r.startOffset, this._isEmbed)); // not changed by insertion
   }
 
-  /** Replaces browser input with custom changes: sanitized paste, typed text (pending formats, out of tokens & recognized
-   *  text), deleting across lines, Backspace at the start of formatted line, Enter in empty nested list item, line breaks
-   *  in line formats (see breakBlock); line break leaves recognized text
+  /** Replaces browser input with custom changes: sanitized paste (its urls etc. are recognized), typed text (pending formats, out of tokens & recognized text), deleting across lines,
+   *  Backspace at the start of formatted line, Enter in empty nested list item, line breaks in line formats
+   *  (see breakBlock); line break leaves recognized text
    * @returns true if input is replaced: event is prevented & `input` is fired (without inputType) */
   replaceInput(e: InputEvent): boolean {
     const t = e.inputType;
     const s = t === "insertText" && e.data;
     const isBreak = t === "insertParagraph" || t === "insertLineBreak";
     isBreak && this.leaveAuto();
-    const isPaste = t === "insertFromPaste" || t === "insertFromPasteAsQuotation" || t === "insertFromDrop";
-    const html = isPaste && e.dataTransfer?.getData("text/html");
+    const html = insertTypes.test(t) && e.dataTransfer?.getData("text/html");
     if (html) {
       // sanitized: otherwise browser pastes anything (images, colors etc.)
       e.preventDefault();
@@ -1073,13 +1153,16 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       return false;
     }
     this.fireInput(); // saves history by state before changes
+    html && this.recognizeInserted();
     return true;
   }
 
-  /** Called on `input`: syncs recognized text with its element (see `recognize`), cleans the new line (see gotLineBreak) */
+  /** Called on `input`: syncs recognized text with its element (see `recognize`), recognizes pasted plain text
+   *  (see recognizeInserted), cleans the new line (see gotLineBreak) */
   gotInput(e: InputEvent): void {
     const t = e.inputType;
     (t === "insertText" || t === "insertReplacementText" || t?.startsWith("delete")) && this.gotRecognize(e.data);
+    insertTypes.test(t) && this.recognizeInserted(); // plain text: browser inserts it
     (t === "insertParagraph" || t === "insertLineBreak") && this.gotLineBreak();
   }
 }
