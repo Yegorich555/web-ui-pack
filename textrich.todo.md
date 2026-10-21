@@ -2,13 +2,8 @@
 
 End-user review (2026-10-20): Chrome 154 vs Google Docs, Notion, Slack, GitHub, CKEditor 5, TipTap, Quill
 
-## Bugs
-
-8. Paste of list from MS Word (`mso-list`): items become paragraphs with literal `·` bullet
-
 ## Editing behavior
 
-9. Backspace at the start of list item merges it into the previous line (bullet disappears with text joined); at the start of the 1st line (list, heading, quote) it does nothing, so format can be removed via toolbar only. Expected (Docs, Notion, Quill, CKEditor, TipTap): 1st Backspace turns block into paragraph, 2nd one merges lines
 10. Enter on empty quote line doesn't leave quote: every quote line is a separate `<blockquote>` and Enter adds one more. Expected: Enter on empty line goes out of quote
 11. Enter in code block only adds lines: it can be left via ArrowRight at the end of the last block only. Expected (TipTap, Notion): 2 Enters on empty lines at the end or ArrowDown at the last line goes out
 12. Markdown shortcuts: only `1. ` & `- `. Expected (Notion, Slack, GitHub, CKEditor, TipTap): `# `…`### `, `> `, ```` ``` ````, `**bold**`, `_italic_`, `` `code` ``, `~~strike~~` (line ones via `ToolValue.recognize`)
@@ -27,3 +22,10 @@ End-user review (2026-10-20): Chrome 154 vs Google Docs, Notion, Slack, GitHub, 
 22. [textRich.scss:292](src/controls/textRich/textRich.scss#L292). Height is fixed between 8em & 16em: no auto-grow & no resize handle, long text is cramped
 23. [textRich.scss:236](src/controls/textRich/textRich.scss#L236). Readonly shows toolbar with 50% opacity: hide it as in other editors
 24. Consecutive quote lines are rendered as separate bars with gaps (`margin: 5px 0` per `<blockquote>`)
+
+## NiceToHave
+
+Won't be fixed: copy-paste from other editors isn't supported
+
+1. Paste from Google Docs: everything becomes bold & headings/lists are flattened into one line with `<br>`. Docs wraps content into `<b style="font-weight:normal" id="docs-internal-guid-…">`; its bold/italic/underline are `<span style="font-weight:700 | font-style:italic | text-decoration:underline">` and they're ignored
+8. Paste of list from MS Word (`mso-list`): items become paragraphs with literal `·` bullet (marker `<span style="mso-list:Ignore">`); real list type is defined in `<style>` (`@list l0:level1`) only

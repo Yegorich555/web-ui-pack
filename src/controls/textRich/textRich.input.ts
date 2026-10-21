@@ -851,6 +851,25 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return true;
   }
 
+  /** Backspace at the start of formatted line (list item, heading, quote etc.) removes its format instead of joining it
+   *  with the previous line (like Google Docs & Notion): nested list item goes to the parent list, other line becomes paragraph
+   * @returns false if caret isn't at the start of such line */
+  protected unformatLine(): boolean {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode;
+    const line = sel.isCollapsed && n ? Utils.Lines.at(n, this) : undefined;
+    if (
+      !line ||
+      charsBefore(line, n!, sel.focusOffset, this._isEmbed) || // not at line start
+      !this._entries.some(([, t, is]) => t.kind === "line" && is?.(line))
+    ) {
+      return false;
+    }
+    const isNested = line.tagName === "LI" && Utils.Lines.nest(line, true);
+    sel.collapse(isNested ? line : Utils.Lines.setTag(line, document.createElement("div")), 0);
+    return true;
+  }
+
   /** Called on `beforeinput` before changes: undo/redo pauses recognizing (otherwise undone link is recognized again
    *  on typing), other input collects elements of recognized text (see `recognize`) */
   gotBeforeInput(e: InputEvent): void {
@@ -859,7 +878,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Replaces browser input with custom changes: sanitized paste, typed text (pending formats, out of tokens & recognized
-   *  text), deleting across lines, Enter in empty nested list item; line break leaves recognized text
+   *  text), deleting across lines, Backspace at the start of formatted line, Enter in empty nested list item;
+   *  line break leaves recognized text
    * @returns true if input is replaced: event is prevented & `input` is fired (without inputType) */
   replaceInput(e: InputEvent): boolean {
     const t = e.inputType;
@@ -876,6 +896,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       this.insertHTML(html, e.dataTransfer!.getData("text/plain"));
     } else if (
       (s && (this.replaceAuto(s) || this.insertOutOfToken(s) || this.insertTyped(s))) ||
+      (t === "deleteContentBackward" && this.unformatLine()) ||
       (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0])) ||
       (t === "insertParagraph" && this.liftEmpty())
     ) {

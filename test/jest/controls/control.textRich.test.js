@@ -2216,6 +2216,39 @@ describe("control.textRich", () => {
     expect(del("<div>ab</div>", [first, 0], [first, 1])[0]).toBe(false); // single line
   });
 
+  test("Backspace at the start of formatted line removes its format", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Sets html & fires `beforeinput` of Backspace
+     * @returns [isPrevented, html] */
+    const back = (html) => {
+      setHtml(html);
+      const ev = new InputEvent("beforeinput", { inputType: "deleteContentBackward", bubbles: true, cancelable: true });
+      ev.getTargetRanges = () => []; // range deleted by browser
+      return [!inp.dispatchEvent(ev), getHtml()];
+    };
+
+    // heading, quote, code block: paragraph (alignment is kept); the next Backspace joins lines as usual
+    expect(back("<div>a</div><h2>|b</h2>")).toEqual([true, "<div>a</div><div>|b</div>"]);
+    expect(back('<blockquote style="text-align: center;">|b</blockquote>')).toEqual([
+      true,
+      '<div style="text-align: center;">|b</div>',
+    ]);
+    expect(back("<pre>|b</pre>")).toEqual([true, "<div>|b</div>"]);
+    // list item: paragraph out of list, nested item goes to the parent list
+    expect(back("<ul><li>a</li><li>|b</li><li>c</li></ul>")).toEqual([
+      true,
+      "<ul><li>a</li></ul><div>|b</div><ul><li>c</li></ul>",
+    ]);
+    expect(back("<ul><li>a<ul><li>|b</li></ul></li></ul>")).toEqual([true, "<ul><li>a</li><li>|b</li></ul>"]);
+    expect(back("<ol><li>|<br></li></ol>")).toEqual([true, "<div>|<br></div>"]); // empty item
+    // not at line start, plain paragraph or selected text: browser deletes as usual
+    expect(back("<h2>a|b</h2>")[0]).toBe(false);
+    expect(back("<div>a</div><div>|b</div>")[0]).toBe(false);
+    expect(back("<h2>[a]b</h2>")[0]).toBe(false);
+  });
+
   test("browser formatting is replaced by tools", async () => {
     await h.wait(1);
     const inp = el.$refInput;
