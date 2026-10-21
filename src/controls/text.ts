@@ -237,7 +237,7 @@ export default class WUPTextControl<
   }
 
   /** Create button-icon `<button {attr}/>` & insert it after pointed element; tooltip shows its `aria-label` */
-  protected renderBtnIcon(attr: string, prev: Element, onClick: (b: HTMLButtonElement) => void): HTMLButtonElement {
+  protected renderBtnIcon(attr: string, prev: Element, onClick: (e: PointerEvent) => void): HTMLButtonElement {
     const b = document.createElement("button");
     prev.after(b);
     b.setAttribute(this.#ctr.classNameBtnIcon, "");
@@ -246,36 +246,25 @@ export default class WUPTextControl<
     b.setAttribute("type", "button");
     useTooltipOnce("w-tooltip");
     b.setAttribute("w-tooltip", ""); // empty: tooltip shows aria-label
-    onEvent(
-      b,
-      "click",
-      (e) => {
-        e.preventDefault(); // prevent from submit
-        onClick(b);
-      },
-      { passive: false }
-    );
+    onEvent(b, "click", onClick, { passive: false });
     return b;
   }
 
   /** Create & append clear-button after copy-button */
   protected renderBtnClear(): HTMLButtonElement {
-    const b = this.renderBtnIcon("clear", (this.$refBtnCopy ?? this.$refLabel.querySelector("span"))!, () =>
-      this.clearValue()
-    );
-    this.setClearLabel(b);
+    const b = this.renderBtnIcon("clear", (this.$refBtnCopy ?? this.$refLabel.querySelector("span"))!, (e) => {
+      e.preventDefault(); // prevent from submit
+      this.clearValue();
+    });
+    b.setAttribute("aria-label", this.#ctr.$ariaClear); // shown via tooltip
     return b;
-  }
-
-  /** Sets `aria-label` (shown via tooltip) of clear button by its state: clear or restore */
-  protected setClearLabel(b: HTMLElement): void {
-    b.setAttribute("aria-label", b.getAttribute("clear") ? this.#ctr.$ariaRestore : this.#ctr.$ariaClear);
   }
 
   /** Create & append copy-button before clear-button */
   protected renderBtnCopy(): HTMLButtonElement {
     let t: ReturnType<typeof setTimeout> | undefined;
-    const b = this.renderBtnIcon("copy", this.$refLabel.querySelector("span")!, async () => {
+    const b = this.renderBtnIcon("copy", this.$refLabel.querySelector("span")!, async (e) => {
+      e.preventDefault(); // prevent from submit
       await this.copyValue();
       b.setAttribute("copy", "done"); // icon of success
       clearTimeout(t);
@@ -636,7 +625,7 @@ export default class WUPTextControl<
     // it's called on every change: skip the same value
     if (b && b.getAttribute("clear") !== v) {
       b.setAttribute("clear", v);
-      this.setClearLabel(b);
+      b.setAttribute("aria-label", v ? this.#ctr.$ariaRestore : this.#ctr.$ariaClear);
     }
     return next;
   }

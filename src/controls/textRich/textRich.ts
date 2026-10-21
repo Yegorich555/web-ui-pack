@@ -761,13 +761,17 @@ export default class WUPTextRichControl<
     return opts;
   }
 
-  $refInput = Object.assign(document.createElement("wup-richinput") as WUPTextRichInput & HTMLInputElement, {
-    _tools: this.#ctr.$tools, // sanitizer keeps their formats
-    _wrapChars: this.#ctr.$wrapChars,
-    _isActive: (name: keyof WUP.TextRich.ToolValues) => !!this.findTool(name),
-    _applyKey: (key: string) => this.applyKey(key),
-    _onFormats: () => this.refreshToolbar(),
-  });
+  // WARN: without type annotation tsc can fail with circular inference (TS7022) when overriding methods
+  $refInput: WUPTextRichInput & HTMLInputElement = Object.assign(
+    document.createElement("wup-richinput") as WUPTextRichInput & HTMLInputElement,
+    {
+      _tools: this.#ctr.$tools, // sanitizer keeps their formats
+      _wrapChars: this.#ctr.$wrapChars,
+      _isActive: (name: keyof WUP.TextRich.ToolValues) => !!this.findTool(name),
+      _applyKey: (key: string) => this.applyKey(key),
+      _onFormats: () => this.refreshToolbar(),
+    }
+  );
 
   /** Toolbar with buttons & dropdowns */
   $refToolbar = document.createElement("div");
@@ -1600,6 +1604,14 @@ export default class WUPTextRichControl<
     super.gotInput(e);
     e.inputType === "insertText" && this.gotTrigger();
     this.$refInput.gotInput(e);
+  }
+
+  protected override setClearState(): ValueType | undefined {
+    const b = this.$refBtnClear;
+    const was = b?.getAttribute("clear");
+    const next = super.setClearState(); // called on every change: relabel only if state is changed
+    b?.getAttribute("clear") !== was && this.setClearLabel(b!); // without button both are undefined
+    return next;
   }
 }
 
