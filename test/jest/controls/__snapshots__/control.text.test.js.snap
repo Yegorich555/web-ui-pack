@@ -20,10 +20,11 @@ exports[`control.text $ariaDetails 1`] = `
       </span>
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -45,10 +46,11 @@ exports[`control.text $ariaDetails 2`] = `
       <strong />
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -71,10 +73,11 @@ exports[`control.text $ariaSpeak 1`] = `
       <strong />
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -105,10 +108,11 @@ exports[`control.text $ariaSpeak 2`] = `
       <strong />
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -130,10 +134,11 @@ exports[`control.text $show/$hide error 1`] = `
       <strong />
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -158,10 +163,11 @@ exports[`control.text $show/$hide error 2`] = `
       <strong />
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -197,10 +203,11 @@ exports[`control.text $show/$hide error 3`] = `
       <strong />
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -257,7 +264,7 @@ exports[`control.text common tests render + styles 2`] = `
   --wup-icon-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='m16.078 258.214 329.139 329.139c21.449 21.449 56.174 21.449 77.567 0l329.139-329.139c21.449-21.449 21.449-56.174 0-77.567s-56.174-21.449-77.567 0L384 471.003 93.644 180.647c-21.449-21.449-56.173-21.449-77.567 0s-21.449 56.173 0 77.567z'/%3E%3C/svg%3E");
   --wup-icon-date: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='768' height='768'%3E%3Cpath d='M652.801 76.8c42.24 0 76.8 34.56 76.8 76.8v537.601c0 42.24-34.56 76.8-76.8 76.8H115.2c-42.624 0-76.8-34.56-76.8-76.8l.384-537.601c0-42.24 33.792-76.8 76.416-76.8h38.4V0h76.8v76.8h307.2V0h76.8v76.8h38.4zM192 345.6h76.8v76.8H192v-76.8zm230.4 0v76.8h-76.8v-76.8h76.8zm153.601 0h-76.8v76.8h76.8v-76.8zM115.2 691.2h537.601V268.8H115.2v422.4z'/%3E%3C/svg%3E");
   --wup-icon-time: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='1' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.25' stroke-width='1.5'/%3E%3Cpath d='M7.5 3.5v5h4'/%3E%3C/svg%3E");
-  --wup-icon-copy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23000' stroke-width='2'%3E%3Crect x='1' y='5' width='8' height='8' rx='2.5'/%3E%3Cpath d='M5 3a2 2 0 0 1 2-2h3.5A2.5 2.5 0 0 1 13 3.5V7a2 2 0 0 1-2 2'/%3E%3C/svg%3E");
+  --wup-icon-copy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23000' stroke-width='1.75'%3E%3Crect x='.875' y='4.875' width='8.25' height='8.25' rx='2.625'/%3E%3Cpath d='M4.875 3A2.125 2.125 0 0 1 7 .875h3.5A2.625 2.625 0 0 1 13.125 3.5V7A2.125 2.125 0 0 1 11 9.125'/%3E%3C/svg%3E");
 }
 [wupdark] {
   --base-btn-focus: #bdbdbd;
@@ -813,10 +820,11 @@ exports[`control.text options clearButton 1`] = `
       <strong />
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -874,10 +882,11 @@ exports[`control.text validations $options.validationShowAll 1`] = `
       <strong />
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -934,10 +943,11 @@ exports[`control.text validations $options.validationShowAll 2`] = `
       <strong />
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -1002,10 +1012,11 @@ exports[`control.text validations $options.validationShowAll 3`] = `
       </strong>
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -1046,10 +1057,11 @@ exports[`control.text validations options.validationCase 1`] = `
       <strong />
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -1078,10 +1090,11 @@ exports[`control.text validations options.validationCase 2`] = `
       </strong>
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Restore"
       clear="back"
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -1129,10 +1142,11 @@ exports[`control.text validations options.validationCase 3`] = `
       </strong>
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -1179,10 +1193,11 @@ exports[`control.text validations options.validationCase 4`] = `
       </strong>
     </span>
     <button
-      aria-hidden="true"
+      aria-label="Clear"
       clear=""
       tabindex="-1"
       type="button"
+      w-tooltip=""
       wup-icon=""
     />
   </label>
@@ -1228,10 +1243,11 @@ exports[`control.text with form 1`] = `
         </strong>
       </span>
       <button
-        aria-hidden="true"
+        aria-label="Clear"
         clear=""
         tabindex="-1"
         type="button"
+        w-tooltip=""
         wup-icon=""
       />
     </label>

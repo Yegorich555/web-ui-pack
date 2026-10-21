@@ -68,7 +68,7 @@ describe("formElement", () => {
     expect(inputs[0].$initValue).toBe("some@email.com");
     expect(inputs[0].$value).toBe("some@email.com");
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit"></button></wup-form>"`
+      `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit"></button></wup-form>"`
     );
 
     expect(inputs[1].$initValue).toBe("hello from 2");
@@ -550,7 +550,15 @@ describe("formElement", () => {
       expect(getNotify().textContent).toBe("From callback");
 
       // no message => no notify
-      for (const v of [undefined, null, false, "", { notifyMessage: "" }, { notifyMessage: null }, { notifyMessage: false }]) {
+      for (const v of [
+        undefined,
+        null,
+        false,
+        "",
+        { notifyMessage: "" },
+        { notifyMessage: null },
+        { notifyMessage: false },
+      ]) {
         await submit(() => Promise.resolve(v));
         expect(spyNotify).not.toBeCalled();
         expect(getNotify()).toBeNull();
@@ -683,19 +691,19 @@ describe("formElement", () => {
       el.$isPending = true;
       await h.wait();
       expect(el.outerHTML).toMatchInlineSnapshot(
-        `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
+        `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
       );
 
       el.changePending(true); // just for coverage
       await h.wait();
       expect(el.outerHTML).toMatchInlineSnapshot(
-        `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
+        `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
       );
 
       el.$isPending = false;
       await h.wait();
       expect(el.outerHTML).toMatchInlineSnapshot(
-        `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit"></button></wup-form>"`
+        `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit"></button></wup-form>"`
       );
       el.$isPending = false; // just for coverage
 
@@ -705,12 +713,12 @@ describe("formElement", () => {
       await h.wait(1);
       expect(el.$isPending).toBe(true);
       expect(el.outerHTML).toMatchInlineSnapshot(
-        `"<wup-form role="form" aria-busy="true"><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
+        `"<wup-form role="form" aria-busy="true"><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
       );
       await h.wait();
       expect(el.$isPending).toBe(false);
       expect(el.outerHTML).toMatchInlineSnapshot(
-        `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit"></button></wup-form>"`
+        `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit"></button></wup-form>"`
       );
       el.removeEventListener("$submit", submitFn);
 
@@ -874,7 +882,7 @@ describe("formElement", () => {
         expect(el.$options.disabled).toBe(false); // otherwise focus can be missed
         expect(document.activeElement).toBe(btnSubmit);
         expect(el.outerHTML).toMatchInlineSnapshot(
-          `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
+          `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
         );
         await h.wait();
         expect(el.$isPending).toBe(false);
@@ -908,7 +916,7 @@ describe("formElement", () => {
         expect(el.$isPending).toBe(true);
         expect(el.$options.disabled).toBeFalsy();
         expect(el.outerHTML).toMatchInlineSnapshot(
-          `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
+          `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
         );
         await h.wait();
       });

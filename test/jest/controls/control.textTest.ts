@@ -124,6 +124,8 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       jest.advanceTimersByTime(1);
       expect(el.$refBtnCopy).toBeDefined();
       expect(el.$refBtnCopy!.previousElementSibling).toBe(el.$refLabel.querySelector("span"));
+      expect(el.$refBtnCopy!.getAttribute("aria-label")).toBe("Copy");
+      expect(el.$refBtnCopy!.getAttribute("w-tooltip")).toBe(""); // tooltip shows aria-label
 
       const writeText = jest.fn(() => Promise.resolve());
       Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });

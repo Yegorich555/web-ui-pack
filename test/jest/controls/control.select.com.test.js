@@ -50,7 +50,7 @@ describe("control.select common", () => {
       `"<ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul>"`
     );
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select opened=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" open="" style="min-width: 100px; display: none;" w-animation="drawer" show=""><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select opened=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="true" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label><wup-popup menu="" open="" style="min-width: 100px; display: none;" w-animation="drawer" show=""><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="true">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
     );
 
     // closing by Esc
@@ -59,7 +59,7 @@ describe("control.select common", () => {
     expect(el.$isOpened).toBe(false);
     expect(el.$refPopup).toBeDefined(); // disposed only by focus out
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label><wup-popup menu="" style="min-width: 100px;" w-animation="drawer"><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-autocomplete="list" aria-owns="txt2" aria-controls="txt2"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label><wup-popup menu="" style="min-width: 100px;" w-animation="drawer"><ul id="txt2" role="listbox" aria-label="Items" tabindex="-1"><li role="option">Donny</li><li role="option" aria-selected="false">Mikky</li><li role="option">Leo</li><li role="option">Splinter</li></ul></wup-popup></wup-select>"`
     );
     expect(onHide).toBeCalledTimes(1);
     expect(el.$onCloseMenu).toBeCalledTimes(1);
@@ -176,7 +176,7 @@ describe("control.select common", () => {
     expect(el.$refInput.readOnly).toBe(true);
     expect(el.$refInput.value).toBeTruthy();
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt5" aria-controls="txt5" readonly=""><strong></strong></span><button wup-icon="" clear="back" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-select>"`
+      `"<wup-select><label for="txt1"><span><input placeholder=" " type="text" id="txt1" role="combobox" aria-haspopup="listbox" aria-expanded="false" autocomplete="off" aria-owns="txt5" aria-controls="txt5" readonly=""><strong></strong></span><button wup-icon="" clear="back" tabindex="-1" type="button" w-tooltip="" aria-label="Restore"></button></label></wup-select>"`
     );
     await h.userClick(el.$refInput);
     await h.wait();

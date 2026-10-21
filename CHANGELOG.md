@@ -62,6 +62,7 @@
 
 ### New Features
 
+- helper [onSwipe](src/helpers/onSwipe.ts)
 - [TextRichControl](src/controls/textRich/textRich.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textRich) (WYSIWYG editor)
 - [TextAreaControl](src/controls/textArea/textArea.ts). Added footer with count of chars `{count} / {max}` (see **$options.hideFooter** & **$renderFooter** to customize content)
 - [NotifyElement](src/notifyElement.ts)
@@ -69,9 +70,10 @@
   - Added option **closeOnSwipe** (`true` by default): on touch devices element follows the horizontal swipe & closes when it's swiped out (like messages in popular mobile apps)
   - Progress bar is mirrored for right placements (shrinks to the right side)
   - Added option **type** (`info`, `success`, `warning`, `error`; attribute `[w-type]`): icon at the left side, background, text & progress bar in colors of the type (css-vars `--notify-{type}` for icon & progress, `--notify-{type}-bg`, `--notify-{type}-text`)
-- helper [onSwipe](src/helpers/onSwipe.ts)
 - [DateControl](src/controls/date.ts) & [CalendarControl](src/controls/calendar.ts). Added option **multiple** (attribute `[w-multiple]`) to select several dates: `$value` is `Date[]`, click (or Enter) on date selects it or removes if it's already selected (menu stays opened); `[w-initvalue]` expects dates separated by comma (`"2022-10-25, 2022-10-28"`); for DateControl user types the next date at the end of input (with mask; completed date is added, already selected is ignored), Backspace/Delete removes the whole date & validations **min**, **max**, **exclude** are checked for every date
-- [TextControl](src/controls/text.ts) & inherited. Added option **copyButton** (attribute `[w-copybutton]`, `false` by default): button before clear button copies text of input into clipboard (icon `--wup-icon-copy` turns into checkmark for 1s)
+- [TextControl](src/controls/text.ts) & inherited.
+  - Added option **copyButton** (attribute `[w-copybutton]`, `false` by default) to clear content into clipboard
+  - Added tooltip for **clearButton**
 - [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts). Added customization of menu via HTML: place `<ul>` with items inside the control; `<li>` elements are bound to **$options.items** by index (see example in JSDoc & demo)
 - [Form](src/formElement.ts)
   - Added notification for submit result (return `{notifyMessage: 'Success', type: "success"}` in $onSubmit Promise result/error to show wup-notify)

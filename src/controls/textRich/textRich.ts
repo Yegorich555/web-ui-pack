@@ -1169,7 +1169,7 @@ export default class WUPTextRichControl<
       required: url === undefined, // new link
       url: (v?: string) => !!v && !Utils.Html.sanitizeUrl(v) && $errorLink,
     };
-    return this.$ask(target, url ?? "https://", { label: $textLink, validations }, hovered);
+    return this.$ask(target, url ?? "https://", { label: $textLink, validations, copyButton: true }, hovered);
   }
 
   /** Asks tool value via its dropdown menu near target: focus stays in editor (or dropdown), menu is closed on selection change
@@ -1600,14 +1600,6 @@ export default class WUPTextRichControl<
     super.gotInput(e);
     e.inputType === "insertText" && this.gotTrigger();
     this.$refInput.gotInput(e);
-  }
-
-  protected override setClearState(): ValueType | undefined {
-    const b = this.$refBtnClear;
-    const was = b?.getAttribute("clear");
-    const next = super.setClearState(); // called on every change: relabel only if state is changed
-    b?.getAttribute("clear") !== was && this.setClearLabel(b!); // without button both are undefined
-    return next;
   }
 }
 
