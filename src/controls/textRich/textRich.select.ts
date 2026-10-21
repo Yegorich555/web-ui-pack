@@ -85,6 +85,9 @@ export class TextRichPrompt extends TextRichAsk {
     };
     el.$onChange = (e) => {
       e.stopPropagation(); // not related to form
+      // url pasted or typed after prefill (link, image etc.): `https://https://x.com` => `https://x.com`
+      const v = el.$value?.replace(/^(?:https?:\/\/)+(?=https?:\/\/)/i, "");
+      v !== el.$value && (el.$value = v);
       hovered && e.detail.reason === SetValueReasons.clear && el.$value === undefined && this.done("", true);
     };
     // WARN: there is no `onfocusout` in HTML spec

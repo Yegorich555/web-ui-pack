@@ -916,19 +916,22 @@ describe("control.textRich", () => {
     setHtml("<div>a |b</div>");
     el.$format("link", url);
     expect(getHtml()).toBe(`<div>a <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>|b</div>`);
-    // empty url removes the whole link around caret
+    // caret or selection inside link: the whole link is changed, empty url removes it
     setHtml(`<div>a <a href="${url}">li|nk</a> b</div>`);
+    el.$format("link", "www.x.com");
+    expect(getHtml()).toBe(
+      '<div>a <a href="https://www.x.com" target="_blank" rel="noopener noreferrer">li|nk</a> b</div>'
+    );
+    setHtml(`<div>a <a href="${url}">l[in]k</a> b</div>`);
     el.$format("link", "");
-    expect(inp.innerHTML).toBe("<div>a link b</div>");
+    expect(getHtml()).toBe("<div>a l[in]k b</div>");
     setHtml("<div>a |b</div>");
     el.$format("link", "");
     expect(inp.innerHTML).toBe("<div>a b</div>");
-
-    // without value: link around caret is removed, otherwise url is asked
-    setHtml(`<div>a <a href="${url}">li|nk</a> b</div>`);
-    el.$format("link");
-    await h.wait(1);
-    expect(inp.innerHTML).toBe("<div>a link b</div>");
+    // selection goes out of link: format is changed for selected text only
+    setHtml(`<div>a <a href="${url}">li[nk</a> b]</div>`);
+    el.$format("link", "");
+    expect(getHtml()).toBe(`<div>a <a href="${url}">li[</a>nk b]</div>`);
   });
 
   test("embed, token & action formats", async () => {
@@ -2227,6 +2230,10 @@ describe("control.textRich", () => {
 
     let txt = await ask("<div>a [b] c</div>");
     expect(txt.$value).toBe("https://");
+    // url pasted after prefill: doubled protocol is removed (the pasted one is kept)
+    await h.userInsertText(txt.$refInput, "http://x.com/");
+    await h.wait();
+    expect([txt.$value, txt.$refInput.value]).toEqual(["http://x.com/", "http://x.com/"]);
     await press(txt, "a");
     expect(txt.isConnected).toBe(true);
     expect(document.activeElement).toBe(txt.$refInput);
@@ -2243,6 +2250,23 @@ describe("control.textRich", () => {
     expect(txt.isConnected).toBe(false);
     expect(document.activeElement).toBe(inp); // focus & selection return to editor
     expect(getHtml()).toBe('<div>a [<a href="https://x.com/" target="_blank" rel="noopener noreferrer">b]</a> c</div>');
+
+    // caret inside link: its url is edited, empty value removes link
+    txt = await ask('<div>a <a href="https://x.com/">l|ink</a> c</div>');
+    expect(txt.$value).toBe("https://x.com/");
+    expect(document.activeElement).toBe(txt.$refInput);
+    txt.$value = "https://y.com/";
+    await press(txt, "Enter");
+    await h.wait();
+    expect(getHtml()).toBe(
+      '<div>a <a href="https://y.com/" target="_blank" rel="noopener noreferrer">l|ink</a> c</div>'
+    );
+    txt = await ask(getHtml());
+    txt.$value = undefined;
+    await press(txt, "Enter");
+    await h.wait();
+    expect(txt.isConnected).toBe(false); // not required
+    expect(getHtml()).toBe("<div>a l|ink c</div>");
 
     // canceled by Escape or focus out
     txt = await ask("<div>a [b] c</div>");

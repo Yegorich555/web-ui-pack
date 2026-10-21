@@ -516,22 +516,25 @@ export default class WUPTextRichControl<
           target: "_blank",
           rel: "noopener noreferrer",
         }),
-      // selection inside link removes it, otherwise asks url
-      ask: (target, c, cur) => (cur === undefined ? c.askLink(target, "https://") : Promise.resolve("")),
+      // url of link at selection start is edited (empty value removes link)
+      ask: (target, c, cur) => c.askLink(target, cur),
       format: ({ range, value: url, editor, tool, applyDefault }) => {
-        if (!range.collapsed) {
+        const a = Utils.Formats.parents(
+          range.startContainer,
+          (el) => tool.is!(el as HTMLElement) !== undefined,
+          editor
+        )[0];
+        if (a?.contains(range.endContainer)) {
+          // caret or selection inside link: the whole link is changed (empty url removes it) like via hover popup
+          const b = url ? Utils.Formats.create(tool, url) : document.createDocumentFragment();
+          b.append(...a.childNodes);
+          a.replaceWith(b);
+        } else if (!range.collapsed) {
           applyDefault(); // empty url removes link
         } else if (url) {
-          const a = Utils.Formats.create(tool, url); // url as text
-          a.textContent = url;
-          editor.$insert(a);
-        } else {
-          const a = Utils.Formats.parents(
-            range.startContainer,
-            (el) => tool.is!(el as HTMLElement) !== undefined,
-            editor
-          )[0]; // remove the whole link
-          a?.replaceWith(...a.childNodes);
+          const el = Utils.Formats.create(tool, url); // url as text
+          el.textContent = url;
+          editor.$insert(el);
         }
       },
     },
@@ -1154,11 +1157,14 @@ export default class WUPTextRichControl<
     });
   }
 
-  /** Asks link url via $ask: `hovered` - hovered link (empty url removes it) */
-  protected askLink(target: HTMLElement, url: string, hovered?: HTMLElement): Promise<string | null> {
+  /** Asks link url via $ask: `url` - url of existing link (empty value removes it), `hovered` - hovered link */
+  protected askLink(target: HTMLElement, url: string | undefined, hovered?: HTMLElement): Promise<string | null> {
     const { $textLink, $errorLink } = this.#ctr;
-    const validations = { required: !hovered, url: (v?: string) => !!v && !Utils.Html.sanitizeUrl(v) && $errorLink };
-    return this.$ask(target, url, { label: $textLink, validations }, hovered);
+    const validations = {
+      required: url === undefined, // new link
+      url: (v?: string) => !!v && !Utils.Html.sanitizeUrl(v) && $errorLink,
+    };
+    return this.$ask(target, url ?? "https://", { label: $textLink, validations }, hovered);
   }
 
   /** Asks tool value via its dropdown menu near target: focus stays in editor (or dropdown), menu is closed on selection change
