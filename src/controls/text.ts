@@ -4,6 +4,7 @@ import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import WUPBaseControl, { SetValueReasons, ValidateFromCases } from "./baseControl";
 import TextHistory from "./text.history";
+import { useTooltipOnce } from "../popup/popupTooltip";
 
 const emailReg =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -132,8 +133,8 @@ declare module "preact/jsx-runtime" {
  *      <input/>
  *      <strong>{$options.label}</strong>
  *   </span>
- *   <button copy/>
- *   <button clear/>
+ *   <button copy aria-label="Copy" w-tooltip/>
+ *   <button clear aria-label="Clear" w-tooltip/> // "Restore" if the next click restores previous value
  * </label>
  * @tutorial Troubleshooting @see {@link https://yegorich555.github.io/web-ui-pack/control/text#troubleshooting} */
 export default class WUPTextControl<
@@ -158,6 +159,12 @@ export default class WUPTextControl<
 
   static $errorParse = __wupln("Invalid value", "validation");
   static $errorMask = __wupln("Incomplete value", "validation");
+  /** `aria-label` & tooltip of clear button; @defaultValue `Clear` */
+  static $ariaClear = __wupln("Clear", "aria");
+  /** `aria-label` & tooltip of clear button when the next click restores previous value (see $options.clearActions); @defaultValue `Restore` */
+  static $ariaRestore = __wupln("Restore", "aria");
+  /** `aria-label` & tooltip of copy button; @defaultValue `Copy` */
+  static $ariaCopy = __wupln("Copy", "aria");
 
   static $defaults: WUP.Text.Options = inheritDefaults(WUPBaseControl.$defaults, {
     selectOnFocus: false,
@@ -229,15 +236,16 @@ export default class WUPTextControl<
     this.$refInput.addEventListener("input", (e) => this.gotInput(e as WUP.Text.GotInputEvent), { passive: true });
   }
 
-  /** Create button-icon `<button {attr}/>` & insert it after pointed element */
+  /** Create button-icon `<button {attr}/>` & insert it after pointed element; tooltip shows its `aria-label` */
   protected renderBtnIcon(attr: string, prev: Element, onClick: (b: HTMLButtonElement) => void): HTMLButtonElement {
     const b = document.createElement("button");
     prev.after(b);
     b.setAttribute(this.#ctr.classNameBtnIcon, "");
     b.setAttribute(attr, "");
     b.setAttribute("tabindex", -1);
-    b.setAttribute("aria-hidden", true);
     b.setAttribute("type", "button");
+    useTooltipOnce("w-tooltip");
+    b.setAttribute("w-tooltip", ""); // empty: tooltip shows aria-label
     onEvent(
       b,
       "click",
@@ -252,20 +260,29 @@ export default class WUPTextControl<
 
   /** Create & append clear-button after copy-button */
   protected renderBtnClear(): HTMLButtonElement {
-    return this.renderBtnIcon("clear", (this.$refBtnCopy ?? this.$refLabel.querySelector("span"))!, () =>
+    const b = this.renderBtnIcon("clear", (this.$refBtnCopy ?? this.$refLabel.querySelector("span"))!, () =>
       this.clearValue()
     );
+    this.setClearLabel(b);
+    return b;
+  }
+
+  /** Sets `aria-label` (shown via tooltip) of clear button by its state: clear or restore */
+  protected setClearLabel(b: HTMLElement): void {
+    b.setAttribute("aria-label", b.getAttribute("clear") ? this.#ctr.$ariaRestore : this.#ctr.$ariaClear);
   }
 
   /** Create & append copy-button before clear-button */
   protected renderBtnCopy(): HTMLButtonElement {
     let t: ReturnType<typeof setTimeout> | undefined;
-    return this.renderBtnIcon("copy", this.$refLabel.querySelector("span")!, async (b) => {
+    const b = this.renderBtnIcon("copy", this.$refLabel.querySelector("span")!, async () => {
       await this.copyValue();
       b.setAttribute("copy", "done"); // icon of success
       clearTimeout(t);
       t = setTimeout(() => b.setAttribute("copy", ""), 1000);
     });
+    b.setAttribute("aria-label", this.#ctr.$ariaCopy);
+    return b;
   }
 
   /** Called when user clicks on button-copy: copies text of input into clipboard */
@@ -616,7 +633,11 @@ export default class WUPTextControl<
     const next = super.setClearState();
     const b = this.$refBtnClear;
     const v = this.#ctr.$isEmpty(next) ? "" : "back";
-    b && b.getAttribute("clear") !== v && b.setAttribute("clear", v); // it's called on every change: skip the same value
+    // it's called on every change: skip the same value
+    if (b && b.getAttribute("clear") !== v) {
+      b.setAttribute("clear", v);
+      this.setClearLabel(b);
+    }
     return next;
   }
 
