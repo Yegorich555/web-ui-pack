@@ -28,9 +28,33 @@ declare global {
       tag: string;
       /** Mention `@john` (name without `@`): it's chosen from menu shown on typing `@` */
       mention: string;
+      /** Inline code `<code>`: typed `` `code` `` is formatted */
+      codeInline: true;
     }
   }
 }
+
+// markdown shortcuts like in Notion & Slack: line formats by text typed at line start (it's removed)
+const { header, blockquote, code, bold, italic, strike } = WUPTextRichControl.$tools;
+header.values!.forEach((v) => {
+  v.value && (v.recognize = new RegExp(`^#{${v.value}}\\s$`)); // `# ` ... `###### `
+});
+blockquote.recognize = /^>\s$/; // `> `
+code.recognize = /^```$/; // without space like in Notion
+// RegExp with group: text of group is formatted on typed closing marker, markers are removed (`**bold**` => `bold`)
+bold.recognize = /(?<!\S)\*\*([^*\s](?:[^*]*[^*\s])?)\*\*$/;
+italic.recognize = /(?<!\S)_([^_\s](?:[^_]*[^_\s])?)_$/;
+strike.recognize = /(?<!\S)~~([^~\s](?:[^~]*[^~\s])?)~~$/;
+
+WUPTextRichControl.$tools.codeInline = {
+  label: "Inline code",
+  className: styles.iconCode,
+  hotKey: ["Control", "E"], // like in Notion
+  kind: "inline",
+  recognize: /(?<!\S)`([^`\s](?:[^`]*[^`\s])?)`$/, // markdown: `code`
+  is: (el) => el.tagName === "CODE" || undefined,
+  create: "code",
+};
 
 WUPTextRichControl.$tools.direction = {
   values: [{ value: "rtl", label: "Right to left", className: styles.iconRtl }], // label & icon of button `{ direction: "rtl" }`
@@ -202,26 +226,16 @@ WUPTextRichControl.$tools.mention = {
   classNameTag: styles.mention,
 };
 
-/** Default toolbar extended with custom tools */
-const toolbar = WUPTextRichControl.$defaults.toolbar!.map((group): WUP.TextRich.ToolbarGroup => {
-  switch (group[0]) {
-    case "link":
-      return [...group, "phone", "colorCode", "tag", "mention"]; // hidden (see `hideOnToolbar`): typed text is recognized
-    case "size":
-      return [...group, "font"];
-    case "align":
-      return [...group, { direction: "rtl" }];
-    default:
-      return group;
-  }
-});
-// placeholder is rendered as dropdown (tool with values)
-toolbar.splice(
-  toolbar.findIndex(([first]) => first === "clean"),
-  0,
-  ["image", "placeholder"]
-);
-(window as any).myTextRichToolbarCustom = toolbar;
+/** Toolbar with custom & customized tools only */
+(window as any).myTextRichToolbarCustom = [
+  ["header"],
+  ["bold", "italic", "strike", "codeInline"],
+  ["blockquote", "code"],
+  // hidden (see `hideOnToolbar`): typed text is recognized, `/` opens menu of tools (labels & placeholders of custom tools)
+  ["link", "phone", "colorCode", "tag", "mention", "command"],
+  ["font", { direction: "rtl" }],
+  ["image", "placeholder"], // placeholder is rendered as dropdown (tool with values)
+] as WUP.TextRich.Options["toolbar"];
 (window as any).myTextRichValidationsMax = { max: 500 } as WUP.TextRich.Options["validations"];
 
 /** Called once on mount/unmount: function is defined outside of component, so React doesn't call it on every render */
@@ -238,16 +252,65 @@ function gotRef(el: WUPTextRichControl | null): void {
 export default function TextRichCustom() {
   return (
     <Example header="Custom tools" link="demo/src/components/controls/textRich/textRich.custom.tsx">
-      <small>
-        Font, direction, image & placeholder (type <b>{"{"}</b> to choose it or <b>{"{someProp}"}</b>), phone (
-        <b>+1 (555) 123-45-67</b>), color code (<b>#ff0000</b>), hashtag & mention (type <b>@</b> to choose it) are
-        added via static $tools; type <b>/</b> to choose any tool. See details in{" "}
-        <MyLink href="/demo/src/components/controls/textRich/textRich.custom.tsx">textRich/textRich.custom.tsx</MyLink>{" "}
-        &{" "}
-        <MyLink href="/demo/src/components/controls/textRich/textRich.custom.scss">
-          textRich/textRich.custom.scss
-        </MyLink>
-        . Footer shows count of chars & validations.max (hidden via $options.hideFooter)
+      <small className={styles.description}>
+        Custom tools added via static $tools:
+        <ul>
+          <li>
+            <b>Font</b>: dropdown with serif & monospace fonts
+          </li>
+          <li>
+            <b>Direction</b>: button of a single value - right-to-left line
+          </li>
+          <li>
+            <b>Image</b>: file is chosen via browser dialog, click on image changes it
+          </li>
+          <li>
+            <b>Placeholder</b>: dropdown & menu on typed <code>{"{"}</code>; typed <code>{"{someProp}"}</code> is
+            placeholder too
+          </li>
+          <li>
+            <b>Inline code</b>: button (Ctrl+E) or typed <code>`code`</code>
+          </li>
+        </ul>
+        Custom tools hidden in toolbar (tool option: hideOnToolbar):
+        <ul>
+          <li>
+            <b>Phone</b>: typed <code>+1 (555) 123-45-67</code> is recognized
+          </li>
+          <li>
+            <b>Color code</b>: typed <code>#ff0000</code> is recognized & shown with swatch
+          </li>
+          <li>
+            <b>Hashtag</b>: typed <code>#news</code> is recognized
+          </li>
+          <li>
+            <b>Mention</b>: menu on typed <code>@</code>
+          </li>
+        </ul>
+        Markdown via recognize of built-in tools (Esc right after it returns typed text):
+        <ul>
+          <li>
+            <b>Heading</b>: <code>#</code> ... <code>######</code> + space at line start
+          </li>
+          <li>
+            <b>Quote</b>: <code>{">"}</code> + space at line start
+          </li>
+          <li>
+            <b>Code block</b>: <code>```</code> at line start
+          </li>
+          <li>
+            <b>Bold</b>: <code>**bold**</code>
+          </li>
+          <li>
+            <b>Italic</b>: <code>_italic_</code>
+          </li>
+          <li>
+            <b>Strikethrough</b>: <code>~~strike~~</code>
+          </li>
+        </ul>
+        Type <code>/</code> to choose any tool (hidden ones too). Footer shows count of chars & validations.max (hidden
+        via $options.hideFooter). See details in{" "}
+        <MyLink href="/demo/src/components/controls/textRich/textRich.custom.tsx">textRich/textRich.custom.tsx</MyLink>
       </small>
       <wup-textrich
         w-name="customTools"
@@ -255,7 +318,8 @@ export default function TextRichCustom() {
         w-toolbar="window.myTextRichToolbarCustom"
         w-validations="window.myTextRichValidationsMax"
         w-initValue={[
-          '<p>Text with <span style="font-family: serif;">serif</span> & <span style="font-family: monospace;">monospace</span> fonts</p>',
+          '<p>Text with <span style="font-family: serif;">serif</span> & <span style="font-family: monospace;">monospace</span> fonts,',
+          " <code>inline code</code></p>",
           '<p style="direction: rtl;">Right-to-left line</p>',
           `<p>Image <img src="${imgLogo}" alt="" style="max-width: 100%;"> inside text (click on it to change)</p>`,
           `<p>Dear <span class="${styles.placeholder}">{firstName}</span>, thank you for your order</p>`,

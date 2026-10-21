@@ -1847,6 +1847,88 @@ describe("control.textRich", () => {
     expect(rec("<div>-|</div>")).toBe("<div>- |</div>");
   });
 
+  test("markdown: `recognize` of line tool & RegExp with group", async () => {
+    // like demo textRich.custom.tsx
+    const { header, blockquote, code, bold, italic } = WUPTextRichControl.$tools;
+    header.values.forEach((v) => {
+      v.value && (v.recognize = new RegExp(`^#{${v.value}}\\s$`));
+    });
+    blockquote.recognize = /^>\s$/;
+    code.recognize = (s) => (s === "```" ? s : undefined);
+    bold.recognize = /(?<!\S)\*\*([^*\s](?:[^*]*[^*\s])?)\*\*$/;
+    italic.recognize = /(?<!\S)_([^_\s](?:[^_]*[^_\s])?)_$/dg; // flags `d` & `g` are ignored
+    try {
+      el.$options.toolbar = [["header"], ["bold", "italic"], ["blockquote", "code"], [{ list: "bullet" }]];
+      await h.wait(1);
+      const inp = el.$refInput;
+      inp.focus();
+      /** Sets html with caret, types text like browser & returns html */
+      const rec = (html, data = " ") => {
+        setHtml(html);
+        userType(data);
+        return getHtml();
+      };
+
+      // line tool: text typed at line start
+      expect(rec("<div>#|</div>")).toBe("<h1>|<br></h1>");
+      expect(rec("<div>###|</div>")).toBe("<h3>|<br></h3>");
+      expect(rec("<div>>|</div>")).toBe("<blockquote>|<br></blockquote>");
+      expect(rec("<div>``|</div>", "`")).toBe("<pre>|<br></pre>");
+      expect(rec("<blockquote>>|</blockquote>")).toBe("<blockquote>&gt; |</blockquote>"); // applied already
+      expect(rec("<div>a >|</div>")).toBe("<div>a &gt; |</div>"); // not at line start
+
+      // inline tool: text of group is formatted on typed closing marker, markers are removed
+      expect(rec("<div>a **bol|</div>", "d")).toBe("<div>a **bold|</div>");
+      expect(rec("<div>a **bold*|</div>", "*")).toBe("<div>a <b>bold|</b></div>");
+      const btnBold = el.querySelector("[tool=bold]");
+      expect(btnBold.getAttribute("aria-pressed")).toBe("false"); // the next typed text goes out of it
+      userType("c");
+      expect(getHtml()).toBe("<div>a <b>bold</b>c|</div>");
+      expect(rec("<div>x _a b|</div>", "_")).toBe("<div>x <em>a b|</em></div>");
+      expect(rec("<div>_a|</div>", "_")).toBe("<div><em>a|</em></div>"); // again: flag `g` is ignored
+      // text split by formats, formatted already
+      expect(rec("<div>**a <i>b</i>*|</div>", "*")).toBe("<div><b>a </b><i><b>b|</b></i></div>");
+      expect(rec("<div><b>**a*|</b></div>", "*")).toBe("<div><b>a|</b></div>");
+      // not recognized
+      expect(rec("<div>snake_case|</div>", "_")).toBe("<div>snake_case_|</div>"); // in word
+      expect(rec("<div>**|</div>", "**")).toBe("<div>****|</div>"); // empty
+      expect(rec("<div>** a *|</div>", "*")).toBe("<div>** a **|</div>"); // whitespace at edges
+      expect(rec("<pre>**a*|</pre>", "*")).toBe("<pre>**a**|</pre>"); // code block
+
+      // formats with markdown aren't recognized text: they follow pending rules & are continued on Enter
+      expect(rec("<div><b>ab|</b></div>", "c")).toBe("<div><b>abc|</b></div>");
+      expect(rec("<div><b>-|</b></div>")).toBe("<ul><li>|<br></li></ul>");
+      userType("z");
+      expect(getHtml()).toBe("<ul><li><b>z|</b><br></li></ul>");
+      setHtml("<div><b>bold</b></div><div><b>|<br></b></div>");
+      inp.dispatchEvent(new InputEvent("input", { inputType: "insertParagraph", bubbles: true }));
+      expect(getHtml()).toBe("<div><b>bold</b></div><div><b>|<br></b></div>");
+
+      // separate undo step: Escape right after it returns typed text
+      setHtml("<div>a **b*|</div>");
+      await h.wait(1);
+      userType("*");
+      expect(getHtml()).toBe("<div>a <b>b|</b></div>");
+      expect(inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }))).toBe(
+        false
+      );
+      await h.wait(1);
+      expect(inp.innerHTML).toBe("<div>a **b**</div>");
+
+      // tool isn't rendered
+      el.$options.toolbar = [["italic"]];
+      await h.wait(1);
+      expect(rec("<div>**a*|</div>", "*")).toBe("<div>**a**|</div>");
+      expect(rec("<div>>|</div>")).toBe("<div>&gt; |</div>");
+    } finally {
+      header.values.forEach((v) => delete v.recognize);
+      delete blockquote.recognize;
+      delete code.recognize;
+      delete bold.recognize;
+      delete italic.recognize;
+    }
+  });
+
   test("Escape right after recognizing undoes it like Ctrl+Z (value isn't cleared via Escape)", async () => {
     await h.wait(1);
     const inp = el.$refInput;

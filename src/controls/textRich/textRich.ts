@@ -76,7 +76,7 @@ declare global {
       hotKey?: HotKey;
       /** Text typed at line start that applies this value like markdown (`1. ` gives numbered list): RegExp must match
        *  the whole text before caret; typed text is removed; works if tool is in toolbar (see `hideOnToolbar`);
-       *  undo (Ctrl+Z or Escape right after it) returns typed text */
+       *  undo (Ctrl+Z or Escape right after it) returns typed text; `line` tool without values: see `Tool.recognize` */
       recognize?: RegExp;
       /** Class of button or dropdown item: to show icon via `--icon-img` instead of label */
       className?: string;
@@ -138,12 +138,17 @@ declare global {
        *  till caret leaves word
        * @tutorial Rules
        * * RegExp must match the end of text (use `$`); function returns the recognized end of text or nothing
+       * * markdown - RegExp with group: text of group is formatted once (`**bold**` gives bold `bold`), the rest of
+       * matched text is removed; the next typed text goes out of format
+       * * `line` tool: text typed at line start applies format like `ToolValue.recognize` (`> ` gives quote)
        * * tool with `values` isn't recognized: value is chosen via menu (see `trigger`), like mentions in messengers;
        * text typed at line start can apply value (see `ToolValue.recognize`): `1. ` gives numbered list
-       * * point `placeholder` too: otherwise tool chosen in menu of `command` does nothing visible
+       * * point `placeholder` too (except markdown): otherwise tool chosen in menu of `command` does nothing visible
        * @example
        * recognize: /(?<!\w)#\w+$/, // hashtags: `#news`
-       * recognize: (s) => /\b[A-Z]+-\d+$/.exec(s)?.[0], // Jira issues: `WUP-123` */
+       * recognize: (s) => /\b[A-Z]+-\d+$/.exec(s)?.[0], // Jira issues: `WUP-123`
+       * recognize: /(?<!\S)\*\*(\S(?:.*?\S)?)\*\*$/, // markdown: `**bold**`
+       * recognize: /^>\s$/, // markdown of line tool: `> ` */
       recognize?: RegExp | ((text: string) => string | null | undefined);
       /** Text that inserted as example when user selects this command (type '/' and chose command with this) */
       placeholder?: string;
@@ -358,7 +363,8 @@ function shortcuts(hk: WUP.TextRich.Tool["hotKey"]): WUP.TextRich.HotKey[] {
  * removes format
  * * typed quote or bracket wraps selected text like in code editors: `"text"`, `(text)` (see static $wrapChars)
  * * typed `trigger` opens tool dropdown near caret: `{` for placeholders, `@` for mentions etc.
- * * typed text is recognized: links, emails (see `recognize` of $tools), lists by `1. ` & `- ` at line start;
+ * * typed text is recognized: links, emails (see `recognize` of $tools), lists by `1. ` & `- ` at line start,
+ * custom markdown (`**bold**`, `> `: see `recognize` of $tools);
  * undo (Ctrl+Z or Escape right after recognizing) returns typed text; Escape doesn't clear value (clear button only)
  * * content styles are global: use `<div wup-textrich>{$value}</div>` to show value outside control
  * @tutorial innerHTML @example
@@ -422,6 +428,7 @@ export default class WUPTextRichControl<
   /** Toolbar tools by name (used in $options.toolbar): change it to redefine labels, shortcuts etc. or to add a custom tool
    *  (applied on the next toolbar render)
    * @see {@link WUP.TextRich.Tool}
+   * @see demo of custom tools (font, image, placeholder, mention, markdown etc.) {@link https://github.com/Yegorich555/web-ui-pack/blob/master/demo/src/components/controls/textRich/textRich.custom.tsx}
    * @example
    * WUPTextRichControl.$tools.strike.label = "Crossed out";
    * WUPTextRichControl.$tools.strike.hotKey = ["Control", "Shift", "S"];

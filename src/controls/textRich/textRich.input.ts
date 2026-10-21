@@ -5,6 +5,19 @@ import * as Utils from "./textRich.utils";
 /** Tool name, tool & checker of element by `is` */
 type ToolEntry = [keyof WUP.TextRich.ToolValues, WUP.TextRich.Tool, ((el: Element) => boolean) | undefined];
 
+/** Returns text recognized by RegExp (the whole match) or by function (see `Tool.recognize`) */
+function recognized(r: WUP.TextRich.Tool["recognize"], s: string): string | null | undefined {
+  return typeof r === "function" ? r(s) : r?.exec(s)?.[0];
+}
+
+/** Returns copy of markdown RegExp (with group) with indices (flag `d`, without `g`) or `undefined` (see `Tool.recognize`) */
+function markdownOf(r: WUP.TextRich.Tool["recognize"]): RegExp | undefined {
+  // empty alternative matches empty string, so result has item per group
+  return r instanceof RegExp && new RegExp(`${r.source}|`, r.flags).exec("")!.length > 1
+    ? new RegExp(r.source, `${r.flags.replace(/[gd]/g, "")}d`)
+    : undefined;
+}
+
 /** Contenteditable element with html value: applies formats & handles typing (pending formats, tokens, recognizing etc.) */
 export default class WUPTextRichInput extends WUPTextAreaInput {
   /** Static $tools of control (by name): sanitizer keeps their formats (see setTools) */
@@ -45,10 +58,15 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     );
     const embeds = this._entries.filter(([, t, is]) => t.kind === "embed" && is);
     this._isEmbed = embeds.length ? (el) => embeds.some(([, , is]) => is!(el)) : undefined;
+    this.#markdown = new Map();
+    this._entries.forEach(([, t]) => {
+      const r = t.kind === "inline" && markdownOf(t.recognize);
+      r && this.#markdown.set(t, r);
+    });
     // tool with values (mentions of users etc.): value is chosen via menu (`trigger`)
-    this.#recognizers = this._entries
-      .filter(([k, t]) => t.recognize && !t.values?.length && this._isActive?.(k))
-      .map(([, t]) => t);
+    const isWorking = ([k, t]: ToolEntry): boolean => !t.values?.length && !!this._isActive?.(k);
+    this.#recognizers = this._entries.filter((e) => this.#isAuto(e[1]) && isWorking(e)).map(([, t]) => t);
+    this.#markdowns = this._entries.filter((e) => this.#markdown.has(e[1]) && e[2] && isWorking(e));
   }
 
   /** Returns selection (anchor & focus) as char offsets (line break & embed = 1 char): valid even if nodes are re-rendered;
@@ -280,7 +298,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       const now = this.getFormats();
       was.forEach((v, k) => {
         const t = this._tools[k]; // recognized text & tokens aren't continued (see gotLineBreak)
-        t.kind === "inline" && !t.recognize && !t.trigger && now.get(k) !== v && this.#pending.set(k, v);
+        t.kind === "inline" && !this.#isAuto(t) && !t.trigger && now.get(k) !== v && this.#pending.set(k, v);
       });
       this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
     }
@@ -524,6 +542,12 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
 
   /** Tools with `recognize` that work (see `_isActive`): cached via setTools */
   #recognizers: WUP.TextRich.Tool[] = [];
+  /** Markdown tools (inline with `recognize` RegExp with group) => its copy with indices: cached via setTools */
+  #markdown = new Map<WUP.TextRich.Tool, RegExp>();
+  /** Markdown tools that work (see `_isActive`): cached via setTools */
+  #markdowns: ToolEntry[] = [];
+  /** Returns true if tool wraps recognized text into element that follows its text (link etc.): see `recognize` */
+  #isAuto = (t: WUP.TextRich.Tool): boolean => !!t.recognize && t.kind === "inline" && !this.#markdown.has(t);
   /** Elements of recognized text in line at caret (`<a href="https://a.com">https://a.com</a>`): taken before input,
    *  so they follow their text after it */
   #auto: Element[] = [];
@@ -639,37 +663,102 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return true;
   }
 
-  /** Applies value of rendered tool recognized in text typed at line start (see `ToolValue.recognize`): `1. ` gives
-   *  numbered list; typed text is removed; it's a separate undo step (Ctrl+Z or Escape right after it returns typed text) */
-  protected recognizeLine(): void {
+  /** Returns caret node, its line & text before caret (from line start, line break or embed: see Utils.Lines.textAround)
+   *  or `undefined` if selection isn't caret in editor or line is code block (typed text isn't recognized there) */
+  protected typedLine(): [Node, HTMLElement, string] | undefined {
     const sel = window.getSelection()!;
     const n = sel.focusNode;
-    if (!sel.isCollapsed || !n || !this.contains(n)) {
-      return;
+    const line = sel.isCollapsed && n && this.contains(n) && this.lineOf(n);
+    return line && line.tagName !== "PRE"
+      ? [n!, line, Utils.Lines.textAround(line, n!, sel.focusOffset, this._isEmbed)[0]]
+      : undefined;
+  }
+
+  /** Applies value of rendered tool recognized in text typed at line start (see `ToolValue.recognize`): `1. ` gives
+   *  numbered list, `> ` gives quote (`line` tool without values: see `Tool.recognize`); typed text is removed;
+   *  it's a separate undo step (Ctrl+Z or Escape right after it returns typed text)
+   * @returns false if nothing is recognized */
+  protected recognizeLine(): boolean {
+    const typed = this.typedLine();
+    if (!typed) {
+      return false;
     }
-    const line = this.lineOf(n);
-    const isEmbed = this._isEmbed;
-    const [s] = Utils.Lines.textAround(line, n, sel.focusOffset, isEmbed);
+    const [n, line, s] = typed;
+    const sel = window.getSelection()!;
     let key = "";
     this._entries.some(([k, t]) => {
-      const v = t.values?.find((x) => x.recognize?.exec(s)?.[0] === s);
-      v && !Utils.Formats.isMatch(t.is?.(line), v.value) && (key = `${k}:${v.value}`); // not applied yet
+      const v = t.values
+        ? t.values.find((x) => recognized(x.recognize, s) === s)
+        : t.kind === "line" && recognized(t.recognize, s) === s && { value: true };
+      // not applied yet
+      v && !Utils.Formats.isMatch(t.is?.(line), v.value) && (key = t.values ? `${k}:${v.value}` : k);
       return v;
     });
-    if (
-      !key ||
-      line.tagName === "PRE" || // code block
-      charsBefore(line, n, sel.focusOffset, isEmbed) !== s.length // text from line start: not after <br> or embed
-    ) {
-      return;
+    // text from line start: not after <br> or embed
+    if (!key || charsBefore(line, n, sel.focusOffset, this._isEmbed) !== s.length) {
+      return false;
     }
     this._history?.commit(); // separate undo step
-    if (this._applyKey?.(key)) {
-      const end = [sel.focusNode!, sel.focusOffset] as const; // caret is restored after typed text
-      sel.setBaseAndExtent(this.lineOf(end[0]), 0, ...end);
-      this.changeContent(() => this.$insert(document.createDocumentFragment())); // merged with format: the same tick
-      this.#autoAt = [sel.focusNode!, sel.focusOffset]; // Escape right after it undoes it
+    if (!this._applyKey?.(key)) {
+      return false;
     }
+    const end = [sel.focusNode!, sel.focusOffset] as const; // caret is restored after typed text
+    sel.setBaseAndExtent(this.lineOf(end[0]), 0, ...end);
+    this.changeContent(() => this.$insert(document.createDocumentFragment())); // merged with format: the same tick
+    this.#autoAt = [sel.focusNode!, sel.focusOffset]; // Escape right after it undoes it
+    return true;
+  }
+
+  /** Formats text recognized at the end of typed text by markdown `recognize` of rendered tool (RegExp with group):
+   *  `**bold**` gives bold `bold`; typed markers are removed & the next typed text goes out of format;
+   *  it's a separate undo step (Ctrl+Z or Escape right after it returns typed text) */
+  protected recognizeMarkdown(): void {
+    const typed = this.#markdowns.length ? this.typedLine() : undefined;
+    if (!typed) {
+      return;
+    }
+    const [n, line, s] = typed;
+    let found: [ToolEntry, RegExpExecArray] | undefined;
+    // eslint-disable-next-line no-restricted-syntax
+    for (const e of this.#markdowns) {
+      const m = this.#markdown.get(e[1])!.exec(s);
+      if (m?.[1] && m.index + m[0].length === s.length) {
+        found = [e, m]; // group isn't empty, match is at the end of text
+        break;
+      }
+    }
+    if (!found) {
+      return;
+    }
+    const [[name, , is], { index: start, indices }] = found;
+    const [from, to] = indices![1]!; // text of group
+    const sel = window.getSelection()!;
+    const isEmbed = this._isEmbed;
+    const at = charsBefore(line, n, sel.focusOffset, isEmbed) - s.length; // text after line break or embed
+    const rangeOf = (a: number, b: number): Range => {
+      const r = document.createRange();
+      r.setStart(...pointAt(line, at + a, isEmbed));
+      r.setEnd(...pointAt(line, at + b, isEmbed));
+      return r;
+    };
+    const h = this._history;
+    h?.commit(); // separate undo step
+    h && (h._stateBeforeInput = h.inputState); // undo restores caret: text is selected to format it below
+    const r = rangeOf(from, to);
+    // the same as toolbar button (it toggles format): text formatted already stays as is
+    if (!Utils.Ranges.split(r).every((t) => Utils.Formats.parents(t, is!, line).length)) {
+      Utils.Ranges.select(r);
+      this._applyKey!(name);
+    }
+    this.changeContent(() => {
+      rangeOf(to, s.length).deleteContents(); // markers: from the end, so positions before it stay valid
+      rangeOf(start, from).deleteContents();
+      line.normalize();
+      sel.collapse(...pointAt(line, at + start + to - from, isEmbed)); // at the end of formatted text (inside it)
+      this.#pending.set(name, false); // the next typed text goes out of it
+      this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
+    }); // merged with format: the same tick
+    this.#autoAt = [sel.focusNode!, sel.focusOffset]; // Escape right after it undoes it
   }
 
   /** Inserts typed text instead of selection with element of recognized text (placeholder of command etc.) as plain text:
@@ -694,16 +783,16 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Called after typing or deleting: syncs recognized text with its element (see `recognize`),
-   *  typed text at line start can apply line format (see `recognizeLine`) */
+   *  typed text can apply format like markdown (see `recognizeLine` & `recognizeMarkdown`) */
   gotRecognize(data: string | null): void {
     this.recognize();
-    data && this.recognizeLine();
+    data && (this.recognizeLine() || this.recognizeMarkdown());
     data && !data.trim() && (this.#isAutoPaused = false); // caret leaves word
   }
 
   /** Returns true if element is recognized text (link etc.) or token (mention etc.): it isn't continued in the next line */
   #isWrapped = (x: Element): boolean =>
-    this._entries.some(([, t, is]) => t.kind === "inline" && (!!t.recognize || !!t.trigger) && is!(x));
+    this._entries.some(([, t, is]) => (this.#isAuto(t) || (t.kind === "inline" && !!t.trigger)) && is!(x));
 
   /** Called after line break: Chrome copies formats of caret into the new line, so empty copies of recognized text, tokens
    *  & formats turned off (Bold toggled off, left via arrow) are removed; pending formats stay for the next typed text */
@@ -741,8 +830,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   protected recognizeEnd(s: string, tools: WUP.TextRich.Tool[]): [string, HTMLElement] | undefined {
     let found: [string, HTMLElement] | undefined;
     tools.some((t) => {
-      const r = t.recognize!;
-      const text = typeof r === "function" ? r(s) : r.exec(s)?.[0];
+      const text = recognized(t.recognize, s);
       const el = text && s.endsWith(text) && Utils.Formats.create(t, text);
       found = el && t.is!(el) !== undefined ? [text, el] : undefined; // invalid url etc.
       return found;
