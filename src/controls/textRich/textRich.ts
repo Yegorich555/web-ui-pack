@@ -94,7 +94,7 @@ declare global {
       /** `aria-label` & tooltip; @defaultValue tool name */
       label?: string;
       /** Keyboard shortcut: modifiers & key `["Control", "Shift", "X"]`; tool with values can select the previous/next value
-       *  `{ prev: ["Control", "Shift", "."], next: ["Control", "Shift", ","] }` (`size`: bigger/smaller)
+       *  `{ prev: ["Control", "Shift", ","], next: ["Control", "Shift", "."] }` (`size`: smaller/bigger)
        * @tutorial Rules
        * * `Control` is Cmd on macOS/iOS (shown as `⌘`)
        * * `Control` or `Alt` is required; key is matched by `KeyboardEvent.code`, so it works with any keyboard layout
@@ -644,12 +644,12 @@ export default class WUPTextRichControl<
     },
     size: {
       label: __wupln("Font size", "aria"),
-      hotKey: { prev: ["Control", "Shift", "."], next: ["Control", "Shift", ","] }, // increase & decrease
+      hotKey: { prev: ["Control", "Shift", ","], next: ["Control", "Shift", "."] }, // decrease & increase
       values: [
-        { value: "hg", label: __wupln("Huge", "content") },
-        { value: "lg", label: __wupln("Large", "content") },
-        { value: false, label: __wupln("Default", "content") },
         { value: "sm", label: __wupln("Small", "content") },
+        { value: false, label: __wupln("Default", "content") },
+        { value: "lg", label: __wupln("Large", "content") },
+        { value: "hg", label: __wupln("Huge", "content") },
       ],
       kind: "inline",
       // unsupported font size is shown as default
@@ -1198,7 +1198,7 @@ export default class WUPTextRichControl<
       target,
       values: b._values,
       selected: isHover ? tool.is?.(target as HTMLElement) : this.$refInput.getFormats().get(name) ?? false,
-      render: (li, v) => this.renderMenuItem(li, tool, v),
+      render: (li, v) => (name === "command" ? this.renderCommandItem(li, v) : this.renderMenuItem(li, tool, v)),
     });
     if (!isHover) {
       const sel = window.getSelection()!;
@@ -1209,10 +1209,11 @@ export default class WUPTextRichControl<
     return this.openAsk(m);
   }
 
-  /** Returns items of menu of tool `command`: tools of toolbar (hidden ones too) except itself & clear button;
-   *  dropdown gives item per value (`Font size: Huge`), tool with menu (mention etc.) - single item */
+  /** Returns items of menu of tool `command`: tools of toolbar (hidden ones too) except itself & clear button
+   *  by groups (see Utils.Tools.commandGroup) in toolbar order; dropdown gives item per value (`Font size: Huge`)
+   *  with `false` first (`Heading: Normal`), tool with menu (mention etc.) - single item */
   protected commandValues(): WUP.TextRich.ToolValue[] {
-    const arr: WUP.TextRich.ToolValue[] = [];
+    const groups: WUP.TextRich.ToolValue[][] = [[], [], [], []];
     this._opts.toolbar!.flat().forEach((item) => {
       // called on toolbar render
       const [name, picked] = (typeof item === "string" ? [item] : Object.entries(item)[0]) as [
@@ -1223,6 +1224,7 @@ export default class WUPTextRichControl<
       if (!t || name === "command" || name === "btnClear") {
         return;
       }
+      const arr = groups[Utils.Tools.commandGroup(t)];
       const label = t.label ?? name;
       const values =
         picked === undefined
@@ -1232,14 +1234,35 @@ export default class WUPTextRichControl<
         arr.push({ value: name, label, hotKey: Array.isArray(t.hotKey) ? t.hotKey : undefined }); // prev/next are for values
         return;
       }
-      values.forEach((v) => {
-        const l = v.label ?? stringPrettify(String(v.value), true, true);
-        // `Heading 1` as is, `Huge` => `Font size: Huge`
-        const full = t.label && !l.toLowerCase().includes(t.label.toLowerCase()) ? `${t.label}: ${l}` : l;
-        arr.push({ value: `${name}:${v.value}`, label: full, hotKey: v.hotKey });
-      });
+      // `false` first: plain text before headings (stable sort keeps the rest in order)
+      [...values]
+        .sort((a, b) => Number(b.value === false) - Number(a.value === false))
+        .forEach((v) => {
+          const l = v.label ?? stringPrettify(String(v.value), true, true);
+          // `Heading 1` as is, `Huge` => `Font size: Huge`
+          const full = t.label && !l.toLowerCase().includes(t.label.toLowerCase()) ? `${t.label}: ${l}` : l;
+          arr.push({ value: `${name}:${v.value}`, label: full, hotKey: v.hotKey });
+        });
     });
-    return arr;
+    return groups.flat();
+  }
+
+  /** Renders item of menu of `command` (value `header:1`, `bold` etc.): icon of toolbar button (via `tool` attribute
+   *  & classes), label & shortcut; separator before the 1st item of group (see Utils.Tools.commandGroup) */
+  protected renderCommandItem(li: HTMLElement, v: WUP.TextRich.ToolValue): void {
+    const key = v.value as string;
+    const [name, ...rest] = key.split(":") as [keyof WUP.TextRich.ToolValues, ...string[]];
+    const t: WUP.TextRich.Tool = this.#ctr.$tools[name];
+    const s = rest.join(":"); // value can contain `:`
+    li.setAttribute("tool", key);
+    t.className && li.classList.add(t.className);
+    const cls = rest.length ? t.values?.find((x) => `${x.value}` === s)?.className : undefined;
+    cls && li.classList.add(cls);
+    const g = `${Utils.Tools.commandGroup(t)}`;
+    li.setAttribute("group", g);
+    const prev = li.previousElementSibling; // items are rendered in order
+    prev && prev.getAttribute("group") !== g && li.setAttribute("sep", "");
+    this.renderMenuItem(li, this.#ctr.$tools.command, v); // label & shortcut
   }
 
   /** Applies tool chosen in menu of `command` (value `header:1`, `bold` etc.): tool with menu (`trigger` & values)
@@ -1500,7 +1523,7 @@ export default class WUPTextRichControl<
     if (!tool.values || val) {
       return this.applyKey(val ? `${name}:${val.value}` : name); // not rendered: browser handles shortcut
     }
-    // tool shortcut: `prev` selects the previous rendered value (bigger font), `next` - the next value
+    // tool shortcut: `prev` selects the previous rendered value (smaller font), `next` - the next value
     const { values } = tool;
     const items = this.findTool(name)?._values;
     const isRendered = (v: WUP.TextRich.ToolValue): boolean =>

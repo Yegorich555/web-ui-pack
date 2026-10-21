@@ -2058,7 +2058,7 @@ describe("control.textRich", () => {
       await h.wait(1);
       return inp.innerHTML;
     };
-    expect(await choose("")).toBe("<h1><br></h1>"); // empty line keeps placeholder
+    expect(await choose("", "1")).toBe("<h1><br></h1>"); // empty line keeps placeholder
     expect(await choose("<div>item |</div>", "bul")).toBe("<ul><li>item </li></ul>");
     expect(await choose("<div>a |</div>", "quo")).toBe("<blockquote>a </blockquote>");
     setHtml("<div>https:|</div>");
@@ -2067,7 +2067,7 @@ describe("control.textRich", () => {
     setHtml("<div>a |</div>");
     userType("/");
     userType("lin");
-    expect(items().map((li) => li.textContent)).toEqual(["UnderlineCtrl+U", "LinkCtrl+K"]); // with shortcuts
+    expect(items().map((li) => li.textContent)).toEqual(["LinkCtrl+K", "UnderlineCtrl+U"]); // with shortcuts
     inp.blur(); // closes menu
     await h.wait(1);
     inp.focus();
@@ -2077,6 +2077,7 @@ describe("control.textRich", () => {
     $tools.marked = {
       kind: "inline",
       placeholder: "text",
+      className: "my-icon-mark",
       is: (e) => e.tagName === "MARK" || undefined,
       create: "mark",
     };
@@ -2092,16 +2093,18 @@ describe("control.textRich", () => {
       setHtml("<div>a |</div>");
       userType("/");
       expect(items().map((li) => li.textContent)).toEqual([
-        "Bold",
-        "Font size: Large",
-        "Font size: Default",
-        "Font size: Xx",
         "Numbered list",
         "Heading 1",
         "Email",
         "Mention",
         "marked",
-      ]);
+        "Bold",
+        "Font size: Default",
+        "Font size: Large",
+        "Font size: Xx",
+      ]); // by groups: blocks, inserts, inline formats; `false` value first
+      expect(el.querySelector("wup-popup[menu] li[tool=marked]").classList.contains("my-icon-mark")).toBe(true); // icon
+      expect(items().map((li) => li.hasAttribute("sep"))).toEqual([0, 0, 1, 0, 0, 1, 0, 0, 0].map(Boolean)); // between groups
       inp.blur();
       await h.wait(1);
       inp.focus();

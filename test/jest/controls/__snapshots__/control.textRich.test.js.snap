@@ -214,13 +214,13 @@ exports[`control.textRich $ariaDetails 1`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -484,13 +484,13 @@ exports[`control.textRich $ariaDetails 2`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -754,13 +754,13 @@ exports[`control.textRich $ariaSpeak 1`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -1032,13 +1032,13 @@ exports[`control.textRich $ariaSpeak 2`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -1302,13 +1302,13 @@ exports[`control.textRich $show/$hide error 1`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -1574,13 +1574,13 @@ exports[`control.textRich $show/$hide error 2`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -1858,13 +1858,13 @@ exports[`control.textRich $show/$hide error 3`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -2113,6 +2113,12 @@ exports[`control.textRich common tests render + styles 2`] = `
   margin: 5px 0;
   padding-left: 16px;
   border-left: 4px solid var(--ctrl-textrich-quote);
+}
+[wup-textrich] blockquote:has(+ blockquote) {
+  margin-bottom: 0;
+}
+[wup-textrich] blockquote + blockquote {
+  margin-top: 0;
 }
 [wup-textrich] pre {
   margin: 5px 0;
@@ -2532,8 +2538,9 @@ WUP-TEXTRICH [role=toolbar] {
   align-items: center;
   justify-content: flex-end;
   gap: 0 0.75em;
-  padding: 0.25em 0.5em;
+  padding: 0.25em 0.375em 0.25em 0.5em;
   border-bottom: 1px solid var(--ctrl-border);
+  overflow: clip;
   cursor: default;
 }
 WUP-TEXTRICH [role=toolbar]:empty, WUP-TEXTRICH [role=toolbar][hidden],
@@ -2541,8 +2548,18 @@ WUP-TEXTRICH [role=toolbar] [hidden] {
   display: none !important;
 }
 WUP-TEXTRICH [role=group] {
+  position: relative;
   display: flex;
   align-items: center;
+}
+WUP-TEXTRICH [role=group]:after {
+  content: "";
+  position: absolute;
+  top: 0.25em;
+  bottom: 0.25em;
+  right: calc(-0.375em - 1px);
+  width: 1px;
+  background: var(--ctrl-border);
 }
 WUP-TEXTRICH [role=group] &gt; button:not([role=combobox]) {
   --icon: var(--ctrl-icon);
@@ -2648,9 +2665,9 @@ WUP-TEXTRICH [tool="indent:1"] {
   --icon-img: var(--wup-icon-indent);
 }
 WUP-TEXTRICH [role=combobox][icon]:before,
-WUP-TEXTRICH &gt; wup-popup[menu] li[icon]:before {
+WUP-TEXTRICH &gt; wup-popup[menu] :is(li[icon], li[tool]):before {
   content: "";
-  --ctrl-icon-img: var(--icon-img);
+  --ctrl-icon-img: var(--icon-img, linear-gradient(transparent, transparent));
   --ctrl-icon-size: 15px;
   display: inline-block;
   width: var(--ctrl-icon-size);
@@ -2748,11 +2765,11 @@ WUP-TEXTRICH .wup-icon-align-right {
 WUP-TEXTRICH .wup-icon-align-justify {
   --icon-img: var(--wup-icon-align-justify);
 }
-WUP-TEXTRICH[disabled] [role=toolbar], WUP-TEXTRICH[readonly] [role=toolbar] {
+WUP-TEXTRICH[disabled] [role=toolbar] {
   pointer-events: none;
 }
 WUP-TEXTRICH[readonly] [role=toolbar] {
-  opacity: 0.5;
+  display: none;
 }
 WUP-TEXTRICH &gt; wup-popup[menu] {
   padding: 0;
@@ -2847,6 +2864,12 @@ WUP-TEXTRICH &gt; wup-popup[menu] li {
 }
 WUP-TEXTRICH &gt; wup-popup[menu] li[hidden] {
   display: none;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] li[tool] {
+  gap: 0.75em;
+}
+WUP-TEXTRICH &gt; wup-popup[menu] ul:not(:has(&gt; li[hidden])) &gt; li[sep] {
+  border-top: 1px solid var(--ctrl-border);
 }
 WUP-TEXTRICH &gt; wup-popup[menu] kbd {
   margin-left: auto;
@@ -3283,13 +3306,13 @@ exports[`control.textRich options clearButton 1`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -3559,13 +3582,13 @@ exports[`control.textRich options clearButton 2`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -3827,13 +3850,13 @@ exports[`control.textRich validations $options.validationShowAll 1`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -4133,13 +4156,13 @@ exports[`control.textRich validations $options.validationShowAll 2`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -4445,13 +4468,13 @@ exports[`control.textRich validations $options.validationShowAll 3`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -4736,13 +4759,13 @@ exports[`control.textRich validations options.validationCase 1`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -5012,13 +5035,13 @@ exports[`control.textRich validations options.validationCase 2`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -5309,13 +5332,13 @@ exports[`control.textRich validations options.validationCase 3`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -5603,13 +5626,13 @@ exports[`control.textRich validations options.validationCase 4`] = `
     >
       <button
         aria-expanded="false"
-        aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+        aria-keyshortcuts="Control+Shift+, Control+Shift+."
         aria-label="Font size"
         role="combobox"
         tabindex="-1"
         tool="size"
         type="button"
-        w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+        w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
       >
         Default
       </button>
@@ -5897,13 +5920,13 @@ exports[`control.textRich with form 1`] = `
       >
         <button
           aria-expanded="false"
-          aria-keyshortcuts="Control+Shift+. Control+Shift+,"
+          aria-keyshortcuts="Control+Shift+, Control+Shift+."
           aria-label="Font size"
           role="combobox"
           tabindex="-1"
           tool="size"
           type="button"
-          w-tooltip="Font size (Ctrl+Shift+. / Ctrl+Shift+,)"
+          w-tooltip="Font size (Ctrl+Shift+, / Ctrl+Shift+.)"
         >
           Default
         </button>

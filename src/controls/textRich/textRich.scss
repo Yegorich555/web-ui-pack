@@ -37,6 +37,15 @@
       margin: 5px 0;
       padding-left: 16px;
       border-left: 4px solid var(--ctrl-textrich-quote);
+
+      // each line is a separate `<blockquote>` => consecutive lines render as one bar
+      &:has(+ blockquote) {
+        margin-bottom: 0;
+      }
+
+      + blockquote {
+        margin-top: 0;
+      }
     }
 
     pre {
@@ -112,8 +121,11 @@ $tools: (
     align-items: center;
     justify-content: flex-end;
     gap: 0 0.75em;
-    padding: 0.25em 0.5em;
+    padding: 0.25em 0.375em 0.25em 0.5em; // right: half of gap, so separator at the row end is out of padding box
     border-bottom: 1px solid var(--ctrl-border);
+    // hides separator at the row end; WARN: not `hidden`: it makes toolbar scrollable (separator overflows it), so popup
+    // takes it as scroll parent of hidden tool (command, mention) & hides menu near caret
+    overflow: clip;
     cursor: default;
 
     &:empty,
@@ -124,8 +136,20 @@ $tools: (
   }
 
   [role="group"] {
+    position: relative; // for separator
     display: flex;
     align-items: center;
+
+    // separator in the middle of gap after group
+    &:after {
+      content: "";
+      position: absolute;
+      top: 0.25em;
+      bottom: 0.25em;
+      right: calc(-0.375em - 1px);
+      width: 1px;
+      background: var(--ctrl-border);
+    }
   }
 
   [role="group"] > button:not([role="combobox"]) {
@@ -158,11 +182,12 @@ $tools: (
     }
   }
 
-  // value icon (`className` of value): in dropdown & its menu items (label is in tooltip)
+  // value icon (`className` of value): in dropdown & its menu items (label is in tooltip);
+  // icon of tool in menu of `command` (label is near)
   [role="combobox"][icon]:before,
-  > wup-popup[menu] li[icon]:before {
+  > wup-popup[menu] :is(li[icon], li[tool]):before {
     content: "";
-    --ctrl-icon-img: var(--icon-img);
+    --ctrl-icon-img: var(--icon-img, linear-gradient(transparent, transparent)); // empty space if tool has no icon
     --ctrl-icon-size: 15px; // as tool buttons
     @include wup-icon;
   }
@@ -230,13 +255,13 @@ $tools: (
     }
   }
 
-  &[disabled] [role="toolbar"],
-  &[readonly] [role="toolbar"] {
+  &[disabled] [role="toolbar"] {
     pointer-events: none;
   }
 
+  // as in other editors: nothing to format
   &[readonly] [role="toolbar"] {
-    opacity: 0.5;
+    display: none;
   }
 
   // dropdown menu
@@ -254,6 +279,16 @@ $tools: (
       &[hidden] {
         display: none; // filtered by typed text
       }
+
+      // menu of `command`
+      &[tool] {
+        gap: 0.75em;
+      }
+    }
+
+    // separator between groups of menu of `command`: not on filtering (otherwise it can be above the 1st visible item)
+    ul:not(:has(> li[hidden])) > li[sep] {
+      border-top: 1px solid var(--ctrl-border);
     }
 
     // shortcut at the right: before checkmark

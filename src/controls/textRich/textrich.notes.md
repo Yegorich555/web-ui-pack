@@ -4,15 +4,7 @@ End-user review (2026-10-20): Chrome 154 vs Google Docs, Notion, Slack, GitHub, 
 
 ## UI
 
- 1. Hover popup of link is text field over toolbar: opening link is Ctrl+Click only (no hint, impossible on touch), removing - clearing field. Expected (Google Docs): small chip `example.com ↗ · Copy · Edit · Unlink`; it opens when caret enters link too (keyboard users)
- 2. [textRich.scss:111](src/controls/textRich/textRich.scss#L111). Toolbar is aligned right (`justify-content: flex-end`) & groups have no separators; at 340px width it takes 3 rows with clear button alone in the last one. Expected: aligned left, thin separators, overflow menu `⋯` on narrow width (CKEditor 5)
- 3. Clear content `✕` is next to Clear formatting `Tx`: misclick risk (Restore helps). Move it away or exclude from default toolbar
- 4. Dropdowns `Normal` (heading) & `Default` (size) look the same: use icon `Aa` or label `Size` for size
- 5. [textRich.ts:1214](src/controls/textRich/textRich.ts#L1214). Slash menu: no icons & groups, Heading 1-6 + `Heading: Normal` take the first 7 items. Expected: icons of toolbar, common items first (text, H1-H3, lists, quote, code, link), H4-H6 shown on filtering only
- 6. Empty editor has no placeholder: `/` & markdown shortcuts aren't discoverable. Expected (Notion): `Type / for commands`
- 7. [textRich.scss:292](src/controls/textRich/textRich.scss#L292). Height is fixed between 8em & 16em: no auto-grow & no resize handle, long text is cramped
- 8. [textRich.scss:236](src/controls/textRich/textRich.scss#L236). Readonly shows toolbar with 50% opacity: hide it as in other editors
- 9. Consecutive quote lines are rendered as separate bars with gaps (`margin: 5px 0` per `<blockquote>`)
+ 2. [textRich.scss:292](src/controls/textRich/textRich.scss#L292). Height is fixed between 8em & 16em: no auto-grow & no resize handle, long text is cramped - probably it's wrong since we have $options.autoHeight
 
 ## NiceToHave
 

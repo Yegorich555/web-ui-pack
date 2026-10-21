@@ -179,8 +179,20 @@ export const Ranges = {
   },
 };
 
-/** Helpers of tool options: shortcuts & recognizing */
+/** Helpers of tool options: shortcuts, recognizing & groups of menu of `command` */
 export const Tools = {
+  /** Returns group of tool in menu of `command` (like in Notion): 0 - blocks (headings, lists, quote),
+   *  1 - inserts (link, embed, mention), 2 - inline formats, 3 - others (align, indent, actions) */
+  commandGroup(t: WUP.TextRich.Tool): number {
+    if (t.kind === "line") {
+      return 0;
+    }
+    if (t.kind === "embed" || t.trigger || t.placeholder) {
+      return 1;
+    }
+    return t.kind === "inline" ? 2 : 3;
+  },
+
   /** Returns list of shortcuts: `["Control", "B"]` => `[["Control", "B"]]`, `{ prev, next }` => `[prev, next]` */
   shortcuts(hk: WUP.TextRich.Tool["hotKey"]): WUP.TextRich.HotKey[] {
     if (!hk) {
