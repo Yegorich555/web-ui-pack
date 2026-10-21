@@ -21,6 +21,7 @@ export default function TextControlView() {
         "Inheritted features from TextControl (mask, prefix, postfix are not supported)",
         "Autoheight (change css rule: wup-textarea [contenteditable] { max-height: none })",
         "Footer with count of chars & validations.max (hidden via $options.hideFooter; override $renderFooter to customize)",
+        "User can resize height & width by dragging bottom-right corner (see $options.allowResizeH & allowResizeW)",
       ]}
     >
       <wup-form
@@ -37,6 +38,9 @@ export default function TextControlView() {
           w-label="TextArea control"
           w-initValue=""
           w-validations="window.myTextAreaValidations"
+          w-hideFooter="false"
+          w-allowResizeH="false"
+          w-allowResizeW="false"
         />
         <wup-textarea
           id="testMe"
@@ -99,6 +103,13 @@ export default function TextControlView() {
           w-label="With saving to localStorage (see $options.storageKey & storage)"
           w-storageKey="true"
           w-initValue="Type text & reload page"
+        />
+        <wup-textarea
+          w-name="resizable"
+          w-label="Resizable (see $options.allowResizeH & allowResizeW)"
+          w-initValue="Drag bottom-right corner to change height & width"
+          w-allowResizeH
+          w-allowResizeW
         />
         <button type="submit">Submit</button>
       </wup-form>

@@ -2,10 +2,6 @@
 
 End-user review (2026-10-20): Chrome 154 vs Google Docs, Notion, Slack, GitHub, CKEditor 5, TipTap, Quill
 
-## UI
-
- 2. [textRich.scss:292](src/controls/textRich/textRich.scss#L292). Height is fixed between 8em & 16em: no auto-grow & no resize handle, long text is cramped - probably it's wrong since we have $options.autoHeight
-
 ## NiceToHave
 
 Won't be fixed: copy-paste from other editors isn't supported

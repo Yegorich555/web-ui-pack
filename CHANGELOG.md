@@ -64,7 +64,9 @@
 
 - helper [onSwipe](src/helpers/onSwipe.ts)
 - [TextRichControl](src/controls/textRich/textRich.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textRich) (WYSIWYG editor)
-- [TextAreaControl](src/controls/textArea/textArea.ts). Added footer with count of chars `{count} / {max}` (see **$options.hideFooter** & **$renderFooter** to customize content)
+- [TextAreaControl](src/controls/textArea/textArea.ts) & inherited
+  - Added footer with count of chars `{count} / {max}` (see **$options.hideFooter** & **$renderFooter** to customize content)
+  - Added options **allowResizeH** & **allowResizeW** (attributes `[w-allowresizeh]`, `[w-allowresizew]`, `false` by default): user can change height/width by dragging the bottom-right corner (after resizing max-height isn't applied & control fits the input width)
 - [NotifyElement](src/notifyElement.ts)
   - Added option **id** to `WUPNotifyElement.$show(...)`: if notification with the same id exists then it's refreshed (content & options updated, closing-time restarted) instead of showing new one; closing (or closed but not removed) one is re-opened
   - Added option **closeOnSwipe** (`true` by default): on touch devices element follows the horizontal swipe & closes when it's swiped out (like messages in popular mobile apps)

@@ -309,7 +309,7 @@ export default function TextRichCustom() {
           </li>
         </ul>
         Type <code>/</code> to choose any tool (hidden ones too). Footer shows count of chars & validations.max (hidden
-        via $options.hideFooter). See details in{" "}
+        via $options.hideFooter). Drag bottom-right corner to change height ($options.allowResizeH). See details in{" "}
         <MyLink href="/demo/src/components/controls/textRich/textRich.custom.tsx">textRich/textRich.custom.tsx</MyLink>
       </small>
       <wup-textrich
@@ -317,6 +317,7 @@ export default function TextRichCustom() {
         w-label="Rich text with custom tools"
         w-toolbar="window.myTextRichToolbarCustom"
         w-validations="window.myTextRichValidationsMax"
+        w-allowResizeH
         w-initValue={[
           '<p>Text with <span style="font-family: serif;">serif</span> & <span style="font-family: monospace;">monospace</span> fonts,',
           " <code>inline code</code></p>",

@@ -264,6 +264,11 @@ $tools: (
     display: none;
   }
 
+  // $options.allowResizeW: control fits width of resized editor & toolbar wraps (otherwise it keeps control wider)
+  &[w-allowresizew] [role="toolbar"] {
+    contain: inline-size;
+  }
+
   // dropdown menu
   > wup-popup[menu] {
     @include wup-menu;

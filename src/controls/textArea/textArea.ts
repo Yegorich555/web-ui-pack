@@ -16,6 +16,14 @@ declare global {
        * @see {@link WUPTextAreaControl.$renderFooter}
        * @defaultValue false */
       hideFooter: boolean;
+      /** Allow user to change height of input by dragging its bottom-right corner (css `resize: vertical`);
+       * after resizing max-height isn't applied
+       * @defaultValue false */
+      allowResizeH: boolean;
+      /** Allow user to change width of input by dragging its bottom-right corner (css `resize: horizontal`);
+       * after resizing control fits the input width (can be wider than parent)
+       * @defaultValue false */
+      allowResizeW: boolean;
     }
     interface Options<T = string, VM = ValidityMap>
       extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "prefix" | "postfix">,
@@ -24,6 +32,8 @@ declare global {
       extends Omit<WUP.Text.JSXProps<C>, "w-mask" | "w-maskholder" | "w-prefix" | "w-postfix">,
         WUP.Base.OnlyNames<NewOptions> {
       "w-hideFooter"?: WUP.Base.JSXBoolAttr;
+      "w-allowResizeH"?: WUP.Base.JSXBoolAttr;
+      "w-allowResizeW"?: WUP.Base.JSXBoolAttr;
     }
   }
 
@@ -105,6 +115,8 @@ export default class WUPTextAreaControl<
       max: (v, setV, c, r) => WUPTextControl.$defaults.validationRules.max!.call!(c, v?.replace(/\n/g, ""), setV, c, r),
     }),
     hideFooter: false,
+    allowResizeH: false,
+    allowResizeW: false,
   });
 
   $refInput = document.createElement("wup-areainput") as HTMLInputElement;
@@ -128,6 +140,12 @@ export default class WUPTextAreaControl<
     delete o.prefix;
     delete o.postfix;
     this.setupFooter(); // max count depends on validations: they can be changed via form too
+    const { allowResizeH: isH, allowResizeW: isW } = this._opts;
+    this.setAttr("w-allowResizeH", isH, true);
+    this.setAttr("w-allowResizeW", isW, true);
+    // size set by user before
+    !isH && this.$refInput.style.removeProperty("height");
+    !isW && this.$refInput.style.removeProperty("width");
   }
 
   /** Creates or removes footer according to $options.hideFooter & renders its content */

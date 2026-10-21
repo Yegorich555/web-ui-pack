@@ -54,6 +54,8 @@ export default function TextRichControlView() {
           w-toolbar="window.myTextRichToolbar"
           w-hideHotKeysHint="false"
           w-hideFooter="false"
+          w-allowResizeH="false"
+          w-allowResizeW="false"
           ref={(el) => {
             if (el) {
               el.$initValue = [

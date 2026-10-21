@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/JetBrains/web-types/master/schema/web-types.json",
   "name": "web-ui-pack",
-  "version": "1.2.10",
+  "version": "1.2.9",
   "description-markup": "markdown",
   "contributions": {
     "html": {
@@ -1572,6 +1572,14 @@
           "doc-url": "https://yegorich555.github.io/web-ui-pack/control/textArea",
           "attributes": [
             {
+              "name": "w-allowresizeh",
+              "description": "Allow user to change height of input by dragging its bottom-right corner (css `resize: vertical`); after resizing max-height isn't applied @defaultValue false"
+            },
+            {
+              "name": "w-allowresizew",
+              "description": "Allow user to change width of input by dragging its bottom-right corner (css `resize: horizontal`); after resizing control fits the input width (can be wider than parent) @defaultValue false"
+            },
+            {
               "name": "w-debouncems",
               "description": "Time to wait for user finishes typing to start validate and provide $change event"
             },
@@ -1658,6 +1666,14 @@
           "description": "Form-control with rich text editor (WYSIWYG): text is formatted via toolbar",
           "doc-url": "https://yegorich555.github.io/web-ui-pack/control/textRich",
           "attributes": [
+            {
+              "name": "w-allowresizeh",
+              "description": "Allow user to change height of input by dragging its bottom-right corner (css `resize: vertical`); after resizing max-height isn't applied @defaultValue false"
+            },
+            {
+              "name": "w-allowresizew",
+              "description": "Allow user to change width of input by dragging its bottom-right corner (css `resize: horizontal`); after resizing control fits the input width (can be wider than parent) @defaultValue false"
+            },
             {
               "name": "w-toolbar",
               "description": "Global reference to object with array of toolbar groups (see WUP.TextRich.ToolbarGroup); null or empty array hides toolbar. Example: window.myToolbar = [[\"bold\", \"italic\"], [\"header\"], [\"clean\"]]"

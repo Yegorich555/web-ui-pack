@@ -8,6 +8,29 @@
     max-height: 4em;
   }
 
+  // $options.allowResizeH & allowResizeW
+  &[w-allowresizeh]:not([disabled]) [contenteditable] {
+    resize: vertical;
+  }
+
+  &[w-allowresizew]:not([disabled]) [contenteditable] {
+    resize: horizontal;
+  }
+
+  &[w-allowresizeh][w-allowresizew]:not([disabled]) [contenteditable] {
+    resize: both;
+  }
+
+  // height & width are set inline by browser after resizing by user
+  &[w-allowresizeh] [contenteditable][style*="height"] {
+    max-height: none;
+  }
+
+  &[w-allowresizew]:has([contenteditable][style*="width"]) {
+    /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+    width: fit-content; // otherwise control keeps width of parent
+  }
+
   // count of chars: hidden via $options.hideFooter
   > footer {
     /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
