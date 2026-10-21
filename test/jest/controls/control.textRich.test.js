@@ -165,11 +165,11 @@ function userType(data) {
   document.dispatchEvent(new Event("selectionchange")); // jsdom doesn't fire it
 }
 
-/** Fires `beforeinput` of paste with html
+/** Fires `beforeinput` of paste with html & plain text
  * @returns true if it's prevented (control pastes it itself) */
-function userPaste(html, targetRange) {
+function userPaste(html, targetRange, text = "text") {
   const ev = new InputEvent("beforeinput", { inputType: "insertFromPaste", bubbles: true, cancelable: true });
-  Object.defineProperty(ev, "dataTransfer", { value: { getData: (t) => (t === "text/html" ? html : "text") } });
+  Object.defineProperty(ev, "dataTransfer", { value: { getData: (t) => (t === "text/html" ? html : text) } });
   targetRange && (ev.getTargetRanges = () => [targetRange]);
   return !el.$refInput.dispatchEvent(ev);
 }
@@ -2128,6 +2128,13 @@ describe("control.textRich", () => {
     setHtml("<ul><li>x|</li></ul>");
     userPaste("<ul><li>a</li><li>b<ol><li>c</li></ol></li></ul><p>d</p>");
     expect(getHtml()).toBe("<ul><li>xa<br>b<br>c<br>d|</li></ul>");
+    // into code block: plain text instead of html
+    setHtml("<pre>a|b</pre>");
+    expect(userPaste("<p><b>x</b></p><p>y</p>", undefined, "x\ny")).toBe(true);
+    expect(getHtml()).toBe("<pre>ax\ny|b</pre>");
+    setHtml("<pre>a[b]c</pre>");
+    userPaste("<b></b>", undefined, ""); // nothing to paste: selection is deleted only
+    expect(inp.innerHTML).toBe("<pre>ac</pre>");
   });
 
   test("delete over several lines", async () => {

@@ -749,14 +749,20 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return found;
   }
 
-  /** Replaces selection with sanitized html: blocks split the current line at caret */
-  insertHTML(html: string): void {
-    const f = Utils.Html.toEditor(html, this._tools);
+  /** Replaces selection with sanitized html: blocks split the current line at caret;
+   *  code block gets plain text instead (formats & blocks aren't supported there)
+   * @param text plain text of the same content (paste `text/plain`) */
+  insertHTML(html: string, text = ""): void {
     const sel = window.getSelection()!;
     this.getSelectionPos(); // wraps loose content: otherwise caret at editor root has no line
     this.deleteLines(sel.getRangeAt(0)) || sel.getRangeAt(0).deleteContents(); // the rest of the last line joins the 1st one
     const r = sel.getRangeAt(0);
     const line = Utils.Lines.at(r.startContainer, this);
+    if (line?.tagName === "PRE") {
+      text && this.$insert(document.createTextNode(text)); // line breaks as `\n` like browser pastes plain text
+      return;
+    }
+    const f = Utils.Html.toEditor(html, this._tools);
     const first = f.firstElementChild;
     if (!first) {
       return;
@@ -866,7 +872,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       const [r] = e.getTargetRanges();
       this.focus({ preventScroll: true });
       r && Utils.Ranges.select(r);
-      this.insertHTML(html);
+      this.insertHTML(html, e.dataTransfer!.getData("text/plain"));
     } else if (
       (s && (this.replaceAuto(s) || this.insertOutOfToken(s) || this.insertTyped(s))) ||
       (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0])) ||

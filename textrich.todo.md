@@ -4,8 +4,6 @@ End-user review (2026-10-20): Chrome 154 vs Google Docs, Notion, Slack, GitHub, 
 
 ## Bugs
 
-2. [textRich.scss:33](src/controls/textRich/textRich.scss#L33). `\n` in $value (Shift+Enter, multi-line plain text paste; intentional instead of `<br>`) & double spaces are shown in editor (`white-space: pre-wrap` of [textArea.input.scss:6](src/controls/textArea/textArea.input.scss#L6)), but not outside it: global content styles `[wup-textrich]` have no `white-space`, so demo Preview `<div wup-textrich>` renders `a\nb` as `a b` in a single line. Expected: `white-space: pre-wrap` in `[wup-textrich]`
-3. [textRich.input.ts:753](src/controls/textRich/textRich.input.ts#L753). Paste of html inside code block inserts paragraphs after `<pre>`. Expected: plain text inside it
 4. [textRich.ts:520](src/controls/textRich/textRich.ts#L520). Ctrl+K (or link button) with caret inside link removes link silently; keyboard users can't edit url of link. Expected: popup with current url & remove action
 5. [textRich.ts:1158](src/controls/textRich/textRich.ts#L1158). Link popup prefill `https://` isn't selected: typed/pasted full url gives `https://https://example.com` (passes validation)
 6. [textRich.ts:819](src/controls/textRich/textRich.ts#L819). Readonly: plain click on link does nothing (Ctrl+Click only). Expected: link opens
