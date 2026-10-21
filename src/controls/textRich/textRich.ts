@@ -356,7 +356,7 @@ function shortcuts(hk: WUP.TextRich.Tool["hotKey"]): WUP.TextRich.HotKey[] {
  * * inline format (bold etc.) with collapsed selection is applied to the next typed text
  * * ArrowRight at the end of inline format (bold, link etc.) or ArrowLeft at its start: the next typed text goes out of it
  * (caret stays visually), the opposite arrow returns into it; then ArrowRight at the end of the last block (list, quote,
- * code, heading) adds new line after it
+ * code, heading) adds new line after it; ArrowDown/ArrowUp do the same at the end/start of the content
  * * Enter continues inline formats in the next line except turned off (Bold toggled off), left via arrow, recognized text & tokens
  * * line format (quote, code block etc.) is a block of lines: Shift+Enter & Enter add line `\n` inside it (Enter in heading &
  * list adds paragraph & the next item); Enter on empty line closes block (caret goes into new paragraph), in empty block
@@ -1536,7 +1536,8 @@ export default class WUPTextRichControl<
     const l = this.#ask;
     const k = e.key;
     const isMod = e.altKey || e.ctrlKey || e.metaKey;
-    const isArrow = !isMod && !e.shiftKey && (k === "ArrowRight" || k === "ArrowLeft");
+    const isArrow = !isMod && !e.shiftKey && k.startsWith("Arrow");
+    const isVertical = k === "ArrowDown" || k === "ArrowUp";
     /^(Arrow|Home$|End$|Page)/.test(k) && inp.resumeRecognize(); // caret leaves word
     if (
       ((isInp || isBar) && this.gotHotKey(e)) || // not for control in link popup
@@ -1544,8 +1545,8 @@ export default class WUPTextRichControl<
       ((isInp || isBar) && l?.onKey?.(e)) ||
       (isBar && !isMod && this.gotToolbarKey(e)) ||
       (isInp && k === "Tab" && !isMod && this.gotTab(e.shiftKey)) ||
-      // arrow at the edge of format (bold, link) or ArrowRight at the end of the last block (list etc.): see leaveFormats
-      (isInp && isArrow && inp.leaveFormats(k === "ArrowRight"))
+      // arrow at the edge of format (bold, link) or ArrowRight/Down at the end of the last block (list etc.): see leaveFormats
+      (isInp && isArrow && inp.leaveFormats(k === "ArrowRight" || k === "ArrowDown", isVertical))
     ) {
       e.preventDefault();
     } else if (k === "Escape" && l?.hovered) {

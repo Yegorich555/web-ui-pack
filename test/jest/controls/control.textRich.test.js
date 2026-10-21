@@ -603,6 +603,9 @@ describe("control.textRich", () => {
     // single value only: sub replaces super
     expect(format("<div>x<sup>[2]</sup></div>", "script", "sub")).toBe("<div>x[<sub>2]</sub></div>");
     expect(format("<div>x[2]</div>", "script", "super")).toBe("<div>x[<sup>2]</sup></div>");
+    // toggle (button) too: other value is removed, the same one is toggled off
+    expect(format("<div>x<sup>[2]</sup></div>", "script", "sub", false)).toBe("<div>x[<sub>2]</sub></div>");
+    expect(format("<div>x<sub>[2]</sub></div>", "script", "sub", false)).toBe("<div>x[2]</div>");
     // set value (dropdown): replaces previous one; false removes format
     expect(format("<div>[a<span style='font-size: small;'>b</span>]</div>", "size", "lg", true)).toBe(
       '<div><span style="font-size: x-large;">[ab]</span></div>'
@@ -1281,6 +1284,50 @@ describe("control.textRich", () => {
     await h.wait(1);
     setHtml("<ol><li>a|</li></ol>");
     expect(press("ArrowRight")).toBe(false);
+    expect(inp.innerHTML).toBe("<ol><li>a</li></ol>");
+  });
+
+  test("ArrowDown/ArrowUp at the end/start of content: like ArrowRight/ArrowLeft", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    const btnBold = el.querySelector("[tool=bold]");
+    /** Presses key on editor @returns true if it's prevented */
+    const press = (key, opts) =>
+      !inp.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...opts }));
+
+    // the end of the last block: new line after it
+    setHtml("<ul><li>a</li><li><b>Note:|</b></li></ul>");
+    expect(press("ArrowDown")).toBe(true); // inline format is left at first
+    expect(btnBold.getAttribute("aria-pressed")).toBe("false");
+    expect(press("ArrowDown")).toBe(true);
+    expect(getHtml()).toBe("<ul><li>a</li><li><b>Note:</b></li></ul><div>|<br></div>");
+    expect(press("ArrowDown")).toBe(false); // plain line: nothing to go out of
+    // the start of content: inline format is left
+    setHtml("<div><b>|bold</b></div>");
+    expect(press("ArrowUp")).toBe(true);
+    expect(btnBold.getAttribute("aria-pressed")).toBe("false");
+    expect(press("ArrowDown")).toBe(false); // not the end: caret moves
+    userType("x");
+    expect(getHtml()).toBe("<div>x|<b>bold</b></div>");
+    setHtml("<ol><li>|a</li></ol>");
+    expect(press("ArrowUp")).toBe(false); // ArrowLeft doesn't add line before block
+
+    // caret can move into another line
+    setHtml("<ul><li><b>a|</b></li><li>b</li></ul>");
+    expect(press("ArrowDown")).toBe(false);
+    setHtml("<div><b>a|</b><br>b</div>"); // soft line break
+    expect(press("ArrowDown")).toBe(false);
+    setHtml("<ul><li><b>a|</b>b</li></ul>"); // native: to the end of line
+    expect(press("ArrowDown")).toBe(false);
+    setHtml("<div>a</div><div><b>|b</b></div>");
+    expect(press("ArrowUp")).toBe(false);
+    setHtml("<ul><li>a<ul><li><b>|b</b></li></ul></li></ul>");
+    expect(press("ArrowUp")).toBe(false);
+    setHtml("<ol><li>[a]</li></ol>");
+    expect(press("ArrowDown")).toBe(false);
+    setHtml("<ol><li>a|</li></ol>");
+    expect(press("ArrowDown", { shiftKey: true })).toBe(false); // selection
     expect(inp.innerHTML).toBe("<ol><li>a</li></ol>");
   });
 

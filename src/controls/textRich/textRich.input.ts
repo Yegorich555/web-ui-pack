@@ -378,26 +378,45 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   /** Elements left via arrows (see leaveFormats): text typed out of them isn't joined on recognizing (see `recognize`) */
   #left = new WeakSet<Element>();
 
+  /** @returns line of collapsed caret at the end of the last line (`isEnd`) or at the start of the 1st one:
+   *  caret has nowhere to move */
+  protected lineAtEdge(isEnd: boolean): HTMLElement | undefined {
+    const sel = window.getSelection()!;
+    const n = sel.focusNode;
+    const line = sel.isCollapsed && n && this.contains(n) ? Utils.Lines.at(n, this) : undefined;
+    if (
+      !line ||
+      Utils.Formats.parents(line, (el) => !!(isEnd ? el.nextSibling : el.previousSibling), this).length // other lines
+    ) {
+      return undefined;
+    }
+    // text, empty nested item, <br> or embed after/before caret
+    const isEmbed = this._isEmbed;
+    const at = charsBefore(line, n!, sel.focusOffset, isEmbed);
+    return (isEnd ? at === charsBefore(line, line, line.childNodes.length, isEmbed) : !at) ? line : undefined;
+  }
+
   /** ArrowRight at the end of formatted element (bold, link etc.) or ArrowLeft at its start: the next typed text goes out of it,
    *  the opposite arrow returns into it (caret stays visually); without such element ArrowRight at the end of the last block
    *  (list, quote etc.) goes into new line after it: `<li><b>Note:</b>|</li>` + ArrowRight continues item with plain text,
-   *  the 2nd one adds line
+   *  the 2nd one adds line; ArrowDown/ArrowUp (`isVertical`) do the same as ArrowRight/ArrowLeft when caret is at the end/start
+   *  of the content (otherwise they move caret into another line)
    * @returns false if there is nothing to leave/return */
-  leaveFormats(isRight: boolean): boolean {
+  leaveFormats(isRight: boolean, isVertical?: boolean): boolean {
+    const line = (isRight || isVertical) && this.lineAtEdge(isRight);
+    if (isVertical && !line) {
+      return false;
+    }
     const p = this.#pending;
     const sel = window.getSelection()!;
     const back = this.formatsAt(isRight).filter(([k]) => p.get(k) === false); // left via the opposite arrow
     const arr = back.length ? back : this.formatsAt(!isRight).filter(([k]) => p.get(k) !== false);
     if (!arr.length) {
-      const n = sel.focusNode;
-      const line = isRight && !this.readOnly && sel.isCollapsed && n && this.contains(n) && Utils.Lines.at(n, this);
-      const isEmbed = this._isEmbed;
       if (
+        !isRight ||
         !line ||
-        !this._entries.some(([, t, is]) => t.kind === "line" && is?.(line)) || // aligned paragraph isn't block
-        Utils.Formats.parents(line, (el) => !!el.nextSibling, this).length || // arrow moves caret into the next line
-        // text, empty nested item, <br> or embed after caret
-        charsBefore(line, n!, sel.focusOffset, isEmbed) !== charsBefore(line, line, line.childNodes.length, isEmbed)
+        this.readOnly ||
+        !this._entries.some(([, t, is]) => t.kind === "line" && is?.(line)) // aligned paragraph isn't block
       ) {
         return false;
       }
