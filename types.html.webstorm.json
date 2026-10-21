@@ -479,6 +479,10 @@
               "description": "Show/hide clear button"
             },
             {
+              "name": "w-copybutton",
+              "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
+            },
+            {
               "name": "w-mask",
               "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
               "value": {
@@ -746,6 +750,10 @@
               "description": "Show/hide clear button"
             },
             {
+              "name": "w-copybutton",
+              "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
+            },
+            {
               "name": "w-mask",
               "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
               "value": {
@@ -890,6 +898,10 @@
             {
               "name": "w-clearbutton",
               "description": "Show/hide clear button"
+            },
+            {
+              "name": "w-copybutton",
+              "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
             },
             {
               "name": "w-initvalue",
@@ -1082,6 +1094,10 @@
               "description": "Show/hide clear button"
             },
             {
+              "name": "w-copybutton",
+              "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
+            },
+            {
               "name": "w-mask",
               "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
               "value": {
@@ -1223,6 +1239,10 @@
             {
               "name": "w-clearbutton",
               "description": "Show/hide clear button"
+            },
+            {
+              "name": "w-copybutton",
+              "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
             },
             {
               "name": "w-mask",
@@ -1457,6 +1477,10 @@
               "description": "Show/hide clear button"
             },
             {
+              "name": "w-copybutton",
+              "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
+            },
+            {
               "name": "w-mask",
               "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
               "value": {
@@ -1560,6 +1584,10 @@
               "description": "Show/hide clear button"
             },
             {
+              "name": "w-copybutton",
+              "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
+            },
+            {
               "name": "w-initvalue",
               "description": "Default value"
             },
@@ -1649,6 +1677,10 @@
             {
               "name": "w-clearbutton",
               "description": "Show/hide clear button"
+            },
+            {
+              "name": "w-copybutton",
+              "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
             },
             {
               "name": "w-initvalue",
@@ -1792,6 +1824,10 @@
             {
               "name": "w-clearbutton",
               "description": "Show/hide clear button"
+            },
+            {
+              "name": "w-copybutton",
+              "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
             },
             {
               "name": "w-mask",

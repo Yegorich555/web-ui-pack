@@ -191,21 +191,43 @@
     --icon-img: var(--wup-icon-back);
   }
 
-  &:focus-within button[clear] {
+  button[copy] {
+    --icon-size: var(--ctrl-icon-size);
+    --icon-hover-r: 24px;
+    --icon-img: var(--wup-icon-copy);
+    --icon: var(--ctrl-label);
+    --icon-hover: var(--ctrl-focus-label);
+    display: none;
+    opacity: 0;
+  }
+
+  button[copy="done"] {
+    --icon-img: var(--wup-icon-check);
+  }
+
+  &:focus-within button[clear],
+  &:focus-within button[copy] {
     display: inline-block;
     opacity: 1;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    &:hover button[clear] {
+    &:hover button[clear],
+    &:hover button[copy] {
       display: inline-block;
       opacity: 1;
     }
   }
 
   &[disabled] button[clear],
-  &[readonly] button[clear] {
+  &[readonly] button[clear],
+  &[disabled] button[copy] {
     display: none;
     pointer-events: none;
+  }
+
+  // nothing to copy; WARN: jsdom fails on `:has` inside multiline selector list
+  label:has(:placeholder-shown, [contenteditable]:empty) > button[copy] {
+    display: none;
   }
 }

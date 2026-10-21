@@ -25,6 +25,7 @@ export default function TextControlView() {
       }}
       features={[
         "Smart clear (reset/revert) by Esc key and button-clear (use $defaults.clearActions)",
+        "Button-copy to copy text into clipboard (use $options.copyButton)",
         "Built-in validations (required,min,max,email). To extend use $defaults.validations",
         "Smart validations on the fly (use $defaults.validationCases)",
         "Powerful accessibility support (keyboard, announcement)",
@@ -49,6 +50,10 @@ export default function TextControlView() {
           w-label="Text control"
           w-initValue="test@google.com"
           w-validations="window.myTextValidations"
+          w-debounceMs={0}
+          w-selectOnFocus="false"
+          w-clearButton="true"
+          w-copyButton="false"
           w-mask=""
           w-maskholder=""
           w-prefix=""
@@ -90,17 +95,10 @@ export default function TextControlView() {
           }}
         />
         <wup-text
-          w-name="withoutClearButton"
-          w-label="Without clear button"
-          w-initValue="Use $options.clearButton"
-          ref={(el) => {
-            if (el) {
-              el.$options.clearButton = false;
-              el.$options.validations = {
-                required: true,
-              };
-            }
-          }}
+          w-name="withCopyButton"
+          w-label="With copy button ($options.copyButton)"
+          w-initValue="Click on the copy button"
+          w-copyButton="true"
         />
         <wup-text
           class={styles.customIcon}

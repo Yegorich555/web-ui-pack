@@ -44,6 +44,7 @@ describe("control.select", () => {
       "w-prefix": { value: "$" },
       "w-postfix": { value: "USD" },
       "w-clearbutton": { value: true },
+      "w-copybutton": { value: true },
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       "w-allownewvalue": { value: true },

@@ -17,6 +17,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       "w-prefix": { value: "$" },
       "w-postfix": { value: "USD" },
       "w-clearbutton": { value: true },
+      "w-copybutton": { value: true },
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       ...opts?.attrs,
@@ -111,6 +112,43 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       jest.advanceTimersByTime(1);
       expect(el.$refBtnClear).toBe(undefined);
       expect(el).toMatchSnapshot();
+    });
+
+    test("copyButton", async () => {
+      const el = getEl();
+      el.$value = initV;
+      jest.advanceTimersByTime(1);
+      expect(el.$refBtnCopy).toBe(undefined); // false by default
+
+      el.$options.copyButton = true;
+      jest.advanceTimersByTime(1);
+      expect(el.$refBtnCopy).toBeDefined();
+      expect(el.$refBtnCopy!.previousElementSibling).toBe(el.$refLabel.querySelector("span"));
+
+      const writeText = jest.fn(() => Promise.resolve());
+      Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+      const ev = new MouseEvent("click", { bubbles: true, cancelable: true });
+      el.$refBtnCopy!.dispatchEvent(ev);
+      expect(ev.defaultPrevented).toBe(true); // prevent from submit
+      expect(writeText).toHaveBeenCalledWith(el.$refInput.value);
+      await h.wait(1);
+      expect(el.$refBtnCopy!.getAttribute("copy")).toBe("done");
+      await h.wait(1000);
+      expect(el.$refBtnCopy!.getAttribute("copy")).toBe("");
+
+      // clearButton re-rendered: copy stays before it
+      el.$options.clearButton = false;
+      jest.advanceTimersByTime(1);
+      el.$options.clearButton = true;
+      jest.advanceTimersByTime(1);
+      expect(el.$refBtnCopy!.previousElementSibling).toBe(el.$refLabel.querySelector("span"));
+      expect(el.$refBtnClear!.compareDocumentPosition(el.$refBtnCopy!) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
+
+      el.$options.copyButton = false;
+      jest.advanceTimersByTime(1);
+      expect(el.$refBtnCopy).toBe(undefined);
+      expect(el.querySelector("[copy]")).toBe(null);
+      delete (navigator as any).clipboard;
     });
 
     test("debounceMs", async () => {

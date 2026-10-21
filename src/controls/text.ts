@@ -32,6 +32,9 @@ declare global {
        * @see {@link ClearActions} from `web-ui-pack/baseControl`
        * @defaultValue true */
       clearButton: boolean;
+      /** Show/hide copy button: click copies text of input into clipboard
+       * @defaultValue false */
+      copyButton: boolean;
       /** Make input masked
        * @rules when mask is pointed
        * * inputmode='numeric' (if mask contains only numeric vars) so mobile device show numeric-keyboard
@@ -65,6 +68,7 @@ declare global {
       "w-debounceMs"?: number;
       "w-selectOnFocus"?: WUP.Base.JSXBoolAttr;
       "w-clearButton"?: WUP.Base.JSXBoolAttr;
+      "w-copyButton"?: WUP.Base.JSXBoolAttr;
       "w-mask"?: string;
       "w-maskholder"?: string | false;
       "w-prefix"?: string;
@@ -128,6 +132,7 @@ declare module "preact/jsx-runtime" {
  *      <input/>
  *      <strong>{$options.label}</strong>
  *   </span>
+ *   <button copy/>
  *   <button clear/>
  * </label>
  * @tutorial Troubleshooting @see {@link https://yegorich555.github.io/web-ui-pack/control/text#troubleshooting} */
@@ -157,6 +162,7 @@ export default class WUPTextControl<
   static $defaults: WUP.Text.Options = inheritDefaults(WUPBaseControl.$defaults, {
     selectOnFocus: false,
     clearButton: true,
+    copyButton: false,
     validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {
       min: (v, setV) => (!v || v.length < setV) && __wupln(`Min length is ${setV} characters`, "validation"),
       max: (v, setV) => (!v || v.length > setV) && __wupln(`Max length is ${setV} characters`, "validation"),
@@ -170,6 +176,7 @@ export default class WUPTextControl<
   });
 
   $refBtnClear?: HTMLButtonElement;
+  $refBtnCopy?: HTMLButtonElement;
   $refMaskholder?: HTMLSpanElement;
   $refPrefix?: HTMLSpanElement;
   $refPostfix?: HTMLSpanElement;
@@ -222,30 +229,48 @@ export default class WUPTextControl<
     this.$refInput.addEventListener("input", (e) => this.gotInput(e as WUP.Text.GotInputEvent), { passive: true });
   }
 
-  /** Create & append element to control */
-  protected renderBtnClear(): HTMLButtonElement {
-    const bc = document.createElement("button");
-    const span = this.$refLabel.querySelector("span");
-    if (span!.nextElementSibling) {
-      this.$refLabel.insertBefore(bc, span!.nextElementSibling);
-    } else {
-      this.$refLabel.appendChild(bc);
-    }
-    bc.setAttribute(this.#ctr.classNameBtnIcon, "");
-    bc.setAttribute("clear", "");
-    bc.setAttribute("tabindex", -1);
-    bc.setAttribute("aria-hidden", true);
-    bc.setAttribute("type", "button");
+  /** Create button-icon `<button {attr}/>` & insert it after pointed element */
+  protected renderBtnIcon(attr: string, prev: Element, onClick: (b: HTMLButtonElement) => void): HTMLButtonElement {
+    const b = document.createElement("button");
+    prev.after(b);
+    b.setAttribute(this.#ctr.classNameBtnIcon, "");
+    b.setAttribute(attr, "");
+    b.setAttribute("tabindex", -1);
+    b.setAttribute("aria-hidden", true);
+    b.setAttribute("type", "button");
     onEvent(
-      bc,
+      b,
       "click",
       (e) => {
         e.preventDefault(); // prevent from submit
-        this.clearValue();
+        onClick(b);
       },
       { passive: false }
     );
-    return bc;
+    return b;
+  }
+
+  /** Create & append clear-button after copy-button */
+  protected renderBtnClear(): HTMLButtonElement {
+    return this.renderBtnIcon("clear", (this.$refBtnCopy ?? this.$refLabel.querySelector("span"))!, () =>
+      this.clearValue()
+    );
+  }
+
+  /** Create & append copy-button before clear-button */
+  protected renderBtnCopy(): HTMLButtonElement {
+    let t: ReturnType<typeof setTimeout> | undefined;
+    return this.renderBtnIcon("copy", this.$refLabel.querySelector("span")!, async (b) => {
+      await this.copyValue();
+      b.setAttribute("copy", "done"); // icon of success
+      clearTimeout(t);
+      t = setTimeout(() => b.setAttribute("copy", ""), 1000);
+    });
+  }
+
+  /** Called when user clicks on button-copy: copies text of input into clipboard */
+  copyValue(): Promise<void> {
+    return navigator.clipboard.writeText(this.$refInput.value);
   }
 
   /** Add/update/remove prefix part */
@@ -360,6 +385,12 @@ export default class WUPTextControl<
     } else if (this.$refBtnClear) {
       this.$refBtnClear.remove();
       this.$refBtnClear = undefined;
+    }
+    if (this._opts.copyButton) {
+      this.$refBtnCopy ??= this.renderBtnCopy();
+    } else if (this.$refBtnCopy) {
+      this.$refBtnCopy.remove();
+      this.$refBtnCopy = undefined;
     }
     if (!propsChanged || propsChanged.includes("prefix")) {
       this.renderPrefix(this._opts.prefix);
