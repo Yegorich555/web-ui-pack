@@ -851,6 +851,65 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return true;
   }
 
+  /** Line breaks in line of `line` tool (heading, quote, code block, list item etc.):
+   * * Shift+Enter adds `\n` (browser adds `<br>` into code block)
+   * * Enter adds `\n` (heading & list item: browser adds paragraph & the next item like other editors)
+   * * Enter on empty line closes block: the line is removed & caret goes into new paragraph after block (the rest of
+   * block goes into its copy after paragraph); empty block becomes paragraph at the same place
+   * @param isSoft Shift+Enter
+   * @returns false if browser handles it: other line, the next list item, selection goes out of line */
+  protected breakBlock(isSoft: boolean): boolean {
+    const sel = window.getSelection()!;
+    const line = Utils.Lines.at(sel.focusNode!, this);
+    if (
+      !line ||
+      Utils.Lines.at(sel.anchorNode!, this) !== line ||
+      !this._entries.some(([, t, is]) => t.kind === "line" && is?.(line))
+    ) {
+      return false;
+    }
+    // heading & list item: browser adds paragraph & the next item (except empty line)
+    const isNative = !isSoft && [this._tools.header, this._tools.list].some((t) => t.is!(line) !== undefined);
+    if (isNative && !sel.isCollapsed) {
+      return false;
+    }
+    const r = sel.getRangeAt(0);
+    r.deleteContents();
+    const isEmbed = this._isEmbed;
+    const { startContainer: n, startOffset: offset } = r;
+    const at = charsBefore(line, n, offset, isEmbed);
+    const rest = charsBefore(line, line, line.childNodes.length, isEmbed) - at; // the last `<br>` isn't counted
+    const after = Utils.Ranges.textAt(line, n, offset);
+    // between line breaks (the last one is extra: it shows empty last line)
+    const isEmpty =
+      (!at || Utils.Ranges.textAt(line, n, offset, true).endsWith("\n")) && (!rest || after.startsWith("\n"));
+    if (isSoft || !isEmpty) {
+      if (isNative) {
+        return false;
+      }
+      // the extra line break at the end shows empty line (browser does the same)
+      const [t, end] = Utils.Ranges.insertText(n, offset, rest ? "\n" : "\n\n");
+      sel.collapse(t, end - +!rest);
+      return true;
+    }
+    let el = line; // empty block becomes paragraph
+    if (at || rest > 1) {
+      // empty line is removed with line breaks around it (range is collapsed at caret), block is split at it
+      at && r.setStart(...pointAt(line, at - 1, isEmbed));
+      after.startsWith("\n") && r.setEnd(...pointAt(line, at + 1, isEmbed));
+      r.deleteContents();
+      Utils.Formats.splitAt(line, r, isEmbed); // the rest goes into copy of block, empty parts are removed
+      // part before empty line (otherwise line is the rest): its previous empty line stays visible
+      at > 1 && line.textContent!.endsWith("\n") && line.append("\n");
+      el = document.createElement(line.tagName === "LI" ? "li" : "div");
+      r.insertNode(el);
+    }
+    const div = Utils.Lines.setTag(el, "DIV"); // list item goes out of list
+    div.replaceChildren(document.createElement("br"));
+    sel.collapse(div, 0);
+    return true;
+  }
+
   /** Backspace at the start of formatted line (list item, heading, quote etc.) removes its format instead of joining it
    *  with the previous line (like Google Docs & Notion): nested list item goes to the parent list, other line becomes paragraph
    * @returns false if caret isn't at the start of such line */
@@ -878,13 +937,14 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Replaces browser input with custom changes: sanitized paste, typed text (pending formats, out of tokens & recognized
-   *  text), deleting across lines, Backspace at the start of formatted line, Enter in empty nested list item;
-   *  line break leaves recognized text
+   *  text), deleting across lines, Backspace at the start of formatted line, Enter in empty nested list item, line breaks
+   *  in line formats (see breakBlock); line break leaves recognized text
    * @returns true if input is replaced: event is prevented & `input` is fired (without inputType) */
   replaceInput(e: InputEvent): boolean {
     const t = e.inputType;
     const s = t === "insertText" && e.data;
-    (t === "insertParagraph" || t === "insertLineBreak") && this.leaveAuto();
+    const isBreak = t === "insertParagraph" || t === "insertLineBreak";
+    isBreak && this.leaveAuto();
     const isPaste = t === "insertFromPaste" || t === "insertFromPasteAsQuotation" || t === "insertFromDrop";
     const html = isPaste && e.dataTransfer?.getData("text/html");
     if (html) {
@@ -898,7 +958,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       (s && (this.replaceAuto(s) || this.insertOutOfToken(s) || this.insertTyped(s))) ||
       (t === "deleteContentBackward" && this.unformatLine()) ||
       (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0])) ||
-      (t === "insertParagraph" && this.liftEmpty())
+      (t === "insertParagraph" && this.liftEmpty()) ||
+      (isBreak && this.breakBlock(t === "insertLineBreak"))
     ) {
       e.preventDefault();
     } else {

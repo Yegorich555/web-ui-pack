@@ -353,6 +353,9 @@ function shortcuts(hk: WUP.TextRich.Tool["hotKey"]): WUP.TextRich.HotKey[] {
  * (caret stays visually), the opposite arrow returns into it; then ArrowRight at the end of the last block (list, quote,
  * code, heading) adds new line after it
  * * Enter continues inline formats in the next line except turned off (Bold toggled off), left via arrow, recognized text & tokens
+ * * line format (quote, code block etc.) is a block of lines: Shift+Enter & Enter add line `\n` inside it (Enter in heading &
+ * list adds paragraph & the next item); Enter on empty line closes block (caret goes into new paragraph), in empty block
+ * removes format
  * * typed quote or bracket wraps selected text like in code editors: `"text"`, `(text)` (see static $wrapChars)
  * * typed `trigger` opens tool dropdown near caret: `{` for placeholders, `@` for mentions etc.
  * * typed text is recognized: links, emails (see `recognize` of $tools), lists by `1. ` & `- ` at line start;

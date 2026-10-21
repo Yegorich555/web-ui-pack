@@ -856,9 +856,10 @@ describe("control.textRich", () => {
     expect(enter("<ul><li>a<ul><li>|<br><ul><li>b</li></ul></li></ul></li></ul>")).toBe(
       "<ul><li>a</li><li>|<br><ul><li>b</li></ul></li></ul>"
     );
-    // browser handles it: text, top level (empty line instead of item)
+    // browser handles it: text (the next item)
     expect(enter("<ul><li>a<ul><li>b|</li></ul></li></ul>")).toBe(false);
-    expect(enter("<ul><li>a</li><li>|<br></li></ul>")).toBe(false);
+    // top level: paragraph instead of item (see line format)
+    expect(enter("<ul><li>a</li><li>|<br></li></ul>")).toBe("<ul><li>a</li></ul><div>|<br></div>");
     // embed is content
     const cleanup = useImage();
     try {
@@ -2247,6 +2248,65 @@ describe("control.textRich", () => {
     expect(back("<h2>a|b</h2>")[0]).toBe(false);
     expect(back("<div>a</div><div>|b</div>")[0]).toBe(false);
     expect(back("<h2>[a]b</h2>")[0]).toBe(false);
+  });
+
+  test("line format is a block of lines: Enter adds line inside it, on empty line closes it", async () => {
+    await h.wait(1);
+    el.$refInput.focus();
+    /** Sets html & fires `beforeinput` of Enter (Shift+Enter if `isSoft`)
+     * @returns [isPrevented, html] */
+    const enter = (html, isSoft) => {
+      setHtml(html);
+      return [typeText(null, isSoft ? "insertLineBreak" : "insertParagraph"), getHtml()];
+    };
+
+    // line break inside block: the extra one at the end shows empty line
+    expect(enter("<blockquote>a|b</blockquote>")).toEqual([true, "<blockquote>a\n|b</blockquote>"]);
+    expect(enter("<blockquote>ab|</blockquote>")).toEqual([true, "<blockquote>ab\n|\n</blockquote>"]);
+    expect(enter("<pre>a[b]</pre>")).toEqual([true, "<pre>a\n|\n</pre>"]); // selection is replaced (browser adds `<br>`)
+    // empty line: it's removed, block is closed & caret goes into paragraph after it (the rest goes into copy of block)
+    expect(enter("<blockquote>a\n|\n</blockquote><div>b</div>")).toEqual([
+      true,
+      "<blockquote>a</blockquote><div>|<br></div><div>b</div>",
+    ]);
+    expect(enter("<pre>a\n|<br></pre>")).toEqual([true, "<pre>a</pre><div>|<br></div>"]);
+    expect(enter("<blockquote>a\n|\nb</blockquote>")).toEqual([
+      true,
+      "<blockquote>a</blockquote><div>|<br></div><blockquote>b</blockquote>",
+    ]);
+    expect(enter("<h2>|\nb</h2>")).toEqual([true, "<div>|<br></div><h2>b</h2>"]);
+    // the previous empty line stays visible: with the extra line break
+    expect(enter("<blockquote>a\n\n|\n</blockquote>")).toEqual([
+      true,
+      "<blockquote>a\n\n</blockquote><div>|<br></div>",
+    ]);
+    // empty block becomes paragraph
+    expect(enter('<blockquote style="text-align: center;">|<br></blockquote>')).toEqual([
+      true,
+      '<div style="text-align: center;">|<br></div>',
+    ]);
+    // heading: Enter adds paragraph (browser), on empty line or in empty heading - paragraph
+    expect(enter("<h2>ab|</h2>")[0]).toBe(false);
+    expect(enter("<h2>a[b]</h2>")[0]).toBe(false);
+    expect(enter("<h2>ab\n|\n</h2>")).toEqual([true, "<h2>ab</h2><div>|<br></div>"]);
+    expect(enter("<h2>|<br></h2>")).toEqual([true, "<div>|<br></div>"]);
+    expect(enter("<h2>ab|</h2>", true)).toEqual([true, "<h2>ab\n|\n</h2>"]);
+    // list: Enter adds the next item (browser), on empty line or in empty item - paragraph out of list
+    expect(enter("<ul><li>a|</li></ul>")[0]).toBe(false);
+    expect(enter("<ul><li>a[b]</li></ul>")[0]).toBe(false);
+    expect(enter("<ul><li>a\n|\n</li><li>b</li></ul>")).toEqual([
+      true,
+      "<ul><li>a</li></ul><div>|<br></div><ul><li>b</li></ul>",
+    ]);
+    expect(enter("<ul><li>a</li><li>|<br></li></ul>")).toEqual([true, "<ul><li>a</li></ul><div>|<br></div>"]);
+    // Shift+Enter: line break only
+    expect(enter("<pre>a\n|\n</pre>", true)).toEqual([true, "<pre>a\n\n|\n</pre>"]);
+    expect(enter("<ul><li>a|</li></ul>", true)).toEqual([true, "<ul><li>a\n|\n</li></ul>"]);
+    // paragraph, loose content or selection goes out of line: browser handles it
+    expect(enter("<div>a|</div>")[0]).toBe(false);
+    expect(enter("<div>a|</div>", true)[0]).toBe(false);
+    expect(enter("a|")[0]).toBe(false);
+    expect(enter("<blockquote>a[b</blockquote><div>c]</div>")[0]).toBe(false);
   });
 
   test("browser formatting is replaced by tools", async () => {
