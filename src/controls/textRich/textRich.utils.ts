@@ -177,6 +177,20 @@ export const Ranges = {
     r.setEnd(...pointAt(root, b, isEmbed));
     return r;
   },
+
+  /** Returns point moved out of nested elements of el while it's at their start or end:
+   *  (`<b>a<i>|bc</i></b>`, `<b>`) => (`<b>`, 1); split at it doesn't leave their empty copies (`<b>a<i></i></b>`) */
+  edgeOf(el: Element, n: Node, offset: number): [Node, number] {
+    while (
+      n !== el &&
+      (!offset || offset === (n.nodeType === Node.TEXT_NODE ? (n as Text).length : n.childNodes.length))
+    ) {
+      const p = n.parentNode!;
+      offset = Array.prototype.indexOf.call(p.childNodes, n) + (offset ? 1 : 0);
+      n = p;
+    }
+    return [n, offset];
+  },
 };
 
 /** Helpers of tool options: shortcuts, recognizing & groups of menu of `command` */
@@ -280,7 +294,7 @@ export const Formats = {
   splitAt(el: Element, r: Range, isEmbed?: (el: Element) => boolean): void {
     const isEmpty = (x: Element | DocumentFragment): boolean =>
       !x.textContent && !(isEmbed && Lines.elements(x).some(isEmbed));
-    r.setStart(...Internal.edgeOf(el, r.startContainer, r.startOffset));
+    r.setStart(...Ranges.edgeOf(el, r.startContainer, r.startOffset));
     r.setEnd(el, el.childNodes.length);
     const f = r.extractContents(); // range is collapsed at split point
     if (!isEmpty(el)) {
@@ -567,27 +581,13 @@ export const Html = {
 const Internal = {
   // Formats
 
-  /** Returns point moved out of nested elements of el while it's at their start or end:
-   *  (`<b>a<i>|bc</i></b>`, `<b>`) => (`<b>`, 1); split at it doesn't leave their empty copies (`<b>a<i></i></b>`) */
-  edgeOf(el: Element, n: Node, offset: number): [Node, number] {
-    while (
-      n !== el &&
-      (!offset || offset === (n.nodeType === Node.TEXT_NODE ? (n as Text).length : n.childNodes.length))
-    ) {
-      const p = n.parentNode!;
-      offset = Array.prototype.indexOf.call(p.childNodes, n) + (offset ? 1 : 0);
-      n = p;
-    }
-    return [n, offset];
-  },
-
   /** Moves content outside `first`..`last` into copies of el: `<b>a[bc]d</b>` => `<b>a</b><b>[bc]</b><b>d</b>`;
    *  split at edges of nested elements: otherwise their empty copies stay (`<b><i></i></b>`) */
   isolate(el: Element, first: Text, last: Text): void {
     [first, last].forEach((t, isEnd) => {
       const r = document.createRange();
       r.selectNodeContents(el);
-      isEnd ? r.setStart(...Internal.edgeOf(el, t, t.length)) : r.setEnd(...Internal.edgeOf(el, t, 0));
+      isEnd ? r.setStart(...Ranges.edgeOf(el, t, t.length)) : r.setEnd(...Ranges.edgeOf(el, t, 0));
       if (!r.collapsed) {
         const c = el.cloneNode(false);
         c.appendChild(r.extractContents());

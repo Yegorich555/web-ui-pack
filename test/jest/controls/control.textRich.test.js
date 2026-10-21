@@ -1858,6 +1858,28 @@ describe("control.textRich", () => {
     }
   });
 
+  test("typed text replaces selection with hashtag & mention", async () => {
+    useSocial();
+    WUPTextRichControl.$tools.mention.values = [{ value: "john", label: "John Smith" }]; // token: it isn't recognized
+    el.$options.toolbar = [["tag", "mention"]];
+    await h.wait(1);
+    el.$refInput.focus();
+    const tag = (s) => `<span class="wup-tag">${s}</span>`;
+    const mention = (s) => `<span class="wup-mention">${s}</span>`;
+
+    // Ctrl+A: lines are merged, otherwise text goes between lines & empty mention stays in the 2nd line
+    setHtml(`<div>[Text</div><div>Call ${tag("#news")} by ${mention("@john]")}</div>`);
+    expect(typeText("d")).toBe(true);
+    expect(getHtml()).toBe("<div>d|<br></div>");
+    // the same line: elements selected entirely are removed (without empty copies)
+    setHtml(`<div>Call ${tag("[#news")} by ${mention("@john]")}</div>`);
+    expect(typeText("d")).toBe(true);
+    expect(getHtml()).toBe("<div>Call d|</div>");
+    setHtml(`<div>${mention("[@john")} by ${tag("#news]")} now</div>`);
+    expect(typeText("d")).toBe(true);
+    expect(getHtml()).toBe("<div>d| now</div>");
+  });
+
   test("lists are recognized by typed text at line start: `1. ` & `- `", async () => {
     await h.wait(1);
     const inp = el.$refInput;

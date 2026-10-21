@@ -772,10 +772,17 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     if (!arr.length) {
       return false;
     }
-    r.deleteContents();
+    // across lines via deleteLines: otherwise text goes between lines (Ctrl+A)
+    if (!this.deleteLines(r)) {
+      // elements selected entirely are removed: otherwise their empty copies stay (`[#news @john]` => `<span></span>`)
+      const line = this.lineOf(r.startContainer);
+      r.setStart(...Utils.Ranges.edgeOf(line, r.startContainer, r.startOffset));
+      r.setEnd(...Utils.Ranges.edgeOf(line, r.endContainer, r.endOffset));
+      r.deleteContents();
+    }
     arr.forEach((x) => x.isConnected && x.replaceWith(...x.childNodes));
     const t = document.createTextNode(text);
-    r.insertNode(t);
+    sel.getRangeAt(0).insertNode(t);
     sel.collapse(t, t.length);
     return true;
   }
