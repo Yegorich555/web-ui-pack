@@ -9,7 +9,7 @@ exports[`control.textArea $ariaDetails 1`] = `
       <wup-areainput
         aria-labelledby="txt1"
         aria-multiline="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -49,7 +49,7 @@ exports[`control.textArea $ariaDetails 2`] = `
       <wup-areainput
         aria-labelledby="txt1"
         aria-multiline="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -85,7 +85,7 @@ exports[`control.textArea $ariaSpeak 1`] = `
         aria-describedby="my-test-id txt2 my-test-id2"
         aria-labelledby="txt1"
         aria-multiline="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -129,7 +129,7 @@ exports[`control.textArea $ariaSpeak 2`] = `
         aria-describedby="my-test-id my-test-id2"
         aria-labelledby="txt1"
         aria-multiline="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -164,7 +164,7 @@ exports[`control.textArea $show/$hide error 1`] = `
       <wup-areainput
         aria-labelledby="txt1"
         aria-multiline="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -202,7 +202,7 @@ exports[`control.textArea $show/$hide error 2`] = `
         aria-describedby="txt2"
         aria-labelledby="txt1"
         aria-multiline="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -251,7 +251,7 @@ exports[`control.textArea $show/$hide error 3`] = `
       <wup-areainput
         aria-labelledby="txt1"
         aria-multiline="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -973,7 +973,7 @@ exports[`control.textArea options clearButton 1`] = `
         aria-describedby="txt2"
         aria-labelledby="txt1"
         aria-multiline="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -1015,7 +1015,7 @@ exports[`control.textArea options clearButton 2`] = `
         aria-describedby="txt2"
         aria-labelledby="txt1"
         aria-multiline="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -1053,7 +1053,7 @@ exports[`control.textArea validations $options.validationShowAll 1`] = `
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -1123,7 +1123,7 @@ exports[`control.textArea validations $options.validationShowAll 2`] = `
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       >
         123
@@ -1201,7 +1201,7 @@ exports[`control.textArea validations $options.validationShowAll 3`] = `
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -1257,7 +1257,7 @@ exports[`control.textArea validations options.validationCase 1`] = `
       <wup-areainput
         aria-labelledby="txt1"
         aria-multiline="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       >
         123
@@ -1299,7 +1299,7 @@ exports[`control.textArea validations options.validationCase 2`] = `
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -1360,7 +1360,7 @@ exports[`control.textArea validations options.validationCase 3`] = `
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       >
         123
@@ -1422,7 +1422,7 @@ exports[`control.textArea validations options.validationCase 4`] = `
         aria-labelledby="txt1"
         aria-multiline="true"
         aria-required="true"
-        contenteditable="true"
+        contenteditable="plaintext-only"
         role="textbox"
       />
       <strong
@@ -1481,7 +1481,7 @@ exports[`control.textArea with form 1`] = `
         <wup-areainput
           aria-labelledby="txt1"
           aria-multiline="true"
-          contenteditable="true"
+          contenteditable="plaintext-only"
           role="textbox"
         />
         <strong

@@ -151,23 +151,39 @@ function getHtml() {
 const typeText = (data, inputType = "insertText") =>
   !el.$refInput.dispatchEvent(new InputEvent("beforeinput", { inputType, data, bubbles: true, cancelable: true }));
 
-/** Types text like browser: control inserts it itself or it's inserted at caret (in text node) as usual */
+/** Types text like browser: control inserts it itself or it's inserted at caret (in text node) as usual;
+ *  caret after text node (after insertion: `(line, index)`) types at its end like Chrome */
 function userType(data) {
   if (typeText(data)) {
     return;
   }
   const sel = window.getSelection();
-  const t = sel.focusNode;
-  const offset = sel.focusOffset;
+  let t = sel.focusNode;
+  let offset = sel.focusOffset;
+  if (t.nodeType !== Node.TEXT_NODE) {
+    t = t.childNodes[offset - 1];
+    offset = t.length;
+  }
   t.insertData(offset, data);
   sel.collapse(t, offset + data.length);
   el.$refInput.dispatchEvent(new InputEvent("input", { inputType: "insertText", data, bubbles: true }));
   document.dispatchEvent(new Event("selectionchange")); // jsdom doesn't fire it
 }
 
+/** Deletes char before caret like browser (Backspace) */
+function userDelete() {
+  const sel = window.getSelection();
+  const t = sel.focusNode;
+  const offset = sel.focusOffset;
+  typeText(null, "deleteContentBackward");
+  t.deleteData(offset - 1, 1);
+  sel.collapse(t, offset - 1);
+  el.$refInput.dispatchEvent(new InputEvent("input", { inputType: "deleteContentBackward", bubbles: true }));
+}
+
 /** Fires `beforeinput` of paste with html & plain text
  * @returns true if it's prevented (control pastes it itself) */
-function userPaste(html, targetRange, text = "text") {
+function userPaste(html, targetRange, text = "") {
   const ev = new InputEvent("beforeinput", { inputType: "insertFromPaste", bubbles: true, cancelable: true });
   Object.defineProperty(ev, "dataTransfer", { value: { getData: (t) => (t === "text/html" ? html : text) } });
   targetRange && (ev.getTargetRanges = () => [targetRange]);
@@ -185,6 +201,7 @@ describe("control.textRich", () => {
 
   testTextAreaControl(() => el, {
     clear: (c) => c.clearValue(), // Escape doesn't clear rich text
+    copied: (c) => ({ "text/html": c.$refInput.value, "text/plain": c.$refInput.text }), // with formats
     attrs: {
       "w-toolbar": {
         value: [
@@ -193,6 +210,7 @@ describe("control.textRich", () => {
         ],
       },
       "w-hidehotkeyshint": { value: true },
+      "w-copypasteformatted": { value: true },
     },
   });
 
@@ -1095,6 +1113,74 @@ describe("control.textRich", () => {
     }
   });
 
+  test("deleted text: typing style of browser is reset, inline formats of deleted text stay for typed text", async () => {
+    useSocial();
+    const cleanup = usePlaceholder();
+    const cleanupImg = useImage();
+    try {
+      el.$options.toolbar = [["bold"], ["mention", "placeholder", "image"]];
+      await h.wait(1);
+      const inp = el.$refInput;
+      inp.focus();
+      const token = '<span class="placeholder">{email}</span>';
+      const mention = '<span class="wup-mention">@john</span>';
+      /** Deletes selection like browser (`html` before & `after` it) @returns formats for the next typed text */
+      const del = (html, after) => {
+        setHtml(html);
+        expect(typeText(null, "deleteContentBackward")).toBe(false); // browser deletes it
+        setHtml(after);
+        const spy = jest.spyOn(window.getSelection(), "collapse");
+        inp.dispatchEvent(new InputEvent("input", { inputType: "deleteContentBackward", bubbles: true }));
+        // selection is set again: Chrome resets its typing style (otherwise typed text gets `<font color>` of mention)
+        expect(spy).toHaveBeenCalled();
+        spy.mockRestore();
+        return inp.getFormats();
+      };
+
+      // Delete, Backspace, Ctrl+X etc.
+      expect(del("<div>a[<b>bc</b>]</div>", "<div>a|</div>").get("bold")).toBe(true);
+      expect(typeText("x")).toBe(true);
+      expect(getHtml()).toBe("<div>a<b>x|</b></div>");
+      // recognized text & tokens aren't continued
+      expect(del(`<div>a[${mention}]</div>`, "<div>a|</div>").has("mention")).toBe(false);
+      expect(del(`<div>a[${token}]</div>`, "<div>a|</div>").has("placeholder")).toBe(false);
+      expect(typeText("x")).toBe(false); // browser types plain text
+
+      // typed text replaces selection: it's deleted at first (otherwise Chrome types with its typing style)
+      setHtml("<div>a[<b>bc</b>]</div>");
+      expect(typeText("x")).toBe(true);
+      expect(getHtml()).toBe("<div>a<b>x|</b></div>");
+      setHtml(`<div>a[${token}]</div>`);
+      expect(typeText("x")).toBe(true);
+      expect(getHtml()).toBe("<div>ax|</div>");
+      setHtml(`<div>${token}[ b]</div>`); // caret goes after token: typed text is out of it
+      expect(typeText("x")).toBe(true);
+      expect(getHtml()).toBe(`<div>${token}x|</div>`);
+      // pasted plain text replaces selection too
+      setHtml(`<div>a[${token}]</div>`);
+      expect(userPaste("", undefined, "xy")).toBe(true);
+      expect(getHtml()).toBe("<div>axy|</div>");
+
+      // everything is deleted by browser: `<br>` is left in editor (caret can't be inside it: it goes into line)
+      inp.innerHTML = "<br>";
+      window.getSelection().collapse(inp, 0);
+      el.$format("bold");
+      expect(typeText("x")).toBe(true);
+      expect(getHtml()).toBe("<div><b>x|</b><br></div>");
+      // the same for embed & line at editor root
+      inp.innerHTML = '<img src="a.png">b';
+      window.getSelection().collapse(inp, 0);
+      inp.getSelectionPos();
+      expect(getHtml()).toBe('<div>|<img src="a.png">b</div>');
+      window.getSelection().collapse(inp, 0);
+      inp.getSelectionPos();
+      expect(getHtml()).toBe('<div>|<img src="a.png">b</div>');
+    } finally {
+      cleanup();
+      cleanupImg();
+    }
+  });
+
   test("tool is applied while editor isn't focused: the last selection is restored", async () => {
     await h.wait(1);
     const inp = el.$refInput;
@@ -1494,9 +1580,9 @@ describe("control.textRich", () => {
         true,
         "<div>'[<span class=\"formula\">x</span>]'</div>",
       ]);
-      // nothing to wrap: char replaces selection as usual
-      expect(wrap("<div>a[ ]b</div>", "(")).toEqual([false, "<div>a[ ]b</div>"]);
-      expect(wrap("<div>[ab]</div>", "x")).toEqual([false, "<div>[ab]</div>"]);
+      // nothing to wrap: char replaces selection as usual (it's deleted at first)
+      expect(wrap("<div>a[ ]b</div>", "(")).toEqual([true, "<div>a(|b</div>"]);
+      expect(wrap("<div>[ab]</div>", "x")).toEqual([true, "<div>x|</div>"]);
     } finally {
       cleanup();
       delete WUPTextRichControl.$tools.formula;
@@ -1533,7 +1619,8 @@ describe("control.textRich", () => {
         false,
         `<div><span class="placeholder">{em|ail}</span></div>`,
       ]);
-      expect(type(`<div>[${token}]</div>`, "x")[0]).toBe(false);
+      // selected token is deleted at first: otherwise Chrome types with its typing style (`<font color>`)
+      expect(type(`<div>[${token}]</div>`, "x")).toEqual([true, "<div>x|</div>"]);
 
       // typed pair of trigger turns text into token even if it isn't in values
       expect(type("<div>a {someProp|</div>", "}")).toEqual([
@@ -1558,6 +1645,63 @@ describe("control.textRich", () => {
     }
   });
 
+  test("token edited inside stays token only if `is` accepts its text", async () => {
+    useSocial();
+    const tool = WUPTextRichControl.$tools.mention;
+    tool.values = [{ value: "john" }, { value: "jon" }];
+    el.$options.toolbar = [["mention"]];
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    const mention = (s) => `<span class="wup-mention">${s}</span>`;
+
+    // `is` accepts any text: edited token stays
+    setHtml(`<div>hi ${mention("@jo|hn")}</div>`);
+    userType("123");
+    expect(getHtml()).toBe(`<div>hi ${mention("@jo123|hn")}</div>`);
+
+    // `is` accepts values only (see demo `allowUnknownMentions`): unknown text becomes plain text, caret stays
+    const anyText = tool.is;
+    tool.is = (e) => {
+      const v = anyText(e);
+      return tool.values.some((x) => x.value === v) ? v : undefined;
+    };
+    setHtml(`<div>hi ${mention("@jo|hn")}</div>`);
+    userType("123");
+    expect(getHtml()).toBe("<div>hi @jo123|hn</div>");
+    setHtml(`<div>hi ${mention("@jo|n")} now</div>`);
+    userType("h"); // known value
+    expect(getHtml()).toBe(`<div>hi ${mention("@joh|n")} now</div>`);
+    // deleted chars
+    setHtml(`<div>hi ${mention("@joh|n")}</div>`);
+    userDelete();
+    expect(getHtml()).toBe(`<div>hi ${mention("@jo|n")}</div>`);
+    userDelete();
+    expect(getHtml()).toBe("<div>hi @j|n</div>");
+    // text typed at token edge goes outside it, but token follows its text (see `recognize`): unknown one is plain text
+    setHtml(`<div>hi ${mention("@john|")}</div>`);
+    userType("x");
+    expect(getHtml()).toBe("<div>hi @johnx|</div>");
+    userDelete();
+    expect(getHtml()).toBe(`<div>hi ${mention("@john|")}</div>`);
+
+    // the same undo step: undo returns token, redo returns plain text (caret inside token); value is loose content
+    el.$value = `hi ${mention("@john")}`;
+    await h.wait(1);
+    const caretInToken = () => window.getSelection().collapse(inp.querySelector(".wup-mention").firstChild, 3);
+    caretInToken();
+    userType("1");
+    expect(getHtml()).toBe("hi @jo1|hn");
+    await h.wait(1);
+    expect(typeText(null, "historyUndo")).toBe(true);
+    await h.wait(1);
+    expect(inp.innerHTML).toBe(`hi ${mention("@john")}`);
+    caretInToken();
+    expect(typeText(null, "historyRedo")).toBe(true);
+    await h.wait(1);
+    expect(inp.innerHTML).toBe("hi @jo1hn");
+  });
+
   test("text is recognized while typing: link, email & phone", async () => {
     useSocial();
     el.$options.toolbar = [["link", "email", "phone"]];
@@ -1569,16 +1713,6 @@ describe("control.textRich", () => {
       setHtml(html);
       userType(data);
       return getHtml();
-    };
-    /** Deletes char before caret like browser (Backspace) */
-    const userDelete = () => {
-      const sel = window.getSelection();
-      const t = sel.focusNode;
-      const offset = sel.focusOffset;
-      typeText(null, "deleteContentBackward");
-      t.deleteData(offset - 1, 1);
-      sel.collapse(t, offset - 1);
-      inp.dispatchEvent(new InputEvent("input", { inputType: "deleteContentBackward", bubbles: true }));
     };
     const a = (href, text = href) => `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
     const b = (href, text) => `<a href="${href}">${text}</a>`; // email & phone
@@ -1826,7 +1960,7 @@ describe("control.textRich", () => {
     inp.dispatchEvent(new InputEvent("input", { inputType: "insertLineBreak", bubbles: true }));
     expect(getHtml()).toBe("<div><b>bold</b></div><div><b>|<br></b></div>");
 
-    // tool with values: menu on trigger at word start, typed text isn't recognized
+    // tool with values: menu on trigger at word start, typed text is recognized too (see the next test)
     const { mention: tool } = WUPTextRichControl.$tools;
     tool.values = [{ value: "john", label: "John Smith" }];
     const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
@@ -1836,7 +1970,7 @@ describe("control.textRich", () => {
       await h.wait(1);
       const btn = el.querySelector("[tool=mention]");
       expect(btn.hidden).toBe(true);
-      expect(rec("<div>hi @joh|</div>", "n")).toBe("<div>hi @john|</div>");
+      expect(rec("<div>hi @joh|</div>", "n")).toBe(`<div>hi ${mention("@john|")}</div>`);
       inp.blur();
       await h.wait(1);
       inp.focus();
@@ -1849,10 +1983,11 @@ describe("control.textRich", () => {
       expect(el.querySelector("wup-popup[menu] li").textContent).toBe("John Smith");
       inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
       await h.wait(1);
-      expect(getHtml()).toBe(`<div>hi ${mention("@john")}|</div>`);
-      // typed text after token isn't recognized & token stays
+      expect(getHtml()).toBe(`<div>hi ${mention("@john")} |</div>`); // followed by space: caret is out of token
+      // text typed right after token goes outside it, but token follows its text (`is` accepts any text here)
+      window.getSelection().collapse(inp.firstChild, 2);
       userType("x");
-      expect(getHtml()).toBe(`<div>hi ${mention("@john")}x|</div>`);
+      expect(getHtml()).toBe(`<div>hi ${mention("@johnx|")} </div>`);
     } finally {
       delete tool.values;
     }
@@ -1860,7 +1995,7 @@ describe("control.textRich", () => {
 
   test("typed text replaces selection with hashtag & mention", async () => {
     useSocial();
-    WUPTextRichControl.$tools.mention.values = [{ value: "john", label: "John Smith" }]; // token: it isn't recognized
+    WUPTextRichControl.$tools.mention.values = [{ value: "john", label: "John Smith" }]; // token
     el.$options.toolbar = [["tag", "mention"]];
     await h.wait(1);
     el.$refInput.focus();
@@ -1878,6 +2013,189 @@ describe("control.textRich", () => {
     setHtml(`<div>${mention("[@john")} by ${tag("#news]")} now</div>`);
     expect(typeText("d")).toBe(true);
     expect(getHtml()).toBe("<div>d| now</div>");
+    // element selected partially is unwrapped: its text with typed one is recognized again
+    setHtml(`<div>${tag("#ne[ws")} b]</div>`);
+    expect(typeText("x")).toBe(true);
+    expect(getHtml()).toBe(`<div>${tag("#nex|")}</div>`);
+  });
+
+  test("arrows at token edges: caret goes out of invisible holder, typed text isn't joined with token", async () => {
+    useSocial();
+    const tool = WUPTextRichControl.$tools.mention;
+    tool.values = [{ value: "john" }];
+    const anyText = tool.is;
+    tool.is = (e) => {
+      const v = anyText(e);
+      return tool.values.some((x) => x.value === v) ? v : undefined; // values only: `@johnx` isn't mention
+    };
+    el.$options.toolbar = [["mention"]];
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    const zw = String.fromCharCode(0x200b); // Chrome paints caret inside token at its end (any point) otherwise
+    const mention = '<span class="wup-mention">@john</span>';
+    /** Presses key on editor @returns true if it's prevented */
+    const press = (key) => !inp.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+
+    setHtml(`<div>hi <span class="wup-mention">@john|</span></div>`);
+    expect(press("ArrowRight")).toBe(true);
+    expect(getHtml()).toBe(`<div>hi ${mention}${zw}|</div>`);
+    expect(press("ArrowRight")).toBe(false); // nowhere to move: holder stays
+    userType("x"); // instead of holder
+    expect(getHtml()).toBe(`<div>hi ${mention}x|</div>`);
+    // ArrowLeft returns into token
+    setHtml(`<div>hi <span class="wup-mention">@john|</span></div>`);
+    press("ArrowRight");
+    expect(press("ArrowLeft")).toBe(true);
+    expect(getHtml()).toBe(`<div>hi <span class="wup-mention">@john|</span></div>`);
+    // Backspace: holder is removed, browser deletes the last char of token
+    press("ArrowRight");
+    expect(typeText(null, "deleteContentBackward")).toBe(false);
+    expect(getHtml()).toBe(`<div>hi ${mention}|</div>`);
+    // holder isn't content: caret moves, the end of the last block (the 2nd ArrowRight adds line), blur
+    setHtml(`<div>hi <span class="wup-mention">@john|</span></div>`);
+    press("ArrowRight");
+    window.getSelection().collapse(inp.firstChild.firstChild, 1);
+    document.dispatchEvent(new Event("selectionchange"));
+    expect(getHtml()).toBe(`<div>h|i ${mention}</div>`);
+    setHtml(`<ul><li>a <span class="wup-mention">@john|</span></li></ul>`);
+    press("ArrowRight");
+    expect(press("ArrowRight")).toBe(true);
+    expect(getHtml()).toBe(`<ul><li>a ${mention}</li></ul><div>|<br></div>`);
+    el.$value = `hi ${mention}`; // blur renders $value (setHtml doesn't change it)
+    await h.wait(1);
+    window.getSelection().collapse(inp.querySelector(".wup-mention").firstChild, 5);
+    press("ArrowRight");
+    expect(inp.innerHTML).toBe(`hi ${mention}${zw}`);
+    inp.blur();
+    await h.wait(1);
+    expect(inp.innerHTML).toBe(`hi ${mention}`);
+    // content is replaced with holder
+    inp.focus();
+    window.getSelection().collapse(inp.querySelector(".wup-mention").firstChild, 5);
+    press("ArrowRight");
+    el.$value = "abc";
+    await h.wait(1);
+    inp.blur();
+    await h.wait(1);
+    expect(inp.innerHTML).toBe("abc");
+
+    // ArrowLeft at the start of token at line start (otherwise caret before it is painted outside it already)
+    inp.focus();
+    setHtml(`<div><span class="wup-mention">|@john</span> hi</div>`);
+    expect(press("ArrowLeft")).toBe(true);
+    expect(getHtml()).toBe(`<div>|${zw}${mention} hi</div>`);
+    userType("x");
+    expect(getHtml()).toBe(`<div>x|${mention} hi</div>`);
+    setHtml(`<div><span class="wup-mention">|@john</span> hi</div>`);
+    press("ArrowLeft");
+    expect(press("ArrowRight")).toBe(true); // back into token
+    expect(getHtml()).toBe(`<div><span class="wup-mention">|@john</span> hi</div>`);
+    setHtml(`<div>hi <span class="wup-mention">|@john</span></div>`);
+    expect(press("ArrowLeft")).toBe(false);
+    // ArrowDown/ArrowUp: the same as ArrowRight/ArrowLeft without line below/above caret
+    setHtml(`<div>hi <span class="wup-mention">@john|</span></div>`);
+    expect(press("ArrowDown")).toBe(true);
+    expect(getHtml()).toBe(`<div>hi ${mention}${zw}|</div>`);
+    setHtml(`<div><span class="wup-mention">|@john</span> hi</div>`);
+    expect(press("ArrowUp")).toBe(true);
+    expect(getHtml()).toBe(`<div>|${zw}${mention} hi</div>`);
+    // rendered rows (paragraph can be wrapped): row of caret & rows of content before/after it
+    let rows = [];
+    Range.prototype.getClientRects = function rectsOf() {
+      return this.collapsed ? [{ top: 20, bottom: 30, height: 10 }] : rows;
+    };
+    try {
+      setHtml(`<div>hi <span class="wup-mention">@john|</span></div>`);
+      press("ArrowDown");
+      rows = [
+        { top: 20, bottom: 30, height: 10 },
+        { top: 0, bottom: 0, height: 0 },
+      ]; // the same row
+      expect(press("ArrowUp")).toBe(true); // back into token
+      expect(getHtml()).toBe(`<div>hi <span class="wup-mention">@john|</span></div>`);
+      press("ArrowDown");
+      rows = [{ top: 0, bottom: 10, height: 10 }]; // row above caret
+      expect(press("ArrowUp")).toBe(false); // browser moves caret into it
+      rows = [{ top: 40, bottom: 50, height: 10 }]; // row below caret
+      expect(press("ArrowDown")).toBe(false);
+    } finally {
+      delete Range.prototype.getClientRects;
+    }
+  });
+
+  test("typed token is recognized if `is` accepts it: tool with values (mention)", async () => {
+    useSocial();
+    const tool = WUPTextRichControl.$tools.mention;
+    tool.values = [{ value: "john", label: "John Smith" }, { value: "Ann Lee" }];
+    const anyText = tool.is;
+    // values only (see demo `allowUnknownMentions`)
+    tool.is = (e) => {
+      const v = anyText(e);
+      return tool.values.some((x) => x.value === v) ? v : undefined;
+    };
+    const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
+    Range.prototype.getBoundingClientRect = () => rect; // jsdom: menu is placed near caret
+    el.$options.toolbar = [["tag", "mention"]];
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    const btn = el.querySelector("[tool=mention]");
+    const tag = (s) => `<span class="wup-tag">${s}</span>`;
+    const mention = (s) => `<span class="wup-mention">${s}</span>`;
+
+    // element follows typed text while menu is filtered by it
+    setHtml("<div>hi |</div>");
+    userType("@");
+    userType("joh");
+    expect(getHtml()).toBe("<div>hi @joh|</div>");
+    userType("n");
+    expect(getHtml()).toBe(`<div>hi ${mention("@john|")}</div>`);
+    expect(btn.getAttribute("aria-expanded")).toBe("true");
+    // unknown text is plain text (without menu: jsdom breaks live range of typed trigger on unwrapping, Chrome doesn't)
+    setHtml(`<div>hi ${mention("@john|")}</div>`);
+    userType("n");
+    userType("y");
+    expect(getHtml()).toBe("<div>hi @johnny|</div>");
+    userDelete();
+    userDelete();
+    expect(getHtml()).toBe(`<div>hi ${mention("@john|")}</div>`);
+
+    // chosen value replaces recognized token entirely (without its empty copy); trigger typed at the start of text node
+    setHtml("<div>| a</div>");
+    userType("@");
+    userType("john");
+    expect(getHtml()).toBe(`<div>${mention("@john|")} a</div>`);
+    expect(btn.getAttribute("aria-expanded")).toBe("true");
+    inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    await h.wait(1);
+    expect(getHtml()).toBe(`<div>${mention("@john")}| a</div>`);
+
+    // token chosen in menu with text that isn't recognized entirely stays as is: it doesn't follow its text
+    setHtml(`<div>hi ${mention("@Ann Lee|")}</div>`);
+    userType(",");
+    expect(getHtml()).toBe(`<div>hi ${mention("@Ann Lee")},|</div>`);
+
+    // line break at the end of token goes out of it: Chrome adds it into span (caret at its end is inside it)...
+    setHtml(`<div>hi ${mention("@john|")}</div>`);
+    expect(typeText(null, "insertLineBreak")).toBe(false); // browser adds it
+    const t = inp.querySelector(".wup-mention").firstChild;
+    t.appendData("\n\n"); // the 2nd one shows empty line at the end
+    window.getSelection().collapse(t, 6);
+    inp.dispatchEvent(new InputEvent("input", { inputType: "insertLineBreak", bubbles: true }));
+    expect(getHtml()).toBe(`<div>hi ${mention("@john")}\n|\n</div>`);
+    // ...& its empty copy into the new line (`is` rejects it: without text); caret after element is at its end too
+    setHtml(`<div>hi ${mention("@john")}|</div>`);
+    expect(typeText(null, "insertParagraph")).toBe(false);
+    inp.insertAdjacentHTML("beforeend", `<div>${mention("<br>")}</div>`);
+    window.getSelection().collapse(inp.lastChild.firstChild, 0);
+    inp.dispatchEvent(new InputEvent("input", { inputType: "insertParagraph", bubbles: true }));
+    expect(getHtml()).toBe(`<div>hi ${mention("@john")}</div><div>|<br></div>`);
+
+    // hashtag pasted over selected text: it's pasted as usual (its value is text itself) & recognized
+    setHtml("<div>see [docs]</div>");
+    expect(userPaste("", undefined, "#news")).toBe(true);
+    expect(getHtml()).toBe(`<div>see ${tag("#news|")}</div>`);
   });
 
   test("lists are recognized by typed text at line start: `1. ` & `- `", async () => {
@@ -2255,7 +2573,7 @@ describe("control.textRich", () => {
       expect(items()[0].hasAttribute("focused")).toBe(true);
       expect(press("Enter")).toBe(true);
       await h.wait(1);
-      expect(getHtml()).toBe('<div>a <span class="placeholder">{email}</span>|</div>');
+      expect(getHtml()).toBe('<div>a <span class="placeholder">{email}</span> |</div>'); // see the next test
       expect(btn.getAttribute("aria-expanded")).toBe("false");
 
       // closed if whitespace is typed, nothing matches or caret leaves trigger
@@ -2293,6 +2611,55 @@ describe("control.textRich", () => {
     }
   });
 
+  test("token chosen in menu of trigger is followed by space (not before whitespace or punctuation)", async () => {
+    const cleanup = usePlaceholder();
+    const tool = WUPTextRichControl.$tools.placeholder;
+    try {
+      el.$options.toolbar = [["placeholder"]];
+      await h.wait(1);
+      const inp = el.$refInput;
+      inp.focus();
+      const token = '<span class="placeholder">{email}</span>';
+      /** Sets html with caret, types trigger & filter, chooses item via Enter @returns html */
+      const choose = async (html) => {
+        setHtml(html);
+        userType("{");
+        userType("em");
+        await h.wait(1); // typing is a separate undo step
+        inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+        await h.wait(1);
+        return getHtml();
+      };
+
+      // the end of line: caret goes after space (Chrome draws caret inside token at its end)
+      expect(await choose("<div>a |</div>")).toBe(`<div>a ${token} |</div>`);
+      // the same undo step
+      expect(typeText(null, "historyUndo")).toBe(true);
+      await h.wait(1);
+      expect(inp.innerHTML).toBe("<div>a {em</div>");
+      // typed text is separated from token
+      await choose("<div>a |</div>");
+      userType("x");
+      expect(getHtml()).toBe(`<div>a ${token} x|</div>`);
+      // before word & line break (Shift+Enter)
+      expect(await choose("<div>a |b</div>")).toBe(`<div>a ${token} |b</div>`);
+      expect(await choose("<div>a |<br>b</div>")).toBe(`<div>a ${token} |<br>b</div>`);
+      // whitespace or punctuation after it: without space
+      expect(await choose("<div>a | b</div>")).toBe(`<div>a ${token}| b</div>`);
+      expect(await choose("<div>(|)</div>")).toBe(`<div>(${token}|)</div>`);
+      expect(await choose("<div>Dear |, hi</div>")).toBe(`<div>Dear ${token}|, hi</div>`);
+
+      // custom `format` inserts something else instead of token: without space
+      tool.format = ({ editor }) => editor.$insert(document.createTextNode("{x}"));
+      expect(await choose("<div>a |</div>")).toBe("<div>a {x}|</div>");
+      tool.format = ({ editor }) => editor.$insert(Object.assign(document.createElement("b"), { textContent: "x" }));
+      expect(await choose("<div>a |</div>")).toBe("<div>a <b>x</b>|</div>");
+    } finally {
+      cleanup();
+      delete tool.format;
+    }
+  });
+
   test("paste", async () => {
     await h.wait(1);
     const inp = el.$refInput;
@@ -2301,7 +2668,61 @@ describe("control.textRich", () => {
     setHtml("<div>a|</div>");
     expect(userPaste("<b>b</b><script>alert(1)</script>")).toBe(true);
     expect(getHtml()).toBe("<div>a<b>b</b>|</div>");
-    expect(userPaste("")).toBe(false); // plain text: browser pastes it
+    expect(userPaste("", undefined, "")).toBe(false); // nothing to paste: browser handles it
+    // plain text (see $options.copyPasteFormatted): copied html has page styles; html is used without text (image etc.)
+    setHtml("<div><b>ab|c</b></div>");
+    expect(userPaste('<span style="font-size: small;">type </span>', undefined, "type ")).toBe(true);
+    expect(getHtml()).toBe("<div><b>abtype |c</b></div>");
+    /** Fires `beforeinput` of drop with html & plain text */
+    const drop = () => {
+      const ev = new InputEvent("beforeinput", { inputType: "insertFromDrop", bubbles: true, cancelable: true });
+      Object.defineProperty(ev, "dataTransfer", { value: { getData: (t) => (t === "text/html" ? "<b>b</b>" : "b") } });
+      inp.dispatchEvent(ev);
+    };
+    setHtml("<div>a|</div>");
+    drop();
+    expect(getHtml()).toBe("<div>ab|</div>");
+    // with formats
+    el.$options.copyPasteFormatted = true;
+    setHtml("<div>a|</div>");
+    drop();
+    expect(getHtml()).toBe("<div>a<b>b</b>|</div>");
+    setHtml("<div>a|</div>");
+    userPaste('<span style="font-size: small;">b</span>', undefined, "b");
+    expect(getHtml()).toBe('<div>a<span style="font-size: small;">b</span>|</div>');
+    el.$options.copyPasteFormatted = false;
+    // inline content goes into formats at caret (the same format isn't nested); Chrome marks copied selection that
+    // ends at line end, it isn't line
+    setHtml("<div><b>ab|cde</b></div>");
+    expect(userPaste('<div><b>XY</b></div><br class="Apple-interchange-newline">')).toBe(true);
+    expect(getHtml()).toBe("<div><b>abXY|cde</b></div>");
+    // Chrome copies spaces at edges as `&nbsp;`: they're spaces
+    setHtml("<div><b>ab|c</b></div>");
+    userPaste("<span>tools<span>&nbsp;</span></span>");
+    expect(getHtml()).toBe("<div><b>abtools |c</b></div>");
+    // pending formats like for typed text: Bold left via ArrowRight, Bold turned on, formats of replaced selection
+    setHtml("<div><b>abc|</b></div>");
+    inp.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+    userPaste("", undefined, "qwe");
+    expect(getHtml()).toBe("<div><b>abc</b>qwe|</div>");
+    setHtml("<div>a|</div>");
+    el.$format("bold");
+    userPaste("", undefined, "qwe");
+    expect(getHtml()).toBe("<div>a<b>qwe</b>|</div>");
+    setHtml("<div>a<b>[bc]</b></div>");
+    userPaste("", undefined, "qwe");
+    expect(getHtml()).toBe("<div>a<b>qwe</b>|</div>");
+    // plain text: line per line of text, the last line break is skipped (copied line ends with it)
+    setHtml("<div><b>ab|cde</b></div>");
+    expect(userPaste("", undefined, "XY\r\n")).toBe(true);
+    expect(getHtml()).toBe("<div><b>abXY|cde</b></div>");
+    setHtml("<div><b>ab|cde</b></div>");
+    userPaste("", undefined, "X\n\nY");
+    expect(getHtml()).toBe("<div><b>ab</b></div><div>X</div><div><br></div><div>Y|</div><div><b>cde</b></div>");
+    // block: caret goes to the end of its content
+    setHtml("<div>a|b</div>");
+    userPaste("<ul><li>x</li></ul>");
+    expect(getHtml()).toBe("<div>a</div><ul><li>x|</li></ul><div>b</div>");
     // target range is selected at first
     setHtml("<div>abc</div>");
     const t = inp.firstChild.firstChild;
@@ -2365,14 +2786,8 @@ describe("control.textRich", () => {
     await h.wait(1);
     expect(inp.innerHTML).toBe("<div>a https://b.com</div>");
 
-    // plain text: browser pastes it
-    setHtml("<div>a |</div>");
-    expect(userPaste("", undefined, "https://b.com c")).toBe(false);
-    const sel = window.getSelection();
-    sel.focusNode.appendData("https://b.com c");
-    sel.collapse(sel.focusNode, sel.focusNode.length);
-    inp.dispatchEvent(new InputEvent("input", { inputType: "insertFromPaste", bubbles: true }));
-    expect(getHtml()).toBe(`<div>a ${a("https://b.com")} c|</div>`);
+    // plain text
+    expect(paste("<div>a |</div>", "", "https://b.com c")).toBe(`<div>a ${a("https://b.com")} c|</div>`);
 
     // url over selected text: it becomes link (selection stays)
     expect(paste("<div>see [docs] here</div>", "", " https://a.com ")).toBe(
@@ -2996,6 +3411,7 @@ describe("control.textRich", () => {
     WUPTextRichControl.$tools.mark = {
       kind: "inline",
       create: "mark",
+      // eslint-disable-next-line no-nested-ternary
       is: (e) => (e.tagName === "MARK" ? (e.classList.contains("red") ? "red" : "yellow") : undefined),
       className: "ic-mark",
       values: [

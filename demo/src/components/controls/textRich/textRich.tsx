@@ -53,6 +53,7 @@ export default function TextRichControlView() {
           w-validations="window.myTextRichValidations"
           w-toolbar="window.myTextRichToolbar"
           w-hideHotKeysHint="false"
+          w-copyPasteFormatted="false"
           w-hideFooter="false"
           w-allowResizeH="false"
           w-allowResizeW="false"

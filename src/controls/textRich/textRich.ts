@@ -113,15 +113,18 @@ declare global {
        *  without `ask` value is asked via this dropdown opened near editor (on `trigger`, hover on `embed`, $format without value) */
       values?: ToolValue<V>[];
       /** Typed text that opens tool dropdown near caret (`{` - placeholders, `@` - mentions, `/` - commands);
-       *  text typed after it filters items by label or value; chosen value replaces typed text;
+       *  text typed after it filters items by label or value; chosen value replaces typed text (token is followed by
+       *  space like in messengers, except whitespace or punctuation after it: `(@john)`);
        *  Arrows - navigate, Enter/Tab/click - choose, Escape/whitespace/caret out - close
        * @tutorial Rules
        * * works only if tool is in toolbar as dropdown (see `hideOnToolbar`)
        * * works at word start only: after whitespace, bracket or quote (`@` of email doesn't open mentions)
        * * typed pair of trigger (see static $wrapChars) applies typed text even if it isn't in values:
        * `{someProp}` gives placeholder `someProp` (`is` can return `undefined` to reject it)
+       * * typed token is recognized without menu if tool has `recognize`: `@john` (see `recognize`)
        * * `inline` tool with trigger inserts token (placeholder, mention): `create` element with text `{trigger}{value}{pair}`
-       * (`{firstName}`, `@john`); hover on it opens dropdown to replace it (like `embed`); text typed at its edges goes outside it
+       * (`{firstName}`, `@john`); hover on it opens dropdown to replace it (like `embed`); text typed at its edges goes outside it;
+       * text edited inside it stays token only if `is` accepts it (return value from `values` only to reject others)
        * * char from static $wrapChars typed over selection wraps it (`{` gives `{text}`)
        * @example
        * WUPTextRichControl.$tools.placeholder = {
@@ -140,11 +143,13 @@ declare global {
        *  formats it (selected text becomes link)
        * @tutorial Rules
        * * RegExp must match the end of text (use `$`); function returns the recognized end of text or nothing
+       * * `is` gets element with recognized text: `undefined` rejects it (invalid url, mention isn't from `values` etc.)
+       * * token (see `trigger`) typed without menu is recognized too (`@john`); token chosen in menu follows its text
+       * only if this text is recognized entirely (`@John Smith` stays as is)
        * * markdown - RegExp with group: text of group is formatted once (`**bold**` gives bold `bold`), the rest of
-       * matched text is removed; the next typed text goes out of format
-       * * `line` tool: text typed at line start applies format like `ToolValue.recognize` (`> ` gives quote)
-       * * tool with `values` isn't recognized: value is chosen via menu (see `trigger`), like mentions in messengers;
-       * text typed at line start can apply value (see `ToolValue.recognize`): `1. ` gives numbered list
+       * matched text is removed; the next typed text goes out of format; tool with `values` isn't supported
+       * * `line` tool: text typed at line start applies format like `ToolValue.recognize` (`> ` gives quote);
+       * tool with `values` applies value via `ToolValue.recognize`: `1. ` gives numbered list
        * * point `placeholder` too (except markdown): otherwise tool chosen in menu of `command` does nothing visible
        * @example
        * recognize: /(?<!\w)#\w+$/, // hashtags: `#news`
@@ -249,8 +254,14 @@ declare global {
        * @see {@link WUP.TextRich.Tool.hotKey}
        * @defaultValue false */
       hideHotKeysHint: boolean;
+      /** Paste & drop content with its formats (only formats of $tools are kept, Ctrl+Shift+V gives plain text anyway),
+       *  otherwise it is plain text: copied html has page styles (font size etc.)
+       * @defaultValue false */
+      copyPasteFormatted: boolean;
     }
-    interface Options<T = string, VM = ValidityMap> extends WUP.TextArea.Options<T, VM>, NewOptions {}
+    interface Options<T = string, VM = ValidityMap>
+      extends Omit<WUP.TextArea.Options<T, VM>, "copyPasteFormatted">,
+        NewOptions {}
     interface JSXProps<C = WUPTextRichControl> extends WUP.TextArea.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       /** Global reference to object with array
        * @see {@link ToolbarGroup}
@@ -261,6 +272,7 @@ declare global {
        * ``` */
       "w-toolbar"?: string;
       "w-hideHotKeysHint"?: WUP.Base.JSXBoolAttr;
+      "w-copyPasteFormatted"?: WUP.Base.JSXBoolAttr;
     }
   }
 
@@ -352,6 +364,8 @@ const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
  * (caret stays visually), the opposite arrow returns into it; then ArrowRight at the end of the last block (list, quote,
  * code, heading) adds new line after it; ArrowDown/ArrowUp do the same at the end/start of the content
  * * Enter continues inline formats in the next line except turned off (Bold toggled off), left via arrow, recognized text & tokens
+ * * deleted text (Delete, Backspace, typed text over selection) continues its inline formats for the next typed text
+ * except recognized text & tokens (browser typing style isn't used: Chrome types with `<font color>` of deleted mention)
  * * line format (quote, code block etc.) is a block of lines: Shift+Enter & Enter add line `\n` inside it (Enter in heading &
  * list adds paragraph & the next item); Enter on empty line closes block (caret goes into new paragraph), in empty block
  * removes format
@@ -745,6 +759,7 @@ export default class WUPTextRichControl<
       ["btnClear"], // if $options.clearButton is true
     ],
     hideHotKeysHint: false,
+    copyPasteFormatted: false,
   });
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
@@ -769,6 +784,7 @@ export default class WUPTextRichControl<
       _wrapChars: this.#ctr.$wrapChars,
       _isActive: (name: keyof WUP.TextRich.ToolValues) => !!this.findTool(name),
       _applyKey: (key: string) => this.applyKey(key),
+      _isFormatted: () => this._opts.copyPasteFormatted,
       _onFormats: () => this.refreshToolbar(),
     }
   );
@@ -992,6 +1008,12 @@ export default class WUPTextRichControl<
       this.clearValue();
     });
     return b;
+  }
+
+  /** Copies value with formats (html) & its plain text (for apps without html) into clipboard */
+  override copyValue(): Promise<void> {
+    const inp = this.$refInput;
+    return navigator.clipboard.write([new ClipboardItem({ "text/html": inp.value, "text/plain": inp.text })]);
   }
 
   /** Renders dropdown item: icon (if `className`) or label inside element of format (preview via `create`) */
@@ -1318,8 +1340,10 @@ export default class WUPTextRichControl<
     if (found) {
       const [name, tool] = found;
       const tr = tool.trigger!;
+      const i = s.length - tr.length;
       const r = document.createRange(); // typed trigger (live range: typing after it doesn't extend it)
-      r.setStart(n, s.length - tr.length);
+      // before text node at its start: otherwise it goes after element of recognized text (`@john` moved into it)
+      i ? r.setStart(n, i) : r.setStartBefore(n);
       r.setEnd(n, s.length);
       // filter by text typed after trigger; close if caret leaves it, whitespace is typed or nothing matches
       this.askMenu(name, r, false, (m) => {
@@ -1340,6 +1364,18 @@ export default class WUPTextRichControl<
           const isLine = tool.kind === "line" || tool.kind === "lineStyle";
           isLine && inp.changeContent(() => sel.getRangeAt(0).deleteContents());
           this.$format(name, v, true);
+          // token is followed by space like in messengers (not before whitespace or punctuation): otherwise Chrome draws
+          // caret inside token at the end of line; the same undo step (changes of the same tick are merged)
+          const caret = sel.focusNode!; // in line: format wraps loose content
+          const el = caret.childNodes[sel.focusOffset - 1]; // caret goes after inserted token
+          const after =
+            tool.kind === "inline" &&
+            el instanceof HTMLElement &&
+            tool.is!(el) !== undefined &&
+            Utils.Lines.textAround(Utils.Lines.at(caret, inp)!, caret, sel.focusOffset, inp._isEmbed)[1];
+          after !== false &&
+            !/^[\s\p{P}]/u.test(after) &&
+            inp.changeContent(() => inp.$insert(document.createTextNode(" ")));
         }
       });
     }
@@ -1624,6 +1660,9 @@ export default class WUPTextRichControl<
   }
 
   protected override gotInput(e: WUP.Text.GotInputEvent): void {
+    // before history saves changes
+    this.$refInput.checkBreak();
+    this.$refInput.checkToken();
     super.gotInput(e);
     e.inputType === "insertText" && this.gotTrigger();
     this.$refInput.gotInput(e);

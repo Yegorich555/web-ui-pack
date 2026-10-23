@@ -7,6 +7,8 @@ type ToolEntry = [keyof WUP.TextRich.ToolValues, WUP.TextRich.Tool, ((el: Elemen
 
 /** Input types of inserted content: paste or drop */
 const insertTypes = /^insertFrom(Paste|Drop)/;
+/** Input types of deleted content that leave caret for typing: Delete, Backspace, Ctrl+X etc. (not drag & drop, IME) */
+const deleteTypes = /^delete(?!ByDrag|CompositionText)/;
 
 /** Contenteditable element with html value: applies formats & handles typing (pending formats, tokens, recognizing etc.) */
 export default class WUPTextRichInput extends WUPTextAreaInput {
@@ -21,6 +23,9 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   /** Applies rendered tool by key `name:value` (see recognizeLine)
    * @returns false if it isn't rendered */
   _applyKey?: (key: string) => boolean;
+  /** Returns true if paste & drop keep formats: see $options.copyPasteFormatted */
+  _isFormatted?: () => boolean;
+  protected override _editable = "true"; // formats are applied by tools, plain text is pasted by `replaceInput`
   /** Called when formats at caret can be changed without selection change: content or pending formats */
   _onFormats?: () => void;
   /** Entries of `_tools` with checker of element by `is`: cached via setTools */
@@ -58,10 +63,12 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
         new RegExp(`${r.source}|`, r.flags).exec("")!.length > 1 &&
         this.#markdown.set(t, new RegExp(r.source, `${r.flags.replace(/[gd]/g, "")}d`));
     });
-    // tool with values (mentions of users etc.): value is chosen via menu (`trigger`)
-    const isWorking = ([k, t]: ToolEntry): boolean => !t.values?.length && !!this._isActive?.(k);
-    this.#recognizers = this._entries.filter((e) => this.#isAuto(e[1]) && isWorking(e)).map(([, t]) => t);
-    this.#markdowns = this._entries.filter((e) => this.#markdown.has(e[1]) && e[2] && isWorking(e));
+    // tool with values too (mention): `is` gets recognized text & can accept values only (typed `@john`)
+    this.#recognizers = this._entries.filter(([k, t]) => this.#isAuto(t) && this._isActive?.(k)).map(([, t]) => t);
+    // markdown applies tool like toolbar button: tool with values (font size etc.) needs value
+    this.#markdowns = this._entries.filter(
+      ([k, t, is]) => this.#markdown.has(t) && is && !t.values?.length && this._isActive?.(k)
+    );
   }
 
   /** Returns selection (anchor & focus) as char offsets (line break & embed = 1 char): valid even if nodes are re-rendered;
@@ -72,7 +79,9 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     // after wrapping (or out of editor: IndexSizeError) & formats find no line (caret isn't inside it)
     const childPos = (n: Node, offset: number): [Node, number] => {
       let c: Node | null = n === this ? this.childNodes[offset] ?? this.lastChild : null;
-      if (!c) {
+      // caret can't be inside `<br>` or embed (Chrome leaves `<br>` when everything is deleted): it goes into line
+      // wrapping them (see below)
+      if (!c || c.nodeName === "BR" || (c instanceof Element && this._isEmbed?.(c))) {
         return [n, offset];
       }
       const isEnd = c !== this.childNodes[offset];
@@ -208,9 +217,12 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       case "inline": {
         const any = (el: Element): boolean => tool.is!(el as HTMLElement) !== undefined;
         if (tool.trigger && isSet && value !== false) {
-          // token replaces selection or token around caret
-          const cur = Utils.Formats.parents(ctx.range.startContainer, any, editor)[0];
-          cur && Utils.Ranges.select(cur);
+          // token replaces selection with tokens at its edges (typed `@john` is recognized already) or token around caret
+          const { range: r } = ctx;
+          const [a, b] = [r.startContainer, r.endContainer].map((n) => Utils.Formats.parents(n, any, editor)[0]);
+          a && r.setStartBefore(a);
+          b && r.setEndAfter(b);
+          Utils.Ranges.select(r);
           this.$insert(this.createToken(tool, value));
           break;
         }
@@ -251,6 +263,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
 
   /** Runs custom change of editor: saves history, updates value (fires `input`) & toolbar */
   changeContent(fn: () => void): void {
+    this.dropHolder(); // it isn't content
     const h = this._history;
     const prev = this.value;
     this.#autoAt = undefined; // the last change isn't recognizing
@@ -270,7 +283,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Replaces selection with node & places caret after it; empty fragment deletes selection: inline formats of deleted
-   *  text stay for the next typed text like on Enter (typed `- ` in bold gives list item with bold text) */
+   *  text stay for the next typed text (see keepFormats) */
   $insert(node: Node): void {
     const sel = window.getSelection()!;
     const r = sel.getRangeAt(0);
@@ -289,15 +302,21 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       );
       sel.collapse(line, 0);
     }
-    if (was) {
-      const now = this.getFormats();
-      was.forEach((v, k) => {
-        const t = this._tools[k]; // recognized text & tokens aren't continued (see gotLineBreak)
-        t.kind === "inline" && !this.#isAuto(t) && !t.trigger && now.get(k) !== v && this.#pending.set(k, v);
-      });
-      this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
-    }
+    was && this.keepFormats(was);
     this.#isInserted = true;
+  }
+
+  /** Inline formats of deleted text stay for the next typed text like on Enter (typed `- ` in bold gives list item with
+   *  bold text), except recognized text & tokens (see gotLineBreak)
+   * @param was formats of deleted text (see getFormats) */
+  protected keepFormats(was: Map<keyof WUP.TextRich.ToolValues, unknown>): void {
+    const sel = window.getSelection()!;
+    const now = this.getFormats();
+    was.forEach((v, k) => {
+      const t = this._tools[k];
+      t.kind === "inline" && !this.#isAuto(t) && !t.trigger && now.get(k) !== v && this.#pending.set(k, v);
+    });
+    this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
   }
 
   /** Fires `input` to update value of control after custom changes */
@@ -318,25 +337,50 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     p && (sel.anchorNode !== p[0] || sel.anchorOffset !== p[1]) && this.#pending.clear();
     const a = this.#autoAt;
     a && (!sel.isCollapsed || sel.focusNode !== a[0] || sel.focusOffset !== a[1]) && (this.#autoAt = undefined);
+    sel.focusNode !== this.#holder?.[0] && this.dropHolder();
   }
 
   /** Called when control loses focus: pending formats are reset & recognizing is resumed */
   gotFocusLost(): void {
+    this.dropHolder();
     this.#pending.clear();
     this.#isAutoPaused = false;
     this.#autoAt = undefined;
   }
 
-  /** Inserts text typed at token edge outside it: otherwise browser extends token (`{firstName}x`)
+  /** Returns true if element is token (placeholder, mention): see `Tool.trigger` */
+  #isToken = (el: Element): boolean =>
+    this._entries.some(([, t, is]) => t.kind === "inline" && !!t.trigger && !!is?.(el));
+
+  /** Token edited inside (typed or deleted text): taken before input (see checkToken) */
+  #token?: Element;
+
+  /** Token edited inside (see `#token`) stays only if `is` accepts its new text, otherwise it becomes plain text
+   *  (`@jo|hn` + `123` => `@jo123hn` isn't mention if `is` accepts values only): called on input before history saves it,
+   *  so it's the same undo step */
+  checkToken(): void {
+    const el = this.#token;
+    this.#token = undefined;
+    if (!el?.isConnected || this.#isToken(el)) {
+      return;
+    }
+    const sel = window.getSelection()!;
+    const line = this.lineOf(el);
+    const isEmbed = this._isEmbed;
+    const at = charsBefore(line, sel.focusNode!, sel.focusOffset, isEmbed); // caret: unwrapping moves its node
+    el.replaceWith(...el.childNodes);
+    line.normalize();
+    sel.collapse(...pointAt(line, at, isEmbed));
+    this._cached = undefined;
+  }
+
+  /** Inserts text typed at token edge outside it: otherwise browser extends token (`{firstName}x`); selection is
+   *  collapsed (see replaceSelection)
    * @returns false if caret isn't at token edge */
   protected insertOutOfToken(text: string): boolean {
     const sel = window.getSelection()!;
-    const n = sel.focusNode;
-    if (!sel.isCollapsed || !n) {
-      return false;
-    }
-    const isToken = (el: Element): boolean =>
-      this._entries.some(([, t, is]) => t.kind === "inline" && t.trigger && is?.(el));
+    const n = sel.focusNode!;
+    const isToken = this.#isToken;
     const off = sel.focusOffset;
     const kids = n.childNodes;
     // caret inside token (the outer one) or next to it (after insertion): browser types into the previous node
@@ -348,7 +392,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     }
     const isStart = !Utils.Ranges.textAt(el, n, off, true);
     if (!isStart && Utils.Ranges.textAt(el, n, off)) {
-      return false; // caret in the middle: edit token text
+      return false; // caret in the middle: edit token text (see checkToken)
     }
     const t = document.createTextNode(text);
     isStart ? el.before(t) : el.after(t);
@@ -373,6 +417,24 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   /** Elements left via arrows (see leaveFormats): text typed out of them isn't joined on recognizing (see `recognize`) */
   #left = new WeakSet<Element>();
 
+  /** Invisible char & token left via arrow (see leaveFormats): it's after/before token with caret outside, otherwise Chrome
+   *  paints caret inside token; it's removed on the next change, caret move & blur (see dropHolder) */
+  #holder?: [Text, Element];
+
+  /** Removes caret holder (see `#holder`): caret at it goes right after/before token (typed text goes there) */
+  protected dropHolder(): void {
+    const [h] = this.#holder ?? [];
+    this.#holder = undefined;
+    if (h?.isConnected) {
+      const sel = window.getSelection()!;
+      const isAt = sel.focusNode === h;
+      const r = document.createRange();
+      r.setStartBefore(h);
+      h.remove();
+      isAt && sel.collapse(r.startContainer, r.startOffset);
+    }
+  }
+
   /** @returns line of collapsed caret at the end of the last line (`isEnd`) or at the start of the 1st one:
    *  caret has nowhere to move */
   protected lineAtEdge(isEnd: boolean): HTMLElement | undefined {
@@ -391,19 +453,56 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return (isEnd ? at === charsBefore(line, line, line.childNodes.length, isEmbed) : !at) ? line : undefined;
   }
 
+  /** Returns true if collapsed caret is in the first row of content (or in the last one: `isEnd`): ArrowUp (ArrowDown)
+   *  can't move it into another line; it's checked via rendered rows (paragraph can be wrapped), without layout (or for
+   *  caret between elements) - via lines (see lineAtEdge) */
+  protected isEdgeRow(isEnd: boolean): boolean {
+    const caret = window.getSelection()!.getRangeAt(0);
+    const c = caret.collapsed && caret.getClientRects?.()[0];
+    if (!c) {
+      return !!this.lineAtEdge(isEnd);
+    }
+    const r = document.createRange(); // content before (after) caret: its rows are above (below) caret
+    r.selectNodeContents(this);
+    isEnd ? r.setStart(caret.endContainer, caret.endOffset) : r.setEnd(caret.startContainer, caret.startOffset);
+    return !Array.prototype.some.call(
+      r.getClientRects(),
+      (x: DOMRect) => x.height && (isEnd ? x.top >= c.bottom - 1 : x.bottom <= c.top + 1)
+    );
+  }
+
   /** ArrowRight at the end of formatted element (bold, link etc.) or ArrowLeft at its start: the next typed text goes out of it,
-   *  the opposite arrow returns into it (caret stays visually); without such element ArrowRight at the end of the last block
+   *  the opposite arrow returns into it (caret stays visually); ArrowRight at the end of token (mention etc.) & ArrowLeft at
+   *  its start (at line start) move caret out of it visually too (see `#holder`), the next typed text isn't joined with it;
+   *  without such element ArrowRight at the end of the last block
    *  (list, quote etc.) goes into new line after it: `<li><b>Note:</b>|</li>` + ArrowRight continues item with plain text,
-   *  the 2nd one adds line; ArrowDown/ArrowUp (`isVertical`) do the same as ArrowRight/ArrowLeft when caret is at the end/start
-   *  of the content (otherwise they move caret into another line)
+   *  the 2nd one adds line; ArrowDown/ArrowUp (`isVertical`) do the same as ArrowRight/ArrowLeft when caret is in the last/first
+   *  row of the content (otherwise they move caret into another line: see isEdgeRow)
    * @returns false if there is nothing to leave/return */
   leaveFormats(isRight: boolean, isVertical?: boolean): boolean {
-    const line = (isRight || isVertical) && this.lineAtEdge(isRight);
-    if (isVertical && !line) {
-      return false;
+    if (isVertical && !this.isEdgeRow(isRight)) {
+      return false; // caret goes into another line
+    }
+    const line = isRight && this.lineAtEdge(true);
+    const sel = window.getSelection()!;
+    const [h, left] = this.#holder ?? [];
+    if (h && isRight !== (left!.nextSibling === h)) {
+      this.dropHolder(); // the opposite arrow returns into token
+      sel.collapse(...pointAt(left!, isRight ? 0 : Infinity, this._isEmbed));
+      return true;
+    }
+    // token (mention etc.): Chrome paints caret inside it at its end (at any point) & at its start without text before it,
+    // so caret goes out of invisible holder
+    const token = !h && this.edgeAt(this.#isToken, !isRight);
+    if (token && (isRight || !Utils.Ranges.textAt(this.lineOf(token), token, 0, true))) {
+      this.#left.add(token);
+      const holder = document.createTextNode("\u200b");
+      isRight ? token.after(holder) : token.before(holder);
+      this.#holder = [holder, token];
+      sel.collapse(holder, +isRight);
+      return true;
     }
     const p = this.#pending;
-    const sel = window.getSelection()!;
     const back = this.formatsAt(isRight).filter(([k]) => p.get(k) === false); // left via the opposite arrow
     const arr = back.length ? back : this.formatsAt(!isRight).filter(([k]) => p.get(k) !== false);
     if (!arr.length) {
@@ -436,7 +535,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Inserts typed text with formats shown by toolbar: pending ones or of elements ending at caret
-   *  (otherwise Chrome types after link)
+   *  (otherwise Chrome types after link); selection is collapsed (see replaceSelection)
    * @returns false if browser can insert it as usual */
   protected insertTyped(text: string): boolean {
     const sel = window.getSelection()!;
@@ -445,18 +544,26 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       isEnd && sel.collapse(...Utils.Ranges.insertText(sel.focusNode!, sel.focusOffset, text));
       return isEnd;
     }
-    const tools = this._tools;
     this.getSelectionPos(); // caret at editor root (value is replaced) goes into line: otherwise text is a new line
     const r = sel.getRangeAt(0);
-    r.deleteContents();
-    // move caret out of elements of removed/changed formats (`true` - added toggle format)
+    const t = document.createTextNode(text);
+    r.insertNode(this.withPending(t, r));
+    sel.collapse(t, t.length);
+    return true;
+  }
+
+  /** Applies pending formats to typed or pasted content & resets them: range goes out of elements of formats turned off
+   *  (Bold toggled off, left via arrow), content is wrapped into elements of formats turned on
+   * @returns content to insert at range */
+  protected withPending<T extends Node>(content: T, r: Range): T | HTMLElement {
+    const tools = this._tools;
+    let node: T | HTMLElement = content;
+    // move range out of elements of removed/changed formats (`true` - added toggle format)
     this.#pending.forEach((v, k) => {
       const is = (x: Element): boolean => tools[k].is!(x as HTMLElement) !== undefined;
       const el = v !== true && Utils.Formats.parents(r.startContainer, is, this).pop(); // the outer one
       el && Utils.Formats.splitAt(el, r, this._isEmbed);
     });
-    const t = document.createTextNode(text);
-    let node: Node = t;
     this.#pending.forEach((v, k) => {
       const is = (x: Element): boolean => Utils.Formats.isMatch(tools[k].is!(x as HTMLElement), v);
       if (v !== false && !Utils.Formats.parents(r.startContainer, is, this).length) {
@@ -465,10 +572,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
         node = el;
       }
     });
-    r.insertNode(node);
-    sel.collapse(t, t.length);
     this.#pending.clear();
-    return true;
+    return node;
   }
 
   /** Wraps selection into typed char & its pair (see `_wrapChars`), keeps content selected;
@@ -593,17 +698,22 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return Utils.Lines.at(n, this) ?? this;
   }
 
-  /** Remembers elements of recognized text in line at caret (their text gives the same element): see `recognize` */
+  /** Remembers elements of recognized text in line at caret (their text is recognized entirely & gives the same element;
+   *  token chosen in menu can have other text: `@John Smith`): see `recognize` */
   collectAuto(): void {
     const tools = this.#recognizers;
     const n = window.getSelection()?.focusNode;
     this.#auto =
       tools.length && n && this.contains(n)
-        ? Utils.Lines.elements(this.lineOf(n)).filter((x) =>
-            tools.some(
-              (t) => t.is!(x) !== undefined && Utils.Formats.isSame(Utils.Formats.create(t, x.textContent!), x)
-            )
-          )
+        ? Utils.Lines.elements(this.lineOf(n)).filter((x) => {
+            const s = x.textContent!;
+            return tools.some(
+              (t) =>
+                t.is!(x) !== undefined &&
+                Utils.Tools.recognized(t.recognize, s) === s &&
+                Utils.Formats.isSame(Utils.Formats.create(t, s), x)
+            );
+          })
         : [];
   }
 
@@ -759,32 +869,63 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     this.#autoAt = [sel.focusNode!, sel.focusOffset]; // Escape right after it undoes it
   }
 
-  /** Inserts typed text instead of selection with element of recognized text (placeholder of command etc.) as plain text:
-   *  otherwise Chrome keeps element (link with the previous url); typed text is recognized again (see `recognize`)
-   * @returns false if selection has no such elements */
-  protected replaceAuto(text: string): boolean {
+  /** Deletes selection before typed or pasted content replaces it (otherwise Chrome wraps typed text into its typing style
+   *  of deleted elements: `<font color>` of mention etc., & keeps fully selected link with the previous url): across
+   *  lines via deleteLines (Ctrl+A), elements selected entirely are removed (otherwise their empty copies stay:
+   *  `[#news @john]` => `<span></span>`), touched elements of recognized text are unwrapped (inserted text is recognized
+   *  again), inline formats of deleted text stay for typed text (see keepFormats)
+   * @returns false if selection is collapsed */
+  protected deleteSelection(): boolean {
     const sel = window.getSelection()!;
     if (sel.isCollapsed) {
       return false;
     }
     const r = sel.getRangeAt(0);
+    const was = this.getFormats();
     const arr = this.#auto.filter((x) => Utils.Ranges.intersects(r, x));
-    if (!arr.length) {
-      return false;
-    }
-    // across lines via deleteLines: otherwise text goes between lines (Ctrl+A)
     if (!this.deleteLines(r)) {
-      // elements selected entirely are removed: otherwise their empty copies stay (`[#news @john]` => `<span></span>`)
       const line = this.lineOf(r.startContainer);
       r.setStart(...Utils.Ranges.edgeOf(line, r.startContainer, r.startOffset));
       r.setEnd(...Utils.Ranges.edgeOf(line, r.endContainer, r.endOffset));
       r.deleteContents();
+      sel.collapse(r.startContainer, r.startOffset); // Chrome keeps selection not collapsed
     }
-    arr.forEach((x) => x.isConnected && x.replaceWith(...x.childNodes));
-    const t = document.createTextNode(text);
-    sel.getRangeAt(0).insertNode(t);
-    sel.collapse(t, t.length);
+    this.keepFormats(was);
+    const olds = arr.filter((x) => x.isConnected); // selected partially
+    if (olds.length) {
+      const n = sel.focusNode!;
+      const line = this.lineOf(n);
+      const isEmbed = this._isEmbed;
+      const at = charsBefore(line, n, sel.focusOffset, isEmbed); // caret: unwrapping moves it before element text
+      olds.forEach((x) => x.replaceWith(...x.childNodes));
+      sel.collapse(...pointAt(line, at, isEmbed));
+    }
     return true;
+  }
+
+  /** Inserts typed text instead of selection: it's deleted at first (see deleteSelection), typed text gets inline formats
+   *  of deleted text & it's recognized again (see `recognize`)
+   * @returns false if selection is collapsed */
+  protected replaceSelection(text: string): boolean {
+    if (!this.deleteSelection()) {
+      return false;
+    }
+    if (!this.insertOutOfToken(text) && !this.insertTyped(text)) {
+      const sel = window.getSelection()!;
+      sel.collapse(...Utils.Ranges.insertText(sel.focusNode!, sel.focusOffset, text));
+    }
+    return true;
+  }
+
+  /** Formats of text deleted via Delete, Backspace, Ctrl+X etc.: taken before input (see gotDelete) */
+  #deleted = new Map<keyof WUP.TextRich.ToolValues, unknown>();
+
+  /** Called after deleting: typing style of browser is reset (Chrome wraps the next typed text into `<font color>` of
+   *  deleted mention, `<font face>` etc.), inline formats of deleted text stay for typed text instead (see keepFormats) */
+  protected gotDelete(): void {
+    const sel = window.getSelection()!;
+    sel.collapse(sel.focusNode, sel.focusOffset); // any selection change resets typing style
+    this.keepFormats(this.#deleted);
   }
 
   /** Called after typing or deleting: syncs recognized text with its element (see `recognize`),
@@ -813,35 +954,77 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     p.size && (this.#pendingAt = [sel.anchorNode!, sel.anchorOffset]); // otherwise caret moved to the new line resets them
   }
 
-  /** Called before line break: caret at the end of recognized text (link etc.) goes out of its element,
-   *  otherwise browser adds line break into it */
+  /** Element of recognized text or token that ends at caret before line break & length of its text (see leaveAuto) */
+  #breakIn?: [Element, number];
+
+  /** Called before line break: caret at the end of recognized text (link etc.) or token goes out of its element,
+   *  otherwise browser adds line break into it (Chrome still does it for span: see checkBreak) */
   protected leaveAuto(): void {
     this.recognize();
     this.#isAutoPaused = false;
+    this.#breakIn = undefined;
+    const el = this.edgeAt(this.#isWrapped);
+    if (el) {
+      const r = document.createRange();
+      r.setStartAfter(el);
+      window.getSelection()!.collapse(r.startContainer, r.startOffset);
+      this.#breakIn = [el, el.textContent!.length];
+    }
+  }
+
+  /** Returns the outer element matched by `is` that ends (or starts) at collapsed caret: caret right after (before) it is
+   *  at its edge too (browser paints & inserts there) */
+  protected edgeAt(is: (el: Element) => boolean, isStart?: boolean): Element | undefined {
     const sel = window.getSelection()!;
     const n = sel.focusNode;
     if (!sel.isCollapsed || !n || !this.contains(n)) {
+      return undefined;
+    }
+    const line = this.lineOf(n);
+    const isEmbed = this._isEmbed;
+    const at = charsBefore(line, n, sel.focusOffset, isEmbed);
+    return Utils.Lines.elements(line).find(
+      (el) => is(el) && charsBefore(line, el, isStart ? 0 : el.childNodes.length, isEmbed) === at
+    );
+  }
+
+  /** Line break typed at the end of recognized text or token (see leaveAuto) goes out of its element: Chrome adds line
+   *  break into span (caret at its end is inside it) & its empty copy into the new line; called on input before history
+   *  saves it, so `is` of token gets its text without line break (see checkToken) */
+  checkBreak(): void {
+    const b = this.#breakIn;
+    this.#breakIn = undefined;
+    if (!b?.[0].isConnected) {
       return;
     }
-    const el = Utils.Formats.parents(n, this.#isWrapped, this.lineOf(n)).pop();
-    if (el && !Utils.Ranges.textAt(el, n, sel.focusOffset)) {
-      const r = document.createRange();
-      r.setStartAfter(el);
-      sel.collapse(r.startContainer, r.startOffset);
+    const [el, len] = b;
+    const sel = window.getSelection()!;
+    const n = sel.focusNode!;
+    Utils.Formats.parents(n, (x) => !x.textContent && Utils.Formats.isSame(x, el), this.lineOf(n)).forEach((x) =>
+      x.replaceWith(...x.childNodes)
+    );
+    if (el.textContent!.length > len) {
+      const line = this.lineOf(el);
+      const isEmbed = this._isEmbed;
+      const at = charsBefore(line, n, sel.focusOffset, isEmbed); // caret: moved nodes lose it
+      el.after(Utils.Ranges.at(el, len, Infinity, isEmbed).extractContents());
+      line.normalize();
+      sel.collapse(...pointAt(line, at, isEmbed));
     }
+    this._cached = undefined;
   }
 
   /** Returns recognized end of text by the 1st matched tool that works (see `Tool.recognize`); it's retried without
    *  trailing whitespace & punctuation: `(see https://example.com).`, typed whitespace or separator (`+1 (359) 232-`)
-   * @returns recognized text, its element, length of text till its end & tool */
+   * @returns recognized text, its element (with text), length of text till its end & tool */
   protected recognizeEnd(s: string): [string, HTMLElement, number, WUP.TextRich.Tool] | undefined {
     for (let str = s; ; str = str.slice(0, -1)) {
       // eslint-disable-next-line no-restricted-syntax
       for (const t of this.#recognizers) {
         const text = Utils.Tools.recognized(t.recognize, str);
-        const el = text && str.endsWith(text) && Utils.Formats.create(t, text);
+        const el = text && str.endsWith(text) && Object.assign(Utils.Formats.create(t, text), { textContent: text });
         if (el && t.is!(el) !== undefined) {
-          return [text, el, str.length, t]; // otherwise invalid url etc.
+          return [text, el, str.length, t]; // otherwise invalid url, mention isn't from values etc.
         }
       }
       if (!/[\s.,;:!?'")\]}-]$/.test(str)) {
@@ -927,24 +1110,33 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
 
   /** Returns tool & value of url, email etc. pasted over selected text: it formats selected text like toolbar button
    *  instead of replacing it (Notion, Slack, GitHub): selected text becomes link
-   * @returns `undefined` if selection is collapsed or in code block, pasted text isn't recognized as a whole */
+   * @returns `undefined` if selection is collapsed or in code block, pasted text isn't recognized as a whole or its value
+   *  is its text (hashtag, mention: pasted text replaces selection & it's recognized as usual) */
   pasteFormat(e: InputEvent): [keyof WUP.TextRich.ToolValues, unknown] | undefined {
     const s = e.inputType === "insertFromPaste" && e.dataTransfer?.getData("text/plain").trim();
     const sel = window.getSelection()!;
-    if (!s || !sel.toString().trim() || Utils.Lines.of(sel.getRangeAt(0), this).some((l) => l.tagName === "PRE")) {
+    const selected = sel.toString();
+    if (!s || !selected.trim() || Utils.Lines.of(sel.getRangeAt(0), this).some((l) => l.tagName === "PRE")) {
       return undefined;
     }
     const f = this.recognizeEnd(s);
-    return f?.[0] === s ? [this._entries.find(([, t]) => t === f[3])![0], f[3].is!(f[1])] : undefined;
+    if (f?.[0] !== s) {
+      return undefined;
+    }
+    const [, el, , t] = f;
+    const v = t.is!(el);
+    el.textContent = selected; // the same value with selected text: url etc.
+    return t.is!(el) === v ? [this._entries.find(([, x]) => x === t)![0], v] : undefined;
   }
 
-  /** Replaces selection with sanitized html: blocks split the current line at caret;
-   *  code block gets plain text instead (formats & blocks aren't supported there)
+  /** Replaces selection with sanitized html: single paragraph goes inline at caret (inside its formats: pasted into bold
+   *  text is bold), other blocks split the current line at caret; code block gets plain text instead (formats & blocks
+   *  aren't supported there)
    * @param text plain text of the same content (paste `text/plain`) */
   insertHTML(html: string, text = ""): void {
     const sel = window.getSelection()!;
     this.getSelectionPos(); // wraps loose content: otherwise caret at editor root has no line
-    this.deleteLines(sel.getRangeAt(0)) || sel.getRangeAt(0).deleteContents(); // the rest of the last line joins the 1st one
+    this.deleteSelection();
     const r = sel.getRangeAt(0);
     const line = Utils.Lines.at(r.startContainer, this);
     if (line?.tagName === "PRE") {
@@ -952,6 +1144,11 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       return;
     }
     const f = Utils.Html.toEditor(html, this._tools);
+    // copied html keeps spaces at edges as `&nbsp;` (Chrome): editor keeps spaces as is (`white-space: pre-wrap`)
+    const w = document.createTreeWalker(f, NodeFilter.SHOW_TEXT);
+    for (let n = w.nextNode() as Text | null; n; n = w.nextNode() as Text | null) {
+      n.data = n.data.replace(/\xa0/g, " ");
+    }
     const first = f.firstElementChild;
     if (!first) {
       return;
@@ -970,13 +1167,20 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
         );
       };
       Array.from(f.children).forEach(flatten);
-      this.$insert(frag);
+      // like typed text: out of format turned off (Bold left via ArrowRight), into turned on one (see insertTyped)
+      const node = this.withPending(frag, r);
+      // formats at caret aren't nested: bold pasted into bold text
+      const formats = Utils.Formats.parents(r.startContainer, () => true, this);
+      node
+        .querySelectorAll("*")
+        .forEach((el) => formats.some((x) => Utils.Formats.isSame(x, el)) && el.replaceWith(...el.childNodes));
+      this.$insert(node);
       return;
     }
     const last = f.lastChild!;
     Utils.Formats.splitAt(line, r, this._isEmbed); // empty parts are removed
     r.insertNode(f);
-    window.getSelection()!.collapse(last, last.childNodes.length);
+    window.getSelection()!.collapse(...pointAt(last, Infinity, this._isEmbed)); // into the last item of list
   }
 
   /** Deletes range across lines instead of browser (it wraps moved content into `<span style>`):
@@ -1118,12 +1322,17 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Called on `beforeinput` before changes: undo/redo pauses recognizing (otherwise undone link is recognized again
-   *  on typing), other input collects elements of recognized text (see `recognize`); paste & drop remember start of
-   *  inserted content (see recognizeInserted) */
+   *  on typing), other input collects elements of recognized text (see `recognize`) & token edited inside
+   *  (see checkToken); paste & drop remember start of inserted content (see recognizeInserted), deleting remembers
+   *  formats of deleted text (see gotDelete) */
   gotBeforeInput(e: InputEvent): void {
+    this.dropHolder(); // caret goes right after token: typed text goes out of it (see insertOutOfToken)
     this.#autoAt = undefined; // the last change isn't recognizing
     const t = e.inputType;
     t.startsWith("history") ? (this.#isAutoPaused = true) : this.collectAuto();
+    deleteTypes.test(t) && (this.#deleted = this.getFormats());
+    const { commonAncestorContainer: n } = window.getSelection()!.getRangeAt(0);
+    this.#token = Utils.Formats.parents(n, this.#isToken, this).pop();
     const r =
       insertTypes.test(t) &&
       this.#recognizers.length &&
@@ -1131,7 +1340,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     r && (this.#insertAt = charsBefore(this, r.startContainer, r.startOffset, this._isEmbed)); // not changed by insertion
   }
 
-  /** Replaces browser input with custom changes: sanitized paste (its urls etc. are recognized), typed text (pending formats, out of tokens & recognized text), deleting across lines,
+  /** Replaces browser input with custom changes: sanitized paste (its urls etc. are recognized), typed text (pending formats, out of tokens & recognized text, instead of selection), deleting across lines,
    *  Backspace at the start of formatted line, Enter in empty nested list item, line breaks in line formats
    *  (see breakBlock); line break leaves recognized text
    * @returns true if input is replaced: event is prevented & `input` is fired (without inputType) */
@@ -1140,16 +1349,34 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     const s = t === "insertText" && e.data;
     const isBreak = t === "insertParagraph" || t === "insertLineBreak";
     isBreak && this.leaveAuto();
-    const html = insertTypes.test(t) && e.dataTransfer?.getData("text/html");
+    const dt = insertTypes.test(t) ? e.dataTransfer : null;
+    const text = dt?.getData("text/plain") ?? "";
+    const rich = dt?.getData("text/html");
+    // plain text (html without text: image etc.) gives line per <div>: otherwise Chrome pastes it into `<span style>`
+    // & splits line by its last line break (it's skipped: copied line ends with it)
+    const div = document.createElement("div");
+    const toLine = (x: string): string => {
+      div.textContent = x;
+      return x ? div.outerHTML : "<div><br></div>";
+    };
+    const html =
+      (this._isFormatted?.() && rich) ||
+      (text &&
+        text
+          .replace(/\r?\n$/, "")
+          .split(/\r?\n/)
+          .map(toLine)
+          .join("")) ||
+      rich;
     if (html) {
       // sanitized: otherwise browser pastes anything (images, colors etc.)
       e.preventDefault();
       const [r] = e.getTargetRanges();
       this.focus({ preventScroll: true });
       r && Utils.Ranges.select(r);
-      this.insertHTML(html, e.dataTransfer!.getData("text/plain"));
+      this.insertHTML(html, text);
     } else if (
-      (s && (this.replaceAuto(s) || this.insertOutOfToken(s) || this.insertTyped(s))) ||
+      (s && (this.replaceSelection(s) || this.insertOutOfToken(s) || this.insertTyped(s))) ||
       (t === "deleteContentBackward" && this.unformatLine()) ||
       (t.startsWith("delete") && this.deleteLines(e.getTargetRanges()[0])) ||
       (t === "insertParagraph" && this.liftEmpty()) ||
@@ -1159,17 +1386,18 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     } else {
       return false;
     }
+    deleteTypes.test(t) && this.gotDelete();
     this.fireInput(); // saves history by state before changes
     html && this.recognizeInserted();
     return true;
   }
 
-  /** Called on `input`: syncs recognized text with its element (see `recognize`), recognizes pasted plain text
-   *  (see recognizeInserted), cleans the new line (see gotLineBreak) */
+  /** Called on `input`: syncs recognized text with its element (see `recognize`), resets typing style after deleting
+   *  (see gotDelete), cleans the new line (see gotLineBreak) */
   gotInput(e: InputEvent): void {
     const t = e.inputType;
     (t === "insertText" || t === "insertReplacementText" || t?.startsWith("delete")) && this.gotRecognize(e.data);
-    insertTypes.test(t) && this.recognizeInserted(); // plain text: browser inserts it
+    deleteTypes.test(t) && this.gotDelete(); // after recognizing: it can move caret
     (t === "insertParagraph" || t === "insertLineBreak") && this.gotLineBreak();
   }
 }

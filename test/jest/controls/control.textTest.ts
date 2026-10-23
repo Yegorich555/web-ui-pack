@@ -127,12 +127,22 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$refBtnCopy!.getAttribute("aria-label")).toBe("Copy");
       expect(el.$refBtnCopy!.getAttribute("w-tooltip")).toBe(""); // tooltip shows aria-label
 
-      const writeText = jest.fn(() => Promise.resolve());
-      Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+      /** Data written into clipboard by type */
+      let copied: Record<string, string> | undefined;
+      const writeText = (s: string) => {
+        copied = { "text/plain": s };
+        return Promise.resolve();
+      };
+      const write = ([data]: Array<Record<string, string>>) => {
+        copied = data;
+        return Promise.resolve();
+      };
+      Object.defineProperty(navigator, "clipboard", { value: { writeText, write }, configurable: true });
+      (window as any).ClipboardItem = jest.fn((data) => data); // jsdom doesn't support it: item is its data
       const ev = new MouseEvent("click", { bubbles: true, cancelable: true });
       el.$refBtnCopy!.dispatchEvent(ev);
       expect(ev.defaultPrevented).toBe(true); // prevent from submit
-      expect(writeText).toHaveBeenCalledWith(el.$refInput.value);
+      expect(copied).toStrictEqual(opts?.copied?.(el) ?? { "text/plain": el.$refInput.value });
       await h.wait(1);
       expect(el.$refBtnCopy!.getAttribute("copy")).toBe("done");
       await h.wait(1000);
@@ -151,6 +161,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el.$refBtnCopy).toBe(undefined);
       expect(el.querySelector("[copy]")).toBe(null);
       delete (navigator as any).clipboard;
+      delete (window as any).ClipboardItem;
     });
 
     test("debounceMs", async () => {

@@ -100,7 +100,9 @@ export default function testTextAreaControl(
     const inp = el.$refInput;
     const attrs = () =>
       ["contenteditable", "tabindex", "aria-readonly", "aria-disabled"].map((a) => inp.getAttribute(a));
-    expect(attrs()).toStrictEqual(["true", null, null, null]);
+    // plain text: browser pastes & drops it without formats; rich text: formats of its tools
+    const editable = inp.tagName === "WUP-RICHINPUT" ? "true" : "plaintext-only";
+    expect(attrs()).toStrictEqual([editable, null, null, null]);
 
     el.$options.readOnly = true;
     await h.wait(1);
@@ -116,7 +118,7 @@ export default function testTextAreaControl(
 
     el.$options.disabled = false;
     await h.wait(1);
-    expect(attrs()).toStrictEqual(["true", null, null, null]);
+    expect(attrs()).toStrictEqual([editable, null, null, null]);
 
     // readonly before input is connected
     const inp2 = document.createElement("wup-areainput") as WUPTextAreaControl["$refInput"];

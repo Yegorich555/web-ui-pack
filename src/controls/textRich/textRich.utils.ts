@@ -529,6 +529,8 @@ export const Html = {
     const f = document.createDocumentFragment();
     if (html) {
       const { body } = new DOMParser().parseFromString(html, "text/html"); // inert: nothing is executed/loaded
+      // Chrome marks copied selection that starts/ends at line end: otherwise inline text is pasted as new lines
+      body.querySelectorAll("br.Apple-interchange-newline").forEach((br) => br.remove());
       Internal.appendBlocks(body, f, Internal.ctxOf(tools, true));
     }
     return f;

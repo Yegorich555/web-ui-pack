@@ -76,6 +76,8 @@ interface TestOptions<T> extends BaseTestOptions {
   noInputSelection?: boolean;
   /** Clears value like user (see $options.clearActions); by default it presses Escape */
   clear?: (el: WUPBaseControl) => void;
+  /** Returns data that copy button writes into clipboard by type (see $options.copyButton); by default `text/plain` of input */
+  copied?: (el: WUPBaseControl) => Record<string, string>;
   /** Set true if control normalizes value so `$value` is a new instance: then it's compared via `toStrictEqual` instead of `toBe` */
   isValueNormalized?: boolean;
   onCreateNew: (el: WUPBaseControl) => void;

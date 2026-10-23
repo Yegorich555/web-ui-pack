@@ -27,7 +27,12 @@ declare global {
     }
     interface Options<T = string, VM = ValidityMap>
       extends Omit<WUP.Text.Options<T, VM>, "mask" | "maskholder" | "prefix" | "postfix">,
-        NewOptions {}
+        NewOptions {
+      /** Paste & drop content with formats: it isn't supported, plain text only (input is `[contenteditable=plaintext-only]`)
+       * @see {@link WUP.TextRich.Options.copyPasteFormatted}
+       * @defaultValue false */
+      readonly copyPasteFormatted?: boolean;
+    }
     interface JSXProps<C = WUPTextAreaControl>
       extends Omit<WUP.Text.JSXProps<C>, "w-mask" | "w-maskholder" | "w-prefix" | "w-postfix">,
         WUP.Base.OnlyNames<NewOptions> {
@@ -86,7 +91,7 @@ declare module "preact/jsx-runtime" {
  * @tutorial innerHTML @example
  * <label>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
- *      <wup-areainput contenteditable="true" role="textbox" aria-multiline="true" />
+ *      <wup-areainput contenteditable="plaintext-only" role="textbox" aria-multiline="true" />
  *      <strong>{$options.label}</strong>
  *   </span>
  *   <button clear/>

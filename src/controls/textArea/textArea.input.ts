@@ -156,27 +156,33 @@ export default class WUPTextAreaInput extends HTMLElement {
     this.setupEditable();
   }
 
+  /** Value of [contenteditable] while it's editable: browser pastes & drops plain text (see $options.copyPasteFormatted) */
+  protected _editable = "plaintext-only";
+
   /** Updates [contenteditable] & [tabindex] according to readOnly & disabled;
    *  WARN: preventing beforeinput isn't enough since IME composition (`insertCompositionText`) isn't cancelable */
   protected setupEditable(): void {
     const ro = this.readOnly;
     const d = this.disabled;
-    this.setAttribute("contenteditable", ro || d ? "false" : "true");
+    this.setAttribute("contenteditable", ro || d ? "false" : this._editable);
     WUPBaseElement.prototype.setAttr.call(this, "tabindex", ro && !d && "0"); // otherwise it's focusable only while editable
   }
 
   _cached?: string;
   /** Cached value isn't reset on the next input event: it's cached right after changes (see TextRich changeContent) */
   _keepCache?: boolean;
-  /** Get/set plain text (getter converts `<br>` & lines added by browser on Enter into '\n'; setter assigns textContent) */
+  /** Returns plain text: `<br>` & lines added by browser on Enter are converted into '\n' */
+  get text(): string {
+    let s = "";
+    walkText(this, (n, len) => {
+      s += n.nodeType === Node.TEXT_NODE ? (n as Text).data : "\n".repeat(len);
+    });
+    return s;
+  }
+
+  /** Get/set plain text (see `text`; setter assigns textContent) */
   get value(): string {
-    if (this._cached == null) {
-      let s = "";
-      walkText(this, (n, len) => {
-        s += n.nodeType === Node.TEXT_NODE ? (n as Text).data : "\n".repeat(len);
-      });
-      this._cached = s;
-    }
+    this._cached ??= this.text;
     return this._cached;
   }
 

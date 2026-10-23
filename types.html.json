@@ -2780,6 +2780,10 @@
           "description": "Hide keyboard shortcuts in tooltips & dropdown items (`Bold (Ctrl+B)` => `Bold`); `aria-keyshortcuts` is set anyway"
         },
         {
+          "name": "w-copypasteformatted",
+          "description": "Paste & drop content with its formats (only formats of tools are kept, Ctrl+Shift+V gives plain text anyway), otherwise it is plain text: copied html has page styles (font size etc.) @defaultValue false"
+        },
+        {
           "name": "w-debouncems",
           "description": "Time to wait for user finishes typing to start validate and provide $change event"
         },
