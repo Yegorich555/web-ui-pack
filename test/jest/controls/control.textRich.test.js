@@ -588,8 +588,9 @@ describe("control.textRich", () => {
       ["<h1>Heading</h1>", "<h1>Heading</h1>"],
       ["<ul><li>Item</li></ul>", "<ul><li>Item</li></ul>"],
       ['<p style="text-align: center;">Centered</p>', '<p style="text-align: center;">Centered</p>'],
-      // otherwise it's parsed as 2 paragraphs
-      ["<p>Line<br>break</p>", "<p>Line<br>break</p>"],
+      // line break is `\n` (`<br>` isn't used): it doesn't split paragraph; empty line is `\n` too
+      ["<p>Line<br>break</p>", "Line\nbreak"],
+      ["<p>a</p><p><br></p>", "<p>a</p><p>\n</p>"],
       // otherwise leading whitespaces are skipped
       ["<p>&nbsp;<strong>bold</strong></p>", "<p>&nbsp;<strong>bold</strong></p>"],
       ["<p>&nbsp;text</p>", "&nbsp;text"],
@@ -1452,17 +1453,28 @@ describe("control.textRich", () => {
           '<div><span style="font-size: small;"><mark>a</mark></span></div>',
         ],
         ['<p><span style="font-size: 20px">a</span></p>', "<div>a</div>"],
-        // line breaks
+        // line breaks: loose `<br>` splits lines, `<br>` in line is `\n` (the last one after content isn't shown: it's
+        // removed with emptied formats, the last of two shows empty line), empty line gets `<br>` (its formats are removed)
         ["a<br>b<br><br>c", "<div>a</div><div>b</div><div><br></div><div>c</div>"],
-        ["<br><p>a<br></p>", "<div><br></div><div>a<br></div>"],
+        ["<br><p>a<br></p>", "<div><br></div><div>a</div>"],
+        ["<p>a<br>b<br><br></p><p><b>c<br></b></p>", '<div>a\nb\n\n</div><div><b class="b">c</b></div>'],
+        [
+          '<p><b>a</b><b><br></b></p><p><img src="a.png"><br></p>',
+          '<div><b class="b">a</b></div><div><img src="a.png"></div>',
+        ],
+        [
+          "<p><b><br></b></p><p>\n</p><p>a\n<img src='a.png'></p>",
+          '<div><br></div><div><br></div><div>a\n<img src="a.png"></div>',
+        ],
         // blocks inside line are flattened
-        ["<h1>a<div>b</div><p>c</p></h1>", "<h1>a<br>b<br>c</h1>"],
+        ["<h1>a<div>b</div><p>c</p></h1>", "<h1>a\nb\nc</h1>"],
+        ["<h1>a<br><div>b</div></h1>", "<h1>a\nb</h1>"],
         ["<h1><div>a</div></h1>", "<h1>a</h1>"],
         // lists
         ["<li>a</li>", "<ul><li>a</li></ul>"],
         [
           "<ul> <li>a<p>b</p><ol><li>c</li></ol></li> <ol><li>d</li></ol> e<b>f</b></ul>",
-          '<ul><li>a<br>b<ol><li>c</li></ol></li><ol><li>d</li></ol><li> e<b class="b">f</b></li></ul>',
+          '<ul><li>a\nb<ol><li>c</li></ol></li><ol><li>d</li></ol><li> e<b class="b">f</b></li></ul>',
         ],
         ["<ul><li></li></ul>", "<ul><li><br></li></ul>"],
         // containers with blocks are unwrapped
@@ -1477,12 +1489,20 @@ describe("control.textRich", () => {
       ].forEach(([html, expected]) => expect(toEditor(html)).toBe(expected));
       expect(toEditor("")).toBe("");
 
-      // value: <strong> instead of <b> (keeps class), trailing <br> of line is removed, empty lines are kept
+      // value: <strong> instead of <b> (keeps class), line breaks are `\n`: the last one of line is removed,
+      // empty lines are kept
       expect(toValue('<div><b class="b">a</b><br></div><div><br></div>')).toBe(
-        '<p><strong class="b">a</strong></p><p><br></p>'
+        '<p><strong class="b">a</strong></p><p>\n</p>'
       );
+      expect(toValue("<div>a<br>b</div><ul><li><br></li></ul>")).toBe("<p>a\nb</p><ul><li>\n</li></ul>");
       expect(toValue("<ul><li>a<br></li></ul><h1>b<br></h1>")).toBe("<ul><li>a</li></ul><h1>b</h1>");
       expect(toValue("<ul>a<br></ul>")).toBe("<ul><li>a</li></ul>"); // loose content of list (invalid html)
+      // editor: `<br>` at root (Chrome leaves it when everything is deleted), empty text node after line break
+      const line = document.createElement("div");
+      line.append("a\n", "");
+      const root = document.createElement("div");
+      root.append(document.createElement("br"), line);
+      expect(Html.fromEditor(root, WUPTextRichControl.$tools)).toBe("<p>\n</p><p>a</p>");
       expect(toValue('<div><img src="a.png"></div>')).toBe('<img src="a.png">'); // embed without text isn't empty
       expect(toValue("<div> </div>")).toBe("");
       expect(toValue("a<br>b")).toBe("<p>a</p><p>b</p>"); // loose content (Chrome doesn't wrap the 1st line)
@@ -1817,7 +1837,7 @@ describe("control.textRich", () => {
     expect(getHtml()).toBe(`<div>${a("https://a.com")}|</div>`);
     setHtml("<div><b>https://a.com|</b></div>"); // not recognized yet: pasted etc.
     typeText(null, "insertLineBreak");
-    expect(getHtml()).toBe(`<div><b>${a("https://a.com")}|</b></div>`);
+    expect(getHtml()).toBe(`<div><b>${a("https://a.com")}\n|\n</b></div>`);
     setHtml("<div>https://a.com!|</div>");
     typeText(null, "insertParagraph");
     expect(getHtml()).toBe(`<div>${a("https://a.com")}!|</div>`);
@@ -1952,7 +1972,7 @@ describe("control.textRich", () => {
     expect(getHtml()).toBe(`<div>hi ${tag("#news")}|</div>`);
     setHtml(`<div>hi ${mention("@john|")}</div>`);
     typeText(null, "insertLineBreak");
-    expect(getHtml()).toBe(`<div>hi ${mention("@john")}|</div>`);
+    expect(getHtml()).toBe(`<div>hi ${mention("@john")}\n|\n</div>`);
     setHtml(`<div>${mention(tag("#news"))}</div><div>${mention(tag("|<br>"))}</div>`); // copied by Chrome
     inp.dispatchEvent(new InputEvent("input", { inputType: "insertParagraph", bubbles: true }));
     expect(getHtml()).toBe(`<div>${mention(tag("#news"))}</div><div>|<br></div>`);
@@ -2176,15 +2196,11 @@ describe("control.textRich", () => {
     userType(",");
     expect(getHtml()).toBe(`<div>hi ${mention("@Ann Lee")},|</div>`);
 
-    // line break at the end of token goes out of it: Chrome adds it into span (caret at its end is inside it)...
+    // line break at the end of token goes out of it: Shift+Enter is custom (see the test of line format), on Enter Chrome
+    // adds its empty copy into the new line (`is` rejects it: without text); caret after element is at its end too
     setHtml(`<div>hi ${mention("@john|")}</div>`);
-    expect(typeText(null, "insertLineBreak")).toBe(false); // browser adds it
-    const t = inp.querySelector(".wup-mention").firstChild;
-    t.appendData("\n\n"); // the 2nd one shows empty line at the end
-    window.getSelection().collapse(t, 6);
-    inp.dispatchEvent(new InputEvent("input", { inputType: "insertLineBreak", bubbles: true }));
+    expect(typeText(null, "insertLineBreak")).toBe(true);
     expect(getHtml()).toBe(`<div>hi ${mention("@john")}\n|\n</div>`);
-    // ...& its empty copy into the new line (`is` rejects it: without text); caret after element is at its end too
     setHtml(`<div>hi ${mention("@john")}|</div>`);
     expect(typeText(null, "insertParagraph")).toBe(false);
     inp.insertAdjacentHTML("beforeend", `<div>${mention("<br>")}</div>`);
@@ -2732,10 +2748,13 @@ describe("control.textRich", () => {
     setHtml("<div>a[b]c</div>");
     expect(userPaste("<script>alert(1)</script>")).toBe(true);
     expect(inp.innerHTML).toBe("<div>ac</div>");
-    // into list item: lists are flattened
+    // into list item: lists are flattened into lines of item (empty line too)
     setHtml("<ul><li>x|</li></ul>");
     userPaste("<ul><li>a</li><li>b<ol><li>c</li></ol></li></ul><p>d</p>");
-    expect(getHtml()).toBe("<ul><li>xa<br>b<br>c<br>d|</li></ul>");
+    expect(getHtml()).toBe("<ul><li>xa\nb\nc\nd|</li></ul>");
+    setHtml("<ul><li>x|</li></ul>");
+    userPaste("<p>a</p><p><br></p><p>b</p>");
+    expect(getHtml()).toBe("<ul><li>xa\n\nb|</li></ul>");
     // into code block: plain text instead of html
     setHtml("<pre>a|b</pre>");
     expect(userPaste("<p><b>x</b></p><p>y</p>", undefined, "x\ny")).toBe(true);
@@ -2821,7 +2840,7 @@ describe("control.textRich", () => {
         `<ul><li>${a("https://a.com")}<img src="a.png">${a(
           "https://www.b.com",
           "www.b.com"
-        )}<br>c.com<ul><li>a 1 <u>2 3|</u></li></ul></li></ul>` // the last recognized text wins like on typing
+        )}\nc.com<ul><li>a 1 <u>2 3|</u></li></ul></li></ul>` // the last recognized text wins like on typing
       );
       // nothing to recognize
       el.$options.toolbar = [["bold"]];
@@ -2963,14 +2982,35 @@ describe("control.textRich", () => {
       "<ul><li>a</li></ul><div>|<br></div><ul><li>b</li></ul>",
     ]);
     expect(enter("<ul><li>a</li><li>|<br></li></ul>")).toEqual([true, "<ul><li>a</li></ul><div>|<br></div>"]);
-    // Shift+Enter: line break only
+    // Shift+Enter: line break only (in any line, like Chrome: Firefox adds `<br>`, Safari - paragraph)
     expect(enter("<pre>a\n|\n</pre>", true)).toEqual([true, "<pre>a\n\n|\n</pre>"]);
     expect(enter("<ul><li>a|</li></ul>", true)).toEqual([true, "<ul><li>a\n|\n</li></ul>"]);
+    expect(enter("<ul><li>a|<ul><li>b</li></ul></li></ul>", true)).toEqual([
+      true,
+      "<ul><li>a\n|<ul><li>b</li></ul></li></ul>",
+    ]);
+    expect(enter("<div>a|b</div>", true)).toEqual([true, "<div>a\n|b</div>"]);
+    expect(enter("a|", true)).toEqual([true, "<div>a\n|\n</div>"]); // loose content (the 1st typed line) goes into line
+    // empty line: extra line break instead of its `<br>` (otherwise 2 empty lines are shown)
+    expect(enter("<div>|<br></div>", true)).toEqual([true, "<div>\n|\n</div>"]);
+    expect(enter("<div><b>|<br></b></div>", true)).toEqual([true, "<div><b>\n|\n</b></div>"]);
+    expect(enter("<div>|</div>", true)).toEqual([true, "<div>\n|\n</div>"]);
+    // Safari fires `insertParagraph` for Shift+Enter
+    setHtml("<div>a|</div>");
+    const keyEnter = (shiftKey) =>
+      el.$refInput.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", shiftKey, bubbles: true, cancelable: true })
+      );
+    keyEnter(true);
+    expect(typeText(null, "insertParagraph")).toBe(true);
+    expect(getHtml()).toBe("<div>a\n|\n</div>");
+    keyEnter(false);
+    expect(typeText(null, "insertParagraph")).toBe(false); // Enter: browser adds paragraph
     // paragraph, loose content or selection goes out of line: browser handles it
     expect(enter("<div>a|</div>")[0]).toBe(false);
-    expect(enter("<div>a|</div>", true)[0]).toBe(false);
     expect(enter("a|")[0]).toBe(false);
     expect(enter("<blockquote>a[b</blockquote><div>c]</div>")[0]).toBe(false);
+    expect(enter("<div>a[b</div><div>c]</div>", true)[0]).toBe(false);
   });
 
   test("browser formatting is replaced by tools", async () => {

@@ -542,15 +542,12 @@ export const Html = {
    * * only formats of tools are kept: other elements are unwrapped (`<span>`, `<table>` etc.)
    * or removed with content (`<script>`, `<img>` if it isn't embed etc.)
    * * links with unsafe protocols are removed (`javascript:` etc.)
-   * * trailing `<br>` of non-empty line is removed (browser adds it to show empty line) */
+   * * line breaks are `\n` (`<br>` isn't used): empty line is `<p>\n</p>`, the last line break after content is removed
+   * (browser adds it to show empty line) */
   fromEditor(root: Node, tools: WUP.TextRich.Tools): string {
     const div = document.createElement("div");
     const ctx = Internal.ctxOf(tools, false);
     Internal.appendBlocks(root, div, ctx);
-    Lines.all(div).forEach((l) => {
-      const last = l.lastChild;
-      last && last !== l.firstChild && last.nodeName === "BR" && last.remove();
-    });
     const text = div.textContent!;
     const p = div.firstChild as HTMLElement;
     const html = text.trim() || ctx.hasEmbed ? (Internal.isPlainParagraph(p) ? p : div).innerHTML : "";
@@ -643,7 +640,7 @@ const Internal = {
   },
 
   /** Appends sanitized inline node: embed (`<img>` etc.) is created again, unsupported elements are unwrapped
-   *  or removed with content (see skipTags); nested blocks are flattened into lines separated by `<br>` */
+   *  or removed with content (see skipTags), `<br>` becomes `\n`; nested blocks are flattened into lines separated by `\n` */
   appendInlineNode(n: Node, dst: HTMLElement, ctx: Ctx): void {
     if (n.nodeType === Node.TEXT_NODE) {
       dst.append((n as Text).data);
@@ -664,11 +661,11 @@ const Internal = {
       return;
     }
     if (tag === "BR") {
-      dst.appendChild(document.createElement("br"));
+      dst.append("\n"); // as typed via Shift+Enter
       return;
     }
     const isBlock = Lines.isBlockTag(tag);
-    isBlock && dst.lastChild && dst.lastChild.nodeName !== "BR" && dst.appendChild(document.createElement("br"));
+    isBlock && dst.lastChild && !dst.textContent!.endsWith("\n") && dst.append("\n");
     // element can apply several formats (`<span style="font-size; color">`) => nested elements;
     // blocks & unsupported elements are unwrapped: <span>, <font>, <code> etc.
     const arr = isBlock ? [] : Internal.applied(ctx.inline, el).map(([t, v]) => Internal.createFor(t, v, ctx));
@@ -680,7 +677,7 @@ const Internal = {
   },
 
   /** Fills line `el` (paragraph, heading, list item etc.) with sanitized content of src: copies line styles (`lineStyle`
-   *  formats & indent); nested lists of list item are kept (empty item gets `<br>`), other blocks are flattened */
+   *  formats & indent); nested lists of list item are kept, other blocks are flattened (see trimBreak) */
   toLine(src: HTMLElement, el: HTMLElement, ctx: Ctx): HTMLElement {
     Internal.applied(ctx.lineStyle, src).forEach(([t, v]) => t.set!(el, v));
     const ml = src.style.marginLeft;
@@ -691,27 +688,66 @@ const Internal = {
         ? el.appendChild(Internal.toList(n as HTMLElement, ctx))
         : Internal.appendInlineNode(n, el, ctx);
     }
-    isItem && !el.firstChild && el.appendChild(document.createElement("br"));
+    Internal.trimBreak(el, ctx);
     return el;
+  },
+
+  /** Normalizes line breaks `\n` of sanitized line: the last one after content is removed (browser adds it to show empty
+   *  line, it isn't shown after text: `a<br>`, `<b>a<br></b>`); empty line (empty item or line break only, its formats
+   *  too) gets `<br>` in editor (browser shows caret there) & `\n` in value; text-less item with nested list stays as is */
+  trimBreak(el: HTMLElement, ctx: Ctx): void {
+    const own = Array.prototype.filter.call(el.childNodes, (n: Node) => !listTags.has(n.nodeName)) as ChildNode[];
+    let text = "";
+    let last: Node | undefined; // the last text or embed
+    let hasEmbed = false;
+    const walk = (n: Node): void => {
+      if (n.nodeType === Node.TEXT_NODE) {
+        text += (n as Text).data;
+        (n as Text).data && (last = n);
+      } else if (!n.firstChild) {
+        hasEmbed = true; // element without content (empty formats aren't appended)
+        last = n;
+      }
+      n.childNodes.forEach(walk);
+    };
+    own.forEach(walk);
+    if (!hasEmbed && (text === "\n" || (!el.firstChild && el.tagName === "LI"))) {
+      own.forEach((n) => n.remove());
+      el.prepend(ctx.isEditor ? document.createElement("br") : "\n");
+    } else if (last instanceof Text && text.endsWith("\n") && !text.endsWith("\n\n")) {
+      last.data = last.data.slice(0, -1);
+      // removed with emptied formats: `<b>a</b><b>\n</b>`
+      let n: Node = last;
+      while (n !== el && !n.firstChild && !n.textContent) {
+        const p = n.parentNode!;
+        (n as ChildNode).remove();
+        n = p;
+      }
+    }
   },
 
   /** Returns sanitized list */
   toList(src: HTMLElement, ctx: Ctx): HTMLElement {
     const list = document.createElement(src.tagName);
     let li: HTMLElement | null = null; // for content directly in list (invalid html)
+    const end = (): void => {
+      li && Internal.trimBreak(li, ctx);
+      li = null;
+    };
     for (let n = src.firstChild; n; n = n.nextSibling) {
       const tag = n.nodeName;
       if (tag === "LI") {
-        li = null;
+        end();
         Internal.toLine(n as HTMLElement, list.appendChild(document.createElement("li")), ctx);
       } else if (listTags.has(tag)) {
-        li = null;
+        end();
         list.appendChild(Internal.toList(n as HTMLElement, ctx)); // Chrome nests lists on indent
       } else if (n.nodeType === Node.ELEMENT_NODE || (n.nodeType === Node.TEXT_NODE && (n as Text).data.trim())) {
         li ??= list.appendChild(document.createElement("li"));
         Internal.appendInlineNode(n, li, ctx);
       }
     }
+    end();
     return list;
   },
 
@@ -719,6 +755,10 @@ const Internal = {
   appendBlocks(src: Node, dst: Node, ctx: Ctx): void {
     const pTag = ctx.isEditor ? "div" : "p";
     let p: HTMLElement | null = null; // current paragraph for inline content
+    const end = (): void => {
+      p && Internal.trimBreak(p, ctx);
+      p = null;
+    };
     for (let n = src.firstChild; n; n = n.nextSibling) {
       if (n.nodeType === Node.TEXT_NODE) {
         const t = (n as Text).data;
@@ -734,9 +774,9 @@ const Internal = {
       const el = n as HTMLElement;
       const tag = el.tagName;
       if (tag === "BR") {
-        // after inline content - next paragraph, otherwise - empty line
-        !p && dst.appendChild(document.createElement(pTag)).appendChild(document.createElement("br"));
-        p = null;
+        // after inline content - next paragraph, otherwise - empty line (see trimBreak)
+        !p && dst.appendChild(document.createElement(pTag)).append(ctx.isEditor ? document.createElement("br") : "\n");
+        end();
         continue;
       }
       if (!Lines.isBlockTag(tag)) {
@@ -748,7 +788,7 @@ const Internal = {
         continue;
       }
 
-      p = null;
+      end();
       const [line] = Internal.applied(ctx.line, el); // heading, blockquote etc.
       if (line) {
         dst.appendChild(Internal.toLine(el, Internal.createFor(...line, ctx), ctx));
@@ -764,9 +804,10 @@ const Internal = {
         paragraph.firstChild && dst.appendChild(paragraph);
       }
     }
+    end();
   },
 
-  /** Returns true if `<p>` can be dropped from value: the only paragraph without styles, `<br>` & leading whitespaces
+  /** Returns true if `<p>` can be dropped from value: the only paragraph without styles & leading whitespaces
    *  (sanitizer adds it back) */
   isPlainParagraph(p: HTMLElement): boolean {
     if (p.nextSibling || p.tagName !== "P" || p.attributes.length) {
@@ -774,9 +815,6 @@ const Internal = {
     }
     p.normalize(); // to check leading whitespaces
     const f = p.firstChild!;
-    return (
-      (f.nodeType !== Node.TEXT_NODE || !!(f as Text).data.trim()) &&
-      !Array.prototype.some.call(p.childNodes, (n: Node) => n.nodeName === "BR")
-    );
+    return f.nodeType !== Node.TEXT_NODE || !!(f as Text).data.trim();
   },
 };

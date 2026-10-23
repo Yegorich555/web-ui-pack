@@ -1596,6 +1596,7 @@ export default class WUPTextRichControl<
     const isMod = e.altKey || e.ctrlKey || e.metaKey;
     const isArrow = !isMod && !e.shiftKey && k.startsWith("Arrow");
     const isVertical = k === "ArrowDown" || k === "ArrowUp";
+    isInp && (inp._isShiftEnter = k === "Enter" && e.shiftKey); // see replaceInput
     /^(Arrow|Home$|End$|Page)/.test(k) && inp.resumeRecognize(); // caret leaves word
     if (
       ((isInp || isBar) && this.gotHotKey(e)) || // not for control in link popup

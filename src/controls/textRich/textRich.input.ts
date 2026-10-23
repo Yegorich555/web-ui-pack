@@ -25,6 +25,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   _applyKey?: (key: string) => boolean;
   /** Returns true if paste & drop keep formats: see $options.copyPasteFormatted */
   _isFormatted?: () => boolean;
+  /** Shift+Enter is pressed (set on keydown): Safari fires `insertParagraph` for it as for Enter (see replaceInput) */
+  _isShiftEnter = false;
   protected override _editable = "true"; // formats are applied by tools, plain text is pasted by `replaceInput`
   /** Called when formats at caret can be changed without selection change: content or pending formats */
   _onFormats?: () => void;
@@ -954,11 +956,11 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     p.size && (this.#pendingAt = [sel.anchorNode!, sel.anchorOffset]); // otherwise caret moved to the new line resets them
   }
 
-  /** Element of recognized text or token that ends at caret before line break & length of its text (see leaveAuto) */
-  #breakIn?: [Element, number];
+  /** Element of recognized text or token that ends at caret before line break (see leaveAuto) */
+  #breakIn?: Element;
 
   /** Called before line break: caret at the end of recognized text (link etc.) or token goes out of its element,
-   *  otherwise browser adds line break into it (Chrome still does it for span: see checkBreak) */
+   *  otherwise browser continues it in the new line (Chrome still adds its empty copy: see checkBreak) */
   protected leaveAuto(): void {
     this.recognize();
     this.#isAutoPaused = false;
@@ -968,7 +970,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       const r = document.createRange();
       r.setStartAfter(el);
       window.getSelection()!.collapse(r.startContainer, r.startOffset);
-      this.#breakIn = [el, el.textContent!.length];
+      this.#breakIn = el;
     }
   }
 
@@ -988,29 +990,18 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     );
   }
 
-  /** Line break typed at the end of recognized text or token (see leaveAuto) goes out of its element: Chrome adds line
-   *  break into span (caret at its end is inside it) & its empty copy into the new line; called on input before history
-   *  saves it, so `is` of token gets its text without line break (see checkToken) */
+  /** Line break typed at the end of recognized text or token (see leaveAuto) goes out of its element: Chrome adds its
+   *  empty copy into the new line (Shift+Enter is custom: see breakBlock); called on input before history saves it */
   checkBreak(): void {
-    const b = this.#breakIn;
+    const el = this.#breakIn;
     this.#breakIn = undefined;
-    if (!b?.[0].isConnected) {
+    if (!el?.isConnected) {
       return;
     }
-    const [el, len] = b;
-    const sel = window.getSelection()!;
-    const n = sel.focusNode!;
+    const n = window.getSelection()!.focusNode!;
     Utils.Formats.parents(n, (x) => !x.textContent && Utils.Formats.isSame(x, el), this.lineOf(n)).forEach((x) =>
       x.replaceWith(...x.childNodes)
     );
-    if (el.textContent!.length > len) {
-      const line = this.lineOf(el);
-      const isEmbed = this._isEmbed;
-      const at = charsBefore(line, n, sel.focusOffset, isEmbed); // caret: moved nodes lose it
-      el.after(Utils.Ranges.at(el, len, Infinity, isEmbed).extractContents());
-      line.normalize();
-      sel.collapse(...pointAt(line, at, isEmbed));
-    }
     this._cached = undefined;
   }
 
@@ -1154,16 +1145,17 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       return;
     }
     if ((f.childNodes.length === 1 && first.tagName === "DIV") || !line || line.tagName === "LI") {
-      // inline content: lines are separated by <br>
+      // inline content: lines are separated by `\n`
       const frag = document.createDocumentFragment();
       const flatten = (el: Element): void => {
         if (Utils.listTags.has(el.tagName)) {
           Array.from(el.children).forEach(flatten);
           return;
         }
-        frag.lastChild && frag.append(document.createElement("br"));
+        frag.lastChild && frag.append("\n");
         Array.from(el.childNodes).forEach((n) =>
-          Utils.listTags.has(n.nodeName) ? flatten(n as Element) : frag.append(n)
+          // `<br>` of empty line: it's between line breaks
+          Utils.listTags.has(n.nodeName) ? flatten(n as Element) : frag.append(n.nodeName === "BR" ? "" : n)
         );
       };
       Array.from(f.children).forEach(flatten);
@@ -1244,19 +1236,20 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Line breaks in line of `line` tool (heading, quote, code block, list item etc.):
-   * * Shift+Enter adds `\n` (browser adds `<br>` into code block)
+   * * Shift+Enter adds `\n` in any line (Firefox adds `<br>`, Chrome does it in code block)
    * * Enter adds `\n` (heading & list item: browser adds paragraph & the next item like other editors)
    * * Enter on empty line closes block: the line is removed & caret goes into new paragraph after block (the rest of
    * block goes into its copy after paragraph); empty block becomes paragraph at the same place
    * @param isSoft Shift+Enter
    * @returns false if browser handles it: other line, the next list item, selection goes out of line */
   protected breakBlock(isSoft: boolean): boolean {
+    isSoft && this.getSelectionPos(); // the 1st typed line is loose content at editor root: it goes into line
     const sel = window.getSelection()!;
     const line = Utils.Lines.at(sel.focusNode!, this);
     if (
       !line ||
       Utils.Lines.at(sel.anchorNode!, this) !== line ||
-      !this._entries.some(([, t, is]) => t.kind === "line" && is?.(line))
+      (!isSoft && !this._entries.some(([, t, is]) => t.kind === "line" && is?.(line)))
     ) {
       return false;
     }
@@ -1279,8 +1272,13 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       if (isNative) {
         return false;
       }
-      // the extra line break at the end shows empty line (browser does the same)
-      const [t, end] = Utils.Ranges.insertText(n, offset, rest ? "\n" : "\n\n");
+      // the extra line break at the end shows empty line (browser does the same) instead of `<br>` of empty line
+      let last = line.lastChild;
+      while (last?.lastChild && !Utils.listTags.has(last.nodeName)) {
+        last = last.lastChild;
+      }
+      !rest && last?.nodeName === "BR" && last.remove(); // caret range is moved if it's after `<br>`
+      const [t, end] = Utils.Ranges.insertText(r.startContainer, r.startOffset, rest ? "\n" : "\n\n");
       sel.collapse(t, end - +!rest);
       return true;
     }
@@ -1345,7 +1343,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
    *  (see breakBlock); line break leaves recognized text
    * @returns true if input is replaced: event is prevented & `input` is fired (without inputType) */
   replaceInput(e: InputEvent): boolean {
-    const t = e.inputType;
+    // Safari: Shift+Enter adds paragraph like Enter (other browsers fire `insertLineBreak`)
+    const t = e.inputType === "insertParagraph" && this._isShiftEnter ? "insertLineBreak" : e.inputType;
     const s = t === "insertText" && e.data;
     const isBreak = t === "insertParagraph" || t === "insertLineBreak";
     isBreak && this.leaveAuto();
