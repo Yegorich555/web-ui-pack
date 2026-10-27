@@ -27,7 +27,7 @@
   outline: none;
 
   &[open] {
-    user-select: initial;
+    user-select: text; // not initial: `auto` takes `none` from body.wup-modal-open
     pointer-events: initial;
     /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
     touch-action: initial;
