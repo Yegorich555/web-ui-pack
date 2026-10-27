@@ -36,5 +36,5 @@ Won't be fixed: copy-paste from other editors isn't supported
 
 ## Bugs
 
-1. Hover on phone - ask input is too big and has wrong label
-2. tool.placeholder - type 'a' at the end - placeholder is off, then remove 'a' - placeholder is not recognized (tool.mention works correct)
+1. tool.placeholder - type 'a' at the end - placeholder is off, then remove 'a' - placeholder is not recognized (but tool.mention works correct)
+2. suggestion: carret on inline tool Ctrl+ArrowDown must open menu with values - we can implement this only if Ctrl+ArrowDown doesn't handled somehow globally

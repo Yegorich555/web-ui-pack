@@ -1405,9 +1405,14 @@ export default class WUPTextRichControl<
     return can ? name : undefined;
   }
 
-  /** Returns element with hover popup under pointer: embed, token or link */
+  /** Returns element with hover popup under pointer: embed, token or link
+   *  (link of tool `link` only: email, phone etc. follow their text, so url popup isn't for them) */
   protected hoverOf(t: Element): HTMLElement | null {
-    return this.embedTool(t, true) ? (t as HTMLElement) : t.closest("a");
+    if (this.embedTool(t, true)) {
+      return t as HTMLElement;
+    }
+    const a = t.closest("a");
+    return a && this.#ctr.$tools.link.is!(a) !== undefined ? a : null;
   }
 
   /** Called when pointer enters element with hover popup (see hoverOf) or its popup, or leaves them (`el` is `null`):
