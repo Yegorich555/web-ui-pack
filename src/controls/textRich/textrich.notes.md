@@ -33,3 +33,8 @@ Won't be fixed: copy-paste from other editors isn't supported
 
 1. Paste from Google Docs: everything becomes bold & headings/lists are flattened into one line with `<br>`. Docs wraps content into `<b style="font-weight:normal" id="docs-internal-guid-…">`; its bold/italic/underline are `<span style="font-weight:700 | font-style:italic | text-decoration:underline">` and they're ignored
 2. Paste of list from MS Word (`mso-list`): items become paragraphs with literal `·` bullet (marker `<span style="mso-list:Ignore">`); real list type is defined in `<style>` (`@list l0:level1`) only
+
+## Bugs
+
+1. Hover on phone - ask input is too big and has wrong label
+2. tool.placeholder - type 'a' at the end - placeholder is off, then remove 'a' - placeholder is not recognized (tool.mention works correct)

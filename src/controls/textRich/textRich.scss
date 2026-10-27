@@ -3,6 +3,7 @@
 :root {
   --ctrl-textrich-quote: #888; // WCAG: non-text 3:1 on #fff
   --ctrl-textrich-code-bg: #f0f0f0;
+  --ctrl-textrich-edge-bg: #00778d1a; // inline element (bold, link etc.) with caret at its edge: typed text goes into it
   // icons render at 15px (1.125em of button font 13.33px): viewBox 15x15 + integer coords => crisp 2px strokes
   // WARN: any other size => blurry icons
   --wup-icon-bold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M4 3h4a2 2 0 0 1 0 4H4zm0 4h4.5a2.5 2.5 0 0 1 0 5H4z'/%3E%3C/svg%3E");
@@ -27,6 +28,7 @@
   [wupdark] {
     --ctrl-textrich-quote: #748093; // WCAG: non-text 3:1 on #161b24, modal #222a36, popup #2b3645
     --ctrl-textrich-code-bg: #26303d; // tone of dark theme (#1d1d1d was invisible on #161b24); text #bdbdbd 7:1 (AAA)
+    --ctrl-textrich-edge-bg: #00a0bc38;
   }
 
   // editor content: global to show value outside via `<div wup-textrich>{value}</div>`
@@ -333,5 +335,10 @@ $tools: (
     margin-top: 0.5em; // as bottom of --ctrl-padding (its top is space for label, but label is above the border here)
     min-height: 8em;
     max-height: 16em;
+
+    // inline element with caret at its edge: otherwise caret looks the same inside & out of it (arrow leaves it)
+    ::highlight(wup-textrich-edge) {
+      background-color: var(--ctrl-textrich-edge-bg);
+    }
   }
 }

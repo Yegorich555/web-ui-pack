@@ -70,6 +70,10 @@ Object.defineProperty(Element.prototype, "innerText", {
 });
 
 window.matchMedia ||= () => ({ matches: false });
+// CSS Custom Highlight API isn't implemented in jsdom
+window.Highlight ||= class Highlight extends Set {};
+window.CSS ||= {};
+window.CSS.highlights ||= new Map();
 window.DOMRect = {
   fromRect: (other) => {
     const x = other?.x || 0;

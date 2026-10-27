@@ -337,12 +337,9 @@ describe("control.textRich", () => {
       const inp = el.$refInput;
       inp.focus();
       const btn = el.querySelector("[tool=placeholder]");
-      /** Sets html, places caret at the end of text & types trigger */
-      const typeTrigger = async (html, text) => {
-        inp.innerHTML = html;
-        const t = document.createTreeWalker(inp, NodeFilter.SHOW_TEXT);
-        while (t.nextNode().data !== text);
-        window.getSelection().collapse(t.currentNode, text.length);
+      /** Sets html with caret (see setHtml) & types trigger */
+      const typeTrigger = async (html) => {
+        setHtml(html);
         const init = { inputType: "insertText", data: "{", bubbles: true, cancelable: true };
         const ev = new InputEvent("beforeinput", init);
         inp.dispatchEvent(ev);
@@ -355,9 +352,11 @@ describe("control.textRich", () => {
       };
 
       // at the end of bold: typed text is inserted by control (otherwise Chrome types after link)
-      expect(await typeTrigger("<div><b>bold </b></div>", "bold ")).toEqual([true, true]);
-      // after token: typed text is inserted out of it
-      expect(await typeTrigger('<div><span class="placeholder">{email}</span></div>', "{email}")).toEqual([true, true]);
+      expect(await typeTrigger("<div><b>bold |</b></div>")).toEqual([true, true]);
+      // next to token (left via arrow or inserted): typed text is inserted out of it
+      expect(await typeTrigger('<div><span class="placeholder">{email}</span>|</div>')).toEqual([true, true]);
+      // inside token at its end: typed text goes into it (it isn't word start)
+      expect(await typeTrigger('<div><span class="placeholder">{email}|</span></div>')).toEqual([true, false]);
     } finally {
       cleanup();
     }
@@ -1418,6 +1417,94 @@ describe("control.textRich", () => {
     expect(inp.innerHTML).toBe("<ol><li>a</li></ol>");
   });
 
+  test("ArrowLeft one char after the start of inline element: caret goes inside it like ArrowRight to the end", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    const btnBold = el.querySelector("[tool=bold]");
+    /** Presses key on editor @returns true if it's prevented */
+    const press = (key) => !inp.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+
+    // in the middle of line Chrome moves caret to the end of text before element
+    setHtml("<div>hi <b>b|old</b></div>");
+    expect(press("ArrowLeft")).toBe(true);
+    expect(getHtml()).toBe("<div>hi <b>|bold</b></div>");
+    expect(btnBold.getAttribute("aria-pressed")).toBe("true");
+    expect(press("ArrowLeft")).toBe(true); // leaves it
+    expect(btnBold.getAttribute("aria-pressed")).toBe("false");
+    expect(press("ArrowLeft")).toBe(false); // caret moves as usual
+    // emoji or letter with combining mark: caret moves over it at once
+    setHtml("<div>hi <b>👍🏽|ok</b></div>");
+    expect(press("ArrowLeft")).toBe(true);
+    expect(getHtml()).toBe("<div>hi <b>|👍🏽ok</b></div>");
+    setHtml(`<div>hi <b>e${String.fromCharCode(0x301)}|ok</b></div>`);
+    expect(press("ArrowLeft")).toBe(true);
+    // nested elements: caret goes inside the inner one, typed text goes into it (Chrome types out of link at its start)
+    setHtml('<div><b>hi <a href="https://a.com">l|ink</a></b></div>');
+    expect(press("ArrowLeft")).toBe(true);
+    expect(getHtml()).toBe('<div><b>hi <a href="https://a.com">|link</a></b></div>');
+    expect(typeText("x")).toBe(true);
+    expect(getHtml()).toBe('<div><b>hi <a href="https://a.com">x|link</a></b></div>');
+
+    // otherwise caret moves as usual
+    setHtml("<div>hi <b>bo|ld</b></div>");
+    expect(press("ArrowLeft")).toBe(false);
+    setHtml("<div>hi b|old</div>");
+    expect(press("ArrowLeft")).toBe(false);
+    setHtml("<div>hi <b>b|old</b></div>");
+    expect(press("ArrowUp")).toBe(false); // to the start of line
+    expect(press("ArrowRight")).toBe(false);
+  });
+
+  test("inline element with caret at its edge is highlighted: typed text goes into it", async () => {
+    useSocial();
+    const tool = WUPTextRichControl.$tools.mention;
+    tool.values = [{ value: "john" }];
+    const anyText = tool.is;
+    tool.is = (e) => (tool.values.some((x) => x.value === anyText(e)) ? anyText(e) : undefined); // values only
+    el.$options.toolbar = [["bold", "link", "mention"]];
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    /** Returns highlighted text */
+    const hl = () => [...CSS.highlights.get("wup-textrich-edge")].map((r) => r.toString());
+    /** Presses key on editor */
+    const press = (key) => {
+      inp.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+      document.dispatchEvent(new Event("selectionchange")); // jsdom doesn't fire it
+    };
+
+    setHtml("<div>hi <b>bo|ld</b></div>");
+    expect(hl()).toEqual([]); // in the middle: nothing to point
+    setHtml("<div>hi <b>bold|</b></div>");
+    expect(hl()).toEqual(["bold"]);
+    press("ArrowRight"); // left: the next typed text goes out of it
+    expect(hl()).toEqual([]);
+    press("ArrowLeft"); // back
+    expect(hl()).toEqual(["bold"]);
+    el.$format("bold"); // off for the next typed text
+    expect(hl()).toEqual([]);
+    setHtml("<div>hi <b>|bold</b></div>");
+    expect(hl()).toEqual(["bold"]);
+    // nested elements: the outer one at caret
+    setHtml('<div><b>hi <a href="https://a.com">link|</a></b></div>');
+    expect(hl()).toEqual(["hi link"]);
+    setHtml('<div><b>hi <a href="https://a.com">link|</a> x</b></div>');
+    expect(hl()).toEqual(["link"]);
+    // token with caret in holder at its start: `is` rejects its text with holder
+    setHtml('<div>hi <span class="wup-mention">@|john</span></div>');
+    press("ArrowLeft");
+    expect(hl()).toEqual([`${String.fromCharCode(0x200b)}@john`]);
+    press("ArrowLeft"); // left
+    expect(hl()).toEqual([]);
+    // blur removes it
+    setHtml("<div>hi <b>bold|</b></div>");
+    expect(hl()).toEqual(["bold"]);
+    inp.blur();
+    await h.wait(1);
+    expect(hl()).toEqual([]);
+  });
+
   test("sanitizer", () => {
     const cleanup = useImage();
     try {
@@ -1622,19 +1709,22 @@ describe("control.textRich", () => {
         return [typeText(ch), getHtml()];
       };
 
-      // text typed at token edges goes outside it
+      // text typed inside token at its edges goes into it like into other inline elements (`is` checks it on input)
       expect(type(`<div>a<span class="placeholder">|{email}</span></div>`, "x")).toEqual([
         true,
-        `<div>ax|${token}</div>`,
+        `<div>a<span class="placeholder">x|{email}</span></div>`,
       ]);
       expect(type(`<div><span class="placeholder">{email}|</span></div>`, "x")).toEqual([
         true,
-        `<div>${token}x|</div>`,
+        `<div><span class="placeholder">{email}x|</span></div>`,
       ]);
-      setHtml(`<div>${token}</div>`);
-      window.getSelection().collapse(el.$refInput.firstChild, 1); // after token (caret after insertion)
+      // next to token (left via arrow, caret after insertion): text goes out of it, otherwise browser extends token
+      expect(type(`<div>${token}|</div>`, "x")).toEqual([true, `<div>${token}x|</div>`]);
+      expect(type(`<div>|${token}</div>`, "x")).toEqual([true, `<div>x|${token}</div>`]);
+      setHtml(`<div>${token}|</div>`);
+      el.$format("bold"); // pending format
       expect(typeText("x")).toBe(true);
-      expect(getHtml()).toBe(`<div>${token}x|</div>`);
+      expect(getHtml()).toBe(`<div>${token}<b>x|</b></div>`);
       expect(type(`<div><span class="placeholder">{em|ail}</span></div>`, "x")).toEqual([
         false,
         `<div><span class="placeholder">{em|ail}</span></div>`,
@@ -2100,19 +2190,32 @@ describe("control.textRich", () => {
     await h.wait(1);
     expect(inp.innerHTML).toBe("abc");
 
-    // ArrowLeft at the start of token at line start (otherwise caret before it is painted outside it already)
+    // ArrowLeft at the start of token (at line start & in the middle of line)
     inp.focus();
     setHtml(`<div><span class="wup-mention">|@john</span> hi</div>`);
     expect(press("ArrowLeft")).toBe(true);
     expect(getHtml()).toBe(`<div>|${zw}${mention} hi</div>`);
     userType("x");
     expect(getHtml()).toBe(`<div>x|${mention} hi</div>`);
-    setHtml(`<div><span class="wup-mention">|@john</span> hi</div>`);
-    press("ArrowLeft");
-    expect(press("ArrowRight")).toBe(true); // back into token
-    expect(getHtml()).toBe(`<div><span class="wup-mention">|@john</span> hi</div>`);
     setHtml(`<div>hi <span class="wup-mention">|@john</span></div>`);
-    expect(press("ArrowLeft")).toBe(false);
+    expect(press("ArrowLeft")).toBe(true);
+    expect(getHtml()).toBe(`<div>hi |${zw}${mention}</div>`);
+    // ArrowRight returns into token: holder inside it (in the middle of line Chrome paints caret out of it otherwise)
+    expect(press("ArrowRight")).toBe(true);
+    const start = `<span class="wup-mention">${zw}|@john</span>`;
+    expect(getHtml()).toBe(`<div>hi ${start}</div>`);
+    expect(press("ArrowRight")).toBe(false); // caret moves as usual
+    // ArrowLeft one char after the start of token goes into its start, the next one leaves it
+    setHtml(`<div>hi <span class="wup-mention">@|john</span></div>`);
+    expect(press("ArrowLeft")).toBe(true);
+    expect(getHtml()).toBe(`<div>hi ${start}</div>`);
+    expect(press("ArrowLeft")).toBe(true);
+    expect(getHtml()).toBe(`<div>hi |${zw}${mention}</div>`);
+    // text typed at the start of token goes into it: `x@john` isn't mention anymore
+    setHtml(`<div>hi <span class="wup-mention">@|john</span></div>`);
+    press("ArrowLeft");
+    userType("x");
+    expect(getHtml()).toBe("<div>hi x|@john</div>");
     // ArrowDown/ArrowUp: the same as ArrowRight/ArrowLeft without line below/above caret
     setHtml(`<div>hi <span class="wup-mention">@john|</span></div>`);
     expect(press("ArrowDown")).toBe(true);
@@ -2191,10 +2294,28 @@ describe("control.textRich", () => {
     await h.wait(1);
     expect(getHtml()).toBe(`<div>${mention("@john")}| a</div>`);
 
-    // token chosen in menu with text that isn't recognized entirely stays as is: it doesn't follow its text
+    // token chosen in menu with text that isn't recognized entirely doesn't follow its text: `is` checks text typed into it
     setHtml(`<div>hi ${mention("@Ann Lee|")}</div>`);
     userType(",");
+    expect(getHtml()).toBe("<div>hi @Ann Lee,|</div>");
+    setHtml(`<div>hi ${mention("@Ann Lee|")}</div>`);
+    inp.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true })); // leaves it
+    userType(",");
     expect(getHtml()).toBe(`<div>hi ${mention("@Ann Lee")},|</div>`);
+    // recognized token follows text typed into it in the same undo step: it stays before typed space
+    el.$value = `hi ${mention("@john")}`;
+    await h.wait(1);
+    window.getSelection().collapse(inp.querySelector(".wup-mention").firstChild, 5);
+    userType(" ");
+    expect(getHtml()).toBe(`hi ${mention("@john")} |`);
+    await h.wait(1);
+    expect(typeText(null, "historyUndo")).toBe(true);
+    await h.wait(1);
+    expect(inp.innerHTML).toBe(`hi ${mention("@john")}`);
+    // pasted text into it isn't recognized: token is checked by `is`
+    window.getSelection().collapse(inp.querySelector(".wup-mention").firstChild, 5);
+    expect(userPaste("", undefined, "x")).toBe(true);
+    expect(inp.innerHTML).toBe("<div>hi @johnx</div>"); // paste wraps loose line
 
     // line break at the end of token goes out of it: Shift+Enter is custom (see the test of line format), on Enter Chrome
     // adds its empty copy into the new line (`is` rejects it: without text); caret after element is at its end too
