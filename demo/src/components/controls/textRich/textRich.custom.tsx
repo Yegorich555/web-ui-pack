@@ -145,6 +145,9 @@ WUPTextRichControl.$tools.placeholder = {
   // dropdown in toolbar & menu shown on typing `{` or on hover on placeholder (chosen value replaces it)
   values: placeholders.map((value) => ({ value, label: value })), // label is name as is: otherwise it's prettified (`First Name`)
   trigger: "{", // menu is filtered by text typed after it; typed `{someProp}` is placeholder too (if `is` allows it)
+  // placeholder follows its text: `{firstName}` + `a` is plain text, Backspace returns placeholder (pasted one too);
+  // spaces inside are allowed (`{first Name}`), but not after `{`: otherwise code `{ return 1; }` is placeholder
+  recognize: /\{[^\s{}][^{}]*\}$/,
   kind: "inline", // editable text like link: caret can be placed inside
   is: placeholderOf, // WARN: sanitizer calls it for pasted html: value is used as text only
   create: "span", // chosen value is inserted as `<span>{firstName}</span>` (trigger, value & its pair `}`)
@@ -274,7 +277,7 @@ export default function TextRichCustom() {
           </li>
           <li>
             <b>Placeholder</b>: dropdown & menu on typed <code>{"{"}</code>; typed <code>{"{someProp}"}</code> is
-            placeholder too
+            recognized
           </li>
           <li>
             <b>Inline code</b>: button (Ctrl+E) or typed <code>`code`</code>
