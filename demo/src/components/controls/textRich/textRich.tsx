@@ -31,6 +31,7 @@ export default function TextRichControlView() {
         "Undo/redo for text & formatting (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y) including OS-native ones (Edit menu, shake on iPhone)",
         "Powerful customizable toolbar (see last example below)",
         "Customizable Hot-Keys for every tool; use Alt+F10 to focus toolbar, Arrows to navigate, Esc to return",
+        "Alt+ArrowDown opens popup of element at caret: dropdown of mention or placeholder, link url, image picker etc. (customizable via static $hotKeyAsk)",
         'Selected text is wrapped into typed quote or bracket like in code editors: "text", (text) etc. (customizable via static $wrapChars)',
         "Typed links & emails are recognized while typing (see `recognize` of static $tools); `1. ` typed at line start begins list (see `recognize` of tool values)",
         "Nested lists: Tab/Shift+Tab (or indent buttons) changes level of list item, Enter in empty nested item moves it to the parent list",

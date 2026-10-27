@@ -3439,6 +3439,124 @@ describe("control.textRich", () => {
     }
   });
 
+  test("$hotKeyAsk: Alt+ArrowDown opens popup of element at caret (token, embed, link)", async () => {
+    const cleanup = usePlaceholder();
+    const ask = jest.fn(() => Promise.resolve("b.png"));
+    const cleanupImg = useImage(ask);
+    const { $hotKeyAsk } = WUPTextRichControl;
+    try {
+      el.$options.toolbar = [["placeholder", "image", "link", "bold"]];
+      await h.wait(1);
+      const inp = el.$refInput;
+      inp.focus();
+      const ph = (v) => `<span class="placeholder">{${v}}</span>`;
+      const popup = () => [...el.querySelectorAll("wup-popup")].at(-1) ?? null;
+      /** Presses Alt + key on target @returns true if it's prevented */
+      const press = (key, opts, t = inp) =>
+        !t.dispatchEvent(
+          new KeyboardEvent("keydown", { key, code: key, altKey: true, bubbles: true, cancelable: true, ...opts })
+        );
+      /** Presses Alt+ArrowDown & returns selected item of opened menu, then closes it via Escape (caret isn't moved) */
+      const menuAt = async (html) => {
+        setHtml(html);
+        expect(press("ArrowDown")).toBe(true);
+        await h.wait(1);
+        const item = popup().querySelector("[aria-selected=true]")?.textContent;
+        expect(press("Escape", { altKey: false })).toBe(true);
+        await h.wait();
+        expect(popup()).toBe(null);
+        expect(getHtml()).toBe(html);
+        return item;
+      };
+
+      // token: caret inside, at its edges (out of it, nested one), in caret holder
+      expect(await menuAt(`<div>a ${ph("first|Name")} b</div>`)).toBe("First Name");
+      expect(await menuAt(`<div>a ${ph("firstName")}| b</div>`)).toBe("First Name");
+      expect(await menuAt(`<div>a |${ph("email")} b</div>`)).toBe("Email");
+      expect(await menuAt(`<div><b>${ph("email")}</b>| b</div>`)).toBe("Email");
+      expect(await menuAt(`<div>a |<b>${ph("firstName")}</b></div>`)).toBe("First Name");
+      setHtml('<div>a <span class="placeholder">{email}|</span></div>');
+      expect(press("ArrowRight", { altKey: false })).toBe(true); // token is left via holder
+      expect(press("ArrowDown")).toBe(true);
+      await h.wait(1);
+      expect(popup().hasAttribute("menu")).toBe(true);
+      // keyboard chooses value: it replaces token
+      setHtml(`<div>a ${ph("first|Name")} b</div>`);
+      expect(press("ArrowDown")).toBe(true);
+      await h.wait(1);
+      expect(press("ArrowDown", { altKey: false })).toBe(true);
+      expect(press("Enter", { altKey: false })).toBe(true);
+      await h.wait();
+      expect(popup()).toBe(null);
+      expect(getHtml()).toBe(`<div>a ${ph("email")}| b</div>`);
+
+      // nothing at caret: key works as usual
+      setHtml(`<div>a|b ${ph("email")}</div>`);
+      expect(press("ArrowDown")).toBe(false);
+      setHtml(`<div>[a]b ${ph("email")}</div>`);
+      expect(press("ArrowDown")).toBe(false);
+      setHtml("<div>[<b>a</b>]</div>"); // selected element isn't matched
+      expect(press("ArrowDown")).toBe(false);
+      window.getSelection().removeAllRanges();
+      expect(press("ArrowDown")).toBe(false);
+      window.getSelection().collapse(el.querySelector("[tool=bold]"), 0); // out of editor
+      expect(press("ArrowDown")).toBe(false);
+      setHtml(`<div>a ${ph("first|Name")}</div>`);
+      el.querySelector("[tool=bold]").focus();
+      expect(press("ArrowDown", {}, el.querySelector("[tool=bold]"))).toBe(false); // toolbar isn't editor
+      inp.focus();
+      expect(press("ArrowDown", { shiftKey: true })).toBe(false); // other shortcut
+      expect(popup()).toBe(null);
+
+      // embed with `ask`: selected, caret after & before it
+      setHtml('<div>[<img src="a.png">]</div>');
+      expect(press("ArrowDown")).toBe(true);
+      expect(ask).toBeCalledWith(inp.querySelector("img"), el, "a.png");
+      await h.wait(1);
+      expect(getHtml()).toBe('<div><img src="b.png">|</div>');
+      setHtml('<div>a <img src="a.png">|</div>');
+      expect(press("ArrowDown")).toBe(true);
+      setHtml('<div>a |<img src="a.png"></div>');
+      expect(press("ArrowDown")).toBe(true);
+      expect(ask).toBeCalledTimes(3);
+      await h.wait(1);
+
+      // link: url popup with focused text control
+      setHtml('<div>a <a href="https://x.com/">li|nk</a></div>');
+      expect(press("ArrowDown")).toBe(true);
+      await h.wait();
+      const txt = popup().querySelector("wup-text");
+      expect(txt.$value).toBe("https://x.com/");
+      expect(popup().contains(document.activeElement)).toBe(true);
+      txt.$value = "https://y.com/";
+      expect(press("Enter", { altKey: false }, txt.$refInput)).toBe(true);
+      await h.wait();
+      expect(inp.querySelector("a").getAttribute("href")).toBe("https://y.com/");
+      expect(getHtml()).toBe('<div>a <a href="https://y.com/">li|nk</a></div>');
+
+      // custom shortcut
+      WUPTextRichControl.$hotKeyAsk = ["Control", "Enter"];
+      setHtml(`<div>a ${ph("first|Name")}</div>`);
+      expect(press("ArrowDown")).toBe(false);
+      expect(press("Enter", { altKey: false, ctrlKey: true })).toBe(true);
+      await h.wait(1);
+      expect(popup().hasAttribute("menu")).toBe(true);
+      expect(press("Escape", { altKey: false })).toBe(true);
+      await h.wait();
+
+      // readonly: tokens & embeds aren't editable
+      WUPTextRichControl.$hotKeyAsk = $hotKeyAsk;
+      el.$options.readOnly = true;
+      await h.wait(1);
+      setHtml(`<div>a ${ph("first|Name")}</div>`);
+      expect(press("ArrowDown")).toBe(false);
+    } finally {
+      WUPTextRichControl.$hotKeyAsk = $hotKeyAsk;
+      cleanupImg();
+      cleanup();
+    }
+  });
+
   test("dropdown menu", async () => {
     const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
     Range.prototype.getBoundingClientRect = () => rect; // jsdom doesn't support it: menu is placed near selection

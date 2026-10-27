@@ -36,4 +36,6 @@ Won't be fixed: copy-paste from other editors isn't supported
 
 ## Bugs
 
-1. suggestion: carret on inline tool Ctrl+ArrowDown must open menu with values - we can implement this only if Ctrl+ArrowDown doesn't handled somehow globally
+1. issue on demo for textarea. tab js/ts must include all new options defined for this control (including attrs/options used for 1st control on the page), buttonSeeMore must show all other.
+Currently missed options hideFooter, allowResizeW, allowResizeW - need to use w-{attr} for 1st control. Remember when we add new option, need to update it on demo too
+2. issue with modal I can't select anything inside modal (it's css issue)

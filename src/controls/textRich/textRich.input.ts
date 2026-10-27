@@ -1031,6 +1031,30 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     );
   }
 
+  /** Returns the outer element matched by `is` at selection: selected one (clicked embed), containing selection or with
+   *  collapsed caret at its edge (caret holder of token too); the one before caret goes first */
+  elementAt(is: (el: Element) => boolean): Element | undefined {
+    const sel = window.getSelection()!;
+    const r = sel.rangeCount ? sel.getRangeAt(0) : undefined;
+    if (!r || !this.contains(r.commonAncestorContainer)) {
+      return undefined;
+    }
+    const { startContainer: n, startOffset: i } = r;
+    const [h, token] = this.#holder ?? [];
+    const one = n === h ? token : n === r.endContainer && r.endOffset === i + 1 && n.childNodes[i];
+    const el =
+      (one instanceof Element && is(one) && one) || Utils.Formats.parents(r.commonAncestorContainer, is, this).pop();
+    if (el || !r.collapsed) {
+      return el;
+    }
+    // caret out of elements at their edge (`<b>@john</b>|` => after `<b>`): matched one at the end of node before caret
+    // or at the start of node after it
+    const [p, k] = Utils.Ranges.edgeOf(this.lineOf(n), n, i);
+    const inner = (x: Node | null | undefined, isEnd?: boolean): Element | undefined =>
+      x instanceof Element ? (is(x) && x) || inner(isEnd ? x.lastChild : x.firstChild, isEnd) : undefined;
+    return inner(p.childNodes[k - 1], true) ?? inner(p.childNodes[k]);
+  }
+
   /** Line break typed at the end of recognized text or token (see leaveAuto) goes out of its element: Chrome adds its
    *  empty copy into the new line (Shift+Enter is custom: see breakBlock); called on input before history saves it */
   checkBreak(): void {

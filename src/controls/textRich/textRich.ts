@@ -123,7 +123,7 @@ declare global {
        * `{someProp}` gives placeholder `someProp` (`is` can return `undefined` to reject it)
        * * typed token is recognized without menu if tool has `recognize`: `@john` (see `recognize`)
        * * `inline` tool with trigger inserts token (placeholder, mention): `create` element with text `{trigger}{value}{pair}`
-       * (`{firstName}`, `@john`); hover on it opens dropdown to replace it (like `embed`); text typed at its edges goes outside it;
+       * (`{firstName}`, `@john`); hover on it or static $hotKeyAsk opens dropdown to replace it (like `embed`); text typed at its edges goes outside it;
        * text edited inside it stays token only if `is` accepts it (return value from `values` only to reject others)
        * * char from static $wrapChars typed over selection wraps it (`{` gives `{text}`)
        * @example
@@ -182,8 +182,8 @@ declare global {
       /** Sets value to line (`undefined` removes it): for default format & sanitizer of `lineStyle`;
        *  WARN: format `line` (heading etc.) keeps only `style` of replaced line, so use styles instead of attributes */
       set?: (el: HTMLElement, value: V | undefined) => void;
-      /** Asks value via custom UI (popup, modal etc.): when tool is applied without value (button, shortcut)
-       *  or on click on `embed` element (value replaces it); `null`/`undefined` cancels;
+      /** Asks value via custom UI (popup, modal etc.): when tool is applied without value (button, shortcut),
+       *  on click on `embed` element or via static $hotKeyAsk at it (value replaces it); `null`/`undefined` cancels;
        *  selection is restored even if focus moves out (to modal etc.); by default tool with `values` asks via its dropdown
        * @param target element to place popup near: clicked embed, tool button or editor (if tool isn't rendered)
        * @param current value at selection start
@@ -358,7 +358,8 @@ const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
  * * undo/redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y, OS-native) works for text & formats
  * * tools are defined in static $tools: change it to redefine labels, shortcuts etc. or to add a custom tool
  * * shortcuts are similar to Google Docs: Ctrl+B, Ctrl+Shift+7, Ctrl+Alt+1 etc. (Cmd on macOS/iOS);
- * they're shown in tooltips & dropdown items (see $options.hideHotKeysHint); Alt+F10 focuses toolbar (Arrows - navigate, Esc - return)
+ * they're shown in tooltips & dropdown items (see $options.hideHotKeysHint); Alt+F10 focuses toolbar (Arrows - navigate, Esc - return);
+ * Alt+ArrowDown opens popup of element at caret: dropdown of token, link url etc. (see static $hotKeyAsk)
  * * inline format (bold etc.) with collapsed selection is applied to the next typed text
  * * ArrowRight at the end of inline format (bold, link etc.) or ArrowLeft at its start: the next typed text goes out of it
  * (caret stays visually), the opposite arrow returns into it; then ArrowRight at the end of the last block (list, quote,
@@ -421,6 +422,11 @@ export default class WUPTextRichControl<
    * @see {@link WUP.TextRich.Tool.hotKey}
    * @defaultValue `["Alt", "F10"]` */
   static $hotKeyToolbar: WUP.TextRich.HotKey = ["Alt", "F10"];
+  /** Shortcut to open popup of element at caret like combobox does: dropdown of token (mention etc.) or embed, `ask` of embed,
+   *  url of link (Esc - return); without such element key works as usual
+   * @see {@link WUP.TextRich.Tool.hotKey}
+   * @defaultValue `["Alt", "ArrowDown"]` */
+  static $hotKeyAsk: WUP.TextRich.HotKey = ["Alt", "ArrowDown"];
   /** Opening => closing char: typed over selection wraps it like in code editors (`(` gives `(text)`, `text` stays selected);
    *  remove pair (or clear map) to replace selection as usual
    * @defaultValue quotes & brackets */
@@ -836,7 +842,7 @@ export default class WUPTextRichControl<
       const el = this.hoverOf(t);
       clearTimeout(this.#hoverTimer);
       if (el !== (this.#ask?.hovered ?? null)) {
-        el ? this.askHover(el) : this.#ask!.done();
+        el ? this.askElement(el, true) : this.#ask!.done();
       }
     };
     // touch presses on click: otherwise popup opens when scrolling starts
@@ -854,10 +860,7 @@ export default class WUPTextRichControl<
       press(t); // touch (mouse is pressed on pointerdown already)
       // embed with `ask` (image etc.): asked value replaces it
       const name = this.embedTool(t);
-      if (name && this.#ctr.$tools[name].kind === "embed" && this.#ctr.$tools[name].ask) {
-        Utils.Ranges.select(t);
-        this.$format(name, undefined, false, t);
-      }
+      name && this.#ctr.$tools[name].kind === "embed" && this.#ctr.$tools[name].ask && this.askElement(t);
     });
   }
 
@@ -1214,12 +1217,13 @@ export default class WUPTextRichControl<
       return Promise.resolve(null);
     }
     const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
+    const el = target instanceof HTMLElement && this.$refInput.contains(target) ? target : null; // embed or token
     const m = new TextRichMenu({
       button: b,
       owner: isHover ? null : (document.activeElement === b && b) || this.$refInput,
       target,
       values: b._values,
-      selected: isHover ? tool.is?.(target as HTMLElement) : this.$refInput.getFormats().get(name) ?? false,
+      selected: el ? tool.is?.(el) : this.$refInput.getFormats().get(name) ?? false,
       render: (li, v) => (name === "command" ? this.renderCommandItem(li, v) : this.renderMenuItem(li, tool, v)),
     });
     if (!isHover) {
@@ -1428,16 +1432,20 @@ export default class WUPTextRichControl<
     }
     const { hoverOpenTimeout, hoverCloseTimeout } = WUPPopupElement.$defaults;
     this.#hoverTimer = setTimeout(
-      () => (el?.isConnected ? this.askHover(el) : this.#ask?.done()),
+      () => (el?.isConnected ? this.askElement(el, true) : this.#ask?.done()),
       el ? hoverOpenTimeout : hoverCloseTimeout
     );
   }
 
-  /** Opens hover popup: dropdown of embed/token (chosen value replaces it) or link url */
-  protected askHover(el: HTMLElement): void {
-    const name = this.embedTool(el, true);
-    if (name) {
-      this.askMenu(name, el, true).then((v) => {
+  /** Opens popup of element: `ask` of embed/token (value replaces it), dropdown of embed/token (chosen value replaces it)
+   *  or link url; `isHover` - hover popup (see hoverOf): without `ask`, closes on pointer leave, ignores keys */
+  protected askElement(el: HTMLElement, isHover?: boolean): void {
+    const name = this.embedTool(el, isHover);
+    if (name && this.#ctr.$tools[name].ask) {
+      Utils.Ranges.select(el);
+      this.$format(name, undefined, false, el);
+    } else if (name) {
+      this.askMenu(name, el, isHover).then((v) => {
         if (v != null && el.isConnected) {
           this.$refInput.focus({ preventScroll: true }); // otherwise control restores previous selection
           Utils.Ranges.select(el);
@@ -1445,7 +1453,7 @@ export default class WUPTextRichControl<
         }
       });
     } else if (el.tagName === "A") {
-      this.askLink(el, el.getAttribute("href")!, el).then(
+      this.askLink(el, el.getAttribute("href")!, isHover ? el : undefined).then(
         (url) =>
           url != null &&
           this.$refInput.changeContent(() => (url ? el.setAttribute("href", url) : el.replaceWith(...el.childNodes)))
@@ -1550,6 +1558,15 @@ export default class WUPTextRichControl<
       );
     if (match(this.#ctr.$hotKeyToolbar) !== -1) {
       this.$refToolbar.querySelector<HTMLElement>("button:not([hidden])")?.focus();
+      return true;
+    }
+    // element with popup at caret: otherwise key works as usual (Option+ArrowDown moves caret on macOS)
+    const near =
+      match(this.#ctr.$hotKeyAsk) !== -1 &&
+      e.target === this.$refInput &&
+      this.$refInput.elementAt((x) => !!this.embedTool(x) || this.hoverOf(x) === x);
+    if (near) {
+      this.askElement(near as HTMLElement);
       return true;
     }
     const found = this.$refInput._entries.find(
