@@ -146,15 +146,16 @@ declare global {
        * * `is` gets element with recognized text: `undefined` rejects it (invalid url, mention isn't from `values` etc.)
        * * token (see `trigger`) typed without menu is recognized too (`@john`); token chosen in menu follows its text
        * only if this text is recognized entirely (`@John Smith` stays as is)
-       * * markdown - RegExp with group: text of group is formatted once (`**bold**` gives bold `bold`), the rest of
-       * matched text is removed; the next typed text goes out of format; tool with `values` isn't supported
+       * * markdown - RegExp with named group `text`: text of group is formatted once (`**bold**` gives bold `bold`), the
+       * rest of matched text is removed; the next typed text goes out of format; tool with `values` isn't supported;
+       * other groups don't make it markdown (`/\b([A-Z]+)-\d+$/` recognizes `WUP-123` as usual)
        * * `line` tool: text typed at line start applies format like `ToolValue.recognize` (`> ` gives quote);
        * tool with `values` applies value via `ToolValue.recognize`: `1. ` gives numbered list
        * * point `placeholder` too (except markdown): otherwise tool chosen in menu of `command` does nothing visible
        * @example
        * recognize: /(?<!\w)#\w+$/, // hashtags: `#news`
        * recognize: (s) => /\b[A-Z]+-\d+$/.exec(s)?.[0], // Jira issues: `WUP-123`
-       * recognize: /(?<!\S)\*\*(\S(?:.*?\S)?)\*\*$/, // markdown: `**bold**`
+       * recognize: /(?<!\S)\*\*(?<text>\S(?:.*?\S)?)\*\*$/, // markdown: `**bold**`
        * recognize: /^>\s$/, // markdown of line tool: `> ` */
       recognize?: RegExp | ((text: string) => string | null | undefined);
       /** Text that inserted as example when user selects this command (type '/' and chose command with this) */

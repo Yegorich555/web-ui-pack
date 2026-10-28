@@ -1975,7 +1975,7 @@ describe("control.textRich", () => {
     const { $tools } = WUPTextRichControl;
     $tools.marked = {
       kind: "inline",
-      recognize: /(?<!\w)#\w+$/,
+      recognize: /(?<!\w)#(\w+)$/, // group isn't markdown (only named group `text`): text is recognized as usual
       is: (e) => e.tagName === "MARK" || undefined,
       create: "mark",
     };
@@ -2371,7 +2371,7 @@ describe("control.textRich", () => {
     expect(rec("<div>-|</div>")).toBe("<div>- |</div>");
   });
 
-  test("markdown: `recognize` of line tool & RegExp with group", async () => {
+  test("markdown: `recognize` of line tool & RegExp with group `text`", async () => {
     // like demo textRich.custom.tsx
     const { header, blockquote, code, bold, italic } = WUPTextRichControl.$tools;
     header.values.forEach((v) => {
@@ -2379,8 +2379,9 @@ describe("control.textRich", () => {
     });
     blockquote.recognize = /^>\s$/;
     code.recognize = (s) => (s === "```" ? s : undefined);
-    bold.recognize = /(?<!\S)\*\*([^*\s](?:[^*]*[^*\s])?)\*\*$/;
-    italic.recognize = /(?<!\S)_([^_\s](?:[^_]*[^_\s])?)_$/dg; // flags `d` & `g` are ignored
+    bold.recognize = /(?<!\S)\*\*(?<text>[^*\s](?:[^*]*[^*\s])?)\*\*$/;
+    // flags `d` & `g` are ignored; other groups are allowed: `_a_` & `*a*`
+    italic.recognize = /(?<!\S)([_*])(?<text>[^_*\s](?:[^_*]*[^_*\s])?)\1$/dg;
     try {
       el.$options.toolbar = [["header"], ["bold", "italic"], ["blockquote", "code"], [{ list: "bullet" }]];
       await h.wait(1);
@@ -2401,7 +2402,7 @@ describe("control.textRich", () => {
       expect(rec("<blockquote>>|</blockquote>")).toBe("<blockquote>&gt; |</blockquote>"); // applied already
       expect(rec("<div>a >|</div>")).toBe("<div>a &gt; |</div>"); // not at line start
 
-      // inline tool: text of group is formatted on typed closing marker, markers are removed
+      // inline tool: text of group `text` is formatted on typed closing marker, markers are removed
       expect(rec("<div>a **bol|</div>", "d")).toBe("<div>a **bold|</div>");
       expect(rec("<div>a **bold*|</div>", "*")).toBe("<div>a <b>bold|</b></div>");
       const btnBold = el.querySelector("[tool=bold]");
@@ -2410,6 +2411,7 @@ describe("control.textRich", () => {
       expect(getHtml()).toBe("<div>a <b>bold</b>c|</div>");
       expect(rec("<div>x _a b|</div>", "_")).toBe("<div>x <em>a b|</em></div>");
       expect(rec("<div>_a|</div>", "_")).toBe("<div><em>a|</em></div>"); // again: flag `g` is ignored
+      expect(rec("<div>x *a|</div>", "*")).toBe("<div>x <em>a|</em></div>"); // group `text` is formatted, not the 1st one
       // text split by formats, formatted already
       expect(rec("<div>**a <i>b</i>*|</div>", "*")).toBe("<div><b>a </b><i><b>b|</b></i></div>");
       expect(rec("<div><b>**a*|</b></div>", "*")).toBe("<div><b>a|</b></div>");

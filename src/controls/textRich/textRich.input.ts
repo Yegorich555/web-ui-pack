@@ -62,11 +62,11 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     this.#markdown = new Map();
     this._entries.forEach(([, t]) => {
       const r = t.recognize;
-      // RegExp with group (empty alternative matches empty string, so result has item per group):
-      // its copy with indices (flag `d`, without `g`)
+      // RegExp with group `text` (empty alternative matches empty string, so result has all groups; other groups don't
+      // matter: `/\b([A-Z]+)-\d+$/` isn't markdown): its copy with indices (flag `d`, without `g`)
       t.kind === "inline" &&
         r instanceof RegExp &&
-        new RegExp(`${r.source}|`, r.flags).exec("")!.length > 1 &&
+        "text" in (new RegExp(`${r.source}|`, r.flags).exec("")!.groups ?? {}) &&
         this.#markdown.set(t, new RegExp(r.source, `${r.flags.replace(/[gd]/g, "")}d`));
     });
     // tool with values too (mention): `is` gets recognized text & can accept values only (typed `@john`)
@@ -704,7 +704,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
 
   /** Tools with `recognize` that work (see `_isActive`): cached via setTools */
   #recognizers: WUP.TextRich.Tool[] = [];
-  /** Markdown tools (inline with `recognize` RegExp with group) => its copy with indices: cached via setTools */
+  /** Markdown tools (inline with `recognize` RegExp with group `text`) => its copy with indices: cached via setTools */
   #markdown = new Map<WUP.TextRich.Tool, RegExp>();
   /** Markdown tools that work (see `_isActive`): cached via setTools */
   #markdowns: ToolEntry[] = [];
@@ -865,7 +865,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return true;
   }
 
-  /** Formats text recognized at the end of typed text by markdown `recognize` of rendered tool (RegExp with group):
+  /** Formats text recognized at the end of typed text by markdown `recognize` of rendered tool (RegExp with group `text`):
    *  `**bold**` gives bold `bold`; typed markers are removed & the next typed text goes out of format;
    *  it's a separate undo step (Ctrl+Z or Escape right after it returns typed text) */
   protected recognizeMarkdown(): void {
@@ -878,7 +878,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     // eslint-disable-next-line no-restricted-syntax
     for (const e of this.#markdowns) {
       const m = this.#markdown.get(e[1])!.exec(s);
-      if (m?.[1] && m.index + m[0].length === s.length) {
+      if (m?.groups!.text && m.index + m[0].length === s.length) {
         found = [e, m]; // group isn't empty, match is at the end of text
         break;
       }
@@ -887,7 +887,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       return;
     }
     const [[name, , is], { index: start, indices }] = found;
-    const [from, to] = indices![1]!; // text of group
+    const [from, to] = indices!.groups!.text!; // text of group
     const sel = window.getSelection()!;
     const isEmbed = this._isEmbed;
     const at = charsBefore(line, n, sel.focusOffset, isEmbed) - s.length; // text after line break or embed

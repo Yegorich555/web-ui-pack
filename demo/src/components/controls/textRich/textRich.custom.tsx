@@ -41,17 +41,17 @@ header.values!.forEach((v) => {
 });
 blockquote.recognize = /^>\s$/; // `> `
 code.recognize = /^```$/; // without space like in Notion
-// RegExp with group: text of group is formatted on typed closing marker, markers are removed (`**bold**` => `bold`)
-bold.recognize = /(?<!\S)\*\*([^*\s](?:[^*]*[^*\s])?)\*\*$/;
-italic.recognize = /(?<!\S)_([^_\s](?:[^_]*[^_\s])?)_$/;
-strike.recognize = /(?<!\S)~~([^~\s](?:[^~]*[^~\s])?)~~$/;
+// RegExp with group `text`: text of group is formatted on typed closing marker, markers are removed (`**bold**` => `bold`)
+bold.recognize = /(?<!\S)\*\*(?<text>[^*\s](?:[^*]*[^*\s])?)\*\*$/;
+italic.recognize = /(?<!\S)_(?<text>[^_\s](?:[^_]*[^_\s])?)_$/;
+strike.recognize = /(?<!\S)~~(?<text>[^~\s](?:[^~]*[^~\s])?)~~$/;
 
 WUPTextRichControl.$tools.codeInline = {
   label: "Inline code",
   className: styles.iconCode,
   hotKey: ["Control", "E"], // like in Notion
   kind: "inline",
-  recognize: /(?<!\S)`([^`\s](?:[^`]*[^`\s])?)`$/, // markdown: `code`
+  recognize: /(?<!\S)`(?<text>[^`\s](?:[^`]*[^`\s])?)`$/, // markdown: `code`
   is: (el) => el.tagName === "CODE" || undefined,
   create: "code",
 };
