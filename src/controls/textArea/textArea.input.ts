@@ -39,6 +39,15 @@ export function walkText(
   }
 }
 
+/** Returns plain text inside root: `<br>` & lines are converted into '\n' (see walkText) */
+export function textOf(root: Node): string {
+  let s = "";
+  walkText(root, (n, len) => {
+    s += n.nodeType === Node.TEXT_NODE ? (n as Text).data : "\n".repeat(len);
+  });
+  return s;
+}
+
 /** Returns count of chars before point (node & offset) inside root: line break & embed are counted as 1 char (see walkText) */
 export function charsBefore(root: Node, node: Node, offset: number, isEmbed?: (el: Element) => boolean): number {
   const r = document.createRange();
@@ -173,11 +182,7 @@ export default class WUPTextAreaInput extends HTMLElement {
   _keepCache?: boolean;
   /** Returns plain text: `<br>` & lines added by browser on Enter are converted into '\n' */
   get text(): string {
-    let s = "";
-    walkText(this, (n, len) => {
-      s += n.nodeType === Node.TEXT_NODE ? (n as Text).data : "\n".repeat(len);
-    });
-    return s;
+    return textOf(this);
   }
 
   /** Get/set plain text (see `text`; setter assigns textContent) */

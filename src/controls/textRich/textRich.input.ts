@@ -1,4 +1,4 @@
-import WUPTextAreaInput, { charsBefore, pointAt, walkText } from "../textArea/textArea.input";
+import WUPTextAreaInput, { charsBefore, pointAt, textOf, walkText } from "../textArea/textArea.input";
 import TextRichHistory from "./textRich.history";
 import * as Utils from "./textRich.utils";
 
@@ -1185,18 +1185,35 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return t.is!(el) === v ? [this._entries.find(([, x]) => x === t)![0], v] : undefined;
   }
 
+  /** Replaces selection with content like paste (see WUPTextRichControl.$insert): html is sanitized (see insertHTML),
+   *  node is inserted as is; urls etc. of inserted text are recognized (see recognizeInserted) */
+  insertContent(content: string | Node): void {
+    this.collectAuto(); // before changes: touched elements of recognized text are unwrapped (see deleteSelection)
+    this.#insertAt = Math.min(...this.getSelectionPos()); // wraps loose content into lines
+    this.changeContent(() => {
+      if (typeof content === "string") {
+        this.insertHTML(content);
+      } else {
+        this.deleteSelection();
+        this.$insert(content);
+      }
+    });
+    this.recognizeInserted();
+  }
+
   /** Replaces selection with sanitized html: single paragraph goes inline at caret (inside its formats: pasted into bold
    *  text is bold), other blocks split the current line at caret; code block gets plain text instead (formats & blocks
    *  aren't supported there)
-   * @param text plain text of the same content (paste `text/plain`) */
-  insertHTML(html: string, text = ""): void {
+   * @param text plain text of the same content (paste `text/plain`); text of sanitized html by default */
+  insertHTML(html: string, text?: string): void {
     const sel = window.getSelection()!;
     this.getSelectionPos(); // wraps loose content: otherwise caret at editor root has no line
     this.deleteSelection();
     const r = sel.getRangeAt(0);
     const line = Utils.Lines.at(r.startContainer, this);
     if (line?.tagName === "PRE") {
-      text && this.$insert(document.createTextNode(text)); // line breaks as `\n` like browser pastes plain text
+      const s = text ?? textOf(Utils.Html.toEditor(html, this._tools)); // lines => `\n`
+      s && this.$insert(document.createTextNode(s)); // line breaks as `\n` like browser pastes plain text
       return;
     }
     const f = Utils.Html.toEditor(html, this._tools);

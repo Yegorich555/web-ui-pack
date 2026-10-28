@@ -1076,15 +1076,21 @@ export default class WUPTextRichControl<
     });
   }
 
-  /** Focuses editor & restores the last selection (focus is on toolbar or out of control) */
+  /** Focuses editor & restores the last selection (focus is on toolbar or out of control, selection is moved out via
+   *  code); without it caret goes to editor start like on focus */
   protected restoreSelection(): void {
     const inp = this.$refInput;
-    if (document.activeElement === inp) {
+    const sel = window.getSelection()!;
+    if (document.activeElement === inp && sel.rangeCount && inp.contains(sel.anchorNode)) {
       return;
     }
     const r = this.#range; // before focus: browser places caret at editor start & it's saved on focus
     inp.focus({ preventScroll: true });
-    r && inp.contains(r.startContainer) && Utils.Ranges.select(r);
+    if (r && inp.contains(r.startContainer)) {
+      Utils.Ranges.select(r);
+    } else if (!sel.rangeCount || !inp.contains(sel.anchorNode)) {
+      sel.collapse(inp, 0); // disabled editor isn't focusable
+    }
   }
 
   /** Applies toolbar button: toggles format or opens dropdown menu */
@@ -1100,7 +1106,8 @@ export default class WUPTextRichControl<
 
   /** Applies tool to selection like toolbar does (tool may be not rendered): sets value if passed,
    *  otherwise asks it (via `ask` or dropdown) or toggles format;
-   *  inline format with collapsed selection is pending for the next typed text (like quill)
+   *  inline format with collapsed selection is pending for the next typed text (like quill);
+   *  works even if control is disabled or readonly (they block user only)
    * @param isSet set value (dropdown item, asked value etc.), otherwise toggle format (button); default: value is passed
    * @example
    * el.$format("bold"); // toggles bold
@@ -1113,15 +1120,9 @@ export default class WUPTextRichControl<
   /** @param target element to place popup near (clicked embed) */
   $format(name: keyof WUP.TextRich.ToolValues, value: unknown, isSet: boolean, target?: HTMLElement): void;
   $format(name: keyof WUP.TextRich.ToolValues, value?: unknown, isSet?: boolean, target?: HTMLElement): void {
-    if (this.$isDisabled || this.$isReadOnly) {
-      return;
-    }
     this.restoreSelection();
     const inp = this.$refInput;
     const sel = window.getSelection()!;
-    if (!sel.rangeCount || !inp.contains(sel.anchorNode)) {
-      return;
-    }
     const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
     const b = this.findTool(name);
     if (value === undefined && (tool.ask || tool.values || b?._values)) {
@@ -1141,6 +1142,20 @@ export default class WUPTextRichControl<
       return;
     }
     inp.applyFormat(name, value ?? true, isSet ?? value !== undefined, this as WUPTextRichControl); // `true` for tool without values
+  }
+
+  /** Replaces selection with content & places caret after it like paste (emoji picker, template etc.): separate undo
+   *  step, urls etc. of inserted text are recognized, $value is updated; selection is restored if focus is out of
+   *  control; works even if control is disabled or readonly (they block user only)
+   * @param content html (sanitized like paste: only formats of $tools are kept; code block gets its text with lines
+   *  as `\n`) or node (inserted as is)
+   * @example
+   * el.$insert("🎉");
+   * el.$insert("<b>Hello</b>, world");
+   * el.$insert(document.createTextNode(userText)); // plain text */
+  $insert(content: string | Node): void {
+    this.restoreSelection();
+    this.$refInput.insertContent(content);
   }
 
   /** Opened popup: $ask or dropdown menu */
