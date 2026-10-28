@@ -40,10 +40,6 @@ Developer (package consumer) side: statics, options, `$format`/`$ask`, types `To
 ✔ - reproduced in installed Chrome (puppeteer over `test/browser/srv/bundle.js`) or via `tsc` on a scratch file.
 TextRich isn't released yet (npm latest 1.2.9 is from 2026-10-02): renames & signature changes are free now
 
-### API: bugs (fix first)
-
-1. **Nested groups of toolbar are shared with `$defaults` ✔**. `cloneDefaults` copies only the outer array: `a.$options.toolbar[0].push("bold")` changes `$defaults.toolbar[0]` & options of other controls (`a` isn't re-rendered). Fix: `d.toolbar?.map((g) => g.slice())`
-
 ### API: simpler custom tools
 
 1. **Derived `is` & boolean `is` ✔ (tsc)**. Simple tools repeat tag twice: `create: "code"` + `is: (el) => el.tagName === "CODE" || undefined`; natural `is: (e) => e.tagName === "MARK"` is rejected (must return `true | undefined`)

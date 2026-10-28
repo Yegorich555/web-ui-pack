@@ -774,8 +774,8 @@ export default class WUPTextRichControl<
 
   static override cloneDefaults<T extends Record<string, any>>(): T {
     const d = super.cloneDefaults() as WUP.TextRich.Options;
-    // otherwise changing $options.toolbar[i] mutates $defaults
-    d.toolbar = d.toolbar?.slice() ?? null;
+    // otherwise changing $options.toolbar or its groups mutates $defaults
+    d.toolbar = d.toolbar?.map((g) => g.slice()) ?? null;
     return d as unknown as T;
   }
 
