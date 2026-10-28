@@ -1098,9 +1098,9 @@ export default class WUPTextRichControl<
     const name = el._format;
     if (el._values) {
       document.activeElement !== el && this.restoreSelection(); // dropdown focused via keyboard keeps focus
-      this.askMenu(name, el).then((v) => v != null && this.$format(name, v, true));
+      this.askMenu(name, el).then((v) => v != null && this.goFormat(name, v, true));
     } else {
-      this.$format(name, el._value, false);
+      this.goFormat(name, el._value, false);
     }
   }
 
@@ -1116,10 +1116,18 @@ export default class WUPTextRichControl<
    * el.$format("link"); // asks url via popup
    * el.$format("link", "https://example.com"); // wraps selection into link
    * el.$format("header"); // asks value via dropdown near selection */
-  $format<K extends keyof WUP.TextRich.ToolValues>(name: K, value?: WUP.TextRich.ToolValues[K], isSet?: boolean): void;
-  /** @param target element to place popup near (clicked embed) */
-  $format(name: keyof WUP.TextRich.ToolValues, value: unknown, isSet: boolean, target?: HTMLElement): void;
-  $format(name: keyof WUP.TextRich.ToolValues, value?: unknown, isSet?: boolean, target?: HTMLElement): void {
+  $format<K extends keyof WUP.TextRich.ToolValues>(name: K, value?: WUP.TextRich.ToolValues[K], isSet?: boolean): void {
+    this.goFormat(name, value, isSet);
+  }
+
+  /** Applies tool to selection (see $format): value isn't typed (toolbar, menus, clicked embed etc.)
+   * @param target element to place popup near (clicked embed) */
+  protected goFormat(
+    name: keyof WUP.TextRich.ToolValues,
+    value?: unknown,
+    isSet?: boolean,
+    target?: HTMLElement
+  ): void {
     this.restoreSelection();
     const inp = this.$refInput;
     const sel = window.getSelection()!;
@@ -1136,7 +1144,7 @@ export default class WUPTextRichControl<
         if (v != null) {
           inp.focus({ preventScroll: true });
           inp.setSelectionPos(pos);
-          this.$format(name, v, true);
+          this.goFormat(name, v, true);
         }
       });
       return;
@@ -1320,7 +1328,7 @@ export default class WUPTextRichControl<
     const isMenu = !rest.length && !!tool.trigger && !!this.findTool(name)?._values;
     const text = isMenu ? tool.trigger : tool.placeholder;
     if (!text) {
-      this.$format(name, v, !!rest.length);
+      this.goFormat(name, v, !!rest.length);
       return;
     }
     const inp = this.$refInput;
@@ -1336,7 +1344,7 @@ export default class WUPTextRichControl<
       inp.setSelectionPos([pos, pos + text.length]); // to type over it
     } else {
       inp.setSelectionPos([pos, pos + text.length]);
-      this.$format(name, v, !!rest.length);
+      this.goFormat(name, v, !!rest.length);
     }
   }
 
@@ -1383,7 +1391,7 @@ export default class WUPTextRichControl<
           sel.setBaseAndExtent(r.startContainer, r.startOffset, sel.focusNode!, sel.focusOffset);
           const isLine = tool.kind === "line" || tool.kind === "lineStyle";
           isLine && inp.changeContent(() => sel.getRangeAt(0).deleteContents());
-          this.$format(name, v, true);
+          this.goFormat(name, v, true);
           // token is followed by space like in messengers (not before whitespace or punctuation): otherwise Chrome draws
           // caret inside token at the end of line; the same undo step (changes of the same tick are merged)
           const caret = sel.focusNode!; // in line: format wraps loose content
@@ -1410,7 +1418,7 @@ export default class WUPTextRichControl<
       return false;
     }
     this.#ask?.done(); // trigger menu
-    this.$format(found[0], found[1], true); // separate undo step
+    this.goFormat(found[0], found[1], true); // separate undo step
     return true;
   }
 
@@ -1459,13 +1467,13 @@ export default class WUPTextRichControl<
     const name = this.embedTool(el, isHover);
     if (name && this.#ctr.$tools[name].ask) {
       Utils.Ranges.select(el);
-      this.$format(name, undefined, false, el);
+      this.goFormat(name, undefined, false, el);
     } else if (name) {
       this.askMenu(name, el, isHover).then((v) => {
         if (v != null && el.isConnected) {
           this.$refInput.focus({ preventScroll: true }); // otherwise control restores previous selection
           Utils.Ranges.select(el);
-          this.$format(name, v, true); // replaces element, caret goes after it
+          this.goFormat(name, v, true); // replaces element, caret goes after it
         }
       });
     } else if (el.tagName === "A") {
@@ -1550,7 +1558,7 @@ export default class WUPTextRichControl<
     const [name, ...rest] = key.split(":") as [keyof WUP.TextRich.ToolValues, ...string[]];
     const v = rest.join(":"); // value can contain `:`
     const item = this.findTool(name)?._values?.find((x) => `${x.value}` === v);
-    item && this.$format(name, item.value, true);
+    item && this.goFormat(name, item.value, true);
     return !!item;
   }
 
@@ -1608,7 +1616,7 @@ export default class WUPTextRichControl<
     const cur = this.$refInput.getFormats().get(name) ?? false;
     const at = values.findIndex((v) => v.value === cur);
     const next = (i ? values.slice(at + 1) : values.slice(0, at < 0 ? undefined : at).reverse()).find(isRendered);
-    next && this.$format(name, next.value, true);
+    next && this.goFormat(name, next.value, true);
     return true;
   }
 
@@ -1686,7 +1694,7 @@ export default class WUPTextRichControl<
       e.preventDefault(); // done via changeContent: separate undo step
     } else if (f) {
       e.preventDefault();
-      this.$format(f[0], f[1], true);
+      this.goFormat(f[0], f[1], true);
     } else if (inp.replaceInput(e)) {
       // fired input has no inputType: gotInput skips it
       s && this.gotTrigger();
