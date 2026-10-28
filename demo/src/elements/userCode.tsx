@@ -97,6 +97,17 @@ function getHTMLAttrs(el: WUPBaseElement): Array<{ name: string; value: string |
     }
   };
 
+  // controls remove option-attrs reflected as css-hooks (`w-allowResizeH="false"`, `w-collapsible="false"`): so take them from JSX props
+  const jsx: Record<string, unknown> = Object.entries(el).find(([k]) => k.startsWith("__reactProps$"))?.[1] ?? {};
+  const optAttrs = Object.keys((el.constructor as typeof WUPBaseElement).$defaults).map((k) => `w-${k.toLowerCase()}`);
+  Object.keys(jsx).forEach((k) => {
+    const name = k.toLowerCase();
+    const v = jsx[k];
+    optAttrs.includes(name) &&
+      (v === true || typeof v === "string") &&
+      addUnique({ name, value: v === true ? null : v });
+  });
+
   if (el instanceof WUPBaseControl) {
     addUnique({ name: "w-autocomplete", value: "off" });
     addUnique({ name: "w-storage", value: "local" });
@@ -333,11 +344,15 @@ function RenderJSCode({ el }: { el: WUPBaseElement }): React.JSX.Element {
     opts.validations = vls;
   }
   const initValue = el instanceof WUPBaseControl ? el.$initValue : undefined;
-  // the same options as attributes on HTML side; all options if there are few of them or no one is defined via attributes
+  // new options of control (base elements have no inherited ones: all options are new there)
+  const [first, ...inherited] = groupByClass(ctr, keys);
+  const own = inherited.length && first.from === ctr ? first.keys : [];
+  // new options + the same options as attributes on HTML side; all options if there are few of them or no one is defined via attributes
   let shownKeys: string[] = getHTMLAttrs(el)
     .map((a) => a.name.replace(/^w-/, ""))
     .map((a) => keys.find((k) => k.toLowerCase() === a))
     .filter((k) => k !== undefined);
+  shownKeys = [...new Set([...own, ...shownKeys])];
   shownKeys = shownKeys.length && keys.length >= 14 ? shownKeys : keys;
   const renderOptions = (arr: string[], hasMore: boolean): string => {
     // option the same as nested one (min === validations.min) is assigned via reference after
