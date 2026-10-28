@@ -3,6 +3,7 @@ import onEvent from "../../helpers/onEvent";
 import { stringPrettify } from "../../helpers/string";
 import WUPPopupElement from "../../popup/popupElement";
 import { useTooltipOnce } from "../../popup/popupTooltip";
+import { SetValueReasons } from "../baseControl";
 import WUPTextControl from "../text";
 import TextHistory from "../text.history";
 import WUPTextAreaControl from "../textArea/textArea";
@@ -355,9 +356,9 @@ const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
     <wup-textrich w-name="description" w-toolbar="window.myToolbar" w-validations="myValidations"/>
   </wup-form>;
  * @tutorial Rules
- * * $value is sanitized html (`undefined` if there is no text & embeds): only formats of $tools are kept
- * (`<strong>`, `<em>`, `<a>`, `<h1>`, `<blockquote>` etc.) with paragraphs `<p>`, lists & indents;
- * a single plain paragraph goes without `<p>` (`text` instead of `<p>text</p>`)
+ * * $value is sanitized html (`undefined` if there is no text & embeds), value set via code too ($value, $initValue,
+ * storage): only formats of $tools are kept (`<strong>`, `<em>`, `<a>`, `<h1>`, `<blockquote>` etc.) with paragraphs `<p>`,
+ * lists & indents; a single plain paragraph goes without `<p>` (`text` instead of `<p>text</p>`); see static $sanitize
  * * undo/redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y, OS-native) works for text & formats
  * * tools are defined in static $tools: change it to redefine labels, shortcuts etc. or to add a custom tool
  * * shortcuts are similar to Google Docs: Ctrl+B, Ctrl+Shift+7, Ctrl+Alt+1 etc. (Cmd on macOS/iOS);
@@ -379,7 +380,7 @@ const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
  * it link; lists by `1. ` & `- ` at line start,
  * custom markdown (`**bold**`, `> `: see `recognize` of $tools);
  * undo (Ctrl+Z or Escape right after recognizing) returns typed text; Escape doesn't clear value (clear button only)
- * * content styles are global: use `<div wup-textrich>{$value}</div>` to show value outside control
+ * * content styles are global: use `<div wup-textrich>{$value}</div>` to show value outside control (stored html - via static $sanitize)
  * @tutorial innerHTML @example
  * <label>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
@@ -785,6 +786,17 @@ export default class WUPTextRichControl<
     return opts;
   }
 
+  /** Returns html sanitized the same way as $value (empty string if there is no text & embeds): only formats of $tools
+   *  are kept; use it to show stored html outside control
+   * @example
+   * div.setAttribute("wup-textrich", ""); // global content styles
+   * div.innerHTML = WUPTextRichControl.$sanitize(htmlFromServer); */
+  static $sanitize(html: string | null | undefined): string | undefined {
+    return html
+      ? Utils.Html.fromEditor(new DOMParser().parseFromString(html, "text/html").body, this.$tools)
+      : undefined;
+  }
+
   // WARN: without type annotation tsc can fail with circular inference (TS7022) when overriding methods
   $refInput: WUPTextRichInput & HTMLInputElement = Object.assign(
     document.createElement("wup-richinput") as WUPTextRichInput & HTMLInputElement,
@@ -879,6 +891,21 @@ export default class WUPTextRichControl<
 
   protected override countChars(): number {
     return Utils.Html.toText(this.$refInput.value).length;
+  }
+
+  /** Default/init value: sanitized the same way as $value (see static $sanitize) */
+  override get $initValue(): ValueType | undefined {
+    return super.$initValue;
+  }
+
+  override set $initValue(v: ValueType | undefined) {
+    super.$initValue = this.#ctr.$sanitize(v as string) as ValueType;
+  }
+
+  protected override setValue(v: ValueType | undefined, reason: SetValueReasons, skipInput = false): boolean | null {
+    // value of editor (user input) & $initValue are sanitized already
+    const isClean = reason === SetValueReasons.userInput || reason === SetValueReasons.initValue;
+    return super.setValue(isClean ? v : (this.#ctr.$sanitize(v as string) as ValueType), reason, skipInput);
   }
 
   /** Renders toolbar according to $options.toolbar */

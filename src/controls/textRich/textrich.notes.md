@@ -42,10 +42,7 @@ TextRich isn't released yet (npm latest 1.2.9 is from 2026-10-02): renames & sig
 
 ### API: bugs (fix first)
 
-1. **Rule "$value is sanitized html" (class JSDoc) is true only after user edits ✔**. `$initValue`/`$value` set via code is returned as is, `<img onerror>` included (decision of 2026-10-07; editor shows sanitized version). With documented `<div wup-textrich>{$value}</div>` developer can render server html unsanitized
-   - fix wording of the rule
-   - add static `WUPTextRichControl.$sanitize(html)`: html of value via `Html.fromEditor` over `DOMParser` body with `$tools` of class: stored html is shown by the same rules (custom tools too)
-2. **Nested groups of toolbar are shared with `$defaults` ✔**. `cloneDefaults` copies only the outer array: `a.$options.toolbar[0].push("bold")` changes `$defaults.toolbar[0]` & options of other controls (`a` isn't re-rendered). Fix: `d.toolbar?.map((g) => g.slice())`
+1. **Nested groups of toolbar are shared with `$defaults` ✔**. `cloneDefaults` copies only the outer array: `a.$options.toolbar[0].push("bold")` changes `$defaults.toolbar[0]` & options of other controls (`a` isn't re-rendered). Fix: `d.toolbar?.map((g) => g.slice())`
 
 ### API: simpler custom tools
 
@@ -74,9 +71,3 @@ TextRich isn't released yet (npm latest 1.2.9 is from 2026-10-02): renames & sig
 3. `ask(target, control, current)` is positional, `format(ctx)` gets object; `$ask(…, hovered?)` exposes internal param of hover popup (both are open since 2026-10-07)
 4. Class JSDoc: most of `Rules` are end-user keyboard details & they hide API rules in IDE hint => move them to demo features list
 5. `$format`: positional boolean is unreadable (`$format("list", "ordered", false)`) => `{ toggle: true }`; returns `void`: with `Promise<boolean>` caller can wait for asked value (link url, image picker)
-
-### API: suggested order
-
-1. Quick & low risk: bugs 2, 1
-2. Simpler custom tools: custom tools 2 (`ctx.insert`, `editor` type), 1, 3
-3. Need decision: hard use cases 1, 2, naming & docs 5 (`{ toggle }` of `$format`), renames
