@@ -38,3 +38,59 @@ Won't be fixed: copy-paste from other editors isn't supported
 
 1. issue on demo for textarea. tab js/ts must include all new options defined for this control (including attrs/options used for 1st control on the page), buttonSeeMore must show all other.
 Currently missed options hideFooter, allowResizeW, allowResizeW - need to use w-{attr} for 1st control. Remember when we add new option, need to update it on demo too
+
+## API review (2026-10-28)
+
+Developer (package consumer) side: statics, options, `$format`/`$ask`, types `Tool`/`FormatContext`, editor via `ctx.editor`/`$refInput`.
+✔ - reproduced in installed Chrome (puppeteer over `test/browser/srv/bundle.js`) or via `tsc` on a scratch file.
+TextRich isn't released yet (npm latest 1.2.9 is from 2026-10-02): renames & signature changes are free now
+
+### API: bugs (fix first)
+
+1. **Capturing group in `recognize` silently turns tool into markdown ✔**. Jira recognizer that "captures" project key `/\b([A-Z]+)-\d+$/`: typed `See WUP-123 now` gives `See <span>WUP</span>23 now` (`-1` is deleted); without group it gives `<span>WUP-123</span>`. Switch is in `setTools` (group detection via `new RegExp(source + "|").exec("")`); group detection was chosen over `Tool.markdown` on 2026-10-21, this is a new reason to make it explicit:
+   - a) markdown only for **named** group (`(?<text>…)`): single `recognize` prop stays (recommended)
+   - b) keep as is & add WARN to JSDoc: use `(?:…)`
+2. **`$insert` is public but safe only inside `Tool.format` ✔**. The only insert API is `el.$refInput.$insert(node)`. Called from outside (emoji picker, button "insert template"): `$value` stays stale till the next input, it isn't own undo step (merged into the next one), readonly is ignored, after click outside of editor it inserts into the page (`Text outside of editor😀`). Safe way today: dummy action tool + `$format("emoji", "🎉", true)`
+   - add `el.$insert(content: Node | string)` to control: readonly guard, `restoreSelection`, `changeContent`; string is html sanitized like paste
+   - add `insert(node)` to `FormatContext` & remove `$` from editor method (`$` means safe public API in the library)
+3. **`$format` overload hole ✔**. `$format("header", "foo")` is rejected, but `$format("header", "foo", true)` compiles: the 2nd overload (`value: unknown, isSet, target?`) exists for clicked embeds only (`askElement`) => make it protected method. Optional:
+   - positional boolean is unreadable (`$format("list", "ordered", false)`) => `{ toggle: true }`
+   - return `Promise<boolean>`: caller can wait for asked value (link url, image picker)
+4. **Incomplete tool compiles & crashes deep inside ✔**. `{ kind: "inline" }` passes TS; click gives `TypeError: t.create is not a function` (or `tool.is is not a function`) from utils. `renderTool` throws for unknown name already => validate there too: `Tool 'hl': kind "inline" requires create & is`
+5. **Rule "$value is sanitized html" (class JSDoc) is true only after user edits ✔**. `$initValue`/`$value` set via code is returned as is, `<img onerror>` included (decision of 2026-10-07; editor shows sanitized version). With documented `<div wup-textrich>{$value}</div>` developer can render server html unsanitized
+   - fix wording of the rule
+   - add static `WUPTextRichControl.$sanitize(html)`: html of value via `Html.fromEditor` over `DOMParser` body with `$tools` of class: stored html is shown by the same rules (custom tools too)
+6. **Nested groups of toolbar are shared with `$defaults` ✔**. `cloneDefaults` copies only the outer array: `a.$options.toolbar[0].push("bold")` changes `$defaults.toolbar[0]` & options of other controls (`a` isn't re-rendered). Fix: `d.toolbar?.map((g) => g.slice())`
+
+### API: simpler custom tools
+
+1. **Derived `is` & boolean `is` ✔ (tsc)**. Simple tools repeat tag twice: `create: "code"` + `is: (el) => el.tagName === "CODE" || undefined`; natural `is: (e) => e.tagName === "MARK"` is rejected (must return `true | undefined`)
+   - default `is` if `create` is tag name: tag + `classNameTag`; tool with values - value with `classNameTag` of element. Highlight = `{ label, className, kind: "inline", create: "mark" }`, dropdown by classes needs no functions. WARN: `span` without `classNameTag` matches every span (size, font): validation must reject it
+   - allow `boolean` for tool without values (`false` = `undefined`): needs one reader instead of ~20 direct calls of `is`; less important with derived `is`
+2. **`ctx.editor` exposes the whole editor**. `FormatContext.editor` is `WUPTextRichInput`: 36 own public members (`replaceInput`, `checkBreak`, `_applyKey`…) + ~14 inherited, tool needs `$insert` only
+   - with `ctx.insert` (see API bugs 2) `editor` can be `HTMLElement`: built-in tools use it as root node & `$insert` only
+   - optional: hide internal members from `.d.ts` via `@internal` & `stripInternal`
+   - `ctx.texts` has WARN "read before changing editor": eager for custom format costs one walk (the same as `normalize()` after every format) & removes WARN
+3. **Built-in tools use protected API: they can't be copied ✔ (tsc)**. `link.ask` calls `c.askLink`, `command.format` calls `control.applyCommand`: it compiles inside class body only, the same code in app gives TS2445 (the same rule as `#ctr` rejected in `clean`). Build `link.ask` on public `$ask`; `command` isn't copied by developers: can stay as is
+
+### API: hard use cases
+
+1. **`toolbar` is feature switch too ✔**. `toolbar: null` (docs: "hides toolbar") disables shortcuts, recognizing, markdown & `/` commands as well, but `$format("bold")` still works. Custom toolbar `[["bold"], ["link"]]` silently drops recognizing of emails & `/` (hidden items `email`, `command`). Editor like Notion (no toolbar, shortcuts & markdown) needs global `hideOnToolbar` or css
+   - a) docs: tools work only if they're listed (hidden ones too) + css recipe to hide toolbar
+   - b) option `hideToolbar`: behavior differs per consumer, so option is justified
+2. **Values loaded at runtime or different per control ✔**. `values` is taken on toolbar render: replaced `$tools.mention.values` isn't used (menu shows old items), mutated array is. 2 editors with different users need subclass & new tag
+   - `values` like `items` of SelectControl: `ToolValue[] | ((control) => ToolValue[] | Promise<…>)` resolved on menu opening; for menus only (hotkeys & `recognize` of values need static array)
+   - minimal: docs "mutate array, don't replace it"
+
+### API: naming & docs
+
+1. `Tool.placeholder` (text inserted via `/` command) clashes with demo tool `placeholder` (`$tools.placeholder.placeholder` is valid) & with html `placeholder` (hint): rename to `example`
+2. `Tool.label` is tool name by default (`codeInline` in aria-label), `ToolValue.label` is prettified value: prettify both
+3. `ask(target, control, current)` is positional, `format(ctx)` gets object; `$ask(…, hovered?)` exposes internal param of hover popup (both are open since 2026-10-07)
+4. Class JSDoc: most of `Rules` are end-user keyboard details & they hide API rules in IDE hint => move them to demo features list
+
+### API: suggested order
+
+1. Quick & low risk: bugs 3, 4, 6, 5, 1a
+2. Simpler custom tools: bugs 2 + custom tools 2 (`$insert`, `ctx.insert`, `editor` type), custom tools 1, 3
+3. Need decision: hard use cases 1, 2, `{ toggle }` of `$format`, renames
