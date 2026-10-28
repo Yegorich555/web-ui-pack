@@ -2972,6 +2972,43 @@ describe("control.textRich", () => {
     }
   });
 
+  test("$insert: content replaces selection like paste", async () => {
+    await h.wait(1);
+    const inp = el.$refInput;
+    // editor isn't focused: selection placed via code is kept
+    setHtml("<div>a|b</div>");
+    el.$insert("x");
+    expect(document.activeElement).toBe(inp);
+    expect(getHtml()).toBe("<div>ax|b</div>");
+    expect(el.$value).toBe("<div>axb</div>"); // updated at once (value of input is mocked: html of editor)
+
+    // html is sanitized: only formats of $tools are kept
+    setHtml("<div>a [b] c</div>");
+    el.$insert('<b>Hello</b>, <img src="x" onerror="alert(1)"><span style="color: red;">world</span>');
+    expect(getHtml()).toBe("<div>a <b>Hello</b>, world| c</div>");
+    // node is inserted as is
+    setHtml("<div>a[b]c</div>");
+    el.$insert(Object.assign(document.createElement("mark"), { textContent: "x" }));
+    expect(getHtml()).toBe("<div>a<mark>x</mark>|c</div>");
+    // text is recognized like pasted one
+    setHtml("<div>see |</div>");
+    el.$insert("https://a.com");
+    expect(getHtml()).toBe(
+      '<div>see <a href="https://a.com" target="_blank" rel="noopener noreferrer">https://a.com|</a></div>'
+    );
+
+    // code block gets text: lines of html are `\n`
+    setHtml("<pre>a|</pre>");
+    await h.wait(1);
+    el.$insert("<p>x</p><p><b>y</b></p>");
+    expect(getHtml()).toBe("<pre>ax\ny|</pre>");
+    // separate undo step
+    await h.wait(1);
+    expect(typeText(null, "historyUndo")).toBe(true);
+    await h.wait(1);
+    expect(inp.innerHTML).toBe("<pre>a</pre>");
+  });
+
   test("delete over several lines", async () => {
     await h.wait(1);
     const inp = el.$refInput;
