@@ -1005,18 +1005,19 @@ describe("control.textRich", () => {
       window.getSelection().collapse(el.$refInput.firstChild, 1);
       el.$format("upper");
       expect(el.$refInput.innerHTML).toBe("<div><b>a</b>b</div>");
-      // readonly: ignored
+      // readonly: API works (options restrict user only)
       el.$options.readOnly = true;
       await h.wait(1);
-      setHtml("<div>[a]</div>");
+      setHtml("<div>[a]b</div>");
       el.$format("upper");
-      expect(el.$refInput.innerHTML).toBe("<div>a</div>");
+      expect(el.$refInput.innerHTML).toBe("<div>Ab</div>");
       el.$options.readOnly = false;
       await h.wait(1);
-      // selection out of editor
+      // selection out of editor: the last selection in editor is restored
+      setHtml("<div>a[b]</div>");
       window.getSelection().selectAllChildren(el.$refLabel);
       el.$format("upper");
-      expect(el.$refInput.innerHTML).toBe("<div>a</div>");
+      expect(getHtml()).toBe("<div>a[B]</div>");
     } finally {
       cleanup();
       cleanupImg();
@@ -3135,7 +3136,7 @@ describe("control.textRich", () => {
     await h.wait(1);
     const inp = el.$refInput;
     inp.focus();
-    const spy = jest.spyOn(el, "$format");
+    const spy = jest.spyOn(el, "goFormat");
     [
       ["formatBold", ["bold", undefined, false]],
       ["formatStrikeThrough", ["strike", undefined, false]],
