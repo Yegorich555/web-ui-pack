@@ -959,7 +959,6 @@ describe("control.textRich", () => {
   test("embed, token & action formats", async () => {
     const cleanup = usePlaceholder();
     const cleanupImg = useImage();
-    WUPTextRichControl.$tools.action = { label: "Action" };
     WUPTextRichControl.$tools.del = { format: ({ editor }) => editor.$insert(document.createDocumentFragment()) };
     WUPTextRichControl.$tools.mention = {
       values: [{ value: "john" }],
@@ -969,7 +968,7 @@ describe("control.textRich", () => {
       create: "mark",
     };
     try {
-      el.$options.toolbar = [["placeholder", "image", "action", "mention"]];
+      el.$options.toolbar = [["placeholder", "image", "mention"]];
       await h.wait(1);
       const inp = el.$refInput;
       inp.focus();
@@ -991,10 +990,7 @@ describe("control.textRich", () => {
       el.$format("mention", "john");
       expect(getHtml()).toBe("<div>a<mark>@john</mark>|</div>");
 
-      // action without `format` changes nothing
-      setHtml("<div>a|</div>");
-      el.$format("action");
-      expect(getHtml()).toBe("<div>a|</div>");
+      // action
       setHtml("<div>a[b]c</div>");
       el.$format("del");
       expect(getHtml()).toBe("<div>a|c</div>");
@@ -1024,7 +1020,6 @@ describe("control.textRich", () => {
     } finally {
       cleanup();
       cleanupImg();
-      delete WUPTextRichControl.$tools.action;
       delete WUPTextRichControl.$tools.mention;
       delete WUPTextRichControl.$tools.del;
       delete WUPTextRichControl.$tools.upper;
@@ -3641,7 +3636,12 @@ describe("control.textRich", () => {
   });
 
   test("dropdown items", async () => {
-    WUPTextRichControl.$tools.image = { kind: "embed", values: [{ value: "a.png", hotKey: ["Control", "Alt", "I"] }] };
+    WUPTextRichControl.$tools.image = {
+      kind: "embed",
+      values: [{ value: "a.png", hotKey: ["Control", "Alt", "I"] }],
+      is: () => undefined,
+      create: "img",
+    };
     try {
       el.$options.toolbar = [["align", { list: ["ordered", "check"] }, "header", "size", "image"]];
       await h.wait(1);
@@ -3746,15 +3746,41 @@ describe("control.textRich", () => {
     await h.wait(1);
     const inp = el.$refInput;
     inp.focus();
-    // unknown tool
+    // unknown tool & tools without members required by `kind` aren't rendered
     const spyErr = jest.spyOn(console, "error").mockImplementation(() => {});
-    el.$options.toolbar = [["bold", "unknown"]];
-    await h.wait(1);
-    expect(spyErr).toBeCalledTimes(1);
-    expect(spyErr.mock.calls[0][0]).toMatch("Toolbar item 'unknown' isn't defined in $tools");
-    expect(el.$refToolbar.innerHTML).toBe(
-      '<div role="group"><button type="button" tabindex="-1" tool="bold" aria-label="Bold" aria-keyshortcuts="Control+B" w-tooltip="Bold (Ctrl+B)" aria-pressed="false"></button></div>'
-    );
+    const { $tools } = WUPTextRichControl;
+    const noop = () => {};
+    $tools.hl = { kind: "inline", is: () => undefined, format: noop }; // format doesn't replace create of inline
+    $tools.dir = { kind: "lineStyle", is: () => undefined };
+    $tools.img = { kind: "embed" };
+    $tools.action = { label: "Action" };
+    $tools.note = { kind: "line", is: () => undefined, format: noop }; // format replaces create
+    try {
+      el.$options.toolbar = [["bold", "unknown", "hl", "dir", "img", "action"], ["note"]];
+      await h.wait(1);
+      expect(spyErr.mock.calls.map((c) => c[0])).toEqual([
+        "WUP-TEXTRICH. Tool 'unknown' isn't defined in $tools",
+        "WUP-TEXTRICH. Tool 'hl' misses create",
+        "WUP-TEXTRICH. Tool 'dir' misses set",
+        "WUP-TEXTRICH. Tool 'img' misses is & create",
+        "WUP-TEXTRICH. Tool 'action' misses format",
+      ]);
+      expect(el.$refToolbar.innerHTML).toBe(
+        '<div role="group"><button type="button" tabindex="-1" tool="bold" aria-label="Bold" aria-keyshortcuts="Control+B" w-tooltip="Bold (Ctrl+B)" aria-pressed="false"></button></div><div role="group"><button type="button" tabindex="-1" tool="note" aria-label="note" w-tooltip="" aria-pressed="false"></button></div>'
+      );
+      // $format: error instead of crash
+      spyErr.mockClear();
+      setHtml("<div>[a]</div>");
+      el.$format("img");
+      el.$format("unknown");
+      expect(getHtml()).toBe("<div>[a]</div>");
+      expect(spyErr.mock.calls.map((c) => c[0])).toEqual([
+        "WUP-TEXTRICH. Tool 'img' misses is & create",
+        "WUP-TEXTRICH. Tool 'unknown' isn't defined in $tools",
+      ]);
+    } finally {
+      ["hl", "dir", "img", "action", "note"].forEach((k) => delete $tools[k]);
+    }
     // label of clear button
     const { label } = WUPTextRichControl.$tools.btnClear;
     delete WUPTextRichControl.$tools.btnClear.label;

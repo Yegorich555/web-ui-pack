@@ -217,7 +217,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return el;
   }
 
-  /** Applies default format by `kind`: sets value if `isSet`, otherwise toggles format */
+  /** Applies default format by `kind` (action has no default format): sets value if `isSet`, otherwise toggles format */
   protected formatByKind(ctx: WUP.TextRich.FormatContext): void {
     const { tool, value, isSet, editor } = ctx; // lines & texts are lazy: read below only where needed
     switch (tool.kind) {
@@ -264,7 +264,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       case "embed":
         this.$insert(Utils.Formats.create(tool, value)); // caret goes after it
         break;
-      default: // action
+      // no default
     }
   }
 
@@ -979,9 +979,10 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     data && !data.trim() && (this.#isAutoPaused = false); // caret leaves word
   }
 
-  /** Returns true if element is recognized text (link etc.) or token (mention etc.): it isn't continued in the next line */
+  /** Returns true if element is recognized text (link etc.) or token (mention etc.): it isn't continued in the next line;
+   *  all tools are checked: tool that isn't rendered can miss `is` */
   #isWrapped = (x: Element): boolean =>
-    this._entries.some(([, t, is]) => (this.#isAuto(t) || (t.kind === "inline" && !!t.trigger)) && is!(x));
+    this._entries.some(([, t, is]) => (this.#isAuto(t) || (t.kind === "inline" && !!t.trigger)) && is?.(x));
 
   /** Called after line break: Chrome copies formats of caret into the new line, so empty copies of recognized text, tokens
    *  & formats turned off (Bold toggled off, left via arrow) are removed; pending formats stay for the next typed text */

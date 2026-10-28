@@ -219,6 +219,18 @@ export const Tools = {
   recognized(r: WUP.TextRich.Tool["recognize"], s: string): string | null | undefined {
     return typeof r === "function" ? r(s) : r?.exec(s)?.[0];
   },
+
+  /** Returns error if tool isn't defined or misses members required by its `kind` (see `Tool.kind`) or empty string */
+  invalid(name: string, t: WUP.TextRich.Tool | undefined): string {
+    if (!t) {
+      return `Tool '${name}' isn't defined in $tools`;
+    }
+    const k = t.kind === "lineStyle" ? "set" : "create";
+    // `format` replaces `create` & `set` except `inline`: pending formats & recognizing create elements
+    const arr = t.kind ? [!t.is && "is", !t[k] && (!t.format || t.kind === "inline") && k] : [!t.format && "format"];
+    const missed = arr.filter(Boolean).join(" & ");
+    return missed && `Tool '${name}' misses ${missed}`;
+  },
 };
 
 /** Helpers of format elements (see `create` & `is` of tool): creating, matching, adding & removing */

@@ -167,6 +167,8 @@ declare global {
        * * `lineStyle` - line style (`text-align` etc.): set to selected lines via `set`
        * * `embed` - element without text (`<img>`, `<hr>`): replaces selection, caret goes after it; counted as 1 char
        * * not set - action: `format` is required
+       * * `is` & `create` (`set` for `lineStyle`) are required for every kind; custom `format` replaces `create` & `set`
+       * except `inline` (pending formats & recognizing create elements); otherwise tool isn't rendered (error in console)
        * @tutorial Sanitizing
        * html of value (paste etc.) keeps only formats of tools with `kind`: element is re-created via `create`
        * (`set` for `lineStyle`) if `is` returns value; others are unwrapped or removed with content (`<script>` etc.) */
@@ -906,14 +908,15 @@ export default class WUPTextRichControl<
     const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
     // value from tool: with label, shortcut & class
     const valueOf = (v: unknown): WUP.TextRich.ToolValue => tool.values?.find((t) => t.value === v) ?? { value: v };
-    if (!tool) {
-      this.throwError(`Toolbar item '${name}' isn't defined in $tools`, undefined, true);
-    } else if (name === "btnClear") {
+    const err = Utils.Tools.invalid(name, tool);
+    if (name === "btnClear") {
       const b = this.$refBtnClear; // exists if $options.clearButton is true
       if (b) {
         this.setClearLabel(b); // button is reused: hideHotKeysHint can be changed
         group.appendChild(b);
       }
+    } else if (err) {
+      this.throwError(err, tool, true); // not rendered: tool doesn't work
     } else if (picked === undefined || Array.isArray(picked)) {
       const values = (picked as unknown[] | undefined)?.map(valueOf) ?? tool.values;
       this.renderButton(
@@ -1128,10 +1131,15 @@ export default class WUPTextRichControl<
     isSet?: boolean,
     target?: HTMLElement
   ): void {
+    const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
+    const err = Utils.Tools.invalid(name, tool);
+    if (err) {
+      this.throwError(err, tool, true);
+      return;
+    }
     this.restoreSelection();
     const inp = this.$refInput;
     const sel = window.getSelection()!;
-    const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
     const b = this.findTool(name);
     if (value === undefined && (tool.ask || tool.values || b?._values)) {
       const cur = inp.getFormats().get(name);
@@ -1259,9 +1267,9 @@ export default class WUPTextRichControl<
     return this.openAsk(m);
   }
 
-  /** Returns items of menu of tool `command`: tools of toolbar (hidden ones too) except itself & clear button
-   *  by groups (see Utils.Tools.commandGroup) in toolbar order; dropdown gives item per value (`Font size: Huge`)
-   *  with `false` first (`Heading: Normal`), tool with menu (mention etc.) - single item */
+  /** Returns items of menu of tool `command`: tools of toolbar (hidden ones too) except itself & invalid ones (clear button
+   *  too: it has no `format`) by groups (see Utils.Tools.commandGroup) in toolbar order; dropdown gives item per value
+   *  (`Font size: Huge`) with `false` first (`Heading: Normal`), tool with menu (mention etc.) - single item */
   protected commandValues(): WUP.TextRich.ToolValue[] {
     const groups: WUP.TextRich.ToolValue[][] = [[], [], [], []];
     this._opts.toolbar!.flat().forEach((item) => {
@@ -1271,7 +1279,7 @@ export default class WUPTextRichControl<
         unknown
       ];
       const t: WUP.TextRich.Tool = this.#ctr.$tools[name];
-      if (!t || name === "command" || name === "btnClear") {
+      if (Utils.Tools.invalid(name, t) || name === "command") {
         return;
       }
       const arr = groups[Utils.Tools.commandGroup(t)];
