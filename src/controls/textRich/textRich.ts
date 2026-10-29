@@ -82,7 +82,7 @@ declare global {
       recognize?: RegExp;
       /** Class of button or dropdown item: to show icon via `--icon-img` instead of label */
       className?: string;
-      /** Class of element created via `create` */
+      /** Class of element created via `create`: value is detected by it if tool has no `is` */
       classNameTag?: string;
     }
     /** Toolbar tool
@@ -104,7 +104,7 @@ declare global {
       /** Class of toolbar button or dropdown (single class): to set icon via css-var `--icon-img`
        *  (`.my-icon-upper { --icon-img: url("data:image/svg+xml,...") }`); or use `wup-textrich [tool="upper"]` selector instead */
       className?: string;
-      /** Class of element created via `create` (in editor, $value & dropdown preview): to style it & detect it in `is` */
+      /** Class of element created via `create` (in editor, $value & dropdown preview): to style it & detect it (see `is`) */
       classNameTag?: string;
       /** Hide button (or dropdown) in toolbar: tool works as rendered one (shortcuts, `trigger`, `recognize` etc.)
        *  if it's in $options.toolbar; `label` is still used: item in menu of `command` & `aria-label` of menu of `trigger` */
@@ -168,19 +168,26 @@ declare global {
        * * `lineStyle` - line style (`text-align` etc.): set to selected lines via `set`
        * * `embed` - element without text (`<img>`, `<hr>`): replaces selection, caret goes after it; counted as 1 char
        * * not set - action: `format` is required
-       * * `is` & `create` (`set` for `lineStyle`) are required for every kind; custom `format` replaces `create` & `set`
-       * except `inline` (pending formats & recognizing create elements); otherwise tool isn't rendered (error in console)
+       * * `create` (`set` for `lineStyle`) & `is` (optional if `create` is tag name) are required for every kind; custom
+       * `format` replaces `create` & `set` except `inline` (pending formats & recognizing create elements); otherwise tool
+       * isn't rendered (error in console)
        * @tutorial Sanitizing
        * html of value (paste etc.) keeps only formats of tools with `kind`: element is re-created via `create`
        * (`set` for `lineStyle`) if `is` returns value; others are unwrapped or removed with content (`<script>` etc.) */
       kind?: "inline" | "line" | "lineStyle" | "embed";
-      /** Returns value of format applied by element or `undefined`: toolbar shows state of the nearest element at selection start;
-       *  `line` & `lineStyle` get lines only (paragraph, heading, list item etc.)
-       *  WARN: sanitizer calls it for untrusted html (paste etc.): return only safe values (see `Html.sanitizeUrl`) */
-      is?: (el: HTMLElement) => V | undefined;
+      /** Returns value of format applied by element, otherwise `undefined` (`false` too for tool without values): toolbar shows
+       *  state of the nearest element at selection start; `line` & `lineStyle` get lines only (paragraph, heading, list item etc.)
+       *  WARN: sanitizer calls it for untrusted html (paste etc.): return only safe values (see `Html.sanitizeUrl`)
+       * @defaultValue if `create` is tag name: element with this tag & `classNameTag` of tool (required for `span` &
+       * containers `div`, `p` etc.); value of tool with values is value with `classNameTag` of element (every value except
+       * `false` needs it)
+       * @example
+       * is: (el) => el.tagName === "B" || el.tagName === "STRONG", // tool without values
+       * is: ({ tagName: t }) => (t === "SUB" && "sub") || (t === "SUP" && "super") || undefined, // tool with values */
+      is?: (el: HTMLElement) => (V extends true ? boolean : V) | undefined;
       /** Creates element to wrap related part of text
        * @example
-       * create: "div", // equal to () => document.createElement("div")
+       * create: "mark", // equal to () => document.createElement("mark"); `is` isn't required (see `is`)
        * create: (v) => document.createElement(v === "sub" ? "sub" : "sup"), */
       create?: keyof HTMLElementTagNameMap | ((value: V) => HTMLElement);
       /** Sets value to line (`undefined` removes it): for default format & sanitizer of `lineStyle`;
@@ -457,8 +464,7 @@ export default class WUPTextRichControl<
    *   label: "Highlight",
    *   className: "my-icon-highlight", // css: `.my-icon-highlight { --icon-img: url("data:image/svg+xml,...") }`
    *   kind: "inline", // toggled by default format
-   *   is: (el) => el.classList.contains("my-highlight") || undefined,
-   *   create: "span",
+   *   create: "span", // element is detected by tag & class (see `is`)
    *   classNameTag: "my-highlight", // css: `.my-highlight { background: yellow }`
    * };
    * WUPTextRichControl.$tools.upper = {
@@ -488,42 +494,39 @@ export default class WUPTextRichControl<
       label: __wupln("Bold", "aria"),
       hotKey: ["Control", "B"],
       kind: "inline",
-      is: ({ tagName: t }) => t === "B" || t === "STRONG" || undefined,
+      is: ({ tagName: t }) => t === "B" || t === "STRONG",
       create: "b", // <strong> is styled as control label
     },
     italic: {
       label: __wupln("Italic", "aria"),
       hotKey: ["Control", "I"],
       kind: "inline",
-      is: ({ tagName: t }) => t === "I" || t === "EM" || undefined,
+      is: ({ tagName: t }) => t === "I" || t === "EM",
       create: "em",
     },
     underline: {
       label: __wupln("Underline", "aria"),
       hotKey: ["Control", "U"],
       kind: "inline",
-      is: (el) => el.tagName === "U" || undefined,
       create: "u",
     },
     strike: {
       label: __wupln("Strikethrough", "aria"),
       hotKey: ["Control", "Shift", "X"], // or ["Alt", "Shift", "5"] as in Google Docs
       kind: "inline",
-      is: ({ tagName: t }) => t === "S" || t === "STRIKE" || t === "DEL" || undefined, // undefined - not applied (false is a value)
+      is: ({ tagName: t }) => t === "S" || t === "STRIKE" || t === "DEL",
       create: "s",
     },
     blockquote: {
       label: __wupln("Quote", "aria"),
       hotKey: ["Control", "Shift", "9"],
       kind: "line",
-      is: (el) => el.tagName === "BLOCKQUOTE" || undefined,
       create: "blockquote",
     },
     code: {
       label: __wupln("Code block", "aria"),
       hotKey: ["Control", "Alt", "Shift", "C"],
       kind: "line",
-      is: (el) => el.tagName === "PRE" || undefined,
       create: "pre",
     },
     link: {
@@ -550,7 +553,7 @@ export default class WUPTextRichControl<
       format: ({ range, value: url, editor, tool, applyDefault }) => {
         const a = Utils.Formats.parents(
           range.startContainer,
-          (el) => tool.is!(el as HTMLElement) !== undefined,
+          (el) => Utils.Formats.is(tool, el) !== undefined,
           editor
         )[0];
         if (a?.contains(range.endContainer)) {
@@ -732,8 +735,7 @@ export default class WUPTextRichControl<
         Object.values((control.constructor as typeof WUPTextRichControl).$tools).forEach(
           (t) =>
             t.kind === "inline" &&
-            t.is &&
-            Utils.Formats.removeInline(texts, (el) => t.is!(el as HTMLElement) !== undefined, editor)
+            Utils.Formats.removeInline(texts, (el) => Utils.Formats.is(t, el) !== undefined, editor)
         );
         // plain paragraph
         lines.forEach((l) => Utils.Lines.setTag(l, document.createElement("div")).removeAttribute("style"));
@@ -982,8 +984,8 @@ export default class WUPTextRichControl<
       b.setAttribute("role", "combobox"); // select-only combobox
       b.setAttribute("aria-expanded", false);
       values.some((x) => x.className) && b.setAttribute("icon", ""); // shows icon of the current value instead of label
-    } else if (tool.is && tool.kind !== "embed") {
-      b.setAttribute("aria-pressed", false); // actions & embeds have no state
+    } else if (tool.kind !== "embed" && (tool.kind || tool.is)) {
+      b.setAttribute("aria-pressed", false); // actions (without `is`) & embeds have no state
     }
     b._format = name;
     b._value = v?.value;
@@ -1282,7 +1284,7 @@ export default class WUPTextRichControl<
       owner: isHover ? null : (document.activeElement === b && b) || this.$refInput,
       target,
       values: b._values,
-      selected: el ? tool.is?.(el) : this.$refInput.getFormats().get(name) ?? false,
+      selected: el ? Utils.Formats.is(tool, el) : this.$refInput.getFormats().get(name) ?? false,
       render: (li, v) => (name === "command" ? this.renderCommandItem(li, v) : this.renderMenuItem(li, tool, v)),
     });
     if (!isHover) {
@@ -1434,7 +1436,7 @@ export default class WUPTextRichControl<
           const after =
             tool.kind === "inline" &&
             el instanceof HTMLElement &&
-            tool.is!(el) !== undefined &&
+            Utils.Formats.is(tool, el) !== undefined &&
             Utils.Lines.textAround(Utils.Lines.at(caret, inp)!, caret, sel.focusOffset, inp._isEmbed)[1];
           after !== false &&
             !/^[\s\p{P}]/u.test(after) &&
@@ -1462,7 +1464,7 @@ export default class WUPTextRichControl<
   protected embedTool(el: Element, isHover?: boolean): keyof WUP.TextRich.ToolValues | undefined {
     const [name, t] =
       this.$refInput._entries.find(
-        ([, x, is]) => (x.kind === "embed" || (x.kind === "inline" && x.trigger)) && is?.(el)
+        ([, x, is]) => (x.kind === "embed" || (x.kind === "inline" && x.trigger)) && is(el)
       ) ?? [];
     const can = t && !this.$isReadOnly && !this.$isDisabled && (!isHover || !t.ask) && this.findTool(name!);
     return can ? name : undefined;
@@ -1475,7 +1477,7 @@ export default class WUPTextRichControl<
       return t as HTMLElement;
     }
     const a = t.closest("a");
-    return a && this.#ctr.$tools.link.is!(a) !== undefined ? a : null;
+    return a && Utils.Formats.is(this.#ctr.$tools.link, a) !== undefined ? a : null;
   }
 
   /** Called when pointer enters element with hover popup (see hoverOf) or its popup, or leaves them (`el` is `null`):

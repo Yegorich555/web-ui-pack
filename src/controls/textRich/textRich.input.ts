@@ -2,8 +2,8 @@ import WUPTextAreaInput, { charsBefore, pointAt, textOf, walkText } from "../tex
 import TextRichHistory from "./textRich.history";
 import * as Utils from "./textRich.utils";
 
-/** Tool name, tool & checker of element by `is` */
-type ToolEntry = [keyof WUP.TextRich.ToolValues, WUP.TextRich.Tool, ((el: Element) => boolean) | undefined];
+/** Tool name, tool & checker of its element (see Utils.Formats.is) */
+type ToolEntry = [keyof WUP.TextRich.ToolValues, WUP.TextRich.Tool, (el: Element) => boolean];
 
 /** Input types of inserted content: paste or drop */
 const insertTypes = /^insertFrom(Paste|Drop)/;
@@ -34,7 +34,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   protected override _editable = "true"; // formats are applied by tools, plain text is pasted by `replaceInput`
   /** Called when formats at caret can be changed without selection change: content or pending formats */
   _onFormats?: () => void;
-  /** Entries of `_tools` with checker of element by `is`: cached via setTools */
+  /** Entries of `_tools` with checker of element (see Utils.Formats.is): cached via setTools */
   _entries: ToolEntry[] = [];
 
   /** Sanitized html (empty string if there is no text or embeds): see Utils.Html.fromEditor */
@@ -55,10 +55,10 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   setTools(tools: WUP.TextRich.Tools): void {
     this._tools = tools;
     this._entries = (Object.entries(tools) as Array<[keyof WUP.TextRich.ToolValues, WUP.TextRich.Tool]>).map(
-      ([k, t]) => [k, t, t.is && ((el) => t.is!(el as HTMLElement) !== undefined)]
+      ([k, t]) => [k, t, (el) => Utils.Formats.is(t, el) !== undefined]
     );
-    const embeds = this._entries.filter(([, t, is]) => t.kind === "embed" && is);
-    this._isEmbed = embeds.length ? (el) => embeds.some(([, , is]) => is!(el)) : undefined;
+    const embeds = this._entries.filter(([, t]) => t.kind === "embed");
+    this._isEmbed = embeds.length ? (el) => embeds.some(([, , is]) => is(el)) : undefined;
     this.#markdown = new Map();
     this._entries.forEach(([, t]) => {
       const r = t.recognize;
@@ -73,7 +73,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     this.#recognizers = this._entries.filter(([k, t]) => this.#isAuto(t) && this._isActive?.(k)).map(([, t]) => t);
     // markdown applies tool like toolbar button: tool with values (font size etc.) needs value
     this.#markdowns = this._entries.filter(
-      ([k, t, is]) => this.#markdown.has(t) && is && !t.values?.length && this._isActive?.(k)
+      ([k, t]) => this.#markdown.has(t) && !t.values?.length && this._isActive?.(k)
     );
   }
 
@@ -128,8 +128,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     if (n && this.contains(n)) {
       const line = Utils.Lines.at(n, this);
       this._entries.forEach(([name, t, is]) => {
-        const el = is && (t.kind === "line" || t.kind === "lineStyle" ? line : Utils.Formats.parents(n, is, this)[0]);
-        const v = el ? t.is!(el as HTMLElement) : undefined;
+        const el = t.kind === "line" || t.kind === "lineStyle" ? line : Utils.Formats.parents(n, is, this)[0];
+        const v = el ? Utils.Formats.is(t, el) : undefined;
         v !== undefined && m.set(name, v);
       });
       this.#pending.forEach((v, k) => (v === false ? m.delete(k) : m.set(k, v)));
@@ -222,7 +222,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     const { tool, value, isSet, editor } = ctx; // lines & texts are lazy: read below only where needed
     switch (tool.kind) {
       case "inline": {
-        const any = (el: Element): boolean => tool.is!(el as HTMLElement) !== undefined;
+        const any = (el: Element): boolean => Utils.Formats.is(tool, el) !== undefined;
         if (tool.trigger && isSet && value !== false) {
           // token replaces selection with tokens at its edges (typed `@john` is recognized already) or token around caret
           const { range: r } = ctx;
@@ -234,7 +234,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
           break;
         }
         const { texts } = ctx;
-        const f = (el: Element): boolean => Utils.Formats.isMatch(tool.is!(el as HTMLElement), value);
+        const f = (el: Element): boolean => Utils.Formats.isMatch(Utils.Formats.is(tool, el), value);
         if (isSet || !value) {
           Utils.Formats.removeInline(texts, any, editor);
           value && Utils.Formats.addInline(texts, Utils.Formats.create(tool, value), editor, f);
@@ -250,7 +250,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       case "line":
       case "lineStyle": {
         const { lines } = ctx;
-        const isOff = !value || (!isSet && lines.every((l) => Utils.Formats.isMatch(tool.is?.(l), value)));
+        const isOff = !value || (!isSet && lines.every((l) => Utils.Formats.isMatch(Utils.Formats.is(tool, l), value)));
         lines.forEach((l) => {
           if (tool.kind === "line") {
             // new element: otherwise <div> keeps attributes of format (class etc.)
@@ -381,8 +381,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   }
 
   /** Returns true if element is token (placeholder, mention): see `Tool.trigger` */
-  #isToken = (el: Element): boolean =>
-    this._entries.some(([, t, is]) => t.kind === "inline" && !!t.trigger && !!is?.(el));
+  #isToken = (el: Element): boolean => this._entries.some(([, t, is]) => t.kind === "inline" && !!t.trigger && is(el));
 
   /** Token edited inside (typed or deleted text): taken before input (see checkToken) */
   #token?: Element;
@@ -421,7 +420,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     }
     if (sel.isCollapsed && n && this.contains(n)) {
       this._entries.forEach(([name, tool, is]) => {
-        const el = is && tool.kind === "inline" && Utils.Formats.parents(n, is, this).pop(); // the outer one
+        const el = tool.kind === "inline" && Utils.Formats.parents(n, is, this).pop(); // the outer one
         if (el) {
           const s = Utils.Ranges.textAt(el, n, off, isStart);
           (isNear ? graphemes.segment(s).containing(0)?.segment === s : !s) && arr.push([name, el]);
@@ -547,7 +546,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
         !isRight ||
         !line ||
         this.readOnly ||
-        !this._entries.some(([, t, is]) => t.kind === "line" && is?.(line)) // aligned paragraph isn't block
+        !this._entries.some(([, t, is]) => t.kind === "line" && is(line)) // aligned paragraph isn't block
       ) {
         return false;
       }
@@ -603,12 +602,12 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     let node: T | HTMLElement = content;
     // move range out of elements of removed/changed formats (`true` - added toggle format)
     this.#pending.forEach((v, k) => {
-      const is = (x: Element): boolean => tools[k].is!(x as HTMLElement) !== undefined;
+      const is = (x: Element): boolean => Utils.Formats.is(tools[k], x) !== undefined;
       const el = v !== true && Utils.Formats.parents(r.startContainer, is, this).pop(); // the outer one
       el && Utils.Formats.splitAt(el, r, this._isEmbed);
     });
     this.#pending.forEach((v, k) => {
-      const is = (x: Element): boolean => Utils.Formats.isMatch(tools[k].is!(x as HTMLElement), v);
+      const is = (x: Element): boolean => Utils.Formats.isMatch(Utils.Formats.is(tools[k], x), v);
       if (v !== false && !Utils.Formats.parents(r.startContainer, is, this).length) {
         const el = Utils.Formats.create(tools[k], v);
         el.appendChild(node);
@@ -693,7 +692,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       const tr = t.kind === "inline" && t.trigger;
       typed = tr ? this.typedValue(s, tr) : undefined;
       // `is` can reject value: unknown placeholder etc.
-      return typed && this._isActive?.(k) && t.is?.(this.createToken(t, typed)) !== undefined;
+      return typed && this._isActive?.(k) && Utils.Formats.is(t, this.createToken(t, typed)) !== undefined;
     });
     if (!found) {
       return undefined;
@@ -752,7 +751,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
             const s = x.textContent!;
             return tools.some(
               (t) =>
-                t.is!(x) !== undefined &&
+                Utils.Formats.is(t, x) !== undefined &&
                 Utils.Tools.recognized(t.recognize, s) === s &&
                 Utils.Formats.isSame(Utils.Formats.create(t, s), x)
             );
@@ -847,7 +846,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
         ? t.values.find((x) => Utils.Tools.recognized(x.recognize, s) === s)
         : t.kind === "line" && Utils.Tools.recognized(t.recognize, s) === s && { value: true };
       // not applied yet
-      v && !Utils.Formats.isMatch(t.is?.(line), v.value) && (key = t.values ? `${k}:${v.value}` : k);
+      v && !Utils.Formats.isMatch(Utils.Formats.is(t, line), v.value) && (key = t.values ? `${k}:${v.value}` : k);
       return v;
     });
     // text from line start: not after <br> or embed
@@ -897,7 +896,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     h && (h._stateBeforeInput = h.inputState); // undo restores caret: text is selected to format it below
     const r = rangeOf(from, to);
     // the same as toolbar button (it toggles format): text formatted already stays as is
-    if (!Utils.Ranges.split(r).every((t) => Utils.Formats.parents(t, is!, line).length)) {
+    if (!Utils.Ranges.split(r).every((t) => Utils.Formats.parents(t, is, line).length)) {
       Utils.Ranges.select(r);
       this._applyKey!(name);
     }
@@ -979,10 +978,9 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     data && !data.trim() && (this.#isAutoPaused = false); // caret leaves word
   }
 
-  /** Returns true if element is recognized text (link etc.) or token (mention etc.): it isn't continued in the next line;
-   *  all tools are checked: tool that isn't rendered can miss `is` */
+  /** Returns true if element is recognized text (link etc.) or token (mention etc.): it isn't continued in the next line */
   #isWrapped = (x: Element): boolean =>
-    this._entries.some(([, t, is]) => (this.#isAuto(t) || (t.kind === "inline" && !!t.trigger)) && is?.(x));
+    this._entries.some(([, t, is]) => (this.#isAuto(t) || (t.kind === "inline" && !!t.trigger)) && is(x));
 
   /** Called after line break: Chrome copies formats of caret into the new line, so empty copies of recognized text, tokens
    *  & formats turned off (Bold toggled off, left via arrow) are removed; pending formats stay for the next typed text */
@@ -991,7 +989,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     const n = sel.focusNode!; // in editor: it's called on input of line break
     const p = this.#pending;
     const isOff = (x: Element): boolean =>
-      Array.from(p).some(([k, v]) => v === false && this._tools[k].is!(x as HTMLElement) !== undefined);
+      Array.from(p).some(([k, v]) => v === false && Utils.Formats.is(this._tools[k], x) !== undefined);
     Utils.Formats.parents(n, (x) => !x.textContent && (this.#isWrapped(x) || isOff(x)), this.lineOf(n)).forEach((x) =>
       x.replaceWith(...x.childNodes)
     );
@@ -1080,7 +1078,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       for (const t of this.#recognizers) {
         const text = Utils.Tools.recognized(t.recognize, str);
         const el = text && str.endsWith(text) && Object.assign(Utils.Formats.create(t, text), { textContent: text });
-        if (el && t.is!(el) !== undefined) {
+        if (el && Utils.Formats.is(t, el) !== undefined) {
           return [text, el, str.length, t]; // otherwise invalid url, mention isn't from values etc.
         }
       }
@@ -1181,9 +1179,9 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       return undefined;
     }
     const [, el, , t] = f;
-    const v = t.is!(el);
+    const v = Utils.Formats.is(t, el);
     el.textContent = selected; // the same value with selected text: url etc.
-    return t.is!(el) === v ? [this._entries.find(([, x]) => x === t)![0], v] : undefined;
+    return Utils.Formats.is(t, el) === v ? [this._entries.find(([, x]) => x === t)![0], v] : undefined;
   }
 
   /** Replaces selection with content like paste (see WUPTextRichControl.$insert): html is sanitized (see insertHTML),
@@ -1332,12 +1330,13 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     if (
       !line ||
       Utils.Lines.at(sel.anchorNode!, this) !== line ||
-      (!isSoft && !this._entries.some(([, t, is]) => t.kind === "line" && is?.(line)))
+      (!isSoft && !this._entries.some(([, t, is]) => t.kind === "line" && is(line)))
     ) {
       return false;
     }
     // heading & list item: browser adds paragraph & the next item (except empty line)
-    const isNative = !isSoft && [this._tools.header, this._tools.list].some((t) => t.is!(line) !== undefined);
+    const isNative =
+      !isSoft && [this._tools.header, this._tools.list].some((t) => Utils.Formats.is(t, line) !== undefined);
     if (isNative && !sel.isCollapsed) {
       return false;
     }
@@ -1393,7 +1392,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     if (
       !line ||
       charsBefore(line, n!, sel.focusOffset, this._isEmbed) || // not at line start
-      !this._entries.some(([, t, is]) => t.kind === "line" && is?.(line))
+      !this._entries.some(([, t, is]) => t.kind === "line" && is(line))
     ) {
       return false;
     }

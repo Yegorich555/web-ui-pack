@@ -52,8 +52,7 @@ WUPTextRichControl.$tools.codeInline = {
   hotKey: ["Control", "E"], // like in Notion
   kind: "inline",
   recognize: /(?<!\S)`(?<text>[^`\s](?:[^`]*[^`\s])?)`$/, // markdown: `code`
-  is: (el) => el.tagName === "CODE" || undefined,
-  create: "code",
+  create: "code", // `<code>` is detected without `is` (span needs classNameTag)
 };
 
 WUPTextRichControl.$tools.direction = {

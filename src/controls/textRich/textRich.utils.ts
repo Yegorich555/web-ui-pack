@@ -31,6 +31,9 @@ const paragraphTags = new Set([
   "TH",
   "TD",
 ]);
+/** Span & containers: element of format detected by tag (tool without `is`) needs class, otherwise every span (font size etc.)
+ *  or paragraph is format (see Formats.is) */
+const plainTags = new Set(["SPAN", ...paragraphTags]);
 export const listTags = new Set(["OL", "UL"]);
 /** Removed with content: unsafe or not supported */
 const skipTags = new Set([
@@ -226,8 +229,14 @@ export const Tools = {
       return `Tool '${name}' isn't defined in $tools`;
     }
     const k = t.kind === "lineStyle" ? "set" : "create";
+    const tag = typeof t.create === "string" ? t.create.toUpperCase() : "";
+    // without `is` element is detected by tag & classes (see Formats.is): value by its class, span & containers need class
+    const isNoClass = t.values
+      ? t.values.some((v) => v.value !== false && !v.classNameTag)
+      : !t.classNameTag && plainTags.has(tag);
+    const is = !t.is && ((!tag && "is") || (isNoClass && "is or classNameTag"));
     // `format` replaces `create` & `set` except `inline`: pending formats & recognizing create elements
-    const arr = t.kind ? [!t.is && "is", !t[k] && (!t.format || t.kind === "inline") && k] : [!t.format && "format"];
+    const arr = t.kind ? [is, !t[k] && (!t.format || t.kind === "inline") && k] : [!t.format && "format"];
     const missed = arr.filter(Boolean).join(" & ");
     return missed && `Tool '${name}' misses ${missed}`;
   },
@@ -242,6 +251,22 @@ export const Formats = {
     const cls = t.values?.find((x) => x.value === v)?.classNameTag;
     cls && el.classList.add(cls);
     return el;
+  },
+
+  /** Returns value of format applied by element via `is` of tool (`false` of tool without values is `undefined`) or
+   *  by tag of `create` & `classNameTag` of tool: value with `classNameTag` of element (`true` for tool without values);
+   *  span & containers are formats only with class (see Tools.invalid)
+   * @returns `undefined` if element isn't format of tool */
+  is(t: WUP.TextRich.Tool, el: Element): unknown {
+    if (t.is) {
+      const v = t.is(el as HTMLElement);
+      return v === false && !t.values ? undefined : v;
+    }
+    const has = (c?: string): boolean => !!c && el.classList.contains(c);
+    if (el.localName !== t.create || (t.classNameTag ? !has(t.classNameTag) : !t.values && plainTags.has(el.tagName))) {
+      return undefined;
+    }
+    return t.values ? t.values.find((x) => has(x.classNameTag))?.value : true;
   },
 
   /** Returns true if applied value `v` matches `value` (`true` matches any value) */
@@ -621,12 +646,10 @@ const Internal = {
 
   // Html: sanitizer
 
-  /** Returns sanitizer context (tools without `is`, `create`/`set` are skipped) */
+  /** Returns sanitizer context (tools without `create`/`set` are skipped) */
   ctxOf(tools: WUP.TextRich.Tools, isEditor: boolean): Ctx {
     const ctx: Ctx = { isEditor, inline: [], line: [], lineStyle: [], embed: [] };
-    Object.values(tools).forEach(
-      (t) => t.kind && t.is && (t.kind === "lineStyle" ? t.set : t.create) && ctx[t.kind].push(t)
-    );
+    Object.values(tools).forEach((t) => t.kind && (t.kind === "lineStyle" ? t.set : t.create) && ctx[t.kind].push(t));
     return ctx;
   },
 
@@ -634,7 +657,7 @@ const Internal = {
   applied(tools: WUP.TextRich.Tool[], el: HTMLElement): Array<[WUP.TextRich.Tool, unknown]> {
     const arr: Array<[WUP.TextRich.Tool, unknown]> = [];
     tools.forEach((t) => {
-      const v = t.is!(el);
+      const v = Formats.is(t, el);
       v !== undefined && v !== false && arr.push([t, v]);
     });
     return arr;

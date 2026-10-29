@@ -42,14 +42,11 @@ TextRich isn't released yet (npm latest 1.2.9 is from 2026-10-02): renames & sig
 
 ### API: simpler custom tools
 
-1. **Derived `is` & boolean `is` ✔ (tsc)**. Simple tools repeat tag twice: `create: "code"` + `is: (el) => el.tagName === "CODE" || undefined`; natural `is: (e) => e.tagName === "MARK"` is rejected (must return `true | undefined`)
-   - default `is` if `create` is tag name: tag + `classNameTag`; tool with values - value with `classNameTag` of element. Highlight = `{ label, className, kind: "inline", create: "mark" }`, dropdown by classes needs no functions. WARN: `span` without `classNameTag` matches every span (size, font): validation must reject it
-   - allow `boolean` for tool without values (`false` = `undefined`): needs one reader instead of ~20 direct calls of `is`; less important with derived `is`
-2. **`ctx.editor` exposes the whole editor**. `FormatContext.editor` is `WUPTextRichInput`: 36 own public members (`replaceInput`, `checkBreak`, `_applyKey`…) + ~14 inherited, tool needs `$insert` only
+1. **`ctx.editor` exposes the whole editor**. `FormatContext.editor` is `WUPTextRichInput`: 36 own public members (`replaceInput`, `checkBreak`, `_applyKey`…) + ~14 inherited, tool needs `$insert` only
    - add `ctx.insert(node)` & remove `$` from editor method `$insert` (`$` means safe public API in the library; out of `Tool.format` it doesn't update `$value` & history, the safe one is `el.$insert`): then `editor` can be `HTMLElement`, built-in tools use it as root node & insert only
    - optional: hide internal members from `.d.ts` via `@internal` & `stripInternal`
    - `ctx.texts` has WARN "read before changing editor": eager for custom format costs one walk (the same as `normalize()` after every format) & removes WARN
-3. **Built-in tools use protected API: they can't be copied ✔ (tsc)**. `link.ask` calls `c.askLink`, `command.format` calls `control.applyCommand`: it compiles inside class body only, the same code in app gives TS2445 (the same rule as `#ctr` rejected in `clean`). Build `link.ask` on public `$ask`; `command` isn't copied by developers: can stay as is
+2. **Built-in tools use protected API: they can't be copied ✔ (tsc)**. `link.ask` calls `c.askLink`, `command.format` calls `control.applyCommand`: it compiles inside class body only, the same code in app gives TS2445 (the same rule as `#ctr` rejected in `clean`). Build `link.ask` on public `$ask`; `command` isn't copied by developers: can stay as is
 
 ### API: hard use cases
 

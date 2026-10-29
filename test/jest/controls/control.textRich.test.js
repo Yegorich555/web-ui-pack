@@ -3759,6 +3759,55 @@ describe("control.textRich", () => {
     }
   });
 
+  test("tool without `is`: element is detected by tag of `create` & classNameTag", async () => {
+    const spyErr = jest.spyOn(console, "error").mockImplementation(() => {});
+    const { $tools } = WUPTextRichControl;
+    $tools.hl = { kind: "inline", create: "span", classNameTag: "hl" };
+    $tools.color = {
+      kind: "inline",
+      create: "span", // without class of tool: value is detected by its class
+      values: [
+        { value: "red", classNameTag: "red" },
+        { value: false, label: "Default" }, // isn't applied: without class
+      ],
+    };
+    $tools.chip = { kind: "inline", create: "span" }; // otherwise every span is format (font size etc.)
+    $tools.marker = { kind: "inline", create: "mark", values: [{ value: "a" }] }; // otherwise value isn't detected
+    try {
+      el.$options.toolbar = [["hl", "color", "chip", "marker"]];
+      await h.wait(1);
+      expect(spyErr.mock.calls.map((c) => c[0])).toEqual([
+        "WUP-TEXTRICH. Tool 'chip' misses is or classNameTag",
+        "WUP-TEXTRICH. Tool 'marker' misses is or classNameTag",
+      ]);
+      el.$refInput.focus();
+      /** Returns pressed state of `hl` & label of `color` */
+      const state = () => [
+        el.querySelector("[tool=hl]").getAttribute("aria-pressed"),
+        el.querySelector("[tool=color]").textContent,
+      ];
+      setHtml("<div>a[b]c</div>");
+      el.$format("hl");
+      expect(getHtml()).toBe('<div>a[<span class="hl">b]</span>c</div>');
+      document.dispatchEvent(new Event("selectionchange"));
+      expect(state()).toEqual(["true", "Default"]);
+
+      setHtml("<div>a[b]c</div>");
+      el.$format("color", "red");
+      expect(getHtml()).toBe('<div>a[<span class="red">b]</span>c</div>');
+      document.dispatchEvent(new Event("selectionchange"));
+      expect(state()).toEqual(["false", "Red"]);
+      // span without class of tool or value isn't format: invalid `chip` too
+      expect(
+        WUPTextRichControl.$sanitize(
+          '<span>a</span><span class="hl">b</span><span class="red">c</span><span class="x">d</span>'
+        )
+      ).toBe('a<span class="hl">b</span><span class="red">c</span>d');
+    } finally {
+      ["hl", "color", "chip", "marker"].forEach((k) => delete $tools[k]);
+    }
+  });
+
   test("toolbar shows formats of the next line if selection starts at the end of line element", async () => {
     el.$options.toolbar = [["header", "bold"]];
     await h.wait(1);
