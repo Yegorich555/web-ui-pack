@@ -269,6 +269,13 @@ export const Formats = {
     return t.values ? t.values.find((x) => has(x.classNameTag))?.value : true;
   },
 
+  /** Replaces element of format with element of value `v` via `create` (empty value unwraps it): content is moved */
+  replace(t: WUP.TextRich.Tool, el: Element, v: unknown): void {
+    const b = v ? Formats.create(t, v) : document.createDocumentFragment();
+    b.append(...el.childNodes);
+    el.replaceWith(b);
+  },
+
   /** Returns true if applied value `v` matches `value` (`true` matches any value) */
   isMatch(v: unknown, value: unknown): boolean {
     return v !== undefined && (value === true || v === value);

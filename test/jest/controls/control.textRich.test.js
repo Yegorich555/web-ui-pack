@@ -3326,10 +3326,11 @@ describe("control.textRich", () => {
         .querySelector("input")
         .dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
       await h.wait();
-      expect(a.getAttribute("href")).toBe("https://y.com/");
+      expect(inp.querySelector("a").getAttribute("href")).toBe("https://y.com/");
+      expect(a.isConnected).toBe(false); // replaced via create
       // cleared url removes link
       move(inp.firstChild);
-      move(a);
+      move(inp.querySelector("a"));
       await h.wait();
       popup().querySelector("wup-text").clearValue();
       await h.wait();
@@ -3401,6 +3402,64 @@ describe("control.textRich", () => {
       expect(popup()).toBe(null);
     } finally {
       cleanupImg();
+    }
+  });
+
+  test("link popup uses `ask` & `create` of tool: url is replaced in place", async () => {
+    const { link } = WUPTextRichControl.$tools;
+    try {
+      el.$options.toolbar = [["link"]];
+      await h.wait(1);
+      const inp = el.$refInput;
+      inp.focus();
+      const move = (t) => t.dispatchEvent(new MouseEvent("pointermove", { bubbles: true }));
+      const press = (key, opts, t = inp) =>
+        t.dispatchEvent(new KeyboardEvent("keydown", { key, code: key, bubbles: true, cancelable: true, ...opts }));
+      const popup = () => [...el.querySelectorAll("wup-popup")].at(-1) ?? null;
+      const html = (url) => `<div>a <a href="${url}" target="_blank" rel="noopener noreferrer">li|nk</a></div>`;
+
+      // hover: url via `create` (`www.` gets protocol), caret stays inside link
+      setHtml('<div>a <a href="https://x.com/">li|nk</a></div>');
+      move(inp.querySelector("a"));
+      await h.wait();
+      const txt = popup().querySelector("wup-text");
+      txt.$value = "www.y.com";
+      press("Enter", {}, txt.$refInput);
+      await h.wait();
+      expect(getHtml()).toBe(html("https://www.y.com"));
+      document.dispatchEvent(new Event("selectionchange")); // jsdom doesn't fire it: control saves selection
+
+      // custom `ask` via $ask: hover popup on hover, focused popup via $hotKeyAsk
+      const ask = jest.fn((t, c, url) => c.$ask(t, url, { label: "My url" }));
+      WUPTextRichControl.$tools.link = { ...link, ask };
+      move(inp.firstChild);
+      move(inp.querySelector("a"));
+      await h.wait();
+      expect(ask).toBeCalledWith(inp.querySelector("a"), el, "https://www.y.com");
+      expect(popup().querySelector("wup-text").$options.label).toBe("My url");
+      expect(popup().contains(document.activeElement)).toBe(false);
+      press("Escape");
+      await h.wait();
+      expect(popup()).toBe(null);
+      press("ArrowDown", { altKey: true });
+      await h.wait();
+      expect(ask).toBeCalledTimes(2);
+      expect(popup().contains(document.activeElement)).toBe(true);
+      press("Escape", {}, popup().querySelector("input"));
+      await h.wait();
+      expect(getHtml()).toBe(html("https://www.y.com"));
+
+      // custom `ask` without popup (modal etc.): the same url changes nothing, empty one removes link
+      ask.mockImplementation((_t, _c, url) => Promise.resolve(url));
+      press("ArrowDown", { altKey: true });
+      await h.wait();
+      expect(getHtml()).toBe(html("https://www.y.com"));
+      ask.mockImplementation(() => Promise.resolve(""));
+      press("ArrowDown", { altKey: true });
+      await h.wait();
+      expect(getHtml()).toBe("<div>a li|nk</div>");
+    } finally {
+      WUPTextRichControl.$tools.link = link;
     }
   });
 
@@ -3567,7 +3626,9 @@ describe("control.textRich", () => {
       expect(press("Enter", { altKey: false }, txt.$refInput)).toBe(true);
       await h.wait();
       expect(inp.querySelector("a").getAttribute("href")).toBe("https://y.com/");
-      expect(getHtml()).toBe('<div>a <a href="https://y.com/">li|nk</a></div>');
+      expect(getHtml()).toBe(
+        '<div>a <a href="https://y.com/" target="_blank" rel="noopener noreferrer">li|nk</a></div>'
+      );
 
       // custom shortcut
       WUPTextRichControl.$hotKeyAsk = ["Control", "Enter"];

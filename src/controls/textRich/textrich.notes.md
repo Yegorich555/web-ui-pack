@@ -40,14 +40,6 @@ Developer (package consumer) side: statics, options, `$format`/`$ask`, types `To
 ✔ - reproduced in installed Chrome (puppeteer over `test/browser/srv/bundle.js`) or via `tsc` on a scratch file.
 TextRich isn't released yet (npm latest 1.2.9 is from 2026-10-02): renames & signature changes are free now
 
-### API: simpler custom tools
-
-1. **`ctx.editor` exposes the whole editor**. `FormatContext.editor` is `WUPTextRichInput`: 36 own public members (`replaceInput`, `checkBreak`, `_applyKey`…) + ~14 inherited, tool needs `$insert` only
-   - add `ctx.insert(node)` & remove `$` from editor method `$insert` (`$` means safe public API in the library; out of `Tool.format` it doesn't update `$value` & history, the safe one is `el.$insert`): then `editor` can be `HTMLElement`, built-in tools use it as root node & insert only
-   - optional: hide internal members from `.d.ts` via `@internal` & `stripInternal`
-   - `ctx.texts` has WARN "read before changing editor": eager for custom format costs one walk (the same as `normalize()` after every format) & removes WARN
-2. **Built-in tools use protected API: they can't be copied ✔ (tsc)**. `link.ask` calls `c.askLink`, `command.format` calls `control.applyCommand`: it compiles inside class body only, the same code in app gives TS2445 (the same rule as `#ctr` rejected in `clean`). Build `link.ask` on public `$ask`; `command` isn't copied by developers: can stay as is
-
 ### API: hard use cases
 
 1. **`toolbar` is feature switch too ✔**. `toolbar: null` (docs: "hides toolbar") disables shortcuts, recognizing, markdown & `/` commands as well, but `$format("bold")` still works. Custom toolbar `[["bold"], ["link"]]` silently drops recognizing of emails & `/` (hidden items `email`, `command`). Editor like Notion (no toolbar, shortcuts & markdown) needs global `hideOnToolbar` or css
@@ -61,6 +53,6 @@ TextRich isn't released yet (npm latest 1.2.9 is from 2026-10-02): renames & sig
 
 1. `Tool.placeholder` (text inserted via `/` command) clashes with demo tool `placeholder` (`$tools.placeholder.placeholder` is valid) & with html `placeholder` (hint): rename to `example`
 2. `Tool.label` is tool name by default (`codeInline` in aria-label), `ToolValue.label` is prettified value: prettify both
-3. `ask(target, control, current)` is positional, `format(ctx)` gets object; `$ask(…, hovered?)` exposes internal param of hover popup (both are open since 2026-10-07)
+3. `ask(target, control, current)` is positional, `format(ctx)` gets object (open since 2026-10-07)
 4. Class JSDoc: most of `Rules` are end-user keyboard details & they hide API rules in IDE hint => move them to demo features list
 5. `$format`: positional boolean is unreadable (`$format("list", "ordered", false)`) => `{ toggle: true }`; returns `void`: with `Promise<boolean>` caller can wait for asked value (link url, image picker)

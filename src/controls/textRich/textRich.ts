@@ -195,9 +195,12 @@ declare global {
       set?: (el: HTMLElement, value: V | undefined) => void;
       /** Asks value via custom UI (popup, modal etc.): when tool is applied without value (button, shortcut),
        *  on click on `embed` element or via static $hotKeyAsk at it (value replaces it); `null`/`undefined` cancels;
-       *  selection is restored even if focus moves out (to modal etc.); by default tool with `values` asks via its dropdown
-       * @param target element to place popup near: clicked embed, tool button or editor (if tool isn't rendered)
-       * @param current value at selection start
+       *  selection is restored even if focus moves out (to modal etc.); by default tool with `values` asks via its dropdown;
+       *  tool `link`: on hover, click & static $hotKeyAsk at link too (value replaces url in place, empty one removes
+       *  link), so ask via $ask: it gives hover popup
+       * @param target element to place popup near: clicked embed, hovered link, tool button or editor (if tool isn't
+       * rendered)
+       * @param current value at selection start (of hovered link)
        * @see {@link WUPTextRichControl.$ask} - popup with text control */
       ask?: (target: HTMLElement, control: WUPTextRichControl, current: V | undefined) => Promise<V | null | undefined>;
       /** Custom format instead of default one (see `kind`); after it control saves history, restores selection
@@ -548,8 +551,15 @@ export default class WUPTextRichControl<
           target: "_blank",
           rel: "noopener noreferrer",
         }),
-      // url of link at selection start is edited (empty value removes link)
-      ask: (target, c, cur) => c.askLink(target, cur),
+      // url of link at selection start or of hovered one is edited (empty value removes link)
+      ask: (target, c, url) => {
+        const { $textLink, $errorLink } = c.constructor as typeof WUPTextRichControl;
+        const validations = {
+          required: url === undefined, // new link
+          url: (v?: string) => !!v && !Utils.Html.sanitizeUrl(v) && $errorLink,
+        };
+        return c.$ask(target, url ?? "https://", { label: $textLink, validations, copyButton: true });
+      },
       format: ({ range, value: url, editor, tool, applyDefault }) => {
         const a = Utils.Formats.parents(
           range.startContainer,
@@ -558,9 +568,7 @@ export default class WUPTextRichControl<
         )[0];
         if (a?.contains(range.endContainer)) {
           // caret or selection inside link: the whole link is changed (empty url removes it) like via hover popup
-          const b = url ? Utils.Formats.create(tool, url) : document.createDocumentFragment();
-          b.append(...a.childNodes);
-          a.replaceWith(b);
+          Utils.Formats.replace(tool, a, url);
         } else if (!range.collapsed) {
           applyDefault(); // empty url removes link
         } else if (url) {
@@ -1211,26 +1219,23 @@ export default class WUPTextRichControl<
   #under?: HTMLElement | null;
   /** The last target of pointer & its element with hover popup (see hoverOf) */
   #hoverAt?: [Element, HTMLElement | null];
+  /** Hovered link while its `ask` is called: $ask opens hover popup for it (see askElement) */
+  #hovered?: HTMLElement;
 
   /** Asks value via popup with text control near target (link url etc.):
-   *  Enter submits, Escape or blur cancels (`null`); Enter/Escape return focus & selection to editor
+   *  Enter submits, Escape or blur cancels (`null`); Enter/Escape return focus & selection to editor;
+   *  called in `ask` of hovered link: hover popup (text control isn't focused, popup closes on pointer leave,
+   *  clearing value resolves `""` to remove link)
    * @param target element to place popup near (ex. tool button)
    * @param value initial value
    * @param opts options of text control: label, validations etc.
-   * @param hovered element edited via hover popup (link): text control isn't focused, popup closes on pointer leave,
-   * clearing value resolves `""` (to remove link)
    * @example
    * WUPTextRichControl.$tools.image = {
    *   ...
    *   ask: (target, c) => c.$ask(target, "https://", { label: "Image url", validations: { required: true } }),
    * }; */
-  $ask(
-    target: HTMLElement,
-    value: string,
-    opts?: Partial<WUP.Text.Options>,
-    hovered?: HTMLElement
-  ): Promise<string | null> {
-    return this.openAsk(new TextRichPrompt(target, value, { readOnly: this.$isReadOnly, ...opts }, hovered));
+  $ask(target: HTMLElement, value: string, opts?: Partial<WUP.Text.Options>): Promise<string | null> {
+    return this.openAsk(new TextRichPrompt(target, value, { readOnly: this.$isReadOnly, ...opts }, this.#hovered));
   }
 
   /** Opens popup instead of the current one
@@ -1250,16 +1255,6 @@ export default class WUPTextRichControl<
       this.#ask = a;
       a.open(this);
     });
-  }
-
-  /** Asks link url via $ask: `url` - url of existing link (empty value removes it), `hovered` - hovered link */
-  protected askLink(target: HTMLElement, url: string | undefined, hovered?: HTMLElement): Promise<string | null> {
-    const { $textLink, $errorLink } = this.#ctr;
-    const validations = {
-      required: url === undefined, // new link
-      url: (v?: string) => !!v && !Utils.Html.sanitizeUrl(v) && $errorLink,
-    };
-    return this.$ask(target, url ?? "https://", { label: $textLink, validations, copyButton: true }, hovered);
   }
 
   /** Asks tool value via its dropdown menu near target: focus stays in editor (or dropdown), menu is closed on selection change
@@ -1499,7 +1494,8 @@ export default class WUPTextRichControl<
   }
 
   /** Opens popup of element: `ask` of embed/token (value replaces it), dropdown of embed/token (chosen value replaces it)
-   *  or link url; `isHover` - hover popup (see hoverOf): without `ask`, closes on pointer leave, ignores keys */
+   *  or `ask` of link (url is replaced in place); `isHover` - hover popup (see hoverOf): without `ask` of embed/token,
+   *  closes on pointer leave, ignores keys */
   protected askElement(el: HTMLElement, isHover?: boolean): void {
     const name = this.embedTool(el, isHover);
     if (name && this.#ctr.$tools[name].ask) {
@@ -1514,11 +1510,23 @@ export default class WUPTextRichControl<
         }
       });
     } else if (el.tagName === "A") {
-      this.askLink(el, el.getAttribute("href")!, isHover ? el : undefined).then(
-        (url) =>
-          url != null &&
-          this.$refInput.changeContent(() => (url ? el.setAttribute("href", url) : el.replaceWith(...el.childNodes)))
-      );
+      // custom `ask` is used too (`create` for new url): $ask called in it opens hover popup
+      const tool = this.#ctr.$tools.link;
+      const cur = Utils.Formats.is(tool, el) as string;
+      this.#hovered = isHover ? el : undefined;
+      const p = tool.ask?.(el, this as WUPTextRichControl, cur);
+      this.#hovered = undefined;
+      p?.then((url) => {
+        if (url != null && url !== cur && el.isConnected) {
+          const inp = this.$refInput;
+          this.restoreSelection(); // focus can move out (to modal etc.)
+          const pos = inp.getSelectionPos(); // caret inside link is lost on replace
+          inp.changeContent(() => {
+            Utils.Formats.replace(tool, el, url);
+            inp.setSelectionPos(pos);
+          });
+        }
+      });
     }
   }
 
