@@ -1676,7 +1676,7 @@
             },
             {
               "name": "w-toolbar",
-              "description": "Global reference to object with array of toolbar groups (see WUP.TextRich.ToolbarGroup); null or empty array hides toolbar. Example: window.myToolbar = [[\"bold\", \"italic\"], [\"header\"], [\"clean\"]]"
+              "description": "Global reference to object with array of toolbar groups (see WUP.TextRich.ToolbarGroup); tools work only if they're listed (hidden ones too): shortcuts, recognizing etc.; null or empty array hides toolbar & turns tools off (to keep them hide toolbar via css: wup-textrich [role=\"toolbar\"] { display: none }). Example: window.myToolbar = [[\"bold\", \"italic\"], [\"header\"], [\"clean\"]]"
             },
             {
               "name": "w-hidehotkeyshint",

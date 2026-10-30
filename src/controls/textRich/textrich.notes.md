@@ -42,10 +42,7 @@ TextRich isn't released yet (npm latest 1.2.9 is from 2026-10-02): renames & sig
 
 ### API: hard use cases
 
-1. **`toolbar` is feature switch too ✔**. `toolbar: null` (docs: "hides toolbar") disables shortcuts, recognizing, markdown & `/` commands as well, but `$format("bold")` still works. Custom toolbar `[["bold"], ["link"]]` silently drops recognizing of emails & `/` (hidden items `email`, `command`). Editor like Notion (no toolbar, shortcuts & markdown) needs global `hideOnToolbar` or css
-   - a) docs: tools work only if they're listed (hidden ones too) + css recipe to hide toolbar
-   - b) option `hideToolbar`: behavior differs per consumer, so option is justified
-2. **Values loaded at runtime or different per control ✔**. `values` is taken on toolbar render: replaced `$tools.mention.values` isn't used (menu shows old items), mutated array is. 2 editors with different users need subclass & new tag
+1. **Values loaded at runtime or different per control ✔**. `values` is taken on toolbar render: replaced `$tools.mention.values` isn't used (menu shows old items), mutated array is. 2 editors with different users need subclass & new tag
    - `values` like `items` of SelectControl: `ToolValue[] | ((control) => ToolValue[] | Promise<…>)` resolved on menu opening; for menus only (hotkeys & `recognize` of values need static array)
    - minimal: docs "mutate array, don't replace it"
 

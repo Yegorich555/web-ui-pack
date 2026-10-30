@@ -251,7 +251,7 @@ declare global {
     interface EventMap extends WUP.TextArea.EventMap {}
     interface ValidityMap extends WUP.TextArea.ValidityMap {}
     interface NewOptions {
-      /** Toolbar items split into groups (`null` or empty array hides toolbar); custom tools must be defined in static $tools
+      /** Use this to disable/configure tools defined in WUPTextRichControl.$tools;
        * @see {@link ToolbarItem}
        * @example
        * [
@@ -264,12 +264,14 @@ declare global {
        * ]
        * @defaultValue all built-in tools */
       toolbar: ToolbarGroup[] | null;
-      /** Hide keyboard shortcuts in tooltips & dropdown items (`Bold (Ctrl+B)` => `Bold`); `aria-keyshortcuts` is set anyway
+      /** Hide keyboard shortcuts in tooltips
        * @see {@link WUP.TextRich.Tool.hotKey}
        * @defaultValue false */
       hideHotKeysHint: boolean;
-      /** Paste & drop content with its formats (only formats of $tools are kept, Ctrl+Shift+V gives plain text anyway),
-       *  otherwise it is plain text: copied html has page styles (font size etc.)
+      /** Enable this use handle Ctrl+V as its (pasted code equally formatted as copied)
+       * @rules
+       * * by default whet it's false: paste adds plain text;
+       * * otherwise it's plain text: copied html has page styles (font size etc.)
        * @defaultValue false */
       copyPasteFormatted: boolean;
     }
@@ -370,7 +372,8 @@ const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
  * storage): only formats of $tools are kept (`<strong>`, `<em>`, `<a>`, `<h1>`, `<blockquote>` etc.) with paragraphs `<p>`,
  * lists & indents; a single plain paragraph goes without `<p>` (`text` instead of `<p>text</p>`); see static $sanitize
  * * undo/redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y, OS-native) works for text & formats
- * * tools are defined in static $tools: change it to redefine labels, shortcuts etc. or to add a custom tool
+ * * tools are defined in static $tools: change it to redefine labels, shortcuts etc. or to add a custom tool;
+ * tool works only if it's listed in $options.toolbar (hidden ones too)
  * * shortcuts are similar to Google Docs: Ctrl+B, Ctrl+Shift+7, Ctrl+Alt+1 etc. (Cmd on macOS/iOS);
  * they're shown in tooltips & dropdown items (see $options.hideHotKeysHint); Alt+F10 focuses toolbar (Arrows - navigate, Esc - return);
  * Alt+ArrowDown opens popup of element at caret: dropdown of token, link url etc. (see static $hotKeyAsk)
