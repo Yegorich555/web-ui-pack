@@ -223,6 +223,11 @@ export const Tools = {
     return typeof r === "function" ? r(s) : r?.exec(s)?.[0];
   },
 
+  /** Returns static values: `undefined` for function (values are loaded on menu opening: see `Tool.values`) */
+  fixed(v: WUP.TextRich.Tool["values"]): WUP.TextRich.ToolValue[] | undefined {
+    return typeof v === "function" ? undefined : v;
+  },
+
   /** Returns error if tool isn't defined or misses members required by its `kind` (see `Tool.kind`) or empty string */
   invalid(name: string, t: WUP.TextRich.Tool | undefined): string {
     if (!t) {
@@ -230,11 +235,12 @@ export const Tools = {
     }
     const k = t.kind === "lineStyle" ? "set" : "create";
     const tag = typeof t.create === "string" ? t.create.toUpperCase() : "";
-    // without `is` element is detected by tag & classes (see Formats.is): value by its class, span & containers need class
-    const isNoClass = t.values
+    // without `is` element is detected by tag & classes (see Formats.is): value by its class, span & containers need class;
+    // value of function `values` is detected via `is` only
+    const isNoClass = Array.isArray(t.values)
       ? t.values.some((v) => v.value !== false && !v.classNameTag)
-      : !t.classNameTag && plainTags.has(tag);
-    const is = !t.is && ((!tag && "is") || (isNoClass && "is or classNameTag"));
+      : !t.values && !t.classNameTag && plainTags.has(tag);
+    const is = !t.is && (((!tag || typeof t.values === "function") && "is") || (isNoClass && "is or classNameTag"));
     // `format` replaces `create` & `set` except `inline`: pending formats & recognizing create elements
     const arr = t.kind ? [is, !t[k] && (!t.format || t.kind === "inline") && k] : [!t.format && "format"];
     const missed = arr.filter(Boolean).join(" & ");
@@ -248,7 +254,7 @@ export const Formats = {
   create(t: WUP.TextRich.Tool, v: unknown): HTMLElement {
     const el = typeof t.create === "string" ? document.createElement(t.create) : t.create!(v);
     t.classNameTag && el.classList.add(t.classNameTag);
-    const cls = t.values?.find((x) => x.value === v)?.classNameTag;
+    const cls = Tools.fixed(t.values)?.find((x) => x.value === v)?.classNameTag;
     cls && el.classList.add(cls);
     return el;
   },
@@ -266,7 +272,7 @@ export const Formats = {
     if (el.localName !== t.create || (t.classNameTag ? !has(t.classNameTag) : !t.values && plainTags.has(el.tagName))) {
       return undefined;
     }
-    return t.values ? t.values.find((x) => has(x.classNameTag))?.value : true;
+    return t.values ? Tools.fixed(t.values)?.find((x) => has(x.classNameTag))?.value : true;
   },
 
   /** Replaces element of format with element of value `v` via `create` (empty value unwraps it): content is moved */

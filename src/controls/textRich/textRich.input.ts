@@ -73,7 +73,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     this.#recognizers = this._entries.filter(([k, t]) => this.#isAuto(t) && this._isActive?.(k)).map(([, t]) => t);
     // markdown applies tool like toolbar button: tool with values (font size etc.) needs value
     this.#markdowns = this._entries.filter(
-      ([k, t]) => this.#markdown.has(t) && !t.values?.length && this._isActive?.(k)
+      ([k, t]) => this.#markdown.has(t) && !(typeof t.values === "function" || t.values?.length) && this._isActive?.(k)
     );
   }
 
@@ -843,7 +843,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     let key = "";
     this._entries.some(([k, t]) => {
       const v = t.values
-        ? t.values.find((x) => Utils.Tools.recognized(x.recognize, s) === s)
+        ? Utils.Tools.fixed(t.values)?.find((x) => Utils.Tools.recognized(x.recognize, s) === s)
         : t.kind === "line" && Utils.Tools.recognized(t.recognize, s) === s && { value: true };
       // not applied yet
       v && !Utils.Formats.isMatch(Utils.Formats.is(t, line), v.value) && (key = t.values ? `${k}:${v.value}` : k);

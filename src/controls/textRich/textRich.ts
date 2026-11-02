@@ -111,8 +111,19 @@ declare global {
       hideOnToolbar?: boolean;
       /** Dropdown values in default order (toolbar item `"header"` = `{ header: [1, 2, 3, 4, 5, 6, false] }`);
        *  `false` - format isn't applied (`Normal` of `header`);
-       *  without `ask` value is asked via this dropdown opened near editor (on `trigger`, hover on `embed`, $format without value) */
-      values?: ToolValue<V>[];
+       *  without `ask` value is asked via this dropdown opened near editor (on `trigger`, hover on `embed`, $format without value);
+       *  it's read on use: replace it with values loaded at runtime (users of mentions etc.)
+       * @tutorial Function
+       * * returns values filtered by text: typed after `trigger` (case as is) or `""` when menu opens (toolbar, hover etc.);
+       * it's called on every change of typed text: result of the last call is shown, empty one closes menu
+       * * Promise: menu shows spinner while values are loading (300ms at least, not for resolved at once like in Select)
+       * * values aren't known before: `hotKey`, `recognize`, `className` & `classNameTag` of values aren't supported
+       * (tool needs `is`), menu of `command` has a single item of tool
+       * @example
+       * values: (text) => fetch(`/api/users?search=${encodeURIComponent(text)}`).then((r) => r.json()), */
+      values?:
+        | ToolValue<V>[]
+        | ((text: string, control: WUPTextRichControl) => ToolValue<V>[] | Promise<ToolValue<V>[]>);
       /** Typed text that opens tool dropdown near caret (`{` - placeholders, `@` - mentions, `/` - commands);
        *  text typed after it filters items by label or value; chosen value replaces typed text (token is followed by
        *  space like in messengers, except whitespace or punctuation after it: `(@john)`);
@@ -232,7 +243,10 @@ declare global {
       applyDefault: () => void;
     }
     /** @see {@link Tool} */
-    type Tools = { [K in keyof BuiltInToolValues]: Tool<ToolValues[K]> } & {
+    type Tools = {
+      // values of built-in tools are static: their shortcuts etc. are customizable (`$tools.header.values![5].hotKey`)
+      [K in keyof BuiltInToolValues]: Tool<ToolValues[K]> & { values?: ToolValue<ToolValues[K]>[] };
+    } & {
       [K in keyof ToolValues]?: Tool<ToolValues[K]>;
     } & {
       /** `labelBack` - label when the next click restores previous value (see $options.clearActions) */
@@ -326,7 +340,7 @@ declare module "preact/jsx-runtime" {
 type ToolElement = HTMLElement & {
   _format: keyof WUP.TextRich.ToolValues;
   _value?: unknown;
-  _values?: WUP.TextRich.ToolValue[];
+  _values?: WUP.TextRich.Tool["values"];
 };
 
 /** Cmd instead of Ctrl (iPadOS reports Macintosh, iOS - like Mac OS X) */
@@ -458,7 +472,7 @@ export default class WUPTextRichControl<
   ]);
 
   /** Toolbar tools by name (used in $options.toolbar): change it to redefine labels, shortcuts etc. or to add a custom tool
-   *  (applied on the next toolbar render)
+   *  (applied on the next toolbar render; `values` - on use: see `Tool.values`)
    * @see {@link WUP.TextRich.Tool}
    * @see demo of custom tools (font, image, placeholder, mention, markdown etc.) {@link https://github.com/Yegorich555/web-ui-pack/blob/master/demo/src/components/controls/textRich/textRich.custom.tsx}
    * @example
@@ -947,7 +961,8 @@ export default class WUPTextRichControl<
     ];
     const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
     // value from tool: with label, shortcut & class
-    const valueOf = (v: unknown): WUP.TextRich.ToolValue => tool.values?.find((t) => t.value === v) ?? { value: v };
+    const valueOf = (v: unknown): WUP.TextRich.ToolValue =>
+      Utils.Tools.fixed(tool.values)?.find((t) => t.value === v) ?? { value: v };
     const err = Utils.Tools.invalid(name, tool);
     if (name === "btnClear") {
       const b = this.$refBtnClear; // exists if $options.clearButton is true
@@ -977,7 +992,7 @@ export default class WUPTextRichControl<
     name: keyof WUP.TextRich.ToolValues,
     tool: WUP.TextRich.Tool,
     v?: WUP.TextRich.ToolValue,
-    values?: WUP.TextRich.ToolValue[]
+    values?: WUP.TextRich.Tool["values"]
   ): void {
     const b = group.appendChild(document.createElement("button")) as HTMLButtonElement & ToolElement;
     b.type = "button";
@@ -994,13 +1009,19 @@ export default class WUPTextRichControl<
     if (values) {
       b.setAttribute("role", "combobox"); // select-only combobox
       b.setAttribute("aria-expanded", false);
-      values.some((x) => x.className) && b.setAttribute("icon", ""); // shows icon of the current value instead of label
+      // shows icon of the current value instead of label
+      Utils.Tools.fixed(values)?.some((x) => x.className) && b.setAttribute("icon", "");
     } else if (tool.kind !== "embed" && (tool.kind || tool.is)) {
       b.setAttribute("aria-pressed", false); // actions (without `is`) & embeds have no state
     }
     b._format = name;
     b._value = v?.value;
-    b._values = values;
+    if (values && values === tool.values) {
+      // read on use: replaced `$tools[name].values` (loaded at runtime) is shown without toolbar render
+      Object.defineProperty(b, "_values", { get: () => tool.values });
+    } else {
+      b._values = values; // chosen in toolbar (`{ header: [1, 2] }`) & items of `command`
+    }
   }
 
   /** Sets `aria-label` & tooltip `{label} ({hotKey})` of button or icon item of dropdown */
@@ -1104,7 +1125,7 @@ export default class WUPTextRichControl<
       if (el._values) {
         // dropdown shows icon or label of the current value (even if value isn't rendered: `Heading 3`)
         const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
-        const v = tool.values?.find((x) => x.value === cur);
+        const v = Utils.Tools.fixed(tool.values)?.find((x) => x.value === cur);
         if (el.hasAttribute("icon")) {
           el.className = "";
           tool.className && el.classList.add(tool.className);
@@ -1272,7 +1293,8 @@ export default class WUPTextRichControl<
     onSelect?: (m: TextRichMenu) => void
   ): Promise<unknown> {
     const b = this.findTool(name);
-    if (!b?._values) {
+    const values = b?._values;
+    if (!values) {
       return Promise.resolve(null);
     }
     const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
@@ -1281,7 +1303,7 @@ export default class WUPTextRichControl<
       button: b,
       owner: isHover ? null : (document.activeElement === b && b) || this.$refInput,
       target,
-      values: b._values,
+      values: typeof values === "function" ? (text) => values(text, this as WUPTextRichControl) : values,
       selected: el ? Utils.Formats.is(tool, el) : this.$refInput.getFormats().get(name) ?? false,
       render: (li, v) => (name === "command" ? this.renderCommandItem(li, v) : this.renderMenuItem(li, tool, v)),
     });
@@ -1311,14 +1333,13 @@ export default class WUPTextRichControl<
       }
       const arr = groups[Utils.Tools.commandGroup(t)];
       const label = t.label ?? name;
-      const values =
-        picked === undefined
-          ? t.values
-          : [picked].flat().map((v) => t.values?.find((x) => x.value === v) ?? { value: v });
-      if (!values || t.trigger) {
+      const fixed = Utils.Tools.fixed(t.values); // function values are asked via menu too
+      if (!fixed || t.trigger) {
         arr.push({ value: name, label, hotKey: Array.isArray(t.hotKey) ? t.hotKey : undefined }); // prev/next are for values
         return;
       }
+      const values =
+        picked === undefined ? fixed : [picked].flat().map((v) => fixed.find((x) => x.value === v) ?? { value: v });
       // `false` first: plain text before headings (stable sort keeps the rest in order)
       [...values]
         .sort((a, b) => Number(b.value === false) - Number(a.value === false))
@@ -1341,7 +1362,7 @@ export default class WUPTextRichControl<
     const s = rest.join(":"); // value can contain `:`
     li.setAttribute("tool", key);
     t.className && li.classList.add(t.className);
-    const cls = rest.length ? t.values?.find((x) => `${x.value}` === s)?.className : undefined;
+    const cls = rest.length ? Utils.Tools.fixed(t.values)?.find((x) => `${x.value}` === s)?.className : undefined;
     cls && li.classList.add(cls);
     const g = `${Utils.Tools.commandGroup(t)}`;
     li.setAttribute("group", g);
@@ -1359,7 +1380,7 @@ export default class WUPTextRichControl<
       return;
     }
     const s = rest.join(":"); // value can contain `:`
-    const v = rest.length ? tool.values?.find((x) => `${x.value}` === s)?.value : undefined;
+    const v = rest.length ? Utils.Tools.fixed(tool.values)?.find((x) => `${x.value}` === s)?.value : undefined;
     const isMenu = !rest.length && !!tool.trigger && !!this.findTool(name)?._values;
     const text = isMenu ? tool.trigger : tool.placeholder;
     if (!text) {
@@ -1414,12 +1435,7 @@ export default class WUPTextRichControl<
         typed.setStart(r.startContainer, r.startOffset);
         sel.isCollapsed && inp.contains(sel.focusNode) && typed.setEnd(sel.focusNode!, sel.focusOffset);
         const str = typed.toString();
-        const q = str.startsWith(tr) && !/\s/.test(str) && str.slice(tr.length).toLowerCase();
-        // label or value contains typed text: `{name` & `{firstName` show `First Name`
-        const has = (x: string): boolean => x.toLowerCase().includes(q as string);
-        (q === false ||
-          !m.filter((v) => has(v.label ?? stringPrettify(String(v.value), true, true)) || has(String(v.value)))) &&
-          m.done();
+        str.startsWith(tr) && !/\s/.test(str) ? m.filter(str.slice(tr.length)) : m.done();
       }).then((v) => {
         if (v != null) {
           // select typed text: embed & token replace it, line formats delete it at first, action gets it selected
@@ -1605,7 +1621,7 @@ export default class WUPTextRichControl<
     }
     const [name, ...rest] = key.split(":") as [keyof WUP.TextRich.ToolValues, ...string[]];
     const v = rest.join(":"); // value can contain `:`
-    const item = this.findTool(name)?._values?.find((x) => `${x.value}` === v);
+    const item = Utils.Tools.fixed(this.findTool(name)?._values)?.find((x) => `${x.value}` === v);
     item && this.goFormat(name, item.value, true);
     return !!item;
   }
@@ -1642,20 +1658,20 @@ export default class WUPTextRichControl<
       return true;
     }
     const found = this.$refInput._entries.find(
-      ([, t]) => match(t.hotKey) !== -1 || t.values?.some((v) => match(v.hotKey) !== -1)
+      ([, t]) => match(t.hotKey) !== -1 || Utils.Tools.fixed(t.values)?.some((v) => match(v.hotKey) !== -1)
     );
     if (!found) {
       return mod && !e.altKey && !e.shiftKey && browserHotKeys.has(e.code); // block browser formatting
     }
     const [name, tool] = found;
     const i = match(tool.hotKey);
-    const val = i === -1 ? tool.values!.find((v) => match(v.hotKey) !== -1) : undefined;
-    if (!tool.values || val) {
+    const values = Utils.Tools.fixed(tool.values); // function values: tool shortcut opens menu
+    const val = i === -1 ? values!.find((v) => match(v.hotKey) !== -1) : undefined;
+    if (!values || val) {
       return this.applyKey(val ? `${name}:${val.value}` : name); // not rendered: browser handles shortcut
     }
     // tool shortcut: `prev` selects the previous rendered value (smaller font), `next` - the next value
-    const { values } = tool;
-    const items = this.findTool(name)?._values;
+    const items = Utils.Tools.fixed(this.findTool(name)?._values);
     const isRendered = (v: WUP.TextRich.ToolValue): boolean =>
       !!this.findTool(`${name}:${v.value}`) || !!items?.some((x) => x.value === v.value);
     if (!values.some(isRendered)) {

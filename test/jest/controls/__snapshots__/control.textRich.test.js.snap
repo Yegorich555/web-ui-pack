@@ -2934,6 +2934,9 @@ WUP-TEXTRICH &gt; wup-popup[menu] :is(h1, h2, h3, h4, h5, h6) {
   margin: 0;
   padding: 0;
 }
+WUP-TEXTRICH &gt; wup-popup[menu] &gt; ul:empty + wup-spin {
+  margin: 0.5em 2em;
+}
 WUP-TEXTRICH &gt; wup-popup:has(&gt; wup-text) {
   padding: 0;
   border-radius: var(--ctrl-border-radius);

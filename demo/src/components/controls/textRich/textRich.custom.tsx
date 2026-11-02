@@ -211,26 +211,41 @@ WUPTextRichControl.$tools.tag = {
   classNameTag: styles.tag,
 };
 
-const mentions: WUP.TextRich.ToolValue<string>[] = [
+/** Users stored on server (see fetchUsers) */
+const users: WUP.TextRich.ToolValue<string>[] = [
   { value: "john", label: "John Smith" },
   { value: "kate", label: "Kate Brown" },
   { value: "alex", label: "Alex Green" },
+  { value: "anna", label: "Anna White" },
+  { value: "mike", label: "Mike Johnson" },
 ];
-/** `false` - mentions from values only: typed `@unknown` & edited one (`@jo|hn` + `123` => `@jo123hn`) stay plain text,
+
+/** Simulated api: returns users with name or label containing text (real app: `fetch(/api/users?search=${text})`) */
+function fetchUsers(text: string): Promise<WUP.TextRich.ToolValue<string>[]> {
+  const s = text.toLowerCase();
+  const arr = users.filter((u) => u.value.includes(s) || u.label!.toLowerCase().includes(s));
+  return new Promise((res) => {
+    setTimeout(() => res(arr), 500);
+  });
+}
+
+/** `false` - known users only: typed `@unknown` & edited one (`@jo|hn` + `123` => `@jo123hn`) stay plain text,
  *  pasted html keeps text only; `true` - any text is mention (see `is` below) */
 const allowUnknownMentions = false;
 WUPTextRichControl.$tools.mention = {
   label: "Mention", // aria-label of menu & item in menu of commands
   hideOnToolbar: true,
-  values: mentions, // menu on typing `@` at word start (not in email)
+  // menu on typing `@` at word start (not in email): users are filtered by api on every typed char (spinner while loading)
+  values: fetchUsers,
   trigger: "@",
   kind: "inline",
   // typed `@john` is mention without menu too
   recognize: /(?<![\p{L}\p{N}\p{M}_.@/-])@[\p{L}\p{N}\p{M}_](?:[\p{L}\p{N}\p{M}_.-]*[\p{L}\p{N}\p{M}_])?$/u,
-  // `undefined` rejects element: typed or edited text stays plain text, sanitizer unwraps it (paste, $value)
+  // `undefined` rejects element: typed or edited text stays plain text, sanitizer unwraps it (paste, $value);
+  // it's sync: real app checks users known on page (loaded via api before)
   is: (el) => {
     const v = el.classList.contains(styles.mention) ? el.textContent!.slice(1) : undefined;
-    return allowUnknownMentions || mentions.some((m) => m.value === v) ? v : undefined;
+    return allowUnknownMentions || users.some((u) => u.value === v) ? v : undefined;
   },
   create: "span", // chosen value is inserted as `<span>@john</span>`
   classNameTag: styles.mention,
@@ -294,7 +309,8 @@ export default function TextRichCustom() {
             <b>Hashtag</b>: typed <code>#news</code> is recognized
           </li>
           <li>
-            <b>Mention</b>: menu on typed <code>@</code>, typed <code>@john</code> is recognized
+            <b>Mention</b>: menu on typed <code>@</code> with users filtered by api (values via function, spinner while
+            loading), typed <code>@john</code> is recognized
           </li>
         </ul>
         Markdown via recognize of built-in tools (Esc right after it returns typed text):

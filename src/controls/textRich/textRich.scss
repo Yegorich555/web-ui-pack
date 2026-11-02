@@ -316,6 +316,18 @@ $tools: (
       margin: 0;
       padding: 0;
     }
+
+    // function values are loading: spinner of text height of item;
+    // item size is re-calculated: otherwise it's taken from :root (3em / 8)
+    > wup-spin {
+      --spin-size: 1.2em;
+      --spin-item-size: calc(var(--spin-size) / 8);
+    }
+
+    // instead of items (it's placed over rendered ones): padding of item, so menu has its height
+    > ul:empty + wup-spin {
+      margin: 0.4em 1em;
+    }
   }
 
   // $ask popup (link url etc.): popup is the control itself (no own padding & corners)

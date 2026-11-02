@@ -35,6 +35,15 @@ function usePlaceholder() {
   };
 }
 
+/** Waits for values resolved at once (see `Tool.values`): menu is shown without spinner;
+ *  otherwise jsdom runs timeout of promiseWait before them */
+async function waitValues() {
+  for (let i = 0; i < 5; ++i) {
+    await Promise.resolve();
+  }
+  await h.wait(1);
+}
+
 /** Adds embed tool `image` (`<img src>`)
  * @returns cleanup function */
 function useImage(ask) {
@@ -2743,6 +2752,193 @@ describe("control.textRich", () => {
     } finally {
       cleanup();
       delete WUPTextRichControl.$tools.header.trigger;
+    }
+  });
+
+  test("values via function: menu shows result of the last call, spinner while loading", async () => {
+    useSocial();
+    const users = [
+      { value: "john", label: "John Smith" },
+      { value: "kate", label: "Kate Johnson" },
+      { value: "jack", label: "Jack Brown" },
+    ];
+    const delays = { j: 500 }; // others: 100ms
+    const calls = [];
+    WUPTextRichControl.$tools.mention.values = (text, control) => {
+      calls.push([text, control]);
+      const arr = users.filter((u) => u.label.toLowerCase().includes(text));
+      return new Promise((res) => setTimeout(() => res(arr), delays[text] ?? 100));
+    };
+    const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
+    Range.prototype.getBoundingClientRect = () => rect; // jsdom: menu is placed near caret
+    el.$options.toolbar = [["mention"]];
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    const menu = () => el.querySelector("wup-popup[menu]");
+    const items = () => [...menu().querySelectorAll("li")].map((li) => li.textContent);
+    const spin = () => menu().querySelector("wup-spin");
+    /** Presses key on editor @returns true if it's prevented */
+    const press = (key) => !inp.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+
+    setHtml("<div>a |</div>");
+    userType("@");
+    expect(calls).toEqual([["", el]]); // all values: nothing is typed after trigger
+    expect(menu()).toBe(null); // spinner isn't shown at once: values can be resolved at once (see the next test)
+    await h.wait(1);
+    expect(spin()).toBeTruthy(); // menu with spinner only
+    expect(menu().getAttribute("aria-busy")).toBe("true");
+    expect(items()).toEqual([]);
+    expect(press("ArrowDown")).toBe(false); // nothing to choose: keys work in editor
+    await h.wait(200);
+    expect(spin()).toBeTruthy(); // resolved after 100ms: spinner is shown 300ms at least like in WUPSelectControl
+    await h.wait(200);
+    expect(spin()).toBe(null);
+    expect(menu().hasAttribute("aria-busy")).toBe(false);
+    expect(items()).toEqual(["John Smith", "Kate Johnson", "Jack Brown"]);
+
+    // result of the last call is shown: previous ones are ignored
+    userType("j");
+    userType("o");
+    document.dispatchEvent(new Event("selectionchange")); // text isn't changed: it isn't requested again
+    expect(calls.map((c) => c[0])).toEqual(["", "j", "jo"]);
+    await h.wait(1);
+    expect(spin()).toBeTruthy(); // over previous items: they can be chosen as usual
+    expect(items()).toEqual(["John Smith", "Kate Johnson", "Jack Brown"]);
+    await h.wait(500); // previous call is resolved later (after 500ms)
+    expect(spin()).toBe(null);
+    expect(items()).toEqual(["John Smith", "Kate Johnson"]);
+    expect(press("ArrowDown")).toBe(true);
+    expect(press("Enter")).toBe(true);
+    await h.wait(1);
+    expect(getHtml()).toBe('<div>a <span class="wup-mention">@kate</span> |</div>');
+  });
+
+  test("values via function: menu is closed on empty result, error & Escape while loading", async () => {
+    useSocial();
+    const tool = WUPTextRichControl.$tools.mention;
+    // values returned at once (array or resolved promise): without spinner
+    tool.values = (text) => [{ value: "john", label: "John Smith" }].filter((u) => u.value.includes(text));
+    const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
+    Range.prototype.getBoundingClientRect = () => rect; // jsdom: menu is placed near caret
+    el.$options.toolbar = [["mention"]];
+    await h.wait(1);
+    const inp = el.$refInput;
+    inp.focus();
+    const btn = el.querySelector("[tool=mention]");
+    const menu = () => el.querySelector("wup-popup[menu]");
+    const press = (key) => !inp.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+    /** Returns promise resolved/rejected after 100ms */
+    const later = (v, isErr) => new Promise((res, rej) => setTimeout(() => (isErr ? rej(v) : res(v)), 100));
+
+    setHtml("<div>a |</div>");
+    userType("@");
+    await waitValues();
+    expect([...menu().querySelectorAll("li")].map((li) => li.textContent)).toEqual(["John Smith"]);
+    expect(menu().querySelector("wup-spin")).toBe(null);
+    // empty result closes menu
+    userType("z");
+    await waitValues();
+    expect(btn.getAttribute("aria-expanded")).toBe("false");
+    await h.wait();
+    expect(menu()).toBe(null);
+
+    // Escape while loading: result isn't shown (failed one too)
+    tool.values = () => later([{ value: "john" }]);
+    setHtml("<div>a |</div>");
+    userType("@");
+    expect(press("Escape")).toBe(true);
+    await h.wait();
+    expect(menu()).toBe(null);
+    tool.values = () => later(new Error("test reject"), true);
+    setHtml("<div>a |</div>");
+    userType("@");
+    await h.wait(1); // with spinner
+    expect(press("Escape")).toBe(true);
+    await h.wait();
+    expect(menu()).toBe(null);
+    // error closes menu: it's shown in console
+    tool.values = () => {
+      throw new Error("test reject");
+    };
+    setHtml("<div>a |</div>");
+    userType("@");
+    await waitValues();
+    expect(btn.getAttribute("aria-expanded")).toBe("false");
+    tool.values = () => later(new Error("test reject"), true);
+    setHtml("<div>a |</div>");
+    userType("@");
+    await h.wait(1);
+    expect(menu().querySelector("wup-spin")).toBeTruthy();
+    await h.wait(500);
+    expect(btn.getAttribute("aria-expanded")).toBe("false");
+    await h.wait();
+    expect(menu()).toBe(null);
+  });
+
+  test("values via function: toolbar dropdown, Alt+ArrowDown & menu of commands", async () => {
+    useSocial();
+    const tool = WUPTextRichControl.$tools.mention;
+    delete tool.hideOnToolbar;
+    const calls = [];
+    tool.values = (text) => {
+      calls.push(text);
+      return [
+        { value: "john", label: "John Smith" },
+        { value: "kate", label: "Kate Brown" },
+      ];
+    };
+    const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
+    Range.prototype.getBoundingClientRect = () => rect; // jsdom: menu is placed near caret
+    const spyErr = jest.spyOn(console, "error").mockImplementation(() => {});
+    WUPTextRichControl.$tools.chip = { kind: "inline", create: "span", classNameTag: "chip", values: () => [] };
+    try {
+      el.$options.toolbar = [["mention", "chip", "command"]];
+      await h.wait(1);
+      // values aren't known before: element is detected via `is` only
+      expect(spyErr.mock.calls.map((c) => c[0])).toEqual(["WUP-TEXTRICH. Tool 'chip' misses is"]);
+      const inp = el.$refInput;
+      inp.focus();
+      const btn = el.querySelector("[tool=mention]");
+      const items = () => [...el.querySelectorAll("wup-popup[menu] li")].filter((li) => !li.hidden);
+      const mention = (s) => `<span class="wup-mention">${s}</span>`;
+
+      // dropdown: values without typed text
+      setHtml("<div>a |</div>");
+      expect(btn.textContent).toBe("Mention");
+      btn.click();
+      await waitValues();
+      expect(calls).toEqual([""]);
+      expect(items().map((li) => li.textContent)).toEqual(["John Smith", "Kate Brown"]);
+      items()[1].click();
+      await h.wait();
+      expect(getHtml()).toBe(`<div>a ${mention("@kate")}|</div>`);
+      // dropdown shows value as is: label is unknown before menu is opened
+      setHtml(`<div>a ${mention("@ka|te")}</div>`);
+      expect(btn.textContent).toBe("kate");
+
+      // Alt+ArrowDown: menu of token at caret with its value selected
+      const altDown = { key: "ArrowDown", code: "ArrowDown", altKey: true, bubbles: true, cancelable: true };
+      inp.dispatchEvent(new KeyboardEvent("keydown", altDown));
+      await waitValues();
+      expect(calls).toEqual(["", ""]);
+      expect(items().map((li) => li.getAttribute("aria-selected"))).toEqual(["false", "true"]);
+      items()[0].click();
+      await h.wait();
+      expect(getHtml()).toBe(`<div>a ${mention("@john")}|</div>`);
+
+      // menu of commands: a single item of tool (values aren't known), it types trigger & opens menu
+      setHtml("<div>a |</div>");
+      userType("/");
+      userType("men");
+      expect(items().map((li) => li.textContent)).toEqual(["Mention"]);
+      inp.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+      await h.wait(1);
+      expect(getHtml()).toBe("<div>a @|</div>");
+      expect(btn.getAttribute("aria-expanded")).toBe("true");
+      expect(calls).toEqual(["", "", ""]);
+    } finally {
+      delete WUPTextRichControl.$tools.chip;
     }
   });
 

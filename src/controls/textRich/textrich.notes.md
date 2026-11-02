@@ -40,12 +40,6 @@ Developer (package consumer) side: statics, options, `$format`/`$ask`, types `To
 ✔ - reproduced in installed Chrome (puppeteer over `test/browser/srv/bundle.js`) or via `tsc` on a scratch file.
 TextRich isn't released yet (npm latest 1.2.9 is from 2026-10-02): renames & signature changes are free now
 
-### API: hard use cases
-
-1. **Values loaded at runtime or different per control ✔**. `values` is taken on toolbar render: replaced `$tools.mention.values` isn't used (menu shows old items), mutated array is. 2 editors with different users need subclass & new tag
-   - `values` like `items` of SelectControl: `ToolValue[] | ((control) => ToolValue[] | Promise<…>)` resolved on menu opening; for menus only (hotkeys & `recognize` of values need static array)
-   - minimal: docs "mutate array, don't replace it"
-
 ### API: naming & docs
 
 1. `Tool.placeholder` (text inserted via `/` command) clashes with demo tool `placeholder` (`$tools.placeholder.placeholder` is valid) & with html `placeholder` (hint): rename to `example`

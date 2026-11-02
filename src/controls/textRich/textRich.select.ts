@@ -1,8 +1,11 @@
 // eslint-disable-next-line max-classes-per-file
 import onEvent from "../../helpers/onEvent";
+import promiseWait from "../../helpers/promiseWait";
+import { stringPrettify } from "../../helpers/string";
 import WUPPopupElement from "../../popup/popupElement";
 import { PopupAnimations, PopupOpenCases } from "../../popup/popupElement.types";
 import { menuPlacements } from "../../popup/popupPlacements";
+import WUPSpinElement from "../../spinElement";
 import { SetValueReasons, ValidationCases } from "../baseControl";
 
 /** TextRich popup near target to ask value: text control (TextRichPrompt) or dropdown menu (TextRichMenu) */
@@ -91,7 +94,8 @@ interface MenuOptions {
   owner: HTMLElement | null;
   /** Element (dropdown, embed) or range (caret, typed trigger) to place menu near */
   target: HTMLElement | Range;
-  values: WUP.TextRich.ToolValue[];
+  /** Items or function that returns items filtered by text (see `Tool.values`) */
+  values: WUP.TextRich.ToolValue[] | ((text: string) => WUP.TextRich.ToolValue[] | Promise<WUP.TextRich.ToolValue[]>);
   selected: unknown;
   render: (li: HTMLLIElement, v: WUP.TextRich.ToolValue) => void;
 }
@@ -102,10 +106,17 @@ interface MenuOptions {
  * <wup-popup menu><ul role="listbox" aria-label="Heading"><li role="option"><h1 role="none">Heading 1</h1></li>...</ul></wup-popup> */
 export default class TextRichMenu extends TextRichAsk {
   #o: MenuOptions;
-  #items: HTMLLIElement[];
+  #ul: HTMLUListElement;
+  #items: HTMLLIElement[] = [];
   #focused?: HTMLLIElement;
   /** Removes blur listener of owner */
   #offBlur?: () => void;
+  /** Element to append popup to: on opening or when function values are loaded */
+  #parent?: HTMLElement;
+  /** Text of the last call of function values: results of previous calls are ignored */
+  #text?: string;
+  /** Spinner while function values are loading */
+  #spin?: WUPSpinElement;
 
   constructor(o: MenuOptions) {
     const t = o.target;
@@ -136,15 +147,7 @@ export default class TextRichMenu extends TextRichAsk {
     ul.id = WUPPopupElement.$uniqueId;
     ul.setAttribute("role", "listbox");
     ul.setAttribute("aria-label", o.button.getAttribute("aria-label")!);
-    this.#items = o.values.map((v) => {
-      const li = ul.appendChild(document.createElement("li"));
-      li.id = WUPPopupElement.$uniqueId;
-      li.setAttribute("role", "option");
-      li.setAttribute("aria-selected", v.value === o.selected);
-      li.onclick = () => this.done(v.value);
-      o.render(li, v);
-      return li;
-    });
+    this.#ul = ul;
     o.owner && (this.onKey = this.handleKey);
   }
 
@@ -153,20 +156,56 @@ export default class TextRichMenu extends TextRichAsk {
     return this.#o.target;
   }
 
+  /** Appends popup with items: function values are loaded at first */
   override open(parent: HTMLElement): void {
-    const { button, owner, values, selected } = this.#o;
+    const { button, owner, values } = this.#o;
     button.setAttribute("aria-expanded", true);
     if (owner) {
-      owner.setAttribute("aria-controls", this.popup.firstElementChild!.id);
+      owner.setAttribute("aria-controls", this.#ul.id);
       // browser window blur keeps owner active
       this.#offBlur = onEvent(owner, "blur", () => document.activeElement !== owner && this.done());
-      this.focus(this.#items[values.findIndex((v) => v.value === selected)] ?? this.#items[0]);
     }
-    super.open(parent);
+    this.#parent = parent;
+    typeof values === "function" ? this.filter("") : this.render(values);
+  }
+
+  /** Renders items, focuses selected or the 1st one & shows popup */
+  protected render(values: WUP.TextRich.ToolValue[]): void {
+    const { owner, selected } = this.#o;
+    this.#ul.replaceChildren();
+    this.#items = values.map((v) => {
+      const li = this.#ul.appendChild(document.createElement("li")); // before render: it checks previous item
+      li.id = WUPPopupElement.$uniqueId;
+      li.setAttribute("role", "option");
+      li.setAttribute("aria-selected", v.value === selected);
+      li.onclick = () => this.done(v.value);
+      this.#o.render(li, v);
+      return li;
+    });
+    owner && this.focus(this.#items[values.findIndex((v) => v.value === selected)] ?? this.#items[0]);
+    this.popup.isConnected || super.open(this.#parent!); // opened with spinner if values are loaded slowly
     // after popup is shown: otherwise it doesn't scroll
     setTimeout(() =>
       (this.#focused ?? this.popup.querySelector("[aria-selected=true]"))?.scrollIntoView({ block: "nearest" })
     );
+  }
+
+  /** Shows spinner over items while function values are loading: menu is opened with it if items aren't rendered yet */
+  protected changePending(v: boolean): void {
+    if (v === !!this.#spin) {
+      return;
+    }
+    if (v) {
+      WUPSpinElement.$use();
+      const s = document.createElement("wup-spin"); // it sets aria-busy on popup
+      // instead of items: otherwise opening animation of popup resets position of spinner placed over it
+      s.$options.inline = !this.popup.isConnected;
+      this.#spin = this.popup.appendChild(s);
+      this.popup.isConnected || super.open(this.#parent!);
+    } else {
+      this.#spin!.remove();
+      this.#spin = undefined;
+    }
   }
 
   /** Focuses item virtually (real focus stays in owner) */
@@ -184,30 +223,54 @@ export default class TextRichMenu extends TextRichAsk {
   protected handleKey = (e: KeyboardEvent): boolean => {
     const k = !(e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.isComposing) && e.key;
     const f = this.#focused;
-    if (k === "ArrowDown" || k === "ArrowUp") {
+    if (k === "Escape") {
+      this.done();
+    } else if (!this.#items.length && typeof this.#o.values === "function") {
+      return false; // function values are loading: keys work in editor
+    } else if (k === "ArrowDown" || k === "ArrowUp") {
       const arr = this.#items.filter((li) => !li.hidden);
       const i = arr.indexOf(f!);
       this.focus(k === "ArrowDown" ? arr[(i + 1) % arr.length] : arr[(i > 0 ? i : arr.length) - 1]);
     } else if (k === "Enter" || k === "Tab" || (k === " " && this.#o.owner === this.#o.button)) {
       f ? f.click() : this.done();
-    } else if (k === "Escape") {
-      this.done();
     } else {
       return false;
     }
     return true;
   };
 
-  /** Hides not matched items & focuses the 1st visible one
-   * @returns false if nothing matches (items stay as is for closing animation) */
-  filter(isMatch: (v: WUP.TextRich.ToolValue) => boolean): boolean {
-    const shown = this.#o.values.map(isMatch);
-    if (!shown.includes(true)) {
-      return false;
+  /** Shows items with label or value containing text (`{name` & `{firstName` show `First Name`) & focuses the 1st one
+   *  or renders items returned by function values (result of the last call); closes menu if nothing matches */
+  filter(text: string): void {
+    const { values } = this.#o;
+    if (typeof values !== "function") {
+      const s = text.toLowerCase();
+      const has = (x: string): boolean => x.toLowerCase().includes(s);
+      const shown = values.map(
+        (v) => has(v.label ?? stringPrettify(String(v.value), true, true)) || has(String(v.value))
+      );
+      if (shown.includes(true)) {
+        this.#items.forEach((li, i) => (li.hidden = !shown[i]));
+        this.focus(this.#items[shown.indexOf(true)]);
+      } else {
+        this.done(); // items stay as is for closing animation
+      }
+    } else if (text !== this.#text) {
+      this.#text = text;
+      const isLast = (): boolean => text === this.#text && !this.isClosed;
+      // like WUPSelectControl: spinner isn't shown for values resolved at once, otherwise it's shown 300ms at least
+      promiseWait(
+        new Promise<WUP.TextRich.ToolValue[]>((res) => res(values(text))), // sync error too
+        300,
+        (v) => isLast() && this.changePending(v)
+      )
+        .then((arr) => isLast() && (arr.length ? this.render(arr) : this.done()))
+        .finally(() => isLast() && this.changePending(false)) // spinner of previous call (the last one is resolved at once)
+        .catch((err) => {
+          isLast() && this.done();
+          throw err; // shown in console
+        });
     }
-    this.#items.forEach((li, i) => (li.hidden = !shown[i]));
-    this.focus(this.#items[shown.indexOf(true)]);
-    return true;
   }
 
   override done(v: unknown = null, isBack = false): void {
