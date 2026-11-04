@@ -18,7 +18,7 @@
   - **BREAKING:** renamed `WUPTextareaControl` => `WUPTextAreaControl`, `WUP.Textarea` => `WUP.TextArea`, `web-ui-pack/controls/textarea` => `web-ui-pack/controls/textArea` (tag `wup-textarea` isn't changed)
   - _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-prefix`, `w-postfix`_
   - _`$value` contains html-escaped chars (typed `a < b` gives `a &lt; b`) & html of `$value` is rendered (scripts of `<img onerror>` are executed)_
-  - _Undo/redo after new line: line break is removed instead of typed text (`abc`, Enter, `d`, Ctrl+Z gives `abcd`); new line & pasted text aren't undone_
+  - Fixed _Undo/redo after new line: line break is removed instead of typed text (`abc`, Enter, `d`, Ctrl+Z gives `abcd`); new line & pasted text aren't undone_
   - _Readonly & disabled doesn't prevent editing_
 - [NotifyElement](src/notifyElement.ts)
   - Improved performance: no forced re-layouts & extra timers on opening (position in the stack is defined via css `translate`)
@@ -36,7 +36,8 @@
 - [TextControl](src/controls/text.ts) & inherited. _Ctrl+Z restores wrong text after text is changed programmatically when the new text ends with the same chars as before the change (ex. `"a, "` => `"a, b, "`)_
 - [SwitchControl](src/controls/switch.ts) & inherited, [RadioControl](src/controls/radio.ts). _Click does nothing in Chrome while the page has selected text (until selection is reset by click outside)_
 - [ModalElement](src/modalElement.ts). _Text inside opened modal can't be selected_
-- [DropdownElement](src/dropdownElement.ts). **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
+- [DropdownElement](src/dropdownElement.ts).
+  - **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
 
   - toggle button (direct child `wup-dropdown > button`) has neutral style: inherited font & color, no background, chevron icon at the right (rotated when menu is opened), hover/focus background via css-vars `--icon-hover-bg` & `--icon-focus-bg`
   - buttons inside menu aren't styled anymore (it's custom content)`
@@ -65,7 +66,7 @@
 
 - helper [onSwipe](src/helpers/onSwipe.ts)
 - [TextRichControl](src/controls/textRich/textRich.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textRich) (WYSIWYG editor)
-- [TextAreaControl](src/controls/textArea/textArea.ts) & inherited
+- [TextAreaControl](src/controls/textArea/textArea.ts)
   - Added footer with count of chars `{count} / {max}` (see **$options.hideFooter** & **$renderFooter** to customize content)
   - Added options **allowResizeH** & **allowResizeW** (attributes `[w-allowresizeh]`, `[w-allowresizew]`, `false` by default): user can change height/width by dragging the bottom-right corner (after resizing max-height isn't applied & control fits the input width)
 - [NotifyElement](src/notifyElement.ts)
