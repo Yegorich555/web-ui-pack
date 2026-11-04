@@ -964,7 +964,7 @@ export default class WUPTextRichControl<
     tool.hideOnToolbar && (b.hidden = true); // works as rendered one
     this.setToolLabel(
       b,
-      v ? v.label ?? stringPrettify(String(v.value), true, true) : tool.label ?? name,
+      v ? v.label ?? stringPrettify(String(v.value), true, true) : tool.label ?? stringPrettify(name, true, true),
       v ? v.hotKey : tool.hotKey
     );
     tool.className && b.classList.add(tool.className);
@@ -1094,7 +1094,7 @@ export default class WUPTextRichControl<
           tool.className && el.classList.add(tool.className);
           v?.className && el.classList.add(v.className);
         } else {
-          const label = cur === false ? tool.label ?? name : String(cur); // unknown value as is: `someProp`
+          const label = cur === false ? tool.label ?? stringPrettify(name, true, true) : String(cur); // unknown value as is: `someProp`
           el.textContent = v ? v.label ?? stringPrettify(String(v.value), true, true) : label;
         }
       } else {
@@ -1304,7 +1304,7 @@ export default class WUPTextRichControl<
         return;
       }
       const arr = groups[Utils.Tools.commandGroup(t)];
-      const label = t.label ?? name;
+      const label = t.label ?? stringPrettify(name, true, true);
       const fixed = Utils.Tools.fixed(t.items); // function items are asked via menu too
       if (!fixed || t.trigger) {
         arr.push({ value: name, label, hotKey: Array.isArray(t.hotKey) ? t.hotKey : undefined }); // prev/next are for values
@@ -1318,7 +1318,7 @@ export default class WUPTextRichControl<
         .forEach((v) => {
           const l = v.label ?? stringPrettify(String(v.value), true, true);
           // `Heading 1` as is, `Huge` => `Font size: Huge`
-          const full = t.label && !l.toLowerCase().includes(t.label.toLowerCase()) ? `${t.label}: ${l}` : l;
+          const full = l.toLowerCase().includes(label.toLowerCase()) ? l : `${label}: ${l}`;
           arr.push({ value: `${name}:${v.value}`, label: full, hotKey: v.hotKey });
         });
     });

@@ -2583,7 +2583,7 @@ describe("control.textRich", () => {
         "Heading 1",
         "Email",
         "Mention",
-        "marked",
+        "Marked", // prettified tool name
         "Bold",
         "Font size: Default",
         "Font size: Large",
@@ -4112,7 +4112,7 @@ describe("control.textRich", () => {
         "WUP-TEXTRICH. Tool 'action' misses format",
       ]);
       expect(el.$refToolbar.innerHTML).toBe(
-        '<div role="group"><button type="button" tabindex="-1" tool="bold" aria-label="Bold" aria-keyshortcuts="Control+B" w-tooltip="Bold (Ctrl+B)" aria-pressed="false"></button></div><div role="group"><button type="button" tabindex="-1" tool="note" aria-label="note" w-tooltip="" aria-pressed="false"></button></div>'
+        '<div role="group"><button type="button" tabindex="-1" tool="bold" aria-label="Bold" aria-keyshortcuts="Control+B" w-tooltip="Bold (Ctrl+B)" aria-pressed="false"></button></div><div role="group"><button type="button" tabindex="-1" tool="note" aria-label="Note" w-tooltip="" aria-pressed="false"></button></div>'
       );
       // $format: error instead of crash
       spyErr.mockClear();
