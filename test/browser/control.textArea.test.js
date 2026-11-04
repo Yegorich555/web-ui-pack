@@ -103,7 +103,7 @@ describe("control.textArea", () => {
     expect(await run("wup-textarea")).toStrictEqual(
       [...area, area[1], area[0], "", ...area].map((v, i) => [caret[i], v])
     );
-    const rich = ["abc", "<p>abc</p><p><br></p>", "<p>abc</p><p>d</p>"];
+    const rich = ["abc", "<p>abc</p><p>\n</p>", "<p>abc</p><p>d</p>"];
     expect(await run("wup-textrich")).toStrictEqual(
       [...rich, rich[1], rich[0], "", ...rich].map((v, i) => [caret[i], v])
     );

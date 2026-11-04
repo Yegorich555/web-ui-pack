@@ -54,6 +54,9 @@ describe("control.textArea", () => {
     // Chrome adds <div> on Enter & <br> to show empty line
     expect(toValue("a &lt; b &amp; c<div>j</div><div><br></div><div><b>h</b><br>i</div>")).toBe("a < b & c\nj\n\nh\ni");
     expect(toValue("<div>a</div><p>b<br></p><ul><li>c</li></ul>")).toBe("a\nb\nc"); // without line break before the 1st line
+    // [contenteditable=plaintext-only]: Chrome adds the last '\n' on Enter at the end to show empty line
+    expect(toValue("abc\n\n")).toBe("abc\n");
+    expect(toValue("abc\nd")).toBe("abc\nd");
 
     inp.value = "x <b>y</b> &amp; z\nnext";
     expect(inp.innerHTML).toBe("x &lt;b&gt;y&lt;/b&gt; &amp;amp; z\nnext"); // html isn't parsed

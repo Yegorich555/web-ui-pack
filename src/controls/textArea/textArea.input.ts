@@ -180,9 +180,11 @@ export default class WUPTextAreaInput extends HTMLElement {
   _cached?: string;
   /** Cached value isn't reset on the next input event: it's cached right after changes (see TextRich changeContent) */
   _keepCache?: boolean;
-  /** Returns plain text: `<br>` & lines added by browser on Enter are converted into '\n' */
+  /** Returns plain text: `<br>` & lines added by browser on Enter are converted into '\n';
+   *  the last '\n' is skipped like the last `<br>`: Chrome adds it on Enter at the end to show the empty last line */
   get text(): string {
-    return textOf(this);
+    const s = textOf(this);
+    return this.lastChild?.nodeType === Node.TEXT_NODE && s.endsWith("\n") ? s.slice(0, -1) : s;
   }
 
   /** Get/set plain text (see `text`; setter assigns textContent) */
