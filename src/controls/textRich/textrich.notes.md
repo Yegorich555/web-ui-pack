@@ -34,16 +34,8 @@ Won't be fixed: copy-paste from other editors isn't supported
 1. Paste from Google Docs: everything becomes bold & headings/lists are flattened into one line with `<br>`. Docs wraps content into `<b style="font-weight:normal" id="docs-internal-guid-…">`; its bold/italic/underline are `<span style="font-weight:700 | font-style:italic | text-decoration:underline">` and they're ignored
 2. Paste of list from MS Word (`mso-list`): items become paragraphs with literal `·` bullet (marker `<span style="mso-list:Ignore">`); real list type is defined in `<style>` (`@list l0:level1`) only
 
-## API review (2026-10-28)
-
-Developer (package consumer) side: statics, options, `$format`/`$ask`, types `Tool`/`FormatContext`, editor via `ctx.editor`/`$refInput`.
-✔ - reproduced in installed Chrome (puppeteer over `test/browser/srv/bundle.js`) or via `tsc` on a scratch file.
-TextRich isn't released yet (npm latest 1.2.9 is from 2026-10-02): renames & signature changes are free now
-
 ### API: naming & docs
 
-1. `Tool.placeholder` (text inserted via `/` command) clashes with demo tool `placeholder` (`$tools.placeholder.placeholder` is valid) & with html `placeholder` (hint): rename to `example`
-2. `Tool.label` is tool name by default (`codeInline` in aria-label), `ToolValue.label` is prettified value: prettify both
-3. `ask(target, control, current)` is positional, `format(ctx)` gets object (open since 2026-10-07)
-4. Class JSDoc: most of `Rules` are end-user keyboard details & they hide API rules in IDE hint => move them to demo features list
-5. `$format`: positional boolean is unreadable (`$format("list", "ordered", false)`) => `{ toggle: true }`; returns `void`: with `Promise<boolean>` caller can wait for asked value (link url, image picker)
+1. `Tool.label` is tool name by default (`codeInline` in aria-label), `ToolValue.label` is prettified value: prettify both
+2. `ask(target, control, current)` is positional, `format(ctx)` gets object (open since 2026-10-07)
+3. `$format`: positional boolean is unreadable (`$format("list", "ordered", false)`) => `{ toggle: true }`; returns `void`: with `Promise<boolean>` caller can wait for asked value (link url, image picker)

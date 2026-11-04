@@ -20,7 +20,7 @@ initTestBaseControl({
  * @returns cleanup function */
 function usePlaceholder() {
   WUPTextRichControl.$tools.placeholder = {
-    values: [{ value: "firstName" }, { value: "email" }],
+    items: [{ value: "firstName" }, { value: "email" }],
     trigger: "{",
     kind: "inline",
     is: (e) => (e.classList.contains("placeholder") ? e.textContent.slice(1, -1) : undefined),
@@ -35,7 +35,7 @@ function usePlaceholder() {
   };
 }
 
-/** Waits for values resolved at once (see `Tool.values`): menu is shown without spinner;
+/** Waits for items resolved at once (see `Tool.items`): menu is shown without spinner;
  *  otherwise jsdom runs timeout of promiseWait before them */
 async function waitValues() {
   for (let i = 0; i < 5; ++i) {
@@ -474,12 +474,12 @@ describe("control.textRich", () => {
     c.remove();
   });
 
-  test("hotkeys of tool values with quotes", async () => {
+  test("hotkeys of tool items with quotes", async () => {
     const format = jest.fn();
     const times = '"Times New Roman", serif';
     WUPTextRichControl.$tools.font = {
       hotKey: { prev: ["Control", "Alt", "Shift", "F"], next: ["Control", "Alt", "Shift", "G"] }, // previous & next value
-      values: [{ value: times, hotKey: ["Control", "Alt", "Shift", "1"] }, { value: "monospace" }],
+      items: [{ value: times, hotKey: ["Control", "Alt", "Shift", "1"] }, { value: "monospace" }],
       format,
     };
     try {
@@ -970,7 +970,7 @@ describe("control.textRich", () => {
     const cleanupImg = useImage();
     WUPTextRichControl.$tools.del = { format: ({ editor }) => editor.$insert(document.createDocumentFragment()) };
     WUPTextRichControl.$tools.mention = {
-      values: [{ value: "john" }],
+      items: [{ value: "john" }],
       trigger: "@",
       kind: "inline",
       is: (e) => (e.tagName === "MARK" ? e.textContent.slice(1) : undefined),
@@ -1464,9 +1464,9 @@ describe("control.textRich", () => {
   test("inline element with caret at its edge is highlighted: typed text goes into it", async () => {
     useSocial();
     const tool = WUPTextRichControl.$tools.mention;
-    tool.values = [{ value: "john" }];
+    tool.items = [{ value: "john" }];
     const anyText = tool.is;
-    tool.is = (e) => (tool.values.some((x) => x.value === anyText(e)) ? anyText(e) : undefined); // values only
+    tool.is = (e) => (tool.items.some((x) => x.value === anyText(e)) ? anyText(e) : undefined); // values only
     el.$options.toolbar = [["bold", "link", "mention"]];
     await h.wait(1);
     const inp = el.$refInput;
@@ -1737,7 +1737,7 @@ describe("control.textRich", () => {
       // selected token is deleted at first: otherwise Chrome types with its typing style (`<font color>`)
       expect(type(`<div>[${token}]</div>`, "x")).toEqual([true, "<div>x|</div>"]);
 
-      // typed pair of trigger turns text into token even if it isn't in values
+      // typed pair of trigger turns text into token even if it isn't in items
       expect(type("<div>a {someProp|</div>", "}")).toEqual([
         true,
         '<div>a <span class="placeholder">{someProp}</span>|</div>',
@@ -1763,7 +1763,7 @@ describe("control.textRich", () => {
   test("token edited inside stays token only if `is` accepts its text", async () => {
     useSocial();
     const tool = WUPTextRichControl.$tools.mention;
-    tool.values = [{ value: "john" }, { value: "jon" }];
+    tool.items = [{ value: "john" }, { value: "jon" }];
     el.$options.toolbar = [["mention"]];
     await h.wait(1);
     const inp = el.$refInput;
@@ -1779,7 +1779,7 @@ describe("control.textRich", () => {
     const anyText = tool.is;
     tool.is = (e) => {
       const v = anyText(e);
-      return tool.values.some((x) => x.value === v) ? v : undefined;
+      return tool.items.some((x) => x.value === v) ? v : undefined;
     };
     setHtml(`<div>hi ${mention("@jo|hn")}</div>`);
     userType("123");
@@ -2075,9 +2075,9 @@ describe("control.textRich", () => {
     inp.dispatchEvent(new InputEvent("input", { inputType: "insertLineBreak", bubbles: true }));
     expect(getHtml()).toBe("<div><b>bold</b></div><div><b>|<br></b></div>");
 
-    // tool with values: menu on trigger at word start, typed text is recognized too (see the next test)
+    // tool with items: menu on trigger at word start, typed text is recognized too (see the next test)
     const { mention: tool } = WUPTextRichControl.$tools;
-    tool.values = [{ value: "john", label: "John Smith" }];
+    tool.items = [{ value: "john", label: "John Smith" }];
     const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
     Range.prototype.getBoundingClientRect = () => rect; // jsdom: menu is placed near caret
     try {
@@ -2104,13 +2104,13 @@ describe("control.textRich", () => {
       userType("x");
       expect(getHtml()).toBe(`<div>hi ${mention("@johnx|")} </div>`);
     } finally {
-      delete tool.values;
+      delete tool.items;
     }
   });
 
   test("typed text replaces selection with hashtag & mention", async () => {
     useSocial();
-    WUPTextRichControl.$tools.mention.values = [{ value: "john", label: "John Smith" }]; // token
+    WUPTextRichControl.$tools.mention.items = [{ value: "john", label: "John Smith" }]; // token
     el.$options.toolbar = [["tag", "mention"]];
     await h.wait(1);
     el.$refInput.focus();
@@ -2137,11 +2137,11 @@ describe("control.textRich", () => {
   test("arrows at token edges: caret goes out of invisible holder, typed text isn't joined with token", async () => {
     useSocial();
     const tool = WUPTextRichControl.$tools.mention;
-    tool.values = [{ value: "john" }];
+    tool.items = [{ value: "john" }];
     const anyText = tool.is;
     tool.is = (e) => {
       const v = anyText(e);
-      return tool.values.some((x) => x.value === v) ? v : undefined; // values only: `@johnx` isn't mention
+      return tool.items.some((x) => x.value === v) ? v : undefined; // values only: `@johnx` isn't mention
     };
     el.$options.toolbar = [["mention"]];
     await h.wait(1);
@@ -2252,15 +2252,15 @@ describe("control.textRich", () => {
     }
   });
 
-  test("typed token is recognized if `is` accepts it: tool with values (mention)", async () => {
+  test("typed token is recognized if `is` accepts it: tool with items (mention)", async () => {
     useSocial();
     const tool = WUPTextRichControl.$tools.mention;
-    tool.values = [{ value: "john", label: "John Smith" }, { value: "Ann Lee" }];
+    tool.items = [{ value: "john", label: "John Smith" }, { value: "Ann Lee" }];
     const anyText = tool.is;
     // values only (see demo `allowUnknownMentions`)
     tool.is = (e) => {
       const v = anyText(e);
-      return tool.values.some((x) => x.value === v) ? v : undefined;
+      return tool.items.some((x) => x.value === v) ? v : undefined;
     };
     const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
     Range.prototype.getBoundingClientRect = () => rect; // jsdom: menu is placed near caret
@@ -2379,7 +2379,7 @@ describe("control.textRich", () => {
   test("markdown: `recognize` of line tool & RegExp with group `text`", async () => {
     // like demo textRich.custom.tsx
     const { header, blockquote, code, bold, italic } = WUPTextRichControl.$tools;
-    header.values.forEach((v) => {
+    header.items.forEach((v) => {
       v.value && (v.recognize = new RegExp(`^#{${v.value}}\\s$`));
     });
     blockquote.recognize = /^>\s$/;
@@ -2452,7 +2452,7 @@ describe("control.textRich", () => {
       expect(rec("<div>**a*|</div>", "*")).toBe("<div>**a**|</div>");
       expect(rec("<div>>|</div>")).toBe("<div>&gt; |</div>");
     } finally {
-      header.values.forEach((v) => delete v.recognize);
+      header.items.forEach((v) => delete v.recognize);
       delete blockquote.recognize;
       delete code.recognize;
       delete bold.recognize;
@@ -2619,7 +2619,7 @@ describe("control.textRich", () => {
       userType("L");
       expect(getHtml()).toBe('<div>a <span style="font-size: x-large;">L|</span></div>');
       // tool with menu: its trigger opens it
-      $tools.mention.values = [{ value: "john", label: "John Smith" }];
+      $tools.mention.items = [{ value: "john", label: "John Smith" }];
       el.$options.toolbar = [["mention", "command"]];
       await h.wait(1);
       expect(await pick("<div>a |</div>", "menti")).toBe("<div>a @|</div>");
@@ -2632,7 +2632,7 @@ describe("control.textRich", () => {
       el.applyCommand("unknown"); // ignored
     } finally {
       delete $tools.marked;
-      delete $tools.mention.values;
+      delete $tools.mention.items;
       el.$options.hideHotKeysHint = false;
       spyErr.mockRestore();
     }
@@ -2755,7 +2755,7 @@ describe("control.textRich", () => {
     }
   });
 
-  test("values via function: menu shows result of the last call, spinner while loading", async () => {
+  test("items via function: menu shows result of the last call, spinner while loading", async () => {
     useSocial();
     const users = [
       { value: "john", label: "John Smith" },
@@ -2764,7 +2764,7 @@ describe("control.textRich", () => {
     ];
     const delays = { j: 500 }; // others: 100ms
     const calls = [];
-    WUPTextRichControl.$tools.mention.values = (text, control) => {
+    WUPTextRichControl.$tools.mention.items = (text, control) => {
       calls.push([text, control]);
       const arr = users.filter((u) => u.label.toLowerCase().includes(text));
       return new Promise((res) => setTimeout(() => res(arr), delays[text] ?? 100));
@@ -2783,7 +2783,7 @@ describe("control.textRich", () => {
 
     setHtml("<div>a |</div>");
     userType("@");
-    expect(calls).toEqual([["", el]]); // all values: nothing is typed after trigger
+    expect(calls).toEqual([["", el]]); // all items: nothing is typed after trigger
     expect(menu()).toBe(null); // spinner isn't shown at once: values can be resolved at once (see the next test)
     await h.wait(1);
     expect(spin()).toBeTruthy(); // menu with spinner only
@@ -2814,11 +2814,11 @@ describe("control.textRich", () => {
     expect(getHtml()).toBe('<div>a <span class="wup-mention">@kate</span> |</div>');
   });
 
-  test("values via function: menu is closed on empty result, error & Escape while loading", async () => {
+  test("items via function: menu is closed on empty result, error & Escape while loading", async () => {
     useSocial();
     const tool = WUPTextRichControl.$tools.mention;
     // values returned at once (array or resolved promise): without spinner
-    tool.values = (text) => [{ value: "john", label: "John Smith" }].filter((u) => u.value.includes(text));
+    tool.items = (text) => [{ value: "john", label: "John Smith" }].filter((u) => u.value.includes(text));
     const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
     Range.prototype.getBoundingClientRect = () => rect; // jsdom: menu is placed near caret
     el.$options.toolbar = [["mention"]];
@@ -2844,13 +2844,13 @@ describe("control.textRich", () => {
     expect(menu()).toBe(null);
 
     // Escape while loading: result isn't shown (failed one too)
-    tool.values = () => later([{ value: "john" }]);
+    tool.items = () => later([{ value: "john" }]);
     setHtml("<div>a |</div>");
     userType("@");
     expect(press("Escape")).toBe(true);
     await h.wait();
     expect(menu()).toBe(null);
-    tool.values = () => later(new Error("test reject"), true);
+    tool.items = () => later(new Error("test reject"), true);
     setHtml("<div>a |</div>");
     userType("@");
     await h.wait(1); // with spinner
@@ -2858,14 +2858,14 @@ describe("control.textRich", () => {
     await h.wait();
     expect(menu()).toBe(null);
     // error closes menu: it's shown in console
-    tool.values = () => {
+    tool.items = () => {
       throw new Error("test reject");
     };
     setHtml("<div>a |</div>");
     userType("@");
     await waitValues();
     expect(btn.getAttribute("aria-expanded")).toBe("false");
-    tool.values = () => later(new Error("test reject"), true);
+    tool.items = () => later(new Error("test reject"), true);
     setHtml("<div>a |</div>");
     userType("@");
     await h.wait(1);
@@ -2876,12 +2876,12 @@ describe("control.textRich", () => {
     expect(menu()).toBe(null);
   });
 
-  test("values via function: toolbar dropdown, Alt+ArrowDown & menu of commands", async () => {
+  test("items via function: toolbar dropdown, Alt+ArrowDown & menu of commands", async () => {
     useSocial();
     const tool = WUPTextRichControl.$tools.mention;
     delete tool.hideOnToolbar;
     const calls = [];
-    tool.values = (text) => {
+    tool.items = (text) => {
       calls.push(text);
       return [
         { value: "john", label: "John Smith" },
@@ -2891,7 +2891,7 @@ describe("control.textRich", () => {
     const rect = { x: 0, y: 0, top: 0, left: 0, right: 1, bottom: 9, width: 1, height: 9 };
     Range.prototype.getBoundingClientRect = () => rect; // jsdom: menu is placed near caret
     const spyErr = jest.spyOn(console, "error").mockImplementation(() => {});
-    WUPTextRichControl.$tools.chip = { kind: "inline", create: "span", classNameTag: "chip", values: () => [] };
+    WUPTextRichControl.$tools.chip = { kind: "inline", create: "span", classNameTag: "chip", items: () => [] };
     try {
       el.$options.toolbar = [["mention", "chip", "command"]];
       await h.wait(1);
@@ -3472,7 +3472,7 @@ describe("control.textRich", () => {
 
   test("popup on hover: link url & dropdown of embed", async () => {
     const cleanupImg = useImage();
-    WUPTextRichControl.$tools.image.values = [{ value: "a.png" }, { value: "b.png" }];
+    WUPTextRichControl.$tools.image.items = [{ value: "a.png" }, { value: "b.png" }];
     try {
       el.$options.toolbar = [["image"]];
       await h.wait(1);
@@ -3661,7 +3661,7 @@ describe("control.textRich", () => {
 
   test("press on element with popup opens it at once", async () => {
     const cleanupImg = useImage();
-    WUPTextRichControl.$tools.image.values = [{ value: "a.png" }];
+    WUPTextRichControl.$tools.image.items = [{ value: "a.png" }];
     try {
       el.$options.toolbar = [["image"]];
       await h.wait(1);
@@ -3919,7 +3919,7 @@ describe("control.textRich", () => {
     el.$format("header");
     await h.wait(1);
     expect(menu()).toBe(null);
-    // dropdown without values: Enter closes it
+    // dropdown without items: Enter closes it
     el.$options.toolbar = [[{ header: [] }]];
     await h.wait(1);
     el.$format("header");
@@ -3933,7 +3933,7 @@ describe("control.textRich", () => {
   test("dropdown items", async () => {
     WUPTextRichControl.$tools.image = {
       kind: "embed",
-      values: [{ value: "a.png", hotKey: ["Control", "Alt", "I"] }],
+      items: [{ value: "a.png", hotKey: ["Control", "Alt", "I"] }],
       is: () => undefined,
       create: "img",
     };
@@ -3990,7 +3990,7 @@ describe("control.textRich", () => {
       // eslint-disable-next-line no-nested-ternary
       is: (e) => (e.tagName === "MARK" ? (e.classList.contains("red") ? "red" : "yellow") : undefined),
       className: "ic-mark",
-      values: [
+      items: [
         { value: "yellow", className: "ic-yellow", classNameTag: "yellow" },
         { value: "red", className: "ic-red", classNameTag: "red" },
       ],
@@ -4023,13 +4023,13 @@ describe("control.textRich", () => {
     $tools.color = {
       kind: "inline",
       create: "span", // without class of tool: value is detected by its class
-      values: [
+      items: [
         { value: "red", classNameTag: "red" },
         { value: false, label: "Default" }, // isn't applied: without class
       ],
     };
     $tools.chip = { kind: "inline", create: "span" }; // otherwise every span is format (font size etc.)
-    $tools.marker = { kind: "inline", create: "mark", values: [{ value: "a" }] }; // otherwise value isn't detected
+    $tools.marker = { kind: "inline", create: "mark", items: [{ value: "a" }] }; // otherwise value isn't detected
     try {
       el.$options.toolbar = [["hl", "color", "chip", "marker"]];
       await h.wait(1);
@@ -4125,15 +4125,27 @@ describe("control.textRich", () => {
     } finally {
       ["hl", "dir", "img", "action", "note"].forEach((k) => delete $tools[k]);
     }
-    // label of clear button
-    const { label } = WUPTextRichControl.$tools.btnClear;
-    delete WUPTextRichControl.$tools.btnClear.label;
+    // labels of clear button: $ariaClear & $ariaRestore (when the next click restores previous value)
+    const { $ariaClear, $ariaRestore } = WUPTextRichControl;
+    WUPTextRichControl.$ariaClear = "Erase";
+    WUPTextRichControl.$ariaRestore = "Bring back";
     try {
+      el.$value = "abc";
       el.$options.toolbar = [["btnClear"]];
       await h.wait(1);
-      expect(el.$refBtnClear.getAttribute("aria-label")).toBe("btnClear");
+      const btn = el.$refBtnClear;
+      expect(btn.getAttribute("aria-label")).toBe("Erase");
+      btn.click();
+      await h.wait(); // till `cleared` is announced: it's removed from aria-describedby
+      expect(btn.getAttribute("clear")).toBe("back");
+      expect(btn.getAttribute("aria-label")).toBe("Bring back");
+      btn.click();
+      await h.wait(1);
+      expect(el.$value).toBe("abc");
+      expect(btn.getAttribute("aria-label")).toBe("Erase");
     } finally {
-      WUPTextRichControl.$tools.btnClear.label = label;
+      WUPTextRichControl.$ariaClear = $ariaClear;
+      WUPTextRichControl.$ariaRestore = $ariaRestore;
     }
 
     // null hides toolbar (not replaced with default one) & hint how to reach it
@@ -4265,11 +4277,11 @@ describe("control.textRich", () => {
       delete WUPTextRichControl.$tools.btnClear.hotKey;
     }
 
-    // current value isn't in values: the 1st shortcut selects the last value
+    // current value isn't in items: the 1st shortcut selects the last value
     const format = jest.fn();
     WUPTextRichControl.$tools.font = {
       hotKey: { prev: ["Control", "Alt", "Shift", "F"], next: ["Control", "Alt", "Shift", "G"] },
-      values: [{ value: "serif" }, { value: "monospace" }],
+      items: [{ value: "serif" }, { value: "monospace" }],
       is: (e) => e.style.fontFamily || undefined,
       format,
     };

@@ -211,7 +211,7 @@ export const Tools = {
   },
 
   /** Returns list of shortcuts: `["Control", "B"]` => `[["Control", "B"]]`, `{ prev, next }` => `[prev, next]` */
-  shortcuts(hk: WUP.TextRich.Tool["hotKey"]): WUP.TextRich.HotKey[] {
+  shortcuts(hk: WUP.TextRich.Tool["hotKey"]): WUP.TextRich.KnownKeys[][] {
     if (!hk) {
       return [];
     }
@@ -223,8 +223,8 @@ export const Tools = {
     return typeof r === "function" ? r(s) : r?.exec(s)?.[0];
   },
 
-  /** Returns static values: `undefined` for function (values are loaded on menu opening: see `Tool.values`) */
-  fixed(v: WUP.TextRich.Tool["values"]): WUP.TextRich.ToolValue[] | undefined {
+  /** Returns static items: `undefined` for function (items are loaded on menu opening: see `Tool.items`) */
+  fixed(v: WUP.TextRich.Tool["items"]): WUP.TextRich.ToolItem[] | undefined {
     return typeof v === "function" ? undefined : v;
   },
 
@@ -236,11 +236,11 @@ export const Tools = {
     const k = t.kind === "lineStyle" ? "set" : "create";
     const tag = typeof t.create === "string" ? t.create.toUpperCase() : "";
     // without `is` element is detected by tag & classes (see Formats.is): value by its class, span & containers need class;
-    // value of function `values` is detected via `is` only
-    const isNoClass = Array.isArray(t.values)
-      ? t.values.some((v) => v.value !== false && !v.classNameTag)
-      : !t.values && !t.classNameTag && plainTags.has(tag);
-    const is = !t.is && (((!tag || typeof t.values === "function") && "is") || (isNoClass && "is or classNameTag"));
+    // value of function `items` is detected via `is` only
+    const isNoClass = Array.isArray(t.items)
+      ? t.items.some((v) => v.value !== false && !v.classNameTag)
+      : !t.items && !t.classNameTag && plainTags.has(tag);
+    const is = !t.is && (((!tag || typeof t.items === "function") && "is") || (isNoClass && "is or classNameTag"));
     // `format` replaces `create` & `set` except `inline`: pending formats & recognizing create elements
     const arr = t.kind ? [is, !t[k] && (!t.format || t.kind === "inline") && k] : [!t.format && "format"];
     const missed = arr.filter(Boolean).join(" & ");
@@ -254,25 +254,25 @@ export const Formats = {
   create(t: WUP.TextRich.Tool, v: unknown): HTMLElement {
     const el = typeof t.create === "string" ? document.createElement(t.create) : t.create!(v);
     t.classNameTag && el.classList.add(t.classNameTag);
-    const cls = Tools.fixed(t.values)?.find((x) => x.value === v)?.classNameTag;
+    const cls = Tools.fixed(t.items)?.find((x) => x.value === v)?.classNameTag;
     cls && el.classList.add(cls);
     return el;
   },
 
-  /** Returns value of format applied by element via `is` of tool (`false` of tool without values is `undefined`) or
-   *  by tag of `create` & `classNameTag` of tool: value with `classNameTag` of element (`true` for tool without values);
+  /** Returns value of format applied by element via `is` of tool (`false` of tool without items is `undefined`) or
+   *  by tag of `create` & `classNameTag` of tool: value with `classNameTag` of element (`true` for tool without items);
    *  span & containers are formats only with class (see Tools.invalid)
    * @returns `undefined` if element isn't format of tool */
   is(t: WUP.TextRich.Tool, el: Element): unknown {
     if (t.is) {
       const v = t.is(el as HTMLElement);
-      return v === false && !t.values ? undefined : v;
+      return v === false && !t.items ? undefined : v;
     }
     const has = (c?: string): boolean => !!c && el.classList.contains(c);
-    if (el.localName !== t.create || (t.classNameTag ? !has(t.classNameTag) : !t.values && plainTags.has(el.tagName))) {
+    if (el.localName !== t.create || (t.classNameTag ? !has(t.classNameTag) : !t.items && plainTags.has(el.tagName))) {
       return undefined;
     }
-    return t.values ? Tools.fixed(t.values)?.find((x) => has(x.classNameTag))?.value : true;
+    return t.items ? Tools.fixed(t.items)?.find((x) => has(x.classNameTag))?.value : true;
   },
 
   /** Replaces element of format with element of value `v` via `create` (empty value unwraps it): content is moved */

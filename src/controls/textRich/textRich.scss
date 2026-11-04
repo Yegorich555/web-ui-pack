@@ -70,7 +70,7 @@
   }
 }
 
-// toolbar button icons: [tool] => --wup-icon-... (dropdown values use `className` of static $tools)
+// toolbar button icons: [tool] => --wup-icon-... (dropdown items use `className` of static $tools)
 $tools: (
   "bold": "bold",
   "italic": "italic",
@@ -317,7 +317,7 @@ $tools: (
       padding: 0;
     }
 
-    // function values are loading: spinner of text height of item;
+    // function items are loading: spinner of text height of item;
     // item size is re-calculated: otherwise it's taken from :root (3em / 8)
     > wup-spin {
       --spin-size: 1.2em;

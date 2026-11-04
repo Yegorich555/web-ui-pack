@@ -69,11 +69,11 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
         "text" in (new RegExp(`${r.source}|`, r.flags).exec("")!.groups ?? {}) &&
         this.#markdown.set(t, new RegExp(r.source, `${r.flags.replace(/[gd]/g, "")}d`));
     });
-    // tool with values too (mention): `is` gets recognized text & can accept values only (typed `@john`)
+    // tool with items too (mention): `is` gets recognized text & can accept values only (typed `@john`)
     this.#recognizers = this._entries.filter(([k, t]) => this.#isAuto(t) && this._isActive?.(k)).map(([, t]) => t);
-    // markdown applies tool like toolbar button: tool with values (font size etc.) needs value
+    // markdown applies tool like toolbar button: tool with items (font size etc.) needs value
     this.#markdowns = this._entries.filter(
-      ([k, t]) => this.#markdown.has(t) && !(typeof t.values === "function" || t.values?.length) && this._isActive?.(k)
+      ([k, t]) => this.#markdown.has(t) && !(typeof t.items === "function" || t.items?.length) && this._isActive?.(k)
     );
   }
 
@@ -677,7 +677,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return v && !/\s/.test(v) ? v : undefined;
   }
 
-  /** Returns token completed by typed pair of trigger (see `_wrapChars`) even if it isn't in values
+  /** Returns token completed by typed pair of trigger (see `_wrapChars`) even if it isn't in items
    *  (`{someProp` + `}` gives placeholder `someProp`) unless `is` rejects it; typed text is selected to be replaced
    * @returns tool name & value or `undefined` if typed text isn't token */
   tokenEnd(data: string): [keyof WUP.TextRich.ToolValues, string] | undefined {
@@ -829,8 +829,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       : undefined;
   }
 
-  /** Applies value of rendered tool recognized in text typed at line start (see `ToolValue.recognize`): `1. ` gives
-   *  numbered list, `> ` gives quote (`line` tool without values: see `Tool.recognize`); typed text is removed;
+  /** Applies value of rendered tool recognized in text typed at line start (see `ToolItem.recognize`): `1. ` gives
+   *  numbered list, `> ` gives quote (`line` tool without items: see `Tool.recognize`); typed text is removed;
    *  it's a separate undo step (Ctrl+Z or Escape right after it returns typed text)
    * @returns false if nothing is recognized */
   protected recognizeLine(): boolean {
@@ -842,11 +842,11 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     const sel = window.getSelection()!;
     let key = "";
     this._entries.some(([k, t]) => {
-      const v = t.values
-        ? Utils.Tools.fixed(t.values)?.find((x) => Utils.Tools.recognized(x.recognize, s) === s)
+      const v = t.items
+        ? Utils.Tools.fixed(t.items)?.find((x) => Utils.Tools.recognized(x.recognize, s) === s)
         : t.kind === "line" && Utils.Tools.recognized(t.recognize, s) === s && { value: true };
       // not applied yet
-      v && !Utils.Formats.isMatch(Utils.Formats.is(t, line), v.value) && (key = t.values ? `${k}:${v.value}` : k);
+      v && !Utils.Formats.isMatch(Utils.Formats.is(t, line), v.value) && (key = t.items ? `${k}:${v.value}` : k);
       return v;
     });
     // text from line start: not after <br> or embed
@@ -874,8 +874,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     }
     const [n, line, s] = typed;
     let found: [ToolEntry, RegExpExecArray] | undefined;
-    // eslint-disable-next-line no-restricted-syntax
-    for (const e of this.#markdowns) {
+    for (let i = 0; i < this.#markdowns.length; ++i) {
+      const e = this.#markdowns[i];
       const m = this.#markdown.get(e[1])!.exec(s);
       if (m?.groups!.text && m.index + m[0].length === s.length) {
         found = [e, m]; // group isn't empty, match is at the end of text
@@ -1074,12 +1074,12 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
    * @returns recognized text, its element (with text), length of text till its end & tool */
   protected recognizeEnd(s: string): [string, HTMLElement, number, WUP.TextRich.Tool] | undefined {
     for (let str = s; ; str = str.slice(0, -1)) {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const t of this.#recognizers) {
+      for (let i = 0; i < this.#recognizers.length; ++i) {
+        const t = this.#recognizers[i];
         const text = Utils.Tools.recognized(t.recognize, str);
         const el = text && str.endsWith(text) && Object.assign(Utils.Formats.create(t, text), { textContent: text });
         if (el && Utils.Formats.is(t, el) !== undefined) {
-          return [text, el, str.length, t]; // otherwise invalid url, mention isn't from values etc.
+          return [text, el, str.length, t]; // otherwise invalid url, mention isn't from items etc.
         }
       }
       if (!/[\s.,;:!?'")\]}-]$/.test(str)) {

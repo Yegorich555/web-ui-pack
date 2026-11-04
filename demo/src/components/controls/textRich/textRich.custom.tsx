@@ -36,7 +36,7 @@ declare global {
 
 // markdown shortcuts like in Notion & Slack: line formats by text typed at line start (it's removed)
 const { header, blockquote, code, bold, italic, strike } = WUPTextRichControl.$tools;
-header.values!.forEach((v) => {
+header.items!.forEach((v) => {
   v.value && (v.recognize = new RegExp(`^#{${v.value}}\\s$`)); // `# ` ... `###### `
 });
 blockquote.recognize = /^>\s$/; // `> `
@@ -56,7 +56,7 @@ WUPTextRichControl.$tools.codeInline = {
 };
 
 WUPTextRichControl.$tools.direction = {
-  values: [{ value: "rtl", label: "Right to left", className: styles.iconRtl }], // label & icon of button `{ direction: "rtl" }`
+  items: [{ value: "rtl", label: "Right to left", className: styles.iconRtl }], // label & icon of button `{ direction: "rtl" }`
   kind: "lineStyle", // default format toggles style of selected lines
   is: ({ style: { direction: d } }) => (d === "rtl" ? d : undefined),
   set: (el, v) => (el.style.direction = v || ""),
@@ -66,7 +66,7 @@ const fonts = new Set(["serif", "monospace"]);
 WUPTextRichControl.$tools.font = {
   label: "Font",
   className: styles.font,
-  values: [
+  items: [
     { value: false, label: "Default font" }, // otherwise the same as `Default` of size
     { value: "serif" }, // label is prettified value: `Serif`
     { value: "monospace" },
@@ -142,7 +142,7 @@ function placeholderOf(el: HTMLElement): string | undefined {
 WUPTextRichControl.$tools.placeholder = {
   label: "Placeholder",
   // dropdown in toolbar & menu shown on typing `{` or on hover on placeholder (chosen value replaces it)
-  values: placeholders.map((value) => ({ value, label: value })), // label is name as is: otherwise it's prettified (`First Name`)
+  items: placeholders.map((value) => ({ value, label: value })), // label is name as is: otherwise it's prettified (`First Name`)
   trigger: "{", // menu is filtered by text typed after it; typed `{someProp}` is placeholder too (if `is` allows it)
   // placeholder follows its text: `{firstName}` + `a` is plain text, Backspace returns placeholder (pasted one too);
   // spaces inside are allowed (`{first Name}`), but not after `{`: otherwise code `{ return 1; }` is placeholder
@@ -212,7 +212,7 @@ WUPTextRichControl.$tools.tag = {
 };
 
 /** Users stored on server (see fetchUsers) */
-const users: WUP.TextRich.ToolValue<string>[] = [
+const users: WUP.TextRich.ToolItem<string>[] = [
   { value: "john", label: "John Smith" },
   { value: "kate", label: "Kate Brown" },
   { value: "alex", label: "Alex Green" },
@@ -221,7 +221,7 @@ const users: WUP.TextRich.ToolValue<string>[] = [
 ];
 
 /** Simulated api: returns users with name or label containing text (real app: `fetch(/api/users?search=${text})`) */
-function fetchUsers(text: string): Promise<WUP.TextRich.ToolValue<string>[]> {
+function fetchUsers(text: string): Promise<WUP.TextRich.ToolItem<string>[]> {
   const s = text.toLowerCase();
   const arr = users.filter((u) => u.value.includes(s) || u.label!.toLowerCase().includes(s));
   return new Promise((res) => {
@@ -236,7 +236,7 @@ WUPTextRichControl.$tools.mention = {
   label: "Mention", // aria-label of menu & item in menu of commands
   hideOnToolbar: true,
   // menu on typing `@` at word start (not in email): users are filtered by api on every typed char (spinner while loading)
-  values: fetchUsers,
+  items: fetchUsers,
   trigger: "@",
   kind: "inline",
   // typed `@john` is mention without menu too
@@ -259,7 +259,7 @@ WUPTextRichControl.$tools.mention = {
   // hidden (see `hideOnToolbar`): typed text is recognized, `/` opens menu of tools (labels & placeholders of custom tools)
   ["link", "phone", "colorCode", "tag", "mention", "command"],
   ["font", { direction: "rtl" }],
-  ["image", "placeholder"], // placeholder is rendered as dropdown (tool with values)
+  ["image", "placeholder"], // placeholder is rendered as dropdown (tool with items)
 ] as WUP.TextRich.Options["toolbar"];
 (window as any).myTextRichValidationsMax = { max: 500 } as WUP.TextRich.Options["validations"];
 
@@ -309,7 +309,7 @@ export default function TextRichCustom() {
             <b>Hashtag</b>: typed <code>#news</code> is recognized
           </li>
           <li>
-            <b>Mention</b>: menu on typed <code>@</code> with users filtered by api (values via function, spinner while
+            <b>Mention</b>: menu on typed <code>@</code> with users filtered by api (items via function, spinner while
             loading), typed <code>@john</code> is recognized
           </li>
         </ul>

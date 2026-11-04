@@ -94,10 +94,10 @@ interface MenuOptions {
   owner: HTMLElement | null;
   /** Element (dropdown, embed) or range (caret, typed trigger) to place menu near */
   target: HTMLElement | Range;
-  /** Items or function that returns items filtered by text (see `Tool.values`) */
-  values: WUP.TextRich.ToolValue[] | ((text: string) => WUP.TextRich.ToolValue[] | Promise<WUP.TextRich.ToolValue[]>);
+  /** Items or function that returns items filtered by text (see `Tool.items`) */
+  items: WUP.TextRich.ToolItem[] | ((text: string) => WUP.TextRich.ToolItem[] | Promise<WUP.TextRich.ToolItem[]>);
   selected: unknown;
-  render: (li: HTMLLIElement, v: WUP.TextRich.ToolValue) => void;
+  render: (li: HTMLLIElement, v: WUP.TextRich.ToolItem) => void;
 }
 
 /** Dropdown menu of TextRich toolbar: listbox with keyboard & aria like WUPSelectControl;
@@ -111,11 +111,11 @@ export default class TextRichMenu extends TextRichAsk {
   #focused?: HTMLLIElement;
   /** Removes blur listener of owner */
   #offBlur?: () => void;
-  /** Element to append popup to: on opening or when function values are loaded */
+  /** Element to append popup to: on opening or when function items are loaded */
   #parent?: HTMLElement;
-  /** Text of the last call of function values: results of previous calls are ignored */
+  /** Text of the last call of function items: results of previous calls are ignored */
   #text?: string;
-  /** Spinner while function values are loading */
+  /** Spinner while function items are loading */
   #spin?: WUPSpinElement;
 
   constructor(o: MenuOptions) {
@@ -156,9 +156,9 @@ export default class TextRichMenu extends TextRichAsk {
     return this.#o.target;
   }
 
-  /** Appends popup with items: function values are loaded at first */
+  /** Appends popup with items: function items are loaded at first */
   override open(parent: HTMLElement): void {
-    const { button, owner, values } = this.#o;
+    const { button, owner, items } = this.#o;
     button.setAttribute("aria-expanded", true);
     if (owner) {
       owner.setAttribute("aria-controls", this.#ul.id);
@@ -166,14 +166,14 @@ export default class TextRichMenu extends TextRichAsk {
       this.#offBlur = onEvent(owner, "blur", () => document.activeElement !== owner && this.done());
     }
     this.#parent = parent;
-    typeof values === "function" ? this.filter("") : this.render(values);
+    typeof items === "function" ? this.filter("") : this.render(items);
   }
 
   /** Renders items, focuses selected or the 1st one & shows popup */
-  protected render(values: WUP.TextRich.ToolValue[]): void {
+  protected render(items: WUP.TextRich.ToolItem[]): void {
     const { owner, selected } = this.#o;
     this.#ul.replaceChildren();
-    this.#items = values.map((v) => {
+    this.#items = items.map((v) => {
       const li = this.#ul.appendChild(document.createElement("li")); // before render: it checks previous item
       li.id = WUPPopupElement.$uniqueId;
       li.setAttribute("role", "option");
@@ -182,15 +182,15 @@ export default class TextRichMenu extends TextRichAsk {
       this.#o.render(li, v);
       return li;
     });
-    owner && this.focus(this.#items[values.findIndex((v) => v.value === selected)] ?? this.#items[0]);
-    this.popup.isConnected || super.open(this.#parent!); // opened with spinner if values are loaded slowly
+    owner && this.focus(this.#items[items.findIndex((v) => v.value === selected)] ?? this.#items[0]);
+    this.popup.isConnected || super.open(this.#parent!); // opened with spinner if items are loaded slowly
     // after popup is shown: otherwise it doesn't scroll
     setTimeout(() =>
       (this.#focused ?? this.popup.querySelector("[aria-selected=true]"))?.scrollIntoView({ block: "nearest" })
     );
   }
 
-  /** Shows spinner over items while function values are loading: menu is opened with it if items aren't rendered yet */
+  /** Shows spinner over items while function items are loading: menu is opened with it if items aren't rendered yet */
   protected changePending(v: boolean): void {
     if (v === !!this.#spin) {
       return;
@@ -225,8 +225,8 @@ export default class TextRichMenu extends TextRichAsk {
     const f = this.#focused;
     if (k === "Escape") {
       this.done();
-    } else if (!this.#items.length && typeof this.#o.values === "function") {
-      return false; // function values are loading: keys work in editor
+    } else if (!this.#items.length && typeof this.#o.items === "function") {
+      return false; // function items are loading: keys work in editor
     } else if (k === "ArrowDown" || k === "ArrowUp") {
       const arr = this.#items.filter((li) => !li.hidden);
       const i = arr.indexOf(f!);
@@ -240,13 +240,13 @@ export default class TextRichMenu extends TextRichAsk {
   };
 
   /** Shows items with label or value containing text (`{name` & `{firstName` show `First Name`) & focuses the 1st one
-   *  or renders items returned by function values (result of the last call); closes menu if nothing matches */
+   *  or renders items returned by function `items` (result of the last call); closes menu if nothing matches */
   filter(text: string): void {
-    const { values } = this.#o;
-    if (typeof values !== "function") {
+    const { items } = this.#o;
+    if (typeof items !== "function") {
       const s = text.toLowerCase();
       const has = (x: string): boolean => x.toLowerCase().includes(s);
-      const shown = values.map(
+      const shown = items.map(
         (v) => has(v.label ?? stringPrettify(String(v.value), true, true)) || has(String(v.value))
       );
       if (shown.includes(true)) {
@@ -258,9 +258,9 @@ export default class TextRichMenu extends TextRichAsk {
     } else if (text !== this.#text) {
       this.#text = text;
       const isLast = (): boolean => text === this.#text && !this.isClosed;
-      // like WUPSelectControl: spinner isn't shown for values resolved at once, otherwise it's shown 300ms at least
+      // like WUPSelectControl: spinner isn't shown for items resolved at once, otherwise it's shown 300ms at least
       promiseWait(
-        new Promise<WUP.TextRich.ToolValue[]>((res) => res(values(text))), // sync error too
+        new Promise<WUP.TextRich.ToolItem[]>((res) => res(items(text))), // sync error too
         300,
         (v) => isLast() && this.changePending(v)
       )
