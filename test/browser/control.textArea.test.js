@@ -19,28 +19,49 @@ describe("control.textArea", () => {
     expect(await page.evaluate(() => el.$value)).toBe("Abc");
 
     await page.keyboard.press("Enter");
-    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`"Abc<div><br></div>"`);
+    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`
+      "Abc
+
+      "
+    `);
     expect(await page.evaluate(() => el.$value)).toBe("Abc"); // because value is trimmed
 
     await page.type("[role=textbox]", "j");
-    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`"Abc<div>j</div>"`);
+    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`
+      "Abc
+      j"
+    `);
     expect(await page.evaluate(() => el.$value)).toBe("Abc\nj");
 
     await page.keyboard.press("Enter");
     await page.type("[role=textbox]", "h");
-    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`"Abc<div>j</div><div>h</div>"`);
+    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`
+      "Abc
+      j
+      h"
+    `);
     expect(await page.evaluate(() => el.$value)).toBe("Abc\nj\nh");
 
     await page.keyboard.press("Backspace");
-    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`"Abc<div>j</div><div><br></div>"`);
+    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`
+      "Abc
+      j
+      <br>"
+    `);
     expect(await page.evaluate(() => el.$value)).toBe("Abc\nj");
 
     await page.keyboard.press("Backspace");
-    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`"Abc<div>j</div>"`);
+    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`
+      "Abc
+      j<br>"
+    `);
     expect(await page.evaluate(() => el.$value)).toBe("Abc\nj");
 
     await page.keyboard.press("Backspace");
-    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`"Abc<div><br></div>"`);
+    expect(await page.evaluate(() => el.$refInput.innerHTML)).toMatchInlineSnapshot(`
+      "Abc
+      <br>"
+    `);
     expect(await page.evaluate(() => el.$value)).toBe("Abc");
   });
 

@@ -188,8 +188,8 @@ WUP-MODAL {
   outline: none;
 }
 WUP-MODAL[open] {
-  -webkit-user-select: initial;
-          user-select: initial;
+  -webkit-user-select: text;
+          user-select: text;
   pointer-events: initial;
   touch-action: initial;
 }
