@@ -37,5 +37,3 @@ Won't be fixed: copy-paste from other editors isn't supported
 ### API: naming & docs
 
 1. `Tool.label` is tool name by default (`codeInline` in aria-label), `ToolValue.label` is prettified value: prettify both
-2. `ask(target, control, current)` is positional, `format(ctx)` gets object (open since 2026-10-07)
-3. `$format`: positional boolean is unreadable (`$format("list", "ordered", false)`) => `{ toggle: true }`; returns `void`: with `Promise<boolean>` caller can wait for asked value (link url, image picker)

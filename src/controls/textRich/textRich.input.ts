@@ -139,12 +139,12 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
 
   /** Applies tool with value to selection: inline format with collapsed selection is pending for the next typed text
    *  (like quill), otherwise `format` of tool or default one is applied (see formatSelection)
-   * @param isSet set value (dropdown item, asked value etc.), otherwise toggle format (button)
+   * @param isToggle toggle format (button), otherwise set value (dropdown item, asked value etc.)
    * @param control for `format` of tool */
   applyFormat(
     name: keyof WUP.TextRich.ToolValues,
     value: unknown,
-    isSet: boolean,
+    isToggle: boolean,
     control: WUP.TextRich.FormatContext["control"]
   ): void {
     const tool = this._tools[name];
@@ -156,14 +156,14 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       if (name === "clean") {
         this._entries.forEach(([k, t]) => t.kind === "inline" && !t.ask && !t.trigger && f.has(k) && p.set(k, false));
       } else {
-        const isOff = !value || (!isSet && Utils.Formats.isMatch(f.get(name), value)); // toggle
+        const isOff = !value || (isToggle && Utils.Formats.isMatch(f.get(name), value));
         p.set(name, !isOff && value);
       }
       this.#pendingAt = [sel.anchorNode!, sel.anchorOffset];
       this.highlightEdge();
       this._onFormats?.();
     } else {
-      this.changeContent(() => this.formatSelection(tool, value, isSet, control));
+      this.changeContent(() => this.formatSelection(tool, value, isToggle, control));
     }
   }
 
@@ -175,7 +175,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
   protected formatSelection(
     tool: WUP.TextRich.Tool,
     value: unknown,
-    isSet: boolean,
+    isToggle: boolean,
     control: WUP.TextRich.FormatContext["control"]
   ): void {
     const pos = this.getSelectionPos();
@@ -187,7 +187,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     const ctx: WUP.TextRich.FormatContext = {
       range,
       value,
-      isSet,
+      isToggle,
       get lines() {
         return (lines ??= Utils.Lines.of(range, editor));
       },
@@ -217,13 +217,13 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
     return el;
   }
 
-  /** Applies default format by `kind` (action has no default format): sets value if `isSet`, otherwise toggles format */
+  /** Applies default format by `kind` (action has no default format): toggles format if `isToggle`, otherwise sets value */
   protected formatByKind(ctx: WUP.TextRich.FormatContext): void {
-    const { tool, value, isSet, editor } = ctx; // lines & texts are lazy: read below only where needed
+    const { tool, value, isToggle, editor } = ctx; // lines & texts are lazy: read below only where needed
     switch (tool.kind) {
       case "inline": {
         const any = (el: Element): boolean => Utils.Formats.is(tool, el) !== undefined;
-        if (tool.trigger && isSet && value !== false) {
+        if (tool.trigger && !isToggle && value !== false) {
           // token replaces selection with tokens at its edges (typed `@john` is recognized already) or token around caret
           const { range: r } = ctx;
           const [a, b] = [r.startContainer, r.endContainer].map((n) => Utils.Formats.parents(n, any, editor)[0]);
@@ -235,7 +235,7 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
         }
         const { texts } = ctx;
         const f = (el: Element): boolean => Utils.Formats.isMatch(Utils.Formats.is(tool, el), value);
-        if (isSet || !value) {
+        if (!isToggle || !value) {
           Utils.Formats.removeInline(texts, any, editor);
           value && Utils.Formats.addInline(texts, Utils.Formats.create(tool, value), editor, f);
         } else {
@@ -250,7 +250,8 @@ export default class WUPTextRichInput extends WUPTextAreaInput {
       case "line":
       case "lineStyle": {
         const { lines } = ctx;
-        const isOff = !value || (!isSet && lines.every((l) => Utils.Formats.isMatch(Utils.Formats.is(tool, l), value)));
+        const isOff =
+          !value || (isToggle && lines.every((l) => Utils.Formats.isMatch(Utils.Formats.is(tool, l), value)));
         lines.forEach((l) => {
           if (tool.kind === "line") {
             // new element: otherwise <div> keeps attributes of format (class etc.)

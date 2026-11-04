@@ -268,7 +268,7 @@ describe("control.textRich", () => {
       inp.innerHTML = html;
       const t = [...inp.querySelectorAll("li")].find((li) => li.firstChild.data === text).firstChild;
       window.getSelection().selectAllChildren(t.parentElement);
-      el.$format(name, value, true);
+      el.$format(name, value);
       return inp.innerHTML;
     };
 
@@ -290,7 +290,7 @@ describe("control.textRich", () => {
     // inline paste into empty editor leaves loose nodes & caret at (editor, childNodes.length)
     inp.innerHTML = "a <b>b</b> c";
     window.getSelection().collapse(inp, 3);
-    expect(() => el.$format("header", 1, true)).not.toThrow(); // otherwise IndexSizeError after wrapping lines
+    expect(() => el.$format("header", 1)).not.toThrow(); // otherwise IndexSizeError after wrapping lines
     expect(inp.innerHTML).toBe("<h1>a <b>b</b> c</h1>");
     const sel = window.getSelection(); // caret stays at the end
     expect(sel.isCollapsed).toBe(true);
@@ -300,12 +300,12 @@ describe("control.textRich", () => {
     // <br> after inline content is the next line, otherwise empty line; whitespaces between lines are skipped
     inp.innerHTML = "a<br><br>b<div>c</div> ";
     window.getSelection().collapse(inp.firstChild, 1);
-    el.$format("header", 1, true);
+    el.$format("header", 1);
     expect(getHtml()).toBe("<h1>a|</h1><div><br></div><div>b</div><div>c</div> ");
     // caret at the end of editor after element
     inp.innerHTML = "a <b>b</b>";
     window.getSelection().collapse(inp, 2);
-    el.$format("header", 1, true);
+    el.$format("header", 1);
     expect(getHtml()).toBe("<h1>a <b>b|</b></h1>");
   });
 
@@ -322,19 +322,19 @@ describe("control.textRich", () => {
     };
 
     // otherwise caret isn't inside any line: nothing is formatted
-    expect(format("<div>a</div>", 1, "header", 1, true)).toBe("<h1>a|</h1>");
-    expect(format("<div>a</div><div>b</div>", 1, "header", 1, true)).toBe("<div>a</div><h1>|b</h1>");
+    expect(format("<div>a</div>", 1, "header", 1)).toBe("<h1>a|</h1>");
+    expect(format("<div>a</div><div>b</div>", 1, "header", 1)).toBe("<div>a</div><h1>|b</h1>");
     // list: into its item
-    expect(format("<ul><li>a</li><li>b</li></ul>", 0, "header", 1, true)).toBe("<h1>|a</h1><ul><li>b</li></ul>");
-    expect(format("<ul><li>a</li><li>b</li></ul>", 1, "header", 1, true)).toBe("<ul><li>a</li></ul><h1>b|</h1>");
-    expect(format("<ol><li>a<ol><li>b</li></ol></li></ol>", 1, "list", "ordered", false)).toBe(
+    expect(format("<ul><li>a</li><li>b</li></ul>", 0, "header", 1)).toBe("<h1>|a</h1><ul><li>b</li></ul>");
+    expect(format("<ul><li>a</li><li>b</li></ul>", 1, "header", 1)).toBe("<ul><li>a</li></ul><h1>b|</h1>");
+    expect(format("<ol><li>a<ol><li>b</li></ol></li></ol>", 1, "list", "ordered", { toggle: true })).toBe(
       "<ol><li>a</li></ol><div>b|</div>"
     );
-    expect(format("<ul></ul>", 1, "header", 1, true)).toBe("|<ul></ul>"); // empty list: nothing to format
+    expect(format("<ul></ul>", 1, "header", 1)).toBe("|<ul></ul>"); // empty list: nothing to format
     // selection by editor points (select all in Firefox)
     inp.innerHTML = "<div>a</div><ul><li>b</li></ul>";
     window.getSelection().setBaseAndExtent(inp, 0, inp, 2);
-    el.$format("align", "center", true);
+    el.$format("align", "center");
     expect(getHtml()).toBe('<div style="text-align: center;">[a</div><ul><li style="text-align: center;">b]</li></ul>');
   });
 
@@ -540,7 +540,7 @@ describe("control.textRich", () => {
     const indent = (margin, value) => {
       inp.innerHTML = `<div style="margin-left: ${margin}; font-size: 16px;">x</div>`;
       window.getSelection().collapse(inp.firstChild.firstChild, 1);
-      el.$format("indent", value, true);
+      el.$format("indent", value);
       return inp.firstChild.style.marginLeft;
     };
     // 3em per level: 96px = 6em = level 2 (otherwise px is ignored: level 0)
@@ -549,7 +549,7 @@ describe("control.textRich", () => {
     expect(indent("6em", 1)).toBe("9em");
     inp.innerHTML = '<div style="margin-left: 48px;">x</div>'; // default font size: 16px
     window.getSelection().collapse(inp.firstChild.firstChild, 1);
-    el.$format("indent", 1, true);
+    el.$format("indent", 1);
     expect(inp.firstChild.style.marginLeft).toBe("6em");
     expect(indent("6em", -1)).toBe("3em");
   });
@@ -631,14 +631,14 @@ describe("control.textRich", () => {
     expect(format("<div>x<sup>[2]</sup></div>", "script", "sub")).toBe("<div>x[<sub>2]</sub></div>");
     expect(format("<div>x[2]</div>", "script", "super")).toBe("<div>x[<sup>2]</sup></div>");
     // toggle (button) too: other value is removed, the same one is toggled off
-    expect(format("<div>x<sup>[2]</sup></div>", "script", "sub", false)).toBe("<div>x[<sub>2]</sub></div>");
-    expect(format("<div>x<sub>[2]</sub></div>", "script", "sub", false)).toBe("<div>x[2]</div>");
+    expect(format("<div>x<sup>[2]</sup></div>", "script", "sub", { toggle: true })).toBe("<div>x[<sub>2]</sub></div>");
+    expect(format("<div>x<sub>[2]</sub></div>", "script", "sub", { toggle: true })).toBe("<div>x[2]</div>");
     // set value (dropdown): replaces previous one; false removes format
-    expect(format("<div>[a<span style='font-size: small;'>b</span>]</div>", "size", "lg", true)).toBe(
+    expect(format("<div>[a<span style='font-size: small;'>b</span>]</div>", "size", "lg")).toBe(
       '<div><span style="font-size: x-large;">[ab]</span></div>'
     );
-    expect(format("<div><span style='font-size: small;'>[a]</span></div>", "size", false, true)).toBe("<div>[a]</div>");
-    expect(format("<div>[a]</div>", "size", "unknown", true)).toBe("<div><span>[a]</span></div>"); // default size
+    expect(format("<div><span style='font-size: small;'>[a]</span></div>", "size", false)).toBe("<div>[a]</div>");
+    expect(format("<div>[a]</div>", "size", "unknown")).toBe("<div><span>[a]</span></div>"); // default size
     // selection starts at the end of text node & ends at start of another one: they're skipped
     setHtml("<div>a<b>b</b>c</div>");
     const [a, , c] = [...el.$refInput.firstChild.childNodes];
@@ -683,26 +683,28 @@ describe("control.textRich", () => {
       return getHtml();
     };
 
-    expect(format("<div>a|</div>", "header", 2, false)).toBe("<h2>a|</h2>"); // button {header: 2}
-    expect(format("<h2>a|</h2>", "header", 2, false)).toBe("<div>a|</div>"); // toggle off
-    expect(format("<h2>a|</h2>", "header", 3, true)).toBe("<h3>a|</h3>"); // dropdown sets value
+    expect(format("<div>a|</div>", "header", 2, { toggle: true })).toBe("<h2>a|</h2>"); // button {header: 2}
+    expect(format("<h2>a|</h2>", "header", 2, { toggle: true })).toBe("<div>a|</div>"); // toggle off
+    expect(format("<h2>a|</h2>", "header", 3)).toBe("<h3>a|</h3>"); // dropdown sets value
     expect(format("<div>a|</div>", "blockquote")).toBe("<blockquote>a|</blockquote>");
     expect(format("<div>a|</div>", "code")).toBe("<pre>a|</pre>");
     // line keeps its style (alignment etc.)
-    expect(format('<div style="text-align: center;">a|</div>', "header", 1, true)).toBe(
+    expect(format('<div style="text-align: center;">a|</div>', "header", 1)).toBe(
       '<h1 style="text-align: center;">a|</h1>'
     );
     // lineStyle
-    expect(format("<div>[a</div><h1>b]</h1>", "align", "right", true)).toBe(
+    expect(format("<div>[a</div><h1>b]</h1>", "align", "right")).toBe(
       '<div style="text-align: right;">[a</div><h1 style="text-align: right;">b]</h1>'
     );
-    expect(format('<div style="text-align: right;">a|</div>', "align", "right", false)).toBe("<div>a|</div>");
-    expect(format('<div style="text-align: right;">a|</div>', "align", false, true)).toBe("<div>a|</div>");
+    expect(format('<div style="text-align: right;">a|</div>', "align", "right", { toggle: true })).toBe(
+      "<div>a|</div>"
+    );
+    expect(format('<div style="text-align: right;">a|</div>', "align", false)).toBe("<div>a|</div>");
     // triple click selects line till the start of the next one: the next line isn't formatted
     setHtml("<div>a</div><div>b</div>");
     const inp = el.$refInput;
     window.getSelection().setBaseAndExtent(inp.firstChild.firstChild, 0, inp.lastChild, 0);
-    el.$format("header", 1, true);
+    el.$format("header", 1);
     expect(inp.innerHTML).toBe("<h1>a</h1><div>b</div>");
     // custom line tool: element style wins
     WUPTextRichControl.$tools.note = {
@@ -727,7 +729,7 @@ describe("control.textRich", () => {
     /** Sets html with selection & applies format */
     const format = (html, value) => {
       setHtml(html);
-      el.$format("list", value, false);
+      el.$format("list", value, { toggle: true });
       return getHtml();
     };
 
@@ -774,7 +776,7 @@ describe("control.textRich", () => {
     /** Sets html with selection & changes indent */
     const indent = (html, value) => {
       setHtml(html);
-      el.$format("indent", value, true);
+      el.$format("indent", value);
       return getHtml();
     };
 
@@ -917,19 +919,19 @@ describe("control.textRich", () => {
     };
 
     // parent selected with nested item: both are formatted
-    expect(format("<ul><li>[a<ul><li>b]</li></ul></li></ul>", "align", "center", true)).toBe(
+    expect(format("<ul><li>[a<ul><li>b]</li></ul></li></ul>", "align", "center")).toBe(
       '<ul><li style="text-align: center;">[a<ul><li style="text-align: center;">b]</li></ul></li></ul>'
     );
     // nested item only: parent isn't formatted
-    expect(format("<ul><li>a<ul><li>[b]</li></ul></li></ul>", "align", "center", true)).toBe(
+    expect(format("<ul><li>a<ul><li>[b]</li></ul></li></ul>", "align", "center")).toBe(
       '<ul><li>a<ul><li style="text-align: center;">[b]</li></ul></li></ul>'
     );
     // nested items keep their level: otherwise list is placed into heading
-    expect(format("<ul><li>a|<ul><li>b</li></ul></li><li>c</li></ul>", "header", 2, true)).toBe(
+    expect(format("<ul><li>a|<ul><li>b</li></ul></li><li>c</li></ul>", "header", 2)).toBe(
       "<h2>a|</h2><ul><ul><li>b</li></ul><li>c</li></ul>"
     );
     // list without parent item: decreasing moves it back
-    expect(format("<h2>a</h2><ul><ul><li>b|</li></ul><li>c</li></ul>", "indent", -1, true)).toBe(
+    expect(format("<h2>a</h2><ul><ul><li>b|</li></ul><li>c</li></ul>", "indent", -1)).toBe(
       "<h2>a</h2><ul><li>b|</li><li>c</li></ul>"
     );
   });
@@ -1081,7 +1083,7 @@ describe("control.textRich", () => {
     // line format replaces line, but caret stays: pending formats too
     setHtml("<div>a|</div>");
     el.$format("bold");
-    el.$format("header", 1, true);
+    el.$format("header", 1);
     document.dispatchEvent(new Event("selectionchange"));
     expect(btnBold.getAttribute("aria-pressed")).toBe("true");
     expect(typeText("b")).toBe(true);
@@ -3371,15 +3373,15 @@ describe("control.textRich", () => {
     inp.focus();
     const spy = jest.spyOn(el, "goFormat");
     [
-      ["formatBold", ["bold", undefined, false]],
-      ["formatStrikeThrough", ["strike", undefined, false]],
-      ["formatJustifyFull", ["align", "justify", true]],
-      ["formatJustifyLeft", ["align", false, true]],
-      ["formatJustifyCenter", ["align", "center", true]],
-      ["formatSuperscript", ["script", "super", false]],
-      ["formatIndent", ["indent", 1, false]],
-      ["formatOutdent", ["indent", -1, false]],
-      ["formatRemove", ["clean", undefined, false]],
+      ["formatBold", ["bold", undefined, true]],
+      ["formatStrikeThrough", ["strike", undefined, true]],
+      ["formatJustifyFull", ["align", "justify", false]],
+      ["formatJustifyLeft", ["align", false, false]],
+      ["formatJustifyCenter", ["align", "center", false]],
+      ["formatSuperscript", ["script", "super", true]],
+      ["formatIndent", ["indent", 1, true]],
+      ["formatOutdent", ["indent", -1, true]],
+      ["formatRemove", ["clean", undefined, true]],
       ["formatFontColor", null], // not supported
     ].forEach(([inputType, args]) => {
       setHtml("<div>[a]</div>");
@@ -4006,7 +4008,7 @@ describe("control.textRich", () => {
       const dropdown = el.querySelector("[tool=mark]");
       expect(dropdown.hasAttribute("icon")).toBe(true);
       setHtml("<div>a[b]c</div>");
-      el.$format("mark", "yellow", true);
+      el.$format("mark", "yellow");
       expect(getHtml()).toBe('<div>a[<mark class="yellow">b]</mark>c</div>'); // classNameTag of value
       document.dispatchEvent(new Event("selectionchange"));
       expect(dropdown.className).toBe("ic-mark ic-yellow");

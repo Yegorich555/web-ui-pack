@@ -211,8 +211,8 @@ declare global {
       range: Range;
       /** `true` for tool without items, `false` removes format */
       value: V;
-      /** `true` - set value (dropdown item, `ask`), `false` - toggle format (button) */
-      isSet: boolean;
+      /** `true` - toggle format (button), `false` - set value (dropdown item, `ask`) */
+      isToggle: boolean;
       /** Selected lines: paragraphs, headings, list items etc. (taken before format) */
       readonly lines: HTMLElement[];
       /** Selected text nodes (split at selection edges);
@@ -1125,9 +1125,9 @@ export default class WUPTextRichControl<
     const name = el._format;
     if (el._items) {
       document.activeElement !== el && this.restoreSelection(); // dropdown focused via keyboard keeps focus
-      this.askMenu(name, el).then((v) => v != null && this.goFormat(name, v, true));
+      this.askMenu(name, el).then((v) => v != null && this.goFormat(name, v, false));
     } else {
-      this.goFormat(name, el._value, false);
+      this.goFormat(name, el._value, true);
     }
   }
 
@@ -1135,16 +1135,23 @@ export default class WUPTextRichControl<
    *  otherwise asks it (via `ask` or dropdown) or toggles format;
    *  inline format with collapsed selection is pending for the next typed text (like quill);
    *  works even if control is disabled or readonly (they block user only)
-   * @param isSet set value (dropdown item, asked value etc.), otherwise toggle format (button); default: value is passed
+   * @param opts `toggle` - toggle value like toolbar button does (removes it if selection has it), otherwise it's set;
+   *  default: `true` without value
+   * @returns `true` when applied, `false` if asked value is canceled or tool is invalid
    * @example
    * el.$format("bold"); // toggles bold
+   * el.$format("bold", true); // sets bold
    * el.$format("header", 2); // sets heading 2
-   * el.$format("list", "ordered", false); // toggles ordered list
-   * el.$format("link"); // asks url via popup
+   * el.$format("list", "ordered", { toggle: true }); // toggles ordered list
    * el.$format("link", "https://example.com"); // wraps selection into link
-   * el.$format("header"); // asks value via dropdown near selection */
-  $format<K extends keyof WUP.TextRich.ToolValues>(name: K, value?: WUP.TextRich.ToolValues[K], isSet?: boolean): void {
-    this.goFormat(name, value, isSet);
+   * el.$format("header"); // asks value via dropdown near selection
+   * const isDone = await el.$format("link"); // asks url via popup */
+  $format<K extends keyof WUP.TextRich.ToolValues>(
+    name: K,
+    value?: WUP.TextRich.ToolValues[K],
+    opts?: { toggle?: boolean }
+  ): Promise<boolean> {
+    return this.goFormat(name, value, opts?.toggle);
   }
 
   /** Applies tool to selection (see $format): value isn't typed (toolbar, menus, clicked embed etc.)
@@ -1152,14 +1159,14 @@ export default class WUPTextRichControl<
   protected goFormat(
     name: keyof WUP.TextRich.ToolValues,
     value?: unknown,
-    isSet?: boolean,
+    isToggle?: boolean,
     target?: HTMLElement
-  ): void {
+  ): Promise<boolean> {
     const tool: WUP.TextRich.Tool = this.#ctr.$tools[name];
     const err = Utils.Tools.invalid(name, tool);
     if (err) {
       this.throwError(err, tool, true);
-      return;
+      return Promise.resolve(false);
     }
     this.restoreSelection();
     const inp = this.$refInput;
@@ -1169,19 +1176,21 @@ export default class WUPTextRichControl<
       const cur = inp.getFormats().get(name);
       // restore by positions: focus can move out (to modal etc.) & nodes can be re-rendered
       const pos = inp.getSelectionPos();
-      (tool.ask
-        ? tool.ask(target ?? (b && !b.hidden ? b : inp), this as WUPTextRichControl, cur)
-        : this.askMenu(name, target ?? sel.getRangeAt(0).cloneRange())
+      return (
+        tool.ask
+          ? tool.ask(target ?? (b && !b.hidden ? b : inp), this as WUPTextRichControl, cur)
+          : this.askMenu(name, target ?? sel.getRangeAt(0).cloneRange())
       ).then((v) => {
-        if (v != null) {
-          inp.focus({ preventScroll: true });
-          inp.setSelectionPos(pos);
-          this.goFormat(name, v, true);
+        if (v == null) {
+          return false;
         }
+        inp.focus({ preventScroll: true });
+        inp.setSelectionPos(pos);
+        return this.goFormat(name, v, false);
       });
-      return;
     }
-    inp.applyFormat(name, value ?? true, isSet ?? value !== undefined, this as WUPTextRichControl); // `true` for tool without items
+    inp.applyFormat(name, value ?? true, isToggle ?? value === undefined, this as WUPTextRichControl); // `true` for tool without items
+    return Promise.resolve(true);
   }
 
   /** Replaces selection with content & places caret after it like paste (emoji picker, template etc.): separate undo
@@ -1347,7 +1356,7 @@ export default class WUPTextRichControl<
     const isMenu = !rest.length && !!tool.trigger && !!this.findTool(name)?._items;
     const text = isMenu ? tool.trigger : tool.placeholder;
     if (!text) {
-      this.goFormat(name, v, !!rest.length);
+      this.goFormat(name, v, !rest.length);
       return;
     }
     const inp = this.$refInput;
@@ -1363,7 +1372,7 @@ export default class WUPTextRichControl<
       inp.setSelectionPos([pos, pos + text.length]); // to type over it
     } else {
       inp.setSelectionPos([pos, pos + text.length]);
-      this.goFormat(name, v, !!rest.length);
+      this.goFormat(name, v, !rest.length);
     }
   }
 
@@ -1405,7 +1414,7 @@ export default class WUPTextRichControl<
           sel.setBaseAndExtent(r.startContainer, r.startOffset, sel.focusNode!, sel.focusOffset);
           const isLine = tool.kind === "line" || tool.kind === "lineStyle";
           isLine && inp.changeContent(() => sel.getRangeAt(0).deleteContents());
-          this.goFormat(name, v, true);
+          this.goFormat(name, v, false);
           // token is followed by space like in messengers (not before whitespace or punctuation): otherwise Chrome draws
           // caret inside token at the end of line; the same undo step (changes of the same tick are merged)
           const caret = sel.focusNode!; // in line: format wraps loose content
@@ -1432,7 +1441,7 @@ export default class WUPTextRichControl<
       return false;
     }
     this.#ask?.done(); // trigger menu
-    this.goFormat(found[0], found[1], true); // separate undo step
+    this.goFormat(found[0], found[1], false); // separate undo step
     return true;
   }
 
@@ -1482,13 +1491,13 @@ export default class WUPTextRichControl<
     const name = this.embedTool(el, isHover);
     if (name && this.#ctr.$tools[name].ask) {
       Utils.Ranges.select(el);
-      this.goFormat(name, undefined, false, el);
+      this.goFormat(name, undefined, true, el);
     } else if (name) {
       this.askMenu(name, el, isHover).then((v) => {
         if (v != null && el.isConnected) {
           this.$refInput.focus({ preventScroll: true }); // otherwise control restores previous selection
           Utils.Ranges.select(el);
-          this.goFormat(name, v, true); // replaces element, caret goes after it
+          this.goFormat(name, v, false); // replaces element, caret goes after it
         }
       });
     } else if (el.tagName === "A") {
@@ -1585,7 +1594,7 @@ export default class WUPTextRichControl<
     const [name, ...rest] = key.split(":") as [keyof WUP.TextRich.ToolValues, ...string[]];
     const v = rest.join(":"); // value can contain `:`
     const item = Utils.Tools.fixed(this.findTool(name)?._items)?.find((x) => `${x.value}` === v);
-    item && this.goFormat(name, item.value, true);
+    item && this.goFormat(name, item.value, false);
     return !!item;
   }
 
@@ -1643,7 +1652,7 @@ export default class WUPTextRichControl<
     const cur = this.$refInput.getFormats().get(name) ?? false;
     const at = all.findIndex((v) => v.value === cur);
     const next = (i ? all.slice(at + 1) : all.slice(0, at < 0 ? undefined : at).reverse()).find(isRendered);
-    next && this.goFormat(name, next.value, true);
+    next && this.goFormat(name, next.value, false);
     return true;
   }
 
@@ -1721,7 +1730,7 @@ export default class WUPTextRichControl<
       e.preventDefault(); // done via changeContent: separate undo step
     } else if (f) {
       e.preventDefault();
-      this.goFormat(f[0], f[1], true);
+      this.goFormat(f[0], f[1], false);
     } else if (inp.replaceInput(e)) {
       // fired input has no inputType: gotInput skips it
       s && this.gotTrigger();
