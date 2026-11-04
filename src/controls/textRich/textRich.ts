@@ -148,50 +148,34 @@ declare global {
        *   classNameTag: "placeholder",
        * }; */
       trigger?: string;
-      /** Recognizes text while user types: word at caret is wrapped into element of `create(text)` as soon as it's matched
-       *  (`someone@gmail.c` => email link); element follows its text on typing & deleting (it's removed if text isn't
-       *  recognized anymore); undo (Ctrl+Z or Escape right after recognizing) returns plain text & pauses recognizing
-       *  till caret leaves word; pasted (dropped) text is recognized too: every matched word, text pasted over selection
-       *  formats it (selected text becomes link)
+      /** Formats text while user types: word at caret is wrapped into `create(text)` as soon as it matches
+       *  (`someone@gmail.c` => email link); element follows its text and is removed when text doesn't match anymore
        * @tutorial Rules
-       * * RegExp must match the end of text (use `$`); function returns the recognized end of text or nothing
-       * * `is` gets element with recognized text: `undefined` rejects it (invalid url, mention isn't from `items` etc.)
-       * * token (see `trigger`) typed without menu is recognized too (`@john`); token chosen in menu follows its text
-       * only if this text is recognized entirely (`@John Smith` stays as is)
-       * * markdown - RegExp with named group `text`: text of group is formatted once (`**bold**` gives bold `bold`), the
-       * rest of matched text is removed; the next typed text goes out of format; tool with `items` isn't supported;
-       * other groups don't make it markdown (`/\b([A-Z]+)-\d+$/` recognizes `WUP-123` as usual)
-       * * `line` tool: text typed at line start applies format like `ToolItem.recognize` (`> ` gives quote);
-       * tool with `items` applies value via `ToolItem.recognize`: `1. ` gives numbered list
-       * * point `placeholder` too (except markdown): otherwise tool chosen in menu of `command` does nothing visible
+       * * Ctrl+Z or Escape right after recognizing returns plain text
+       * * pasted text is recognized too; url pasted over selection makes it link
+       * * `is` returning `undefined` rejects recognized text (invalid url, unknown mention etc.)
+       * * token chosen in `trigger` menu keeps format only if its text is recognized entirely (`@John Smith` isn't)
+       * * set `placeholder` too (except markdown): otherwise tool chosen in `command` menu does nothing visible
        * @example
-       * recognize: /(?<!\w)#\w+$/, // hashtags: `#news`
-       * recognize: (s) => /\b[A-Z]+-\d+$/.exec(s)?.[0], // Jira issues: `WUP-123`
-       * recognize: /(?<!\S)\*\*(?<text>\S(?:.*?\S)?)\*\*$/, // markdown: `**bold**`
-       * recognize: /^>\s$/, // markdown of line tool: `> ` */
+       * recognize: /(?<!\w)#\w+$/, // hashtag `#news`: RegExp must match the end of text
+       * recognize: (s) => /\b[A-Z]+-\d+$/.exec(s)?.[0], // Jira issue `WUP-123`: function returns matched end of text
+       * recognize: /(?<!\S)\*\*(?<text>\S(?:.*?\S)?)\*\*$/, // markdown `**bold**` => bold `bold`: named group `text` is formatted, the rest is removed (not for tool with `items`)
+       * recognize: /^>\s$/, // line tool: `> ` at line start => quote
+       * items: [{ value: "ordered", recognize: /^1[.)]\s$/ }], // tool with items: `1. ` => numbered list */
       recognize?: RegExp | ((text: string) => string | null | undefined);
-      /** Text that inserted as example when user selects this command (type '/' and chose command with this) */
+      /** Text that inserted as example when user selects command (type '/' and chose related command) */
       placeholder?: string;
       /** Kind of format: defines default `format`, sanitizing & behavior with collapsed selection
        * * `inline` - wraps text (`<b>`, `<a>`, `<span style>`); with collapsed selection it's applied to the next typed text
        * (if no `ask`); removed by `clean`
        * * `line` - line element (`<h1>`, `<blockquote>`): replaces selected lines (`false` - paragraph)
        * * `lineStyle` - line style (`text-align` etc.): set to selected lines via `set`
-       * * `embed` - element without text (`<img>`, `<hr>`): replaces selection, caret goes after it; counted as 1 char
-       * * not set - action: `format` is required
-       * * `create` (`set` for `lineStyle`) & `is` (optional if `create` is tag name) are required for every kind; custom
-       * `format` replaces `create` & `set` except `inline` (pending formats & recognizing create elements); otherwise tool
-       * isn't rendered (error in console)
-       * @tutorial Sanitizing
-       * html of value (paste etc.) keeps only formats of tools with `kind`: element is re-created via `create`
-       * (`set` for `lineStyle`) if `is` returns value; others are unwrapped or removed with content (`<script>` etc.) */
+       * * `embed` - element without text (`<img>`, `<hr>`): replaces selection, caret goes after it; counted as 1 char */
       kind?: "inline" | "line" | "lineStyle" | "embed";
-      /** Returns value of format applied by element, otherwise `undefined` (`false` too for tool without items): toolbar shows
+      /** Returns value of tool applied by element, otherwise `undefined` (`false` too for tool without items): toolbar shows
        *  state of the nearest element at selection start; `line` & `lineStyle` get lines only (paragraph, heading, list item etc.)
        *  WARN: sanitizer calls it for untrusted html (paste etc.): return only safe values (see `Html.sanitizeUrl`)
-       * @defaultValue if `create` is tag name: element with this tag & `classNameTag` of tool (required for `span` &
-       * containers `div`, `p` etc.); value of tool with items is value with `classNameTag` of element (every value except
-       * `false` needs it)
+       * @defaultValue if `create` is string tag name then this could be skipped
        * @example
        * is: (el) => el.tagName === "B" || el.tagName === "STRONG", // tool without items
        * is: ({ tagName: t }) => (t === "SUB" && "sub") || (t === "SUP" && "super") || undefined, // tool with items */
@@ -201,21 +185,20 @@ declare global {
        * create: "mark", // equal to () => document.createElement("mark"); `is` isn't required (see `is`)
        * create: (v) => document.createElement(v === "sub" ? "sub" : "sup"), */
       create?: keyof HTMLElementTagNameMap | ((value: V) => HTMLElement);
-      /** Sets value to line (`undefined` removes it): for default format & sanitizer of `lineStyle`;
-       *  WARN: format `line` (heading etc.) keeps only `style` of replaced line, so use styles instead of attributes */
+      /** Sets value to line (`undefined` removes it): for default format & sanitizer of `lineStyle`
+       * * WARN: format `line` (heading etc.) keeps only `style` of replaced line, so use styles instead of attributes */
       set?: (el: HTMLElement, value: V | undefined) => void;
-      /** Asks value via custom UI (popup, modal etc.): when tool is applied without value (button, shortcut),
-       *  on click on `embed` element or via static $hotKeyAsk at it (value replaces it); `null`/`undefined` cancels;
-       *  selection is restored even if focus moves out (to modal etc.); by default tool with `items` asks via its dropdown;
-       *  tool `link`: on hover, click & static $hotKeyAsk at link too (value replaces url in place, empty one removes
-       *  link), so ask via $ask: it gives hover popup
-       * @param target element to place popup near: clicked embed, hovered link, tool button or editor (if tool isn't
-       * rendered)
-       * @param current value at selection start (of hovered link)
-       * @see {@link WUPTextRichControl.$ask} - popup with text control */
+      /** Asks value via custom UI (popup, modal etc.); `null`/`undefined` cancels
+       * @tutorial Rules
+       * * called when tool is applied without value (button, shortcut)
+       * * on click or static $hotKeyAsk at `embed` element & link (+hover): value replaces it, empty url removes link
+       * * tool with `items` asks via its dropdown by default
+       * @param target element to place popup near: embed, link, tool button or editor
+       * @param current value at selection start
+       * @example
+       * ask: (target, c, url) => c.$ask(target, url ?? "https://", { label: "Url" }), // popup with text control (hover popup for link) */
       ask?: (target: HTMLElement, control: WUPTextRichControl, current: V | undefined) => Promise<V | null | undefined>;
-      /** Custom format instead of default one (see `kind`); after it control saves history, restores selection
-       *  (use `editor.$insert` to insert content & place caret after it), updates $value & toolbar
+      /** Custom format instead of default one (see `kind`)
        * @example
        * format: ({ texts }) => texts.forEach((t) => (t.data = t.data.toUpperCase())), // uppercase selected text
        * format: ({ editor }) => editor.$insert(document.createTextNode(new Date().toLocaleDateString())), // insert date
@@ -380,32 +363,21 @@ const browserHotKeys = new Set<string>(["KeyB", "KeyI", "KeyU"]);
     <wup-textrich w-name="description" w-toolbar="window.myToolbar" w-validations="myValidations"/>
   </wup-form>;
  * @tutorial Rules
- * * $value is sanitized html (`undefined` if there is no text & embeds), value set via code too ($value, $initValue,
- * storage): only formats of $tools are kept (`<strong>`, `<em>`, `<a>`, `<h1>`, `<blockquote>` etc.) with paragraphs `<p>`,
- * lists & indents; a single plain paragraph goes without `<p>` (`text` instead of `<p>text</p>`); see static $sanitize
- * * undo/redo (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y, OS-native) works for text & formats
- * * tools are defined in static $tools: change it to redefine labels, shortcuts etc. or to add a custom tool;
- * tool works only if it's listed in $options.toolbar (hidden ones too)
- * * shortcuts are similar to Google Docs: Ctrl+B, Ctrl+Shift+7, Ctrl+Alt+1 etc. (Cmd on macOS/iOS);
- * they're shown in tooltips & dropdown items (see $options.hideHotKeysHint); Alt+F10 focuses toolbar (Arrows - navigate, Esc - return);
- * Alt+ArrowDown opens popup of element at caret: dropdown of token, link url etc. (see static $hotKeyAsk)
- * * inline format (bold etc.) with collapsed selection is applied to the next typed text
- * * ArrowRight at the end of inline format (bold, link etc.) or ArrowLeft at its start: the next typed text goes out of it
- * (caret stays visually), the opposite arrow returns into it; then ArrowRight at the end of the last block (list, quote,
- * code, heading) adds new line after it; ArrowDown/ArrowUp do the same at the end/start of the content
- * * Enter continues inline formats in the next line except turned off (Bold toggled off), left via arrow, recognized text & tokens
- * * deleted text (Delete, Backspace, typed text over selection) continues its inline formats for the next typed text
- * except recognized text & tokens (browser typing style isn't used: Chrome types with `<font color>` of deleted mention)
- * * line format (quote, code block etc.) is a block of lines: Shift+Enter & Enter add line `\n` inside it (Enter in heading &
- * list adds paragraph & the next item); Enter on empty line closes block (caret goes into new paragraph), in empty block
- * removes format
- * * typed quote or bracket wraps selected text like in code editors: `"text"`, `(text)` (see static $wrapChars)
- * * typed `trigger` opens tool dropdown near caret: `{` for placeholders, `@` for mentions etc.
- * * typed & pasted text is recognized: links, emails (see `recognize` of $tools), pasted url over selected text makes
- * it link; lists by `1. ` & `- ` at line start,
- * custom markdown (`**bold**`, `> `: see `recognize` of $tools);
- * undo (Ctrl+Z or Escape right after recognizing) returns typed text; Escape doesn't clear value (clear button only)
- * * content styles are global: use `<div wup-textrich>{$value}</div>` to show value outside control (stored html - via static $sanitize)
+ * * $value is sanitized html (on set too): only formats of $tools are kept; single plain paragraph goes without `<p>`;
+ * empty => `undefined` (see static $sanitize)
+ * * tools are defined in static $tools; tool works only if it's listed in $options.toolbar (hidden ones too)
+ * * shortcuts like in Google Docs: Ctrl+B etc. (see $options.hideHotKeysHint); Alt+F10 focuses toolbar;
+ * Alt+ArrowDown opens popup at caret: token dropdown, link url etc. (see static $hotKeyAsk)
+ * * undo/redo works for text & formats
+ * * inline format (bold etc.) with collapsed selection is applied to the next typed text;
+ * Enter & deleting keep it too (except tokens & recognized text)
+ * * ArrowRight/ArrowLeft at the edge of inline format leaves it; ArrowRight at the end of the last block (list, quote etc.) adds new line
+ * * Enter in quote or code block adds line inside it; Enter on empty line leaves block
+ * * typed quote or bracket wraps selected text: `(text)` (see static $wrapChars)
+ * * typed `trigger` opens dropdown at caret: `@` - mentions, `{` - placeholders
+ * * typed & pasted text is recognized: links, emails, lists `1. `, markdown etc. (see `recognize` of $tools)
+ * * Escape doesn't clear value (clear button only)
+ * * content styles are global: use `<div wup-textrich>{$value}</div>` to show value outside control
  * @tutorial innerHTML @example
  * <label>
  *   <span> // extra span requires to use with icons via label:before, label:after without adjustments
