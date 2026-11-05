@@ -33,6 +33,7 @@
 - [CheckTreeControl](src/controls/checkTree.ts). Icon of partially checked item is customizable via css-var `--wup-icon-minus` (previously it was drawn via css)
 - [Form](src/formElement.ts). _**SubmitActions.reset**: values changed by user during the pending state are assigned to `$initValue`/`$initModel` on success (considered as submitted)_
 - [CalendarControl](src/controls/calendar.ts). _Option **storageKey** with **utc** saves date shifted by timezone (the previous day for timezones behind UTC)_
+- [SelectControl](src/controls/select.ts). _Changing option **multiple** at runtime throws errors: `$value` & `$initValue` aren't converted (now `value` => `[value]` OR `values` => the first value)_
 - [TextControl](src/controls/text.ts) & inherited. _Ctrl+Z restores wrong text after text is changed programmatically when the new text ends with the same chars as before the change (ex. `"a, "` => `"a, b, "`)_
 - [SwitchControl](src/controls/switch.ts) & inherited, [RadioControl](src/controls/radio.ts). _Click does nothing in Chrome while the page has selected text (until selection is reset by click outside)_
 - [ModalElement](src/modalElement.ts). _Text inside opened modal can't be selected_
@@ -74,11 +75,16 @@
   - Added option **closeOnSwipe** (`true` by default): on touch devices element follows the horizontal swipe & closes when it's swiped out (like messages in popular mobile apps)
   - Progress bar is mirrored for right placements (shrinks to the right side)
   - Added option **type** (`info`, `success`, `warning`, `error`; attribute `[w-type]`): icon at the left side, background, text & progress bar in colors of the type (css-vars `--notify-{type}` for icon & progress, `--notify-{type}-bg`, `--notify-{type}-text`)
-- [DateControl](src/controls/date.ts) & [CalendarControl](src/controls/calendar.ts). Added option **multiple** (attribute `[w-multiple]`) to select several dates: `$value` is `Date[]`, click (or Enter) on date selects it or removes if it's already selected (menu stays opened); `[w-initvalue]` expects dates separated by comma (`"2022-10-25, 2022-10-28"`); for DateControl user types the next date at the end of input (with mask; completed date is added, already selected is ignored), Backspace/Delete removes the whole date & validations **min**, **max**, **exclude** are checked for every date
+- [DateControl](src/controls/date.ts) & [CalendarControl](src/controls/calendar.ts)
+  - Added option **multiple** (attribute `[w-multiple]`) to select several dates: `$value` is `Date[]`, click (or Enter) on date selects it or removes if it's already selected (menu stays opened); `[w-initvalue]` expects dates separated by comma (`"2022-10-25, 2022-10-28"`); for DateControl user types the next date at the end of input (with mask; completed date is added, already selected is ignored), Backspace/Delete removes the whole date & validations **min**, **max**, **exclude** are checked for every date
+  - With option **multiple** Shift + click selects every date between the previous clicked (or the last selected) and pointed one (as OS does with files) or deselects them if they're already selected; disabled dates are skipped; while Shift is pressed hovered range is highlighted (dates that click changes get attr `[wup-range]`, css-var `--ctrl-clr-range-bg`)
 - [TextControl](src/controls/text.ts) & inherited.
   - Added option **copyButton** (attribute `[w-copybutton]`, `false` by default) to clear content into clipboard
   - Added tooltip for **clearButton**
-- [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts). Added customization of menu via HTML: place `<ul>` with items inside the control; `<li>` elements are bound to **$options.items** by index (see example in JSDoc & demo)
+- [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts)
+  - Added customization of menu via HTML: place `<ul>` with items inside the control; `<li>` elements are bound to **$options.items** by index (see example in JSDoc & demo)
+  - With option **multiple** (SelectManyControl always) Shift + click on menu item selects every visible item between the previous clicked (or the last selected) and pointed one (as OS does with files) or deselects them if they're already selected
+- [CheckTreeControl](src/controls/checkTree.ts). Shift + click (or Shift + Space) checks every item between the previous toggled and pointed one with nested items (as OS does with files) or unchecks them if they're already checked; disabled & readonly items are skipped
 - [Form](src/formElement.ts)
   - Added notification for submit result (return `{notifyMessage: 'Success', type: "success"}` in $onSubmit Promise result/error to show wup-notify)
   - Added option **autoSubmit** (attribute `[w-autosubmit]`): form without submit button is submitted automatically in pointed ms after the last change made by user (if it's valid; errors aren't shown) & success result is shown via wup-notify. On browser exit (closing tab, reload) waiting changes are submitted at once & browser asks user to stay till the end of submit. **BREAKING:** enabled by default (`3000`ms), point `false` to disable
