@@ -59,6 +59,9 @@ declare global {
        * @defaultValue false */
       allowNewValue: boolean;
       /** Allow to select multiple values; in this case $value & $initValue must contain Array<ValueType>
+       * * Shift + click (or Shift + Enter) selects every visible item between the previous clicked (or the last selected) & pointed one (as OS does with files)
+       *   OR deselects them if they're already selected
+       * * changing the option converts $value & $initValue: value => [value] OR values => the first value
        * @defaultValue false */
       multiple: boolean;
     }
@@ -382,6 +385,16 @@ export default class WUPSelectControl<
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Select.Options> | null): void {
     this._opts.items ??= [];
+    if (!propsChanged || propsChanged.includes("multiple")) {
+      // convert values to format of option `multiple`: value => [value] OR values => the first value
+      const m = !!this._opts.multiple;
+      this.convertValue((v) => {
+        if (v === undefined || m === Array.isArray(v)) {
+          return v; // WARN: null is valid value of item
+        }
+        return (m ? [v] : (v as any[])[0]) as ValueType;
+      });
+    }
     if (!propsChanged || propsChanged.includes("items")) {
       propsChanged && this.removePopup(); // reset state only if props changed
       this.fetchItems(); // WARN: it's important to be before super otherwise initValue won't work
@@ -646,40 +659,60 @@ export default class WUPSelectControl<
     e.preventDefault(); // to prevent popup-hide-show - because it handles by selectMenuItem
   }
 
-  /** Called when need to setValue & close base on clicked item */
+  /** Value of item that user clicked last time without Shift (option `multiple`): it's focused to show the start of range for the next Shift + click */
+  #anchor?: ValueType;
+  /** Called when need to setValue & close base on clicked item;
+   *  with option `multiple` Shift + click selects every visible item between the previous clicked (or the last selected) & pointed one
+   *  OR deselects them if they're already selected */
   protected gotMenuItemClick(e: MouseEvent, li: WUP.Select.MenuItemElement): void {
-    const o = this._cachedItems![this._menuItems!.all.indexOf(li)]; // undefined for item `(New option)`
+    const { all } = this._menuItems!;
+    const i = all.indexOf(li);
+    const o = this._cachedItems![i]; // undefined for item `(New option)`
     o?.onClick?.call(e.target, e, o);
     if (e.defaultPrevented) {
       return;
     }
-    const canOff = this._opts.multiple && li.getAttribute("aria-selected") === "true";
-    this.selectMenuItem(canOff || !o ? null : li); // select/deselect; item `(New option)` must not keep aria-selected
-    canOff && li.setAttribute("aria-selected", "false");
-
-    this.selectValue(li._value, !this._opts.multiple);
+    if (!this._opts.multiple || !o) {
+      this.selectMenuItem(o ? li : null); // item `(New option)` must not keep aria-selected
+      this.selectValue(li._value, !this._opts.multiple);
+      return;
+    }
+    const was = this.$value as ValueType[] | undefined;
+    this.#anchor ??= was?.[was.length - 1]; // the last selected is the start of range if user didn't click before
+    let a = e.shiftKey ? this._cachedItems!.findIndex((it) => this.#ctr.$isEqual(it.value, this.#anchor, this)) : -1;
+    if (a < 0 || a === i) {
+      a = i;
+      this.#anchor = li._value;
+      this.focusMenuItem(li); // to show user the start of range for the next Shift + click
+      this._menuItems!.focused = i; // index in `all` because filter is cleared by selectValue
+    }
+    const range =
+      a === i
+        ? [li]
+        : all
+            .slice(Math.min(a, i), Math.max(a, i) + 1)
+            .filter((el) => !el.style.display && !el.hasAttribute("aria-disabled"));
+    a > i && range.reverse(); // from anchor to pointed: in order of selection
+    const added = range.filter((el) => el.getAttribute("aria-selected") !== "true");
+    if (added.length) {
+      added.forEach((el) => this.selectMenuItem(el));
+    } else {
+      range.forEach((el) => el.setAttribute("aria-selected", false)); // every item of range is selected: so range is deselected
+      this.selectMenuItem(null);
+    }
+    const vals = (added.length ? added : range).map((el) => el._value);
+    this.selectValue(li._value, false, vals);
   }
 
-  protected override selectValue(v: ValueType, canCloseMenu = true): void {
+  /** Called when user selected new value from menu and need to close menu;
+   *  with option `multiple` it adds values `vals` OR removes them if every one is already selected */
+  protected override selectValue(v: ValueType, canCloseMenu = true, vals: ValueType[] = [v]): void {
     if (this._opts.multiple) {
-      let arr = this.$value as Array<ValueType>;
-      if (!arr?.length) {
-        v = [v] as any;
-      } else {
-        const i = arr.findIndex((vi) => this.#ctr.$isEqual(vi, v, this));
-        if (i !== -1) {
-          if (arr.length === 1) {
-            arr = undefined as any;
-            // this.selectMenuItem(null);
-          } else {
-            arr = [...arr];
-            arr.splice(i, 1);
-          }
-        } else {
-          arr = [...arr, v];
-        }
-        v = arr as any;
-      }
+      const was = (this.$value as ValueType[] | undefined) ?? [];
+      const has = (arr: ValueType[], x: ValueType): boolean => arr.some((y) => this.#ctr.$isEqual(y, x, this));
+      const added = vals.filter((x) => !has(was, x));
+      const arr = added.length ? was.concat(added) : was.filter((x) => !has(vals, x));
+      v = (arr.length ? arr : undefined) as any;
     }
     super.selectValue(v, canCloseMenu);
 

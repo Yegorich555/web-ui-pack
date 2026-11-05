@@ -66,11 +66,15 @@ declare global {
       /** Allow to select multiple dates; in this case $value & $initValue must be `Date[]`
        * @tutorial rules
        * * click (or Enter) on date selects it OR removes if it's already selected; menu stays opened
+       * * Shift + click (or Shift + Enter) selects every date between the previous clicked (or the last selected) & pointed one (as OS does with files)
+       *   OR deselects them if they're already selected; disabled dates are skipped
+       * * while Shift is pressed hovered range is highlighted: dates that click selects/deselects get attr [wup-range]
        * * selected dates are shown in input separated by comma; new date is added at the end; time isn't copied from previous value
        * * user types the next date at the end of input (mask is applied to it): completed date is added, already selected is ignored
        * * Backspace/Delete removes the whole selected date
        * * validations `min`, `max` & `exclude` are checked for every date
        * * option `sync` is ignored
+       * * changing the option converts $value & $initValue: date => [date] OR dates => the first date
        * @defaultValue false */
       multiple: boolean;
     }
@@ -305,7 +309,7 @@ export default class WUPDateControl<
   }
 
   protected override gotChanges(propsChanged: Array<keyof WUP.Date.Options> | null): void {
-    WUPCalendarControl.prototype.gotChangesSharable.call(this);
+    WUPCalendarControl.prototype.gotChangesSharable.call(this, propsChanged);
 
     this._opts.format ||= "YYYY-MM-DD";
     if (this._opts.format.toUpperCase().includes("MMM")) {

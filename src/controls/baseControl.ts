@@ -1059,6 +1059,19 @@ export default abstract class WUPBaseControl<
     return true;
   }
 
+  /** Replaces $initValue & $value by result of `convert` (ex. when option `multiple` is changed: value => [value]);
+   *  without $change event & keeping attr [w-initvalue] */
+  protected convertValue(convert: (v: ValueType | undefined) => ValueType | undefined): void {
+    const iv = this.$initValue;
+    if (convert(iv) !== iv) {
+      (this as any)._noDelInitValueAttr = true; // otherwise attr [w-initvalue] is removed
+      this.$initValue = convert(iv); // it changes $value also if control isn't changed
+      delete (this as any)._noDelInitValueAttr;
+    }
+    const v = this.$value;
+    convert(v) !== v && this.setValue(convert(v), SetValueReasons.initValue);
+  }
+
   /** Fires `$change` event (async) */
   protected fireChange(reason: SetValueReasons): void {
     setTimeout(() => this.fireEvent("$change", { cancelable: false, bubbles: true, detail: { reason } }));

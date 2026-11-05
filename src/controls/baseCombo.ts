@@ -377,7 +377,8 @@ export default abstract class WUPBaseComboControl<
     const isEscPrevent = this.#isOpened && e.key === "Escape";
     !isEscPrevent && super.gotKeyDown(e);
 
-    if (e.altKey || e.shiftKey || e.ctrlKey) {
+    // Shift + Enter on focused menu item selects range (option `multiple`)
+    if (e.altKey || e.ctrlKey || (e.shiftKey && !(e.key === "Enter" && this._focusedMenuItem))) {
       return;
     }
 
@@ -406,7 +407,7 @@ export default abstract class WUPBaseComboControl<
             const isPrevented =
               el &&
               // !el.hasAttribute("disabled") && // looks impossible case
-              !el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+              !el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true, shiftKey: e.shiftKey }));
             if (!isPrevented) {
               this.$refInput.value || this.$isRequired
                 ? this.resetInputValue()

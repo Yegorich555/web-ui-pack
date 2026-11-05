@@ -289,8 +289,8 @@ export default class WUPSelectManyControl<
   }
 
   // @ts-expect-error - because expected v: ValueType[]
-  protected override selectValue(v: ValueType, canCloseMenu = true): void {
-    super.selectValue(v as any, canCloseMenu);
+  protected override selectValue(v: ValueType, canCloseMenu = true, vals: ValueType[] = [v]): void {
+    super.selectValue(v as any, canCloseMenu, vals as any);
     this._opts.hideSelected && this.focusMenuItem(null);
   }
 
