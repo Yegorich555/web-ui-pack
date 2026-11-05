@@ -202,8 +202,12 @@ export default class WUPCalendarControl<
   /** Compares by valueOf(); arrays (option `multiple`) are equal if contain the same dates in any order */
   static override $isEqual(v1: unknown, v2: unknown, c: WUPBaseControl): boolean {
     if (Array.isArray(v1) && Array.isArray(v2)) {
-      const key = (arr: Date[]): string => arr.map(Number).sort().join();
-      return v1.length === v2.length && key(v1) === key(v2);
+      if (v1.length !== v2.length) {
+        return false;
+      }
+      const sorted = (arr: Date[]): number[] => arr.map((d) => d.valueOf()).sort((a, b) => a - b); // valueOf() is faster than Number()
+      const s2 = sorted(v2);
+      return sorted(v1).every((n, i) => n === s2[i]);
     }
     return super.$isEqual(v1, v2, c);
   }
@@ -618,15 +622,12 @@ export default class WUPCalendarControl<
       }
       let arr: Date[];
       if (isAdd) {
-        const key = (["Date", "Month", "FullYear"] as const)[this._picker];
-        const step = a > i ? 1 : -1;
-        const added: Date[] = [];
-        // go from pointed date to the anchor (indexes are sequential): then reverse so dates are added in order of selection
-        for (let k = i, d = new Date(utcVal); k !== a + step; k += step) {
-          isChanged(k) && added.push(toValue(d));
-          d[`setUTC${key}`](d[`getUTC${key}`]() + step);
+        arr = was.slice();
+        const step = i > a ? 1 : -1;
+        // go from the anchor to pointed date (indexes are sequential) so dates are added in order of selection
+        for (let k = a; k !== i + step; k += step) {
+          isChanged(k) && arr.push(toValue(this.#toDate!(this._picker ? k : k * 86400000))); // index => item value: see #indexOf
         }
-        arr = was.concat(added.reverse());
       } else {
         arr = was.filter((d) => !isChanged(getIndex(this.normalizeToUTC(d), 0))); // every enabled date of range is selected: so range is deselected
       }
