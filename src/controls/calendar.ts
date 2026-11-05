@@ -21,7 +21,8 @@ declare global {
       renderItems: (ol: HTMLElement, v: Date) => IItemElement[];
       getIndex: (v: Date, firstValue: number) => number;
       next: (v: Date, n: number) => Date;
-      onItemClick: (e: MouseEvent & { target: HTMLElement }, targetValue: number) => void;
+      /** Returns UTC date of item by its `_value` */
+      toDate: (itemValue: number) => Date;
     }
     /** UTC-normalized params for disabled dates */
     interface INormalized {
@@ -394,6 +395,7 @@ export default class WUPCalendarControl<
   _picker: PickersEnum = 0;
   /** Index function of the current picker: `getIndex(utcDate, 0)` is unique number of day/month/year */
   #getIndex?: WUP.Calendar.IPickerResult["getIndex"];
+  #toDate?: WUP.Calendar.IPickerResult["toDate"];
   /** Returns true if item of the current picker is disabled (by options min, max, exclude); `k` is `getIndex(utcDate, 0)` */
   #isOff?: (k: number) => boolean;
   #refreshSelected?: () => void;
@@ -432,8 +434,8 @@ export default class WUPCalendarControl<
     }
 
     this.$refCalendar.setAttribute("calendar", type);
-    this.#handleClickItem = r.onItemClick;
     this.#getIndex = r.getIndex;
+    this.#toDate = r.toDate;
     const { min, max, exclude, months, years } = this.#disabled!;
     const off = new Set(pickerNext ? [months, years][pickerNext - 1] : exclude?.map((d) => r.getIndex(d, 0)));
     const from = min ? r.getIndex(min, 0) : -Infinity;
@@ -589,7 +591,7 @@ export default class WUPCalendarControl<
         v.setUTCMonth(v.getUTCMonth() + n);
         return v;
       },
-      onItemClick: (e, v) => this.selectDate(e.target, new Date(v), e.shiftKey),
+      toDate: (v) => new Date(v),
     };
   }
 
@@ -724,12 +726,7 @@ export default class WUPCalendarControl<
         v.setUTCFullYear(v.getUTCFullYear() + n);
         return v;
       },
-      onItemClick: (e, v) => {
-        const dt = new Date(Date.UTC(Math.floor(v / pageSize), v % pageSize, 1));
-        this._opts.endWith === PickersEnum.Month
-          ? this.selectDate(e.target, dt, e.shiftKey)
-          : this.changePicker(dt, PickersEnum.Day);
-      },
+      toDate: (v) => new Date(Date.UTC(Math.floor(v / pageSize), v % pageSize, 1)),
     };
   }
 
@@ -767,12 +764,7 @@ export default class WUPCalendarControl<
         v.setUTCFullYear(v.getUTCFullYear() + n * pageSize);
         return v;
       },
-      onItemClick: (e, v) => {
-        const dt = new Date(Date.UTC(v, 0));
-        this._opts.endWith === PickersEnum.Year
-          ? this.selectDate(e.target, dt, e.shiftKey)
-          : this.changePicker(dt, PickersEnum.Month);
-      },
+      toDate: (v) => new Date(Date.UTC(v, 0)),
     };
   }
 
@@ -1091,7 +1083,6 @@ export default class WUPCalendarControl<
     return r;
   }
 
-  #handleClickItem?: WUP.Calendar.IPickerResult["onItemClick"];
   /** Called when user clicks on calendar */
   protected gotClick(e: MouseEvent): void {
     if (e.button || this.$isReadOnly || this.$isDisabled) {
@@ -1106,8 +1097,12 @@ export default class WUPCalendarControl<
         const v = (t as any)._value;
         if (v !== undefined) {
           e.preventDefault();
-          !(t as HTMLElement).hasAttribute("disabled") &&
-            this.#handleClickItem!.call(this, e as MouseEvent & { target: HTMLElement }, v);
+          if (!(t as HTMLElement).hasAttribute("disabled")) {
+            const dt = this.#toDate!(v);
+            this._picker === (this._opts.endWith ?? PickersEnum.Day) // the last picker: lower ones aren't allowed
+              ? this.selectDate(t as HTMLElement, dt, e.shiftKey)
+              : this.changePicker(dt, this._picker - 1);
+          }
           break;
         }
         t = t.parentElement!;
