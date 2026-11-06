@@ -84,11 +84,15 @@
             },
             {
               "name": "w-multiple",
-              "description": "Allow to select multiple dates; in this case `$value` & `$initValue` must be `Date[]`"
+              "description": "Allow to select multiple dates (`true`) OR range of dates (`range`); in this case `$value` & `$initValue` must be `Date[]`; for `range` it's `[from, to]`: the 1st click defines the start & the 2nd one the end",
+              "value": {
+                "kind": "plain",
+                "type": "'true' | 'false' | 'range'"
+              }
             },
             {
               "name": "w-initvalue",
-              "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`; with [w-multiple] dates are separated by comma: `2022-10-25, 2022-10-28 02:40`"
+              "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`; with [w-multiple] dates are separated by comma: `2022-10-25, 2022-10-28 02:40` (`from, to` for `range`)"
             },
             {
               "name": "w-label",
@@ -440,7 +444,11 @@
             },
             {
               "name": "w-multiple",
-              "description": "Allow to select multiple dates; in this case `$value` & `$initValue` must be `Date[]`; user types the next date at the end of input"
+              "description": "Allow to select multiple dates (`true`) OR range of dates (`range`); in this case `$value` & `$initValue` must be `Date[]`; user types the next date at the end of input; for `range` it's `[from, to]`: the 1st click defines the start & the 2nd one the end, input shows `from ... to`",
+              "value": {
+                "kind": "plain",
+                "type": "'true' | 'false' | 'range'"
+              }
             },
             {
               "name": "w-opencase",
@@ -504,7 +512,7 @@
             },
             {
               "name": "w-initvalue",
-              "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`; with [w-multiple] dates are separated by comma: `2022-10-25, 2022-10-28 02:40`"
+              "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`; with [w-multiple] dates are separated by comma: `2022-10-25, 2022-10-28 02:40` (`from, to` for `range`)"
             },
             {
               "name": "w-label",

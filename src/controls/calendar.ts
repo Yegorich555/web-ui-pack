@@ -79,16 +79,14 @@ declare global {
       /** Dates that user can't choose (disabled dates)
        * * DateControl: user can type excluded date, so option is assigned to `$options.validations.exclude` (overrides pointed one) */
       exclude: Date[] | null;
-      /** Allow to select multiple dates; in this case $value & $initValue must be `Date[]`
-       * @tutorial rules
-       * * click (or Enter) on date selects it OR removes if it's already selected
-       * * Shift + click (or Shift + Enter) selects every date between the previous clicked (or the last selected) & pointed one (as OS does with files)
-       *   OR deselects them if they're already selected; disabled dates are skipped
-       * * while Shift is pressed hovered range is highlighted: dates that click selects/deselects get attr [wup-range]
-       * * new date is added at the end; time isn't copied from previous value (new dates have time 00:00)
-       * * changing the option converts $value & $initValue: date => [date] OR dates => the first date
+      /** Select several dates (`true`) OR range of dates (`"range"`); $value & $initValue are `Date[]` in this case
+       * * `true` - click (or Enter) toggles date; Shift + click toggles every date between the last clicked & pointed one
+       * * `"range"` - $value is `[from, to]` (sorted); the 1st click sets `from`, the 2nd one sets `to`; disabled dates can be inside range
+       * * css: dates that click will change get `[wup-range]`, dates between selected `from` & `to` get `[in-range]`
+       * * new dates have time 00:00 (`"range"` keeps time of previous `from` & `to`)
+       * * changing the option converts $value & $initValue to the new type
        * @defaultValue false */
-      multiple: boolean;
+      multiple: boolean | "range";
     }
     interface Options<T = Date, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPCalendarControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
@@ -118,7 +116,7 @@ declare global {
        * <wup-calendar w-exclude="window.exclude"></wup-calendar>
        * ``` */
       "w-exclude"?: string;
-      "w-multiple"?: WUP.Base.JSXBoolAttr;
+      "w-multiple"?: WUP.Base.JSXBoolAttr | "range";
     }
   }
 
@@ -212,6 +210,9 @@ export default class WUPCalendarControl<
     return super.$isEqual(v1, v2, c);
   }
 
+  /** Delimiter between `from` & `to`: title of years picker `2018 ... 2033` & input of DateControl with `multiple: "range"` */
+  static $rangeDelimiter = " ... ";
+
   /** Returns days of pointed number-of-month with placeholders of prev, next months
    * @param year 2022 etc.
    * @param month index of month (0-11)
@@ -268,6 +269,7 @@ export default class WUPCalendarControl<
     m.firstweekday = { type: AttributeTypes.number };
     m.startwith = { type: AttributeTypes.string };
     m.endwith = { type: AttributeTypes.string };
+    m.multiple = { type: AttributeTypes.bool, parse: (s) => (s === "range" ? s : s !== "false") };
     return m;
   }
 
@@ -456,14 +458,22 @@ export default class WUPCalendarControl<
       a[r.getIndex(now, first)]?.setAttribute("aria-current", "date");
 
       this.#refreshSelected = () => {
-        const v = this.$value as Date | Date[] | undefined;
-        const getItem = (d: Date): WUP.Calendar.IItemElement | undefined =>
-          a[r.getIndex(this.normalizeToUTC(d), first)];
-        if (Array.isArray(v)) {
-          this.selectItem(undefined);
-          v.forEach((d) => this.selectItem(getItem(d), true));
+        const isRange = this._opts.multiple === "range";
+        const v = ((isRange && this.#anchor) || this.$value) as Date | Date[] | undefined; // only the start of range till the 2nd click
+        const getIndex = (d: Date): number => r.getIndex(this.normalizeToUTC(d), first);
+        this.selectItem(undefined);
+        if (!Array.isArray(v)) {
+          v && this.selectItem(a[getIndex(v)], true);
+        } else if (isRange) {
+          let i1 = getIndex(v[0]);
+          let i2 = getIndex(v[v.length - 1]);
+          i1 > i2 && ([i1, i2] = [i2, i1]);
+          for (let i = Math.max(i1, 0), end = Math.min(i2, a.length - 1); i <= end; ++i) {
+            this.selectItem(a[i], true);
+            i !== i1 && i !== i2 && a[i].setAttribute("in-range", "");
+          }
         } else {
-          this.selectItem(v && getItem(v));
+          v.forEach((d) => this.selectItem(a[getIndex(d)], true));
         }
       };
       this.#refreshSelected();
@@ -599,18 +609,32 @@ export default class WUPCalendarControl<
     };
   }
 
-  /** Date (in format of $value) that user clicked last time without Shift (option `multiple`) */
+  /** Date (in format of $value) that user clicked last time without Shift (option `multiple`);
+   * with `multiple: "range"` it's the start of range that user selects now (till the 2nd click) */
   #anchor?: Date;
   /** Called when user selects item on the last picker (see $options.endWith);
    * with option `multiple` it adds date to value OR removes if it's already selected;
    * point `isRange` (Shift + click) to add every enabled date between the previous clicked (or the last selected) and pointed one
-   * OR remove them if they're already selected */
+   * OR remove them if they're already selected;
+   * with `multiple: "range"` the 1st click defines the start of range & the 2nd one changes value to `[from, to]` */
   protected selectDate(item: HTMLElement, utcVal: Date, isRange?: boolean): void {
     const toValue = (d: Date): Date =>
       this._opts.utc ? new Date(d) : new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
     const dt = toValue(utcVal);
     let v: Date | Date[] | undefined = dt;
-    if (this._opts.multiple) {
+    if (this._opts.multiple === "range") {
+      const a = this.#anchor;
+      this.focusItem(item);
+      if (!a) {
+        this.#anchor = dt;
+        this.#refreshSelected!(); // shows only the start of range
+        return;
+      }
+      this.#anchor = undefined;
+      v = a > dt ? [dt, a] : [a, dt];
+      const prev = (this.$value || this.$initValue) as Date[] | undefined;
+      prev && v.forEach((d, i) => prev[i] && dateCopyTime(d, prev[i], !!this._opts.utc));
+    } else if (this._opts.multiple) {
       const was = (this.$value as Date[] | undefined) || [];
       const getIndex = this.#getIndex!;
       const i = getIndex(utcVal, 0);
@@ -644,9 +668,14 @@ export default class WUPCalendarControl<
   /** Returns range of click on item `i` (option `multiple`; indexes: see getIndex): `a` is index of the start of range;
    *  point `isRange` (Shift + click) to start from the previous clicked (or the last selected) item, otherwise range is `i` only;
    *  `isAdd` - range has enabled & not selected items so they're selected, otherwise every enabled item of range is deselected;
-   *  `isChanged(k)` - returns true if item is selected/deselected by click */
+   *  `isChanged(k)` - returns true if item is selected/deselected by click;
+   *  with `multiple: "range"` returns items between the start of range (the 1st click) & `i` (the start isn't included) */
   protected getRange(i: number, isRange?: boolean): { a: number; isAdd: boolean; isChanged: (k: number) => boolean } {
     const getIndex = this.#getIndex!;
+    if (this._opts.multiple === "range") {
+      const a = this.#anchor ? getIndex(this.normalizeToUTC(this.#anchor), 0) : i;
+      return { a, isAdd: true, isChanged: (j) => j !== a && (j - a) * (j - i) <= 0 };
+    }
     const isOff = this.#isOff!;
     const was = (this.$value as Date[] | undefined) || [];
     const s = isRange && (this.#anchor ?? was[was.length - 1]); // the last selected is the start of range if user didn't click before
@@ -662,20 +691,20 @@ export default class WUPCalendarControl<
   /** Item under the pointer (it's target of `mouseover`) */
   #hovered?: EventTarget | null;
   /** Called on hover & on pressing/releasing Shift: highlights items via [wup-range] that Shift + click on hovered item selects/deselects
-   *  (option `multiple`); point `false` to remove highlighting */
-  protected highlightRange(isShift: boolean): void {
+   *  (option `multiple`); point `false` to remove highlighting;
+   *  with `multiple: "range"` highlights items between the start of range & `target` (Shift is ignored) */
+  protected highlightRange(isShift: boolean, target = this.#hovered): void {
     const items = this.$refCalendarItems._items;
     if (!items) {
       return; // not rendered yet
     }
     items.forEach((el) => el.removeAttribute("wup-range"));
-    const n = items.indexOf(this.#hovered as WUP.Calendar.IItemElement); // -1 if items are re-rendered
+    const n = items.indexOf(target as WUP.Calendar.IItemElement); // -1 if items are re-rendered
+    const { multiple } = this._opts;
+    const isOn = multiple === "range" ? !!this.#anchor : isShift && multiple;
     const isSelectable =
-      this._opts.multiple &&
-      this._picker === (this._opts.endWith ?? PickersEnum.Day) &&
-      !this.$isReadOnly &&
-      !this.$isDisabled;
-    if (isShift && n > -1 && isSelectable && !items[n].hasAttribute("disabled")) {
+      this._picker === (this._opts.endWith ?? PickersEnum.Day) && !this.$isReadOnly && !this.$isDisabled;
+    if (isOn && n > -1 && isSelectable && !items[n].hasAttribute("disabled")) {
       const k = this.#indexOf(items[0]);
       const { isChanged } = this.getRange(k + n, true);
       items.forEach((el, j) => isChanged(k + j) && el.setAttribute("wup-range", ""));
@@ -746,7 +775,7 @@ export default class WUPCalendarControl<
     const renderItems = (_ol: HTMLElement, v: Date): WUP.Calendar.IItemElement[] => {
       let year = getFirst(v);
 
-      this.$refCalendarTitle.textContent = `${year} ... ${year + pageSize - 1}`;
+      this.$refCalendarTitle.textContent = `${year}${this.#ctr.$rangeDelimiter}${year + pageSize - 1}`;
       const items: WUP.Calendar.IItemElement[] = [];
       let i = 0;
       for (i = 0; i < pageSize; ++i) {
@@ -869,8 +898,14 @@ export default class WUPCalendarControl<
         el.hasAttribute("disabled") && el.setAttribute("aria-disabled", true);
         el.hasAttribute("aria-selected") && el.setAttribute("aria-selected", "true"); // otherwise NVDA doesn't announce it again
       }, 100); // without timeout text isn't announced when switch pickers
+      this._opts.multiple === "range" && this.highlightRange(false, el); // range from the start to focused item (for keyboard users)
     } else {
       !this.$isFocused && this.$refInput.removeAttribute("aria-activedescendant");
+      if (this.#anchor && this._opts.multiple === "range") {
+        this.#anchor = undefined; // cancel started range: on focus lost, closing menu (DateControl) etc.
+        this.#refreshSelected?.call(this);
+        this.highlightRange(false);
+      }
     }
   }
 
@@ -911,11 +946,16 @@ export default class WUPCalendarControl<
 
   /** Select item (set aria-selected); point `isAdd` to keep previously selected items (option `multiple`) */
   protected selectItem(el: HTMLElement | undefined, isAdd?: boolean): void {
-    !isAdd && this.querySelectorAll("[aria-selected]").forEach((a) => a.removeAttribute("aria-selected"));
+    !isAdd &&
+      this.querySelectorAll("[aria-selected]").forEach((a) => {
+        a.removeAttribute("aria-selected");
+        a.removeAttribute("in-range"); // option `multiple: "range"`
+      });
     el?.setAttribute("aria-selected", "true");
   }
 
   override setValue(v: ValueType | undefined, reason: SetValueReasons): boolean | null {
+    this._opts.multiple === "range" && (this.#anchor = undefined); // started range is canceled by any value change
     const r = super.setValue(v, reason);
     this.setInputValue(v);
     this.#refreshSelected?.call(this);
@@ -923,7 +963,7 @@ export default class WUPCalendarControl<
     return r;
   }
 
-  /** Called when need to update/announce value for input; with option `multiple` dates are joined by comma */
+  /** Called when need to update/announce value for input; with option `multiple` dates are joined by comma (by ` – ` for `"range"`) */
   setInputValue(v: ValueType | undefined | null): void {
     const key = this._opts.utc ? "UTC" : "";
     const p = this._opts.endWith;
@@ -933,7 +973,7 @@ export default class WUPCalendarControl<
       return `${d}${m}${dt[`get${key}FullYear`]()}`;
     };
     if (Array.isArray(v)) {
-      this.$refInput.value = v.map(toStr).join(", ");
+      this.$refInput.value = v.map(toStr).join(this._opts.multiple === "range" ? " – " : ", ");
     } else {
       this.$refInput.value = v ? toStr(v) : "";
     }
@@ -1013,7 +1053,11 @@ export default class WUPCalendarControl<
     } else {
       this.$refTitle.classList.remove(this.#ctr.classNameHidden);
     }
-    this.setAttr.call(this.$refCalendarItems, "aria-multiselectable", this._opts.multiple === true);
+    this.setAttr.call(this.$refCalendarItems, "aria-multiselectable", !!this._opts.multiple);
+    if (propsChanged?.includes("multiple")) {
+      this.#anchor = undefined; // it's the start of range OR anchor for Shift + click depending on option
+      this.#refreshSelected?.call(this);
+    }
 
     if (!propsChanged || propsChanged.includes("exclude")) {
       this._opts.exclude?.sort((a, b) => a.valueOf() - b.valueOf());
@@ -1046,13 +1090,26 @@ export default class WUPCalendarControl<
     }
 
     if (!propsChanged || propsChanged.includes("multiple")) {
-      // convert values to format of option `multiple`: date => [date] OR dates => the first date
-      const m = !!this._opts.multiple;
+      // convert values to format of option `multiple`: date => [date] OR dates => the first date (without duplicates);
+      // `range`: date => [date, date] OR dates => [the earliest, the latest]
+      const m = this._opts.multiple;
       this.convertValue((v) => {
-        if (!v || m === Array.isArray(v)) {
+        if (!v) {
           return v;
         }
-        return (m ? [v] : (v as Date[])[0]) as ValueType;
+        const a = ([] as Date[]).concat(v as Date | Date[]);
+        if (!m) {
+          return a[0] as ValueType;
+        }
+        if (m === "range") {
+          if (a.length === 2 && a[0] <= a[1]) {
+            return v;
+          }
+          const s = a.slice().sort((x, y) => x.valueOf() - y.valueOf());
+          return [s[0], s[s.length - 1]] as ValueType;
+        }
+        const uniq = a.filter((d, i) => a.findIndex((x) => x.valueOf() === d.valueOf()) === i); // range [date, date] => [date]
+        return (Array.isArray(v) && uniq.length === a.length ? v : uniq) as ValueType;
       });
     }
   }

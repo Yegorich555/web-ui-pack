@@ -3,7 +3,7 @@
 :root {
   --ctrl-clr-selected: #fff;
   --ctrl-clr-selected-bg: #007e95; // WCAG AA (4.5:1) with white text
-  // Shift + hover: items that click selects/deselects
+  // Shift + hover: items that click selects/deselects; dates inside selected range (option `multiple: "range"`)
   /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
   --ctrl-clr-range-bg: color-mix(in srgb, var(--ctrl-clr-selected-bg) 30%, transparent);
   --ctrl-clr-w: 17em;
@@ -153,6 +153,12 @@
     &[aria-selected] {
       color: inherit; // it's deselected by Shift + click
     }
+  }
+
+  // dates between `from` & `to` of selected range (option `multiple: "range"`)
+  li[in-range] {
+    background-color: var(--ctrl-clr-range-bg);
+    color: inherit;
   }
 
   li[focused] {

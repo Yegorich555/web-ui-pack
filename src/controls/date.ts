@@ -36,7 +36,7 @@ declare global {
        * @defaultValue localeInfo.date
        * @example `yyyy-mm-dd` or `dd/mm/yyyy`; `yyyy-mm` to select only year & month; `yyyy` to select only year (see option `endWith`)
        * @tutorial Troubleshooting
-       * * with changing $options.format need to change/reset mask/maskholder also */
+       * * with changing $options.format (or `multiple: "range"`) need to change/reset mask/maskholder also */
       format: WUPDateFormat | (string & {});
       /** Anchor to TimeControl to sync with date
        * @tutorial dateControl is master and it means
@@ -63,20 +63,15 @@ declare global {
        * @tutorial
        * * options `min`, `max` & `exclude` are compared by month/year for PickersEnum.Month/Year */
       endWith: PickersEnum | null;
-      /** Allow to select multiple dates; in this case $value & $initValue must be `Date[]`
-       * @tutorial rules
-       * * click (or Enter) on date selects it OR removes if it's already selected; menu stays opened
-       * * Shift + click (or Shift + Enter) selects every date between the previous clicked (or the last selected) & pointed one (as OS does with files)
-       *   OR deselects them if they're already selected; disabled dates are skipped
-       * * while Shift is pressed hovered range is highlighted: dates that click selects/deselects get attr [wup-range]
-       * * selected dates are shown in input separated by comma; new date is added at the end; time isn't copied from previous value
-       * * user types the next date at the end of input (mask is applied to it): completed date is added, already selected is ignored
-       * * Backspace/Delete removes the whole selected date
-       * * validations `min`, `max` & `exclude` are checked for every date
-       * * option `sync` is ignored
-       * * changing the option converts $value & $initValue: date => [date] OR dates => the first date
+      /** Select several dates (`true`) OR range of dates (`"range"`); $value & $initValue are `Date[]` in this case
+       * * `true` - click (or Enter) toggles date & menu stays opened; Shift + click toggles every date between the last clicked & pointed one
+       * * `true` - input shows dates separated by comma: user types the next date at the end, Backspace/Delete removes the whole date
+       * * `"range"` - $value is `[from, to]` (sorted); the 1st click sets `from`, the 2nd one sets `to` & closes menu
+       * * `"range"` - input shows `from ... to` (see static `$rangeDelimiter`); user can type both dates
+       * * validations `min`, `max` & `exclude` are checked for every date (only `from` & `to` for `"range"`); option `sync` is ignored
+       * * changing the option converts $value & $initValue to the new type
        * @defaultValue false */
-      multiple: boolean;
+      multiple: boolean | "range";
     }
     interface JSXProps<C = WUPDateControl>
       extends WUP.BaseCombo.JSXProps<C>,
@@ -168,6 +163,9 @@ export default class WUPDateControl<
     return WUPCalendarControl.$isEqual(v1, v2, c);
   }
 
+  /** Delimiter between `from` & `to` in input with `multiple: "range"` */
+  static $rangeDelimiter = WUPCalendarControl.$rangeDelimiter;
+
   static get mappedAttributes(): Record<string, AttributeMap> {
     const m = super.mappedAttributes;
     m.min = { type: AttributeTypes.parsedObject };
@@ -176,6 +174,7 @@ export default class WUPDateControl<
     m.startwith = { type: AttributeTypes.string };
     m.endwith = { type: AttributeTypes.string };
     m.sync = { type: AttributeTypes.selector };
+    m.multiple = { type: AttributeTypes.bool, parse: (s) => (s === "range" ? s : s !== "false") };
     return m;
   }
 
@@ -240,12 +239,21 @@ export default class WUPDateControl<
   }
 
   /** Called to parse input text to value (related to locale or pointed format);
-   * with option `multiple` dates are separated by comma (the same dates & not completed last date are skipped) */
+   * with option `multiple` dates are separated by comma (the same dates & not completed last date are skipped);
+   * with `multiple: "range"` returns sorted `[from, to]` from text `from ... to` */
   override parseInput(text: string): ValueType | undefined {
     const format = `${this._opts.format.toUpperCase()} hh:mm:ss.fff${this._opts.utc ? "Z" : ""}`;
     const parse = (s: string): Date | undefined => dateFromString(s, format, { throwOutOfRange: true }) ?? undefined;
-    if (!this._opts.multiple) {
+    const { multiple } = this._opts;
+    if (!multiple) {
       return parse(text) as ValueType;
+    }
+    if (multiple === "range") {
+      const [a, b] = text.split(this.#ctr.$rangeDelimiter).map(parse);
+      if (!a || !b) {
+        throw new RangeError(`Impossible to parse range from '${text}'`);
+      }
+      return (a > b ? [b, a] : [a, b]) as ValueType;
     }
     const arr = text.split(",");
     this.refMask?.isCompleted === false && arr.pop(); // date that user types now
@@ -265,12 +273,12 @@ export default class WUPDateControl<
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override canParseInput(_text: string): boolean {
-    return this._opts.multiple || !this.refMask || this.refMask.isCompleted; // with option `multiple` not completed date is skipped
+    return this._opts.multiple === true || !this.refMask || this.refMask.isCompleted; // with option `multiple` not completed date is skipped
   }
 
   /** Returns length of text with selected dates (option `multiple`): mask is applied only to the date that user types after them */
   protected override get maskOffset(): number {
-    const i = this._opts.multiple ? this.$refInput.value.lastIndexOf(", ") : -1;
+    const i = this._opts.multiple === true ? this.$refInput.value.lastIndexOf(", ") : -1;
     return i === -1 ? 0 : i + 2;
   }
 
@@ -316,13 +324,16 @@ export default class WUPDateControl<
       this.throwError(`'MMM' in format isn't supported`);
       this._opts.format = "YYYY-MM-DD";
     }
-    this._opts.mask ||= this._opts.format
-      .replace(/[yY]/g, "0")
-      .replace(/dd|DD/, "00")
-      .replace(/[dD]/, "#0")
-      .replace(/mm|MM/, "00")
-      .replace(/[mM]/, "#0"); // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
-    this._opts.maskholder ||= this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1");
+    const twice = (s: string): string => (this._opts.multiple === "range" ? s + this.#ctr.$rangeDelimiter + s : s); // from ... to
+    this._opts.mask ||= twice(
+      this._opts.format
+        .replace(/[yY]/g, "0")
+        .replace(/dd|DD/, "00")
+        .replace(/[dD]/, "#0")
+        .replace(/mm|MM/, "00")
+        .replace(/[mM]/, "#0") // convert yyyy-mm-dd > 0000-00-00; d/m/yyyy > #0/#0/0000
+    );
+    this._opts.maskholder ||= twice(this._opts.format.replace(/([mMdD]){1,2}/g, "$1$1"));
 
     const el = this.refTime;
     if (el) {
@@ -373,7 +384,7 @@ export default class WUPDateControl<
     el.setValue = (val, reason) => {
       const r = WUPCalendarControl.prototype.setValue.call(el, val, reason);
       if (reason === SetValueReasons.userSelect) {
-        this.selectValue(el.$value as ValueType, !this._opts.multiple); // menu stays opened to select several dates
+        this.selectValue(el.$value as ValueType, this._opts.multiple !== true); // menu stays opened to select several dates
       }
       return r;
     };
@@ -401,9 +412,14 @@ export default class WUPDateControl<
         }
       }
     } else if (v && skipInput) {
-      // time isn't shown in input: so the same dates are taken from previous value
-      const prev = [this.$value, this.$initValue].flat() as Array<Date | undefined>;
-      v = v.map((d) => prev.find((p) => p && this.compareDates(p, d) === 0) || d) as ValueType;
+      if (this._opts.multiple === "range") {
+        const prev = (this.$value || this.$initValue) as Date[] | undefined;
+        prev && v.forEach((d, i) => prev[i] && dateCopyTime(d, prev[i], this._opts.utc)); // copy time from the same end
+      } else {
+        // time isn't shown in input: so the same dates are taken from previous value
+        const prev = [this.$value, this.$initValue].flat() as Array<Date | undefined>;
+        v = v.map((d) => prev.find((p) => p && this.compareDates(p, d) === 0) || d) as ValueType;
+      }
     }
 
     const isChanged = super.setValue(v, reason, skipInput);
@@ -415,7 +431,7 @@ export default class WUPDateControl<
         setTimeout(() => (c._isStopChanges = false)); // without timeout calendar.$changeEvent is fired
       }
       if (skipInput && this._opts.multiple) {
-        // add delimiter for the next date; keep date that user types now
+        // add delimiter for the next date; keep date that user types now; for `range`: show sorted dates
         const tail = this.refMask?.isCompleted === false ? this.$refInput.value.substring(this.maskOffset) : "";
         const s = this.valueToInput(this.$value) + tail;
         s !== this.$refInput.value && this.setInputValueDirect(s, reason);
@@ -441,8 +457,9 @@ export default class WUPDateControl<
     if (!Array.isArray(v)) {
       return dateToString(v, f);
     }
-    const s = v.map((d) => dateToString(d, f)).join(", ");
-    return s && this.$isFocused && !this.$refInput.readOnly ? `${s}, ` : s; // delimiter to type the next date
+    const isMany = this._opts.multiple === true;
+    const s = v.map((d) => dateToString(d, f)).join(isMany ? ", " : this.#ctr.$rangeDelimiter);
+    return isMany && s && this.$isFocused && !this.$refInput.readOnly ? `${s}, ` : s; // delimiter to type the next date
   }
 
   protected override gotBeforeInput(e: WUP.Text.GotInputEvent): void {
@@ -476,13 +493,13 @@ export default class WUPDateControl<
   }
 
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
-    this._opts.multiple && !this._inputError && this.setInputValue(this.$value, SetValueReasons.userInput); // to add delimiter
+    this._opts.multiple === true && !this._inputError && this.setInputValue(this.$value, SetValueReasons.userInput); // to add delimiter
     return super.gotFocus(ev);
   }
 
   protected override gotFocusLost(): void {
     super.gotFocusLost();
-    this._opts.multiple && !this._inputError && this.setInputValue(this.$value, SetValueReasons.userInput); // to remove delimiter
+    this._opts.multiple === true && !this._inputError && this.setInputValue(this.$value, SetValueReasons.userInput); // to remove delimiter
   }
 
   protected override focusMenuItem(next: HTMLElement | null): void {

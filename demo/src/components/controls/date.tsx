@@ -35,7 +35,7 @@ export default function DateControlView() {
         "Localized. Display format depends on user-locale (see web-ui-pack/objects/localeInfo). Use $options.format or localeInfo (globally)",
         "Smart mask. Don't worry about separators (it adds automatically); need only type numbers",
         "Select only month or year according to format: 'yyyy-mm' or 'yyyy' (see $options.endWith)",
-        "Select several dates (see $options.multiple)",
+        "Select several dates or range of dates (see $options.multiple)",
       ]}
     >
       <wup-form
@@ -69,6 +69,13 @@ export default function DateControlView() {
           w-label="Several dates (see $options.multiple)"
           w-multiple="true"
           w-initValue="2022-03-01, 2022-03-05"
+          w-exclude="window.myDateExcludeDays"
+        />
+        <wup-date
+          w-name="range"
+          w-label="Range of dates (see $options.multiple)"
+          w-multiple="range"
+          w-initValue="2022-03-14, 2022-03-20"
           w-exclude="window.myDateExcludeDays"
         />
         <div className={stylesCom.group}>
