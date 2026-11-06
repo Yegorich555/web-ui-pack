@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 1.3.1 (\_\_\_)
+## 1.3.0 (\_\_\_)
 
 ### Fixes & Improvements
 
