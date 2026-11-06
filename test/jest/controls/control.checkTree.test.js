@@ -728,6 +728,60 @@ describe("control.checkTree", () => {
     expect(ev.defaultPrevented).toBe(false);
   });
 
+  test("Shift + click & Shift + Space", async () => {
+    // without previous toggling only pointed item is toggled
+    await h.userClick(getRows()[2], { shiftKey: true }); // Write
+    expect(el.$value).toStrictEqual([12]);
+    expect(getFocused()).toBe("Write");
+
+    // every item between the previous toggled & pointed is checked; focus stays on the start of range
+    await h.userClick(getRows()[4], { shiftKey: true }); // Settings
+    expect(el.$value).toStrictEqual([12, 2, 3]);
+    expect(getFocused()).toBe("Write");
+    expect(getStates()).toStrictEqual(["Users:mixed", "Read:false", "Write:true:tab", "Reports:true", "Settings:true"]);
+    await h.userClick(getRows()[0], { shiftKey: true }); // Users: range includes its nested items
+    expect(el.$value).toStrictEqual([1, 11, 12, 2, 3]);
+    expect(getFocused()).toBe("Write");
+    // every item of range is checked => range is unchecked
+    await h.userClick(getRows()[4], { shiftKey: true });
+    expect(el.$value).toStrictEqual([11]);
+    expect(getStates()).toStrictEqual([
+      "Users:mixed",
+      "Read:true",
+      "Write:false:tab",
+      "Reports:false",
+      "Settings:false",
+    ]);
+
+    // click without Shift => new start of range
+    await h.userClick(getRows()[3]); // Reports
+    expect(el.$value).toStrictEqual([11, 2]);
+    expect(getFocused()).toBe("Reports");
+
+    // Shift + Space
+    expect(pressKey("ArrowUp")).toBe(true);
+    expect(getFocused()).toBe("Write");
+    expect(pressKey(" ", { shiftKey: true })).toBe(true);
+    expect(el.$value).toStrictEqual([1, 11, 12, 2]);
+    expect(pressKey(" ")).toBe(true); // Space without Shift => new start of range
+    expect(el.$value).toStrictEqual([11, 2]);
+
+    // control isn't focused => pointed item is focused
+    document.activeElement.blur();
+    await h.wait(1);
+    expect(el.$isFocused).toBe(false);
+    await h.userClick(getRows()[4], { shiftKey: true }); // Settings
+    expect(el.$value).toStrictEqual([1, 11, 12, 2, 3]);
+    expect(getFocused()).toBe("Settings");
+
+    // re-rendering resets start of range
+    el.$options.items = getItems();
+    await h.wait(1);
+    await h.userClick(getRows()[3], { shiftKey: true }); // Reports
+    expect(el.$value).toStrictEqual([1, 11, 12, 3]);
+    expect(getFocused()).toBe("Reports");
+  });
+
   test("option collapsible", async () => {
     el.$value = [12];
     el.$options.collapsible = true;

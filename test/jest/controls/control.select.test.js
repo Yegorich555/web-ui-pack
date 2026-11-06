@@ -1288,6 +1288,133 @@ describe("control.select", () => {
       expect(el.$value).toStrictEqual([10, 20]);
       expect(el.$isChanged).toBe(false);
     });
+
+    test("multiple: Shift + click", async () => {
+      const getLi = () => el.$refPopup.querySelectorAll("li");
+      const getSelected = () =>
+        Array.from(el.$refPopup.querySelectorAll("li[aria-selected=true]")).map((li) => li.textContent);
+      const getFocused = () => el.$refPopup.querySelector("li[focused]")?.textContent;
+      el.$options.multiple = true;
+      el.$initValue = [40];
+      await h.wait(1);
+      HTMLInputElement.prototype.focus.call(el.$refInput);
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+
+      // the last selected is the start of range if user didn't click before; values are added from start to pointed
+      await h.userClick(getLi()[1], { shiftKey: true });
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([40, 30, 20]);
+      expect(getSelected()).toStrictEqual(["Mikky", "Leo", "Splinter"]);
+      expect(getFocused()).toBe(undefined); // focus isn't changed by Shift + click
+      expect(el.$isOpened).toBe(true);
+      // every item of range is selected => range is deselected
+      await h.userClick(getLi()[2], { shiftKey: true });
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20]);
+      expect(getSelected()).toStrictEqual(["Mikky"]);
+      expect(getLi()[2].getAttribute("aria-selected")).toBe("false");
+      expect(getLi()[3].getAttribute("aria-selected")).toBe("false");
+
+      // click without Shift => new start of range that is focused
+      await h.userClick(getLi()[0]);
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20, 10]);
+      expect(getFocused()).toBe("Donny");
+      // Shift + click on the start of range toggles it
+      await h.userClick(getLi()[0], { shiftKey: true });
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20]);
+      expect(getFocused()).toBe("Donny");
+      await h.userClick(getLi()[2], { shiftKey: true });
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20, 10, 30]); // already selected Mikky is skipped
+      expect(getSelected()).toStrictEqual(["Donny", "Mikky", "Leo"]);
+      expect(getFocused()).toBe("Donny");
+
+      // only visible items are selected
+      await h.userClick(getLi()[2]); // deselect Leo => it's start of range
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20, 10]);
+      expect(await h.userTypeText(el.$refInput, "s", { clearPrevious: false })).toBe("Mikky, Donny, s|");
+      await h.wait(1);
+      expect(getLi()[2].style.display).toBe("none");
+      await h.userClick(getLi()[3], { shiftKey: true });
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20, 10, 40]); // hidden Leo is skipped
+      expect(getSelected()).toStrictEqual(["Donny", "Mikky", "Splinter"]);
+      expect(el.$refInput.value).toBe("Mikky, Donny, Splinter, ");
+      expect(getLi()[2].style.display).toBe(""); // filter is cleared
+
+      // start of range isn't found in items => Shift + click works as click
+      el.$options.items = getItems().filter((it) => it.value !== 30);
+      await h.wait(1);
+      await h.userClick(el);
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      expect(getSelected()).toStrictEqual(["Donny", "Mikky", "Splinter"]);
+      await h.userClick(getLi()[0], { shiftKey: true });
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20, 40]);
+      expect(getFocused()).toBe("Donny");
+
+      // Shift + Enter on focused item
+      const pressKey = (key, opts) => {
+        const ev = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...opts });
+        el.$refInput.dispatchEvent(ev);
+        return ev.defaultPrevented;
+      };
+      pressKey("ArrowDown");
+      pressKey("ArrowDown");
+      expect(getFocused()).toBe("Splinter");
+      expect(pressKey("Enter", { shiftKey: true })).toBe(true);
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20, 40, 10]);
+      expect(el.$isOpened).toBe(true);
+      // Shift + Enter without focused item is ignored
+      el.$closeMenu();
+      await h.wait();
+      expect(pressKey("Enter", { shiftKey: true })).toBe(false);
+      await h.wait(1);
+      expect(el.$value).toStrictEqual([20, 40, 10]);
+      expect(el.$isOpened).toBe(false);
+    });
+
+    test("multiple: changing converts value", async () => {
+      const onChange = jest.fn();
+      el.$onChange = onChange;
+      el.$initValue = 20;
+      el.$value = 30;
+      await h.wait();
+
+      onChange.mockClear();
+      el.$options.multiple = true;
+      await h.wait();
+      expect(el.$initValue).toStrictEqual([20]);
+      expect(el.$value).toStrictEqual([30]);
+      expect(el.$refInput.value).toBe("Leo");
+      expect(el.$isChanged).toBe(true);
+      expect(onChange).not.toBeCalled();
+
+      el.$value = [10, 40];
+      await h.wait();
+      onChange.mockClear();
+      el.$options.multiple = false;
+      await h.wait();
+      expect(el.$initValue).toBe(20);
+      expect(el.$value).toBe(10); // the first value
+      expect(el.$refInput.value).toBe("Donny");
+      expect(onChange).not.toBeCalled();
+
+      // empty value isn't converted
+      el.$initValue = undefined;
+      el.$value = undefined;
+      await h.wait(1);
+      el.$options.multiple = true;
+      await h.wait(1);
+      expect(el.$initValue).toBe(undefined);
+      expect(el.$value).toBe(undefined);
+    });
   });
 
   test("history undo/redo", async () => {
