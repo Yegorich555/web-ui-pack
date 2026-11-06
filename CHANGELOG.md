@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 1.3.0 (\_\_\_)
+## 1.3.0 (Nov 6, 2026)
 
 ### Fixes & Improvements
 
