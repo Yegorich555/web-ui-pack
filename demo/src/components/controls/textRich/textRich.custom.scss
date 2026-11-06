@@ -1,0 +1,73 @@
+// description of example: list per group of tools
+.description ul {
+  margin: 0.25em 0 0.5em;
+  padding-left: 1.5em;
+}
+
+// icon of custom tool `direction`: class is pointed via `className` of value in static $tools
+.iconRtl {
+  --icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M13 3H6m7 4H6m7 4H2m2-2-2 2 2 2'/%3E%3C/svg%3E");
+}
+
+// icon of custom tool `image`: class is pointed via `className` of tool in static $tools
+.iconImage {
+  --icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Crect width='11' height='9' x='2' y='3' rx='1.5'/%3E%3Cpath fill='%23000' stroke='none' d='M3 11h9l-2.5-2.5L8 10 5.5 7.5z'/%3E%3Cpath d='M10 6z'/%3E%3C/svg%3E");
+}
+
+// icon of custom tool `codeInline`
+.iconCode {
+  --icon-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 15 15'%3E%3Cpath d='M5.5 4 2 7.5l3.5 3.5m4-7 3.5 3.5L9.5 11'/%3E%3C/svg%3E");
+}
+
+// fixed width by the widest item: otherwise toolbar is shifted when selection is changed
+button.font {
+  min-width: 6.875em;
+}
+
+// the same for dropdown of custom tool `placeholder`: it's pointed via attribute `tool` instead of `className` of tool
+button[tool="placeholder"] {
+  min-width: 6.375em;
+}
+
+// custom tools `placeholder` & `mention`: class is pointed via `classNameTag` of tool in static $tools;
+// [wup-textrich] - styles of content: in editor & in value shown outside control
+[wup-textrich] .placeholder,
+[wup-textrich] .mention {
+  padding: 0 0.25em;
+  border-radius: 0.25em;
+  color: #00778d;
+  background: #009fbc26;
+}
+
+// the same colors as active link in the side menu: otherwise WCAG contrast is too low
+[wupdark] [wup-textrich] .placeholder,
+[wupdark] [wup-textrich] .mention {
+  color: $activeLinkColor;
+  background: $activeLinkBgColor;
+}
+
+// custom tool `codeInline`: the same colors as code block
+[wup-textrich] code {
+  padding: 0 0.25em;
+  border-radius: 3px;
+  background: var(--ctrl-textrich-code-bg);
+  font-family: monospace;
+}
+
+// custom tool `tag`: hashtag `#news`
+[wup-textrich] .tag {
+  color: var(--ctrl-selected);
+}
+
+// custom tool `colorCode`: swatch before color `#ff0000` (css-var is set via `create` of tool)
+[wup-textrich] .color:before {
+  content: "";
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-right: 0.25em;
+  border-radius: 2px;
+  vertical-align: -0.05em;
+  background: var(--color);
+  box-shadow: 0 0 0 1px var(--ctrl-border); // visible on the same background
+}

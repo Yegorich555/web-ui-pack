@@ -156,8 +156,23 @@
           ]
         },
         {
+          "name": "w-multiple",
+          "description": "Allow to select multiple dates (`true`) OR range of dates (`range`); in this case `$value` & `$initValue` must be `Date[]`; for `range` it's `[from, to]`: the 1st click defines the start & the 2nd one the end",
+          "values": [
+            {
+              "name": "true"
+            },
+            {
+              "name": "false"
+            },
+            {
+              "name": "range"
+            }
+          ]
+        },
+        {
           "name": "w-initvalue",
-          "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`"
+          "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`; with [w-multiple] dates are separated by comma: `2022-10-25, 2022-10-28 02:40` (`from, to` for `range`)"
         },
         {
           "name": "w-label",
@@ -620,7 +635,7 @@
       "attributes": [
         {
           "name": "w-sync",
-          "description": "Anchor to TimeControl to sync with date",
+          "description": "Anchor to TimeControl to sync with date (ignored with [w-multiple])",
           "values": [
             {
               "name": "#timeId"
@@ -751,6 +766,21 @@
           ]
         },
         {
+          "name": "w-multiple",
+          "description": "Allow to select multiple dates (`true`) OR range of dates (`range`); in this case `$value` & `$initValue` must be `Date[]`; user types the next date at the end of input; for `range` it's `[from, to]`: the 1st click defines the start & the 2nd one the end, input shows `from ... to`",
+          "values": [
+            {
+              "name": "true"
+            },
+            {
+              "name": "false"
+            },
+            {
+              "name": "range"
+            }
+          ]
+        },
+        {
           "name": "w-opencase",
           "description": "Case when menu-popup to show @defaultValue `onPressArrowKey | onClick | onFocus | onInput`",
           "references": [
@@ -806,6 +836,10 @@
           "description": "Show/hide clear button"
         },
         {
+          "name": "w-copybutton",
+          "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
+        },
+        {
           "name": "w-mask",
           "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
           "references": [
@@ -846,7 +880,7 @@
         },
         {
           "name": "w-initvalue",
-          "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`"
+          "description": "Default value in strict format `yyyy-MM-dd hh:mm:ss.fff`; with [w-multiple] dates are separated by comma: `2022-10-25, 2022-10-28 02:40` (`from, to` for `range`)"
         },
         {
           "name": "w-label",
@@ -993,6 +1027,18 @@
         {
           "name": "w-autostore",
           "description": "Enable to store data in localStorage to prevent losing till submitted"
+        },
+        {
+          "name": "w-autosubmit",
+          "description": "Submit form automatically in pointed ms after the last change made by user (only if form has no submit button); `true` means 3000ms, `false` disables \n\r  @defaultValue 3000",
+          "values": [
+            {
+              "name": "false"
+            },
+            {
+              "name": "3000"
+            }
+          ]
         },
         {
           "name": "w-autofocus",
@@ -1218,6 +1264,10 @@
         {
           "name": "w-clearbutton",
           "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-copybutton",
+          "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
         },
         {
           "name": "w-mask",
@@ -1482,6 +1532,10 @@
         {
           "name": "w-clearbutton",
           "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-copybutton",
+          "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
         },
         {
           "name": "w-initvalue",
@@ -1785,6 +1839,10 @@
           "description": "Show/hide clear button"
         },
         {
+          "name": "w-copybutton",
+          "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
+        },
+        {
           "name": "w-mask",
           "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
           "references": [
@@ -2019,6 +2077,10 @@
         {
           "name": "w-clearbutton",
           "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-copybutton",
+          "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
         },
         {
           "name": "w-mask",
@@ -2417,6 +2479,10 @@
           "description": "Show/hide clear button"
         },
         {
+          "name": "w-copybutton",
+          "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
+        },
+        {
           "name": "w-mask",
           "description": "Make input masked; 0-required digit, #-optional digit, *-any char, *{1,5} - any 1..5 chars",
           "references": [
@@ -2571,10 +2637,18 @@
       "references": [
         {
           "name": "demo",
-          "url": "https://yegorich555.github.io/web-ui-pack/control/textarea"
+          "url": "https://yegorich555.github.io/web-ui-pack/control/textArea"
         }
       ],
       "attributes": [
+        {
+          "name": "w-allowresizeh",
+          "description": "Allow user to change height of input by dragging its bottom-right corner (css `resize: vertical`); after resizing max-height isn't applied @defaultValue false"
+        },
+        {
+          "name": "w-allowresizew",
+          "description": "Allow user to change width of input by dragging its bottom-right corner (css `resize: horizontal`); after resizing control fits the input width (can be wider than parent) @defaultValue false"
+        },
         {
           "name": "w-debouncems",
           "description": "Time to wait for user finishes typing to start validate and provide $change event"
@@ -2586,6 +2660,166 @@
         {
           "name": "w-clearbutton",
           "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-copybutton",
+          "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
+        },
+        {
+          "name": "w-initvalue",
+          "description": "Default value"
+        },
+        {
+          "name": "w-label",
+          "description": "Title/label of control \n\r`null` means auto=>parsed from option [name]. To skip point `label=''` (empty string)"
+        },
+        {
+          "name": "w-name",
+          "description": "Property/key of model (collected by form); \n\r Point `empty-string` to partially detach (exclude from `form.$model`, `form.$isChanged`, but include in validations & submit) \n\r or Skip attr to completely detach from form",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-autofocus",
+          "description": "Focus element when it's appended to layout"
+        },
+        {
+          "name": "w-autocomplete",
+          "description": "Name to autocomplete by browser; Point `true` to inherit from $options.name or some string if control has no autocomplete option then it's inherited from form \n\r`null` means false if form.$options.autoComplete false also"
+        },
+        {
+          "name": "disabled",
+          "description": "Disallow edit/copy value; use attr [disabled] for styling. Point string (reason) to show it via tooltip"
+        },
+        {
+          "name": "readonly",
+          "description": "Disallow copy value; use attr [readonly] for styling. Point string (reason) to show it via tooltip"
+        },
+        {
+          "name": "w-clearactions",
+          "description": "Behavior that expected for clearing value inside control (via pressEsc or btnClear) @defaultValue `initClearBack`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.ClearActions",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-validations",
+          "description": "Rules enabled for current control (related to $defaults.validationRules); \n\r Point Global reference to object",
+          "values": [
+            {
+              "name": "window.myValidations"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[validations]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-validatedebouncems",
+          "description": "Wait for pointed time after valueChange before showError (it's summarized with $options.debounceMs); WARN: hide error without debounce @defaultValue 500"
+        },
+        {
+          "name": "w-validationshowall",
+          "description": "Show all validation-rules with checkpoints as list instead of single error"
+        },
+        {
+          "name": "w-storagekey",
+          "description": "Storage key for auto saving value in storage. Point `true` to use built-in key-generator or point custom key",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storageKey]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-storage",
+          "description": "Type of storage for saving value",
+          "values": [
+            {
+              "name": "local"
+            },
+            {
+              "name": "session"
+            },
+            {
+              "name": "url"
+            }
+          ],
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[storage]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        },
+        {
+          "name": "w-enableinitonchange",
+          "description": "Fire `$change` event on init (with reason `initValue`) even if value is empty; by default `$change` fires on init only if value is restored from storage (then reason `storage` is used) @defaultValue `false`",
+          "references": [
+            {
+              "name": "@see WUP.BaseControl.Options[enableInitOnChange]",
+              "url": "https://github.com/Yegorich555/web-ui-pack/blob/master/src/controls/baseControl.ts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wup-textrich",
+      "description": "Form-control with rich text editor (WYSIWYG): text is formatted via toolbar",
+      "references": [
+        {
+          "name": "demo",
+          "url": "https://yegorich555.github.io/web-ui-pack/control/textRich"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "w-allowresizeh",
+          "description": "Allow user to change height of input by dragging its bottom-right corner (css `resize: vertical`); after resizing max-height isn't applied @defaultValue false"
+        },
+        {
+          "name": "w-allowresizew",
+          "description": "Allow user to change width of input by dragging its bottom-right corner (css `resize: horizontal`); after resizing control fits the input width (can be wider than parent) @defaultValue false"
+        },
+        {
+          "name": "w-toolbar",
+          "description": "Global reference to object with array of toolbar groups (see WUP.TextRich.ToolbarGroup); tools work only if they're listed (hidden ones too): shortcuts, recognizing etc.; null or empty array hides toolbar & turns tools off (to keep them hide toolbar via css: wup-textrich [role=\"toolbar\"] { display: none }). Example: window.myToolbar = [[\"bold\", \"italic\"], [\"header\"], [\"clean\"]]"
+        },
+        {
+          "name": "w-hidehotkeyshint",
+          "description": "Hide keyboard shortcuts in tooltips & dropdown items (`Bold (Ctrl+B)` => `Bold`); `aria-keyshortcuts` is set anyway"
+        },
+        {
+          "name": "w-copypasteformatted",
+          "description": "Paste & drop content with its formats (only formats of tools are kept, Ctrl+Shift+V gives plain text anyway), otherwise it is plain text: copied html has page styles (font size etc.) @defaultValue false"
+        },
+        {
+          "name": "w-debouncems",
+          "description": "Time to wait for user finishes typing to start validate and provide $change event"
+        },
+        {
+          "name": "w-selectonfocus",
+          "description": "Select whole text when input got focus (when input is not readonly and not disabled)"
+        },
+        {
+          "name": "w-clearbutton",
+          "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-copybutton",
+          "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
         },
         {
           "name": "w-initvalue",
@@ -2827,6 +3061,10 @@
         {
           "name": "w-clearbutton",
           "description": "Show/hide clear button"
+        },
+        {
+          "name": "w-copybutton",
+          "description": "Show/hide copy button: click copies text of input into clipboard @defaultValue false"
         },
         {
           "name": "w-mask",

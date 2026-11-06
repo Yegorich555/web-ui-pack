@@ -2,7 +2,10 @@
 
 :root {
   --ctrl-clr-selected: #fff;
-  --ctrl-clr-selected-bg: #009fbc;
+  --ctrl-clr-selected-bg: #007e95; // WCAG AA (4.5:1) with white text
+  // Shift + hover: items that click selects/deselects; dates inside selected range (option `multiple: "range"`)
+  /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+  --ctrl-clr-range-bg: color-mix(in srgb, var(--ctrl-clr-selected-bg) 30%, transparent);
   --ctrl-clr-w: 17em;
   --ctrl-clr-cell-gap: 0px;
   --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
@@ -143,6 +146,21 @@
     opacity: 1;
   }
 
+  li[wup-range] {
+    background-color: var(--ctrl-clr-range-bg);
+    opacity: 1;
+
+    &[aria-selected] {
+      color: inherit; // it's deselected by Shift + click
+    }
+  }
+
+  // dates between `from` & `to` of selected range (option `multiple: "range"`)
+  li[in-range] {
+    background-color: var(--ctrl-clr-range-bg);
+    color: inherit;
+  }
+
   li[focused] {
     box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
     opacity: 1;
@@ -226,6 +244,10 @@
   :host {
     [calendar] > div {
       overflow: hidden;
+    }
+
+    ol > li {
+      transition: background-color var(--anim), color var(--anim); // smooth highlighting of range [wup-range] & selection
     }
 
     [zoom] {

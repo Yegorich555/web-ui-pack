@@ -1,4 +1,6 @@
 /* eslint-disable no-promise-executor-return */
+import Code from "src/elements/code";
+import Example from "src/elements/example";
 import Page from "src/elements/page";
 import { WUPModalElement, WUPSelectControl, WUPSpinElement } from "web-ui-pack";
 import { ClearActions } from "web-ui-pack/controls/baseControl";
@@ -36,6 +38,13 @@ const items = [
   items,
   initArr: [items[0].value, items[1].value],
 };
+
+/** Items bound to custom HTML by index (item.text is used for input & filtering) */
+const customItems: WUP.Select.MenuItem[] = [
+  { text: "Donny", value: 1 },
+  { text: "Mikky", value: 2 },
+  { text: "Leo", value: 3 },
+];
 
 (window as any)._someSelectValidations = { required: true } as WUP.Select.Options["validations"];
 (window as any)._someSelectValidations2 = { required: false } as WUP.Select.Options["validations"];
@@ -241,6 +250,37 @@ export default function SelectControlView() {
             }
           }}
         />
+        <Example header="Customized via HTML" link="demo/src/components/controls/select.tsx">
+          <wup-select
+            w-name="customViewHtml"
+            w-label="Customized via HTML"
+            ref={(el) => {
+              if (el) {
+                el.$options.items = customItems;
+              }
+            }}
+          >
+            <ul>
+              <li>
+                <span>
+                  <b>Donny</b> <small>(admin)</small>
+                </span>
+              </li>
+              <li>
+                <span>
+                  <b>Mikky</b> <small>(editor)</small>
+                </span>
+              </li>
+              <li>
+                <span>
+                  <b>Leo</b> <small>(viewer)</small>
+                </span>
+              </li>
+            </ul>
+          </wup-select>
+          <Code code={codeHtml} />
+          <Code code={code} />
+        </Example>
         <SelectControlDesc />
         <FAQ
           endString=""
@@ -267,3 +307,27 @@ export default function SelectControlView() {
     </Page>
   );
 }
+
+const codeHtml = `html
+<!-- html -->
+<wup-select w-name="customViewHtml">
+  <!-- single wrapper inside <li> because selected item is [display: flex] (otherwise spaces between elements are lost) -->
+  <ul>
+    <li><span><b>Donny</b> <small>(admin)</small></span></li>
+    <li><span><b>Mikky</b> <small>(editor)</small></span></li>
+    <li><span><b>Leo</b> <small>(viewer)</small></span></li>
+  </ul>
+</wup-select>`;
+
+const code = `js
+// js
+import WUPSelectControl from "web-ui-pack";
+WUPSelectControl.$use(); // register control
+const el = document.querySelector("wup-select");
+// items are bound to <li> by index; item.text is used for input & filtering
+el.$options.items = [
+  { text: "Donny", value: 1 },
+  { text: "Mikky", value: 2 },
+  { text: "Leo", value: 3 },
+];
+// WARN: it's important to update .$options.items with html-changes`;

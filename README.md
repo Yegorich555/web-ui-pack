@@ -86,19 +86,19 @@ It's developed with [Typescript](https://www.typescriptlang.org/) and has huge b
       - [x] Full customized
     - [x] [TextControl](src/controls/text.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
       - [x] [Mask/pattern for controls](src/controls/text.mask.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/text)
-      - [x] [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
-        - [ ] TextRichControl
+      - [x] [TextAreaControl](src/controls/textArea/textArea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textArea)
+        - [x] [TextRichControl (WYSIWYG)](src/controls/textRich/textRich.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textRich)
       - [x] [PasswordControl](src/controls/password.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/password)
       - [x] [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
       - [x] [_BaseComboControl_](src/controls/baseCombo.ts)
         - [x] [SelectControl (combobox)](src/controls/select.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/select)
-          - [ ] Full customized menu
+          - [x] Full customized menu
           - [x] [SelectManyControl](src/controls/selectMany.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/selectMany)
         - [ ] SearchControl
         - [x] [TimeControl](src/controls/time.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/time)
         - [x] [DateControl](src/controls/date.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/date)
           - [x] option `sync` to sync with TimeControl
-          - [ ] option `multiple`
+          - [x] option `multiple`
           - [ ] DateTimeControl
           - [ ] DateRangeControl
     - [x] [CalendarControl](src/controls/calendar.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/calendar)
@@ -285,6 +285,7 @@ use `import focusFirst from "web-ui-pack/helpers/focusFirst"` etc.\
 - [**onScrollStop**](src/helpers/onScrollStop.ts) ⇒ `Returns callback when scrolling is stopped (via checking scroll position every frame-render)`
 - [**onFocusLost**](src/helpers/onFocusLost.ts) ⇒ `Fires when element/children completely lost focus`
 - [**onSpy**](src/helpers/onSpy.ts) ⇒ `Spy on method-call of object`
+- [**onSwipe**](src/helpers/onSwipe.ts) ⇒ `Handles horizontal swipe by touch & pen (shift, fling velocity, prevents click after swipe)`
 
 #### Helpers.String
 

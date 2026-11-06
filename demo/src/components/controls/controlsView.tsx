@@ -10,10 +10,14 @@ import {
   WUPPasswordControl,
   WUPSelectManyControl,
   WUPFormElement,
+  WUPTextAreaControl,
+  WUPTextRichControl,
 } from "web-ui-pack";
 
 WUPFormElement.$use();
 WUPTextControl.$use();
+WUPTextAreaControl.$use();
+WUPTextRichControl.$use();
 WUPPasswordControl.$use();
 WUPSelectControl.$use();
 WUPSelectManyControl.$use();
@@ -61,12 +65,16 @@ export default function ControlsView() {
         <>
           Option <b>autoStore</b> prevents losing not-sumbitted data
         </>,
+        <>
+          Option <b>autoSubmit</b> submits changes automatically (debounced) without submit button
+        </>,
       ]}
       details={{ tag: "wup-form", linkDemo: "demo/src/components/controls/controlsView.tsx", customHTML, customJS }}
     >
       <wup-form
-        w-autoComplete={false}
-        w-autoStore={false}
+        w-autoComplete="false"
+        w-autoStore="false"
+        w-autoSubmit={3000}
         w-autoFocus
         disabled={false}
         readonly={false}
@@ -77,8 +85,19 @@ export default function ControlsView() {
             el.$onSubmit = (e) => {
               console.warn("submitted model", e.detail.model);
               console.warn("to convert model to FormData use helper: web-ui-pack/helpers/objectToFormData");
-              // eslint-disable-next-line no-promise-executor-return
-              return new Promise((resolve) => setTimeout(resolve, 1000));
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              return new Promise<WUP.Form.SubmitMessage>((resolve, _reject) =>
+                setTimeout(() => {
+                  resolve({
+                    notifyMessage: "This is success-message handles from $onSubmit<Promise<WUP.Form.SubmitMessage>>",
+                  });
+
+                  // eslint-disable-next-line prefer-promise-reject-errors
+                  // reject({
+                  //   notifyMessage: "This is fail-message handles from $onSubmit<Promise<WUP.Form.SubmitMessage>>",
+                  // });
+                }, 1000)
+              );
             };
           }
         }}
@@ -119,8 +138,31 @@ export default function ControlsView() {
         />
         <wup-date w-name="date" />
         <wup-time w-name="time" />
+        <wup-textarea w-name="textArea" />
+        <wup-textrich w-name="textRich" />
         <button type="submit">Submit (see result into browser console)</button>
       </wup-form>
+      <section>
+        <h3>Auto-submit</h3>
+        <small>
+          Changes are submitted in 1000ms after the last one (<b>w-autoSubmit="1000"</b>). Without submit button the
+          result is shown via notification
+        </small>
+        <wup-form
+          w-autoSubmit={1000}
+          ref={(el) => {
+            if (el) {
+              el.$onSubmit = (e) => {
+                console.warn("auto-submitted model", e.detail.model);
+                return new Promise((resolve) => setTimeout(resolve, 500));
+              };
+            }
+          }}
+        >
+          <wup-switch w-name="notifications" w-label="Email notifications" />
+          <wup-text w-name="nickname" />
+        </wup-form>
+      </section>
     </Page>
   );
 }
@@ -130,6 +172,7 @@ const customHTML = [
 <wup-form
   w-autocomplete="false"
   w-autostore="false"
+  w-autosubmit="3000"
   w-autofocus="false"
   readonly="false"
   disabled="false"
@@ -149,8 +192,17 @@ form.$onSubmit = (e) => {
   // post request here
   console.warn("submitted model", e.detail.model);
   // return promise to block form and show spinner
-  return new Promise<boolean>((resolve) => setTimeout(resolve, 1000));
-};
+  return new Promise<WUP.Form.SubmitMessage>((resolve, reject) =>
+  setTimeout(() => {
+    resolve({
+      notifyMessage: "This is success-message handles from $onSubmit<Promise<WUP.Form.SubmitMessage>>",
+    });
+
+    // eslint-disable-next-line prefer-promise-reject-errors
+    // reject({
+    //   notifyMessage: "This is fail-message handles from $onSubmit<Promise<WUP.Form.SubmitMessage>>",
+    // });
+  }, 1000)};
 
 const iFirstName = form.$controls[0] as WUPTextControl;
 iFirstName.$options.validations = { required: true };

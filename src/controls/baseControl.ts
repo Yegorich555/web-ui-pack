@@ -1,5 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import WUPBaseElement, { AttributeMap, AttributeTypes } from "../baseElement";
+// eslint-disable-next-line import/no-cycle -- const enum only: values are inlined by TS so import is removed in build result
 import WUPFormElement from "../formElement";
 import isEqual from "../helpers/isEqual";
 import nestedProperty from "../helpers/nestedProperty";
@@ -190,18 +191,18 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface JSXProps<C = WUPBaseControl> extends WUP.Base.OnlyNames<Options> {
       /** Default value in string/boolean/number representation (depends on `control.prototype.parse()`) */
-      "w-initValue"?: string | boolean | number;
+      "w-initValue"?: string | number | WUP.Base.JSXBoolAttr;
       "w-label"?: string;
       "w-name"?: string;
-      "w-autoFocus"?: boolean | "" | "true" | "false";
-      "w-autoComplete"?: string | boolean;
+      "w-autoFocus"?: WUP.Base.JSXBoolAttr;
+      "w-autoComplete"?: string | WUP.Base.JSXBoolAttr;
 
       /** @deprecated use [disabled] instead since related to CSS-styles */
-      "w-disabled"?: boolean | "";
+      "w-disabled"?: WUP.Base.JSXBoolAttr;
       /** Point string (reason) to show it via tooltip */
       disabled?: boolean | string;
       /** @deprecated use [readonly] instead since related to CSS-styles */
-      "w-readonly"?: boolean | "";
+      "w-readonly"?: WUP.Base.JSXBoolAttr;
       /** Point string (reason) to show it via tooltip */
       readonly?: boolean | string;
 
@@ -222,11 +223,11 @@ declare global {
        * @defaultValue null */
       "w-validations"?: string;
       "w-validateDebounceMs"?: number;
-      "w-validationShowAll"?: boolean | "";
+      "w-validationShowAll"?: WUP.Base.JSXBoolAttr;
       /** Expected 'true' for getting from w-name or another string to override default */
-      "w-storageKey"?: boolean | string;
+      "w-storageKey"?: WUP.Base.JSXBoolAttr | string;
       "w-storage"?: "local" | "session" | "url";
-      "w-enableInitOnChange"?: boolean | "";
+      "w-enableInitOnChange"?: WUP.Base.JSXBoolAttr;
       /** @readonly Use [required] for styling */
       readonly required?: "";
       /** @readonly Use [invalid] for styling */
@@ -239,6 +240,13 @@ declare global {
 
 /** Controls grouped by `storage:storageKey`: to sync value between controls pointed to the same storage & key */
 const storageSyncMap = new Map<string, Set<WUPBaseControl>>();
+
+/** Adds/removes id in `aria-describedby`: other descriptions of element are kept */
+function toggleDescribedBy(el: Element, id: string, isAdd: boolean): void {
+  const ids = (el.getAttribute("aria-describedby") ?? "").split(" ").filter((s) => s && s !== id);
+  isAdd && ids.push(id);
+  ids.length ? el.setAttribute("aria-describedby", ids.join(" ")) : el.removeAttribute("aria-describedby");
+}
 
 /** Base abstract form-control */
 export default abstract class WUPBaseControl<
@@ -476,17 +484,12 @@ export default abstract class WUPBaseControl<
     el.className = this.#ctr.classNameHidden;
     el.id = this.#ctr.$uniqueId;
     const i = this.$refInput;
-    const an = "aria-describedby";
-    i.setAttribute(an, `${i.getAttribute(an) || ""} ${el.id}`.trimStart());
+    toggleDescribedBy(i, el.id, true);
     this.appendChild(el);
     setTimeout(() => (el.textContent = text), delayMs); // otherwise reader doesn't announce section
     setTimeout(() => {
       el.remove();
-      const a = i.getAttribute(an);
-      if (a != null) {
-        const aNext = a.replace(el.id, "").replace("  ", " ").trim();
-        aNext ? i.setAttribute(an, aNext) : i.removeAttribute(an);
-      }
+      toggleDescribedBy(i, el.id, false);
     }, 500); // WARN: expected that 500ms is enough to get action from screen-reader
   }
 
@@ -901,7 +904,7 @@ export default abstract class WUPBaseControl<
     const renderedErr = (this.$refError as StoredRefError)._wupVldItems?.find((li) => li.textContent === err);
     this.setAttr.call(el, "class", renderedErr ? this.#ctr.classNameHidden : null);
 
-    target.setAttribute("aria-describedby", this.$refError.id); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
+    toggleDescribedBy(target, this.$refError.id, true); // watchfix: nvda doesn't read aria-errormessage: https://github.com/nvaccess/nvda/issues/8318
     if (!this.$isFocused) {
       this.$refError!.setAttribute("role", "alert"); // force to announce error when focus is already missed
       renderedErr?.scrollIntoView();
@@ -918,7 +921,7 @@ export default abstract class WUPBaseControl<
       this.$refError = undefined;
 
       (this.#refErrTarget as HTMLInputElement).setCustomValidity?.call(this.#refErrTarget, "");
-      this.#refErrTarget!.removeAttribute("aria-describedby");
+      toggleDescribedBy(this.#refErrTarget!, p.id, false);
       this.removeAttribute("invalid");
       this.#refErrTarget = undefined;
     }
@@ -1054,6 +1057,19 @@ export default abstract class WUPBaseControl<
     }
 
     return true;
+  }
+
+  /** Replaces $initValue & $value by result of `convert` (ex. when option `multiple` is changed: value => [value]);
+   *  without $change event & keeping attr [w-initvalue] */
+  protected convertValue(convert: (v: ValueType | undefined) => ValueType | undefined): void {
+    const iv = this.$initValue;
+    if (convert(iv) !== iv) {
+      (this as any)._noDelInitValueAttr = true; // otherwise attr [w-initvalue] is removed
+      this.$initValue = convert(iv); // it changes $value also if control isn't changed
+      delete (this as any)._noDelInitValueAttr;
+    }
+    const v = this.$value;
+    convert(v) !== v && this.setValue(convert(v), SetValueReasons.initValue);
   }
 
   /** Fires `$change` event (async) */

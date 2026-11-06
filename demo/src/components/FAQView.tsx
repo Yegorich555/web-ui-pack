@@ -215,14 +215,14 @@ const codeCssVars = `css
 body { /* Redefine css variables */
   background: #f3f6f9;
   color: black;
-  --base-btn-bg: #009fbc;
+  --base-btn-bg: #007e95;
   --border-radius: 0;
   --ctrl-label: #028198; /* etc. */
 }
 body[wupdark] {
   background: #161b24;
   color: white;
-  --ctrl-label: #919191; /* etc. */
+  --ctrl-label: #a6a6a6; /* etc. */
 }`;
 
 const codeAttrs = `js

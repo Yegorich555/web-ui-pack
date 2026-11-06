@@ -64,12 +64,40 @@
   border-top-left-radius: $borderRadius;
 }
 
-:root {
-  // todo develop different types ???
-  --toastify-color-info: #3498db;
-  --toastify-color-success: #07bc0c;
-  --toastify-color-warning: #f1c40f;
-  --toastify-color-error: #e74c3c;
+.types {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+
+  > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+  }
+
+  // the same colors & icons as notify-element has per type
+  @each $t in (info, success, warning, error) {
+    > button[data-type="#{$t}"] {
+      --base-btn-bg: var(--notify-#{$t}-bg);
+      --base-btn-text: var(--notify-#{$t}-text);
+
+      &:before {
+        content: "";
+        width: 1.2em;
+        height: 1.2em;
+        background: var(--notify-#{$t});
+        /* stylelint-disable plugin/no-unsupported-browser-features */
+        mask-image: var(--wup-icon-#{$t});
+        mask-size: contain;
+        mask-repeat: no-repeat;
+        /* stylelint-enable plugin/no-unsupported-browser-features */
+      }
+    }
+  }
 }
 
 .inlineCenter {

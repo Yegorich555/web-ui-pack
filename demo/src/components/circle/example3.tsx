@@ -10,7 +10,7 @@ export default function Example3() {
       </small>
       <wup-circle
         style={{ maxWidth: "120px" }}
-        w-back={false}
+        w-back="false"
         w-from={-90}
         w-to={270}
         ref={(el) => {
@@ -40,7 +40,7 @@ export default function Example3() {
       </small>
       <wup-circle
         class={styles.half}
-        w-back={false}
+        w-back="false"
         w-from={-90}
         w-to={90}
         ref={(el) => {

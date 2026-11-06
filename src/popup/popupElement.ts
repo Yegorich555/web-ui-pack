@@ -124,7 +124,7 @@ export default class WUPPopupElement<
   static get mappedAttributes(): Record<string, AttributeMap> {
     return {
       target: {
-        type: AttributeTypes.string,
+        type: AttributeTypes.selector,
       },
       placement: {
         type: AttributeTypes.parseCustom,
@@ -392,21 +392,16 @@ export default class WUPPopupElement<
   /** Defines target on show; @returns Element
    * @throws Error if target isn't found */
   defineTarget(): HTMLElement | SVGElement {
-    let el: Element | null;
-    const attrTrg = this.getAttribute("w-target"); // NiceToHave: re-use automated parseAttr()
-    if (attrTrg) {
-      el = document.querySelector(attrTrg);
-    } else if (this._opts.target) {
-      return this._opts.target;
-    } else {
-      el = this.previousElementSibling;
-    }
+    const trg = this._opts.target as Element | string | null | undefined; // string if [w-target] isn't found on parsing
+    const el = typeof trg === "string" ? this.findBySelector(trg) : trg || this.previousElementSibling;
     if (el instanceof HTMLElement || el instanceof SVGElement) {
       return el;
     }
 
     throw new Error(
-      `${this.tagName}. Target as HTMLElement|SVGElement is not defined'${attrTrg ? ` for ${attrTrg}` : ""}'`
+      `${this.tagName}. Target as HTMLElement|SVGElement is not defined'${
+        typeof trg === "string" ? ` for ${trg}` : ""
+      }'`
     );
   }
 

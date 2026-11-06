@@ -1,0 +1,10 @@
+.form {
+  // 2 calendars in a row (+ section paddings) don't fit the default form width
+  /* stylelint-disable-next-line plugin/no-unsupported-browser-features */
+  max-width: fit-content;
+}
+
+.row {
+  justify-content: center; // aligns rows inside & outside the section
+  flex-wrap: wrap; // for narrow screens
+}

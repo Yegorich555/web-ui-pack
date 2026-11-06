@@ -2,6 +2,97 @@
 
 # Changelog
 
+## 1.3.0 (\_\_\_)
+
+### Fixes & Improvements
+
+- **Global**
+  - Fixed TypeScript of boolean attributes for all elements & controls: `{false}` isn't allowed anymore (React 19 & Preact remove attribute with boolean `false` so option falls back to `$defaults`)
+  - _Changing of attributes is ignored forever after any error during applying options (ex. popup target isn't found)_
+  - Increased color contrast according to WCAG AA (text was below 4.5:1)
+    - `--base-btn-bg` (primary & submit buttons) and `--ctrl-clr-selected-bg` (selected day of calendar): `#009fbc` => `#007e95`
+    - dark mode. `--ctrl-label` (labels & icons of controls): `#919191` => `#a6a6a6`
+    - dark mode. `--ctrl-focus-label`, `--ctrl-selected`, `--ctrl-time-current`, `--sort-active-color`, `--sort-active-shadow`: `#25a1b6` => `#40c2d8`
+    - light mode. `--sort-active-color`, `--sort-active-shadow`: `#25a1b6` => `#00778d`
+- [TextAreaControl](src/controls/textArea/textArea.ts).
+  - **BREAKING:** renamed `WUPTextareaControl` => `WUPTextAreaControl`, `WUP.Textarea` => `WUP.TextArea`, `web-ui-pack/controls/textarea` => `web-ui-pack/controls/textArea` (tag `wup-textarea` isn't changed)
+  - _JSX/TSX props offer unsupported `w-mask`, `w-maskholder`, `w-prefix`, `w-postfix`_
+  - _`$value` contains html-escaped chars (typed `a < b` gives `a &lt; b`) & html of `$value` is rendered (scripts of `<img onerror>` are executed)_
+  - Fixed _Undo/redo after new line: line break is removed instead of typed text (`abc`, Enter, `d`, Ctrl+Z gives `abcd`); new line & pasted text aren't undone_
+  - _Readonly & disabled doesn't prevent editing_
+- [NotifyElement](src/notifyElement.ts)
+  - Improved performance: no forced re-layouts & extra timers on opening (position in the stack is defined via css `translate`)
+  - _Re-opened element is closed earlier by the timer of previous opening_
+  - _Custom buttons `[close]` placed inside element don't close it_
+  - _Repeated pause (ex. hover + window blur) shortens time left before closing_
+  - _Changing options of opened element is ignored (`$options.placement` removes position styles)_
+  - _Progress bar is scrolled with overflowed content_
+  - _Long words without spaces (urls etc.) aren't wrapped & overflow the element_
+  - _Option **autoClose** less than `100` throws error_
+- [TimeControl](src/controls/time.ts). Improved quality of icon
+- [CheckTreeControl](src/controls/checkTree.ts). Icon of partially checked item is customizable via css-var `--wup-icon-minus` (previously it was drawn via css)
+- [Form](src/formElement.ts). _**SubmitActions.reset**: values changed by user during the pending state are assigned to `$initValue`/`$initModel` on success (considered as submitted)_
+- [CalendarControl](src/controls/calendar.ts). _Option **storageKey** with **utc** saves date shifted by timezone (the previous day for timezones behind UTC)_
+- [SelectControl](src/controls/select.ts). _Changing option **multiple** at runtime throws errors: `$value` & `$initValue` aren't converted (now `value` => `[value]` OR `values` => the first value)_
+- [TextControl](src/controls/text.ts) & inherited. _Ctrl+Z restores wrong text after text is changed programmatically when the new text ends with the same chars as before the change (ex. `"a, "` => `"a, b, "`)_
+- [SwitchControl](src/controls/switch.ts) & inherited, [RadioControl](src/controls/radio.ts). _Click does nothing in Chrome while the page has selected text (until selection is reset by click outside)_
+- [ModalElement](src/modalElement.ts). _Text inside opened modal can't be selected_
+- [DropdownElement](src/dropdownElement.ts).
+  - **BREAKING:** changed default styles of buttons (previously every `<button>` inside `<wup-dropdown>` had primary-button style)
+
+  - toggle button (direct child `wup-dropdown > button`) has neutral style: inherited font & color, no background, chevron icon at the right (rotated when menu is opened), hover/focus background via css-vars `--icon-hover-bg` & `--icon-focus-bg`
+  - buttons inside menu aren't styled anymore (it's custom content)`
+  - to restore previous styles add the following code once after `WUPDropdownElement.$use()`
+
+    ```js
+    import { useBuiltinStyle, WUPcssButton } from "web-ui-pack/styles";
+
+    // :root increases specificity, so styles override built-in ones regardless of order in <head>
+    useBuiltinStyle(`${WUPcssButton(":root wup-dropdown button")}
+      :root wup-dropdown button {
+        display: inline-block;
+        min-width: initial;
+        margin: 0;
+        padding: 0.7em;
+        white-space: normal;
+      }
+      :root wup-dropdown > button:after {
+        content: none;
+      }`);
+    ```
+
+  - to restore styles of menu buttons only (and keep new style of toggle button) use `useBuiltinStyle(WUPcssButton(":root wup-dropdown [menu] button"))` with the same `min-width`, `margin`, `padding` overrides for selector `:root wup-dropdown [menu] button`
+
+### New Features
+
+- helper [onSwipe](src/helpers/onSwipe.ts)
+- [TextRichControl](src/controls/textRich/textRich.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textRich) (WYSIWYG editor)
+- [TextAreaControl](src/controls/textArea/textArea.ts)
+  - Added footer with count of chars `{count} / {max}` (see **$options.hideFooter** & **$renderFooter** to customize content)
+  - Added options **allowResizeH** & **allowResizeW** (attributes `[w-allowresizeh]`, `[w-allowresizew]`, `false` by default): user can change height/width by dragging the bottom-right corner (after resizing max-height isn't applied & control fits the input width)
+- [NotifyElement](src/notifyElement.ts)
+  - Added option **id** to `WUPNotifyElement.$show(...)`: if notification with the same id exists then it's refreshed (content & options updated, closing-time restarted) instead of showing new one; closing (or closed but not removed) one is re-opened
+  - Added option **closeOnSwipe** (`true` by default): on touch devices element follows the horizontal swipe & closes when it's swiped out (like messages in popular mobile apps)
+  - Progress bar is mirrored for right placements (shrinks to the right side)
+  - Added option **type** (`info`, `success`, `warning`, `error`; attribute `[w-type]`): icon at the left side, background, text & progress bar in colors of the type (css-vars `--notify-{type}` for icon & progress, `--notify-{type}-bg`, `--notify-{type}-text`)
+- [DateControl](src/controls/date.ts) & [CalendarControl](src/controls/calendar.ts)
+  - Added option **multiple** (attribute `[w-multiple]`) to select several dates: `$value` is `Date[]`, click (or Enter) on date selects it or removes if it's already selected (menu stays opened); `[w-initvalue]` expects dates separated by comma (`"2022-10-25, 2022-10-28"`); for DateControl user types the next date at the end of input (with mask; completed date is added, already selected is ignored), Backspace/Delete removes the whole date & validations **min**, **max**, **exclude** are checked for every date
+  - With option **multiple** Shift + click selects every date between the previous clicked (or the last selected) and pointed one (as OS does with files) or deselects them if they're already selected; disabled dates are skipped; while Shift is pressed hovered range is highlighted (dates that click changes get attr `[wup-range]`, css-var `--ctrl-clr-range-bg`)
+  - Option **multiple** accepts `"range"` (attribute `[w-multiple="range"]`) to select range of dates: `$value` is `[from, to]` (`from <= to`), the 1st click defines the start & the 2nd one the end (DateControl closes menu), dates between the start & hovered/focused one are highlighted (`[wup-range]`) & dates inside selected range get attr `[in-range]`; disabled dates can be inside range; for DateControl input shows `from ... to` (mask is applied to both dates) & validations **min**, **max**, **exclude** are checked for `from` & `to`
+  - Added static **WUPCalendarControl.$rangeDelimiter** (`" ... "` by default) for title of years picker & for value with `multiple: "range"` (announced value of CalendarControl, input of DateControl)
+- [TextControl](src/controls/text.ts) & inherited.
+  - Added option **copyButton** (attribute `[w-copybutton]`, `false` by default) to clear content into clipboard
+  - Added tooltip for **clearButton**
+- [SelectControl](src/controls/select.ts) & [SelectManyControl](src/controls/selectMany.ts)
+  - Added customization of menu via HTML: place `<ul>` with items inside the control; `<li>` elements are bound to **$options.items** by index (see example in JSDoc & demo)
+  - With option **multiple** (SelectManyControl always) Shift + click on menu item selects every visible item between the previous clicked (or the last selected) and pointed one (as OS does with files) or deselects them if they're already selected
+- [CheckTreeControl](src/controls/checkTree.ts). Shift + click (or Shift + Space) checks every item between the previous toggled and pointed one with nested items (as OS does with files) or unchecks them if they're already checked; disabled & readonly items are skipped
+- [Form](src/formElement.ts)
+  - Added notification for submit result (return `{notifyMessage: 'Success', type: "success"}` in $onSubmit Promise result/error to show wup-notify)
+  - Added option **autoSubmit** (attribute `[w-autosubmit]`): form without submit button is submitted automatically in pointed ms after the last change made by user (if it's valid; errors aren't shown) & success result is shown via wup-notify. On browser exit (closing tab, reload) waiting changes are submitted at once & browser asks user to stay till the end of submit. **BREAKING:** enabled by default (`3000`ms), point `false` to disable
+
+---
+
 ## 1.2.9 (Oct 2, 2026)
 
 ### Fixes & Improvements
@@ -505,7 +596,7 @@
   - _Wrong size of monthPicker if previously scroll dayPicker to min/max date_
   - _User can't scroll when `$initValue` > `$options.max`_
 - [DateControl](src/controls/date.ts). _Menu isn't closed if click on the selected date_
-- [TextareaControl](src/controls/textarea.ts)
+- [TextAreaControl](src/controls/textArea/textArea.ts)
   - _Exception when try to clear empty control_
   - _`Ctrl + Z` doesn't revert changes_
 - [NumberControl](src/controls/number.ts). _option `format` isn't applied on init_
@@ -636,7 +727,7 @@
 - helper [onFocusLost](src/helpers/onFocusLost.ts). _Isn't fired if stopPropagation is called_
 - [TimeControl](src/controls/time.ts). _Extra margin for menu-buttons on Safari_
 - [SwitchControl](src/controls/switch.ts). [CheckControl](src/controls/check.ts). _Attribute `initvalue=''` sets value to `true` (expected `false`)_
-- [TextareaControl](src/controls/textarea.ts). _`Ctrl + B` makes text bold but it's unexpected for plain textarea_
+- [TextAreaControl](src/controls/textArea/textArea.ts). _`Ctrl + B` makes text bold but it's unexpected for plain textarea_
 - **Controls**. _Hover effect on Android devices (expected: no-hover on touch-screens)_
 - **Controls**. _Focus frame isn't rounded on Safari_
 - **Controls**. _Attributes `initvalue,min,max` for controls Date & Calendar doesn't work on Safari (Date.parse(yyyy-MM-dd) doesn't work by default)_
@@ -734,7 +825,7 @@
 - Controls **Number, Date, Calendar** are locale based and depends on [localeInfo](src/objects/localeInfo.ts) helper
 - Added elements
   - [NumberControl](src/controls/number.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/number)
-  - [TextareaControl](src/controls/textarea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textarea)
+  - [TextAreaControl](src/controls/textArea/textArea.ts) [**demo**](https://yegorich555.github.io/web-ui-pack/control/textArea)
 - Added [helpers](README.md#helpers)
   - [onScroll](src/helpers/onScroll.ts)
   - [localeInfo](src/objects/localeInfo.ts)

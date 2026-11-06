@@ -199,6 +199,18 @@ describe("control.text.hist", () => {
     expect(await h.userUndo(el)).toBe("|");
   });
 
+  test("insert without data", async () => {
+    // contenteditable fires beforeinput without data on Enter, paste etc. => changes are defined by diff of values
+    expect(await h.userTypeText(el, "abc")).toBe("abc|");
+    h.setInputCursor(el, "ab|c", { skipEvent: true });
+    const inputType = "insertFromPaste";
+    el.dispatchEvent(new InputEvent("beforeinput", { bubbles: true, cancelable: true, inputType }));
+    h.setInputCursor(el, "ab12|c", { skipEvent: true });
+    el.dispatchEvent(new InputEvent("input", { bubbles: true, inputType }));
+    expect(await h.userUndo(el)).toBe("ab|c");
+    expect(await h.userRedo(el)).toBe("ab12|c");
+  });
+
   test("findDifference & updateLast", async () => {
     // appended
     expect(TextHistory.findDiff("ab", "ab.")).toStrictEqual({ inserted: { v: ".", pos: 2 }, removed: null });
@@ -209,6 +221,7 @@ describe("control.text.hist", () => {
     expect(TextHistory.findDiff("ab", "34ab")).toStrictEqual({ inserted: { v: "34", pos: 0 }, removed: null });
     expect(TextHistory.findDiff("ab", "a56b")).toStrictEqual({ inserted: { v: "56", pos: 1 }, removed: null });
     expect(TextHistory.findDiff("11.53", "111.53")).toStrictEqual({ inserted: { v: "1", pos: 2 }, removed: null });
+    expect(TextHistory.findDiff("a, ", "a, b, ")).toStrictEqual({ inserted: { v: "b, ", pos: 3 }, removed: null });
     // removed
     expect(TextHistory.findDiff("ab.", "ab")).toStrictEqual({ removed: { v: ".", pos: 2 }, inserted: null });
     expect(TextHistory.findDiff(".ab", "ab")).toStrictEqual({ removed: { v: ".", pos: 0 }, inserted: null });
@@ -218,6 +231,7 @@ describe("control.text.hist", () => {
     expect(TextHistory.findDiff("34ab", "ab")).toStrictEqual({ removed: { v: "34", pos: 0 }, inserted: null });
     expect(TextHistory.findDiff("a56b", "ab")).toStrictEqual({ removed: { v: "56", pos: 1 }, inserted: null });
     expect(TextHistory.findDiff("111.53", "11.53")).toStrictEqual({ removed: { v: "1", pos: 2 }, inserted: null });
+    expect(TextHistory.findDiff("a, b, ", "a, ")).toStrictEqual({ removed: { v: "b, ", pos: 3 }, inserted: null });
 
     // replaced
     expect(TextHistory.findDiff("ab.", "ab1")).toStrictEqual({

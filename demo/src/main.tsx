@@ -16,7 +16,8 @@ import SortView from "./components/sort/sortView";
 import ModalView from "./components/modal/modalView";
 
 import TextControlView from "./components/controls/text";
-import TextareaControlView from "./components/controls/textarea";
+import TextAreaControlView from "./components/controls/textArea";
+import TextRichControlView from "./components/controls/textRich/textRich";
 import PasswordControlView from "./components/controls/password";
 import SelectControlView from "./components/controls/select";
 import SwitchControlView from "./components/controls/switch";
@@ -67,7 +68,8 @@ const routes: IRoute[] = [
 
   { path: "controls", label: "Form & Controls", el: ControlsView },
   { path: "control/text", el: TextControlView, isNested: true },
-  { path: "control/textarea", el: TextareaControlView, isNested: true },
+  { path: "control/textArea", el: TextAreaControlView, isNested: true },
+  { path: "control/textRich", el: TextRichControlView, isNested: true },
   { path: "control/password", el: PasswordControlView, isNested: true },
   { path: "control/number", el: NumberControlView, isNested: true },
   { path: "control/switch", el: SwitchControlView, isNested: true },
@@ -113,7 +115,8 @@ function changeDarkMode(isDark: boolean): void {
   window.onDarkModeChanged?.call(window, isDark);
 }
 // WARN: init darkMode required because $onChange triggers only after some timeout and blink visible on the screen
-changeDarkMode(!!localStorage.getItem("darkmode"));
+// darkMode by default: switch can't store `false` via w-storagekey (it removes the key) so storage is handled here
+changeDarkMode(localStorage.getItem("darkmode") !== "0");
 
 export default function AppContainer() {
   const navigate = useNavigate();
@@ -138,13 +141,16 @@ export default function AppContainer() {
         </MyLink>
         <wup-switch
           class={styles.darkMode}
-          w-storageKey="darkmode"
           ref={(el) => {
             if (el) {
-              // WARN: value from storage applies in gotReady (after timeout) so pre-set attr to prevent toggle animation on init
+              // WARN: value applies in gotReady (after timeout) so pre-set attr to prevent toggle animation on init
               el.toggleAttribute("checked", !!window.isDark);
+              el.$initValue = !!window.isDark;
               el.$refInput.ariaLabel = "toggle between light and darkmode";
-              el.$onChange = () => changeDarkMode(el.$value);
+              el.$onChange = () => {
+                localStorage.setItem("darkmode", el.$value ? "1" : "0");
+                changeDarkMode(el.$value);
+              };
             }
           }}
         />

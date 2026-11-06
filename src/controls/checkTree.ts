@@ -73,9 +73,9 @@ declare global {
        * <wup-checktree w-items="window.myItems"></wup-checktree>
        * ``` */
       "w-items"?: string;
-      "w-collapsible"?: boolean | "" | "true" | "false";
-      /** Point `"false"` to hide the main checkbox (React skips attr with boolean `false`) */
-      "w-checkable"?: boolean | "" | "true" | "false";
+      "w-collapsible"?: WUP.Base.JSXBoolAttr;
+      /** Point `"false"` to hide the main checkbox */
+      "w-checkable"?: WUP.Base.JSXBoolAttr;
     }
   }
 
@@ -161,7 +161,8 @@ function attrOf(el: Element, attr: string): boolean | string | undefined {
   return v === "" || (v ?? undefined);
 }
 
-/** Form-control with tree of checkboxes; the main checkbox checks/unchecks all items
+/** Form-control with tree of checkboxes; the main checkbox checks/unchecks all items;
+ * Shift + click (or Shift + Space) checks every item between the previous toggled & pointed one (as OS does with files) OR unchecks them if they're checked
  * @see demo {@link https://yegorich555.github.io/web-ui-pack/control/checkTree}
  * @example
   const el = document.createElement("wup-checktree");
@@ -346,7 +347,8 @@ export default class WUPCheckTreeControl<
     const t = this.$refTree;
     this.appendEvent(t, "mousedown", (e) => {
       const li = this.findItem(e);
-      li && this.setActive(li._index, true); // WARN: default behavior (text-selection & blur) is prevented by BaseControl
+      const isRange = e.shiftKey && this.#anchor > -1 && this.$isFocused; // focus stays on the start of range: see toggleItem
+      li && !isRange && this.setActive(li._index, true); // WARN: default behavior (text-selection & blur) is prevented by BaseControl
     });
     this.appendEvent(t, "click", (e) => this.gotClickItem(e), { passive: false }); // otherwise item.onClick can't prevent checking
     this.appendEvent(
@@ -394,6 +396,7 @@ export default class WUPCheckTreeControl<
     };
     add(typeof items === "function" ? items() : items, -1);
     this._nodes = nodes;
+    this.#anchor = -1;
 
     if (this._isCustomRendered && nodes.length && !this.bindNodes()) {
       this._isCustomRendered = false; // custom HTML is replaced by default rendering
@@ -616,6 +619,18 @@ export default class WUPCheckTreeControl<
     this.$isReadOnly ? this.checkInput() : this.toggleCheck(0, this._nodes!.length); // checkInput rollbacks changes of browser
   }
 
+  /** Index of item that user toggled last time without Shift: it stays focused on Shift + click to show the start of range */
+  #anchor = -1;
+  /** Called when user toggles item (click or Space): checks it with nested items or unchecks if they're checked;
+   *  point `isRange` (Shift + click/Space) to check every item between the previous toggled one & pointed (as OS does with files)
+   *  OR uncheck them if they're already checked */
+  protected toggleItem(i: number, isRange?: boolean): void {
+    const nodes = this._nodes!;
+    (!isRange || this.#anchor < 0) && (this.#anchor = i);
+    const a = this.#anchor;
+    this.toggleCheck(Math.min(a, i), Math.max(nodes[a].end, nodes[i].end));
+  }
+
   /** Called when user toggles items placed in range [from, to): checks them or unchecks if they're checked;
    *  disabled & readonly items aren't changed */
   protected toggleCheck(from: number, to: number): void {
@@ -738,10 +753,10 @@ export default class WUPCheckTreeControl<
       this.toggleExpand(i);
       return;
     }
-    const { item, end, isCheckable } = this._nodes![i];
+    const { item, isCheckable } = this._nodes![i];
     item.onClick?.call(li, e, item);
     if (!e.defaultPrevented) {
-      isCheckable ? !this.$isReadOnly && this.toggleCheck(i, end) : this.toggleExpand(i);
+      isCheckable ? !this.$isReadOnly && this.toggleItem(i, e.shiftKey) : this.toggleExpand(i);
     }
   }
 
@@ -767,7 +782,7 @@ export default class WUPCheckTreeControl<
         if (i === -1) {
           return; // browser toggles the main checkbox itself: see gotInput
         }
-        this._nodes![i].isCheckable && this.toggleCheck(i, this._nodes![i].end);
+        this._nodes![i].isCheckable && this.toggleItem(i, e.shiftKey);
         break;
       case "Enter":
         if (!this.toggleExpand(i)) {

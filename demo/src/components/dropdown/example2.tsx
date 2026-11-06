@@ -1,5 +1,8 @@
 import Example from "src/elements/example";
+import { useBuiltinStyle, WUPcssButton } from "web-ui-pack/styles";
 import styles from "./dropdownView.scss";
+
+useBuiltinStyle(WUPcssButton(`.${styles.custom} button`)); // toggle & menu buttons are styled as primary
 
 export default function Example2() {
   return (

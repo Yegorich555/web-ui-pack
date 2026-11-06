@@ -28,6 +28,7 @@ export { default as onFocusLost } from "./helpers/onFocusLost";
 export { default as onScroll } from "./helpers/onScroll";
 export { default as onScrollStop } from "./helpers/onScrollStop";
 export { default as onSpy } from "./helpers/onSpy";
+export { default as onSwipe } from "./helpers/onSwipe";
 // export * from "./helpers/onFocusLost";
 export { default as promiseWait } from "./helpers/promiseWait";
 export { default as WUPScrolled } from "./helpers/scrolled";

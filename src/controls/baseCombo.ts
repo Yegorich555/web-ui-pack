@@ -2,6 +2,7 @@ import { inheritDefaults } from "../baseElement";
 import { onEvent } from "../indexHelpers";
 import WUPPopupElement from "../popup/popupElement";
 import { PopupOpenCases, PopupAnimations } from "../popup/popupElement.types";
+import { menuPlacements } from "../popup/popupPlacements";
 import WUPBaseControl, { SetValueReasons } from "./baseControl";
 import WUPTextControl from "./text";
 
@@ -65,7 +66,7 @@ declare global {
       /** Set `true` to rollback value to that was before menu opened when user presses Escape (menu is closed in any case)
        * @tutorial Troubleshooting
        * * affects only if value is changed while menu is opened: by typing or via menu that stays opened
-       * (Select with `multiple: true`, SelectMany, Time with `menuButtonsOff: true`)
+       * (Select with `multiple: true`, SelectMany, Date with `multiple: true`, Time with `menuButtonsOff: true`)
        * * Time with `menuButtonsOff: true` always rollbacks value on Escape
        * @defaultValue false */
       menuEscRollback: boolean;
@@ -73,7 +74,7 @@ declare global {
     interface Options<T = any, VM = ValidityMap> extends WUP.Text.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPBaseComboControl> extends WUP.Text.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       "w-openCase"?: MenuOpenCases | number;
-      "w-readOnlyInput"?: boolean | number;
+      "w-readOnlyInput"?: WUP.Base.JSXBoolAttr | number;
       /** Virtual padding of fitElement applied to popup-menu
        * @example
        * ```js
@@ -81,8 +82,8 @@ declare global {
        * <wup-select w-popupOffsetFitElement="window.offset"></wup-select>
        * ``` */
       "w-popupOffsetFitElement"?: string;
-      "w-popupMinWidthByTarget"?: boolean | "";
-      "w-menuEscRollback"?: boolean | "";
+      "w-popupMinWidthByTarget"?: WUP.Base.JSXBoolAttr;
+      "w-menuEscRollback"?: WUP.Base.JSXBoolAttr;
     }
   }
 }
@@ -98,6 +99,11 @@ export default abstract class WUPBaseComboControl<
 
   static get $style(): string {
     return super.$style;
+  }
+
+  /** `null` can be a valid value (menu item) so it isn't empty */
+  static override $isEmpty(v: unknown): boolean {
+    return WUPBaseControl.$isEmpty(v);
   }
 
   static $defaults: WUP.BaseCombo.Options<any> = inheritDefaults(WUPTextControl.$defaults, {
@@ -214,16 +220,7 @@ export default abstract class WUPBaseComboControl<
     p.$options.offsetFitElement = this._opts.popupOffsetFitElement;
     p.$options.minWidthByTarget = this._opts.popupMinWidthByTarget;
     p.$options.keepPosition = true; // avoid changing position when control-height is changed (ex. selectMany collapses items on focusOut)
-    p.$options.placement = [
-      WUPPopupElement.$placements.$bottom.$start,
-      WUPPopupElement.$placements.$bottom.$end,
-      WUPPopupElement.$placements.$top.$start,
-      WUPPopupElement.$placements.$top.$end,
-      WUPPopupElement.$placements.$bottom.$start.$resizeHeight,
-      WUPPopupElement.$placements.$bottom.$end.$resizeHeight,
-      WUPPopupElement.$placements.$top.$start.$resizeHeight,
-      WUPPopupElement.$placements.$top.$end.$resizeHeight,
-    ];
+    p.$options.placement = [...menuPlacements];
 
     p.setAttribute("menu", "");
     p.$options.animation = PopupAnimations.drawer;
@@ -380,7 +377,8 @@ export default abstract class WUPBaseComboControl<
     const isEscPrevent = this.#isOpened && e.key === "Escape";
     !isEscPrevent && super.gotKeyDown(e);
 
-    if (e.altKey || e.shiftKey || e.ctrlKey) {
+    // Shift + Enter on focused menu item selects range (option `multiple`)
+    if (e.altKey || e.ctrlKey || (e.shiftKey && !(e.key === "Enter" && this._focusedMenuItem))) {
       return;
     }
 
@@ -409,7 +407,7 @@ export default abstract class WUPBaseComboControl<
             const isPrevented =
               el &&
               // !el.hasAttribute("disabled") && // looks impossible case
-              !el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true }));
+              !el.dispatchEvent(new MouseEvent("click", { cancelable: true, bubbles: true, shiftKey: e.shiftKey }));
             if (!isPrevented) {
               this.$refInput.value || this.$isRequired
                 ? this.resetInputValue()

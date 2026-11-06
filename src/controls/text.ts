@@ -4,6 +4,7 @@ import MaskTextInput from "./text.mask";
 import { onEvent } from "../indexHelpers";
 import WUPBaseControl, { SetValueReasons, ValidateFromCases } from "./baseControl";
 import TextHistory from "./text.history";
+import { useTooltipOnce } from "../popup/popupTooltip";
 
 const emailReg =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -32,6 +33,9 @@ declare global {
        * @see {@link ClearActions} from `web-ui-pack/baseControl`
        * @defaultValue true */
       clearButton: boolean;
+      /** Show/hide copy button: click copies text of input into clipboard
+       * @defaultValue false */
+      copyButton: boolean;
       /** Make input masked
        * @rules when mask is pointed
        * * inputmode='numeric' (if mask contains only numeric vars) so mobile device show numeric-keyboard
@@ -63,8 +67,9 @@ declare global {
     interface Options<T = string, VM = ValidityMap> extends WUP.BaseControl.Options<T, VM>, NewOptions {}
     interface JSXProps<C = WUPTextControl> extends WUP.BaseControl.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
       "w-debounceMs"?: number;
-      "w-selectOnFocus"?: boolean | "";
-      "w-clearButton"?: boolean | "";
+      "w-selectOnFocus"?: WUP.Base.JSXBoolAttr;
+      "w-clearButton"?: WUP.Base.JSXBoolAttr;
+      "w-copyButton"?: WUP.Base.JSXBoolAttr;
       "w-mask"?: string;
       "w-maskholder"?: string | false;
       "w-prefix"?: string;
@@ -128,7 +133,8 @@ declare module "preact/jsx-runtime" {
  *      <input/>
  *      <strong>{$options.label}</strong>
  *   </span>
- *   <button clear/>
+ *   <button copy aria-label="Copy" w-tooltip/>
+ *   <button clear aria-label="Clear" w-tooltip/> // "Restore" if the next click restores previous value
  * </label>
  * @tutorial Troubleshooting @see {@link https://yegorich555.github.io/web-ui-pack/control/text#troubleshooting} */
 export default class WUPTextControl<
@@ -147,17 +153,26 @@ export default class WUPTextControl<
     return super.$style;
   }
 
+  static $isEmpty(v: unknown): boolean {
+    return v === "" || v == null;
+  }
+
   static $errorParse = __wupln("Invalid value", "validation");
   static $errorMask = __wupln("Incomplete value", "validation");
+  /** `aria-label` & tooltip of clear button; @defaultValue `Clear` */
+  static $ariaClear = __wupln("Clear", "aria");
+  /** `aria-label` & tooltip of clear button when the next click restores previous value (see $options.clearActions); @defaultValue `Restore` */
+  static $ariaRestore = __wupln("Restore", "aria");
+  /** `aria-label` & tooltip of copy button; @defaultValue `Copy` */
+  static $ariaCopy = __wupln("Copy", "aria");
 
   static $defaults: WUP.Text.Options = inheritDefaults(WUPBaseControl.$defaults, {
     selectOnFocus: false,
     clearButton: true,
+    copyButton: false,
     validationRules: inheritDefaults(WUPBaseControl.$defaults.validationRules, {
-      min: (v, setV) =>
-        (v === undefined || v.length < setV) && __wupln(`Min length is ${setV} characters`, "validation"),
-      max: (v, setV) =>
-        (v === undefined || v.length > setV) && __wupln(`Max length is ${setV} characters`, "validation"),
+      min: (v, setV) => (!v || v.length < setV) && __wupln(`Min length is ${setV} characters`, "validation"),
+      max: (v, setV) => (!v || v.length > setV) && __wupln(`Max length is ${setV} characters`, "validation"),
       email: (v, setV) => setV && (!v || !emailReg.test(v)) && __wupln("Invalid email address", "validation"),
     }),
     debounceMs: 0,
@@ -168,6 +183,7 @@ export default class WUPTextControl<
   });
 
   $refBtnClear?: HTMLButtonElement;
+  $refBtnCopy?: HTMLButtonElement;
   $refMaskholder?: HTMLSpanElement;
   $refPrefix?: HTMLSpanElement;
   $refPostfix?: HTMLSpanElement;
@@ -220,30 +236,47 @@ export default class WUPTextControl<
     this.$refInput.addEventListener("input", (e) => this.gotInput(e as WUP.Text.GotInputEvent), { passive: true });
   }
 
-  /** Create & append element to control */
+  /** Create button-icon `<button {attr}/>` & insert it after pointed element; tooltip shows its `aria-label` */
+  protected renderBtnIcon(attr: string, prev: Element, onClick: (e: PointerEvent) => void): HTMLButtonElement {
+    const b = document.createElement("button");
+    prev.after(b);
+    b.setAttribute(this.#ctr.classNameBtnIcon, "");
+    b.setAttribute(attr, "");
+    b.setAttribute("tabindex", -1);
+    b.setAttribute("type", "button");
+    useTooltipOnce("w-tooltip");
+    b.setAttribute("w-tooltip", ""); // empty: tooltip shows aria-label
+    onEvent(b, "click", onClick, { passive: false });
+    return b;
+  }
+
+  /** Create & append clear-button after copy-button */
   protected renderBtnClear(): HTMLButtonElement {
-    const bc = document.createElement("button");
-    const span = this.$refLabel.querySelector("span");
-    if (span!.nextElementSibling) {
-      this.$refLabel.insertBefore(bc, span!.nextElementSibling);
-    } else {
-      this.$refLabel.appendChild(bc);
-    }
-    bc.setAttribute(this.#ctr.classNameBtnIcon, "");
-    bc.setAttribute("clear", "");
-    bc.setAttribute("tabindex", -1);
-    bc.setAttribute("aria-hidden", true);
-    bc.setAttribute("type", "button");
-    onEvent(
-      bc,
-      "click",
-      (e) => {
-        e.preventDefault(); // prevent from submit
-        this.clearValue();
-      },
-      { passive: false }
-    );
-    return bc;
+    const b = this.renderBtnIcon("clear", (this.$refBtnCopy ?? this.$refLabel.querySelector("span"))!, (e) => {
+      e.preventDefault(); // prevent from submit
+      this.clearValue();
+    });
+    b.setAttribute("aria-label", this.#ctr.$ariaClear); // shown via tooltip
+    return b;
+  }
+
+  /** Create & append copy-button before clear-button */
+  protected renderBtnCopy(): HTMLButtonElement {
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const b = this.renderBtnIcon("copy", this.$refLabel.querySelector("span")!, async (e) => {
+      e.preventDefault(); // prevent from submit
+      await this.copyValue();
+      b.setAttribute("copy", "done"); // icon of success
+      clearTimeout(t);
+      t = setTimeout(() => b.setAttribute("copy", ""), 1000);
+    });
+    b.setAttribute("aria-label", this.#ctr.$ariaCopy);
+    return b;
+  }
+
+  /** Called when user clicks on button-copy: copies text of input into clipboard */
+  copyValue(): Promise<void> {
+    return navigator.clipboard.writeText(this.$refInput.value);
   }
 
   /** Add/update/remove prefix part */
@@ -294,11 +327,16 @@ export default class WUPTextControl<
 
   /** Custom history undo/redo */
   _refHistory?: TextHistory;
+  /** Returns custom history undo/redo (called if canHandleUndo() returns true) */
+  protected createHistory(): TextHistory {
+    return new TextHistory(this.$refInput);
+  }
+
   protected override gotFocus(ev: FocusEvent): Array<() => void> {
     const arr = super.gotFocus(ev);
 
     if (this.canHandleUndo()) {
-      this._refHistory ??= new TextHistory(this.$refInput);
+      this._refHistory ??= this.createHistory();
     }
 
     if (!this.$refInput.readOnly) {
@@ -354,6 +392,12 @@ export default class WUPTextControl<
       this.$refBtnClear.remove();
       this.$refBtnClear = undefined;
     }
+    if (this._opts.copyButton) {
+      this.$refBtnCopy ??= this.renderBtnCopy();
+    } else if (this.$refBtnCopy) {
+      this.$refBtnCopy.remove();
+      this.$refBtnCopy = undefined;
+    }
     if (!propsChanged || propsChanged.includes("prefix")) {
       this.renderPrefix(this._opts.prefix);
     }
@@ -373,13 +417,20 @@ export default class WUPTextControl<
   protected gotBeforeInput(e: WUP.Text.GotInputEvent): void {
     const isUndoRedo = this._refHistory?.handleBeforeInput(e);
 
-    this.#declineInputEnd?.call(this);
-    this._beforeSnap = TextHistory.historyToSnapshot(this.$refInput.value, this.$refInput.selectionStart || 0);
+    const decline = this.#declineInputEnd;
+    decline?.call(this);
+    // state is captured by history already (selectionStart of contenteditable walks the whole text before caret)
+    const st = (!decline && this._refHistory?._stateBeforeInput) || {
+      value: this.$refInput.value,
+      pos1: this.$refInput.selectionStart || 0,
+    };
+    this._beforeSnap = TextHistory.historyToSnapshot(st.value, st.pos1);
     setTimeout(() => delete this._beforeSnap);
 
     if (!isUndoRedo && this._opts.mask) {
-      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value);
-      this.refMask.handleBeforeInput(e);
+      const offset = this.maskOffset;
+      this.refMask = this.refMask ?? new MaskTextInput(this._opts.mask, e.target.value.substring(offset));
+      this.refMask.handleBeforeInput(e, offset);
     }
   }
 
@@ -389,7 +440,7 @@ export default class WUPTextControl<
   protected gotInput(e: WUP.Text.GotInputEvent): void {
     const isBrowserAutofill = e.isTrusted && e.inputType == null;
     if (isBrowserAutofill && !this._refHistory && this.canHandleUndo()) {
-      this._refHistory = new TextHistory(this.$refInput);
+      this._refHistory = this.createHistory();
     }
     this._refHistory?.handleInput(e);
 
@@ -448,6 +499,12 @@ export default class WUPTextControl<
 
   /** Mask object to process mask on input */
   refMask?: MaskTextInput;
+  /** Returns count of chars at the beginning of input that mask isn't applied to
+   * @defaultValue 0 (mask is applied to the whole text) */
+  protected get maskOffset(): number {
+    return 0;
+  }
+
   /** Called to apply mask-behavior (on "input" event) */
   protected maskInputProcess(e: WUP.Text.GotInputEvent | null): string {
     const el = this.$refInput;
@@ -464,26 +521,29 @@ export default class WUPTextControl<
       return v; // ignore mask prefix/postfix if user isn't touched input; it appends only by focusGot
     }
 
+    const offset = this.maskOffset;
     let declinedAdd = 0;
     let pos = el.selectionStart || 0;
     if (!e) {
-      mi.parse(v);
+      mi.parse(v.substring(offset));
       pos = mi.value.length; // fix case: mask with prefix + call .clearValue()
     } else {
-      const r = mi.handleInput(e);
+      const r = mi.handleInput(e, offset);
       declinedAdd = r.declinedAdd;
       pos = r.position;
     }
+    pos += offset;
+    const next = v.substring(0, offset) + mi.value;
 
     if (declinedAdd) {
-      this.declineInput(pos, mi.value); // fix when ###: "12|" + "3b" => 123|
-    } else if (el.value !== mi.value) {
-      el.value = mi.value;
+      this.declineInput(pos, next); // fix when ###: "12|" + "3b" => 123|
+    } else if (el.value !== next) {
+      el.value = next;
       document.activeElement === el && el.setSelectionRange(pos, pos); // without checking on focus setSelectionRange sets focus on Safari
     }
     isFocused && this.renderMaskHolder(this._opts.maskholder, mi.leftLength - declinedAdd);
 
-    return mi.value;
+    return next;
   }
 
   /** Add/update maskholder or skip if it's not defined */
@@ -560,8 +620,12 @@ export default class WUPTextControl<
 
   protected override setClearState(): ValueType | undefined {
     const next = super.setClearState();
-    if (this.$refBtnClear) {
-      this.$refBtnClear.setAttribute("clear", this.#ctr.$isEmpty(next) ? "" : "back");
+    const b = this.$refBtnClear;
+    const v = this.#ctr.$isEmpty(next) ? "" : "back";
+    // it's called on every change: skip the same value
+    if (b && b.getAttribute("clear") !== v) {
+      b.setAttribute("clear", v);
+      b.setAttribute("aria-label", v ? this.#ctr.$ariaRestore : this.#ctr.$ariaClear);
     }
     return next;
   }

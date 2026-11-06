@@ -49,3 +49,4 @@ export function useBuiltinStyle(cssString: string): HTMLStyleElement {
   refStyle.append(cssString);
   return refStyle;
 }
+//

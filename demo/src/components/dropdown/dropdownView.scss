@@ -1,4 +1,19 @@
 /* stylelint-disable no-descending-specificity */
+// toggle button with primary style (WUPcssButton is applied in example1.tsx)
+.primary {
+  margin-left: 1em;
+
+  > button {
+    min-width: initial;
+    margin: 0;
+    padding: 0.7em;
+  }
+
+  > button:after {
+    content: none; // hide default chevron
+  }
+}
+
 .custom {
   margin: 6px;
 
@@ -11,7 +26,14 @@
     justify-content: center;
     height: 34px;
     width: 34px;
+    min-width: initial;
+    margin: 0;
+    padding: 0;
     border-radius: 9999px;
+  }
+
+  > button:after {
+    content: none; // hide default chevron
   }
 
   > wup-popup {

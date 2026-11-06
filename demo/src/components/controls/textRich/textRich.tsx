@@ -1,0 +1,113 @@
+import { useRef } from "react";
+import Page from "src/elements/page";
+import { WUPTextRichControl } from "web-ui-pack";
+import TextRichCustom from "./textRich.custom";
+import stylesCom from "../controls.scss";
+
+WUPTextRichControl.$use();
+
+(window as any).myTextRichToolbar = WUPTextRichControl.$defaults.toolbar;
+(window as any).myTextRichValidations = { required: true, min: 4 } as WUP.TextRich.Options["validations"];
+(window as any).myTextRichToolbarShort = [
+  ["link"],
+  ["bold", "underline", "italic", "strike"],
+] as WUP.TextRich.Options["toolbar"];
+
+export default function TextRichControlView() {
+  const refPreview = useRef<HTMLDivElement>(null);
+  return (
+    <Page
+      header="TextRichControl"
+      link="src/controls/textRich/textRich.ts"
+      details={{
+        tag: "wup-textrich",
+        linkDemo: "demo/src/components/controls/textRich/textRich.tsx",
+        cssVarAlt: new Map([["--ctrl-icon-img", "Used several times for btn-clear, error-list etc."]]),
+      }}
+      features={[
+        "Inheritted features from TextAreaControl",
+        "Uses own js-engine and doesn't depend on Browser (not used deprecated and not stable document.execCommand)",
+        "Value is sanitized html",
+        "Undo/redo for text & formatting (Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z, Ctrl+Y) including OS-native ones (Edit menu, shake on iPhone)",
+        "Powerful customizable toolbar (see last example below)",
+        "Customizable Hot-Keys for every tool; use Alt+F10 to focus toolbar, Arrows to navigate, Esc to return",
+        "Alt+ArrowDown opens popup of element at caret: dropdown of mention or placeholder, link url, image picker etc. (customizable via static $hotKeyAsk)",
+        'Selected text is wrapped into typed quote or bracket like in code editors: "text", (text) etc. (customizable via static $wrapChars)',
+        "Typed links & emails are recognized while typing (see `recognize` of static $tools); `1. ` typed at line start begins list (see `recognize` of tool items)",
+        "Nested lists: Tab/Shift+Tab (or indent buttons) changes level of list item, Enter in empty nested item moves it to the parent list",
+        "Slash commands: type / at word start to choose any tool of toolbar (hidden ones too); link, email etc. insert example text to type over (see `command` & `placeholder` of static $tools)",
+        "Validations min/max count visible chars only",
+      ]}
+    >
+      <wup-form
+        class={stylesCom.formWide}
+        ref={(el) => {
+          if (el) {
+            el.$onSubmit = (e) => console.warn("submitted model", e.detail.model);
+          }
+        }}
+        w-autoFocus
+      >
+        <wup-textrich
+          w-name="description"
+          w-label="Rich text"
+          w-validations="window.myTextRichValidations"
+          w-toolbar="window.myTextRichToolbar"
+          w-hideHotKeysHint="false"
+          w-copyPasteFormatted="false"
+          w-hideFooter="false"
+          w-allowResizeH="false"
+          w-allowResizeW="false"
+          ref={(el) => {
+            if (el) {
+              el.$initValue = [
+                "<h2>Release notes</h2>",
+                "<p>Text with <strong>bold</strong>, <em>italic</em>, <u>underline</u>, <s>strike</s> and ",
+                '<a href="https://github.com/Yegorich555/web-ui-pack">link</a></p>',
+                "<blockquote>Quote</blockquote>",
+                "<pre>const code = true;</pre>",
+                "<ol><li>Numbered<ol><li>Nested (Tab/Shift+Tab)</li></ol></li><li>List</li></ol>",
+                "<ul><li>Bulleted<ul><li>Nested</li></ul></li><li>List</li></ul>",
+                '<p style="text-align: center;">Centered text with <span style="font-size: x-large">large</span> size</p>',
+              ].join("");
+
+              setTimeout(() => {
+                refPreview.current!.innerHTML = el.$initValue!;
+              }, 100);
+              el.$onChange = () => {
+                console.warn("$change", { value: el.$value });
+                refPreview.current!.innerHTML = el.$value ?? ""; // value is sanitized html
+              };
+            }
+          }}
+        />
+        <section>
+          <h3>Preview</h3>
+          <small>
+            value of the 1st control rendered via {"<div wup-textrich />"} with the same styles (change the value to see
+            it here)
+          </small>
+          <div wup-textrich="" ref={refPreview} />
+        </section>
+        {/* margin of controls is reset in group: so it requires space for label placed above the border */}
+        <div className={stylesCom.group} style={{ marginTop: "calc(var(--base-margin) + 1.75em)" }}>
+          <wup-textrich
+            w-name="readonly"
+            w-label="Readonly with smaller toolbar ($options.toolbar)"
+            readonly
+            w-toolbar="window.myTextRichToolbarShort"
+            w-initValue="Readonly <strong>text</strong>"
+          />
+          <wup-textrich
+            w-name="disabled"
+            disabled
+            w-toolbar="window.myTextRichToolbarShort"
+            w-initValue="Disabled <strong>text</strong>"
+          />
+        </div>
+        <TextRichCustom />
+        <button type="submit">Submit</button>
+      </wup-form>
+    </Page>
+  );
+}

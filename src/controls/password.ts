@@ -29,7 +29,7 @@ declare global {
       extends Omit<WUP.Text.JSXProps<C>, "w-mask" | "w-maskholder" | "w-storageKey" | "w-storage"> {
       /** Reversed-style for button-eye
        * @defaultValue false */
-      "w-reverse"?: boolean | string;
+      "w-reverse"?: WUP.Base.JSXBoolAttr;
     }
   }
 
@@ -205,8 +205,8 @@ export default class WUPPasswordControl<
   protected changeInputType(isVisible: boolean): void {
     const h = this.$refInput.offsetHeight;
     this.$refInput.type = isVisible ? "text" : "password";
-    const isHchanged = h !== this.$refInput.offsetHeight;
-    if (isHchanged && h) {
+    const isChanged = h !== this.$refInput.offsetHeight;
+    if (isChanged && h) {
       this.$refInput.style.height = `${h}px`;
     }
   }

@@ -70,6 +70,10 @@ Object.defineProperty(Element.prototype, "innerText", {
 });
 
 window.matchMedia ||= () => ({ matches: false });
+// CSS Custom Highlight API isn't implemented in jsdom
+window.Highlight ||= class Highlight extends Set {};
+window.CSS ||= {};
+window.CSS.highlights ||= new Map();
 window.DOMRect = {
   fromRect: (other) => {
     const x = other?.x || 0;
@@ -105,3 +109,6 @@ HTMLElement.prototype.dispatchEvent = function dispatchEventFix(/** @type Event 
 };
 
 Element.prototype.scrollIntoView ||= () => {};
+// Web Animations API isn't implemented in jsdom: it's required for wup-notify (form shows it on submit)
+Element.prototype.animate ||= () => ({ play: () => {}, pause: () => {}, cancel: () => {} });
+InputEvent.prototype.getTargetRanges ||= () => []; // browser returns [] for synthetic events

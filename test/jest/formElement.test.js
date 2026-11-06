@@ -50,6 +50,7 @@ describe("formElement", () => {
       "w-autocomplete": { value: true },
       "w-autofocus": { value: true },
       "w-autostore": { value: true },
+      "w-autosubmit": { value: 500 },
       disabled: { value: true, equalValue: "" },
       "w-disabled": { value: true, equalValue: "", skip: true },
       readonly: { value: true, equalValue: "" },
@@ -67,7 +68,7 @@ describe("formElement", () => {
     expect(inputs[0].$initValue).toBe("some@email.com");
     expect(inputs[0].$value).toBe("some@email.com");
     expect(el.outerHTML).toMatchInlineSnapshot(
-      `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit"></button></wup-form>"`
+      `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit"></button></wup-form>"`
     );
 
     expect(inputs[1].$initValue).toBe("hello from 2");
@@ -484,6 +485,104 @@ describe("formElement", () => {
       expect(el.$onSubmit).toBe(onSubmitOriginal);
     });
 
+    test("notify on submit result", async () => {
+      el.addEventListener("$submitEnd", $submitEvEnd);
+      const spyNotify = jest.spyOn(el, "$showNotify");
+      const getNotify = () => document.body.querySelector("wup-notify");
+      const submit = async (onSubmit, onEvent) => {
+        jest.clearAllMocks();
+        document.body.querySelectorAll("wup-notify").forEach((n) => n.remove());
+        el.$onSubmit = onSubmit;
+        onEvent && el.addEventListener("$submit", onEvent, { once: true });
+        btnSubmit.click();
+        await h.wait();
+      };
+
+      // success with message from $onSubmit
+      await submit(() => Promise.resolve({ notifyMessage: "Saved" }));
+      expect(spyNotify).toBeCalledTimes(1);
+      expect(spyNotify).lastCalledWith({ notifyMessage: "Saved" }, false);
+      expect(getNotify()).toBe(spyNotify.mock.results[0].value);
+      expect(getNotify().textContent).toBe("Saved");
+      expect(getNotify().$options.type).toBe("success");
+      expect(getNotify().$options.placement).toBe("bottom-right");
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(true);
+
+      // fail with message from $onSubmit
+      await submit(() => Promise.reject({ notifyMessage: "Oops" })); // eslint-disable-line prefer-promise-reject-errors
+      expect(spyNotify).toBeCalledTimes(1);
+      expect(spyNotify).lastCalledWith({ notifyMessage: "Oops" }, true);
+      expect(getNotify().textContent).toBe("Oops");
+      expect(getNotify().$options.type).toBe("error");
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(false);
+
+      // notifyMessage: true => default messages
+      await submit(() => Promise.resolve({ notifyMessage: true }));
+      expect(getNotify().textContent).toBe("Successful");
+      expect(getNotify().$options.type).toBe("success");
+      await submit(() => Promise.reject({ notifyMessage: true })); // eslint-disable-line prefer-promise-reject-errors
+      expect(getNotify().textContent).toBe("Failed");
+      expect(getNotify().$options.type).toBe("error");
+
+      // custom type
+      await submit(() => Promise.resolve({ notifyMessage: "Saved partially", type: "warning" }));
+      expect(getNotify().$options.type).toBe("warning");
+      await submit(() => Promise.reject({ notifyMessage: "Server is busy", type: "info" })); // eslint-disable-line prefer-promise-reject-errors
+      expect(getNotify().$options.type).toBe("info");
+
+      // message from e.detail.waitFor
+      await submit(undefined, (e) => (e.detail.waitFor = Promise.resolve({ notifyMessage: "From waitFor" })));
+      expect(spyNotify).lastCalledWith({ notifyMessage: "From waitFor" }, false);
+      expect(getNotify().textContent).toBe("From waitFor");
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(true);
+      // eslint-disable-next-line prefer-promise-reject-errors
+      await submit(undefined, (e) => (e.detail.waitFor = Promise.reject({ notifyMessage: "Fail from waitFor" })));
+      expect(spyNotify).lastCalledWith({ notifyMessage: "Fail from waitFor" }, true);
+      expect(getNotify().textContent).toBe("Fail from waitFor");
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(false);
+
+      // message from $onSubmit has priority over waitFor
+      await submit(
+        () => Promise.resolve({ notifyMessage: "From callback" }),
+        (e) => (e.detail.waitFor = Promise.resolve({ notifyMessage: "From waitFor" }))
+      );
+      expect(spyNotify).toBeCalledTimes(1);
+      expect(getNotify().textContent).toBe("From callback");
+
+      // no message => no notify
+      for (const v of [
+        undefined,
+        null,
+        false,
+        "",
+        { notifyMessage: "" },
+        { notifyMessage: null },
+        { notifyMessage: false },
+      ]) {
+        await submit(() => Promise.resolve(v));
+        expect(spyNotify).not.toBeCalled();
+        expect(getNotify()).toBeNull();
+        expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(true);
+
+        await submit(() => Promise.reject(v));
+        expect(spyNotify).not.toBeCalled();
+        expect(getNotify()).toBeNull();
+        expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(false);
+      }
+      await submit(() => {}); // sync callback
+      expect(spyNotify).not.toBeCalled();
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(true);
+      await submit(() => Promise.reject(new Error("test reject")));
+      expect(spyNotify).not.toBeCalled();
+      expect($submitEvEnd.mock.lastCall[0].detail.success).toBe(false);
+
+      // $showNotify can be overridden
+      spyNotify.mockImplementation(() => null);
+      await submit(() => Promise.resolve({ notifyMessage: "Saved" }));
+      expect(spyNotify).toBeCalledTimes(1);
+      expect(getNotify()).toBeNull();
+    });
+
     test("prevent submit", async () => {
       el.addEventListener("$submit", $submitEv);
       const prevFn = (e) => e.preventDefault();
@@ -592,19 +691,19 @@ describe("formElement", () => {
       el.$isPending = true;
       await h.wait();
       expect(el.outerHTML).toMatchInlineSnapshot(
-        `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
+        `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
       );
 
       el.changePending(true); // just for coverage
       await h.wait();
       expect(el.outerHTML).toMatchInlineSnapshot(
-        `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
+        `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
       );
 
       el.$isPending = false;
       await h.wait();
       expect(el.outerHTML).toMatchInlineSnapshot(
-        `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit"></button></wup-form>"`
+        `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit"></button></wup-form>"`
       );
       el.$isPending = false; // just for coverage
 
@@ -614,12 +713,12 @@ describe("formElement", () => {
       await h.wait(1);
       expect(el.$isPending).toBe(true);
       expect(el.outerHTML).toMatchInlineSnapshot(
-        `"<wup-form role="form" aria-busy="true"><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
+        `"<wup-form role="form" aria-busy="true"><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
       );
       await h.wait();
       expect(el.$isPending).toBe(false);
       expect(el.outerHTML).toMatchInlineSnapshot(
-        `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit"></button></wup-form>"`
+        `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit"></button></wup-form>"`
       );
       el.removeEventListener("$submit", submitFn);
 
@@ -783,7 +882,7 @@ describe("formElement", () => {
         expect(el.$options.disabled).toBe(false); // otherwise focus can be missed
         expect(document.activeElement).toBe(btnSubmit);
         expect(el.outerHTML).toMatchInlineSnapshot(
-          `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
+          `"<wup-form role="form" aria-busy="true" readonly=""><wup-text busy=""><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off" readonly=""><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off" readonly=""><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text busy=""><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off" readonly=""><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
         );
         await h.wait();
         expect(el.$isPending).toBe(false);
@@ -817,7 +916,7 @@ describe("formElement", () => {
         expect(el.$isPending).toBe(true);
         expect(el.$options.disabled).toBeFalsy();
         expect(el.outerHTML).toMatchInlineSnapshot(
-          `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" aria-hidden="true" type="button"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
+          `"<wup-form role="form"><wup-text><label for="txt1"><span><input placeholder=" " type="text" id="txt1" autocomplete="off"><strong>Email</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt2"><span><input placeholder=" " type="text" id="txt2" autocomplete="off"><strong>First Name</strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><wup-text><label for="txt3"><span><input placeholder=" " type="text" id="txt3" autocomplete="off"><strong></strong></span><button wup-icon="" clear="" tabindex="-1" type="button" w-tooltip="" aria-label="Clear"></button></label></wup-text><button type="submit" aria-busy="true" busy=""></button></wup-form>"`
         );
         await h.wait();
       });
@@ -961,6 +1060,255 @@ describe("formElement", () => {
       // storage contains valid model but no matched controls
       window.localStorage.setItem("customKey", '{"missedControl":"Mrs"}');
       expect(el.storageGet()).toBe(null);
+    });
+
+    test("option 'autoSubmit'", async () => {
+      const onSubmit = jest.fn();
+      el.$onSubmit = onSubmit;
+      const spyNotify = jest.spyOn(el, "$showNotify");
+      const type = (i, text) => h.userTypeText(inputs[i].$refInput, text);
+      const lastModel = () => onSubmit.mock.lastCall[0].detail.model;
+
+      // works only if form has no submit button
+      expect(el.$options.autoSubmit).toBe(3000);
+      await type(0, "a@b.c");
+      await h.wait(5000);
+      expect(onSubmit).not.toBeCalled();
+      btnSubmit.remove();
+
+      // point false to disable
+      el.$options.autoSubmit = false;
+      await type(0, "a@b.c");
+      await h.wait(5000);
+      expect(onSubmit).not.toBeCalled();
+
+      // attribute: empty means `true`
+      el.setAttribute("w-autosubmit", "");
+      await h.wait(1);
+      expect(el.$options.autoSubmit).toBe(true);
+      el.setAttribute("w-autosubmit", "true");
+      await h.wait(1);
+      expect(el.$options.autoSubmit).toBe(true);
+      el.setAttribute("w-autosubmit", "false");
+      await h.wait(1);
+      expect(el.$options.autoSubmit).toBe(false);
+
+      // true: submit in 3000ms after the last change
+      el.$options.autoSubmit = true;
+      await type(1, "Mi");
+      await h.wait(2000);
+      await type(1, "Mike"); // debounce is restarted
+      await h.wait(2950);
+      expect(onSubmit).not.toBeCalled();
+      await h.wait(100);
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(lastModel()).toEqual({ email: "a@b.c", firstName: "Mike" });
+      expect(onSubmit.mock.lastCall[0].detail.submitter).toBe(inputs[1]);
+      expect(onSubmit.mock.lastCall[0].detail.relatedEvent.type).toBe("$change");
+      await h.wait(5000);
+      expect(onSubmit).toBeCalledTimes(1);
+      // with success notification: otherwise user doesn't see the result
+      expect(spyNotify).toBeCalledTimes(1);
+      expect(spyNotify).lastCalledWith({ notifyMessage: true }, false);
+      expect(document.body.querySelector("wup-notify").textContent).toBe("Successful");
+
+      // number: debounce in ms
+      onSubmit.mockClear();
+      el.$options.autoSubmit = 500;
+      await type(0, "b@b.c");
+      await h.wait(450);
+      expect(onSubmit).not.toBeCalled();
+      await h.wait(100);
+      expect(onSubmit).toBeCalledTimes(1);
+
+      // rejected when user changed value back: it's compared with submitted values
+      onSubmit.mockClear();
+      await h.wait(1000); // end of submit: jsdom sets pending state even for resolved promise (timers & promises order)
+      expect(inputs[0].$initValue).toBe("b@b.c");
+      await type(0, "bb@b.c");
+      await type(0, "b@b.c");
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
+      // without SubmitActions.reset submitted values aren't stored: so it isn't rejected
+      el.$options.submitActions = SubmitActions.none;
+      await type(0, "bb@b.c");
+      await type(0, "b@b.c");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      el.$options.submitActions = WUPFormElement.$defaults.submitActions;
+
+      // skip programmatic changes, controls without name & other elements
+      onSubmit.mockClear();
+      inputs[0].$value = "c@b.c";
+      await type(2, "without name");
+      el.appendChild(document.createElement("div")).dispatchEvent(
+        new CustomEvent("$change", { bubbles: true, detail: { reason: 3 } })
+      );
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
+
+      // any other submit cancels waiting auto-submit
+      await type(0, "d@b.c");
+      el.$submit();
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+
+      // disabled during the waiting
+      onSubmit.mockClear();
+      await type(0, "e@b.c");
+      el.$options.autoSubmit = false;
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
+
+      // form is validated silently: without showing errors & focusing invalid control
+      el.$options.autoSubmit = 500;
+      inputs[1].$options.validations = { required: true };
+      inputs[1].$value = "";
+      await type(0, "f@b.c");
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
+      expect(inputs[1].$refError).toBeFalsy();
+      expect(document.activeElement).toBe(inputs[0].$refInput);
+      await type(1, "Kate");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(lastModel()).toEqual({ email: "f@b.c", firstName: "Kate" });
+
+      // invisible & readonly controls are skipped like on submit (when form is visible)
+      onSubmit.mockClear();
+      inputs[1].$value = "";
+      h.setupLayout(el, { h: 100, w: 100, x: 1, y: 1 });
+      jest.spyOn(inputs[1], "offsetHeight", "get").mockReturnValue(0);
+      await type(0, "g@b.c");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      // but they are validated when form is hidden or removed (visibility of controls is unknown)
+      jest.spyOn(el, "offsetHeight", "get").mockReturnValue(0);
+      await type(0, "gg@b.c");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      jest.spyOn(el, "offsetHeight", "get").mockReturnValue(100);
+      jest.spyOn(inputs[1], "offsetHeight", "get").mockReturnValue(20);
+      inputs[1].$options.readOnly = true;
+      await type(0, "h@b.c");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(2);
+      // all controls are validated without SubmitActions.validateChangeable
+      onSubmit.mockClear();
+      el.$options.submitActions = SubmitActions.none;
+      await type(0, "i@b.c");
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
+      el.$options.submitActions = WUPFormElement.$defaults.submitActions;
+      inputs[1].$options.readOnly = false;
+      inputs[1].$value = "Kate";
+
+      // it isn't locked by the pending state of previous submit: otherwise changes are lost
+      onSubmit.mockClear();
+      onSubmit.mockImplementation(() => new Promise((res) => setTimeout(res, 2000)));
+      await type(0, "j@b.c");
+      await h.wait(500); // auto-submit is started here
+      expect(onSubmit).toBeCalledTimes(1);
+      await type(1, "Kitty"); // changed during the pending state
+      await h.wait(1000);
+      expect(el.$isPending).toBe(true);
+      expect(onSubmit).toBeCalledTimes(2);
+      expect(lastModel()).toEqual({ email: "j@b.c", firstName: "Kitty" });
+      await h.wait(3000); // wait for the end of submits
+      expect(el.$isPending).toBe(false);
+      expect(inputs[0].$initValue).toBe("j@b.c"); // submitted value is $initValue after success
+      // value changed back during the pending state is submitted: otherwise server keeps the previous one
+      onSubmit.mockClear();
+      await type(0, "jj@b.c");
+      await h.wait(500); // auto-submit is started here
+      await type(0, "j@b.c"); // the same as $initValue: it's updated after success only
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(2);
+      expect(lastModel().email).toBe("j@b.c");
+      await h.wait(3000);
+
+      // value changed during the pending state isn't considered as submitted (when lockOnPending is off)
+      el.$options.submitActions = WUPFormElement.$defaults.submitActions & ~SubmitActions.lockOnPending;
+      onSubmit.mockClear();
+      onSubmit.mockImplementation(() => new Promise((res) => setTimeout(res, 200)));
+      await type(0, "s1@b.c");
+      await h.wait(500); // auto-submit is started here
+      await type(0, "s2@b.c"); // during the pending state
+      await h.wait(400); // 1st submit is finished
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(inputs[0].$initValue).toBe("s1@b.c");
+      expect(el.$isChanged).toBe(true);
+      await h.wait(500);
+      expect(onSubmit).toBeCalledTimes(2);
+      expect(lastModel().email).toBe("s2@b.c");
+      el.$options.submitActions = WUPFormElement.$defaults.submitActions;
+      onSubmit.mockReset();
+
+      // failed submit: values aren't saved so $initValue isn't changed
+      onSubmit.mockImplementationOnce(() => Promise.reject(new Error("test reject")));
+      await type(0, "s3@b.c");
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(inputs[0].$initValue).toBe("s2@b.c");
+      expect(el.$isChanged).toBe(true);
+      onSubmit.mockReset();
+
+      // message from $onSubmit has priority over default notification
+      spyNotify.mockClear();
+      onSubmit.mockImplementationOnce(() => Promise.resolve({ notifyMessage: "Saved" }));
+      await type(0, "l@b.c");
+      await h.wait(1000);
+      expect(spyNotify).lastCalledWith({ notifyMessage: "Saved" }, false);
+
+      // browser exit: waiting auto-submit is fired at once & browser asks to stay till the end of submit
+      const exit = () => {
+        const ev = new Event("beforeunload", { cancelable: true });
+        window.dispatchEvent(ev);
+        return ev.defaultPrevented;
+      };
+      expect(exit()).toBe(false); // nothing to wait
+      onSubmit.mockClear();
+      onSubmit.mockImplementation(() => new Promise((res) => setTimeout(res, 1000)));
+      await type(0, "o@b.c");
+      expect(exit()).toBe(true);
+      expect(onSubmit).toBeCalledTimes(1); // at once: page is paused while browser asks user
+      expect(lastModel()).toEqual({ email: "o@b.c", firstName: "Kitty" });
+      await h.wait(500);
+      expect(el.$isPending).toBe(true);
+      expect(exit()).toBe(true); // till the end of submit
+      await h.wait(1000);
+      expect(el.$isPending).toBe(false);
+      expect(exit()).toBe(false);
+      expect(onSubmit).toBeCalledTimes(1);
+      // nothing to submit & wait for when value is changed back
+      await type(0, "oo@b.c");
+      await type(0, "o@b.c");
+      expect(exit()).toBe(false);
+      expect(onSubmit).toBeCalledTimes(1);
+      onSubmit.mockReset();
+
+      // removed form: waiting auto-submit is fired at once with the whole model
+      onSubmit.mockClear();
+      await type(0, "m@b.c");
+      el.remove();
+      await h.wait(1);
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(lastModel()).toEqual({ email: "m@b.c", firstName: "Kitty" });
+      await h.wait(1000);
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(exit()).toBe(false); // listener is removed with the form
+      // but only if it's valid
+      onSubmit.mockClear();
+      document.body.appendChild(el);
+      await h.wait(1);
+      inputs[1].$value = "";
+      await type(0, "n@b.c");
+      expect(exit()).toBe(true); // listener is added again: changes aren't saved because form is invalid
+      expect(onSubmit).not.toBeCalled();
+      await type(0, "nn@b.c");
+      el.remove();
+      await h.wait(1000);
+      expect(onSubmit).not.toBeCalled();
     });
   });
 

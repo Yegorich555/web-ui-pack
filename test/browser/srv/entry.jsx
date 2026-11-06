@@ -2,6 +2,10 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import * as webUIpack from "web-ui-pack";
 
+// CSS Custom Highlight API isn't implemented in puppeteer's Chromium 105
+window.Highlight ||= class Highlight extends Set {};
+window.CSS.highlights ||= new Map();
+
 const div = document.body.appendChild(document.createElement("div"));
 div.id = "app";
 

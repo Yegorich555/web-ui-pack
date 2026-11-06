@@ -362,9 +362,7 @@ export default abstract class WUPBaseElement<
   protected gotReady(): void {
     this.#readyTimeout = undefined;
     this.#isReady = true;
-    this._isStopChanges = true;
-    this.gotChanges(null);
-    this._isStopChanges = false;
+    this.#callChanges(null);
     if (this.autofocus || this._opts.autoFocus) {
       this._willFocus = setTimeout(() => this.focus(), 2);
     }
@@ -381,14 +379,24 @@ export default abstract class WUPBaseElement<
     this.#ctr.mergeDefaults(this._opts); // WARN during the init it fired twice: 1st: cloned defaults, 2nd: merge defaults here
   }
 
+  /** Calls gotChanges() with blocked parsing of attributes;
+   * the block is released even if gotChanges() throws, otherwise element ignores attributes forever */
+  #callChanges(propsChanged: Array<string> | null): void {
+    this._isStopChanges = true;
+    try {
+      this.gotChanges(propsChanged);
+    } finally {
+      this._isStopChanges = false;
+    }
+  }
+
   /** Called when element isReady and at least one of observedOptions is changed */
   protected gotOptionsChanged(e: WUP.Base.OptionEvent): void {
     this._isStopChanges = true;
     e.props.forEach((p) => {
       this.removeAttribute(`w-${p}`);
     }); // remove related attributes otherwise impossible to override
-    this.gotChanges(e.props);
-    this._isStopChanges = false;
+    this.#callChanges(e.props);
   }
 
   /** Called once on Init */
@@ -458,9 +466,7 @@ export default abstract class WUPBaseElement<
         this.#attrChanged = [];
         this.#attrTimer = setTimeout(() => {
           this.#attrTimer = undefined;
-          this._isStopChanges = true;
-          this.gotChanges(this.#attrChanged!);
-          this._isStopChanges = false;
+          this.#callChanges(this.#attrChanged!);
           this.#attrChanged = undefined;
         });
       }
@@ -781,6 +787,11 @@ declare global {
     type toJSX<T> = {
       [P in keyof T]?: T[P] extends number | boolean | string | undefined ? T[P] : string;
     };
+    /** Boolean attribute: `true`, `""` & `"true"` mean `true`; point `"false"` for `false`
+     * @tutorial rules
+     * * React 19 & Preact remove attr with boolean `false` (so option falls back to $defaults); React <= 18 renders it as `"false"`
+     * * boolean `true` is rendered as `""` (React 19) or `"true"` (React <= 18, Preact) */
+    type JSXBoolAttr = true | "" | "true" | "false";
     type OnlyNames<T> = {
       // [K in keyof T]?: never;
       [K in keyof T as K extends string ? `w-${K}` : never]?: unknown; // watchfix https://github.com/microsoft/TypeScript/issues/50715

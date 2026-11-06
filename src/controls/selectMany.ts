@@ -33,8 +33,8 @@ declare global {
       postfix?: string | null | undefined;
     }
     interface JSXProps<C = WUPSelectManyControl> extends WUP.Select.JSXProps<C>, WUP.Base.OnlyNames<NewOptions> {
-      "w-hideSelected"?: boolean | "";
-      "w-sortable"?: boolean | "" | "true" | "false";
+      "w-hideSelected"?: WUP.Base.JSXBoolAttr;
+      "w-sortable"?: WUP.Base.JSXBoolAttr;
       /** @deprecated Not supported in SelectManyControl */
       "w-prefix"?: any;
       /** @deprecated Not supported in SelectManyControl */
@@ -289,8 +289,8 @@ export default class WUPSelectManyControl<
   }
 
   // @ts-expect-error - because expected v: ValueType[]
-  protected override selectValue(v: ValueType, canCloseMenu = true): void {
-    super.selectValue(v as any, canCloseMenu);
+  protected override selectValue(v: ValueType, canCloseMenu = true, vals: ValueType[] = [v]): void {
+    super.selectValue(v as any, canCloseMenu, vals as any);
     this._opts.hideSelected && this.focusMenuItem(null);
   }
 

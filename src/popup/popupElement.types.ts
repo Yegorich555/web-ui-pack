@@ -132,9 +132,8 @@ declare global {
         | "right-end";
       /** QuerySelector to find target - anchor that popup uses for placement.
        * If attr.target and $options.target are empty previousSibling will be attached.
-       * Popup defines target on show()
-       *
-       * attr `w-target` has higher priority than ref.options.target */
+       * @tutorial rules
+       * * point 'prev' to select previousSibling, 'next' to select nextSibling */
       "w-target"?: string;
       /** @readonly Result position; use this to restyle animation etc. */
       readonly position?: "top" | "left" | "bottom" | "right" | "center";

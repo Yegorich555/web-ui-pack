@@ -90,7 +90,6 @@ $wup-sort-mixins-only: true; // only mixin wup-sortable is required
       @include wup-icon;
       display: var(--ctrl-select-item-del-display);
       content: "";
-      padding: 0;
       margin-left: 0.5em;
     }
 

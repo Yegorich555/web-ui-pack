@@ -103,6 +103,7 @@ export function findAllFunctions(obj: any) {
 
 export interface BaseTestOptions {
   skipAttrs?: boolean;
+  /** Point `null` for attr that isn't observed (ex. option is removed in inherited component) */
   attrs: Record<
     string,
     {
@@ -115,7 +116,7 @@ export interface BaseTestOptions {
       parsedValue?: any;
       /** With removing attr option reverted to default till nullValue is defined here */
       nullValue?: any;
-    }
+    } | null
   >;
 }
 
@@ -201,7 +202,7 @@ export function baseTestComponent(createFunction: () => any, opts: BaseTestOptio
         });
 
         observedAttrs.forEach((attrName) => {
-          const pa = pointed[attrName];
+          const pa = pointed[attrName]!; // observed attrs are equal to pointed (checked above)
           if (pa.skip) {
             return;
           }

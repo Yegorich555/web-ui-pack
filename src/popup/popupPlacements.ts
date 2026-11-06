@@ -299,6 +299,19 @@ export const PopupPlacements = {
   });
 });
 
+/** Placements of popup menu (select, dropdown etc.): below or above target aligned by start or end,
+ *  then the same with decreased height if there is no space; WARN: copy it before changing */
+export const menuPlacements = [
+  PopupPlacements.$bottom.$start,
+  PopupPlacements.$bottom.$end,
+  PopupPlacements.$top.$start,
+  PopupPlacements.$top.$end,
+  PopupPlacements.$bottom.$start.$resizeHeight,
+  PopupPlacements.$bottom.$end.$resizeHeight,
+  PopupPlacements.$top.$start.$resizeHeight,
+  PopupPlacements.$top.$end.$resizeHeight,
+];
+
 /** Returns normalized offset */
 export function getOffset(
   offset: [number, number, number, number] | [number, number] | undefined

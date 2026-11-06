@@ -12,7 +12,7 @@ export default function Example1() {
         Button with relative position
         <wup-spin //
           w-fit=""
-          w-inline={false}
+          w-inline="false"
           w-overflowFade=""
           w-overflowTarget="auto"
           w-overflowOffset=""

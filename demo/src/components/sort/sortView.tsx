@@ -61,7 +61,8 @@ export default function SortView() {
   <li item>Item 1</li>
 </ul>`,
         ],
-        customJS: `const el = document.querySelector("wup-sort");
+        customJS: `js
+const el = document.querySelector("wup-sort");
 el.$onChange = (e) => console.warn({
   reason: e.detail.reason, // "move"
   newOrderedIndexes: e.detail.value, // [2,0,1] means: was [0,1,2]

@@ -1,6 +1,11 @@
 import WUPBaseElement, { AttributeMap, AttributeTypes } from "./baseElement";
+// eslint-disable-next-line import/no-cycle -- const enum only: values are inlined by TS so import is removed in build result
+import { SetValueReasons } from "./controls/baseControl";
 import IBaseControl from "./controls/baseControl.i";
 import { nestedProperty, promiseWait, scrollIntoView } from "./indexHelpers";
+import WUPNotifyElement from "./notifyElement";
+
+WUPNotifyElement.$use();
 
 export const enum SubmitActions {
   /** Disable any action */
@@ -13,7 +18,7 @@ export const enum SubmitActions {
   validateChangeable = 1 << 2,
   /** Collect to model only changed values */
   collectChanged = 1 << 3,
-  /** Reset isDirty and assign $value to $initValue for controls (on success only) */
+  /** Reset isDirty and assign submitted $value to $initValue for controls (on success only) */
   reset = 1 << 4,
   /** Lock the whole form during the pending state (set $isPending = true or provide `promise` to submitEvent.waitFor);
    * Otherwise user can submit several times in a short time;
@@ -24,17 +29,23 @@ export const enum SubmitActions {
 const tagName = "wup-form";
 declare global {
   namespace WUP.Form {
+    interface SubmitMessage {
+      /** By default type is defined based on Promise, Promise.then - success, Promise.catch - fail */
+      type?: WUP.Notify.Options["type"];
+      /** Point to show success result in <wup-notify>, point bool to show default value "Successful" & "Failed" */
+      notifyMessage: string | boolean | null | undefined;
+    }
     interface SubmitDetails {
       /** Model collected from controls */
       model: Record<string | number, any>;
       /** Form related to submit event; equal to event.target */
       relatedForm: WUPFormElement;
-      /** Event that produced submit event; null if `form.$submit()` is called */
-      relatedEvent: MouseEvent | KeyboardEvent | null;
+      /** Event that produced submit event; `$change` event of control for auto-submit (see `$options.autoSubmit`); null if `form.$submit()` is called */
+      relatedEvent: MouseEvent | KeyboardEvent | EventMap["$change"] | null;
       /** Element that produced submit event */
       submitter: HTMLElement | null;
       /** Point a promise as callback to allow form show pending state during the promise */
-      waitFor?: Promise<unknown>;
+      waitFor?: Promise<unknown | SubmitMessage>;
     }
 
     interface EventMap extends WUP.Base.EventMap {
@@ -77,19 +88,35 @@ declare global {
       /** Enable/disable browser-autocomplete; if control has no autocomplete option then it's inherited from form
        *  @defaultValue false */
       autoComplete: boolean;
-    }
+      /** $onSubmit event called automatically on form.$change and if there is no submit button also it auto-enables notification-success
+       * point number for debounce in ms (event called after change + pointed time)
+       * point true for using default value 3000ms
+       * point false to disable option
+       *  @defaultValue 3000ms
+       * @tutorial rules
+       * * works only if form has no submit button (`[type=submit]`)
+       * * only changes made by user are handled (changes via `control.$value`, `form.$model`, storage etc. are skipped)
+       * * form is validated silently: if it's invalid submit is skipped without showing errors & scrolling to invalid control
+       * * it's skipped if user changed values back: compared with submitted values (it's `$initValue` via `SubmitActions.reset`)
+       * * when form is removed (unmounted) waiting auto-submit is fired at once otherwise changes are lost
+       * * on browser exit (closing tab, reload, navigation to another site) waiting auto-submit is fired at once
+       *   and browser asks user to stay ("Leave site?") while submit isn't finished (custom text isn't possible)
+       * * `$submit` event contains `$change` event in `e.detail.relatedEvent` and changed control in `e.detail.submitter` */
+      autoSubmit: boolean | number;
+    } //  todo add Ctrl+Z hook ???
 
     interface JSXProps extends WUP.Base.OnlyNames<Options> {
       "w-submitActions"?: SubmitActions | number;
-      "w-autoStore"?: boolean | string;
-      "w-autoFocus"?: boolean | "" | "true" | "false";
-      "w-autoComplete"?: boolean | "";
+      "w-autoStore"?: WUP.Base.JSXBoolAttr | string;
+      "w-autoSubmit"?: WUP.Base.JSXBoolAttr | number;
+      "w-autoFocus"?: WUP.Base.JSXBoolAttr;
+      "w-autoComplete"?: WUP.Base.JSXBoolAttr;
 
       /** @deprecated use [disabled] instead since related to CSS-styles */
-      "w-disabled"?: boolean | "";
+      "w-disabled"?: WUP.Base.JSXBoolAttr;
       disabled?: boolean | "";
       /** @deprecated use [readonly] instead since related to CSS-styles */
-      "w-readonly"?: boolean | "";
+      "w-readonly"?: WUP.Base.JSXBoolAttr;
       readonly?: boolean | "";
 
       /** @deprecated SyntheticEvent is not supported. Use ref.addEventListener('$change') instead */
@@ -202,6 +229,7 @@ export default class WUPFormElement<
   static get mappedAttributes(): Record<string, AttributeMap> {
     const m = super.mappedAttributes;
     m.autostore.type = AttributeTypes.string;
+    m.autosubmit.parse = (v) => (v === "" || v === "true" ? true : v !== "false" && +v); // boolean or number
     return m;
   }
 
@@ -247,6 +275,15 @@ export default class WUPFormElement<
     return prevModel;
   }
 
+  /** Change this to override styles/behavior of notify */
+  $showNotify(msg: WUP.Form.SubmitMessage, isFail: boolean): WUPNotifyElement {
+    return WUPNotifyElement.$show({
+      // eslint-disable-next-line no-nested-ternary
+      textContent: msg.notifyMessage === true ? (isFail ? "Failed" : "Successful") : (msg.notifyMessage as string),
+      defaults: { type: msg.type || (isFail ? "error" : "success"), placement: "bottom-right" },
+    });
+  }
+
   static get observedAttributes(): Array<string> {
     const a = super.observedAttributes;
     a.push("disabled", "readonly"); // support for `readonly` & `w-readonly`
@@ -264,6 +301,7 @@ export default class WUPFormElement<
     autoComplete: false,
     autoFocus: false,
     autoStore: false,
+    autoSubmit: 3000,
     disabled: false,
     readOnly: false,
   };
@@ -274,7 +312,7 @@ export default class WUPFormElement<
    * @tutorial
    * * need to return promise to lock form and show spinner on http-request
    * * call `e.preventDefault()` to prevent dispatching `$submitEnd` & closing modal (if form in modal) */
-  $onSubmit?: (ev: WUP.Form.EventMap["$submit"]) => void | Promise<unknown>;
+  $onSubmit?: (ev: WUP.Form.EventMap["$submit"]) => void | Promise<unknown | WUP.Form.SubmitMessage>;
   /** Fires when submit is end (after http-response);
    * @tutorial
    * call `e.preventDefault()` to prevent closing modal (if form in modal) */
@@ -429,11 +467,21 @@ export default class WUPFormElement<
     }
   }
 
-  /** Called on submit before validation (to fire validation & $onSubmit if successful) */
-  gotSubmit(e: KeyboardEvent | MouseEvent | null, submitter: HTMLElement): void {
+  /** Called on submit before validation (to fire validation & $onSubmit if successful)
+   * @param e event that produced submit; `$change` event of control for auto-submit (see `$options.autoSubmit`) */
+  gotSubmit(e: KeyboardEvent | MouseEvent | WUP.Form.EventMap["$change"] | null, submitter: HTMLElement): void {
     e?.preventDefault(); // prevent default keyboard or mouse event because it's handled in custom event
 
-    if (this.$isPending && this._opts.submitActions & SubmitActions.lockOnPending) {
+    const isAuto = e?.type === "$change"; // auto-submit isn't locked by pending state otherwise changes are lost
+    if (!isAuto && this.$isPending && this._opts.submitActions & SubmitActions.lockOnPending) {
+      return;
+    }
+    // current submit includes changes that auto-submit waits for
+    clearTimeout(this.#autoSubmitT);
+    this.#autoSubmitEv = undefined;
+    // reject auto-submit if user changed values back: submitted values are $initValue (via SubmitActions.reset)
+    // WARN: during the pending state $initValue isn't updated yet
+    if (isAuto && this._opts.submitActions & SubmitActions.reset && !this.$isPending && !this.$isChanged) {
       return;
     }
 
@@ -453,12 +501,14 @@ export default class WUPFormElement<
     // validate
     let errCtrl: IBaseControl | undefined;
     let arrCtrl = this.$controlsAttached;
+    const isHidden = !this.offsetHeight; // form is hidden or removed (possible on auto-submit): validate invisible controls also
     const ctrlsAffected =
       this._opts.submitActions & SubmitActions.validateChangeable
-        ? arrCtrl.filter((c) => c.offsetHeight > 0 && !c.$isReadOnly && !c.$isDisabled)
+        ? arrCtrl.filter((c) => (c.offsetHeight > 0 || isHidden) && !c.$isReadOnly && !c.$isDisabled)
         : arrCtrl;
-    if (this._opts.submitActions & SubmitActions.validateUntilFirst) {
-      errCtrl = ctrlsAffected.find((c) => c.validateBySubmit() && c.canShowError);
+    if (isAuto || this._opts.submitActions & SubmitActions.validateUntilFirst) {
+      // auto-submit validates silently: errors are shown by controls itself (according to `validationCase`)
+      errCtrl = ctrlsAffected.find((c) => (isAuto ? !c.$isValid : c.validateBySubmit()) && c.canShowError);
     } else {
       ctrlsAffected.forEach((c) => {
         const err = c.validateBySubmit();
@@ -470,7 +520,7 @@ export default class WUPFormElement<
 
     // analyze - go to error
     if (errCtrl) {
-      if (this._opts.submitActions & SubmitActions.goToError) {
+      if (!isAuto && this._opts.submitActions & SubmitActions.goToError) {
         const el = errCtrl;
         scrollIntoView(el, { offsetTop: -30, onlyIfNeeded: true }).then(() => el.focus());
       }
@@ -485,7 +535,8 @@ export default class WUPFormElement<
     const m = this.#ctr.$modelFromControls({}, arrCtrl, "$value", !!onlyChanged);
     // fire events
     const needReset = this._opts.submitActions & SubmitActions.reset;
-    setTimeout(() => {
+    const submitted = { ...this.$model }; // copy: otherwise values changed during the pending state are considered as submitted
+    const fire = (): void => {
       let p1: Promise<void> | unknown;
       const orig = this.$onSubmit;
       if (orig) {
@@ -516,20 +567,70 @@ export default class WUPFormElement<
 
       let success = false;
       promiseWait(Promise.all([p1, ev.detail.waitFor]), 300, (v: boolean) => this.changePending(v))
-        .then(() => {
+        .then((arr) => {
           this._opts.autoStore && this.storageSave(null); // clear storage after submit
           if (needReset) {
             arrCtrl.forEach((v) => (v.$isDirty = false));
-            this.$initModel = this.$model;
+            this.$initModel = submitted;
           }
           success = true;
+          if ((arr[0] as WUP.Form.SubmitMessage | undefined)?.notifyMessage) {
+            this.$showNotify(arr[0] as WUP.Form.SubmitMessage, false);
+          } else if ((arr[1] as WUP.Form.SubmitMessage | undefined)?.notifyMessage) {
+            this.$showNotify(arr[1] as WUP.Form.SubmitMessage, false);
+          } else if (this._opts.autoSubmit && !this.querySelector("[type=submit]")) {
+            this.$showNotify({ notifyMessage: true }, false); // otherwise user doesn't see that changes are saved
+          }
+        })
+        .catch((err) => {
+          (err as WUP.Form.SubmitMessage | undefined)?.notifyMessage &&
+            this.$showNotify(err as WUP.Form.SubmitMessage, true);
         })
         .finally(() => {
           !ev.defaultPrevented &&
             this.fireEvent("$submitEnd", { detail: { success }, cancelable: true, bubbles: true });
         });
-    });
+    };
+    // auto-submit at once: on browser exit the page is paused while browser asks user to leave
+    isAuto ? fire() : setTimeout(fire);
   }
+
+  /** Called on `$change` event of nested elements (bubbles from control so `e.target` is the control) */
+  protected gotControlChange(e: WUP.Form.EventMap["$change"]): void {
+    this.$onChange?.call(this, e);
+
+    const ms = this._opts.autoSubmit;
+    const c = e.target as IBaseControl;
+    if (ms && this.$controls.includes(c) && c.$options.name) {
+      const r = e.detail.reason; // skip programmatic changes: via $value, $model, storage etc.
+      if (
+        (r === SetValueReasons.userInput || r === SetValueReasons.userSelect || r === SetValueReasons.clear) &&
+        !this.querySelector("[type=submit]") // otherwise user submits via button
+      ) {
+        clearTimeout(this.#autoSubmitT);
+        this.#autoSubmitEv = e;
+        this.#autoSubmitT = setTimeout(() => this._opts.autoSubmit && this.gotSubmit(e, c), ms === true ? 3000 : ms);
+        // WARN: listen only when it's required, otherwise Firefox doesn't put the page into back/forward cache
+        this.#offExit ??= this.appendEvent(
+          window as any,
+          "beforeunload",
+          (ev) => {
+            const w = this.#autoSubmitEv; // submit at once otherwise changes are lost
+            w && this._opts.autoSubmit && this.gotSubmit(w, w.target as HTMLElement);
+            ((w && this.$isChanged) || this.$isPending) && ev.preventDefault(); // browser asks user to stay till the end of submit
+          },
+          { passive: false }
+        );
+      }
+    }
+  }
+
+  /** Debounce timeout of `$options.autoSubmit` */
+  #autoSubmitT?: ReturnType<typeof setTimeout>;
+  /** Event of the last change that auto-submit waits for */
+  #autoSubmitEv?: WUP.Form.EventMap["$change"];
+  /** Removes `beforeunload` listener of auto-submit */
+  #offExit?: () => void;
 
   /** Auto-safe debounce timeout */
   #autoStoreT?: ReturnType<typeof setTimeout>;
@@ -614,7 +715,7 @@ export default class WUPFormElement<
       { passive: false }
     );
     // WARN: bubbling phase instead of capture - otherwise it's fired before control stops propagation
-    this.appendEvent(this, "$change", (e) => this.$onChange?.call(this, e as WUP.Form.EventMap["$change"]));
+    this.appendEvent(this, "$change", (e) => this.gotControlChange(e as WUP.Form.EventMap["$change"]));
   }
 
   protected override connectedCallback(): void {
@@ -710,9 +811,12 @@ export default class WUPFormElement<
   protected override disconnectedCallback(): void {
     super.disconnectedCallback();
     formStore.splice(formStore.indexOf(this), 1);
+    this.#offExit = undefined; // listener is removed by dispose()
+    // submit waiting changes at once otherwise they are lost
+    // WARN: nested controls are removed from $controls after the form, so model is still complete here
+    const ev = this.#autoSubmitEv;
+    ev && this._opts.autoSubmit && this.gotSubmit(ev, ev.target as HTMLElement);
   }
 }
 
 customElements.define(tagName, WUPFormElement);
-
-// todo show success/error result in <wup-alert> at the left/right angle + add autoSubmit option + check autoSubmit on exit + check how it works on unmounted controls

@@ -95,7 +95,7 @@ declare global {
     interface JSXProps extends WUP.Base.OnlyNames<Omit<Options, "items">> {
       "w-width"?: number;
       "w-corner"?: number;
-      "w-back"?: boolean | "";
+      "w-back"?: WUP.Base.JSXBoolAttr;
       "w-from"?: number;
       "w-to"?: number;
       "w-min"?: number;

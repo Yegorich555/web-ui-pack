@@ -70,11 +70,11 @@ declare global {
        * * point 'prev' to select previousSibling */
       "w-target"?: string;
       "w-placement"?: Options["placement"];
-      "w-autoFocus"?: boolean | "";
-      "w-autoClose"?: boolean | "";
-      "w-selfRemove"?: boolean | "";
-      "w-replace"?: boolean | "";
-      "w-confirmUnsaved"?: boolean | "";
+      "w-autoFocus"?: WUP.Base.JSXBoolAttr;
+      "w-autoClose"?: WUP.Base.JSXBoolAttr;
+      "w-selfRemove"?: WUP.Base.JSXBoolAttr;
+      "w-replace"?: WUP.Base.JSXBoolAttr;
+      "w-confirmUnsaved"?: WUP.Base.JSXBoolAttr;
     }
   }
   interface HTMLElement {
@@ -499,12 +499,12 @@ export default class WUPModalElement<
 
   /** Called on keydown event */
   gotKeyDown(e: KeyboardEvent): void {
-    if (e.altKey || e.ctrlKey || e.metaKey) {
-      return;
+    if (e.altKey || e.ctrlKey || e.metaKey || e.defaultPrevented) {
+      return; // handled by content: TextRich changes level of list item on Tab etc.
     }
     switch (e.key) {
       case "Escape":
-        if (!e.shiftKey && !e.defaultPrevented) {
+        if (!e.shiftKey) {
           e.preventDefault();
           this.goClose(ModalCloseCases.onPressEsc, e);
         }

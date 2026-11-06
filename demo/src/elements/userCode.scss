@@ -60,6 +60,36 @@
   margin: 0 2px;
 }
 
+// `.code .language-js .token.operator` resets color, so need higher specificity
+/* stylelint-disable-next-line selector-pseudo-class-no-unknown -- css-modules */
+.jsCode code :global(.token.operator).more {
+  cursor: pointer;
+  padding: 0 6px;
+  color: $activeLinkColor;
+  font-weight: bold;
+  text-shadow: none;
+  border-radius: $borderRadius;
+
+  &::before {
+    content: "See more"; // code has only `...` so copy-paste keeps it valid
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: #fff;
+    background: $activeLinkColor;
+    outline: none;
+  }
+}
+
+.allOptions {
+  font-size: smaller;
+
+  pre {
+    margin: 0;
+  }
+}
+
 .defLink {
   color: $activeLinkColor;
 

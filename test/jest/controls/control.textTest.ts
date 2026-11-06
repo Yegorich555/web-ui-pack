@@ -6,6 +6,8 @@ import * as h from "../../testHelper";
 // eslint-disable-next-line jest/no-export
 export default function testTextControl(getEl: () => WUPTextControl, opts: Parameters<typeof testBaseControl>[0]) {
   const initV = "some init val";
+  const userClear =
+    opts?.clear ?? ((c: WUPTextControl) => c.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })));
 
   testBaseControl({
     ...opts,
@@ -15,6 +17,7 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       "w-prefix": { value: "$" },
       "w-postfix": { value: "USD" },
       "w-clearbutton": { value: true },
+      "w-copybutton": { value: true },
       "w-debouncems": { value: 5 },
       "w-selectonfocus": { value: true },
       ...opts?.attrs,
@@ -111,6 +114,56 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       expect(el).toMatchSnapshot();
     });
 
+    test("copyButton", async () => {
+      const el = getEl();
+      el.$value = initV;
+      jest.advanceTimersByTime(1);
+      expect(el.$refBtnCopy).toBe(undefined); // false by default
+
+      el.$options.copyButton = true;
+      jest.advanceTimersByTime(1);
+      expect(el.$refBtnCopy).toBeDefined();
+      expect(el.$refBtnCopy!.previousElementSibling).toBe(el.$refLabel.querySelector("span"));
+      expect(el.$refBtnCopy!.getAttribute("aria-label")).toBe("Copy");
+      expect(el.$refBtnCopy!.getAttribute("w-tooltip")).toBe(""); // tooltip shows aria-label
+
+      /** Data written into clipboard by type */
+      let copied: Record<string, string> | undefined;
+      const writeText = (s: string) => {
+        copied = { "text/plain": s };
+        return Promise.resolve();
+      };
+      const write = ([data]: Array<Record<string, string>>) => {
+        copied = data;
+        return Promise.resolve();
+      };
+      Object.defineProperty(navigator, "clipboard", { value: { writeText, write }, configurable: true });
+      (window as any).ClipboardItem = jest.fn((data) => data); // jsdom doesn't support it: item is its data
+      const ev = new MouseEvent("click", { bubbles: true, cancelable: true });
+      el.$refBtnCopy!.dispatchEvent(ev);
+      expect(ev.defaultPrevented).toBe(true); // prevent from submit
+      expect(copied).toStrictEqual(opts?.copied?.(el) ?? { "text/plain": el.$refInput.value });
+      await h.wait(1);
+      expect(el.$refBtnCopy!.getAttribute("copy")).toBe("done");
+      await h.wait(1000);
+      expect(el.$refBtnCopy!.getAttribute("copy")).toBe("");
+
+      // clearButton re-rendered: copy stays before it
+      el.$options.clearButton = false;
+      jest.advanceTimersByTime(1);
+      el.$options.clearButton = true;
+      jest.advanceTimersByTime(1);
+      expect(el.$refBtnCopy!.previousElementSibling).toBe(el.$refLabel.querySelector("span"));
+      expect(el.$refBtnClear!.compareDocumentPosition(el.$refBtnCopy!) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
+
+      el.$options.copyButton = false;
+      jest.advanceTimersByTime(1);
+      expect(el.$refBtnCopy).toBe(undefined);
+      expect(el.querySelector("[copy]")).toBe(null);
+      delete (navigator as any).clipboard;
+      delete (window as any).ClipboardItem;
+    });
+
     test("debounceMs", async () => {
       const el = getEl();
       el.$options.debounceMs = 400;
@@ -151,10 +204,10 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
       el.$refInput.selectionEnd = 0;
       expect(el.$refInput.selectionEnd).toBe(0);
 
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
       expect(el.$value).toBe(undefined);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
       jest.advanceTimersByTime(1);
 
       expect(el.$value).toBe(initV);
@@ -173,8 +226,8 @@ export default function testTextControl(getEl: () => WUPTextControl, opts: Param
 
       // checking if select by clear not depends on $options.selectOnFocus
       expect(el.$value).toBe(initV);
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      userClear(el);
+      userClear(el);
       jest.advanceTimersByTime(1);
 
       expect(el.$value).toBe(initV);

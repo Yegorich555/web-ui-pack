@@ -113,7 +113,7 @@ describe("popupElement", () => {
       testEl.$options.minHeightByTarget = true;
     });
     await page.click("label");
-    await page.waitForTimeout(2); // timeout required because of debounceFilters
+    await page.waitForFunction(() => t.gotShow === 1); // opened: inline opacity is reset & animation is finished
     const t = await page.evaluate(() => ({ ...t, html: testEl.outerHTML }));
     expect(t.html).toBe(
       '<wup-popup open="" position="bottom" show="" style="min-width: 177px; min-height: 21px; transform: translate(72px, 29px);">Popup text</wup-popup>'
@@ -125,7 +125,7 @@ describe("popupElement", () => {
       testEl.$options.arrowEnable = true;
     });
     await page.click("label");
-    await page.waitForTimeout(1); // timeout required because of debounceFilters
+    await page.waitForFunction(() => t.gotShow === 1); // opened: inline opacity is reset & animation is finished
     const t = await page.evaluate(() => ({ ...t, html: document.body.outerHTML }));
     expect(t.html).toMatchInlineSnapshot(
       `"<body><div id="app"><label><span>Label text</span><input><wup-popup open="" position="bottom" show="" style="transform: translate(72px, 39px);">Popup text</wup-popup><wup-popup-arrow style="transform: translate(124px, 29px) rotate(180.1deg);"></wup-popup-arrow></label></div></body>"`
