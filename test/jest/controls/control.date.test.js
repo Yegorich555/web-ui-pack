@@ -613,6 +613,7 @@ describe("control.date", () => {
       expect(el.$value).toEqual([new Date("2022-10-05T13:40:00.000Z"), new Date("2022-10-25"), new Date("2022-10-15")]); // added at the end; time isn't copied
       expect(el.$refInput.value).toBe("2022-10-05, 2022-10-25, 2022-10-15, ");
       expect(getSelected()).toEqual(["5", "15", "25"]);
+      expect(el.querySelector("[focused]")?.textContent).toBe("15"); // clicked date is focused: the start for the next Shift + click
       expect(onChange).toBeCalledTimes(1);
       expect(el.$isChanged).toBe(true);
 
@@ -639,6 +640,7 @@ describe("control.date", () => {
       expect(getSelected()).toEqual(["15", "25", "2"]); // [next] placeholder of November is selected also
 
       // keyboard: Enter selects/removes focused date
+      el.focusMenuItem(null); // reset focus of the previous click
       expect(pressKey("ArrowRight")).toBe(false); // prevented
       expect(el.querySelector("[focused]")?.textContent).toBe("15"); // starts from the 1st selected
       pressKey("ArrowRight");
@@ -1009,6 +1011,52 @@ describe("control.date", () => {
       expect(el.$options.maskholder).toBe("yyyy-mm-dd");
       expect(el.$refInput.value).toBe("2022-10-07");
       expect(el.$refInput.readOnly).toBe(false);
+    });
+
+    test("range", async () => {
+      const onChange = jest.fn();
+      el.$onChange = onChange;
+      el.$options.multiple = "range";
+      el.$options.mask = undefined; // mask is doubled for range
+      el.$options.maskholder = undefined;
+      el.$initValue = [new Date("2022-10-05T13:40:00.000Z"), new Date("2022-10-08T10:00:00.000Z")];
+      await h.wait(1);
+      expect(el.$options.mask).toBe("0000-00-00 ... 0000-00-00");
+      expect(el.$options.maskholder).toBe("yyyy-mm-dd ... yyyy-mm-dd");
+      expect(el.$refInput.value).toBe("2022-10-05 ... 2022-10-08");
+
+      HTMLInputElement.prototype.focus.call(el.$refInput);
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      expect(el.$refInput.value).toBe("2022-10-05 ... 2022-10-08"); // without delimiter for the next date
+      expect(el.$refPopup.firstChild.$options.multiple).toBe("range");
+      expect(getSelected()).toEqual(["5", "6", "7", "8"]);
+
+      // the 1st click defines the start & menu stays opened; the 2nd one changes value & closes menu
+      await h.userClick(getDay(20));
+      await h.wait();
+      expect(el.$isOpened).toBe(true);
+      expect(getSelected()).toEqual(["20"]);
+      expect(onChange).not.toBeCalled();
+      await h.userClick(getDay(15));
+      await h.wait();
+      expect(el.$isOpened).toBe(false);
+      expect(el.$value).toEqual([new Date("2022-10-15T13:40:00.000Z"), new Date("2022-10-20T10:00:00.000Z")]);
+      expect(el.$refInput.value).toBe("2022-10-15 ... 2022-10-20");
+      expect(onChange).toBeCalledTimes(1);
+
+      // typing: reversed range is sorted; time is copied from the same end of previous value
+      expect(await h.userTypeText(el.$refInput, "2022102520221022")).toBe("2022-10-22 ... 2022-10-25|");
+      expect(el.$value).toEqual([new Date("2022-10-22T13:40:00.000Z"), new Date("2022-10-25T10:00:00.000Z")]);
+      expect(onChange).toBeCalledTimes(2);
+      el.$value = [new Date("2022-10-01T05:00:00.000Z")]; // only the start
+      expect(await h.userTypeText(el.$refInput, "2022100320221004")).toBe("2022-10-03 ... 2022-10-04|");
+      expect(el.$value).toEqual([new Date("2022-10-03T05:00:00.000Z"), new Date("2022-10-04")]);
+      el.$initValue = undefined;
+      el.$value = undefined;
+      expect(await h.userTypeText(el.$refInput, "2022100320221004")).toBe("2022-10-03 ... 2022-10-04|");
+      expect(el.$value).toEqual([new Date("2022-10-03"), new Date("2022-10-04")]);
+      expect(() => el.parseInput("2022-10-05")).toThrow("Impossible to parse range from '2022-10-05'");
     });
   });
 

@@ -1088,6 +1088,7 @@ exports[`control.calendar common tests render + styles 2`] = `
   :root {
   --ctrl-clr-selected: #fff;
   --ctrl-clr-selected-bg: #007e95;
+  --ctrl-clr-range-bg: color-mix(in srgb, var(--ctrl-clr-selected-bg) 30%, transparent);
   --ctrl-clr-w: 17em;
   --ctrl-clr-cell-gap: 0px;
   --ctrl-clr-padding: calc(4px + var(--ctrl-clr-cell-gap) / 2);
@@ -1358,6 +1359,17 @@ WUP-CALENDAR li[aria-selected] {
   color: var(--ctrl-clr-selected);
   opacity: 1;
 }
+WUP-CALENDAR li[wup-range] {
+  background-color: var(--ctrl-clr-range-bg);
+  opacity: 1;
+}
+WUP-CALENDAR li[wup-range][aria-selected] {
+  color: inherit;
+}
+WUP-CALENDAR li[in-range] {
+  background-color: var(--ctrl-clr-range-bg);
+  color: inherit;
+}
 WUP-CALENDAR li[focused] {
   box-shadow: 0 0 3px 1px inset var(--ctrl-focus);
   opacity: 1;
@@ -1425,6 +1437,9 @@ WUP-CALENDAR li[disabled][aria-selected] {
   }
   WUP-CALENDAR [calendar] &gt; div {
     overflow: hidden;
+  }
+  WUP-CALENDAR ol &gt; li {
+    transition: background-color var(--anim), color var(--anim);
   }
   WUP-CALENDAR [zoom] {
     animation: none var(--anim-t) linear forwards;

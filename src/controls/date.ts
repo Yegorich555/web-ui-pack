@@ -67,7 +67,7 @@ declare global {
        * * `true` - click (or Enter) toggles date & menu stays opened; Shift + click toggles every date between the last clicked & pointed one
        * * `true` - input shows dates separated by comma: user types the next date at the end, Backspace/Delete removes the whole date
        * * `"range"` - $value is `[from, to]` (sorted); the 1st click sets `from`, the 2nd one sets `to` & closes menu
-       * * `"range"` - input shows `from ... to` (see static `$rangeDelimiter`); user can type both dates
+       * * `"range"` - input shows `from ... to` (see `WUPCalendarControl.$rangeDelimiter`); user can type both dates
        * * validations `min`, `max` & `exclude` are checked for every date (only `from` & `to` for `"range"`); option `sync` is ignored
        * * changing the option converts $value & $initValue to the new type
        * @defaultValue false */
@@ -163,9 +163,6 @@ export default class WUPDateControl<
     return WUPCalendarControl.$isEqual(v1, v2, c);
   }
 
-  /** Delimiter between `from` & `to` in input with `multiple: "range"` */
-  static $rangeDelimiter = WUPCalendarControl.$rangeDelimiter;
-
   static get mappedAttributes(): Record<string, AttributeMap> {
     const m = super.mappedAttributes;
     m.min = { type: AttributeTypes.parsedObject };
@@ -174,7 +171,7 @@ export default class WUPDateControl<
     m.startwith = { type: AttributeTypes.string };
     m.endwith = { type: AttributeTypes.string };
     m.sync = { type: AttributeTypes.selector };
-    m.multiple = { type: AttributeTypes.bool, parse: (s) => (s === "range" ? s : s !== "false") };
+    m.multiple = WUPCalendarControl.mappedAttributes.multiple;
     return m;
   }
 
@@ -249,7 +246,7 @@ export default class WUPDateControl<
       return parse(text) as ValueType;
     }
     if (multiple === "range") {
-      const [a, b] = text.split(this.#ctr.$rangeDelimiter).map(parse);
+      const [a, b] = text.split(WUPCalendarControl.$rangeDelimiter).map(parse);
       if (!a || !b) {
         throw new RangeError(`Impossible to parse range from '${text}'`);
       }
@@ -324,7 +321,8 @@ export default class WUPDateControl<
       this.throwError(`'MMM' in format isn't supported`);
       this._opts.format = "YYYY-MM-DD";
     }
-    const twice = (s: string): string => (this._opts.multiple === "range" ? s + this.#ctr.$rangeDelimiter + s : s); // from ... to
+    const twice = (s: string): string =>
+      this._opts.multiple === "range" ? s + WUPCalendarControl.$rangeDelimiter + s : s; // from ... to
     this._opts.mask ||= twice(
       this._opts.format
         .replace(/[yY]/g, "0")
@@ -411,15 +409,13 @@ export default class WUPDateControl<
           v = vt.copyToDate(v, this._opts.utc) as ValueType;
         }
       }
+    } else if (v && skipInput && this._opts.multiple === "range") {
+      const prev = (this.$value || this.$initValue) as Date[] | undefined;
+      prev && v.forEach((d, i) => prev[i] && dateCopyTime(d, prev[i], this._opts.utc)); // copy time from the same end
     } else if (v && skipInput) {
-      if (this._opts.multiple === "range") {
-        const prev = (this.$value || this.$initValue) as Date[] | undefined;
-        prev && v.forEach((d, i) => prev[i] && dateCopyTime(d, prev[i], this._opts.utc)); // copy time from the same end
-      } else {
-        // time isn't shown in input: so the same dates are taken from previous value
-        const prev = [this.$value, this.$initValue].flat() as Array<Date | undefined>;
-        v = v.map((d) => prev.find((p) => p && this.compareDates(p, d) === 0) || d) as ValueType;
-      }
+      // time isn't shown in input: so the same dates are taken from previous value
+      const prev = [this.$value, this.$initValue].flat() as Array<Date | undefined>;
+      v = v.map((d) => prev.find((p) => p && this.compareDates(p, d) === 0) || d) as ValueType;
     }
 
     const isChanged = super.setValue(v, reason, skipInput);
@@ -458,7 +454,7 @@ export default class WUPDateControl<
       return dateToString(v, f);
     }
     const isMany = this._opts.multiple === true;
-    const s = v.map((d) => dateToString(d, f)).join(isMany ? ", " : this.#ctr.$rangeDelimiter);
+    const s = v.map((d) => dateToString(d, f)).join(isMany ? ", " : WUPCalendarControl.$rangeDelimiter);
     return isMany && s && this.$isFocused && !this.$refInput.readOnly ? `${s}, ` : s; // delimiter to type the next date
   }
 

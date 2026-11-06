@@ -762,13 +762,24 @@ describe("control.calendar", () => {
     expect(el.$refCalendarTitle.textContent).toBe("January 2018");
   });
 
+  /** Returns text of selected items */
+  const getSelected = () => Array.from(el.querySelectorAll("[aria-selected]")).map((li) => li.textContent);
+  /** Returns text of items with pointed attribute */
+  const getMarked = (attr) =>
+    Array.from(el.$refCalendarItems.querySelectorAll(`[${attr}]`)).map((li) => li.textContent);
+  /** Returns item of the current month */
+  const getDay = (day) =>
+    Array.from(el.$refCalendarItems.children).find(
+      (li) => li.textContent === `${day}` && !li.hasAttribute("prev") && !li.hasAttribute("next")
+    );
+  /** Simulates moving pointer over the item */
+  const hover = (item, shiftKey = false) =>
+    item.dispatchEvent(new MouseEvent("mouseover", { bubbles: true, shiftKey }));
+  /** Returns date of October 2022 */
+  const oct = (day, time = "00:00") => new Date(`2022-10-${`${day}`.padStart(2, "0")}T${time}:00.000Z`);
+
   test("option multiple", async () => {
     const onChange = jest.fn();
-    const getSelected = () => Array.from(el.querySelectorAll("[aria-selected]")).map((li) => li.textContent);
-    const getDay = (day) =>
-      Array.from(el.$refCalendarItems.children).find(
-        (li) => li.textContent === `${day}` && !li.hasAttribute("prev") && !li.hasAttribute("next")
-      );
     el.remove();
     el = document.createElement("wup-calendar");
     el.$onChange = onChange;
@@ -862,6 +873,217 @@ describe("control.calendar", () => {
     el.$options.multiple = false;
     await h.wait();
     expect(el.$refCalendarItems.getAttribute("aria-multiselectable")).toBe(null);
+  });
+
+  test("option multiple: Shift + click", async () => {
+    const shiftClick = (day) => h.userClick(getDay(day), { shiftKey: true });
+    const pressShift = (type, opts) => document.dispatchEvent(new KeyboardEvent(type, { key: "Shift", ...opts }));
+    el.remove();
+    el = document.createElement("wup-calendar");
+    el.$options.multiple = true;
+    el.$options.exclude = [oct(12)];
+    el.$initValue = [oct(5)];
+    document.body.appendChild(el);
+    await h.wait();
+    expect(el.$refCalendarTitle.textContent).toBe("October 2022");
+
+    // without previous click the last selected is the start of range; disabled dates are skipped
+    hover(getDay(8), true);
+    expect(getMarked("wup-range")).toEqual(["6", "7", "8"]);
+    await shiftClick(8);
+    await h.wait();
+    expect(el.$value).toEqual([5, 6, 7, 8].map((d) => oct(d)));
+    await shiftClick(14);
+    await h.wait();
+    expect(el.$value).toEqual([5, 6, 7, 8, 9, 10, 11, 13, 14].map((d) => oct(d)));
+    expect(getSelected()).toEqual(["5", "6", "7", "8", "9", "10", "11", "13", "14"]);
+    // dates are added in order from the start
+    await shiftClick(3);
+    await h.wait();
+    expect(el.$value).toEqual([5, 6, 7, 8, 9, 10, 11, 13, 14, 4, 3].map((d) => oct(d)));
+    // range without not selected dates is deselected
+    await shiftClick(7);
+    await h.wait();
+    expect(el.$value).toEqual([8, 9, 10, 11, 13, 14, 4, 3].map((d) => oct(d)));
+
+    // click without Shift defines the start for the next Shift + click
+    await h.userClick(getDay(20));
+    await h.wait();
+    expect(getMarked("focused")).toEqual(["20"]);
+
+    // Shift + hover highlights dates that click changes
+    hover(getDay(25), true);
+    expect(getMarked("wup-range")).toEqual(["21", "22", "23", "24", "25"]);
+    hover(getDay(25));
+    expect(getMarked("wup-range")).toEqual([]);
+    pressShift("keydown");
+    expect(getMarked("wup-range")).toEqual(["21", "22", "23", "24", "25"]);
+    pressShift("keyup");
+    expect(getMarked("wup-range")).toEqual([]);
+    pressShift("keydown", { repeat: true }); // ignored
+    expect(getMarked("wup-range")).toEqual([]);
+    hover(getDay(12), true); // disabled
+    expect(getMarked("wup-range")).toEqual([]);
+    hover(el.$refCalendarItems, true); // not item
+    expect(getMarked("wup-range")).toEqual([]);
+    el.$options.readOnly = true;
+    await h.wait();
+    hover(getDay(25), true);
+    expect(getMarked("wup-range")).toEqual([]);
+    el.$options.readOnly = false;
+    await h.wait();
+    hover(getDay(25), true);
+    expect(getMarked("wup-range")).toEqual(["21", "22", "23", "24", "25"]);
+    el.$refCalendarItems.dispatchEvent(new MouseEvent("mouseleave"));
+    expect(getMarked("wup-range")).toEqual([]);
+    pressShift("keydown"); // nothing is hovered
+    expect(getMarked("wup-range")).toEqual([]);
+    pressShift("keyup");
+
+    // highlighting is removed after click
+    hover(getDay(18), true);
+    expect(getMarked("wup-range")).toEqual(["18", "19"]);
+    await shiftClick(18);
+    await h.wait();
+    expect(el.$value).toEqual([8, 9, 10, 11, 13, 14, 4, 3, 20, 19, 18].map((d) => oct(d)));
+    expect(getMarked("wup-range")).toEqual([]);
+
+    // only the last picker is selectable
+    await h.userClick(el.$refCalendarTitle);
+    await h.wait();
+    expect(el.querySelector("[calendar='month']")).toBeTruthy();
+    hover(el.$refCalendarItems.children[2], true);
+    expect(getMarked("wup-range")).toEqual([]);
+  });
+
+  test("option multiple: range", async () => {
+    const onChange = jest.fn();
+    const pressKey = (key) =>
+      el.$refInput.dispatchEvent(new KeyboardEvent("keydown", { key, cancelable: true, bubbles: true }));
+    el.remove();
+    el = document.createElement("wup-calendar");
+    el.$onChange = onChange;
+    el.setAttribute("w-multiple", "range");
+    el.setAttribute("w-utc", "");
+    el.setAttribute("w-initvalue", "2022-10-05 10:00, 2022-10-08 12:00");
+    el.$options.exclude = [oct(12)];
+    document.body.appendChild(el);
+    await h.wait();
+    expect(el.$options.multiple).toBe("range");
+    expect(el.$initValue).toEqual([oct(5, "10:00"), oct(8, "12:00")]);
+    expect(el.$refCalendarItems.getAttribute("aria-multiselectable")).toBe("true");
+    expect(getSelected()).toEqual(["5", "6", "7", "8"]);
+    expect(getMarked("in-range")).toEqual(["6", "7"]);
+    expect(el.$refInput.value).toBe("5 October 2022 ... 8 October 2022");
+
+    // the 1st click defines only the start of range
+    el.focus();
+    await h.userClick(getDay(20));
+    await h.wait();
+    expect(el.$value).toBe(el.$initValue);
+    expect(onChange).not.toBeCalled();
+    expect(getSelected()).toEqual(["20"]);
+    expect(getMarked("in-range")).toEqual([]);
+    expect(getMarked("focused")).toEqual(["20"]);
+
+    // dates between the start & hovered/focused one are highlighted (Shift is ignored)
+    hover(getDay(17));
+    expect(getMarked("wup-range")).toEqual(["17", "18", "19"]);
+    hover(getDay(22), true);
+    expect(getMarked("wup-range")).toEqual(["21", "22"]);
+    hover(getDay(10));
+    expect(getMarked("wup-range")).toEqual(["10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]); // disabled can be inside range
+    hover(getDay(12));
+    expect(getMarked("wup-range")).toEqual([]); // but can't be the end
+    pressKey("ArrowRight");
+    expect(getMarked("focused")).toEqual(["21"]);
+    expect(getMarked("wup-range")).toEqual(["21"]);
+
+    // the 2nd click changes value to sorted [from, to]; time is copied from the same end of previous value
+    await h.userClick(getDay(15));
+    await h.wait();
+    expect(el.$value).toEqual([oct(15, "10:00"), oct(20, "12:00")]);
+    expect(onChange).toBeCalledTimes(1);
+    expect(getSelected()).toEqual(["15", "16", "17", "18", "19", "20"]);
+    expect(getMarked("in-range")).toEqual(["16", "17", "18", "19"]);
+    expect(getMarked("wup-range")).toEqual([]);
+    expect(el.$refInput.value).toBe("15 October 2022 ... 20 October 2022");
+    hover(getDay(25));
+    expect(getMarked("wup-range")).toEqual([]); // nothing without the start
+    expect(el.getRange(1).isChanged(1)).toBe(false);
+    await h.userClick(getDay(25));
+    await h.userClick(getDay(27));
+    await h.wait();
+    expect(el.$value).toEqual([oct(25, "10:00"), oct(27, "12:00")]);
+
+    // focus lost cancels started range
+    await h.userClick(getDay(3));
+    hover(getDay(5));
+    expect(getSelected()).toEqual(["3"]);
+    expect(getMarked("wup-range")).toEqual(["4", "5"]);
+    el.blur();
+    await h.wait();
+    expect(getSelected()).toEqual(["25", "26", "27"]);
+    expect(getMarked("wup-range")).toEqual([]);
+    expect(el.$value).toEqual([oct(25, "10:00"), oct(27, "12:00")]);
+
+    // without previous value time is 00:00
+    el.$initValue = undefined;
+    el.$value = undefined;
+    el.focus();
+    await h.userClick(getDay(3));
+    await h.userClick(getDay(4));
+    await h.wait();
+    expect(el.$value).toEqual([oct(3), oct(4)]);
+    el.$value = [oct(10, "05:00")]; // only the start
+    await h.userClick(getDay(1));
+    await h.userClick(getDay(2));
+    await h.wait();
+    expect(el.$value).toEqual([oct(1, "05:00"), oct(2)]);
+
+    // value isn't sorted by developer
+    el.$value = [oct(20), oct(15)];
+    expect(getSelected()).toEqual(["15", "16", "17", "18", "19", "20"]);
+    expect(getMarked("in-range")).toEqual(["16", "17", "18", "19"]);
+
+    // changing option converts value
+    el.$value = [oct(15), oct(20)];
+    el.$options.multiple = true;
+    await h.wait();
+    expect(el.$value).toEqual([oct(15), oct(20)]);
+    expect(getSelected()).toEqual(["15", "20"]);
+    expect(getMarked("in-range")).toEqual([]);
+    el.$options.multiple = "range";
+    await h.wait();
+    expect(el.$value).toEqual([oct(15), oct(20)]);
+    expect(getMarked("in-range")).toEqual(["16", "17", "18", "19"]);
+    el.$options.multiple = true;
+    el.$value = [oct(20), oct(15)];
+    await h.wait();
+    el.$options.multiple = "range";
+    await h.wait();
+    expect(el.$value).toEqual([oct(15), oct(20)]); // sorted
+    el.$options.multiple = true;
+    el.$value = [oct(20), oct(15), oct(25)];
+    await h.wait();
+    el.$options.multiple = "range";
+    await h.wait();
+    expect(el.$value).toEqual([oct(15), oct(25)]); // [the earliest, the latest]
+    el.$value = [oct(10), oct(10)];
+    el.$options.multiple = true;
+    await h.wait();
+    expect(el.$value).toEqual([oct(10)]); // without duplicates
+    el.$options.multiple = false;
+    await h.wait();
+    expect(el.$value).toEqual(oct(10));
+    el.$options.multiple = "range";
+    await h.wait();
+    expect(el.$value).toEqual([oct(10), oct(10)]);
+    el.$options.multiple = false;
+    await h.wait();
+    el.$options.multiple = true;
+    await h.wait();
+    expect(el.$value).toEqual([oct(10)]);
   });
 
   test("save hh even when no $value but has $initValue", async () => {
