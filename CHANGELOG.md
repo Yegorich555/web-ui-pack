@@ -2,6 +2,12 @@
 
 # Changelog
 
+## 1.3.1 (\_\_\_)
+
+### Fixes & Improvements
+
+- [ModalElement](src/modalElement.ts). _XSS: html of confirm question is rendered (`$showConfirm({ question })` & attr `[w-confirm]`; scripts of `<img onerror>` are executed)_
+
 ## 1.3.0 (Nov 6, 2026)
 
 ### Fixes & Improvements

@@ -349,11 +349,18 @@ export default class WUPModalElement<
 
   /** Override it to change default render for modalConfirm */
   gotRenderConfirm(headerContent: string): void {
-    this.innerHTML = `<h2>${headerContent}</h2>
-<footer>
-  <button type='button' data-close='modal'>${__wupln("Cancel", "content")}</button>
-  <button type='button' data-close='confirm'>${__wupln("Confirm", "content")}</button>
-</footer>`;
+    const h = document.createElement("h2");
+    h.textContent = headerContent; // WARN: not innerHTML to prevent XSS: content can come from attr [w-confirm]
+    const footer = document.createElement("footer");
+    const addBtn = (close: string, text: string): void => {
+      const b = footer.appendChild(document.createElement("button"));
+      b.type = "button";
+      b.setAttribute("data-close", close);
+      b.textContent = text;
+    };
+    addBtn("modal", __wupln("Cancel", "content"));
+    addBtn("confirm", __wupln("Confirm", "content"));
+    this.replaceChildren(h, footer);
   }
 
   /** Related button that need to listen for click event to open modal */
